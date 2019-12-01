@@ -61,7 +61,8 @@ function core() {
         'lastBgm': null, // 上次播放的bgm
         'gainNode': null,
         'playingSounds': {}, // 正在播放的SE
-        'volume': 1.0, // 音量
+        'userVolume': 1.0, // 用户音量
+        'designVolume': 1.0, //设计音量
         'cachedBgms': [], // 缓存BGM内容
         'cachedBgmCount': 4, // 缓存的bgm数量
     }
@@ -250,12 +251,14 @@ core.prototype._init_flags = function () {
             var locs = loc.split(","), x = parseInt(locs[0]), y = parseInt(locs[1]);
             for (var index in autoEvents[loc]) {
                 var autoEvent = core.clone(autoEvents[loc][index]);
-                if (autoEvent && autoEvent.data) {
+                if (autoEvent && autoEvent.condition && autoEvent.data) {
                     autoEvent.floorId = floorId;
                     autoEvent.x = x;
                     autoEvent.y = y;
                     autoEvent.index = index;
                     autoEvent.symbol = floorId + "@" + x + "@" + y + "@" + index;
+                    autoEvent.condition = core.replaceValue(autoEvent.condition);
+                    autoEvent.data = core.precompile(autoEvent.data);
                     core.initStatus.autoEvents.push(autoEvent);
                 }
             }
@@ -302,6 +305,8 @@ core.prototype._init_platform = function () {
     }
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
+    //新增 userVolume 默认值1.0
+    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 1.0);
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
         if (navigator.userAgent.indexOf(t) >= 0) {
             if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;

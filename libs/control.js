@@ -1465,6 +1465,10 @@ control.prototype._replayAction_equip = function (action) {
     var index = ownEquipment.indexOf(equipId), per = core.__SIZE__-1;
     if (index<0) return false;
     core.status.route.push(action);
+    if (core.material.items[equipId].hideInReplay) {
+        core.loadEquip(equipId, core.replay);
+        return true;
+    }
     core.status.event.data = {"page":Math.floor(index/per)+1, "selectId":null};
     index = index%per+per;
     core.ui.drawEquipbox(index);
@@ -2247,7 +2251,7 @@ control.prototype._playBgm_play = function (bgm, startTime) {
     // 缓存BGM
     core.loader.loadBgm(bgm);
     // 播放当前BGM
-    core.material.bgms[bgm].volume = core.musicStatus.volume;
+    core.material.bgms[bgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
     core.material.bgms[bgm].currentTime = startTime || 0;
     core.material.bgms[bgm].play();
     core.musicStatus.playingBgm = bgm;
@@ -2320,7 +2324,7 @@ control.prototype.playSound = function (sound) {
             core.musicStatus.playingSounds[id] = source;
         }
         else {
-            core.material.sounds[sound].volume = core.musicStatus.volume;
+            core.material.sounds[sound].volume = core.musicStatus.userVolume;
             core.material.sounds[sound].play();
         }
     }

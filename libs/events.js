@@ -234,7 +234,14 @@ events.prototype._gameOver_askRate = function (ending) {
     }
 
     if (ending == null) {
-        core.restart();
+        core.status.event.selection = 0;
+        core.ui.drawConfirmBox("你想读取自动存档么？", function () {
+            core.ui.closePanel();
+            core.doSL("autoSave", "load");
+        }, function () {
+            core.ui.closePanel();
+            core.restart();
+        });
         return;
     }
 
@@ -931,6 +938,8 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     }
     if (!action) return;
 
+    action = this.precompile(action);
+
     if (core.status.event.id != 'action') {
         this.startEvents(action, x, y, callback);
     }
@@ -1037,6 +1046,98 @@ events.prototype.popEventLoc = function () {
         core.status.event.data.y = loc.y;
         core.status.event.data.floorId = loc.floorId;
     }
+}
+
+events.prototype.precompile = function (data) {
+    var array = this.__precompile_getArray();
+    if (typeof data == 'string') {
+        return this.__precompile_text(data);
+    }
+    if (data instanceof Array) {
+        for (var i = 0; i < data.length; ++i) {
+            data[i] = this.precompile(data[i]);
+        }
+        return data;
+    }
+    if (data && data.type) {
+        if (this["_precompile_" + data.type]) {
+            data = this["_precompile_" + data.type](data);
+        }
+        if (array.texts.indexOf(data.type) >= 0) {
+            data.text = this.__precompile_text(data.text);
+        }
+        if (array.locs.indexOf(data.type) >= 0) {
+            data.loc = this.__precompile_array(data.loc);
+        }
+        if (array.values.indexOf(data.type) >= 0) {
+            data.value = core.replaceValue(data.value);
+        }
+        if (array.uievents.indexOf(data.type) >= 0) {
+            data.x = core.replaceValue(data.x);
+            data.y = core.replaceValue(data.y);
+            data.width = core.replaceValue(data.width);
+            data.height = core.replaceValue(data.height);
+        }
+        if (data.type in array.others) {
+            array.others[data.type].forEach(function (field) {
+                data[field] = core.replaceValue(data[field]);
+            })
+        }
+    }
+    return data;
+}
+
+events.prototype.__precompile_getArray = function () {
+    var texts = [
+        "text", "autoText", "scrollText", "tip", "textImage", "input", "input2",
+        "choices", "confirm", "fillText", "fillBoldText", "drawTextContent"
+    ];
+    var locs = [
+        "show", "hide", "setBlock", "showFloorImg", "hideFloorImg", "showBgFgMap",
+        "hideBgFgMap", "setBgFgBlock", "animate", "setViewport", "move", "jumoHero",
+        "changeFloor", "changePos", "showTextImage", "showGif", "openDoor",
+        "closeDoor", "battle", "trigger", "insert"
+    ];
+    var values = [
+        "setValue", "setValue2", "addValue", "setEnemy", "setFloor", "setGlobalValue",
+    ];
+    var uievents = [
+        "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "strokeCircle",
+        "drawIcon", "drawSelector", "drawBackground",
+    ];
+    var others = {
+        "strokeCircle": ["r"],
+        "drawLine": ["x1", "y1", "x2", "y2"],
+        "drawArrow": ["x1", "y1", "x2", "y2"],
+        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1"],
+        "drawTextContent": ["left", "top"],
+    };
+    return {
+        texts: texts,
+        locs: locs,
+        values: values,
+        uievents: uievents,
+        others: others
+    };
+}
+
+events.prototype.__precompile_text = function (text) {
+    return text.replace(/\${(.*?)}/g, function (word, value) {
+        return "${" + core.replaceValue(value) + "}";
+    });
+}
+
+events.prototype.__precompile_array = function (value) {
+    if (typeof value == 'string') {
+        value = core.replaceValue(value);
+        return value;
+    }
+    if (value instanceof Array) {
+        for (var i = 0; i < value.length; ++i) {
+            value[i] = this.__precompile_array(value[i]);
+        }
+    }
+    return value;
 }
 
 // ------ 样板提供的的自定义事件 ------ //
@@ -1231,6 +1332,12 @@ events.prototype._action_jump = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.jumpBlock, from[0], from[1], to[0], to[1], data.time, data.keep);
 }
 
+events.prototype._precompile_jump = function (data) {
+    data.from = this.__precompile_array(data.from);
+    data.to = this.__precompile_array(data.to);
+    return data;
+}
+
 events.prototype._action_jumpHero = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     this.__action_doAsyncFunc(data.async, core.jumpHero, loc[0], loc[1], data.time);
@@ -1258,6 +1365,12 @@ events.prototype._action_showImage = function (data, x, y, prefix) {
         data.code, data.image, data.sloc, data.loc, data.opacity, data.time);
 }
 
+events.prototype._precompile_showImage = function (data) {
+    data.sloc = this.__precompile_array(data.sloc);
+    data.loc = this.__precompile_array(data.loc);
+    return data;
+}
+
 events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
@@ -1279,6 +1392,11 @@ events.prototype._action_showGif = function (data, x, y, prefix) {
 events.prototype._action_moveImage = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     this.__action_doAsyncFunc(data.async, core.moveImage, data.code, data.to, data.opacity, data.time);
+}
+
+events.prototype._precompile_moveImage = function (data) {
+    data.to = this.__precompile_array(data.to);
+    return data;
 }
 
 events.prototype._action_setFg = function (data, x, y, prefix) {
@@ -1337,6 +1455,16 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
         core.drawTip("当前无法使用" + ((core.material.items[data.id] || {}).name || "未知道具"));
         core.doAction();
     }
+}
+
+events.prototype._action_loadEquip = function (data, x, y, prefix) {
+    core.loadEquip(data.id);
+    core.doAction();
+}
+
+events.prototype._action_unloadEquip = function (data, x, y, prefix) {
+    core.unloadEquip(data.pos);
+    core.doAction();
 }
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
@@ -1453,6 +1581,15 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
     this.setValue(data.name, data.value, prefix);
+    if (data.refresh) {
+        if (core.status.hero.hp <= 0) {
+            core.status.hero.hp = 0;
+            core.updateStatusBar();
+            core.events.lose();
+        } else {
+            core.updateStatusBar();
+        }
+    }
     core.doAction();
 }
 
@@ -1462,6 +1599,15 @@ events.prototype._action_setValue2 = function (data, x, y, prefix) {
 
 events.prototype._action_addValue = function (data, x, y, prefix) {
     this.addValue(data.name, data.value, prefix);
+    if (data.refresh) {
+        if (core.status.hero.hp <= 0) {
+            core.status.hero.hp = 0;
+            core.updateStatusBar();
+            core.events.lose();
+        } else {
+            core.updateStatusBar();
+        }
+    }
     core.doAction();
 }
 
@@ -1542,6 +1688,13 @@ events.prototype._action_if = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._precompile_if = function (data) {
+    data.condition = core.replaceValue(data.condition);
+    data["true"] = this.precompile(data["true"]);
+    data["false"] = this.precompile(data["false"]);
+    return data;
+}
+
 events.prototype._action_switch = function (data, x, y, prefix) {
     var key = core.calValue(data.condition, prefix)
     var list = [];
@@ -1555,6 +1708,15 @@ events.prototype._action_switch = function (data, x, y, prefix) {
     }
     core.insertAction(list);
     core.doAction();
+}
+
+events.prototype._precompile_switch = function (data) {
+    data.condition = core.replaceValue(data.condition);
+    for (var i = 0; i < data.caseList.length; i++) {
+        data.caseList[i]["case"] = core.replaceValue(data.caseList[i]["case"]);
+        data.caseList[i].action = this.precompile(data.caseList[i].action);
+    }
+    return data;
 }
 
 events.prototype._action_choices = function (data, x, y, prefix) {
@@ -1583,6 +1745,16 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     core.ui.drawChoices(data.text, data.choices);
 }
 
+events.prototype._precompile_choices = function (data) {
+    if (!(data.choices instanceof Array)) return data;
+    for (var i = 0; i < data.choices.length; ++i) {
+        data.choices[i].condition = core.replaceValue(data.choices[i].condition);
+        data.choices[i].text = this.__precompile_text(data.choices[i].text);
+        data.choices[i].action = this.precompile(data.choices[i].action);
+    }
+    return data;
+}
+
 events.prototype._action_confirm = function (data, x, y, prefix) {
     core.status.event.ui = {"text": data.text, "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
@@ -1609,6 +1781,12 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
     core.ui.drawConfirmBox(data.text);
 }
 
+events.prototype._precompile_confirm = function (data) {
+    data.yes = this.precompile(data.yes);
+    data.no = this.precompile(data.no);
+    return data;
+}
+
 events.prototype._action_while = function (data, x, y, prefix) {
     if (core.calValue(data.condition, prefix)) {
         core.unshift(core.status.event.data.list,
@@ -1618,11 +1796,23 @@ events.prototype._action_while = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._precompile_while = function (data) {
+    data.condition = core.replaceValue(data.condition);
+    data.data = this.precompile(data.data);
+    return data;
+}
+
 events.prototype._action_dowhile = function (data, x, y, prefix) {
     core.unshift(core.status.event.data.list,
         {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
     );
     core.doAction();
+}
+
+events.prototype._precompile_dowhile = function (data) {
+    data.condition = core.replaceValue(data.condition);
+    data.data = this.precompile(data.data);
+    return data;
 }
 
 events.prototype._action_break = function (data, x, y, prefix) {
@@ -1641,11 +1831,11 @@ events.prototype._action_continue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_win = function (data, x, y, prefix) {
-    this.win(data.reason, data.norank, data.noexit);
+    this.win(core.replaceText(data.reason), data.norank, data.noexit);
 }
 
 events.prototype._action_lose = function (data, x, y, prefix) {
-    this.lose(data.reason);
+    this.lose(core.replaceText(data.reason));
 }
 
 events.prototype._action_restart = function (data, x, y, prefix) {
@@ -1809,6 +1999,11 @@ events.prototype._action_previewUI = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._precompile_previewUI = function (data) {
+    data.action = this.precompile(data.action);
+    return data;
+}
+
 events.prototype.__action_doUIEvent = function (data) {
     this.__action_doUIEvent_doOne(data);
     var current = core.status.event.data.list[0];
@@ -1849,12 +2044,22 @@ events.prototype._action_fillPolygon = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
+events.prototype._precompile_fillPolygon = function (data) {
+    data.nodes = this.__precompile_array(data.nodes);
+    return data;
+}
+
 events.prototype._action_strokeRect = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
 events.prototype._action_strokePolygon = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
+}
+
+events.prototype._precompile_strokePolygon = function (data) {
+    data.nodes = this.__precompile_array(data.nodes);
+    return data;
 }
 
 events.prototype._action_fillCircle = function (data, x, y, prefix) {
@@ -2099,17 +2304,11 @@ events.prototype.setValue = function (name, value, prefix, add) {
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
     this._setValue_setGlobal(name, value);
-    core.updateStatusBar();
 }
 
 events.prototype._setValue_setStatus = function (name, value) {
     if (name.indexOf("status:") !== 0) return;
     core.setStatus(name.substring(7), value);
-    if (core.status.hero.hp <= 0) {
-        core.status.hero.hp = 0;
-        core.updateStatusBar();
-        core.events.lose();
-    }
 }
 
 events.prototype._setValue_setItem = function (name, value) {
@@ -2341,16 +2540,16 @@ events.prototype.showGif = function (name, x, y) {
 ////// 淡入淡出音乐 //////
 events.prototype.setVolume = function (value, time, callback) {
     var set = function (value) {
-        core.musicStatus.volume = value;
+        core.musicStatus.designVolume = value;
         if (core.musicStatus.playingBgm)
-            core.material.bgms[core.musicStatus.playingBgm].volume = value;
+            core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
     }
     if (!time || time < 100) {
         set(value);
         if (callback) callback();
         return;
     }
-    var currVolume = core.musicStatus.volume;
+    var currVolume = core.musicStatus.designVolume;
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     if (steps <= 0) steps = 1;

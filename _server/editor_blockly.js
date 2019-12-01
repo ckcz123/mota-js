@@ -100,10 +100,10 @@ editor_blockly = function () {
     ],
     '数据相关':[
       MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
@@ -120,6 +120,8 @@ editor_blockly = function () {
       MotaActionBlocks['changePos_1_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['useItem_s'].xmlText(),
+      MotaActionBlocks['loadEquip_s'].xmlText(),
+      MotaActionBlocks['unloadEquip_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
@@ -232,6 +234,7 @@ editor_blockly = function () {
       MotaActionBlocks['idString_3_e'].xmlText(),
       MotaActionBlocks['idString_4_e'].xmlText(),
       MotaActionBlocks['idString_5_e'].xmlText(),
+      MotaActionBlocks['idString_6_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
@@ -684,7 +687,7 @@ function omitedcheckUpdateFunction(event) {
     var previewBlock = function (b) {
         var types = [
             "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
-            "fillBoldText_s", "drawTextContent_s", "fillRect_s", "strokeRect_s", "drawLine_s",
+            "fillBoldText_s", "fillRect_s", "strokeRect_s", "drawLine_s",
             "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillCircle_s", "strokeCircle_s",
             "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s"
         ];
@@ -744,7 +747,7 @@ function omitedcheckUpdateFunction(event) {
         'comment_s',
         'show_s',
         'hide_s',
-        'setValue_s',
+        'addValue_s',
         'if_s',
         'battle_s',
         'openDoor_s',
@@ -960,6 +963,16 @@ function omitedcheckUpdateFunction(event) {
                     }).sort();
                 }
             }
+        }
+
+        // 提供 flags.xxx 补全
+        index = content.lastIndexOf("flags.");
+        if (index >= 0) {
+            var token = content.substring(index+6);
+            return Object.keys(editor.used_flags || {}).filter(function (one) {
+                return one != token && one.startsWith(token)
+                    && /^[a-zA-Z_]\w*$/.test(one);
+            }).sort();
         }
 
         return [];

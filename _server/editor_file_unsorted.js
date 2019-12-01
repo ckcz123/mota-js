@@ -146,10 +146,14 @@ editor_file = function (editor, callback) {
         var templateActions = [];
 
         var image = info.images;
+        var bindFaceIds = false;
 
         if (image=='autotile') {
             callback('不能对自动元件进行自动注册！');
             return;
+        }
+        if (image=='npc48' && confirm("你想绑定npc48的朝向么？\n如果是，则会连续四个一组的对npc48的faceIds进行自动绑定。")) {
+            bindFaceIds = true;
         }
         var c=image.toUpperCase().charAt(0);
 
@@ -162,15 +166,20 @@ editor_file = function (editor, callback) {
         var allIds = [];
         editor.ids.forEach(function (v) {
             if (v.images==image) {
-                allIds[v.y]=true;
+                allIds[v.y]=v;
             }
         })
 
         var per_height = image.endsWith('48')?48:32;
 
+        var faceIds = []; // down, left, right, up
+
         var idnum=300;
         for (var y=0; y<editor.widthsX[image][3]/per_height;y++) {
-            if (allIds[y]) continue;
+            if (allIds[y] != null) {
+                faceIds.push(allIds[y]);
+                continue;
+            }
             while (editor.core.maps.blocksInfo[idnum]) idnum++;
 
             // get id num
@@ -182,12 +191,24 @@ editor_file = function (editor, callback) {
             else {
                 iconActions.push(["add", "['" + image + "']['" + id + "']", y])
             }
-            mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}])
+            mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}]);
+            faceIds.push({idnum: idnum, id: id});
             if (image=='items')
                 templateActions.push(["add", "['items']['" + id + "']", editor.file.comment._data.items_template]);
             else if (image.indexOf('enemy')==0)
                 templateActions.push(["add", "['" + id + "']", editor.file.comment._data.enemys_template]);
             idnum++;
+        }
+
+        if (bindFaceIds) {
+            for (var i = 0; i < faceIds.length - 3; i+=4) {
+                var down = faceIds[i], left = faceIds[i+1], right = faceIds[i+2], up = faceIds[i+3];
+                var obj = {down: down.id, left: left.id, right: right.id, up: up.id};
+                mapActions.push(["add", "['" + down.idnum + "']['faceIds']", obj]);
+                mapActions.push(["add", "['" + left.idnum + "']['faceIds']", obj]);
+                mapActions.push(["add", "['" + right.idnum + "']['faceIds']", obj]);
+                mapActions.push(["add", "['" + up.idnum + "']['faceIds']", obj]);
+            }
         }
 
         if (mapActions.length==0) {

@@ -1920,7 +1920,10 @@ actions.prototype._clickSwitchs = function (x, y) {
     var choices = core.status.event.ui.choices;
     var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     var selection = y - topIndex;
-    if ((x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) && (x != this.HSIZE-2 && selection != 2) && (x != this.HSIZE+2 && selection != 2) && (x != this.HSIZE-2 && selection != 3) && (x != this.HSIZE+2 && selection != 3)) return;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
+        if (selection != 2 && selection != 3) return;
+        if (x != this.HSIZE - 2 && x != this.HSIZE + 2) return;
+    }
     if (selection >= 0 && selection < choices.length) {
         core.status.event.selection = selection;
         switch (selection) {
@@ -1929,12 +1932,12 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                if (x == this.HSIZE-2) { return this._clickSwitchs_userVolume(-0.1); }
-                else if (x == this.HSIZE+2) { return this._clickSwitchs_userVolume(0.1); }
+                if (x == this.HSIZE - 2) return this._clickSwitchs_userVolume(-1);
+                if (x == this.HSIZE + 2) return this._clickSwitchs_userVolume(1);
                 return;
             case 3:
-                if (x == this.HSIZE-2) { return this._clickSwitchs_moveSpeed(-10); }
-                else if (x == this.HSIZE+2) { return this._clickSwitchs_moveSpeed(10); }
+                if (x == this.HSIZE - 2) return this._clickSwitchs_moveSpeed(-10);
+                if (x == this.HSIZE + 2) return this._clickSwitchs_moveSpeed(10);
                 return;
             case 4:
                 return this._clickSwitchs_displayEnemyDamage();
@@ -1966,23 +1969,20 @@ actions.prototype._clickSwitchs_sound = function () {
 }
 
 actions.prototype._clickSwitchs_userVolume = function (delta) {
-    //浮点运算精度 JS弱类型
-    var value= parseFloat(Math.sqrt(core.musicStatus.userVolume).toFixed(1));
-    core.musicStatus.userVolume = parseFloat(Math.pow(core.clamp(parseFloat(value + delta), 0, 1), 2).toFixed(2));
+    var value = Math.round(Math.sqrt(100 * core.musicStatus.userVolume));
+    core.musicStatus.userVolume = core.clamp(Math.pow(value + delta, 2) / 100, 0, 1);
     //audioContext 音效 不受designVolume 影响
-    if(core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
+    if (core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
     if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
     core.setLocalStorage('userVolume', core.musicStatus.userVolume);
     core.ui.drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_moveSpeed = function (delta) {
-    var value = core.clamp(parseInt(core.values.moveSpeed + delta), 50, 200);
-    core.values.moveSpeed = parseInt(value);
+    core.values.moveSpeed = core.clamp(core.values.moveSpeed + delta, 50, 200);
     core.setLocalStorage("moveSpeed", core.values.moveSpeed);
     core.ui.drawSwitchs();
 }
-
 
 actions.prototype._clickSwitchs_displayEnemyDamage = function () {
     core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;

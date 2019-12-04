@@ -219,10 +219,10 @@ editor_blockly = function () {
     ],
     '值块':[
       MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
       MotaActionBlocks['evFlag_e'].xmlText(),

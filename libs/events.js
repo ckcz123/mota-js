@@ -1582,7 +1582,7 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
     this.setValue(data.name, data.value, prefix);
-    if (data.refresh) {
+    if (!data.norefresh) {
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp = 0;
             core.updateStatusBar();
@@ -1600,7 +1600,7 @@ events.prototype._action_setValue2 = function (data, x, y, prefix) {
 
 events.prototype._action_addValue = function (data, x, y, prefix) {
     this.addValue(data.name, data.value, prefix);
-    if (data.refresh) {
+    if (!data.norefresh) {
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp = 0;
             core.updateStatusBar();

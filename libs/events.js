@@ -1122,6 +1122,7 @@ events.prototype.__precompile_getArray = function () {
 }
 
 events.prototype.__precompile_text = function (text) {
+    if (typeof text != 'string') return text;
     return text.replace(/\${(.*?)}/g, function (word, value) {
         return "${" + core.replaceValue(value) + "}";
     });

@@ -2522,6 +2522,10 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         }, {
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });
+        if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {
+            core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4], 2);
+            core.fillText('ui', data.hard, x, parseInt(y+22+size/2), core.dom.hard.style.color, this._buildFont(30,true));
+        }
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;

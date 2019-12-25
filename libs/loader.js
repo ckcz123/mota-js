@@ -209,7 +209,7 @@ loader.prototype._loadAnimates = function () {
                 core.material.animates[t] = null;
             }, "text/plain; charset=x-user-defined")
         })
-    }'application/zip'
+    }
 }
 
 loader.prototype._loadAnimate = function (name, content) {

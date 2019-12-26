@@ -266,7 +266,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!(core.material.animates[equipAnimate] || {}).se)
 		core.playSound('attack.mp3');
 	// 强制战斗的战斗动画
-	core.drawAnimate(equipAnimate, x != null ? x : core.getHeroLoc('x'), y != null ? y : core.getHeroLoc('y'));
+	if (x != null && y != null)
+		core.drawAnimate(equipAnimate, x, y);
+	else
+		core.drawHeroAnimate(equipAnimate);
 
 	var damage = core.enemys.getDamage(enemyId, x, y);
 	if (damage == null) damage = core.status.hero.hp + 1;

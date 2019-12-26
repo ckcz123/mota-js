@@ -1624,6 +1624,12 @@ core.drawAnimate(name, x, y, callback)
 此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
 
 
+core.drawHeroAnimate(name, callback)
+绘制一个跟随勇士行动的动画。name为动画名，callback为绘制完毕的回调函数。
+此函数将播放动画音效，并异步开始绘制该动画。
+此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
+
+
 core.stopAnimate(id, doCallback)
 立刻停止某个动画的播放。id为上面core.drawAnimate的返回值。
 如果doCallback为真，则会执行该动画所对应的回调函数。

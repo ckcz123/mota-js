@@ -169,7 +169,17 @@ control.prototype._animationFrame_animate = function (timestamp) {
         return obj.index < obj.animate.frames.length;
     });
     core.status.animateObjs.forEach(function (obj) {
-        core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+        if (obj.hero) {
+            // calculate position
+            var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
+            var offset = 4 * core.status.heroMoving;
+            if (offset < 0) offset = 0;
+            var way = core.utils.scan[direction];
+            var centerX = 32 * x + way.x * offset + 16, centerY = 32 * y + way.y * offset + 16;
+            core.maps._drawAnimateFrame(obj.animate, centerX, centerY, obj.index++);
+        } else {
+            core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+        }
     });
     core.animateFrame.animateTime = timestamp;
 }
@@ -996,7 +1006,7 @@ control.prototype.checkBlock = function () {
     if (damage) {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
-        core.drawAnimate("zone", x, y);
+        core.drawHeroAnimate("zone");
         this._checkBlock_disableQuickShop();
         core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {

@@ -1304,9 +1304,12 @@ events.prototype._action_unfollow = function (data, x, y, prefix) {
 }
 
 events.prototype._action_animate = function (data, x, y, prefix) {
-    if (data.loc == 'hero') data.loc = [core.getHeroLoc('x'), core.getHeroLoc('y')];
-    else data.loc = this.__action_getLoc(data.loc, x, y, prefix);
-    this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+    if (data.loc == 'hero') {
+        this.__action_doAsyncFunc(data.async, core.drawHeroAnimate, data.name);
+    } else {
+        data.loc = this.__action_getLoc(data.loc, x, y, prefix);
+        this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+    }
 }
 
 events.prototype._action_setViewport = function (data, x, y, prefix) {

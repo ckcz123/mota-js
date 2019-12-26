@@ -148,11 +148,12 @@ loader.prototype.loadImagesFromZip = function (url, names, toSave, callback) {
 
     core.unzip(url + "?v=" + main.version, function (data) {
         var cnt = 1;
-        names.forEach(function (name) {
-            if (name.indexOf('.') < 0) name += '.png';
-            if (name in data) {
+		names.forEach(function (name) {
+			var imgName = name;
+            if (imgName.indexOf('.') < 0) imgName += '.png';
+            if (imgName in data) {
                 var img = new Image();
-                var url = URL.createObjectURL(data[name]);
+                var url = URL.createObjectURL(data[imgName]);
                 cnt++;
                 img.onload = function () {
                     cnt--;

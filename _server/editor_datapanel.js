@@ -698,8 +698,8 @@ editor_datapanel_wrapper = function (editor) {
                 editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, v.x * 32, v.y * ysize, 32, ysize, 32 * ii, editor.dom.sprite.height - ysize, 32, ysize);
             }
             var dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-            var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
-            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
+            var imgbase64 = editor.dom.sprite.toDataURL('image/png');
+            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
@@ -707,6 +707,7 @@ editor_datapanel_wrapper = function (editor) {
                 printf('追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
                 editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
                 editor.dom.spriteCtx.putImageData(dt, 0, 0);
+                core.material.images[editor.dom.selectAppend.value].src = imgbase64;
             });
         }
 
@@ -729,8 +730,8 @@ editor_datapanel_wrapper = function (editor) {
             }
 
             dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-            var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
-            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
+            var imgbase64 = editor.dom.sprite.toDataURL('image/png');
+            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
@@ -738,6 +739,7 @@ editor_datapanel_wrapper = function (editor) {
                 printf('快速追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
                 editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
                 editor.dom.spriteCtx.putImageData(dt, 0, 0);
+                core.material.images[editor.dom.selectAppend.value].src = imgbase64;
             });
 
         }

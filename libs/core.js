@@ -116,6 +116,7 @@ function core() {
 
         // 勇士属性
         'hero': {},
+        'heroCenter': {'px': null, 'py': null},
 
         // 当前地图
         'floorId': null,

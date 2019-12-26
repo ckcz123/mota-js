@@ -170,13 +170,7 @@ control.prototype._animationFrame_animate = function (timestamp) {
     });
     core.status.animateObjs.forEach(function (obj) {
         if (obj.hero) {
-            // calculate position
-            var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
-            var offset = 4 * core.status.heroMoving;
-            if (offset < 0) offset = 0;
-            var way = core.utils.scan[direction];
-            var centerX = 32 * x + way.x * offset + 16, centerY = 32 * y + way.y * offset + 16;
-            core.maps._drawAnimateFrame(obj.animate, centerX, centerY, obj.index++);
+            core.maps._drawAnimateFrame(obj.animate, core.status.heroCenter.px, core.status.heroCenter.py, obj.index++);
         } else {
             core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
         }
@@ -816,6 +810,8 @@ control.prototype.drawHero = function (status, offset) {
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
     core.clearMap('hero');
+    core.status.heroCenter.px = 32 * x + offsetX + 16;
+    core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
     if (!core.hasFlag('hideHero')) {
         this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {

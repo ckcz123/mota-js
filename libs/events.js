@@ -2700,6 +2700,8 @@ events.prototype._jumpHero_jumping = function (jumpInfo) {
     core.control.updateViewport();
     core.drawImage('hero', core.material.images.hero, jumpInfo.icon.stop, jumpInfo.icon.loc * height, width, height,
         nowx + (32 - width) / 2 - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, width, height);
+    core.status.heroCenter.px = nowx + 16;
+    core.status.heroCenter.py = nowy + 32 - height / 2;
 }
 
 events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {

@@ -29,10 +29,18 @@ editor_materialpanel_wrapper = function (editor) {
      * editor.dom.iconExpandBtn.onclick
      */
     editor.uifunctions.fold_material_click = function () {
-        if (confirm(editor.uivalues.folded ? "你想要展开素材吗？\n展开模式下将显示全素材内容。"
-            : ("你想要折叠素材吗？\n折叠模式下每个素材将仅显示单列，并且每" + editor.uivalues.foldPerCol + "个自动换列。"))) {
-            core.setLocalStorage('folded', !editor.uivalues.folded);
-            window.location.reload();
+        if (editor.uivalues.folded) {
+            if (confirm("你想要展开素材吗？\n展开模式下将显示全素材内容。")) {
+                core.setLocalStorage('folded', false);
+                window.location.reload();
+            }
+        } else {
+            var perCol = parseInt(prompt("请输入折叠素材模式下每列的个数：", "50")) || 0;
+            if (perCol > 0) {
+                core.setLocalStorage('foldPerCol', perCol);
+                core.setLocalStorage('folded', true);
+                window.location.reload();
+            }
         }
     }
 

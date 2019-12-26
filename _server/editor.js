@@ -82,6 +82,12 @@ function editor() {
             loc: null,
             n: -1,
             enemys: []
+        },
+
+        // 复制怪物或道具属性
+        copyEnemyItem : {
+            type: null,
+            data: {}
         }
 
     };
@@ -402,7 +408,7 @@ editor.prototype.drawInitData = function (icons) {
     editor.widthsX = {};
     editor.uivalues.folded = core.getLocalStorage('folded', false);
     // editor.uivalues.folded = true;
-    editor.uivalues.foldPerCol = 50;
+    editor.uivalues.foldPerCol = core.getLocalStorage('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 

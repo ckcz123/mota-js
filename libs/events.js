@@ -976,13 +976,13 @@ events.prototype.recoverEvents = function (data) {
 ////// 检测自动事件 //////
 events.prototype.checkAutoEvents = function () {
     // 只有在无操作或事件流中才能执行自动事件！
-    if (!core.isPlaying() || core.status.lockControl && core.status.event.id != 'action') return;
+    if (!core.isPlaying() || (core.status.lockControl && core.status.event.id != 'action')) return;
     var todo = [], delay = [];
     core.status.autoEvents.forEach(function (autoEvent) {
         var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;
         // 不在当前楼层 or 已经执行过 or 正在执行中
         if (autoEvent.currentFloor && floorId != core.status.floorId) return;
-        if (!autoEvent.multiExecute && autoEvent.executed) return;
+        if (!autoEvent.multiExecute && core.autoEventExecuted(symbol)) return;
         if (core.autoEventExecuting(symbol)) return;
         var prefix = floorId + "@" + x + "@" + y;
         try {
@@ -992,7 +992,7 @@ events.prototype.checkAutoEvents = function () {
         }
 
         core.autoEventExecuting(symbol, true);
-        autoEvent.executed = true;
+        core.autoEventExecuted(symbol, true);
 
         var event = [
             {"type": "function", "function":
@@ -1022,7 +1022,13 @@ events.prototype.checkAutoEvents = function () {
 
 events.prototype.autoEventExecuting = function (symbol, value) {
     var name = '_executing_autoEvent_' + symbol;
-    if (value == null) return core.getFlag(name, false);
+    if (value == null) return core.hasFlag(name);
+    else core.setFlag(name, value || null);
+}
+
+events.prototype.autoEventExecuted = function (symbol, value) {
+    var name = '_executed_autoEvent_' + symbol;
+    if (value == null) return core.hasFlag(name);
     else core.setFlag(name, value || null);
 }
 

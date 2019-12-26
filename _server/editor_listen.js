@@ -133,6 +133,7 @@ editor_listen_wrapper = function (editor) {
 
         editor.uifunctions.newIdIdnum_func()
         editor.uifunctions.changeId_func()
+        editor.uifunctions.copyPasteEnemyItem_func();
 
         editor.uifunctions.selectFloor_func()
         editor.uifunctions.saveFloor_func()

@@ -210,7 +210,57 @@ editor_datapanel_wrapper = function (editor) {
         }
     }
 
+    editor.uifunctions.copyPasteEnemyItem_func = function () {
+        var copyEnemyItem = document.getElementById('copyEnemyItem');
+        var pasteEnemyItem = document.getElementById('pasteEnemyItem');
 
+        copyEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || (cls != 'enemys' && cls != 'enemy48' && cls != 'items')) return;
+            editor.uivalues.copyEnemyItem.type = cls;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                editor.uivalues.copyEnemyItem.data = core.clone(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id]);
+                printf("怪物属性复制成功");
+            } else {
+                editor.uivalues.copyEnemyItem.data = {};
+                for (var x in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+                    if (items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] != null) {
+                        editor.uivalues.copyEnemyItem.data[x] = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id]);
+                    }
+                }
+                printf("道具属性复制成功");
+            }
+        }
+
+        pasteEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || !cls || cls != editor.uivalues.copyEnemyItem.type) return;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                if (confirm("你确定要覆盖此怪物的全部属性么？这是个不可逆操作！")) {
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id] = core.clone(editor.uivalues.copyEnemyItem.data);
+                    editor.file.saveSetting('enemys', [], function (err) {
+                        if (err) printe(err);
+                        else printf("怪物属性粘贴成功\n请再重新选中该怪物方可查看更新后的表格。");
+                    })
+                }
+            } else {
+                if (confirm("你确定要覆盖此道具的全部属性么？这是个不可逆操作！")) {
+                    for (var x in editor.uivalues.copyEnemyItem.data) {
+                        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] = core.clone(editor.uivalues.copyEnemyItem.data[x]);
+                    }
+                    editor.file.saveSetting('items', [], function (err) {
+                        if (err) printe(err);
+                        else printf("道具属性粘贴成功\n请再重新选中该道具方可查看更新后的表格。");
+                    })
+                }
+            }
+
+        }
+
+
+    }
 
 
 

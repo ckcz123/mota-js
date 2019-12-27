@@ -703,7 +703,7 @@ function omitedcheckUpdateFunction(event) {
                     var dt = obj[0];
                     editor.uievent.previewUI([{"type": "fillRect", "x": dt.px[0], "y": dt.py[0],
                         "width": "(" + dt.px[1] + ")-(" + dt.px[0] + ")", "height": "(" + dt.py[1] + ")-(" + dt.py[0] + ")",
-                        "style": "#FF0000"}])
+                        "style": "rgba(255,0,0,0.5)"}])
                 }
                 else if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
                     if (b.type == 'previewUI_s')

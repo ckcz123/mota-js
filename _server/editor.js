@@ -159,7 +159,7 @@ editor.prototype.init = function (callback) {
             editor.mode = editor_mode;
             core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
             var lastFloorId = core.getLocalStorage('editorLastFloorId', core.status.floorId);
-            if (core.floors.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
+            if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
             core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
             }, true);

@@ -692,14 +692,20 @@ function omitedcheckUpdateFunction(event) {
             "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
             "fillBoldText_s", "fillRect_s", "strokeRect_s", "drawLine_s",
             "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillCircle_s", "strokeCircle_s",
-            "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s"
+            "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s",
+            "waitContext_2"
         ];
         if (b && types.indexOf(b.type)>=0) {
             try {
                 var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e)/g, '\\\\$1') + "]";
                 eval("var obj="+code);
-                // console.log(obj);
-                if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
+                if (obj.length > 0 && b.type == 'waitContext_2') {
+                    var dt = obj[0];
+                    editor.uievent.previewUI([{"type": "fillRect", "x": dt.px[0], "y": dt.py[0],
+                        "width": "(" + dt.px[1] + ")-(" + dt.px[0] + ")", "height": "(" + dt.py[1] + ")-(" + dt.py[0] + ")",
+                        "style": "#FF0000"}])
+                }
+                else if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
                     if (b.type == 'previewUI_s')
                         editor.uievent.previewUI(obj[0].action);
                     else editor.uievent.previewUI([obj[0]]);

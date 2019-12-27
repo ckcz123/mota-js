@@ -2020,14 +2020,14 @@ return code;
 
 
 waitContext_2
-    : '点击的场合' '像素x范围' Int '~' Int '; y范围' Int '~' Int BGNL? Newline action+ BEND Newline
+    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString BGNL? Newline action+ BEND Newline
 
 /* waitContext_2
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
 default : [0,32,0,32]
 colour : this.subColor
-var code = '{"case": "mouse", "px": [' + Int_0 + ',' + Int_1 + '], "py": [' + Int_2 + ',' + Int_3 + '], "action": [\n' + action_0 + ']},\n';
+var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + '], "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 

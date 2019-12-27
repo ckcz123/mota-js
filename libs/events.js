@@ -1970,6 +1970,17 @@ events.prototype.__action_wait_afterGet = function (data) {
         core.insertAction(todo);
 }
 
+events.prototype._precompile_wait = function (data) {
+    if (data.data) {
+        data.data.forEach(function (v) {
+            if (v.px) v.px = this.__precompile_array(v.px);
+            if (v.py) v.py = this.__precompile_array(v.py);
+            v.action = this.precompile(v.action);
+        }, this);
+    }
+    return data;
+}
+
 events.prototype._action_waitAsync = function (data, x, y, prefix) {
     var test = window.setInterval(function () {
         if (!core.hasAsync()) {

@@ -131,23 +131,31 @@ editor_ui_wrapper = function (editor) {
             || focusElement.id == 'selectFloor') {
 
             //Ctrl+z 撤销上一步undo
-            if (e.keyCode == 90 && e.ctrlKey && editor.uivalues.preMapData.length > 0) {
+            if (e.keyCode == 90 && e.ctrlKey) {
                 e.preventDefault();
-                var data = editor.uivalues.preMapData.pop();
-                editor.map = JSON.parse(JSON.stringify(data.map));
-                editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
-                editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
-                editor.uivalues.postMapData.push(data);
+                if (editor.uivalues.preMapData.length > 0) {
+                    var data = editor.uivalues.preMapData.pop();
+                    editor.map = JSON.parse(JSON.stringify(data.map));
+                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
+                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.updateMap();
+                    editor.uivalues.postMapData.push(data);
+                    printf("已撤销此操作，你可能需要重新保存地图。");
+                }
                 return;
             }
             //Ctrl+y 重做一步redo
-            if (e.keyCode == 89 && e.ctrlKey && editor.uivalues.postMapData.length > 0) {
+            if (e.keyCode == 89 && e.ctrlKey) {
                 e.preventDefault();
-                var data = editor.uivalues.postMapData.pop();
-                editor.map = JSON.parse(JSON.stringify(data.map));
-                editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
-                editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
-                editor.uivalues.preMapData.push(data);
+                if (editor.uivalues.postMapData.length > 0) {
+                    var data = editor.uivalues.postMapData.pop();
+                    editor.map = JSON.parse(JSON.stringify(data.map));
+                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
+                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.updateMap();
+                    editor.uivalues.preMapData.push(data);
+                    printf("已重做此操作，你可能需要重新保存地图。");
+                }
                 return;
             }
 

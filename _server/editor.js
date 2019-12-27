@@ -158,7 +158,8 @@ editor.prototype.init = function (callback) {
             editor_mode = editor_mode(editor);
             editor.mode = editor_mode;
             core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-            core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
+            var lastFloorId = core.getLocalStorage('editorLastFloorId', core.status.floorId);
+            core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
             }, true);
             core.events.setInitData(null);
@@ -256,6 +257,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
         editor.setViewport(x, y);
 
+        core.setLocalStorage('editorLastFloorId', floorId);
         if (callback) callback();
     });
 }

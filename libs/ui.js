@@ -2502,9 +2502,9 @@ ui.prototype._drawSLPanel_loadSave = function(page, callback) {
         ids.push(id);
     }
     core.getSaves(ids, function (data) {
-        for (var i = 0; i < ids.length; ++i)
+        for (var i = 1; i < ids.length; ++i)
             core.status.event.ui[i] = data[i];
-        core.saves.autosave.data = data[0];
+        core.status.event.ui[0] = data[0] == null ? null : data[0][data[0].length-1];
         callback();
     });
 }

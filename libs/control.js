@@ -1601,7 +1601,13 @@ control.prototype.autosave = function (removeLast) {
     }
     if (core.status.event.id == 'action') // 事件中的自动存档
         core.setFlag("__events__", core.clone(core.status.event.data));
-    core.saves.autosave.data = core.saveData();
+    if (core.saves.autosave.data == null) {
+        core.saves.autosave.data = [];
+    }
+    core.saves.autosave.data.push(core.saveData());
+    if (core.saves.autosave.data.length > core.saves.autosave.max) {
+        core.saves.autosave.data.shift();
+    }
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
     core.removeFlag("__events__");
@@ -1657,11 +1663,21 @@ control.prototype._doSL_save = function (id) {
 
 control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        callback(id, core.clone(core.saves.autosave.data))
+        var data = core.saves.autosave.data.pop();
+        if (core.saves.autosave.data.length == 0) {
+            core.saves.autosave.data.push(core.clone(data));
+        }
+        callback(id, data);
     }
     else {
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
-            if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+            if (id == 'autoSave' && data != null) {
+                core.saves.autosave.data = data;
+                if (!(core.saves.autosave.data instanceof Array)) {
+                    core.saves.autosave.data = [core.saves.autosave.data];
+                }
+                return core.control._doSL_load(id, callback);
+            }
             callback(id, data);
         }, function(err) {
             main.log(err);
@@ -1841,10 +1857,16 @@ control.prototype.getSave = function (index, callback) {
     if (index == 0) {
         // --- 自动存档先从缓存中获取
         if (core.saves.autosave.data != null)
-            callback(core.clone(core.saves.autosave.data));
+            callback(core.saves.autosave.data);
         else {
             core.getLocalForage("autoSave", null, function(data) {
-                callback(data);
+                if (data != null) {
+                    core.saves.autosave.data = data;
+                    if (!(core.saves.autosave.data instanceof Array)) {
+                        core.saves.autosave.data = [core.saves.autosave.data];
+                    }
+                }
+                callback(core.saves.autosave.data);
             }, function(err) {
                 main.log(err);
                 callback(null);

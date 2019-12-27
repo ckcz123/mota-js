@@ -56,12 +56,9 @@ function editor() {
         startPos:null,
         endPos:null,
         // 撤销/恢复
-        currDrawData : {
-            pos: [],
-            info: {}
-        },
-        reDo : null,
-        preMapData : null,
+        preMapData : [],
+        preMapMax: 10,
+        postMapData: [],
         //
         shortcut:{},
         copyedInfo : null,
@@ -246,7 +243,8 @@ editor.prototype.changeFloor = function (floorId, callback) {
         });
         editor.currentFloorData[name]=mapArray;
     }
-    editor.uivalues.preMapData = null;
+    editor.uivalues.preMapData = [];
+    editor.uivalues.postMapData = [];
     editor.uifunctions._extraEvent_bindSpecialDoor_doAction(true);
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         editor.game.fetchMapFromCore();

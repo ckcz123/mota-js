@@ -206,7 +206,7 @@ editor_mappanel_wrapper = function (editor) {
         }
         editor.uivalues.holdingPath = 0;
         if (editor.uivalues.stepPostfix && editor.uivalues.stepPostfix.length) {
-            editor.uivalues.preMapData = JSON.parse(JSON.stringify({ map: editor.map, fgmap: editor.fgmap, bgmap: editor.bgmap }));
+            editor.savePreMap();
             if (editor.brushMod !== 'line') {
                 var x0 = editor.uivalues.stepPostfix[0].x;
                 var y0 = editor.uivalues.stepPostfix[0].y;
@@ -221,9 +221,6 @@ editor_mappanel_wrapper = function (editor) {
                     }
                 }
             }
-            editor.uivalues.currDrawData.pos = JSON.parse(JSON.stringify(editor.uivalues.stepPostfix));
-            editor.uivalues.currDrawData.info = JSON.parse(JSON.stringify(editor.info));
-            editor.uivalues.reDo = null;
             // console.log(editor.uivalues.stepPostfix);
             if (editor.brushMod === 'tileset' && core.tilesets.indexOf(editor.info.images) !== -1) {
                 var imgWidth = ~~(core.material.images.tilesets[editor.info.images].width / 32);
@@ -511,8 +508,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.copyLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
-        editor.uivalues.preMapData = null;
-        editor.uivalues.reDo = null;
+        editor.savePreMap();
         editor_mode.onmode('');
         var now = editor.pos, last = editor.uivalues.lastRightButtonPos[1];
         if (now.x == last.x && now.y == last.y) return;
@@ -535,8 +531,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.moveLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
-        editor.uivalues.preMapData = null;
-        editor.uivalues.reDo = null;
+        editor.savePreMap();
         editor_mode.onmode('');
         editor.exchangePos(editor.pos, editor.uivalues.lastRightButtonPos[1]);
     }
@@ -547,7 +542,6 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearEvent_click = function (e) {
         e.stopPropagation();
-        editor.uivalues.reDo = null;
         editor.clearPos(false);
     }
 
@@ -557,7 +551,6 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearLoc_click = function (e) {
         e.stopPropagation();
-        editor.uivalues.reDo = null;
         editor.clearPos(true);
     }
 
@@ -768,6 +761,21 @@ editor_mappanel_wrapper = function (editor) {
             if (callback) callback();
         });
     }
+
+    editor.constructor.prototype.savePreMap = function () {
+        var dt = {
+            map: editor.map,
+            fgmap: editor.fgmap,
+            bgmap: editor.bgmap,
+        };
+        if (editor.uivalues.preMapData.length == 0
+            || !core.same(editor.uivalues.preMapData[editor.uivalues.preMapData.length - 1], dt)) {
+            editor.uivalues.preMapData.push(core.clone(dt));
+            if (editor.uivalues.preMapData.length > editor.uivalues.preMapMax) {
+                editor.uivalues.preMapData.shift();
+            }
+        }
+    }
     
     editor.constructor.prototype.moveBgFg = function (startPos, endPos, name, callback) {
         if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
@@ -809,7 +817,7 @@ editor_mappanel_wrapper = function (editor) {
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
         editor.uifunctions.hideMidMenu();
-        editor.uivalues.preMapData = null;
+        editor.savePreMap();
         editor.info = 0;
         editor_mode.onmode('');
         if (clearPos)

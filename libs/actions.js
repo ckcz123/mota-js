@@ -439,6 +439,7 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
         core.setFlag('px', px);
         core.setFlag('py', py);
         core.status.route.push("input:" + (1000000 + 1000 * px + py));
+        core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
     }
     else {
@@ -726,6 +727,7 @@ actions.prototype._sys_onmousewheel = function (direct) {
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
         core.status.route.push("input:" + keycode);
+        core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
     }
@@ -985,6 +987,7 @@ actions.prototype._keyUpAction = function (keycode) {
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
         core.status.route.push("input:" + keycode);
+        core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
     }

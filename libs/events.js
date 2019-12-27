@@ -1910,6 +1910,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
             var value = parseInt(code.substring(6));
             core.status.route.push("input:" + value);
             this.__action_wait_getValue(value);
+            this.__action_wait_afterGet(data);
         }
         else {
             main.log("录像文件出错！当前需要一个 input: 项，实际为 " + code);
@@ -1942,6 +1943,31 @@ events.prototype.__action_wait_getValue = function (value) {
         core.setFlag('type', 0);
         core.setFlag('keycode', value);
     }
+}
+
+events.prototype.__action_wait_afterGet = function (data) {
+    if (!data.data) return;
+    var todo = [];
+    data.data.forEach(function (one) {
+        if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
+            if (one["keycode"] == core.getFlag("keycode", 0)) {
+                core.push(todo, one.action);
+            }
+        }
+        if (one["case"] == "mouse" && one.px instanceof Array
+            && one.py instanceof Array && core.getFlag("type") == 1) {
+            var pxmin = core.calValue(one.px[0]);
+            var pxmax = core.calValue(one.px[1]);
+            var pymin = core.calValue(one.py[0]);
+            var pymax = core.calValue(one.py[1]);
+            var px = core.getFlag("px", 0), py = core.getFlag("py", 0);
+            if (px >= pxmin && px <= pxmax && py >= pymin && py <= pymax) {
+                core.push(todo, one.action);
+            }
+        }
+    })
+    if (todo.length > 0)
+        core.insertAction(todo);
 }
 
 events.prototype._action_waitAsync = function (data, x, y, prefix) {

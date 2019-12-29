@@ -426,7 +426,17 @@ main.dom.body.onkeyup = function(e) {
             (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyUp(e);
     } catch (ee) { main.log(ee); }
-}
+};
+
+[main.dom.startButtons, main.dom.levelChooseButtons].forEach(function (dom) {
+    dom.onmousemove = function (e) {
+        for (var i = 0; i < dom.children.length; ++i) {
+            if (dom.children[i] == e.target && i != (main.selectedButton || 0)) {
+                main.selectButton(i);
+            }
+        }
+    }
+});
 
 ////// 开始选择时 //////
 main.dom.body.onselectstart = function () {

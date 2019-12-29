@@ -976,13 +976,13 @@ events.prototype.recoverEvents = function (data) {
 ////// 检测自动事件 //////
 events.prototype.checkAutoEvents = function () {
     // 只有在无操作或事件流中才能执行自动事件！
-    if (!core.isPlaying() || core.status.lockControl && core.status.event.id != 'action') return;
+    if (!core.isPlaying() || (core.status.lockControl && core.status.event.id != 'action')) return;
     var todo = [], delay = [];
     core.status.autoEvents.forEach(function (autoEvent) {
         var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;
         // 不在当前楼层 or 已经执行过 or 正在执行中
         if (autoEvent.currentFloor && floorId != core.status.floorId) return;
-        if (!autoEvent.multiExecute && autoEvent.executed) return;
+        if (!autoEvent.multiExecute && core.autoEventExecuted(symbol)) return;
         if (core.autoEventExecuting(symbol)) return;
         var prefix = floorId + "@" + x + "@" + y;
         try {
@@ -992,7 +992,7 @@ events.prototype.checkAutoEvents = function () {
         }
 
         core.autoEventExecuting(symbol, true);
-        autoEvent.executed = true;
+        core.autoEventExecuted(symbol, true);
 
         var event = [
             {"type": "function", "function":
@@ -1022,7 +1022,13 @@ events.prototype.checkAutoEvents = function () {
 
 events.prototype.autoEventExecuting = function (symbol, value) {
     var name = '_executing_autoEvent_' + symbol;
-    if (value == null) return core.getFlag(name, false);
+    if (value == null) return core.hasFlag(name);
+    else core.setFlag(name, value || null);
+}
+
+events.prototype.autoEventExecuted = function (symbol, value) {
+    var name = '_executed_autoEvent_' + symbol;
+    if (value == null) return core.hasFlag(name);
     else core.setFlag(name, value || null);
 }
 
@@ -1298,9 +1304,12 @@ events.prototype._action_unfollow = function (data, x, y, prefix) {
 }
 
 events.prototype._action_animate = function (data, x, y, prefix) {
-    if (data.loc == 'hero') data.loc = [core.getHeroLoc('x'), core.getHeroLoc('y')];
-    else data.loc = this.__action_getLoc(data.loc, x, y, prefix);
-    this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+    if (data.loc == 'hero') {
+        this.__action_doAsyncFunc(data.async, core.drawHeroAnimate, data.name);
+    } else {
+        data.loc = this.__action_getLoc(data.loc, x, y, prefix);
+        this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+    }
 }
 
 events.prototype._action_setViewport = function (data, x, y, prefix) {
@@ -1901,6 +1910,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
             var value = parseInt(code.substring(6));
             core.status.route.push("input:" + value);
             this.__action_wait_getValue(value);
+            this.__action_wait_afterGet(data);
         }
         else {
             main.log("录像文件出错！当前需要一个 input: 项，实际为 " + code);
@@ -1933,6 +1943,42 @@ events.prototype.__action_wait_getValue = function (value) {
         core.setFlag('type', 0);
         core.setFlag('keycode', value);
     }
+}
+
+events.prototype.__action_wait_afterGet = function (data) {
+    if (!data.data) return;
+    var todo = [];
+    data.data.forEach(function (one) {
+        if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
+            if (one["keycode"] == core.getFlag("keycode", 0)) {
+                core.push(todo, one.action);
+            }
+        }
+        if (one["case"] == "mouse" && one.px instanceof Array
+            && one.py instanceof Array && core.getFlag("type") == 1) {
+            var pxmin = core.calValue(one.px[0]);
+            var pxmax = core.calValue(one.px[1]);
+            var pymin = core.calValue(one.py[0]);
+            var pymax = core.calValue(one.py[1]);
+            var px = core.getFlag("px", 0), py = core.getFlag("py", 0);
+            if (px >= pxmin && px <= pxmax && py >= pymin && py <= pymax) {
+                core.push(todo, one.action);
+            }
+        }
+    })
+    if (todo.length > 0)
+        core.insertAction(todo);
+}
+
+events.prototype._precompile_wait = function (data) {
+    if (data.data) {
+        data.data.forEach(function (v) {
+            if (v.px) v.px = this.__precompile_array(v.px);
+            if (v.py) v.py = this.__precompile_array(v.py);
+            v.action = this.precompile(v.action);
+        }, this);
+    }
+    return data;
 }
 
 events.prototype._action_waitAsync = function (data, x, y, prefix) {
@@ -2691,6 +2737,8 @@ events.prototype._jumpHero_jumping = function (jumpInfo) {
     core.control.updateViewport();
     core.drawImage('hero', core.material.images.hero, jumpInfo.icon.stop, jumpInfo.icon.loc * height, width, height,
         nowx + (32 - width) / 2 - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, width, height);
+    core.status.heroCenter.px = nowx + 16;
+    core.status.heroCenter.py = nowy + 32 - height / 2;
 }
 
 events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {

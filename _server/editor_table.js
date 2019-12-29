@@ -293,6 +293,7 @@ editor_table_wrapper = function (editor) {
         var thiseval = null;
         if (input.checked != null) input.value = input.checked;
         try {
+            if (input.value == '') input.value = 'null';
             thiseval = JSON.parse(input.value);
         } catch (ee) {
             printe(field + ' : ' + ee);

@@ -39,22 +39,22 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"redPotion": {
 			"cls": "items",
 			"name": "红血瓶",
-			"text": "'，生命+'+core.values.redPotion"
+			"text": "'，生命+${core.values.redPotion}'"
 		},
 		"bluePotion": {
 			"cls": "items",
 			"name": "蓝血瓶",
-			"text": "'，生命+'+core.values.bluePotion"
+			"text": "'，生命+${core.values.bluePotion}'"
 		},
 		"yellowPotion": {
 			"cls": "items",
 			"name": "黄血瓶",
-			"text": "'生命+'+core.values.yellowPotion"
+			"text": "'，生命+${core.values.yellowPotion'}"
 		},
 		"greenPotion": {
 			"cls": "items",
 			"name": "绿血瓶",
-			"text": "'，生命+'+core.values.greenPotion"
+			"text": "'，生命+${core.values.greenPotion}'"
 		},
 		"sword0": {
 			"cls": "items",

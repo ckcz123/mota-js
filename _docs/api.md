@@ -1624,6 +1624,12 @@ core.drawAnimate(name, x, y, callback)
 此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
 
 
+core.drawHeroAnimate(name, callback)
+绘制一个跟随勇士行动的动画。name为动画名，callback为绘制完毕的回调函数。
+此函数将播放动画音效，并异步开始绘制该动画。
+此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
+
+
 core.stopAnimate(id, doCallback)
 立刻停止某个动画的播放。id为上面core.drawAnimate的返回值。
 如果doCallback为真，则会执行该动画所对应的回调函数。
@@ -2166,7 +2172,16 @@ core.same(a, b)
 如果a和b都是数组，则会递归依次比较数组中的值；如果都是对象亦然。
 
 
-core.utils.http(type, url, formData, success, error, mimeType, responseType)
+core.unzip(blobOrUrl, success, error, convertToText)
+解压一个zip文件。
+blobOrUrl为传入的二进制zip文件Blob格式，或zip文件的地址。
+success为成功后的回调，接收 文件名-文件内容 形式的对象，即
+{"filename1": ..., "filename2": ...}
+error为失败的回调，接收参数message为错误信息。
+convertToText如果为true则会将每个文件内容转成纯文本而不是二进制格式。
+
+
+core.http(type, url, formData, success, error, mimeType, responseType)
 发送一个异步HTTP请求。
 type为'GET'或者'POST'；url为目标地址；formData如果是POST请求则为表单数据。
 success为成功后的回调，error为失败后的回调。

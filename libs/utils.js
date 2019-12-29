@@ -1166,6 +1166,54 @@ utils.prototype._export = function (floorIds) {
     console.log(content);
 }
 
+utils.prototype.unzip = function (blobOrUrl, success, error, convertToText) {
+    var _error = function (msg) {
+        main.log(msg);
+        if (error) error(msg);
+    }
+
+    if (!window.zip) {
+        return _error("zip.js not exists!");
+    }
+
+    if (typeof blobOrUrl == 'string') {
+        return core.http('GET', blobOrUrl, null, function (data) {
+            core.unzip(data, success, error, convertToText);
+        }, _error, 'application/zip', 'blob');
+    }
+
+    if (!(blobOrUrl instanceof Blob)) {
+        return _error("Should use Blob or URL as input");
+    }
+
+    zip.createReader(new zip.BlobReader(blobOrUrl), function (reader) {
+        reader.getEntries(function (entries) {
+            core.utils._unzip_readEntries(entries, function (data) {
+                reader.close(function () {
+                    if (success) success(data);
+                });
+            }, convertToText);
+        });
+    }, _error);
+}
+
+utils.prototype._unzip_readEntries = function (entries, success, convertToText) {
+    var results = {};
+    if (entries == null) {
+        return success(results);
+    }
+    var length = entries.length;
+    entries.forEach(function (entry) {
+        entry.getData(convertToText ? new zip.TextWriter('utf8') : new zip.BlobWriter(), function (data) {
+            results[entry.filename] = data;
+            length--;
+            if (length == 0) {
+                success(results);
+            }
+        });
+    });
+}
+
 utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);
@@ -1191,6 +1239,12 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     if (formData)
         xhr.send(formData);
     else xhr.send();
+}
+
+utils.prototype.httpAndZip = function (url, success, error) {
+    this.http('GET', url, null, function (data) {
+
+    }, error, null, 'blob');
 }
 
 // LZW-compress

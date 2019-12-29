@@ -98,7 +98,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var block = {'x': x, 'y': y, 'id': id};
     if (disable != null) block.disable = disable;
 
-    if (id == 17) block.event = {"cls": "terrains", "id": "airwall", "noPass": true};
+    if (id == 17) block.event = {"cls": "terrains", "id": "airwall", "noPass": true, "cannotIn":["up", "down", "left", "right"]};
     else if (id in this.blocksInfo) block.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
     else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id, "noPass": true};
     else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
@@ -369,7 +369,7 @@ maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
         return core.status[name + "maps"][floorId];
 
     var arr = core.clone(core.floors[floorId][name + "map"] || []);
-    if (main.mode == 'editor' && !(uievent && uievent.isOpen))
+    if (main.mode == 'editor' && !(window.editor && editor.uievent && editor.uievent.isOpen))
         arr = core.clone(editor[name + "map"]) || arr;
     for (var x = 0; x < width; x++) {
         for (var y = 0; y < height; y++) {
@@ -2030,13 +2030,7 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
     name = core.getMappedName(name);
 
     // 正在播放录像：不显示动画
-    if (core.isReplaying()) {
-        if (callback) callback();
-        return -1;
-    }
-
-    // 检测动画是否存在
-    if (!core.material.animates[name] || x == null || y == null) {
+    if (core.isReplaying() || !core.material.animates[name] || x == null || y == null) {
         if (callback) callback();
         return -1;
     }
@@ -2052,6 +2046,33 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
         "animate": animate,
         "centerX": centerX,
         "centerY": centerY,
+        "index": 0,
+        "callback": callback
+    });
+
+    return id;
+}
+
+////// 绘制一个跟随勇士的动画 //////
+maps.prototype.drawHeroAnimate = function (name, callback) {
+    name = core.getMappedName(name);
+
+    // 正在播放录像或动画不存在：不显示动画
+    if (core.isReplaying() || !core.material.animates[name]) {
+        if (callback) callback();
+        return -1;
+    }
+
+    // 开始绘制
+    var animate = core.material.animates[name];
+    // 播放音效
+    core.playSound(animate.se);
+
+    var id = setTimeout(null);
+    core.status.animateObjs.push({
+        "id": id,
+        "animate": animate,
+        "hero": true,
         "index": 0,
         "callback": callback
     });

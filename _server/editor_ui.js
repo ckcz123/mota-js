@@ -81,14 +81,14 @@ editor_ui_wrapper = function (editor) {
     editor.uifunctions.body_shortcut = function (e) {
 
         // UI预览 & 地图选点
-        if (uievent && uievent.isOpen) {
+        if (editor.uievent && editor.uievent.isOpen) {
             e.preventDefault();
-            if (e.keyCode == 27) uievent.close();
-            else if (e.keyCode == 13) uievent.confirm();
-            else if (e.keyCode == 87) uievent.move(0, -1)
-            else if (e.keyCode == 65) uievent.move(-1, 0)
-            else if (e.keyCode == 83) uievent.move(0, 1);
-            else if (e.keyCode == 68) uievent.move(1, 0);
+            if (e.keyCode == 27) editor.uievent.close();
+            else if (e.keyCode == 13) editor.uievent.confirm();
+            else if (e.keyCode == 87) editor.uievent.move(0, -1)
+            else if (e.keyCode == 65) editor.uievent.move(-1, 0)
+            else if (e.keyCode == 83) editor.uievent.move(0, 1);
+            else if (e.keyCode == 68) editor.uievent.move(1, 0);
             return;
         }
 
@@ -111,29 +111,6 @@ editor_ui_wrapper = function (editor) {
         if (editor_multi.id != "" || editor_blockly.id != "")
             return;
 
-        //Ctrl+z 撤销上一步undo
-        if (e.keyCode == 90 && e.ctrlKey && editor.uivalues.preMapData && editor.uivalues.currDrawData.pos.length && selectBox.isSelected()) {
-            editor.map = JSON.parse(JSON.stringify(editor.uivalues.preMapData.map));
-            editor.fgmap = JSON.parse(JSON.stringify(editor.uivalues.preMapData.fgmap));
-            editor.bgmap = JSON.parse(JSON.stringify(editor.uivalues.preMapData.bgmap));
-            editor.updateMap();
-            editor.uivalues.reDo = JSON.parse(JSON.stringify(editor.uivalues.currDrawData));
-            editor.uivalues.currDrawData = { pos: [], info: {} };
-            editor.uivalues.preMapData = null;
-            return;
-        }
-        //Ctrl+y 重做一步redo
-        if (e.keyCode == 89 && e.ctrlKey && editor.uivalues.reDo && editor.uivalues.reDo.pos.length && selectBox.isSelected()) {
-            editor.uivalues.preMapData = JSON.parse(JSON.stringify({ map: editor.map, fgmap: editor.fgmap, bgmap: editor.bgmap }));
-            for (var j = 0; j < editor.uivalues.reDo.pos.length; j++)
-                editor.map[editor.uivalues.reDo.pos[j].y][editor.uivalues.reDo.pos[j].x] = JSON.parse(JSON.stringify(editor.uivalues.reDo.info));
-
-            editor.updateMap();
-            editor.uivalues.currDrawData = JSON.parse(JSON.stringify(editor.uivalues.reDo));
-            editor.uivalues.reDo = null;
-            return;
-        }
-
         // PGUP和PGDOWN切换楼层
         if (e.keyCode == 33 || e.keyCode == 34) {
             e.preventDefault();
@@ -151,7 +128,37 @@ editor_ui_wrapper = function (editor) {
 
         var focusElement = document.activeElement;
         if (!focusElement || focusElement.tagName.toLowerCase() == 'body'
-        || focusElement.id == 'selectFloor') {
+            || focusElement.id == 'selectFloor') {
+
+            //Ctrl+z 撤销上一步undo
+            if (e.keyCode == 90 && e.ctrlKey) {
+                e.preventDefault();
+                if (editor.uivalues.preMapData.length > 0) {
+                    var data = editor.uivalues.preMapData.pop();
+                    editor.map = JSON.parse(JSON.stringify(data.map));
+                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
+                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.updateMap();
+                    editor.uivalues.postMapData.push(data);
+                    printf("已撤销此操作，你可能需要重新保存地图。");
+                }
+                return;
+            }
+            //Ctrl+y 重做一步redo
+            if (e.keyCode == 89 && e.ctrlKey) {
+                e.preventDefault();
+                if (editor.uivalues.postMapData.length > 0) {
+                    var data = editor.uivalues.postMapData.pop();
+                    editor.map = JSON.parse(JSON.stringify(data.map));
+                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
+                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.updateMap();
+                    editor.uivalues.preMapData.push(data);
+                    printf("已重做此操作，你可能需要重新保存地图。");
+                }
+                return;
+            }
+
             // Ctrl+C, Ctrl+X, Ctrl+V
             if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
                 e.preventDefault();

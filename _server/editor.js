@@ -56,12 +56,9 @@ function editor() {
         startPos:null,
         endPos:null,
         // 撤销/恢复
-        currDrawData : {
-            pos: [],
-            info: {}
-        },
-        reDo : null,
-        preMapData : null,
+        preMapData : [],
+        preMapMax: 10,
+        postMapData: [],
         //
         shortcut:{},
         copyedInfo : null,
@@ -82,6 +79,12 @@ function editor() {
             loc: null,
             n: -1,
             enemys: []
+        },
+
+        // 复制怪物或道具属性
+        copyEnemyItem : {
+            type: null,
+            data: {}
         }
 
     };
@@ -155,7 +158,9 @@ editor.prototype.init = function (callback) {
             editor_mode = editor_mode(editor);
             editor.mode = editor_mode;
             core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-            core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
+            var lastFloorId = core.getLocalStorage('editorLastFloorId', core.status.floorId);
+            if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
+            core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
             }, true);
             core.events.setInitData(null);
@@ -240,7 +245,8 @@ editor.prototype.changeFloor = function (floorId, callback) {
         });
         editor.currentFloorData[name]=mapArray;
     }
-    editor.uivalues.preMapData = null;
+    editor.uivalues.preMapData = [];
+    editor.uivalues.postMapData = [];
     editor.uifunctions._extraEvent_bindSpecialDoor_doAction(true);
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         editor.game.fetchMapFromCore();
@@ -252,6 +258,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
         editor.setViewport(x, y);
 
+        core.setLocalStorage('editorLastFloorId', floorId);
         if (callback) callback();
     });
 }
@@ -402,7 +409,7 @@ editor.prototype.drawInitData = function (icons) {
     editor.widthsX = {};
     editor.uivalues.folded = core.getLocalStorage('folded', false);
     // editor.uivalues.folded = true;
-    editor.uivalues.foldPerCol = 50;
+    editor.uivalues.foldPerCol = core.getLocalStorage('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 

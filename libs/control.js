@@ -169,7 +169,11 @@ control.prototype._animationFrame_animate = function (timestamp) {
         return obj.index < obj.animate.frames.length;
     });
     core.status.animateObjs.forEach(function (obj) {
-        core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+        if (obj.hero) {
+            core.maps._drawAnimateFrame(obj.animate, core.status.heroCenter.px, core.status.heroCenter.py, obj.index++);
+        } else {
+            core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+        }
     });
     core.animateFrame.animateTime = timestamp;
 }
@@ -806,6 +810,8 @@ control.prototype.drawHero = function (status, offset) {
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.clearAutomaticRouteNode(x+dx, y+dy);
     core.clearMap('hero');
+    core.status.heroCenter.px = 32 * x + offsetX + 16;
+    core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
     if (!core.hasFlag('hideHero')) {
         this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
@@ -996,7 +1002,7 @@ control.prototype.checkBlock = function () {
     if (damage) {
         core.status.hero.hp -= damage;
         core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
-        core.drawAnimate("zone", x, y);
+        core.drawHeroAnimate("zone");
         this._checkBlock_disableQuickShop();
         core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
@@ -1595,7 +1601,13 @@ control.prototype.autosave = function (removeLast) {
     }
     if (core.status.event.id == 'action') // 事件中的自动存档
         core.setFlag("__events__", core.clone(core.status.event.data));
-    core.saves.autosave.data = core.saveData();
+    if (core.saves.autosave.data == null) {
+        core.saves.autosave.data = [];
+    }
+    core.saves.autosave.data.push(core.saveData());
+    if (core.saves.autosave.data.length > core.saves.autosave.max) {
+        core.saves.autosave.data.shift();
+    }
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
     core.removeFlag("__events__");
@@ -1651,11 +1663,21 @@ control.prototype._doSL_save = function (id) {
 
 control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        callback(id, core.clone(core.saves.autosave.data))
+        var data = core.saves.autosave.data.pop();
+        if (core.saves.autosave.data.length == 0) {
+            core.saves.autosave.data.push(core.clone(data));
+        }
+        callback(id, data);
     }
     else {
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
-            if (id == 'autoSave') core.saves.autosave.data = core.clone(data);
+            if (id == 'autoSave' && data != null) {
+                core.saves.autosave.data = data;
+                if (!(core.saves.autosave.data instanceof Array)) {
+                    core.saves.autosave.data = [core.saves.autosave.data];
+                }
+                return core.control._doSL_load(id, callback);
+            }
             callback(id, data);
         }, function(err) {
             main.log(err);
@@ -1835,10 +1857,16 @@ control.prototype.getSave = function (index, callback) {
     if (index == 0) {
         // --- 自动存档先从缓存中获取
         if (core.saves.autosave.data != null)
-            callback(core.clone(core.saves.autosave.data));
+            callback(core.saves.autosave.data);
         else {
             core.getLocalForage("autoSave", null, function(data) {
-                callback(data);
+                if (data != null) {
+                    core.saves.autosave.data = data;
+                    if (!(core.saves.autosave.data instanceof Array)) {
+                        core.saves.autosave.data = [core.saves.autosave.data];
+                    }
+                }
+                callback(core.saves.autosave.data);
             }, function(err) {
                 main.log(err);
                 callback(null);
@@ -2452,7 +2480,7 @@ control.prototype.updateHeroIcon = function (name) {
     // 全身图
     var w = core.material.icons.hero.width || 32;
     var h = core.material.icons.hero.height || 48;
-    var ratio = Math.max(w / h, 1), width = 32 * ratio, left = 16 - width/2;
+    var ratio = Math.min(w / h, 1), width = 32 * ratio, left = 16 - width/2;
 
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");

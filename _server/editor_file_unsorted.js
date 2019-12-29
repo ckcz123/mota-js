@@ -897,6 +897,8 @@ editor_file = function (editor, callback) {
         callback('出错了,要设置的文件名不识别');
     }
 
+    editor.file.saveSetting = saveSetting;
+
     return editor_file;
 }
 //editor_file = editor_file(editor);

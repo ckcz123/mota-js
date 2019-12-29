@@ -239,25 +239,15 @@ body {
     position: absolute;
     left: 964px;
     top: 10px;
-<<<<<<< HEAD
-    width: 376px;
-    height: 655px;
-=======
     right: 0;
     bottom: 0;
->>>>>>> v2.x
     /* border: 1px solid rgb(238, 13, 13); */
 }
 
 #iconLib {
     position: absolute;
-<<<<<<< HEAD
-    width: 371px;
-    height: 655px;
-=======
     right: 0;
     bottom: 0;
->>>>>>> v2.x
     left: 5px;
     top: 5px;
     overflow: auto;

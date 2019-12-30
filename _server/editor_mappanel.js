@@ -229,6 +229,7 @@ editor_mappanel_wrapper = function (editor) {
                 editor.uivalues.stepPostfix = [];
                 for (var jj = y0; jj < y0 + editor.uivalues.tileSize[1]; ++jj) {
                     for (var ii = x0; ii < x0 + editor.uivalues.tileSize[0]; ++ii) {
+                        if (jj >= editor[editor.layerMod].length || ii >= editor[editor.layerMod][0].length) continue;
                         editor.uivalues.stepPostfix.push({ x: ii, y: jj });
                     }
                 }

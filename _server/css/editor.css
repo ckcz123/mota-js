@@ -40,7 +40,7 @@ body {
     width: 104px;
 }
 
-#left, #mid, #right {
+#left, #mid, #mid2, #right {
     border-radius: 2px;
     box-sizing: border-box;
     box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
@@ -128,6 +128,14 @@ body {
     top: 10px;
     width: 440px;
     height: 630px;
+}
+
+#mid2 {
+    position: absolute;
+    left: 448px;
+    top: 650px;
+    width: 440px;
+    bottom: 10px;
 }
 
 #mapEdit {

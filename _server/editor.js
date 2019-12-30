@@ -85,8 +85,10 @@ function editor() {
         copyEnemyItem : {
             type: null,
             data: {}
-        }
+        },
 
+        // tile
+        tileSize: [1,1],
     };
 
     window.onerror = function (msg, url, lineNo, columnNo, error) {

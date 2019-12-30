@@ -221,8 +221,19 @@ editor_mappanel_wrapper = function (editor) {
                     }
                 }
             }
-            // console.log(editor.uivalues.stepPostfix);
-            if (editor.brushMod === 'tileset' && core.tilesets.indexOf(editor.info.images) !== -1) {
+            var useBrushMode = editor.brushMod == 'tileset';
+            if (editor.uivalues.stepPostfix.length == 1 && (editor.uivalues.tileSize[0] > 1 || editor.uivalues.tileSize[1] > 1)) {
+                useBrushMode = true;
+                var x0 = editor.uivalues.stepPostfix[0].x;
+                var y0 = editor.uivalues.stepPostfix[0].y;
+                editor.uivalues.stepPostfix = [];
+                for (var jj = y0; jj < y0 + editor.uivalues.tileSize[1]; ++jj) {
+                    for (var ii = x0; ii < x0 + editor.uivalues.tileSize[0]; ++ii) {
+                        editor.uivalues.stepPostfix.push({ x: ii, y: jj });
+                    }
+                }
+            }
+            if (useBrushMode && core.tilesets.indexOf(editor.info.images) !== -1) {
                 var imgWidth = ~~(core.material.images.tilesets[editor.info.images].width / 32);
                 var x0 = editor.uivalues.stepPostfix[0].x;
                 var y0 = editor.uivalues.stepPostfix[0].y;

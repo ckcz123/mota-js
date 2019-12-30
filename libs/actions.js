@@ -492,7 +492,8 @@ actions.prototype._sys_onmove_choices = function (x, y) {
 
     switch (core.status.event.id) {
         case 'action':
-            if (core.status.event.id != 'choices') break;
+            if (core.status.event.data.type != 'choices') break;
+        case 'shop':
         case 'selectShop':
         case 'switchs':
         case 'settings':

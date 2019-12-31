@@ -406,7 +406,6 @@ editor.prototype.updateLastUsedMap = function () {
     ctx.lineWidth = 4;
     for (var i = 0; i < editor.uivalues.lastUsed.length; ++i) {
         var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
-        if (y >= 5) break;
         var info = editor.uivalues.lastUsed[i];
         if (!info || !info.images) continue;
         if (info.isTile) {

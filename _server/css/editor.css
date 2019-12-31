@@ -150,6 +150,13 @@ body {
     height: 416px;
 }
 
+#lastUsedDiv {
+    height: auto;
+    bottom: 0;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
 #mid .tools {
     position: absolute;
     width: 425px;

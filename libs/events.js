@@ -842,8 +842,13 @@ events.prototype.doEvent = function (data, x, y, prefix) {
 
 events.prototype.setEvents = function (list, x, y, callback) {
     var data = core.status.event.data || {};
-    if (list)
+    if (list) {
         data.list = [{todo: core.clone(list), total: core.clone(list), condition: "false"}];
+        // 结束所有正在执行的自动事件
+        core.status.autoEvents.forEach(function (autoEvent) {
+            core.autoEventExecuting(autoEvent.symbol, null);
+        });
+    }
     if (x != null) data.x = x;
     if (y != null) data.y = y;
     if (callback) data.callback = callback;

@@ -1621,9 +1621,12 @@ control.prototype.autosave = function (removeLast) {
 control.prototype.checkAutosave = function () {
     if (!core.animateFrame || !core.saves || !core.saves.autosave) return;
     core.setLocalStorage('totalTime', core.animateFrame.totalTime);
-    if (core.saves.autosave.data == null || !core.saves.autosave.updated) return;
-    core.saves.autosave.updated = false;
-    core.setLocalForage("autoSave", core.saves.autosave.data);
+    var autosave = core.saves.autosave;
+    if (autosave.data == null || !autosave.updated || !autosave.storage) return;
+    autosave.updated = false;
+    if (autosave.data.length >= 1) {
+        core.setLocalForage("autoSave", autosave.data[autosave.data.length - 1]);
+    }
 }
 
 ////// 实际进行存读档事件 //////

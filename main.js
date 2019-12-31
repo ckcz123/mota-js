@@ -489,6 +489,7 @@ main.dom.data.ontouchstart = function (e) {
         e.preventDefault();
         var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
+        main.lastTouchLoc = loc;
         main.core.ondown(loc);
     }catch (ee) { main.log(ee); }
 }
@@ -499,6 +500,7 @@ main.dom.data.ontouchmove = function (e) {
         e.preventDefault();
         var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
+        main.lastTouchLoc = loc;
         main.core.onmove(loc);
     }catch (ee) { main.log(ee); }
 }
@@ -507,8 +509,9 @@ main.dom.data.ontouchmove = function (e) {
 main.dom.data.ontouchend = function (e) {
     try {
         e.preventDefault();
-        var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
-        if (loc == null) return;
+        if (main.lastTouchLoc == null) return;
+        var loc = main.lastTouchLoc;
+        delete main.lastTouchLoc;
         main.core.onup(loc);
     } catch (e) {
         main.log(e);

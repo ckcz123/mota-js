@@ -540,7 +540,7 @@ editor_datapanel_wrapper = function (editor) {
                         }
 
                         //画灰白相间的格子
-                        var bgc = editor.dom.bg.getContext('2d');
+                        var bgc = editor.dom.bgCtx;
                         var colorA = ["#f8f8f8", "#cccccc"];
                         var colorIndex;
                         var sratio = 4;

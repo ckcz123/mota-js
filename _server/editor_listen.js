@@ -34,6 +34,8 @@ editor_listen_wrapper = function (editor) {
         editor.dom.clearEvent.onmousedown = editor.uifunctions.clearEvent_click
         editor.dom.clearLoc.onmousedown = editor.uifunctions.clearLoc_click
 
+        editor.dom.lastUsed.onmousedown = editor.uifunctions.lastUsed_click;
+
         editor.dom.brushMod.onchange = editor.uifunctions.brushMod_onchange
         if (editor.dom.brushMod2) editor.dom.brushMod2.onchange = editor.uifunctions.brushMod2_onchange;
         if (editor.dom.brushMod3) editor.dom.brushMod3.onchange = editor.uifunctions.brushMod3_onchange;

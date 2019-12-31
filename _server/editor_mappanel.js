@@ -251,6 +251,10 @@ editor_mappanel_wrapper = function (editor) {
                     editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.info;
             }
             // console.log(editor.map);
+            if (editor.info.y != null) {
+                editor.uivalues.lastUsed = [editor.info].concat(editor.uivalues.lastUsed.filter(function (e) { return e.id != editor.info.id}));
+                core.setLocalStorage("lastUsed", editor.uivalues.lastUsed);
+            }
             editor.updateMap();
             editor.uivalues.holdingPath = 0;
             editor.uivalues.stepPostfix = [];
@@ -587,6 +591,7 @@ editor_mappanel_wrapper = function (editor) {
      * 切换画笔模式
      */
     editor.uifunctions.brushMod3_onchange = function () {
+        alert("从V2.6.6开始，tileset贴图模式已被废弃。\n请右键额外素材，并输入所需要绘制的宽高，然后单击地图以绘制一个区域。");
         // tip.showHelp(5)
         tip.isSelectedBlock(false)
         tip.msgs[11] = String('tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
@@ -708,6 +713,20 @@ editor_mappanel_wrapper = function (editor) {
             });
         }
         saveFloor.onclick = editor_mode.saveFloor;
+    }
+
+    editor.uifunctions.lastUsed_click = function (e) {
+        if (editor.isMobile) return;
+
+        var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
+        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
+        var px = scrollLeft + e.clientX - editor.dom.mid2.offsetLeft - editor.dom.lastUsedDiv.offsetLeft,
+            py = scrollTop + e.clientY - editor.dom.mid2.offsetTop - editor.dom.lastUsedDiv.offsetTop;
+        var x = parseInt(px / 32), y = parseInt(py / 32);
+        var index = x + core.__SIZE__ * y;
+        if (index >= editor.uivalues.lastUsed.length) return;
+        editor.setSelectBoxFromInfo(editor.uivalues.lastUsed[index]);
+        return;
     }
 
 
@@ -848,9 +867,6 @@ editor_mappanel_wrapper = function (editor) {
             if (callback) callback();
         });
     }
-
-
-
 
 
 

@@ -147,6 +147,7 @@ editor_materialpanel_wrapper = function (editor) {
                 tip.infos(JSON.parse(JSON.stringify(editor.info)));
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('enemyitem');
+                editor.updateLastUsedMap();
                 //editor_mode.enemyitem();
             }
         }

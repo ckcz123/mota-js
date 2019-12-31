@@ -846,7 +846,7 @@ events.prototype.setEvents = function (list, x, y, callback) {
         data.list = [{todo: core.clone(list), total: core.clone(list), condition: "false"}];
         // 结束所有正在执行的自动事件
         core.status.autoEvents.forEach(function (autoEvent) {
-            core.autoEventExecuting(autoEvent.symbol, null);
+            core.autoEventExecuting(autoEvent.symbol, false);
         });
     }
     if (x != null) data.x = x;
@@ -1020,7 +1020,10 @@ events.prototype.checkAutoEvents = function () {
         core.insertAction(todo);
         core.push(core.status.event.data.appendingEvents, delay);
     } else {
-        core.insertAction(delay);
+        core.insertAction(delay[0]);
+        if (delay.length > 0) {
+            core.insertAction(delay.slice(1));
+        }
     }
 
 }

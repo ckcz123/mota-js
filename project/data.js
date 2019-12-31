@@ -63,8 +63,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"武器",
 			"盾牌"
 		],
-		"startBgm": "bgm.mp3",
-		"statusLeftBackground": "url(project/images/ground.png) repeat",
+		"startBgm": null,
+		"statusLeftBackground": null,
 		"statusTopBackground": "url(project/images/ground.png) repeat",
 		"toolsBackground": "url(project/images/ground.png) repeat",
 		"borderColor": "#CCCCCC",
@@ -78,7 +78,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.6.5",
+		"version": "Ver 2.6.6",
 		"floorId": "sample0",
 		"hero": {
 			"name": "阳光",
@@ -387,7 +387,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"snowFourDirections": false,
 		"bigKeyIsBox": false,
 		"steelDoorWithoutKey": false,
-		"itemFirstText": true,
+		"itemFirstText": false,
 		"equipment": false,
 		"equipboxButton": false,
 		"iconInEquipbox": false,

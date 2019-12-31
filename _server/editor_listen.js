@@ -24,6 +24,7 @@ editor_listen_wrapper = function (editor) {
         editor.dom.iconExpandBtn.onclick = editor.uifunctions.fold_material_click
 
         editor.dom.iconLib.onmousedown = editor.uifunctions.material_ondown
+        editor.dom.iconLib.oncontextmenu = function (e) { e.preventDefault() }
 
         editor.dom.extraEvent.onmousedown = editor.uifunctions.extraEvent_click
         editor.dom.chooseThis.onmousedown = editor.uifunctions.chooseThis_click
@@ -32,6 +33,8 @@ editor_listen_wrapper = function (editor) {
         editor.dom.moveLoc.onmousedown = editor.uifunctions.moveLoc_click
         editor.dom.clearEvent.onmousedown = editor.uifunctions.clearEvent_click
         editor.dom.clearLoc.onmousedown = editor.uifunctions.clearLoc_click
+
+        editor.dom.lastUsed.onmousedown = editor.uifunctions.lastUsed_click;
 
         editor.dom.brushMod.onchange = editor.uifunctions.brushMod_onchange
         if (editor.dom.brushMod2) editor.dom.brushMod2.onchange = editor.uifunctions.brushMod2_onchange;
@@ -133,6 +136,7 @@ editor_listen_wrapper = function (editor) {
 
         editor.uifunctions.newIdIdnum_func()
         editor.uifunctions.changeId_func()
+        editor.uifunctions.copyPasteEnemyItem_func();
 
         editor.uifunctions.selectFloor_func()
         editor.uifunctions.saveFloor_func()

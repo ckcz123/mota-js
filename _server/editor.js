@@ -8,6 +8,7 @@ function editor() {
         body:document.body,
         eui:document.getElementById('eui'),
         euiCtx:document.getElementById('eui').getContext('2d'),
+        efgCtx:document.getElementById('efg').getContext('2d'),
         mid:document.getElementById('mid'),
         mapEdit:document.getElementById('mapEdit'),
         selectFloor:document.getElementById('selectFloor'),
@@ -26,9 +27,13 @@ function editor() {
         brushMod2:document.getElementById('brushMod2'),
         brushMod3:document.getElementById('brushMod3'),
         bgc : document.getElementById('bg'),
+        bgCtx : document.getElementById('bg').getContext('2d'),
         fgc : document.getElementById('fg'),
-        evc : document.getElementById('event'), 
+        fgCtx : document.getElementById('fg').getContext('2d'),
+        evc : document.getElementById('event'),
+        evCtx : document.getElementById('event').getContext('2d'),
         ev2c : document.getElementById('event2'),
+        ev2Ctx : document.getElementById('event2').getContext('2d'),
         layerMod:document.getElementById('layerMod'),
         layerMod2:document.getElementById('layerMod2'),
         layerMod3:document.getElementById('layerMod3'),
@@ -46,6 +51,10 @@ function editor() {
         changeFloorId :document.getElementById('changeFloorId'),
         left1 : document.getElementById('left1'),
         editModeSelect :document.getElementById('editModeSelect'),
+        mid2 : document.getElementById('mid2'),
+        lastUsedDiv: document.getElementById('lastUsedDiv'),
+        lastUsed: document.getElementById('lastUsed'),
+        lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
     };
 
     this.uivalues={
@@ -56,12 +65,9 @@ function editor() {
         startPos:null,
         endPos:null,
         // 撤销/恢复
-        currDrawData : {
-            pos: [],
-            info: {}
-        },
-        reDo : null,
-        preMapData : null,
+        preMapData : [],
+        preMapMax: 10,
+        postMapData: [],
         //
         shortcut:{},
         copyedInfo : null,
@@ -82,8 +88,19 @@ function editor() {
             loc: null,
             n: -1,
             enemys: []
-        }
+        },
 
+        // 复制怪物或道具属性
+        copyEnemyItem : {
+            type: null,
+            data: {}
+        },
+
+        // tile
+        tileSize: [1,1],
+
+        // 最近使用的图块
+        lastUsed: [],
     };
 
     window.onerror = function (msg, url, lineNo, columnNo, error) {
@@ -155,7 +172,9 @@ editor.prototype.init = function (callback) {
             editor_mode = editor_mode(editor);
             editor.mode = editor_mode;
             core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-            core.changeFloor(core.status.floorId, null, core.firstData.hero.loc, null, function () {
+            var lastFloorId = core.getLocalStorage('editorLastFloorId', core.status.floorId);
+            if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
+            core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
             }, true);
             core.events.setInitData(null);
@@ -205,9 +224,9 @@ editor.prototype.init = function (callback) {
 }
 
 editor.prototype.mapInit = function () {
-    var ec = document.getElementById('event').getContext('2d');
+    var ec = editor.dom.evCtx;
     ec.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
-    document.getElementById('event2').getContext('2d').clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+    editor.dom.ev2Ctx.clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
     editor.map = [];
     var sy=editor.currentFloorData.map.length,sx=editor.currentFloorData.map[0].length;
     for (var y = 0; y < sy; y++) {
@@ -240,7 +259,8 @@ editor.prototype.changeFloor = function (floorId, callback) {
         });
         editor.currentFloorData[name]=mapArray;
     }
-    editor.uivalues.preMapData = null;
+    editor.uivalues.preMapData = [];
+    editor.uivalues.postMapData = [];
     editor.uifunctions._extraEvent_bindSpecialDoor_doAction(true);
     core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
         editor.game.fetchMapFromCore();
@@ -252,6 +272,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
         editor.setViewport(x, y);
 
+        core.setLocalStorage('editorLastFloorId', floorId);
         if (callback) callback();
     });
 }
@@ -259,7 +280,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
 /////////// 游戏绘图相关 ///////////
 
 editor.prototype.drawEventBlock = function () {
-    var fg=document.getElementById('efg').getContext('2d');
+    var fg=editor.dom.efgCtx;
 
     fg.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
     var firstData = editor.game.getFirstData();
@@ -310,7 +331,7 @@ editor.prototype.drawEventBlock = function () {
 
 editor.prototype.drawPosSelection = function () {
     this.drawEventBlock();
-    var fg=document.getElementById('efg').getContext('2d');
+    var fg=editor.dom.efgCtx;
     fg.strokeStyle = 'rgba(255,255,255,0.7)';
     fg.lineWidth = 4;
     fg.strokeRect(32*editor.pos.x - core.bigmap.offsetX + 4, 32*editor.pos.y - core.bigmap.offsetY + 4, 24, 24);
@@ -362,20 +383,43 @@ editor.prototype.updateMap = function () {
         //ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
     }
     // 绘制地图 start
-    var eventCtx = document.getElementById('event').getContext("2d");
-    var fgCtx = document.getElementById('fg').getContext("2d");
-    var bgCtx = document.getElementById('bg').getContext("2d");
-    for (var y = 0; y < editor.map.length; y++)
+    for (var y = 0; y < editor.map.length; y++) {
         for (var x = 0; x < editor.map[0].length; x++) {
             var tileInfo = editor.map[y][x];
-            drawTile(eventCtx, x, y, tileInfo);
+            drawTile(editor.dom.evCtx, x, y, tileInfo);
             tileInfo = editor.fgmap[y][x];
-            drawTile(fgCtx, x, y, tileInfo);
+            drawTile(editor.dom.fgCtx, x, y, tileInfo);
             tileInfo = editor.bgmap[y][x];
-            drawTile(bgCtx, x, y, tileInfo);
+            drawTile(editor.dom.bgCtx, x, y, tileInfo);
         }
+    }
     // 绘制地图 end
-    
+
+    this.updateLastUsedMap();
+}
+
+editor.prototype.updateLastUsedMap = function () {
+    // 绘制最近使用事件
+    var ctx = editor.dom.lastUsedCtx;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.strokeStyle = 'rgba(255,128,0,0.85)';
+    ctx.lineWidth = 4;
+    for (var i = 0; i < editor.uivalues.lastUsed.length; ++i) {
+        var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
+        var info = editor.uivalues.lastUsed[i];
+        if (!info || !info.images) continue;
+        if (info.isTile) {
+            ctx.drawImage(core.material.images.tilesets[info.images], 32 * info.x, 32 * info.y, 32, 32, x*32, y*32, 32, 32);
+        } else if (info.images == 'autotile') {
+            ctx.drawImage(core.material.images.autotile[info.id], 0, 0, 32, 32, x * 32, y * 32, 32, 32);
+        } else {
+            var per_height = info.images.endsWith('48') ? 48 : 32;
+            ctx.drawImage(core.material.images[info.images], 0, info.y * per_height, 32, per_height, x * 32, y * 32, 32, 32);
+        }
+        if (selectBox.isSelected() && editor.info.id == info.id) {
+            ctx.strokeRect(32 * x + 2, 32 * y + 2, 28, 28);
+        }
+    }
 }
 
 editor.prototype.setViewport=function (x, y) {
@@ -402,8 +446,9 @@ editor.prototype.drawInitData = function (icons) {
     editor.widthsX = {};
     editor.uivalues.folded = core.getLocalStorage('folded', false);
     // editor.uivalues.folded = true;
-    editor.uivalues.foldPerCol = 50;
+    editor.uivalues.foldPerCol = core.getLocalStorage('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
+    editor.uivalues.lastUsed = core.getLocalStorage("lastUsed", []);
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
     for (var ii = 0; ii < imgNames.length; ii++) {
@@ -596,7 +641,10 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
     editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
     editor.dom.dataSelection.style.top = pos.y * ysize + 'px';
     editor.dom.dataSelection.style.height = ysize - 6 + 'px';
-    setTimeout(function(){selectBox.isSelected(true);});
+    setTimeout(function(){
+        selectBox.isSelected(true);
+        editor.updateLastUsedMap();
+    });
     editor.info = JSON.parse(JSON.stringify(thisevent));
     tip.infos(JSON.parse(JSON.stringify(thisevent)));
     editor.pos=pos;

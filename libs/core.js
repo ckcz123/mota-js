@@ -106,6 +106,8 @@ function core() {
             "data": null,
             "time": 0,
             "updated": false,
+            "storage": true, // 是否把自动存档写入文件a
+            "max": 10, // 自动存档最大回退数
         },
         "favorite": [],
         "favoriteName": {}
@@ -116,6 +118,7 @@ function core() {
 
         // 勇士属性
         'hero': {},
+        'heroCenter': {'px': null, 'py': null},
 
         // 当前地图
         'floorId': null,

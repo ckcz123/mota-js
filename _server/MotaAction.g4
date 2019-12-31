@@ -589,27 +589,27 @@ return code;
 */;
 
 setValue_s
-    :   '数值操作' ':' '名称' idString_e '值' expression '刷新状态栏和显伤' Bool Newline
+    :   '数值操作' ':' '名称' idString_e '值' expression '不刷新状态栏' Bool Newline
     
 
 /* setValue_s
 tooltip : setValue：设置勇士的某个属性、道具个数, 或某个变量/Flag的值
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setvalue%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%8B%87%E5%A3%AB%E7%9A%84%E6%9F%90%E4%B8%AA%E5%B1%9E%E6%80%A7%E3%80%81%E9%81%93%E5%85%B7%E4%B8%AA%E6%95%B0%EF%BC%8C%E6%88%96%E6%9F%90%E4%B8%AA%E5%8F%98%E9%87%8Fflag%E7%9A%84%E5%80%BC
 colour : this.dataColor
-Bool_0 = Bool_0 ? ', "refresh": true' : '';
+Bool_0 = Bool_0 ? ', "norefresh": true' : '';
 var code = '{"type": "setValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"' + Bool_0 + '},\n';
 return code;
 */;
 
 addValue_s
-    :   '数值增减' ':' '名称' idString_e '+=' expression '刷新状态栏和显伤' Bool  Newline
+    :   '数值增减' ':' '名称' idString_e '+=' expression '不刷新状态栏' Bool  Newline
 
 
 /* addValue_s
 tooltip : addValue：增减勇士的某个属性、道具个数, 或某个变量/Flag的值
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=addValue%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
 colour : this.dataColor
-Bool_0 = Bool_0 ? ', "refresh": true' : '';
+Bool_0 = Bool_0 ? ', "norefresh": true' : '';
 var code = '{"type": "addValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"' + Bool_0 + '},\n';
 return code;
 */;
@@ -1988,15 +1988,53 @@ return code;
 
 
 wait_s
-    :   '等待用户操作并获得按键或点击信息'
+    :   '等待用户操作并获得按键或点击信息' BGNL? Newline waitContext* BEND Newline
 
 
 /* wait_s
-tooltip : wait: 等待用户操作并获得按键或点击信息（具体用法看文档）
+tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
 colour : this.soundColor
-var code = '{"type": "wait"},\n';
+waitContext_0 = waitContext_0 ? (', "data": [\n' + waitContext_0 + ']') : '';
+var code = '{"type": "wait"' + waitContext_0 + '},\n';
 return code;
+*/;
+
+
+waitContext
+    : waitContext_1
+    | waitContext_2
+    | waitContext_empty;
+
+
+waitContext_1
+    : '按键的场合' '键值' Int BGNL? Newline action+ BEND Newline
+
+/* waitContext_1
+tooltip : wait: 等待用户操作并获得按键或点击信息
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
+colour : this.subColor
+var code = '{"case": "keyboard", "keycode": ' + Int_0 + ', "action": [\n' + action_0 + ']},\n';
+return code;
+*/;
+
+
+waitContext_2
+    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString BGNL? Newline action+ BEND Newline
+
+/* waitContext_2
+tooltip : wait: 等待用户操作并获得按键或点击信息
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
+default : [0,32,0,32]
+colour : this.subColor
+var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + '], "action": [\n' + action_0 + ']},\n';
+return code;
+*/;
+
+waitContext_empty : Newline
+
+/* waitContext_empty
+return '';
 */;
 
 
@@ -3398,7 +3436,7 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setValue_s'].xmlText([
         this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
-        data.refresh || false,
+        data.norefresh || false,
         this.next]);
       break;
     case "setValue2":
@@ -3406,7 +3444,7 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['addValue_s'].xmlText([
         this.tryToUseEvFlag_e('idString_e', [data.name]),
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
-        data.refresh || false,
+        data.norefresh || false,
         this.next]);
       break;
     case "setEnemy":
@@ -3547,8 +3585,22 @@ ActionParser.prototype.parseAction = function() {
         data.time||0,data.noSkip||false,this.next]);
       break;
     case "wait": // 等待用户操作
+      var case_waitList = null;
+      if (data.data) {
+        for(var ii=data.data.length-1,caseNow;caseNow=data.data[ii];ii--) {
+          if (caseNow["case"] == "keyboard") {
+            case_waitList = MotaActionBlocks['waitContext_1'].xmlText([
+              caseNow.keycode || 0, this.insertActionList(caseNow.action), case_waitList
+            ]);
+          } else if (caseNow["case"] == "mouse") {
+            case_waitList = MotaActionBlocks['waitContext_2'].xmlText([
+              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], this.insertActionList(caseNow.action), case_waitList
+            ]);
+          }
+        }
+      }
       this.next = MotaActionBlocks['wait_s'].xmlText([
-        this.next]);
+        case_waitList, this.next]);
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([

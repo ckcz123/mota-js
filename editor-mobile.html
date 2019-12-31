@@ -77,6 +77,7 @@
                 <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
                 <input id="appendConfirm" type="button" value="追加"/>
                 <input id="quickAppendConfirm" type="button" value="快速追加"/>
+                <span style="font-size: 13px">自动注册</span><input id="appendRegister" type="checkbox" checked/>
             </p>
             <p>
                 色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
@@ -134,6 +135,10 @@
                         </tr>
                         </tbody>
                     </table>
+                </div>
+                <div style="margin-top: -10px; margin-bottom: 10px">
+                    <button id="copyEnemyItem">复制属性</button>
+                    <button id="pasteEnemyItem">粘贴属性</button>
                 </div>
             </div>
             <div id='newIdIdnum'><!-- id and idnum -->
@@ -307,6 +312,12 @@
             <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
         
+    </div>
+    <div id="mid2" style="display: none">
+        <p style="margin: 10px">最近使用的图块列表：</p>
+        <div class="map" style="height: 160px; margin-top: 25px" id="lastUsedDiv">
+            <canvas class='gameCanvas' id='lastUsed' width='416' height='160'></canvas>
+        </div>
     </div>
     <div id="right" style="z-index:-1;opacity: 0;">
         <div id="iconLib">
@@ -585,6 +596,7 @@
 <script src='_server/editor_legacy.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
+<script src='libs/thirdparty/zip.min.js'></script>
 <script id='mainScript' src='main.js'></script>
 <script src='_server/editor.js'></script>
 <script>

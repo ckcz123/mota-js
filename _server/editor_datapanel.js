@@ -210,7 +210,57 @@ editor_datapanel_wrapper = function (editor) {
         }
     }
 
+    editor.uifunctions.copyPasteEnemyItem_func = function () {
+        var copyEnemyItem = document.getElementById('copyEnemyItem');
+        var pasteEnemyItem = document.getElementById('pasteEnemyItem');
 
+        copyEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || (cls != 'enemys' && cls != 'enemy48' && cls != 'items')) return;
+            editor.uivalues.copyEnemyItem.type = cls;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                editor.uivalues.copyEnemyItem.data = core.clone(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id]);
+                printf("怪物属性复制成功");
+            } else {
+                editor.uivalues.copyEnemyItem.data = {};
+                for (var x in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+                    if (items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] != null) {
+                        editor.uivalues.copyEnemyItem.data[x] = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id]);
+                    }
+                }
+                printf("道具属性复制成功");
+            }
+        }
+
+        pasteEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || !cls || cls != editor.uivalues.copyEnemyItem.type) return;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                if (confirm("你确定要覆盖此怪物的全部属性么？这是个不可逆操作！")) {
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id] = core.clone(editor.uivalues.copyEnemyItem.data);
+                    editor.file.saveSetting('enemys', [], function (err) {
+                        if (err) printe(err);
+                        else printf("怪物属性粘贴成功\n请再重新选中该怪物方可查看更新后的表格。");
+                    })
+                }
+            } else {
+                if (confirm("你确定要覆盖此道具的全部属性么？这是个不可逆操作！")) {
+                    for (var x in editor.uivalues.copyEnemyItem.data) {
+                        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] = core.clone(editor.uivalues.copyEnemyItem.data[x]);
+                    }
+                    editor.file.saveSetting('items', [], function (err) {
+                        if (err) printe(err);
+                        else printf("道具属性粘贴成功\n请再重新选中该道具方可查看更新后的表格。");
+                    })
+                }
+            }
+
+        }
+
+
+    }
 
 
 
@@ -490,7 +540,7 @@ editor_datapanel_wrapper = function (editor) {
                         }
 
                         //画灰白相间的格子
-                        var bgc = editor.dom.bg.getContext('2d');
+                        var bgc = editor.dom.bgCtx;
                         var colorA = ["#f8f8f8", "#cccccc"];
                         var colorIndex;
                         var sratio = 4;
@@ -586,6 +636,8 @@ editor_datapanel_wrapper = function (editor) {
 
     editor.uifunctions.appendConfirm_func = function () {
 
+        var appendRegister = document.getElementById('appendRegister');
+
         var appendConfirm = document.getElementById('appendConfirm');
         appendConfirm.onclick = function () {
 
@@ -648,15 +700,29 @@ editor_datapanel_wrapper = function (editor) {
                 editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, v.x * 32, v.y * ysize, 32, ysize, 32 * ii, editor.dom.sprite.height - ysize, 32, ysize);
             }
             var dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-            var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
-            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
+            var imgbase64 = editor.dom.sprite.toDataURL('image/png');
+            var imgName = editor_mode.appendPic.imageName;
+            fs.writeFile('./project/images/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
                 }
-                printf('追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
-                editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
+                var currHeight = editor.dom.sprite.height;
+                editor.dom.sprite.style.height = (editor.dom.sprite.height = (currHeight + ysize)) + "px";
                 editor.dom.spriteCtx.putImageData(dt, 0, 0);
+                core.material.images[imgName].src = imgbase64;
+                editor.widthsX[imgName][3] = currHeight;
+                if (appendRegister && appendRegister.checked) {
+                    editor.file.autoRegister({images: imgName}, function (e) {
+                        if (e) {
+                            printe(e);
+                            throw e;
+                        }
+                        printf('追加素材并自动注册成功！你可以继续追加其他素材，最后再刷新以使用。');
+                    });
+                } else {
+                    printf('追加素材成功！你可以继续追加其他素材，最后再刷新以使用。');
+                }
             });
         }
 
@@ -679,15 +745,29 @@ editor_datapanel_wrapper = function (editor) {
             }
 
             dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-            var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
-            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64, 'base64', function (err, data) {
+            var imgbase64 = editor.dom.sprite.toDataURL('image/png');
+            var imgName = editor_mode.appendPic.imageName;
+            fs.writeFile('./project/images/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
                 }
-                printf('快速追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
-                editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
+                var currHeight = editor.dom.sprite.height;
+                editor.dom.sprite.style.height = (editor.dom.sprite.height = (currHeight + ysize)) + "px";
                 editor.dom.spriteCtx.putImageData(dt, 0, 0);
+                core.material.images[imgName].src = imgbase64;
+                editor.widthsX[imgName][3] = currHeight;
+                if (appendRegister && appendRegister.checked) {
+                    editor.file.autoRegister({images: imgName}, function (e) {
+                        if (e) {
+                            printe(e);
+                            throw e;
+                        }
+                        printf('快速追加素材并自动注册成功！你可以继续追加其他素材，最后再刷新以使用。');
+                    })
+                } else {
+                    printf('快速追加素材成功！你可以继续追加其他素材，最后再刷新以使用。');
+                }
             });
 
         }

@@ -29,10 +29,18 @@ editor_materialpanel_wrapper = function (editor) {
      * editor.dom.iconExpandBtn.onclick
      */
     editor.uifunctions.fold_material_click = function () {
-        if (confirm(editor.uivalues.folded ? "你想要展开素材吗？\n展开模式下将显示全素材内容。"
-            : ("你想要折叠素材吗？\n折叠模式下每个素材将仅显示单列，并且每" + editor.uivalues.foldPerCol + "个自动换列。"))) {
-            core.setLocalStorage('folded', !editor.uivalues.folded);
-            window.location.reload();
+        if (editor.uivalues.folded) {
+            if (confirm("你想要展开素材吗？\n展开模式下将显示全素材内容。")) {
+                core.setLocalStorage('folded', false);
+                window.location.reload();
+            }
+        } else {
+            var perCol = parseInt(prompt("请输入折叠素材模式下每列的个数：", "50")) || 0;
+            if (perCol > 0) {
+                core.setLocalStorage('foldPerCol', perCol);
+                core.setLocalStorage('folded', true);
+                window.location.reload();
+            }
         }
     }
 
@@ -42,6 +50,7 @@ editor_materialpanel_wrapper = function (editor) {
      */
     editor.uifunctions.material_ondown = function (e) {
         e.stopPropagation();
+        e.preventDefault();
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -51,6 +60,7 @@ editor_materialpanel_wrapper = function (editor) {
             'size': 32
         };
         editor.loc = loc;
+        editor.uivalues.tileSize = [1,1];
         var pos = editor.uifunctions.locToPos(loc);
         for (var spriter in editor.widthsX) {
             if (pos.x >= editor.widthsX[spriter][1] && pos.x < editor.widthsX[spriter][2]) {
@@ -118,10 +128,26 @@ editor_materialpanel_wrapper = function (editor) {
                             break;
                         }
                     }
+
+                    if (editor.info.isTile && e.button == 2) {
+                        var v = prompt("请输入该额外素材区域绑定宽高，以逗号分隔", "1,1");
+                        if (v != null && /^\d+,\d+$/.test(v)) {
+                            v = v.split(",");
+                            var x = parseInt(v[0]), y = parseInt(v[1]);
+                            var widthX = editor.widthsX[editor.info.images];
+                            if (x <= 0 || y <= 0 || editor.info.x + x > widthX[2] - widthX[1] || 32*(editor.info.y + y) > widthX[3]) {
+                                alert("不合法的输入范围，已经越界");
+                            } else {
+                                editor.uivalues.tileSize = [x, y];
+                            }
+                        }
+                    }
+
                 }
                 tip.infos(JSON.parse(JSON.stringify(editor.info)));
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('enemyitem');
+                editor.updateLastUsedMap();
                 //editor_mode.enemyitem();
             }
         }

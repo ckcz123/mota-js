@@ -1,6 +1,6 @@
 # 事件
 
-?> 目前版本**v2.6.5**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.6.6**，上次更新时间：* {docsify-updated} *
 
 本章内将对样板所支持的事件进行介绍。
 
@@ -486,7 +486,8 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 ![](img/events/13.jpg)
 
-从V2.6.5开始，默认`addValue`不会刷新状态栏、地图显伤和自动事件，除非设置了`"refresh": true`。
+从V2.6.5开始，当设置了`"norefresh": true`后可以不刷新状态栏、地图显伤和自动事件，从而加速事件执行。
+
 
 在刷新的情况下，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
 
@@ -509,7 +510,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 ![](img/events/14.jpg)
 
-从V2.6.5开始，默认`addValue`不会刷新状态栏、地图显伤和自动事件，除非设置了`"refresh": true`。
+从V2.6.5开始，当设置了`"norefresh": true`后可以不刷新状态栏、地图显伤和自动事件，从而加速事件执行。
 
 ### setEnemy：设置怪物属性
 
@@ -1962,6 +1963,31 @@ yes和no均为必填项，即用户点击确认或取消后执行的事件。
 ```
 
 ![](img/events/52.jpg)
+
+从V2.6.6开始，也允许直接在`type:wait`中增加`data`项判定按键或点击坐标。
+
+```js
+[
+  {"type": "wait", "data": [
+    {"case": "keyboard", "keycode": 13, "action": [
+      {"type": "comment", "text": "当按下回车(keycode=13)时执行此事件"},
+    ]},
+    {"case": "mouse", "px": [0,32], "py": [0,32], "action": [
+      {"type": "comment", "text": "当点击地图左上角时执行此事件"},
+    ]},
+  ]},
+]
+```
+
+![](img/events/52.png)
+
+`data`是一个数组，每一项中，case只能为`keyboard`和`mouse`二选一，分别对应键盘和鼠标（即`type=0`和`type=1`）。
+
+如果是键盘，则可以指定`keycode`为键盘的按键内容；否则指定`px`和`py`为点击的像素区间。
+
+action为如果满足该条件时应该执行的事件列表。
+
+
 
 ### waitAsync：等待所有异步事件执行完毕
 

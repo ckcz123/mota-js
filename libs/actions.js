@@ -42,6 +42,7 @@ actions.prototype._init = function () {
     // --- onmove注册
     this.registerAction('onmove', '_sys_checkReplay', this._sys_checkReplay, 100);
     this.registerAction('onmove', '_sys_onmove_paint', this._sys_onmove_paint, 50);
+    this.registerAction('onmove', '_sys_onmove_choices', this._sys_onmove_choices, 30);
     this.registerAction('onmove', '_sys_onmove', this._sys_onmove, 0);
     // --- onup注册
     this.registerAction('onup', '_sys_checkReplay', this._sys_checkReplay, 100);
@@ -439,6 +440,7 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
         core.setFlag('px', px);
         core.setFlag('py', py);
         core.status.route.push("input:" + (1000000 + 1000 * px + py));
+        core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
     }
     else {
@@ -485,6 +487,30 @@ actions.prototype._sys_onmove_paint = function (x, y, px, py) {
     }
 }
 
+actions.prototype._sys_onmove_choices = function (x, y) {
+    if (!core.status.lockControl) return false;
+
+    switch (core.status.event.id) {
+        case 'action':
+            if (core.status.event.data.type != 'choices') break;
+        case 'shop':
+        case 'selectShop':
+        case 'switchs':
+        case 'settings':
+        case 'syncSave':
+        case 'syncSelect':
+        case 'localSaveSelect':
+        case 'storageRemove':
+        case 'replay':
+        case 'gameInfo':
+            this._onMoveChoices(x, y);
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
 actions.prototype._sys_onmove = function (x, y) {
     if ((core.status.stepPostfix || []).length > 0) {
         var pos = {'x': x, 'y': y};
@@ -509,8 +535,10 @@ actions.prototype._sys_onmove = function (x, y) {
 }
 
 ////// 当点击（触摸）事件放开时 //////
-actions.prototype.onup = function () {
-    this.doRegisteredAction('onup');
+actions.prototype.onup = function (loc) {
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
+    this.doRegisteredAction('onup', x, y, px, py);
 }
 
 actions.prototype._sys_onup_paint = function () {
@@ -726,6 +754,7 @@ actions.prototype._sys_onmousewheel = function (direct) {
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
         core.status.route.push("input:" + keycode);
+        core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
     }
@@ -846,6 +875,21 @@ actions.prototype._keyDownChoices = function (keycode) {
     }
     if (keycode == 40) {
         core.status.event.selection++;
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+    }
+}
+
+// 移动光标
+actions.prototype._onMoveChoices = function (x, y) {
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+
+    if (y >= topIndex && y < topIndex + choices.length) {
+        var selection = y - topIndex;
+        if (selection == core.status.event.selection) return;
+        core.status.event.selection = selection;
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -985,6 +1029,7 @@ actions.prototype._keyUpAction = function (keycode) {
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
         core.status.route.push("input:" + keycode);
+        core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
     }

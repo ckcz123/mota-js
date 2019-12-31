@@ -587,7 +587,7 @@ ui.prototype._getTitleAndIcon = function (content) {
 
 ////// 正则处理 \b[up,xxx] 问题
 ui.prototype._getPosition = function (content) {
-    var pos = null, px = null, py = null;
+    var pos = null, px = null, py = null, noPeak = false;
     if (core.status.event.id=='action') {
         px = core.status.event.data.x;
         py = core.status.event.data.y;
@@ -614,6 +614,7 @@ ui.prototype._getPosition = function (content) {
                 } else{
                     px = parseInt(str[0]);
                     py = parseInt(str[1]);
+                    noPeak = core.getBlockId(px, py) == null;
                 }
             }
             if(pos=='hero' || pos=='null'){
@@ -621,7 +622,7 @@ ui.prototype._getPosition = function (content) {
             }
             return "";
         });
-    return {content: content, position: pos, px: px, py: py};
+    return {content: content, position: pos, px: px, py: py, noPeak: noPeak};
 }
 
 ////// 绘制选择光标
@@ -719,8 +720,8 @@ ui.prototype.drawWindowSkin = function(background, ctx, x, y, w, h, direction, p
 ////// 绘制一个背景图，可绘制 winskin 或纯色背景；支持小箭头绘制
 ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     posInfo = posInfo || {};
-    var px = posInfo.px == null ? null : posInfo.px * 32 - core.bigmap.offsetX;
-    var py = posInfo.py == null ? null : posInfo.py * 32 - core.bigmap.offsetY;
+    var px = posInfo.px == null || posInfo.noPeak ? null : posInfo.px * 32 - core.bigmap.offsetX;
+    var py = posInfo.py == null || posInfo.noPeak ? null : posInfo.py * 32 - core.bigmap.offsetY;
     var xoffset = posInfo.xoffset || 0, yoffset = posInfo.yoffset || 0;
     var background = core.status.textAttribute.background;
 
@@ -1114,7 +1115,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     main.dom.next.style.borderRightColor = main.dom.next.style.borderBottomColor = core.arrayToRGB(textAttribute.text);
     main.dom.next.style.top = (vPos.bottom - 20) * core.domStyle.scale + "px";
     var left = (hPos.left + hPos.right) / 2;
-    if (pInfo.position == 'up' && pInfo.px != null && Math.abs(pInfo.px * 32 + 16 - left) < 50)
+    if (pInfo.position == 'up' && !pInfo.noPeak && pInfo.px != null && Math.abs(pInfo.px * 32 + 16 - left) < 50)
         left = hPos.right - 64;
     main.dom.next.style.left = left * core.domStyle.scale + "px";
     return config;
@@ -2501,9 +2502,9 @@ ui.prototype._drawSLPanel_loadSave = function(page, callback) {
         ids.push(id);
     }
     core.getSaves(ids, function (data) {
-        for (var i = 0; i < ids.length; ++i)
+        for (var i = 1; i < ids.length; ++i)
             core.status.event.ui[i] = data[i];
-        core.saves.autosave.data = data[0];
+        core.status.event.ui[0] = data[0] == null ? null : data[0][data[0].length-1];
         callback();
     });
 }
@@ -2522,6 +2523,10 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         }, {
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });
+        if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {
+            core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4], 2);
+            core.fillText('ui', data.hard, x, parseInt(y+22+size/2), core.dom.hard.style.color, this._buildFont(30,true));
+        }
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;

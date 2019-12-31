@@ -410,6 +410,8 @@ editor.prototype.updateLastUsedMap = function () {
         if (!info || !info.images) continue;
         if (info.isTile) {
             ctx.drawImage(core.material.images.tilesets[info.images], 32 * info.x, 32 * info.y, 32, 32, x*32, y*32, 32, 32);
+        } else if (info.images == 'autotile') {
+            ctx.drawImage(core.material.images.autotile[info.id], 0, 0, 32, 32, x * 32, y * 32, 32, 32);
         } else {
             var per_height = info.images.endsWith('48') ? 48 : 32;
             ctx.drawImage(core.material.images[info.images], 0, info.y * per_height, 32, per_height, x * 32, y * 32, 32, 32);

@@ -49,7 +49,7 @@ editor_ui_wrapper = function (editor) {
             }
         }
         if (unselect) {
-            if (clickpath.indexOf('eui') === -1 && clickpath.indexOf('lastUsed')) {
+            if (clickpath.indexOf('eui') === -1 && clickpath.indexOf('lastUsed') === -1) {
                 if (selectBox.isSelected()) {
                     editor_mode.onmode('');
                     editor.file.saveFloorFile(function (err) {

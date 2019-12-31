@@ -540,7 +540,7 @@ editor_datapanel_wrapper = function (editor) {
                         }
 
                         //画灰白相间的格子
-                        var bgc = editor.dom.bg.getContext('2d');
+                        var bgc = editor.dom.bgCtx;
                         var colorA = ["#f8f8f8", "#cccccc"];
                         var colorIndex;
                         var sratio = 4;
@@ -636,6 +636,8 @@ editor_datapanel_wrapper = function (editor) {
 
     editor.uifunctions.appendConfirm_func = function () {
 
+        var appendRegister = document.getElementById('appendRegister');
+
         var appendConfirm = document.getElementById('appendConfirm');
         appendConfirm.onclick = function () {
 
@@ -699,15 +701,28 @@ editor_datapanel_wrapper = function (editor) {
             }
             var dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
             var imgbase64 = editor.dom.sprite.toDataURL('image/png');
-            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
+            var imgName = editor_mode.appendPic.imageName;
+            fs.writeFile('./project/images/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
                 }
-                printf('追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
-                editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
+                var currHeight = editor.dom.sprite.height;
+                editor.dom.sprite.style.height = (editor.dom.sprite.height = (currHeight + ysize)) + "px";
                 editor.dom.spriteCtx.putImageData(dt, 0, 0);
-                core.material.images[editor.dom.selectAppend.value].src = imgbase64;
+                core.material.images[imgName].src = imgbase64;
+                editor.widthsX[imgName][3] = currHeight;
+                if (appendRegister && appendRegister.checked) {
+                    editor.file.autoRegister({images: imgName}, function (e) {
+                        if (e) {
+                            printe(e);
+                            throw e;
+                        }
+                        printf('追加素材并自动注册成功！你可以继续追加其他素材，最后再刷新以使用。');
+                    });
+                } else {
+                    printf('追加素材成功！你可以继续追加其他素材，最后再刷新以使用。');
+                }
             });
         }
 
@@ -731,15 +746,28 @@ editor_datapanel_wrapper = function (editor) {
 
             dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
             var imgbase64 = editor.dom.sprite.toDataURL('image/png');
-            fs.writeFile('./project/images/' + editor_mode.appendPic.imageName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
+            var imgName = editor_mode.appendPic.imageName;
+            fs.writeFile('./project/images/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
                 }
-                printf('快速追加素材成功，你可以继续追加其他素材，最后再刷新以显示在素材区');
-                editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + ysize)) + "px";
+                var currHeight = editor.dom.sprite.height;
+                editor.dom.sprite.style.height = (editor.dom.sprite.height = (currHeight + ysize)) + "px";
                 editor.dom.spriteCtx.putImageData(dt, 0, 0);
-                core.material.images[editor.dom.selectAppend.value].src = imgbase64;
+                core.material.images[imgName].src = imgbase64;
+                editor.widthsX[imgName][3] = currHeight;
+                if (appendRegister && appendRegister.checked) {
+                    editor.file.autoRegister({images: imgName}, function (e) {
+                        if (e) {
+                            printe(e);
+                            throw e;
+                        }
+                        printf('快速追加素材并自动注册成功！你可以继续追加其他素材，最后再刷新以使用。');
+                    })
+                } else {
+                    printf('快速追加素材成功！你可以继续追加其他素材，最后再刷新以使用。');
+                }
             });
 
         }

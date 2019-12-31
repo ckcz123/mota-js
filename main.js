@@ -464,9 +464,12 @@ main.dom.data.onmousemove = function (e) {
 }
 
 ////// 鼠标放开时 //////
-main.dom.data.onmouseup = function () {
+main.dom.data.onmouseup = function (e) {
     try {
-        main.core.onup();
+        e.stopPropagation();
+        var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     }catch (e) { main.log(e); }
 }
 
@@ -504,7 +507,9 @@ main.dom.data.ontouchmove = function (e) {
 main.dom.data.ontouchend = function (e) {
     try {
         e.preventDefault();
-        main.core.onup();
+        var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     } catch (e) {
         main.log(e);
     }

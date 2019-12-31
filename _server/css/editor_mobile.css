@@ -110,6 +110,10 @@ body {
     position: absolute;
 }
 
+#mid2 {
+    display: none;
+}
+
 #mapEdit {
     overflow: hidden;
 }

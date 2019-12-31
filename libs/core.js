@@ -106,6 +106,7 @@ function core() {
             "data": null,
             "time": 0,
             "updated": false,
+            "storage": true, // 是否把自动存档写入文件a
             "max": 10, // 自动存档最大回退数
         },
         "favorite": [],

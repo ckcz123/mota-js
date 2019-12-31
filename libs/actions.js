@@ -492,7 +492,8 @@ actions.prototype._sys_onmove_choices = function (x, y) {
 
     switch (core.status.event.id) {
         case 'action':
-            if (core.status.event.id != 'choices') break;
+            if (core.status.event.data.type != 'choices') break;
+        case 'shop':
         case 'selectShop':
         case 'switchs':
         case 'settings':
@@ -534,8 +535,10 @@ actions.prototype._sys_onmove = function (x, y) {
 }
 
 ////// 当点击（触摸）事件放开时 //////
-actions.prototype.onup = function () {
-    this.doRegisteredAction('onup');
+actions.prototype.onup = function (loc) {
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
+    this.doRegisteredAction('onup', x, y, px, py);
 }
 
 actions.prototype._sys_onup_paint = function () {

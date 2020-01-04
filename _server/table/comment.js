@@ -74,6 +74,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "道具效果，仅对cls为tools或constants有效。"
 				},
+				"useItemEvent": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "item",
+					"_data": "使用本道具所执行的事件"
+				},
 				"canUseItemEffect": {
 					"_leaf": true,
 					"_type": "textarea",

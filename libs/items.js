@@ -13,7 +13,10 @@ items.prototype._init = function () {
     this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
     if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition)
         items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition = {};
+    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent)
+        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent = {};
     this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition;
+    this.useItemEvent = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent;
 }
 
 ////// 获得所有道具 //////
@@ -111,6 +114,14 @@ items.prototype._useItemEffect = function (itemId) {
         try {
             var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
             eval(this.useItemEffect[itemId]);
+        }
+        catch (e) {
+            main.log(e);
+        }
+    }
+    if (this.useItemEvent[itemId]) {
+        try {
+            core.insertAction(this.useItemEvent[itemId]);
         }
         catch (e) {
             main.log(e);

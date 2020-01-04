@@ -70,6 +70,15 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
             }
         }
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
+
+        if (this.useItemEvent[itemId]) {
+            try {
+                core.insertAction(this.useItemEvent[itemId]);
+            }
+            catch (e) {
+                main.log(e);
+            }
+        }
     }
     else {
         core.addItem(itemId, itemNum);
@@ -88,14 +97,6 @@ items.prototype.getItemEffectTip = function (itemId) {
             } catch (e) {
                 main.log(e);
                 return "";
-            }
-        }
-        if (this.useItemEvent[itemId]) {
-            try {
-                core.insertAction(this.useItemEvent[itemId]);
-            }
-            catch (e) {
-                main.log(e);
             }
         }
     }

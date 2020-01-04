@@ -310,6 +310,18 @@ var code = '[\n'+action_0+']\n';
 return code;
 */;
 
+//item 事件编辑器入口之一
+item_m
+    :   '使用道具事件' BGNL? Newline action+ BEND
+
+
+/* item_m
+tooltip : 使用道具事件
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+var code = '[\n'+action_0+']\n';
+return code;
+*/;
+
 //为了避免关键字冲突,全部加了_s
 //动作
 action

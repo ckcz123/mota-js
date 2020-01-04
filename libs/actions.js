@@ -595,12 +595,12 @@ actions.prototype._getClickLoc = function (x, y) {
     size = size * core.domStyle.scale;
 
     if (core.domStyle.isVertical) {
-        statusBar.x = 0;
+        statusBar.x = 3;
         statusBar.y = core.dom.statusBar.offsetHeight + 3;
     }
     else {
         statusBar.x = core.dom.statusBar.offsetWidth + 3;
-        statusBar.y = 0;
+        statusBar.y = 3;
     }
 
     var left = core.dom.gameGroup.offsetLeft + statusBar.x;

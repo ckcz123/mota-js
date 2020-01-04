@@ -90,6 +90,14 @@ items.prototype.getItemEffectTip = function (itemId) {
                 return "";
             }
         }
+        if (this.useItemEvent[itemId]) {
+            try {
+                core.insertAction(this.useItemEvent[itemId]);
+            }
+            catch (e) {
+                main.log(e);
+            }
+        }
     }
     return "";
 }

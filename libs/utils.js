@@ -1166,7 +1166,7 @@ utils.prototype._export = function (floorIds) {
     console.log(content);
 }
 
-utils.prototype.unzip = function (blobOrUrl, success, error, convertToText) {
+utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
     var _error = function (msg) {
         main.log(msg);
         if (error) error(msg);
@@ -1179,7 +1179,7 @@ utils.prototype.unzip = function (blobOrUrl, success, error, convertToText) {
     if (typeof blobOrUrl == 'string') {
         return core.http('GET', blobOrUrl, null, function (data) {
             core.unzip(data, success, error, convertToText);
-        }, _error, 'application/zip', 'blob');
+        }, _error, 'application/zip', 'blob', onprogress);
     }
 
     if (!(blobOrUrl instanceof Blob)) {
@@ -1214,7 +1214,7 @@ utils.prototype._unzip_readEntries = function (entries, success, convertToText) 
     });
 }
 
-utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
+utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType, onprogress) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);
     if (mimeType) xhr.overrideMimeType(mimeType);
@@ -1227,6 +1227,11 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
             if (error) error("HTTP " + xhr.status);
         }
     };
+    xhr.onprogress = function (e) {
+        if (e.lengthComputable) {
+            if (onprogress) onprogress(e.loaded / e.total);
+        }
+    }
     xhr.onabort = function () {
         if (error) error("Abort");
     }

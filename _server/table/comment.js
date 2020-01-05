@@ -67,6 +67,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "即捡即用类物品在获得时提示的文字，仅对cls为items有效。"
 				},
+				"useItemEvent": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "item",
+					"_data": "碰触或使用本道具所执行的事件"
+				},
 				"useItemEffect": {
 					"_leaf": true,
 					"_type": "textarea",

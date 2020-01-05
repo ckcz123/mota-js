@@ -12,16 +12,9 @@ function dynamicMapEditor() {
 		'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'pickaxe', 'bomb', 'centerFly',
 		'cls:autotile', 'cls:enemys', 'cls:enemy48'
 	];
-	this.userParams = {
-		hotKeys: {
-			openToolBox: 219,
-			save: 221,
-			undo: 220
-		}
-	};
 	this.items = [];
 	this.userChanged = [];
-	this.key2Function = {};
+	this.savedItems = [];
 	this.dom = null;
 	this.canvas = null;
 	this.mapRecord = {};
@@ -38,11 +31,6 @@ function dynamicMapEditor() {
 // ------ init
 
 dynamicMapEditor.prototype._init = function () {
-	var hotkeys = this.userParams.hotKeys;
-	this.key2Function[hotkeys.openToolBox] = this.openToolBox;
-	this.key2Function[hotkeys.save] = this.applyCurrentChange;
-	this.key2Function[hotkeys.undo] = this.undo;
-
 	this.dom = document.createElement("canvas");
 	this.dom.id = 'dynamicMapEditor';
 	this.dom.style.display = 'none';
@@ -56,7 +44,7 @@ dynamicMapEditor.prototype._init = function () {
 
 	this.initInfos();
 	this.pageMax = Math.ceil(this.items.length / this.pageMaxItems);
-	core.registerAction('onkeyUp', 'plugin_dme_keydown', this.onKeyDown.bind(this), 200);
+	core.registerAction('onkeyUp', 'plugin_dme_keydown', this.onKeyUp.bind(this), 200);
 	core.registerAction('onclick', 'plugin_dme_click', this.onMapClick.bind(this), 200);
 	this.dom.addEventListener("click",this.onBoxClick.bind(this));
 	this.showInitHelp();
@@ -80,6 +68,7 @@ dynamicMapEditor.prototype.initInfos = function () {
 		}
 	}, this);
 	this.items = this.items.filter(function (v) { return v && v.id && v.number >= 0; });
+	this.savedItems = core.getLocalStorage('_dynamicMapEditor_savedItems', []);
 }
 
 // ------ bind actions
@@ -88,10 +77,31 @@ dynamicMapEditor.prototype.isValid = function () {
 	return main.mode == 'play' && core.isPlaying() && !core.isReplaying() && !core.status.lockControl;
 }
 
-dynamicMapEditor.prototype.onKeyDown = function(e) {
+dynamicMapEditor.prototype.onKeyUp = function(e) {
 	if (!this.isValid()) return false;
-	var func = this.key2Function[e.keyCode];
-	func && func.call(this);
+	if (e.keyCode == 219) {
+		this.openToolBox();
+		return true;
+	}
+	if (!this.isUsingTool) return false;
+
+	if (e.keyCode == 220) {
+		this.undo();
+		return true;
+	} else if (e.keyCode == 221) {
+		this.applyCurrentChange();
+		return true;
+	} else {
+		// 0-9
+		if (e.keyCode >= 48 && e.keyCode <= 57) {
+			if (e.altKey) {
+				this.savedItem(e.keyCode - 48);
+			} else {
+				this.loadItem(e.keyCode - 48);
+			}
+		}
+		return true;
+	}
 	return false;
 }
 
@@ -286,6 +296,23 @@ dynamicMapEditor.prototype.changePage = function(delta) {
 	this.refreshToolBox();
 }
 
+dynamicMapEditor.prototype.savedItem = function (number) {
+	if (!this.isUsingTool || this.selectedItem < 0) return;
+	this.savedItems[number] = [this.pageId, this.selectedIndex];
+	core.setLocalStorage('_dynamicMapEditor_savedItems', this.savedItems);
+	core.drawTip("已保存此图块");
+}
+
+dynamicMapEditor.prototype.loadItem = function (number) {
+	if (!this.isUsingTool) return;
+	var u = this.savedItems[number];
+	if (!u) return core.drawTip("没有保存的图块！");
+	this.pageId = u[0];
+	this.selectedIndex = u[1];
+	this.selectedItem = this.items[this.pageId * this.pageMaxItems + this.selectedIndex];
+	this.refreshToolBox();
+}
+
 // ------ draw
 
 dynamicMapEditor.prototype.itemRect = function(index) {
@@ -366,7 +393,8 @@ dynamicMapEditor.prototype.showHelp = function (fromButton) {
 	if (main.mode != 'play' || (!fromButton && core.getLocalStorage('_dynamicMapEditor_help'))) return;
 	var text = "欢迎使用黄鸡编写的运行时编辑拓展！你可以一边游戏一边编辑地图或者修改数据。\n\n";
 	text += "基本操作：\n - 点击图块再点地图可以放置；\n - 双击图块可以编辑数据；\n";
-	text += " - [ 键将开关此模式；\n - ] 键将会把改动保存到文件；\n - \\ 键将撤销上步操作。\n\n";
+	text += " - [ 键将开关此模式；\n - ] 键将会把改动保存到文件；\n - \\ 键将撤销上步操作。\n";
+	text +=	" - Alt+0~9 保存当前图块 \n - 0~9 读取当前图块\n";
 	text += "最下面三行数据分别是：\n"
 	text += "血攻防魔防；金经黄蓝红；破炸飞和debuff。";
 	if (!fromButton) text += "\n\n点取消将不再提示本页面。";

@@ -69,6 +69,7 @@ editor_blockly = function () {
       MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
       MotaActionBlocks['commonEvent_m'].xmlText(),
+      MotaActionBlocks['item_m'].xmlText(),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),

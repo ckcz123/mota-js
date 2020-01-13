@@ -405,20 +405,22 @@ editor.prototype.updateLastUsedMap = function () {
     ctx.strokeStyle = 'rgba(255,128,0,0.85)';
     ctx.lineWidth = 4;
     for (var i = 0; i < editor.uivalues.lastUsed.length; ++i) {
-        var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
-        var info = editor.uivalues.lastUsed[i];
-        if (!info || !info.images) continue;
-        if (info.isTile) {
-            ctx.drawImage(core.material.images.tilesets[info.images], 32 * info.x, 32 * info.y, 32, 32, x*32, y*32, 32, 32);
-        } else if (info.images == 'autotile') {
-            ctx.drawImage(core.material.images.autotile[info.id], 0, 0, 32, 32, x * 32, y * 32, 32, 32);
-        } else {
-            var per_height = info.images.endsWith('48') ? 48 : 32;
-            ctx.drawImage(core.material.images[info.images], 0, info.y * per_height, 32, per_height, x * 32, y * 32, 32, 32);
-        }
-        if (selectBox.isSelected() && editor.info.id == info.id) {
-            ctx.strokeRect(32 * x + 2, 32 * y + 2, 28, 28);
-        }
+        try {
+            var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
+            var info = editor.uivalues.lastUsed[i];
+            if (!info || !info.images) continue;
+            if (info.isTile && core.material.images.tilesets[info.images]) {
+                ctx.drawImage(core.material.images.tilesets[info.images], 32 * info.x, 32 * info.y, 32, 32, x*32, y*32, 32, 32);
+            } else if (info.images == 'autotile' && core.material.images.autotile[info.id]) {
+                ctx.drawImage(core.material.images.autotile[info.id], 0, 0, 32, 32, x * 32, y * 32, 32, 32);
+            } else {
+                var per_height = info.images.endsWith('48') ? 48 : 32;
+                ctx.drawImage(core.material.images[info.images], 0, info.y * per_height, 32, per_height, x * 32, y * 32, 32, 32);
+            }
+            if (selectBox.isSelected() && editor.info.id == info.id) {
+                ctx.strokeRect(32 * x + 2, 32 * y + 2, 28, 28);
+            }
+        } catch (e) {}
     }
 }
 

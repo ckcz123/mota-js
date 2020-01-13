@@ -943,7 +943,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
 
 	// 如果正在执行事件，则忽略
-	if (core.status.event.id != null) return;
+	if (core.status.lockControl) return;
 	// 如果当前正在行走，则忽略；也可以使用 core.waitHeroToStop(callback) 来停止行走再回调执行脚本
 	if (core.isMoving()) return;
 

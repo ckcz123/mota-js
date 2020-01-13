@@ -855,10 +855,8 @@ actions.prototype.onStatusBarClick = function (e) {
 }
 
 actions.prototype._sys_onStatusBarClick = function (px, py) {
-    if (!core.status.played) return true;
-    if (this.actionsdata.onStatusBarClick) {
-        this.actionsdata.onStatusBarClick(px, py);
-    }
+    if (this.actionsdata.onStatusBarClick)
+        return this.actionsdata.onStatusBarClick(px, py);
 }
 
 /////////////////// 在某个界面时的按键点击效果 ///////////////////

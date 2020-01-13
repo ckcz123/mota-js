@@ -207,9 +207,7 @@ loader.prototype._loadAnimates = function () {
                         core.loader._loadAnimate(t, animates[name]);
                 }
             }
-        }, null, true, function (percentage) {
-            core.loader._setStartProgressVal(percentage * 100);
-        });
+        }, null, true);
     } else {
         core.animates.forEach(function (t) {
             core.http('GET', 'project/animates/' + t + ".animate?v=" + main.version, null, function (content) {
@@ -284,8 +282,6 @@ loader.prototype._loadMusic = function () {
                     core.loader._loadOneSound_decodeData(name, data[name]);
                 }
             }
-        }, null, false, function (percentage) {
-            core.loader._setStartProgressVal(percentage * 100);
         });
     } else {
         core.sounds.forEach(function (t) {

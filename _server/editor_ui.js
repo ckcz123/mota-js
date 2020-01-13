@@ -48,7 +48,7 @@ editor_ui_wrapper = function (editor) {
                 break;
             }
         }
-        if (unselect) {
+        if (unselect && !editor.uivalues.lockMode) {
             if (clickpath.indexOf('eui') === -1 && clickpath.indexOf('lastUsed') === -1) {
                 if (selectBox.isSelected()) {
                     editor_mode.onmode('');

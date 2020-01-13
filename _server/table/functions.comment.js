@@ -139,6 +139,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_lint": true,
 					"_data": "按键处理"
+				},
+				"onStatusBarClick": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "状态栏点击事件，仅在开启自绘状态栏时生效"
 				}
 			}
 		},

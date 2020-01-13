@@ -55,6 +55,7 @@ function editor() {
         lastUsedDiv: document.getElementById('lastUsedDiv'),
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
+        lockMode: document.getElementById('lockMode'),
     };
 
     this.uivalues={
@@ -98,6 +99,7 @@ function editor() {
 
         // tile
         tileSize: [1,1],
+        lockMode: false,
 
         // 最近使用的图块
         lastUsed: [],

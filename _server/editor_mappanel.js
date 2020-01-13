@@ -571,6 +571,16 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     /**
+     * editor.dom.lockMode.onchange
+     * 点击【】
+     */
+    editor.uifunctions.lockMode_onchange = function () {
+        tip.msgs[11] = String('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
+        tip.whichShow(12);
+        editor.uivalues.lockMode = editor.dom.lockMode.checked;
+    }
+
+    /**
      * editor.dom.brushMod.onchange
      * 切换画笔模式
      */
@@ -591,7 +601,10 @@ editor_mappanel_wrapper = function (editor) {
      * 切换画笔模式
      */
     editor.uifunctions.brushMod3_onchange = function () {
-        alert("从V2.6.6开始，tileset贴图模式已被废弃。\n请右键额外素材，并输入所需要绘制的宽高，然后单击地图以绘制一个区域。");
+        if (!core.getLocalStorage('alertTileMode') &&
+            !confirm("从V2.6.6开始，tileset贴图模式已被废弃。\n请右键额外素材，并输入所需要绘制的宽高，然后单击地图以绘制一个区域。\n\n点取消将不再显示此提示。")) {
+            core.setLocalStorage('alertTileMode', true);
+        }
         // tip.showHelp(5)
         tip.isSelectedBlock(false)
         tip.msgs[11] = String('tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');

@@ -933,6 +933,23 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	*/
 	}
 
+},
+        "onStatusBarClick": function (px, py) {
+	// 点击状态栏时触发的事件，仅在自绘状态栏开启时生效
+	// px和py为点击的像素坐标
+	// 
+	// 横屏模式下状态栏的画布大小是 129*416
+	// 竖屏模式下状态栏的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
+	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
+
+	// 如果正在执行事件，则忽略
+	if (core.status.event.id != null) return;
+	// 如果当前正在行走，则忽略；也可以使用 core.waitHeroToStop(callback) 来停止行走再回调执行脚本
+	if (core.isMoving()) return;
+
+	// 判定px和py来执行自己的脚本内容.... 注意横竖屏
+	// 这里是直接打出点击坐标的例子。
+	// console.log("onStatusBarClick:", px, py);
 }
     },
     "control": {

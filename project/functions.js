@@ -938,8 +938,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 点击状态栏时触发的事件，仅在自绘状态栏开启时生效
 	// px和py为点击的像素坐标
 	// 
-	// 横屏模式下状态栏的画布大小是 129*416
-	// 竖屏模式下状态栏的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
+	// 横屏模式下状态栏的画布大小是 149*480
+	// 竖屏模式下状态栏的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
 
 	// 如果正在执行事件，则忽略

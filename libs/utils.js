@@ -1179,7 +1179,7 @@ utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onpr
     if (typeof blobOrUrl == 'string') {
         return core.http('GET', blobOrUrl, null, function (data) {
             core.unzip(data, success, error, convertToText);
-        }, _error, 'application/zip', 'blob', onprogress);
+        }, _error, null, 'blob', onprogress);
     }
 
     if (!(blobOrUrl instanceof Blob)) {

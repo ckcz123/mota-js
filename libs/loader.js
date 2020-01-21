@@ -52,7 +52,7 @@ loader.prototype._loadIcons = function () {
 loader.prototype._loadMaterialImages = function (callback) {
     this._setStartLoadTipText("正在加载资源文件...");
     if (main.useCompress) {
-        this.loadImagesFromZip('project/images/materials.zip', core.materials, core.material.images, callback);
+        this.loadImagesFromZip('project/images/materials.h5data', core.materials, core.material.images, callback);
     } else {
         this.loadImages(core.materials, core.material.images, callback);
     }
@@ -67,7 +67,7 @@ loader.prototype._loadExtraImages = function (callback) {
 
     this._setStartLoadTipText("正在加载图片文件...");
     if (main.useCompress) {
-        this.loadImagesFromZip('project/images/images.zip', images, core.material.images.images, callback);
+        this.loadImagesFromZip('project/images/images.h5data', images, core.material.images.images, callback);
     } else {
         this.loadImages(images, core.material.images.images, callback);
     }
@@ -90,7 +90,7 @@ loader.prototype._loadAutotiles = function (callback) {
     }
     this._setStartLoadTipText("正在加载自动元件...");
     if (main.useCompress) {
-        this.loadImagesFromZip('project/images/autotiles.zip', keys, autotiles, _callback);
+        this.loadImagesFromZip('project/images/autotiles.h5data', keys, autotiles, _callback);
     } else {
         this.loadImages(keys, autotiles, _callback);
     }
@@ -114,7 +114,7 @@ loader.prototype._loadTilesets = function (callback) {
     }
     this._setStartLoadTipText("正在加载额外素材...");
     if (main.useCompress) {
-        this.loadImagesFromZip('project/images/tilesets.zip', core.tilesets, core.material.images.tilesets, _callback);
+        this.loadImagesFromZip('project/images/tilesets.h5data', core.tilesets, core.material.images.tilesets, _callback);
     } else {
         this.loadImages(core.tilesets, core.material.images.tilesets, _callback);
     }
@@ -199,7 +199,7 @@ loader.prototype.loadImage = function (imgName, callback) {
 loader.prototype._loadAnimates = function () {
     this._setStartLoadTipText("正在加载动画文件...");
     if (main.useCompress) {
-        core.unzip('project/animates/animates.zip?v=' + main.version, function (animates) {
+        core.unzip('project/animates/animates.h5data?v=' + main.version, function (animates) {
             for (var name in animates) {
                 if (name.endsWith(".animate")) {
                     var t = name.substring(0, name.length - 8);
@@ -276,7 +276,7 @@ loader.prototype._loadMusic = function () {
 
     this._setStartLoadTipText("正在加载音效文件...");
     if (main.useCompress && core.musicStatus.audioContext) {
-        core.unzip('project/sounds/sounds.zip?v=' + main.version, function (data) {
+        core.unzip('project/sounds/sounds.h5data?v=' + main.version, function (data) {
             for (var name in data) {
                 if (core.sounds.indexOf(name) >= 0) {
                     core.loader._loadOneSound_decodeData(name, data[name]);

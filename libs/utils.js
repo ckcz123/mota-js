@@ -1179,7 +1179,7 @@ utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onpr
     if (typeof blobOrUrl == 'string') {
         return core.http('GET', blobOrUrl, null, function (data) {
             core.unzip(data, success, error, convertToText);
-        }, _error, 'application/zip', 'blob', onprogress);
+        }, _error, null, 'blob', onprogress);
     }
 
     if (!(blobOrUrl instanceof Blob)) {
@@ -1244,12 +1244,6 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     if (formData)
         xhr.send(formData);
     else xhr.send();
-}
-
-utils.prototype.httpAndZip = function (url, success, error) {
-    this.http('GET', url, null, function (data) {
-
-    }, error, null, 'blob');
 }
 
 // LZW-compress

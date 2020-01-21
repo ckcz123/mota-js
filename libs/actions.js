@@ -59,6 +59,8 @@ actions.prototype._init = function () {
     // --- longClick注册
     this.registerAction('longClick', '_sys_longClick_lockControl', this._sys_longClick_lockControl, 50);
     this.registerAction('longClick', '_sys_longClick', this._sys_longClick, 0);
+    // --- onStatusBarClick注册
+    this.registerAction('onStatusBarClick', '_sys_onStatusBarClick', this._sys_onStatusBarClick, 0);
 
 }
 
@@ -612,7 +614,7 @@ actions.prototype._getClickLoc = function (x, y) {
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
 actions.prototype.onclick = function (x, y, stepPostfix) {
     // console.log("Click: (" + x + "," + y + ")");
-    this.doRegisteredAction('onclick', x, y, stepPostfix || []);
+    return this.doRegisteredAction('onclick', x, y, stepPostfix || []);
 }
 
 actions.prototype._sys_onclick_lockControl = function (x, y) {
@@ -842,6 +844,19 @@ actions.prototype._sys_longClick = function (x, y, fromEvent) {
         return true;
     }
     return false;
+}
+
+actions.prototype.onStatusBarClick = function (e) {
+    if (!core.isPlaying()) return false;
+    var left = core.dom.gameGroup.offsetLeft + 3;
+    var top = core.dom.gameGroup.offsetTop + 3;
+    var px = parseInt((e.clientX - left) / core.domStyle.scale), py = parseInt((e.clientY - top) / core.domStyle.scale);
+    return this.doRegisteredAction('onStatusBarClick', px, py);
+}
+
+actions.prototype._sys_onStatusBarClick = function (px, py) {
+    if (this.actionsdata.onStatusBarClick)
+        return this.actionsdata.onStatusBarClick(px, py);
 }
 
 /////////////////// 在某个界面时的按键点击效果 ///////////////////

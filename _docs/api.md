@@ -1341,6 +1341,12 @@ core.loadMap(data, floorId)
 从data中读取楼层数据，并调用core.loadFloor()进行初始化。
 
 
+core.removeMaps(fromId, toId)
+删除某个区域的地图。调用此函数后，这些楼层将不可飞，不可被浏览地图，也不计入存档。
+fromId和toId为要删除的起终点楼层ID；toId也可以不填代表只删除某一层。
+此函数适用于高层塔的砍层，例如每100层一个区域且互相独立，不可再返回的情况。
+
+
 core.resizeMap(floorId)
 根据某层楼的地图大小来调整大地图的画布大小。floorId可为null表示当前层。
 

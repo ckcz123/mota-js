@@ -31,15 +31,17 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.fold_material_click = function () {
         if (editor.uivalues.folded) {
             if (confirm("你想要展开素材吗？\n展开模式下将显示全素材内容。")) {
-                core.setLocalStorage('folded', false);
-                window.location.reload();
+                editor.config.set('folded', false, function() {
+                    window.location.reload();
+                });
             }
         } else {
             var perCol = parseInt(prompt("请输入折叠素材模式下每列的个数：", "50")) || 0;
             if (perCol > 0) {
-                core.setLocalStorage('foldPerCol', perCol);
-                core.setLocalStorage('folded', true);
-                window.location.reload();
+                editor.config.set('foldPerCol', perCol, false);
+                editor.config.set('folded', true, function() {
+                    window.location.reload();
+                });
             }
         }
     }

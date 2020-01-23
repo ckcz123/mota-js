@@ -151,17 +151,20 @@ editor.prototype.init = function (callback) {
     editor.airwallImg.src = './project/images/airwall.png';
 
     main.init('editor', function () {
-        editor_util_wrapper(editor);
-        editor_game_wrapper(editor, main, core);
-        editor_file_wrapper(editor);
-        editor_table_wrapper(editor);
-        editor_ui_wrapper(editor);
-        editor_mappanel_wrapper(editor);
-        editor_datapanel_wrapper(editor);
-        editor_materialpanel_wrapper(editor);
-        editor_listen_wrapper(editor);
-        editor.printe=printe;
-        afterMainInit();
+        editor.config = new editor_config();
+        editor.config.load(function() {
+            editor_util_wrapper(editor);
+            editor_game_wrapper(editor, main, core);
+            editor_file_wrapper(editor);
+            editor_table_wrapper(editor);
+            editor_ui_wrapper(editor);
+            editor_mappanel_wrapper(editor);
+            editor_datapanel_wrapper(editor);
+            editor_materialpanel_wrapper(editor);
+            editor_listen_wrapper(editor);
+            editor.printe=printe;
+            afterMainInit();
+        })
     });
 
     var afterMainInit = function () {
@@ -174,7 +177,7 @@ editor.prototype.init = function (callback) {
             editor_mode = editor_mode(editor);
             editor.mode = editor_mode;
             core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-            var lastFloorId = core.getLocalStorage('editorLastFloorId', core.status.floorId);
+            var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
             if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
             core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
@@ -274,8 +277,9 @@ editor.prototype.changeFloor = function (floorId, callback) {
         var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
         editor.setViewport(x, y);
 
-        core.setLocalStorage('editorLastFloorId', floorId);
-        if (callback) callback();
+        editor.config.set('editorLastFloorId', floorId, function() {
+            if (callback) callback();
+        });  
     });
 }
 
@@ -448,11 +452,11 @@ editor.prototype.drawInitData = function (icons) {
     var maxHeight = 700;
     var sumWidth = 0;
     editor.widthsX = {};
-    editor.uivalues.folded = core.getLocalStorage('folded', false);
+    editor.uivalues.folded = editor.config.get('folded', false);
     // editor.uivalues.folded = true;
-    editor.uivalues.foldPerCol = core.getLocalStorage('foldPerCol', 50);
+    editor.uivalues.foldPerCol = editor.config.get('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
-    editor.uivalues.lastUsed = core.getLocalStorage("lastUsed", []);
+    editor.uivalues.lastUsed = editor.config.get("lastUsed", []);
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
     for (var ii = 0; ii < imgNames.length; ii++) {

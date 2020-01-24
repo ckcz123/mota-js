@@ -253,7 +253,7 @@ editor_mappanel_wrapper = function (editor) {
             // console.log(editor.map);
             if (editor.info.y != null) {
                 editor.uivalues.lastUsed = [editor.info].concat(editor.uivalues.lastUsed.filter(function (e) { return e.id != editor.info.id}));
-                core.setLocalStorage("lastUsed", editor.uivalues.lastUsed);
+                editor.config.set("lastUsed", editor.uivalues.lastUsed);
             }
             editor.updateMap();
             editor.uivalues.holdingPath = 0;
@@ -601,9 +601,9 @@ editor_mappanel_wrapper = function (editor) {
      * 切换画笔模式
      */
     editor.uifunctions.brushMod3_onchange = function () {
-        if (!core.getLocalStorage('alertTileMode') &&
+        if (!editor.config.get('alertTileMode') &&
             !confirm("从V2.6.6开始，tileset贴图模式已被废弃。\n请右键额外素材，并输入所需要绘制的宽高，然后单击地图以绘制一个区域。\n\n点取消将不再显示此提示。")) {
-            core.setLocalStorage('alertTileMode', true);
+            editor.config.set('alertTileMode', true);
         }
         // tip.showHelp(5)
         tip.isSelectedBlock(false)

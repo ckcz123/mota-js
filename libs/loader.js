@@ -67,7 +67,22 @@ loader.prototype._loadExtraImages = function (callback) {
 
     this._setStartLoadTipText("正在加载图片文件...");
     if (main.useCompress) {
+        // Check .gif
+        var gifs = images.filter(function (name) {
+            return name.toLowerCase().endsWith('.gif');
+        });
+        images = images.filter(function (name) {
+            return !name.toLowerCase().endsWith('.gif');
+        });
+
         this.loadImagesFromZip('project/images/images.h5data', images, core.material.images.images, callback);
+        gifs.forEach(function (gif) {
+            this.loadImage(gif, function (id, image) {
+                if (image != null) {
+                    core.material.images.images[gif] = image;
+                }
+            });
+        }, this);
     } else {
         this.loadImages(images, core.material.images.images, callback);
     }

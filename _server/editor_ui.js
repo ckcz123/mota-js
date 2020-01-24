@@ -219,7 +219,7 @@ editor_ui_wrapper = function (editor) {
                 if (infoToSave == JSON.stringify({})) return;
                 editor.uivalues.shortcut[e.keyCode] = JSON.parse(infoToSave);
                 printf('已保存该快捷图块, 数字键 ' + (e.keyCode - 48) + ' 使用.')
-                core.setLocalStorage('shortcut', editor.uivalues.shortcut);
+                editor.config.set('shortcut', editor.uivalues.shortcut);
                 return;
             }
             //ctrl + 0~9 切换到快捷图块

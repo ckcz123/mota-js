@@ -93,6 +93,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.deleteAllCanvas(); // 删除所有创建的画布
 			core.dom.gif2.innerHTML = "";
 		}
+		reason = core.replaceText(reason);
 		core.drawText([
 			"\t[" + (reason || "恭喜通关") + "]你的分数是${status:hp}。"
 		], function () {

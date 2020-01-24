@@ -15,7 +15,7 @@ editor_listen_wrapper = function (editor) {
 
         editor.dom.mid.onmousewheel = editor.uifunctions.map_mousewheel
 
-        editor.uivalues.shortcut = core.getLocalStorage('shortcut', { 48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0 });
+        editor.uivalues.shortcut = editor.config.get('shortcut', { 48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0 });
         editor.dom.body.onkeydown = editor.uifunctions.body_shortcut
 
         editor.uivalues.scrollBarHeight = editor.uifunctions.getScrollBarHeight();

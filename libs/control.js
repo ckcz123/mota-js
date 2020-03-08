@@ -1897,7 +1897,7 @@ control.prototype.getSave = function (index, callback) {
                 callback(core.saves.autosave.data);
             }, function(err) {
                 main.log(err);
-                callback(null,-1);
+                callback(null);
             });
         }
         return;

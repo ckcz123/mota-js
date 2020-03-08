@@ -119,8 +119,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
 	var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
-	if (!core.hasFlag("__leaveLoc__")) core.setFlag("__leaveLoc__", {});
-	if (currentId != null) core.getFlag("__leaveLoc__")[currentId] = core.status.hero.loc;
+	if (!fromLoad) {
+		if (!core.hasFlag("__leaveLoc__")) core.setFlag("__leaveLoc__", {});
+		if (currentId != null) core.getFlag("__leaveLoc__")[currentId] = core.status.hero.loc;
+	}
 
 	// 可以对currentId进行判定，比如删除某些自定义图层等
 	// if (currentId == 'MT0') {
@@ -808,6 +810,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	case 65: // A：读取自动存档（回退）
 		core.doSL("autoSave", "load");
 		break;
+	case 87: // W：撤销回退
+		core.doSL("autoSave", "reload");
+		break;
 	case 83: // S：存档
 		core.save(true);
 		break;
@@ -904,6 +909,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 		break;
+	case 53: // 5：读取自动存档（回退），方便手机版操作
+		core.doSL("autoSave", "load");
+		break;
+	case 54: // 6：撤销回退，方便手机版操作
+		core.doSL("autoSave", "reload");
+		break;
 	case 55: // 快捷键7：绑定为轻按，方便手机版操作
 		core.getNextItem();
 		break;
@@ -917,20 +928,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.useItem('skill1', true);
 		}
 		break;
-	// 在这里可以任意新增或编辑已有的快捷键内容
-	/*
-	case 0: // 使用该按键的keyCode
-		// 还可以再判定altKey是否被按下，即 if (altKey) { ...
+		// 在这里可以任意新增或编辑已有的快捷键内容
+		/*
+		case 0: // 使用该按键的keyCode
+			// 还可以再判定altKey是否被按下，即 if (altKey) { ...
 
-		// ... 在这里写你要执行脚本
-		// **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
-		if (core.hasItem('...')) {
-			core.status.route.push("key:0");
-			core.useItem('...', true); // 增加true代表该使用道具不计入录像
-		}
+			// ... 在这里写你要执行脚本
+			// **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
+			if (core.hasItem('...')) {
+				core.status.route.push("key:0");
+				core.useItem('...', true); // 增加true代表该使用道具不计入录像
+			}
 
-		break;
-	*/
+			break;
+		*/
 	}
 
 },

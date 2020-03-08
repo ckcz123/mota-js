@@ -1673,8 +1673,6 @@ control.prototype._doSL_save = function (id) {
 
 control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        if(core.saves.autosave.now>0)
-        {
             core.saves.autosave.now=core.saves.autosave.now-1;
             var data = core.saves.autosave.data.splice(core.saves.autosave.now,1)[0];
             if(core.status.played && !core.status.gameOver)
@@ -1684,11 +1682,10 @@ control.prototype._doSL_load = function (id, callback) {
             }
             if(core.saves.autosave.now==0)
             {
-                core.saves.autosave.data.unshift(data);
+                core.saves.autosave.data.unshift(core.clone(data));
 	 core.saves.autosave.now=core.saves.autosave.now+1;
              }
             callback(id, data);
-        }
     }
     else {
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {

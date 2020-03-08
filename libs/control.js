@@ -1884,7 +1884,7 @@ control.prototype.getSave = function (index, callback) {
     if (index == 0) {
         // --- 自动存档先从缓存中获取
         if (core.saves.autosave.data != null)
-            callback(core.saves.autosave.data,core.saves.autosave.now);
+            callback(core.saves.autosave.data);
         else {
             core.getLocalForage("autoSave", null, function(data) {
                 if (data != null) {
@@ -1894,7 +1894,7 @@ control.prototype.getSave = function (index, callback) {
                     }
 	     core.saves.autosave.now=core.saves.autosave.data.length;
                 }
-                callback(core.saves.autosave.data,-1);
+                callback(core.saves.autosave.data);
             }, function(err) {
                 main.log(err);
                 callback(null,-1);
@@ -1903,23 +1903,22 @@ control.prototype.getSave = function (index, callback) {
         return;
     }
     core.getLocalForage("save"+index, null, function(data) {
-        if (callback) callback(data,-1);
+        if (callback) callback(data);
     }, function(err) {
         main.log(err);
-        if (callback) callback(null,-1);
+        if (callback) callback(null);
     });
 }
 
 control.prototype.getSaves = function (ids, callback) {
     if (!(ids instanceof Array)) return this.getSave(ids, callback);
-    var count = ids.length, data = {},flag=-1;
+    var count = ids.length, data = {};
     for (var i = 0; i < ids.length; ++i) {
         (function (i) {
-            core.getSave(ids[i], function (result,_flag) {
+            core.getSave(ids[i], function (result) {
                 data[i] = result;
-	 if(_flag!=-1)flag=_flag;
                 if (Object.keys(data).length == count)
-                    callback(data,flag);
+                    callback(data);
             })
         })(i);
     }

@@ -2501,10 +2501,10 @@ ui.prototype._drawSLPanel_loadSave = function(page, callback) {
             id = core.saves.favorite[id - 1]; // 因为favorite第一个不是自动存档 所以要偏移1
         ids.push(id);
     }
-    core.getSaves(ids, function (data, flag) {
+    core.getSaves(ids, function (data) {
         for (var i = 1; i < ids.length; ++i)
             core.status.event.ui[i] = data[i];
-        core.status.event.ui[0] = data[0] == null ? null : data[0][flag==-1?data[0].length-1:flag-1];
+        core.status.event.ui[0] = data[0] == null ? null : data[0][core.saves.autosave.now-1];
         callback();
     });
 }

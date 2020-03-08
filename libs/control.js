@@ -1604,9 +1604,15 @@ control.prototype.autosave = function (removeLast) {
     if (core.saves.autosave.data == null) {
         core.saves.autosave.data = [];
     }
-    core.saves.autosave.data.push(core.saveData());
+    core.saves.autosave.data.splice(core.saves.autosave.now,0,core.saveData());
+    core.saves.autosave.now=core.saves.autosave.now+1;
     if (core.saves.autosave.data.length > core.saves.autosave.max) {
-        core.saves.autosave.data.shift();
+        if(core.saves.autosave.now<core.saves.autosave.max/2) core.saves.autosave.data.pop();
+        else
+        {
+	core.saves.autosave.data.shift();
+	core.saves.autosave.now=core.saves.autosave.now-1;
+        }
     }
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
@@ -1625,7 +1631,7 @@ control.prototype.checkAutosave = function () {
     if (autosave.data == null || !autosave.updated || !autosave.storage) return;
     autosave.updated = false;
     if (autosave.data.length >= 1) {
-        core.setLocalForage("autoSave", autosave.data[autosave.data.length - 1]);
+        core.setLocalForage("autoSave", autosave.data[autosave.now-1]);
     }
 }
 
@@ -1634,6 +1640,7 @@ control.prototype.doSL = function (id, type) {
     switch (type) {
         case 'save': this._doSL_save(id); break;
         case 'load': this._doSL_load(id, this._doSL_load_afterGet); break;
+        case 'reload': this._doSL_reload(id, this._doSL_load_afterGet); break;
         case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
         case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
     }
@@ -1666,11 +1673,22 @@ control.prototype._doSL_save = function (id) {
 
 control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        var data = core.saves.autosave.data.pop();
-        if (core.saves.autosave.data.length == 0) {
-            core.saves.autosave.data.push(core.clone(data));
+        if(core.saves.autosave.now>0)
+        {
+            core.saves.autosave.now=core.saves.autosave.now-1;
+            var data = core.saves.autosave.data.splice(core.saves.autosave.now,1)[0];
+            if(core.status.played && !core.status.gameOver)
+            {
+                core.control.autosave(0);
+                core.saves.autosave.now=core.saves.autosave.now-1;
+            }
+            if(core.saves.autosave.now==0)
+            {
+                core.saves.autosave.data.unshift(data);
+	 core.saves.autosave.now=core.saves.autosave.now+1;
+             }
+            callback(id, data);
         }
-        callback(id, data);
     }
     else {
         core.getLocalForage(id=='autoSave'?id:"save"+id, null, function(data) {
@@ -1679,13 +1697,22 @@ control.prototype._doSL_load = function (id, callback) {
                 if (!(core.saves.autosave.data instanceof Array)) {
                     core.saves.autosave.data = [core.saves.autosave.data];
                 }
-                return core.control._doSL_load(id, callback);
+	return core.control._doSL_load(id, callback);
             }
             callback(id, data);
         }, function(err) {
             main.log(err);
             alert("无效的存档");
         })
+    }
+    return;
+}
+
+control.prototype._doSL_reload = function (id, callback) {
+    if (core.saves.autosave.data!=null&&core.saves.autosave.now < core.saves.autosave.data.length) {
+        var data = core.saves.autosave.data.splice(core.saves.autosave.now,1)[0];
+        core.control.autosave(0);
+        callback(id, data);
     }
     return;
 }
@@ -1860,7 +1887,7 @@ control.prototype.getSave = function (index, callback) {
     if (index == 0) {
         // --- 自动存档先从缓存中获取
         if (core.saves.autosave.data != null)
-            callback(core.saves.autosave.data);
+            callback(core.saves.autosave.data,core.saves.autosave.now);
         else {
             core.getLocalForage("autoSave", null, function(data) {
                 if (data != null) {
@@ -1868,32 +1895,34 @@ control.prototype.getSave = function (index, callback) {
                     if (!(core.saves.autosave.data instanceof Array)) {
                         core.saves.autosave.data = [core.saves.autosave.data];
                     }
+	     core.saves.autosave.now=core.saves.autosave.data.length;
                 }
-                callback(core.saves.autosave.data);
+                callback(core.saves.autosave.data,-1);
             }, function(err) {
                 main.log(err);
-                callback(null);
+                callback(null,-1);
             });
         }
         return;
     }
     core.getLocalForage("save"+index, null, function(data) {
-        if (callback) callback(data);
+        if (callback) callback(data,-1);
     }, function(err) {
         main.log(err);
-        if (callback) callback(null);
+        if (callback) callback(null,-1);
     });
 }
 
 control.prototype.getSaves = function (ids, callback) {
     if (!(ids instanceof Array)) return this.getSave(ids, callback);
-    var count = ids.length, data = {};
+    var count = ids.length, data = {},flag=-1;
     for (var i = 0; i < ids.length; ++i) {
         (function (i) {
-            core.getSave(ids[i], function (result) {
+            core.getSave(ids[i], function (result,_flag) {
                 data[i] = result;
+	 if(_flag!=-1)flag=_flag;
                 if (Object.keys(data).length == count)
-                    callback(data);
+                    callback(data,flag);
             })
         })(i);
     }

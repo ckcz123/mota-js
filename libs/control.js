@@ -1694,6 +1694,7 @@ control.prototype._doSL_load = function (id, callback) {
                 if (!(core.saves.autosave.data instanceof Array)) {
                     core.saves.autosave.data = [core.saves.autosave.data];
                 }
+                core.saves.autosave.now=core.saves.autosave.data.length;
                 return core.control._doSL_load(id, callback);
             }
             callback(id, data);

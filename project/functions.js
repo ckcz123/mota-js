@@ -930,7 +930,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		break;*/
 	// 在这里可以任意新增或编辑已有的快捷键内容
 	/*
-		case 0: // 使用该按键的keyCode
+	case 0: // 使用该按键的keyCode
 		// 还可以再判定altKey是否被按下，即 if (altKey) { ...
 
 		// ... 在这里写你要执行脚本

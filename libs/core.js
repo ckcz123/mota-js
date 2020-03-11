@@ -107,7 +107,8 @@ function core() {
             "time": 0,
             "updated": false,
             "storage": true, // 是否把自动存档写入文件a
-            "max": 10, // 自动存档最大回退数
+            "max": 20, // 自动存档最大回退数
+            "now": 0,
         },
         "favorite": [],
         "favoriteName": {}

@@ -1604,9 +1604,15 @@ control.prototype.autosave = function (removeLast) {
     if (core.saves.autosave.data == null) {
         core.saves.autosave.data = [];
     }
-    core.saves.autosave.data.push(core.saveData());
+    core.saves.autosave.data.splice(core.saves.autosave.now,0,core.saveData());
+    core.saves.autosave.now=core.saves.autosave.now+1;
     if (core.saves.autosave.data.length > core.saves.autosave.max) {
-        core.saves.autosave.data.shift();
+        if(core.saves.autosave.now<core.saves.autosave.max/2) core.saves.autosave.data.pop();
+        else
+        {
+            core.saves.autosave.data.shift();
+            core.saves.autosave.now=core.saves.autosave.now-1;
+        }
     }
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
@@ -1625,7 +1631,7 @@ control.prototype.checkAutosave = function () {
     if (autosave.data == null || !autosave.updated || !autosave.storage) return;
     autosave.updated = false;
     if (autosave.data.length >= 1) {
-        core.setLocalForage("autoSave", autosave.data[autosave.data.length - 1]);
+        core.setLocalForage("autoSave", autosave.data[autosave.now-1]);
     }
 }
 
@@ -1634,6 +1640,7 @@ control.prototype.doSL = function (id, type) {
     switch (type) {
         case 'save': this._doSL_save(id); break;
         case 'load': this._doSL_load(id, this._doSL_load_afterGet); break;
+        case 'reload': this._doSL_reload(id, this._doSL_load_afterGet); break;
         case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
         case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
     }
@@ -1666,9 +1673,17 @@ control.prototype._doSL_save = function (id) {
 
 control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        var data = core.saves.autosave.data.pop();
-        if (core.saves.autosave.data.length == 0) {
-            core.saves.autosave.data.push(core.clone(data));
+        core.saves.autosave.now=core.saves.autosave.now-1;
+        var data = core.saves.autosave.data.splice(core.saves.autosave.now,1)[0];
+        if(core.status.played && !core.status.gameOver)
+        {
+            core.control.autosave(0);
+            core.saves.autosave.now=core.saves.autosave.now-1;
+        }
+        if(core.saves.autosave.now==0)
+        {
+            core.saves.autosave.data.unshift(core.clone(data));
+            core.saves.autosave.now=core.saves.autosave.now+1;
         }
         callback(id, data);
     }
@@ -1679,6 +1694,7 @@ control.prototype._doSL_load = function (id, callback) {
                 if (!(core.saves.autosave.data instanceof Array)) {
                     core.saves.autosave.data = [core.saves.autosave.data];
                 }
+                core.saves.autosave.now=core.saves.autosave.data.length;
                 return core.control._doSL_load(id, callback);
             }
             callback(id, data);
@@ -1686,6 +1702,15 @@ control.prototype._doSL_load = function (id, callback) {
             main.log(err);
             alert("无效的存档");
         })
+    }
+    return;
+}
+
+control.prototype._doSL_reload = function (id, callback) {
+    if (core.saves.autosave.data!=null&&core.saves.autosave.now < core.saves.autosave.data.length) {
+        var data = core.saves.autosave.data.splice(core.saves.autosave.now,1)[0];
+        core.control.autosave(0);
+        callback(id, data);
     }
     return;
 }
@@ -1868,6 +1893,7 @@ control.prototype.getSave = function (index, callback) {
                     if (!(core.saves.autosave.data instanceof Array)) {
                         core.saves.autosave.data = [core.saves.autosave.data];
                     }
+                    core.saves.autosave.now=core.saves.autosave.data.length;
                 }
                 callback(core.saves.autosave.data);
             }, function(err) {

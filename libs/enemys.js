@@ -376,7 +376,7 @@ enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
     if (!(floorId instanceof Array)) floorId = [floorId];
     if (!(enemyId instanceof Array)) enemyId = [enemyId];
     var list;
-    for (var i = 0; i < floorId.length; ++i) {
+    for (var i = 0; i < floorId.length; i++) {
         list = {};
         var mapBlocks = core.status.maps[floorId[i]].blocks;
         for (var b = 0; b < mapBlocks.length; b++) {

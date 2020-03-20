@@ -21,7 +21,7 @@ editor_mode = function (editor) {
         this.mode = '';
         this.info = {};
         this.appendPic = {};
-        this.doubleClickMode='change';
+        this.doubleClickMode = 'change';
     }
 
     editor_mode.prototype.init = function (callback) {
@@ -49,15 +49,16 @@ editor_mode = function (editor) {
         editor_mode.actionList.push(action);
     }
 
-    editor_mode.prototype.doActionList = function (mode, actionList) {
+    editor_mode.prototype.doActionList = function (mode, actionList, callback) {
         if (actionList.length == 0) return;
         printf('修改中...');
-        var cb=function(objs_){
+        var cb = function (objs_) {
             if (objs_.slice(-1)[0] != null) {
                 printe(objs_.slice(-1)[0]);
-                throw(objs_.slice(-1)[0])
+                throw (objs_.slice(-1)[0])
             }
-            ;printf('修改成功');
+            ; printf('修改成功' + (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name == 'template' ? '\n\n请注意：全塔属性的name尚未修改，请及时予以设置' : ''));
+            if (callback) callback();
         }
         switch (mode) {
             case 'loc':
@@ -95,9 +96,9 @@ editor_mode = function (editor) {
         }
     }
 
-    editor_mode.prototype.onmode = function (mode) {
+    editor_mode.prototype.onmode = function (mode, callback) {
         if (editor_mode.mode != mode) {
-            if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList);
+            if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
             if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
             if (mode !== 'save') editor_mode.mode = mode;
             editor_mode.actionList = [];
@@ -109,14 +110,77 @@ editor_mode = function (editor) {
             editor_mode.dom[name].style = 'z-index:-1;opacity: 0;';
         }
         editor_mode.dom[mode].style = '';
-        editor_mode.doubleClickMode='change';
+        editor_mode.doubleClickMode = 'change';
         // clear
         editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
-        document.getElementById('editModeSelect').value = mode;
-        var tips = tip_in_showMode;
-        if (!selectBox.isSelected()) printf('tips: ' + tips[~~(tips.length * Math.random())]);
+        editor.dom.editModeSelect.value = mode;
+        if (!selectBox.isSelected()) tip.showHelp();
     }
+
+    editor_mode.prototype.change = function (value) {
+        editor_mode.onmode('nextChange');
+        editor_mode.onmode(value);
+        if (editor.isMobile) editor.showdataarea(false);
+    }
+
+
+    editor_mode.prototype.checkUnique = function (thiseval) {
+        if (!(thiseval instanceof Array)) return false;
+        var map = {};
+        for (var i = 0; i < thiseval.length; ++i) {
+            if (map[thiseval[i]]) {
+                alert("警告：存在重复定义！");
+                return false;
+            }
+            map[thiseval[i]] = true;
+        }
+        return true;
+    }
+
+    editor_mode.prototype.checkFloorIds = function (thiseval) {
+        if (!editor_mode.checkUnique(thiseval)) return false;
+        var oldvalue = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds;
+        fs.readdir('project/floors', function (err, data) {
+            if (err) {
+                printe(err);
+                throw Error(err);
+            }
+            var newfiles = thiseval.map(function (v) { return v + '.js' });
+            var notExist = '';
+            for (var name, ii = 0; name = newfiles[ii]; ii++) {
+                if (data.indexOf(name) === -1) notExist = name;
+            }
+            if (notExist) {
+                var discard = confirm('文件' + notExist + '不存在, 保存会导致工程无法打开, 是否放弃更改');
+                if (discard) {
+                    editor.file.editTower([['change', "['main']['floorIds']", oldvalue]], function (objs_) {//console.log(objs_);
+                        if (objs_.slice(-1)[0] != null) {
+                            printe(objs_.slice(-1)[0]);
+                            throw (objs_.slice(-1)[0])
+                        }
+                        ; printe('已放弃floorIds的修改，请F5进行刷新');
+                    });
+                }
+            }
+        });
+        return true
+    }
+
+    editor_mode.prototype.changeDoubleClickModeByButton = function (mode) {
+        ({
+            delete: function () {
+                printf('下一次双击表格的项删除，切换下拉菜单可取消；编辑后需刷新浏览器生效。');
+                editor_mode.doubleClickMode = mode;
+            },
+            add: function () {
+                printf('下一次双击表格的项则在同级添加新项，切换下拉菜单可取消；编辑后需刷新浏览器生效。');
+                editor_mode.doubleClickMode = mode;
+            }
+        }[mode])();
+    }
+
+    /////////////////////////////////////////////////////////////////////////////
 
     editor_mode.prototype.loc = function (callback) {
         //editor.pos={x: 0, y: 0};
@@ -141,17 +205,19 @@ editor_mode = function (editor) {
         //editor.info=editor.ids[editor.indexs[201]];
         if (!core.isset(editor.info)) return;
 
-        if (Object.keys(editor.info).length !== 0 && editor.info.idnum!=17) editor_mode.info = editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
+        if (Object.keys(editor.info).length !== 0 && editor.info.idnum != 17) editor_mode.info = editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
 
         if (!core.isset(editor_mode.info.id)) {
             // document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';
-            document.getElementById('enemyItemTable').style.display = 'none';
             document.getElementById('newIdIdnum').style.display = 'block';
+            document.getElementById('enemyItemTable').style.display = 'none';
+            document.getElementById('changeId').style.display = 'none';
             return;
         }
 
         document.getElementById('newIdIdnum').style.display = 'none';
         document.getElementById('enemyItemTable').style.display = 'block';
+        document.getElementById('changeId').style.display = 'block';
 
         var objs = [];
         if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
@@ -231,7 +297,7 @@ editor_mode = function (editor) {
         tableinfo.listen(tableinfo.guids);
         if (Boolean(callback)) callback();
     }
-    
+
     editor_mode.prototype.plugins = function (callback) {
         var objs = [];
         editor.file.editPlugins([], function (objs_) {
@@ -245,11 +311,17 @@ editor_mode = function (editor) {
         if (Boolean(callback)) callback();
     }
 
-/////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * editor.dom.editModeSelect.onchange
+     */
+    editor_mode.prototype.editModeSelect_onchange = function () {
+        editor_mode.change(editor.dom.editModeSelect.value);
+    }
 
     editor_mode.prototype.listen = function (callback) {
-
-        // 移动至 editor_unsorted_2.js
+        // 移动至 editor_listen.js -> editor.constructor.prototype.mode_listen
     }
 
     var editor_mode = new editor_mode();

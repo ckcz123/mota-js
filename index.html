@@ -16,6 +16,33 @@
     <link type='text/css' href='styles.css' rel='stylesheet'>
 </head>
 <body>
+<div id='startImageBackgroundDiv'>
+    <div id='startImageDiv'></div>
+    <img id='startImageLogo' />
+</div>
+<script>
+    (function () {
+        var startImageBackgroundDiv = document.getElementById('startImageBackgroundDiv');
+        var startImageLogo = document.getElementById('startImageLogo');
+        var startImageDiv = document.getElementById('startImageDiv');
+        startImageLogo.onload = function () {
+            startImageBackgroundDiv.style.display = 'block';
+            var onAnimationEnd = function () {
+                startImageBackgroundDiv.style.display = 'none';
+                startImageLogo.classList.remove("startImageAnimation");
+                startImageDiv.classList.remove("startImageDivAnimation");
+            }
+            startImageDiv.addEventListener("webkitAnimationEnd", onAnimationEnd);
+            startImageDiv.addEventListener("animationend", onAnimationEnd);
+            startImageLogo.classList.add("startImageAnimation");
+            startImageDiv.classList.add("startImageDivAnimation");
+            // 注释下面这句话以禁止单击立刻跳过开场动画
+            startImageBackgroundDiv.onclick = onAnimationEnd;
+        }
+        startImageLogo.onerror = function () {}
+        startImageLogo.src = "logo.png";
+    })();
+</script>
 <div id='gameGroup'>
     <p id='mainTips'>请稍后...</p>
     <img id='musicBtn'>
@@ -147,12 +174,13 @@
         <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+        <div id="next"></div>
     </div>
 </div>
 <div id='inputDiv'>
     <div id='inputDialog'>
         <p id="inputMessage">请输入文字...</p>
-        <input id='inputBox' type="text"/>
+        <input id='inputBox' type="text" autocomplete="off"/>
         <button id='inputYes'>确定</button>
         <button id='inputNo'>取消</button>
     </div>
@@ -160,6 +188,7 @@
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/priority-queue.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
+<script src='libs/thirdparty/zip.min.js'></script>
 <script id='mainScript' src='main.js'></script>
 <script>main.init('play');main.listen();</script>
 </body>

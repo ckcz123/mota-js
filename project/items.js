@@ -3,30 +3,33 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"items": {
 		"yellowKey": {
 			"cls": "keys",
-			"name": "黄钥匙"
+			"name": "黄钥匙",
+			"text": "可以打开一扇黄门"
 		},
 		"blueKey": {
 			"cls": "keys",
-			"name": "蓝钥匙"
+			"name": "蓝钥匙",
+			"text": "可以打开一扇蓝门"
 		},
 		"redKey": {
 			"cls": "keys",
-			"name": "红钥匙"
+			"name": "红钥匙",
+			"text": "可以打开一扇红门"
 		},
 		"redJewel": {
 			"cls": "items",
 			"name": "红宝石",
-			"text": "'，攻击+'+core.values.redJewel"
+			"text": "'，攻击+${core.values.redJewel}'"
 		},
 		"blueJewel": {
 			"cls": "items",
 			"name": "蓝宝石",
-			"text": "'，防御+'+core.values.blueJewel"
+			"text": "'，防御+${core.values.blueJewel}'"
 		},
 		"greenJewel": {
 			"cls": "items",
 			"name": "绿宝石",
-			"text": "'，魔防+'+core.values.greenJewel"
+			"text": "'，魔防+${core.values.greenJewel}'"
 		},
 		"yellowJewel": {
 			"cls": "items",
@@ -36,22 +39,22 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"redPotion": {
 			"cls": "items",
 			"name": "红血瓶",
-			"text": "'，生命+'+core.values.redPotion"
+			"text": "'，生命+${core.values.redPotion}'"
 		},
 		"bluePotion": {
 			"cls": "items",
 			"name": "蓝血瓶",
-			"text": "'，生命+'+core.values.bluePotion"
+			"text": "'，生命+${core.values.bluePotion}'"
 		},
 		"yellowPotion": {
 			"cls": "items",
 			"name": "黄血瓶",
-			"text": "'生命+'+core.values.yellowPotion"
+			"text": "'，生命+${core.values.yellowPotion'}"
 		},
 		"greenPotion": {
 			"cls": "items",
 			"name": "绿血瓶",
-			"text": "'，生命+'+core.values.greenPotion"
+			"text": "'，生命+${core.values.greenPotion}'"
 		},
 		"sword0": {
 			"cls": "items",
@@ -365,7 +368,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"pickaxe": "core.playSound('pickaxe.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
 		"icePickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
 		"snow": "core.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-		"bigKey": "core.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
+		"bigKey": "(function () {\n\tvar actions = core.status.event.ui.map(function (id) {\n\t\tvar block = core.status.thisMap.blocks[id];\n\t\treturn { \"type\": \"openDoor\", \"loc\": [block.x, block.y], \"async\": true };\n\t});\n\tactions.push({ \"type\": \"waitAsync\" });\n\tactions.push({ \"type\": \"tip\", \"text\": core.material.items[itemId].name + \"使用成功\" });\n\tcore.insertAction(actions);\n})();",
 		"bomb": "core.playSound('bomb.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
 		"hammer": "core.playSound('bomb.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
 		"centerFly": "core.playSound('centerFly.mp3');\ncore.clearMap('hero');\ncore.setHeroLoc('x', core.bigmap.width-1-core.getHeroLoc('x'));\ncore.setHeroLoc('y', core.bigmap.height-1-core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
@@ -399,7 +402,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"upFly": "(function() {\n\tvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\n\tif (index<core.floorIds.length-1) {\n\t\tvar toId = core.floorIds[index+1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width, mh = core.floors[toId].height;\n\t\tif (toX>=0 && toX<mw && toY>=0 && toY<mh && core.getBlock(toX, toY, toId)==null) {\n\t\t\tcore.status.event.ui = {'id': toId, 'x': toX, 'y': toY};\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
 		"downFly": "(function() {\n\tvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\n\tif (index>0) {\n\t\tvar toId = core.floorIds[index-1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width, mh = core.floors[toId].height;\n\t\tif (toX>=0 && toX<mw && toY>=0 && toY<mh && core.getBlock(toX, toY, toId)==null) {\n\t\t\tcore.status.event.ui = {'id': toId, 'x': toX, 'y': toY};\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
 		"snow": "(function () {\n\tvar ids = [], id2s = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.event.id == 'lava' && core.nearHero(block.x, block.y)) {\n\t\t\tif (core.flags.snowFourDirections || (block.x == core.nextX() && block.y == core.nextY()))\n\t\t\t\tids.push(i);\n\t\t\telse id2s.push(i);\n\t\t}\n\t}\n\tif (ids.length>0) {\n\t\tcore.status.event.ui = ids;\n\t\treturn true;\n\t}\n\tif (id2s.length==1) {\n\t\tcore.status.event.ui = id2s;\n\t\treturn true;\n\t}\n\treturn false;\n})();",
-		"bigKey": "(function() {\n\tvar able=false, ids = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.event.id == 'yellowDoor') {\n\t\t\tids.push(i);\n\t\t}\n\t}\n\tif (ids.length>0) {\n\t\tcore.status.event.ui = ids;\n\t\table=true;\n\t}\n\treturn able;\n})();",
+		"bigKey": "(function () {\n\tvar able = false,\n\t\tids = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.event.id == 'yellowDoor') {\n\t\t\tids.push(i);\n\t\t}\n\t}\n\tif (ids.length > 0) {\n\t\tcore.status.event.ui = ids;\n\t\table = true;\n\t}\n\treturn able;\n})();",
 		"poisonWine": "core.hasFlag('poison');",
 		"weakWine": "core.hasFlag('weak');",
 		"curseWine": "core.hasFlag('curse');",
@@ -416,5 +419,5 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"yellowJewel": "true",
 		"skill1": "true"
 	},
-	"canEquip": {}
+	"equipCondition": {}
 }

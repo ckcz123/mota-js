@@ -2,7 +2,11 @@ editor_blockly = function () {
 
     var editor_blockly = {};
 
-    initscript = String.raw`
+/////////////////initscript start/////////////////////////////
+// do not use String.raw because of highlighting
+// Comment tagged templates
+// https://marketplace.visualstudio.com/items?itemName=bierner.comment-tagged-templates
+    initscript = /* js */`
 (function(){
   var getCategory = function(name,custom){
     for(var node of document.getElementById('toolbox').children) {
@@ -22,6 +26,16 @@ editor_blockly = function () {
         "本事件触发一次后会消失",
         {"type": "hide", "time": 500},
       ],'event'),
+      MotaActionFunctions.actionParser.parse({
+        "condition": "flag:__door__==2",
+        "currentFloor": true,
+        "priority": 0,
+        "delayExecute": false,
+        "multiExecute": false,
+        "data": [
+          {"type": "openDoor", "loc": [10,5]}
+        ],
+      },'autoEvent'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
@@ -30,12 +44,17 @@ editor_blockly = function () {
         "textInList": "1F金币商店", 
         "use": "money",
         "need": "20+10*times*(times+1)",  
-        "text": "勇敢的武士啊，给我\${need}金币就可以：", 
+        "text": "勇敢的武士啊，给我\\\${need}金币就可以：", 
         "choices": [ 
           {"text": "生命+800", "effect": "status:hp+=800"},
           {"text": "攻击+4", "effect": "status:atk+=4"},
-          {"text": "防御+4", "effect": "status:def+=4"},
-          {"text": "魔防+10", "effect": "status:mdef+=10"}
+        ]
+      },{
+        "id": "itemShop",
+        "item": true,
+        "textInList": "道具商店",
+        "choices": [
+          {"id": "yellowKey", "number": 10, "money": 10}
         ]
       },{
         "id": "keyShop1",
@@ -50,6 +69,7 @@ editor_blockly = function () {
       MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
       MotaActionBlocks['commonEvent_m'].xmlText(),
+      MotaActionBlocks['item_m'].xmlText(),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -72,20 +92,21 @@ editor_blockly = function () {
       MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',MotaActionBlocks['choicesContext'].xmlText([
-          '剑','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
+          '剑','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
           MotaActionBlocks['choicesContext'].xmlText([
-            '盾','','',null,MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
+            '盾','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
           ])
         ])
       ]),
     ],
     '数据相关':[
-      MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
-      ]),
       MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
+      MotaActionBlocks['setValue_s'].xmlText([
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
+      ]),
+      MotaActionBlocks['setEnemy_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
       MotaActionBlocks['setGlobalValue_s'].xmlText(),
@@ -93,7 +114,6 @@ editor_blockly = function () {
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
-      MotaActionBlocks['updateEnemys_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['jumpHero_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),
@@ -101,6 +121,8 @@ editor_blockly = function () {
       MotaActionBlocks['changePos_1_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['useItem_s'].xmlText(),
+      MotaActionBlocks['loadEquip_s'].xmlText(),
+      MotaActionBlocks['unloadEquip_s'].xmlText(),
       MotaActionBlocks['openShop_s'].xmlText(),
       MotaActionBlocks['disableShop_s'].xmlText(),
       MotaActionBlocks['setHeroIcon_s'].xmlText(),
@@ -108,6 +130,7 @@ editor_blockly = function () {
       MotaActionBlocks['unfollow_s'].xmlText(),
     ],
     '地图处理':[
+      MotaActionBlocks['battle_1_s'].xmlText(),
       MotaActionBlocks['openDoor_s'].xmlText(),
       MotaActionBlocks['closeDoor_s'].xmlText(),
       MotaActionBlocks['show_s'].xmlText(),
@@ -122,8 +145,8 @@ editor_blockly = function () {
       MotaActionBlocks['hideFloorImg_s'].xmlText(),
     ],
     '事件控制':[
-      MotaActionBlocks['if_s'].xmlText(),
       MotaActionBlocks['if_1_s'].xmlText(),
+      MotaActionBlocks['if_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "switch", "condition": "判别值", "caseList": [
         {"action": [{"type": "comment", "text": "当判别值是值的场合执行此事件"}]},
         {"action": [], "nobreak": true},
@@ -141,12 +164,19 @@ editor_blockly = function () {
     ],
     '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
-      MotaActionBlocks['wait_s'].xmlText(),
+      MotaActionFunctions.actionParser.parseList({"type": "wait", "data": [
+        {"case": "keyboard", "keycode": 13, "action": [{"type": "comment", "text": "当按下回车(keycode=13)时执行此事件"}]},
+        {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件"}]},
+      ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
+      MotaActionBlocks['setViewport_s'].xmlText(),
+      MotaActionBlocks['moveViewport_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
+      MotaActionBlocks['showHero_s'].xmlText(),
+      MotaActionBlocks['hideHero_s'].xmlText(),
       MotaActionBlocks['setCurtain_0_s'].xmlText(),
       MotaActionBlocks['setCurtain_1_s'].xmlText(),
       MotaActionBlocks['screenFlash_s'].xmlText(),
@@ -164,16 +194,39 @@ editor_blockly = function () {
       MotaActionBlocks['autoSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
     ],
+    'UI绘制':[
+      MotaActionBlocks['previewUI_s'].xmlText(),
+      MotaActionBlocks['clearMap_s'].xmlText(),
+      MotaActionBlocks['clearMap_1_s'].xmlText(),
+      MotaActionBlocks['setAttribute_s'].xmlText(),
+      MotaActionBlocks['fillText_s'].xmlText(),
+      MotaActionBlocks['fillBoldText_s'].xmlText(),
+      MotaActionBlocks['drawTextContent_s'].xmlText(),
+      MotaActionBlocks['fillRect_s'].xmlText(),
+      MotaActionBlocks['strokeRect_s'].xmlText(),
+      MotaActionBlocks['drawLine_s'].xmlText(),
+      MotaActionBlocks['drawArrow_s'].xmlText(),
+      MotaActionBlocks['fillPolygon_s'].xmlText(),
+      MotaActionBlocks['strokePolygon_s'].xmlText(),
+      MotaActionBlocks['fillCircle_s'].xmlText(),
+      MotaActionBlocks['strokeCircle_s'].xmlText(),
+      MotaActionBlocks['drawImage_s'].xmlText(),
+      MotaActionBlocks['drawImage_1_s'].xmlText(),
+      MotaActionBlocks['drawIcon_s'].xmlText(),
+      MotaActionBlocks['drawBackground_s'].xmlText(),
+      MotaActionBlocks['drawSelector_s'].xmlText(),
+      MotaActionBlocks['drawSelector_1_s'].xmlText(),
+    ],
     '原生脚本':[
       MotaActionBlocks['function_s'].xmlText(),
       MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
-      MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
-      ]),
       MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','hp'])
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
+      ]),
+      MotaActionBlocks['setValue_s'].xmlText([
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
       MotaActionBlocks['evFlag_e'].xmlText(),
@@ -182,33 +235,37 @@ editor_blockly = function () {
       MotaActionBlocks['idString_e'].xmlText(),
       MotaActionBlocks['idString_1_e'].xmlText(),
       MotaActionBlocks['idString_2_e'].xmlText(),
+      MotaActionBlocks['idString_3_e'].xmlText(),
+      MotaActionBlocks['idString_4_e'].xmlText(),
+      MotaActionBlocks['idString_5_e'].xmlText(),
+      MotaActionBlocks['idString_6_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
       '<label text="检测音乐如果没有开启则系统提示开启"></label>',
       MotaActionFunctions.actionParser.parseList({"type": "if", "condition": "!core.musicStatus.bgmStatus",
         "true": [
-          "\t[系统提示]你当前音乐处于关闭状态，本塔开音乐游戏效果更佳"
+          "\\t[系统提示]你当前音乐处于关闭状态，本塔开音乐游戏效果更佳"
         ],
         "false": []
       }),
       '<label text="商店购买属性/钥匙"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
+        {"type": "choices", "text": "\\t[老人,man]少年，你需要钥匙吗？\\n我这里有大把的！",
         "choices": [
-            {"text": "黄钥匙（\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
+            {"text": "黄钥匙（\\\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
                 {"type": "if", "condition": "status:money>=9+flag:shop_times",
                     "true": [
                         {"type": "addValue", "name": "status:money", "value": "-(9+flag:shop_times)"},
                         {"type": "addValue", "name": "item:yellowKey", "value": "1"},
                     ],
                     "false": [
-                        "\t[老人,man]你的金钱不足！",
+                        "\\t[老人,man]你的金钱不足！",
                         {"type": "revisit"}
                     ]
                 }
             ]},
-            {"text": "蓝钥匙（\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
+            {"text": "蓝钥匙（\\\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
             ]},
             {"text": "离开", "action": [
                 {"type": "exit"}
@@ -361,7 +418,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\i/g, '\\\\i');
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\(i|c|d|e)/g, '\\\\\\\\$1');
     codeAreaHL.setValue(code);
   } catch (error) {
     codeAreaHL.setValue(String(error));
@@ -433,6 +490,18 @@ function omitedcheckUpdateFunction(event) {
   }
 })();
 `;
+/////////////////initscript end  /////////////////////////////
+
+    editor.uivalues.disableBlocklyReplace = editor.config.get("disableBlocklyReplace", false);
+    var replaceCheckbox = document.getElementById('blocklyReplace');
+    replaceCheckbox.checked = !editor.uivalues.disableBlocklyReplace;
+
+    editor_blockly.triggerReplace = function () {
+        editor.uivalues.disableBlocklyReplace = !replaceCheckbox.checked;
+        editor.config.set("disableBlocklyReplace", !replaceCheckbox.checked);
+        if (MotaActionFunctions) MotaActionFunctions.disableReplace = !replaceCheckbox.checked;
+        alert("已" + (replaceCheckbox.checked ? "开启" : "关闭") + "中文变量名替换！\n关闭并重开事件编辑器以生效。");
+    }
 
     var input_ = '';
     editor_blockly.runOne = function () {
@@ -463,6 +532,7 @@ function omitedcheckUpdateFunction(event) {
         }
         input_ = xhr.responseText;
         editor_blockly.runOne();
+        MotaActionFunctions.disableReplace = editor.uivalues.disableBlocklyReplace;
     }
     xhr.open('GET', '_server/MotaAction.g4', true);
     xhr.send(null);
@@ -503,8 +573,7 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\r/g, '\\\\r').replace(/\\f/g, '\\\\f')
-                .replace(/\\i/,'\\\\i')),
+            }).replace(/\\(r|f|i|c|d|e)/g,'\\\\$1')),
             document.getElementById('entryType').value
         );
     }
@@ -578,14 +647,86 @@ function omitedcheckUpdateFunction(event) {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
-        code = code.replace(/\\i/g, '\\\\i');
+        code = code.replace(/\\(i|c|d|e)/g, '\\\\$1');
         eval('var obj=' + code);
+        if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
+            "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
         setvalue(JSON.stringify(obj));
+    }
+
+    // 检查"不等待处理完毕"
+    editor_blockly.checkAsync = function (obj) {
+        if (!(obj instanceof Array)) return false;
+        var hasAsync = false;
+        for (var i = 0; i < obj.length; ++i) {
+            var one = obj[i];
+            if (one.type == 'if' && (this.checkAsync(one['true']) || this.checkAsync(one['false'])))
+                return true;
+            if ((one.type == 'while' || one.type == 'dowhile') && this.checkAsync(one.data))
+                return true;
+            if (one.type == 'if' && (this.checkAsync(one.yes) || this.checkAsync(one.no)))
+                return true;
+            if (one.type == 'choices') {
+                var list = one.choices;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
+            if (one.type == 'switch') {
+                var list = one.caseList;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
+            if (one.async && one.type != 'animate') hasAsync = true;
+            if (one.type == 'waitAsync') hasAsync = false;
+        }
+        return hasAsync;
+    }
+
+    var previewBlock = function (b) {
+        var types = [
+            "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
+            "fillBoldText_s", "fillRect_s", "strokeRect_s", "drawLine_s",
+            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillCircle_s", "strokeCircle_s",
+            "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s",
+            "waitContext_2"
+        ];
+        if (b && types.indexOf(b.type)>=0) {
+            try {
+                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e)/g, '\\\\$1') + "]";
+                eval("var obj="+code);
+                if (obj.length > 0 && b.type == 'waitContext_2') {
+                    var dt = obj[0];
+                    editor.uievent.previewUI([{"type": "fillRect", "x": dt.px[0], "y": dt.py[0],
+                        "width": "(" + dt.px[1] + ")-(" + dt.px[0] + ")", "height": "(" + dt.py[1] + ")-(" + dt.py[0] + ")",
+                        "style": "rgba(255,0,0,0.5)"}])
+                }
+                else if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
+                    if (b.type == 'previewUI_s')
+                        editor.uievent.previewUI(obj[0].action);
+                    else editor.uievent.previewUI([obj[0]]);
+                }
+            } catch (e) {main.log(e);}
+            return true;
+        }
+        return false;
     }
 
     editor_blockly.doubleClickBlock = function (blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
-        //console.log(b);
+
+        if (previewBlock(b)) return;
+
+        if (b && b.type in selectPointBlocks) { // selectPoint
+            this.selectPoint();
+            return;
+        }
+
         var textStringDict = {
             'text_0_s': 'EvalString_0',
             'text_1_s': 'EvalString_2',
@@ -597,6 +738,7 @@ function omitedcheckUpdateFunction(event) {
             'function_s': 'RawEvalString_0',
             'shopsub': 'EvalString_3',
             'confirm_s': 'EvalString_0',
+            'drawTextContent_s': 'EvalString_0',
         }
         var f = b ? textStringDict[b.type] : null;
         if (f) {
@@ -615,7 +757,7 @@ function omitedcheckUpdateFunction(event) {
         'comment_s',
         'show_s',
         'hide_s',
-        'setValue_s',
+        'addValue_s',
         'if_s',
         'battle_s',
         'openDoor_s',
@@ -644,40 +786,26 @@ function omitedcheckUpdateFunction(event) {
 
     // Index from 1 - 9
     editor_blockly.openToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null || element.getAttribute("aria-selected")=="true") return;
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
     }
     editor_blockly.reopenToolbox = function(index) {
-        // var element = document.getElementById(':'+index);
-        // if (element == null) return;
-        // if (element.getAttribute("aria-selected")=="true") element.click();
-        // element.click();
-        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index-1]);
-        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index-1].blocks);
+        if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
+        editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
+        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index].blocks);
     }
 
     editor_blockly.closeToolbox = function() {
-        /*
-        for (var i=1; i<=10; i++) {
-            var element = document.getElementById(':'+i);
-            if (element && element.getAttribute("aria-selected")=="true") {
-                element.click();
-                return;
-            }
-        }
-        */
         editor_blockly.workspace.toolbox_.clearSelection();
     }
 
     var searchInput = document.getElementById("searchBlock");
     searchInput.onfocus = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     searchInput.oninput = function () {
-        editor_blockly.reopenToolbox(10);
+        editor_blockly.reopenToolbox(-1);
     }
 
     editor_blockly.searchBlock = function (value) {
@@ -702,6 +830,342 @@ function omitedcheckUpdateFunction(event) {
         return results.length == 0 ? editor_blockly.lastUsedType : results;
     }
 
+    // ------ select point ------
+
+    // id: [x, y, floorId, forceFloor]
+    var selectPointBlocks = {
+        "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
+        "jumpHero_s": ["PosString_0", "PosString_1"],
+        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
+        "changePos_0_s": ["PosString_0", "PosString_1"],
+        "battle_1_s": ["PosString_0", "PosString_1"],
+        "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "closeDoor_s": ["PosString_0", "PosString_1"],
+        "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
+        "move_s": ["PosString_0", "PosString_1"],
+        "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
+        "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "setBgFgBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
+        "showFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
+        "trigger_s": ["PosString_0", "PosString_1"],
+        "insert_2_s": ["PosString_0", "PosString_1", "IdString_0"],
+        "animate_s": ["EvalString_0", "EvalString_0"],
+        "setViewport_s": ["PosString_0", "PosString_1"]
+    }
+
+    editor_blockly.selectPoint = function () {
+        var block = Blockly.selected, arr = null;
+        var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
+        if (block != null && block.type in selectPointBlocks) {
+            arr = selectPointBlocks[block.type];
+            var xv = parseInt(block.getFieldValue(arr[0])), yv = parseInt(block.getFieldValue(arr[1]));
+            if (block.type == 'animate_s') {
+                var v = block.getFieldValue(arr[0]).split(",");
+                xv = parseInt(v[0]); yv = parseInt(v[1]);
+            }
+            if (!isNaN(xv)) x = xv;
+            if (!isNaN(yv)) y = yv;
+            if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
+        }
+        editor.uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+            if (!arr) return;
+            if (arr[2] != null) {
+                if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);
+                else block.setFieldValue(arr[3] ? fv : "", arr[2]);
+            }
+            if (block.type == 'animate_s') {
+                block.setFieldValue(xv+","+yv, arr[0]);
+            }
+            else {
+                block.setFieldValue(xv+"", arr[0]);
+                block.setFieldValue(yv+"", arr[1]);
+            }
+            if (block.type == 'changeFloor_m') {
+                block.setFieldValue("floorId", "Floor_List_0");
+                block.setFieldValue("loc", "Stair_List_0");
+            }
+        });
+    }
+
+    editor_blockly.getAutoCompletions = function (content) {
+        // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
+
+        // 检查 status:xxx，item:xxx和flag:xxx
+        var index = Math.max(content.lastIndexOf(":"), content.lastIndexOf("："));
+        if (index >= 0) {
+            var ch = content.charAt(index);
+            var before = content.substring(0, index), token = content.substring(index+1);
+            if (/^[a-zA-Z0-9_\u4E00-\u9FCC]*$/.test(token)) {
+                if (before.endsWith("状态") || (ch == ':' && before.endsWith("status"))) {
+                    var list = Object.keys(core.status.hero);
+                    if (before.endsWith("状态") && MotaActionFunctions) {
+                        list = MotaActionFunctions.pattern.replaceStatusList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    return list.filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
+                }
+                else if (before.endsWith("物品") || (ch == ':' && before.endsWith("item"))) {
+                    var list = Object.keys(core.material.items);
+                    if (before.endsWith("物品") && MotaActionFunctions) {
+                        list = MotaActionFunctions.pattern.replaceItemList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    return list.filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
+                }
+                else if (before.endsWith("变量") || (ch == ':' && before.endsWith("flag"))) {
+                    return Object.keys(editor.used_flags || {}).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    }).sort();
+                } else if (before.endsWith("怪物") || (ch == ':' && before.endsWith("enemy"))) {
+                    return Object.keys(core.material.enemys).filter(function (one) {
+                        return one != token && one.startsWith(token);
+                    })
+                } else {
+                    var index2 = Math.max(content.lastIndexOf(":", index-1), content.lastIndexOf("：", index-1));
+                    var ch2 = content.charAt(index2);
+                    if (index2 >= 0) {
+                        before = content.substring(0, index2);
+                        if (before.endsWith("怪物") || (ch == ':' && ch2 == ':' && before.endsWith("enemy"))) {
+                            var list = ["name", "hp", "atk", "def", "money", "experience", "point", "special"];
+                            if (before.endsWith("怪物") && MotaActionFunctions) {
+                                list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
+                                    return v[1];
+                                }).concat(list);
+                            }
+                            return list.filter(function (one) {
+                                return one != token && one.startsWith(token);
+                            })
+                        }
+                    }
+
+                }
+            }
+        }
+
+        // 提供 core.xxx 的补全
+        index = content.lastIndexOf("core.");
+        if (index >= 0) {
+            var s = content.substring(index + 5);
+            if (/^[\w.]*$/.test(s)) {
+                var tokens = s.split(".");
+                var now = core, prefix = tokens[tokens.length - 1];
+                for (var i = 0; i < tokens.length - 1; ++i) {
+                    now = now[tokens[i]];
+                    if (now == null) break;
+                }
+                if (now != null) {
+                    var candidates = [];
+                    for (var i in now) {
+                        candidates.push(i);
+                    }
+                    return candidates.filter(function (one) {
+                        return one != prefix && one.startsWith(prefix);
+                    }).sort();
+                }
+            }
+        }
+
+        // 提供 flags.xxx 补全
+        index = content.lastIndexOf("flags.");
+        if (index >= 0) {
+            var token = content.substring(index+6);
+            return Object.keys(editor.used_flags || {}).filter(function (one) {
+                return one != token && one.startsWith(token)
+                    && /^[a-zA-Z_]\w*$/.test(one);
+            }).sort();
+        }
+
+        return [];
+    }
+
+    editor_blockly.completeItems = [];
     return editor_blockly;
 }
-//editor_blockly=editor_blockly();
+
+// --- modify Blockly
+
+Blockly.FieldColour.prototype.createWidget_ = function() {
+    Blockly.WidgetDiv.hide();
+
+    // console.log('here')
+    var self=this;
+    var pb=self.sourceBlock_
+    var args = MotaActionBlocks[pb.type].args
+    var targetf=args[args.indexOf(self.name)-1]
+
+    var getValue=function(){
+        // return self.getValue() // css颜色
+        var f = pb.getFieldValue(targetf);
+        if (/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/.test(f)) {
+            return f;
+        }
+        return "";
+        // 也可以用 pb.getFieldValue(targetf) 获得颜色块左边的域的内容
+    }
+
+    var setValue=function(newValue){ // css颜色
+        self.setValue(newValue)
+        var c=new Colors();
+        c.setColor(newValue)
+        var rgbatext = [c.colors.webSmart.r,c.colors.webSmart.g,c.colors.webSmart.b,c.colors.alpha].join(",");
+        pb.setFieldValue(rgbatext, targetf) // 放在颜色块左边的域中
+    }
+
+    setTimeout(function () {
+        document.getElementById("colorPicker").value = getValue();
+        window.jsColorPicker.confirm = setValue;
+        // 设置位置
+        triggerColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top);
+    });
+
+    return document.createElement('table');
+};
+
+Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
+    Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL, this.widgetDispose_());
+    var div = Blockly.WidgetDiv.DIV;
+    // Create the input.
+    var htmlInput =
+        goog.dom.createDom(goog.dom.TagName.INPUT, 'blocklyHtmlInput');
+    htmlInput.setAttribute('spellcheck', this.spellcheck_);
+    var fontSize =
+        (Blockly.FieldTextInput.FONTSIZE * this.workspace_.scale) + 'pt';
+    div.style.fontSize = fontSize;
+    htmlInput.style.fontSize = fontSize;
+
+    Blockly.FieldTextInput.htmlInput_ = htmlInput;
+    div.appendChild(htmlInput);
+
+    htmlInput.value = htmlInput.defaultValue = this.text_;
+    htmlInput.oldValue_ = null;
+
+    // console.log('here')
+    var self=this;
+    var pb=self.sourceBlock_
+    var args = MotaActionBlocks[pb.type].args
+    var targetf=args[args.indexOf(self.name)+1]
+
+    // ------ colour
+
+    if(targetf && targetf.slice(0,7)==='Colour_'){
+        var inputDom = htmlInput;
+        // var getValue=function(){ // 获得自己的字符串
+        //     return pb.getFieldValue(self.name);
+        // }
+        var setValue = function(newValue){ // 设置右边颜色块的css颜色
+            pb.setFieldValue(newValue, targetf)
+        }
+        // 给inputDom绑事件
+        inputDom.oninput=function(){
+            var value=inputDom.value
+            if(/[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?/.test(value)){
+                setValue('rgba('+value+')')
+            }
+        }
+    }
+    else {
+
+        htmlInput.onkeydown = function (e) {
+            if (e.keyCode == 13 && awesomplete.opened && awesomplete.selected) {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                awesomplete.select();
+                return false;
+            }
+        }
+
+        // --- awesomplete
+        var awesomplete = new Awesomplete(htmlInput, {
+            minChars: pb.type == "idString_3_e" ? 1 : 2,
+            maxItems: 12,
+            autoFirst: true,
+            replace: function (text) {
+                text = text.toString();
+                var value = this.input.value, index = this.input.selectionEnd;
+                if (index == null) index = value.length;
+                if (index < awesomplete.prefix.length) index = awesomplete.prefix.length;
+                var str = value.substring(0, index - awesomplete.prefix.length) + text + value.substring(index);
+                this.input.value = str;
+                pb.setFieldValue(str, self.name);
+                index += text.length - awesomplete.prefix.length;
+                this.input.setSelectionRange(index, index);
+
+                editor_blockly.completeItems = editor_blockly.completeItems.filter(function (x) {
+                    return x != text;
+                });
+                editor_blockly.completeItems.unshift(text);
+            },
+            filter: function () {return true;},
+            item: function (text, input) {
+                var li = document.createElement("li");
+                li.setAttribute("role", "option");
+                li.setAttribute("aria-selected", "false");
+                input = awesomplete.prefix.trim();
+                if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
+                li.innerHTML = text;
+                return li;
+            },
+            sort: function (a, b) {
+                a = a.toString(); b = b.toString();
+                var ia = editor_blockly.completeItems.indexOf(a), ib = editor_blockly.completeItems.indexOf(b);
+                if (ia < 0) ia = editor_blockly.completeItems.length;
+                if (ib < 0) ib = editor_blockly.completeItems.length;
+                if (ia != ib) return ia - ib;
+                if (a.length != b.length) return a.length - b.length;
+                return a < b ? -1 : 1;
+            }
+        });
+
+        htmlInput.oninput = function () {
+            var value = htmlInput.value, index = htmlInput.selectionEnd;
+            if (index == null) index = value.length;
+            value = value.substring(0, index);
+            // cal prefix
+            awesomplete.prefix = "";
+            for (var i = index - 1; i>=0; i--) {
+                var c = value.charAt(i);
+                if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
+                    awesomplete.prefix = value.substring(i+1);
+                    break;
+                }
+            }
+
+            var list = editor_blockly.getAutoCompletions(value);
+            if (pb.type == "idString_3_e") {
+                list = list.concat(Object.keys(core.material.enemys).filter(function (one) {
+                    return one != value && one.startsWith(value);
+                }));
+                list.sort();
+            }
+
+            awesomplete.list = list;
+            awesomplete.ul.style.marginLeft = getCaretCoordinates(htmlInput, htmlInput.selectionStart).left -
+                htmlInput.scrollLeft - 20 + "px";
+            awesomplete.evaluate();
+        }
+
+        awesomplete.container.style.width = "100%";
+
+        window.awesomplete = awesomplete;
+    }
+
+    if (!quietInput) {
+        htmlInput.focus();
+        htmlInput.select();
+    }
+    this.validate_();
+    this.resizeEditor_();
+
+    this.bindEvents_(htmlInput);
+};

@@ -19,7 +19,16 @@ enemys.prototype._init = function () {
 }
 
 enemys.prototype.getEnemys = function () {
-    return core.clone(this.enemys);
+    var enemys = core.clone(this.enemys);
+    var enemyInfo = core.getFlag('enemyInfo');
+    if (enemyInfo) {
+        for (var id in enemyInfo) {
+            for (var name in enemyInfo[id]) {
+                enemys[id][name] = core.clone(enemyInfo[id][name]);
+            }
+        }
+    }
+    return enemys;
 }
 
 ////// 判断是否含有某特殊属性 //////
@@ -241,6 +250,11 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
 
 enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, floorId) {
     var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, turn = info.turn;
+    // ------ 超大回合数强制使用二分算临界
+    // 以避免1攻10e回合，2攻5e回合导致下述循环卡死问题
+    if (turn >= 1e6) { // 100w回合以上强制二分计算临界
+        return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
+    }
     var list = [], pre = null;
     for (var t = turn - 1; t >= 1; t--) {
         var nextAtk = Math.ceil(mon_hp / t) + mon_def;
@@ -293,10 +307,8 @@ enemys.prototype._calDamage = function (enemy, hero, x, y, floorId) {
     return info.damage;
 }
 
-////// 更新怪物数据 //////
-enemys.prototype.updateEnemys = function () {
-    return this.enemydata.updateEnemys();
-}
+////// 更新怪物数据。已经不再使用，这里留空进行兼容。 //////
+enemys.prototype.updateEnemys = function () {}
 
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
@@ -360,6 +372,14 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
 }
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
+    if (floorId == null) floorId = core.status.floorId;
+    if (floorId instanceof Array) {
+        for (var i = 0; i < floorId.length; ++i) {
+            if (core.hasEnemyLeft(enemyId, floorId[i]))
+                return true;
+        }
+        return false;
+    }
     return core.getCurrentEnemys(floorId).filter(function (enemy) {
         return enemyId == null || enemy.id == enemyId;
     }).length > 0;

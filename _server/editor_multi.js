@@ -81,6 +81,12 @@ editor_multi = function () {
         _format();
     }
 
+    editor_multi.hasError = function () {
+        if (!editor_multi.lintAutocomplete) return false;
+        return JSHINT.errors.filter(function (e) {
+            return e.code.startsWith("E")
+        }).length > 0;
+    }
 
     editor_multi.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
@@ -94,6 +100,8 @@ editor_multi = function () {
         editor_multi.lintAutocomplete = false;
         if (args.lint === true) editor_multi.lintAutocomplete = true;
         if (field.indexOf('Effect') !== -1) editor_multi.lintAutocomplete = true;
+        if ((!input.value || input.value == 'null') && editor_mode.mode == 'plugins')
+            input.value = '"function () {\\n\\t// 在此增加新插件\\n\\t\\n}"';
         if (input.value.slice(0, 1) === '"' || args.string) {
             editor_multi.isString = true;
             codeEditor.setValue(JSON.parse(input.value) || '');
@@ -113,6 +121,7 @@ editor_multi = function () {
             }
             codeEditor.setValue(tstr || '');
         }
+        document.getElementById('showPlugins').style.display = editor_mode.mode == 'plugins' ? 'block': 'none';
         editor_multi.show();
         return true;
     }
@@ -124,6 +133,11 @@ editor_multi = function () {
     }
 
     editor_multi.confirm = function () {
+        if (editor_multi.hasError()) {
+            alert("当前好像存在严重的语法错误，请处理后再保存。\n严重的语法错误可能会导致整个编辑器的崩溃。");
+            return;
+        }
+
         if (!editor_multi.id) {
             editor_multi.id = '';
             return;
@@ -171,6 +185,11 @@ editor_multi = function () {
         // ----- 自动格式化
         _format();
         setvalue(codeEditor.getValue() || '');
+    }
+
+    editor_multi.showPlugins = function () {
+        if (editor.isMobile && !confirm("你确定要跳转到云端插件列表吗？")) return;
+        window.open("https://h5mota.com/plugins/", "_blank");
     }
 
     var multiLineArgs = [null, null, null];

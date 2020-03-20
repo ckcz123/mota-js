@@ -16,17 +16,15 @@ function core() {
         'ground': null,
         'items': {},
         'enemys': {},
-        'icons': {}
+        'icons': {},
     }
     this.timeout = {
-        'tipTimeout': null,
         'turnHeroTimeout': null,
         'onDownTimeout': null,
         'sleepTimeout': null,
     }
     this.interval = {
         'heroMoveInterval': null,
-        "tipAnimate": null,
         'onDownInterval': null,
     }
     this.animateFrame = {
@@ -47,6 +45,12 @@ function core() {
             'data': null,
             'fog': null,
         },
+        "tips": {
+            'time': 0,
+            'offset': 0,
+            'list': [],
+            'lastSize': 0,
+        },
         "asyncId": {}
     }
     this.musicStatus = {
@@ -57,7 +61,8 @@ function core() {
         'lastBgm': null, // 上次播放的bgm
         'gainNode': null,
         'playingSounds': {}, // 正在播放的SE
-        'volume': 1.0, // 音量
+        'userVolume': 1.0, // 用户音量
+        'designVolume': 1.0, //设计音量
         'cachedBgms': [], // 缓存BGM内容
         'cachedBgmCount': 4, // 缓存的bgm数量
     }
@@ -72,7 +77,6 @@ function core() {
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
         'useLocalForage': true,
-        'extendKeyboard': false,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -102,6 +106,8 @@ function core() {
             "data": null,
             "time": 0,
             "updated": false,
+            "storage": true, // 是否把自动存档写入文件a
+            "max": 10, // 自动存档最大回退数
         },
         "favorite": [],
         "favoriteName": {}
@@ -112,6 +118,7 @@ function core() {
 
         // 勇士属性
         'hero': {},
+        'heroCenter': {'px': null, 'py': null},
 
         // 当前地图
         'floorId': null,
@@ -171,6 +178,7 @@ function core() {
             'ui': null,
             'interval': null,
         },
+        'autoEvents': [],
         'textAttribute': {
             'position': "center",
             "offset": 0,
@@ -222,7 +230,9 @@ core.prototype.init = function (coreData, callback) {
     this._initPlugins();
 
     core.loader._load(function () {
-        core._afterLoadResources(callback);
+        core.extensions._load(function () {
+            core._afterLoadResources(callback);
+        });
     });
 }
 
@@ -232,11 +242,39 @@ core.prototype._init_flags = function () {
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
 
-    core.dom.versionLabel.innerHTML = core.firstData.version;
-    core.dom.logoLabel.innerHTML = core.firstData.title;
+    core.dom.versionLabel.innerText = core.firstData.version;
+    core.dom.logoLabel.innerText = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";
-    document.getElementById("startLogo").innerHTML = core.firstData.title;
+    document.getElementById("startLogo").innerText = core.firstData.title;
     (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
+    // 初始化自动事件
+    for (var floorId in core.floors) {
+        var autoEvents = core.floors[floorId].autoEvent || {};
+        for (var loc in autoEvents) {
+            var locs = loc.split(","), x = parseInt(locs[0]), y = parseInt(locs[1]);
+            for (var index in autoEvents[loc]) {
+                var autoEvent = core.clone(autoEvents[loc][index]);
+                if (autoEvent && autoEvent.condition && autoEvent.data) {
+                    autoEvent.floorId = floorId;
+                    autoEvent.x = x;
+                    autoEvent.y = y;
+                    autoEvent.index = index;
+                    autoEvent.symbol = floorId + "@" + x + "@" + y + "@" + index;
+                    autoEvent.condition = core.replaceValue(autoEvent.condition);
+                    autoEvent.data = core.precompile(autoEvent.data);
+                    core.initStatus.autoEvents.push(autoEvent);
+                }
+            }
+        }
+    }
+    core.initStatus.autoEvents.sort(function (e1, e2) {
+        if (e1.priority != e2.priority) return e2.priority - e1.priority;
+        if (e1.floorId != e2.floorId) return core.floorIds.indexOf(e1.floorId) - core.floorIds.indexOf(e2.floorId);
+        if (e1.x != e2.x) return e1.x - e2.x;
+        if (e1.y != e2.y) return e1.y - e2.y;
+        return e1.index - e2.index;
+    })
+
     core.maps._setFloorSize();
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
@@ -252,6 +290,8 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    // 行走速度
+    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed);
 }
 
 core.prototype._init_platform = function () {
@@ -268,6 +308,8 @@ core.prototype._init_platform = function () {
     }
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
+    //新增 userVolume 默认值1.0
+    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 1.0);
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
         if (navigator.userAgent.indexOf(t) >= 0) {
             if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;
@@ -276,14 +318,13 @@ core.prototype._init_platform = function () {
         }
     });
     core.platform.string = core.platform.isPC ? "PC" : core.platform.isAndroid ? "Android" : core.platform.isIOS ? "iOS" : "";
-    core.platform.supportCopy = document.queryCommandSupported || document.queryCommandSupported("copy");
+    core.platform.supportCopy = document.queryCommandSupported && document.queryCommandSupported("copy");
     var chrome = /Chrome\/(\d+)\./i.exec(navigator.userAgent);
     if (chrome && parseInt(chrome[1]) >= 50) core.platform.isChrome = true;
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
     this._init_checkLocalForage();
-    core.platform.extendKeyboard = core.getLocalStorage("extendKeyboard", false);
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {

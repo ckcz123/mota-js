@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
     <link href="_server/css/editor_mobile.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
+    <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
     <link href="_server/css/editor_mode_mobile.css" rel="stylesheet">
 </head>
 <body>
@@ -75,6 +76,8 @@
                 <select id="selectAppend"></select>
                 <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
                 <input id="appendConfirm" type="button" value="追加"/>
+                <input id="quickAppendConfirm" type="button" value="快速追加"/>
+                <span style="font-size: 13px">自动注册</span><input id="appendRegister" type="checkbox" checked/>
             </p>
             <p>
                 色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
@@ -100,7 +103,7 @@
         </div>
     </div>
     <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><!-- loc -->
-        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
+        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.uifunctions.addAutoEvent()">添加自动事件页</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
         </h3>
         <div class="leftTabContent">
             <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce' style="margin-left: 15px">0,0</p>
@@ -121,13 +124,6 @@
         <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('enemyitem')">配置表格</button>
         </h3>
         <div class="leftTabContent">
-            <div id='newIdIdnum'><!-- id and idnum -->
-                <input placeholder="新id（唯一标识符）"/>
-                <input placeholder="新idnum（10000以内数字）"/>
-                <button>save</button>
-                <br/>
-                <button style="margin-top: 10px">自动注册</button>
-            </div>
             <div id="enemyItemTable"><!-- enemy and item -->
                 <div class='etable'>
                     <table>
@@ -140,6 +136,21 @@
                         </tbody>
                     </table>
                 </div>
+                <div style="margin-top: -10px; margin-bottom: 10px">
+                    <button id="copyEnemyItem">复制属性</button>
+                    <button id="pasteEnemyItem">粘贴属性</button>
+                </div>
+            </div>
+            <div id='newIdIdnum'><!-- id and idnum -->
+                <input placeholder="新id（唯一标识符）"/>
+                <input placeholder="新idnum（10000以内数字）"/>
+                <button>save</button>
+                <br/>
+                <button style="margin-top: 10px">自动注册</button>
+            </div>
+            <div id='changeId'><!-- id and idnum -->
+                <input placeholder="修改图块id为"/>
+                <button>save</button>
             </div>
         </div>
     </div>
@@ -157,6 +168,10 @@
                     </tr>
                     </tbody>
                 </table>
+            </div>
+            <div id='changeFloorId'><!-- id and idnum -->
+                <input placeholder="修改floorId为"/>
+                <button>save</button>
             </div>
         </div>
     </div>
@@ -186,6 +201,7 @@
                 -->
                 <select id="entryType" disabled="disabled" style="display: none">
                     <option value="event">event</option>
+                    <option value="autoEvent">autoEvent</option>
                     <option value="changeFloor">changeFloor</option>
                     <option value="level">level</option>
                     <option value="shop">shop</option>
@@ -195,6 +211,7 @@
                     <option value="firstArrive">firstArrive</option>
                     <option value="eachArrive">eachArrive</option>
                     <option value="commonEvent">commonEvent</option>
+                    <option value="item">item</option>
                 </select>
                 <button onclick="editor_blockly.confirm()">确认</button>
                 <button onclick="editor_blockly.parse()">解析</button>
@@ -208,6 +225,10 @@
                     <input class="color" id="colorPicker" value="255,215,0,1"/>
                     <button onclick="confirmColor()">确定</button>
                 </div>
+                <button class="cpPanel" onclick="editor_blockly.selectPoint()">地图选点</button>
+                <button class="cpPanel" onclick="editor.uievent.searchUsedFlags()" style="margin-left:5px">变量出现位置搜索</button>
+                <input type="checkbox" class="cpPanel" id="blocklyReplace" onchange="editor_blockly.triggerReplace()" style="margin-left: 10px" />
+                <span class="cpPanel" style="margin-left: -4px; font-size: 13px">开启中文名替换</span>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -226,6 +247,7 @@
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: bottom;margin-left:6px"/>
         <span style="vertical-align: bottom; margin-left: -3px">语法检查</span>
+        <button onclick="editor_multi.showPlugins()" style="display: none; margin-top: 3px" id="showPlugins">显示云端插件列表</button>
         <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
@@ -288,9 +310,15 @@
             <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
             <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
-            <canvas class='egameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+            <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
         </div>
         
+    </div>
+    <div id="mid2" style="display: none">
+        <p style="margin: 10px">最近使用的图块列表：</p>
+        <div class="map" style="height: 160px; margin-top: 25px" id="lastUsedDiv">
+            <canvas class='gameCanvas' id='lastUsed' width='416' height='160'></canvas>
+        </div>
     </div>
     <div id="right" style="z-index:-1;opacity: 0;">
         <div id="iconLib">
@@ -299,6 +327,7 @@
                 <div id='dataSelection' style="display:none"></div>
             </div>
         </div>
+        <button id="iconExpandBtn"></button>
     </div>
     <div id="down">
         <div style="margin:0.5rem">
@@ -325,7 +354,7 @@
                 </span>
                 <div id="menuDiv">
                     <div id="midMenu" style="display:none">
-                        <div id='addFloorEvent' class="menuitem" style="display:none"><div class="menuitem-content">添加上下楼事件</div></div>
+                        <div id='extraEvent' class='menuitem' style="display:none"><div class="menuitem-content"></div></div>
                         <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
                         <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
                         <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
@@ -345,6 +374,7 @@
                     <option value="commonevent">公共事件</option>
                     <option value="plugins">插件编写</option>
                 </select>
+                <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定模式</span>
                 <select id="brushMod" style="clear:right">
                     <option value="line">画线</option>
                     <option value="rectangle">画矩形</option>
@@ -504,14 +534,46 @@
         <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
         <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
+        <div id="next"></div>
     </div>
 </div>
-<div id='inputBackground' style='display: none'>
+<div id='inputDiv' style='display: none'>
     <div id='inputDialog'>
         <p id="inputMessage">请输入文字...</p>
         <input id='inputBox' type="text"/>
         <button id='inputYes'>确定</button>
         <button id='inputNo'>取消</button>
+    </div>
+</div>
+<!-- UI预览 & 地图选点 -->
+<div id='uieventDiv' style='display: none'>
+    <div id='uieventDialog'>
+        <div id="uieventHead">
+            <span id="uieventTitle"></span>
+            <select id="uieventBackground" style="margin-left: 20px">
+                <option value="thumbnail" selected>缩略图</option>
+                <option value="#000000">黑色</option>
+                <option value="#FFFFFF">白色</option>
+            </select>
+            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
+            <button id="uieventNo">关闭</button>
+            <button id="uieventYes">确定</button>
+        </div>
+        <hr style="clear: both; margin-top: 0"/>
+        <div id='uieventBody'>
+            <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
+            <div id="selectPointBox"></div>
+            <div id="uieventUsedFlagList" style="display: none"></div>
+        </div>
+        <div id="selectPoint">
+            <select id="selectPointFloor"></select>
+            <div id="selectPointButtons">
+                <input type="button" value="←"/>
+                <input type="button" value="↑"/>
+                <input type="button" value="↓"/>
+                <input type="button" value="→"/>
+            </div>
+        </div>
     </div>
 </div>
 <!-- */</script> -->
@@ -522,23 +584,29 @@
 <!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
 <!-- <script src='_server/vendor/polyfill.min.js'></script> -->
 <script src='_server/fs.js'></script>
+<script src='_server/editor_config.js'></script>
 <script src='_server/editor_util.js'></script>
-<script src='_server/editor_file.js'></script>
 <script src='_server/editor_game.js'></script>
+<script src='_server/editor_file.js'></script>
+<script src='_server/editor_file_unsorted.js'></script>
 <script src='_server/editor_table.js'></script>
 <script src='_server/editor_mode.js'></script>
-<script src='_server/editor_unsorted_1.js'></script>
-<script src='_server/editor_unsorted_2.js'></script>
-<script src='_server/editor_unsorted_3.js'></script>
+<script src='_server/editor_ui.js'></script>
+<script src='_server/editor_mappanel.js'></script>
+<script src='_server/editor_datapanel.js'></script>
+<script src='_server/editor_materialpanel.js'></script>
+<script src='_server/editor_listen.js'></script>
+<script src='_server/editor_legacy.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
+<script src='libs/thirdparty/zip.min.js'></script>
 <script id='mainScript' src='main.js'></script>
 <script src='_server/editor.js'></script>
 <script>
     editor.isMobile=true;
     editor.init(function () {
         editor.listen();
-        editor.mode.listen();
+        editor.mode_listen();
         editor.mobile_listen();
     });
     //main.listen();
@@ -558,9 +626,11 @@
 <script src="_server/CodeMirror/jshint.min.js"></script>
 <script src="_server/CodeMirror/beautify.min.js"></script>
 <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
-<!-- colorPicker -->
-<script type="text/javascript" src="_server/colorPicker/color.all.min.js"></script>
-<script type="text/javascript" src="_server/colorPicker/jsColor.js"></script>
+<!-- thirdparty -->
+<script src="_server/thirdparty/color.all.min.js"></script>
+<script src="_server/thirdparty/awesomplete.min.js"></script>
+<script src="_server/thirdparty/caret-position.js"></script>
+<script src="_server/thirdparty/jsColor.js"></script>
 
 </body>
 </html>

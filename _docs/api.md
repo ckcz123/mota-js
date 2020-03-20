@@ -1,6 +1,6 @@
 # 附录：API列表
 
-?> 目前版本**v2.6**，上次更新时间：* {docsify-updated} *
+?> 目前版本**v2.6.6**，上次更新时间：* {docsify-updated} *
 
 这里将列出所有被转发到core的API，没有被转发的函数此处不会列出，请自行在代码中查看。
 
@@ -57,7 +57,6 @@ core.platform.isPC    （是否是电脑端）
 core.platform.isAndroid    （是否是安卓端）
 core.platform.isIOS    （是否是iOS端）
 core.platform.useLocalForage    （是否开启了新版存档）
-core.platform.extendKeyBoard    （是否开启了拓展键盘）
 
 
 core.domStyle
@@ -339,7 +338,7 @@ core.setHeroMoveInterval(callback)
 
 
 core.moveOneStep(x, y)
-每走完一步后执行的操作，被转发到了脚本编辑中。
+每走完一步后执行的操作，被转发到了脚本编辑中，执行脚本编辑moveOneStep中的内容。
 
 
 core.moveAction(callback)
@@ -350,6 +349,7 @@ core.moveAction(callback)
 core.moveHero(direction, callback)
 令勇士朝一个方向行走。如果设置了callback，则只会行走一步，并执行回调。
 否则，将一直朝该方向行走，直到core.status.heroStop为true为止。
+direction可为"up","down","right","left"，分别对应上，下，右，左。
 
 
 core.isMoving()
@@ -362,10 +362,11 @@ core.waitHeroToStop(callback)
 
 core.turnHero(direction)
 转向。如果设置了direction则会转到该方向，否则会右转。该函数会自动计入录像。
+direction可为"up","down","right","left"，分别对应上，下，右，左。
 
 
 core.moveDirectly(destX, destY)
-尝试瞬间移动到某点，被转发到了脚本编辑中。
+尝试瞬间移动到某点，被转发到了脚本编辑中，执行脚本编辑中的内容。
 此函数返回非负值代表成功进行瞬移，返回值是省略的步数；如果返回-1则代表没有成功瞬移。
 
 
@@ -500,12 +501,12 @@ core.syncSave(type) / core.syncLoad()
 
 
 core.saveData()
-获得要存档的内容，实际转发到了脚本编辑中。
+获得要存档的内容，实际转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.loadData(data, callback)
 实际执行一次读档行为，data为读取到的数据，callback为执行完毕的回调。
-实际转发到了脚本编辑中。
+实际转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getSave(index, callback)
@@ -535,19 +536,23 @@ core.removeSave(index)
 // ------ 属性、状态、位置、变量等 ------ //
 
 core.setStatus(name, value)
-设置勇士当前的某个属性。
+设置勇士当前的某个属性，name可为"atk","def","hp"等。
+如core.setStatus("atk", 100)则为设置勇士攻击为100。
 
 
 core.addStatus(name, value)
-加减勇士当前的某个属性。等价于 core.setStatus(name, core.getStatus(name) + value)
+加减勇士当前的某个属性，name可为"atk","def","hp"等。
+如core.addStatus("atk", 100)则为增加勇士攻击100点。
+等价于 core.setStatus(name, core.getStatus(name) + value)。
 
 
 core.getStatus(name)
-获得勇士的某个原始属性值。
+获得勇士的某个原始属性值，该值不受百分比增幅影响。
+譬如你有一件道具加10%的攻击，你可以使用该函数获得你的攻击被增幅前的数值
 
 
 core.getStatusOrDefault(status, name)
-尝试从status中获得某个原始属性值；如果status为null或不存在对应属性值则从勇士属性中获取。
+尝试从status中获得某个原始属性值，该值不受百分比增幅影响；如果status为null或不存在对应属性值则从勇士属性中获取。
 此项在伤害计算函数中使用较多，例如传递新的攻击和防御来计算临界和1防减伤。
 
 
@@ -573,12 +578,14 @@ core.getBuff(name)
 
 
 core.setHeroLoc(name, value, noGather)
-设置勇士位置属性。name只能为'x', 'y'和'direction'之一。
+设置勇士位置属性。name只能为'x'（勇士x坐标）, 'y'（勇士y坐标）和'direction'（勇士朝向）之一。
 如果noGather为true，则不会聚集所有的跟随者。
+譬如core.setHeroLoc("x", 1, true)则为设置勇士x坐标为1，不聚集所有跟随者。
 
 
 core.getHeroLoc(name)
 获得勇士的某个位置属性。如果name为null则直接返回core.status.hero.loc。
+譬如core.getHeroLoc("x")则返回勇士当前x坐标
 
 
 core.getLvName(lv)
@@ -587,19 +594,26 @@ core.getLvName(lv)
 
 core.setFlag(name, value)
 设置某个自定义变量或flag。如果value为null则会调用core.removeFlag进行删除。
+这里的变量与事件中使用的变量等价
+譬如core.setFlag("xxx",1)则为设置变量xxx为1。
 
 
 core.addFlag(name, value)
 加减某个自定义的变量或flag。等价于 core.setFlag(name, core.getFlag(name, 0) + value)
+这里的变量与事件中使用的变量等价
+譬如core.addFlag("xxx",1)则为增加变量xxx1
 
 
 core.getFlag(name, defaultValue)
-获得某个自定义的变量或flag。如果该flag不存在（从未赋值过），则返回defaultValue值。
+获得某个自定义的变量或flag。如果该flag不存在（从未赋值过），则返回defaultValue的值。
+这里的变量与事件中使用的变量等价
+譬如core.getFlag("xxx",1)则为获得变量xxx的值，如变量xxx不存在则返回1
 
 
 core.hasFlag(name)
 判定是否拥有某个自定义变量或flag。等价于 !!core.getFlag(name, 0)
-
+这里的变量与事件中使用的变量等价
+譬如core.hasFlag("xxx",1)则为判断变量xxx是否存在
 
 core.removeFlag(name)
 删除一个自定义变量或flag。
@@ -620,6 +634,8 @@ core.setWeather(type, level)
 
 core.setCurtain(color, time, callback)
 更改画面色调。color为更改到的色调，是个三元或四元组；time为渐变时间，0代表立刻切换。
+譬如core.setCurtain([255,255,255,1], 0)即为无回调无等待更改画面色调为白色
+
 
 
 core.screenFlash(color, time, times, callback)
@@ -655,9 +671,9 @@ core.clearStatusBar()
 清空状态栏的数据。
 
 
-core.updateStatusBar()
+core.updateStatusBar(doNotCheckAutoEvents)
 更新状态栏，被转发到了脚本编辑中。此函数还会根据是否在回放来设置工具栏的图标。
-
+如果doNotCheckAutoEvents为true则此时不检查自动事件。
 
 core.showStatusBar() / core.hideStatusBar(showToolbox)
 显示和隐藏状态栏。
@@ -708,7 +724,7 @@ special为要测试的内容，允许接收如下类型参数：
 
 
 core.getSpecials()
-获得所有特殊属性的列表。实际上被转发到了脚本编辑中。
+获得所有特殊属性的列表。实际上被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getSpecialText(enemy)
@@ -748,7 +764,7 @@ number为要计算的临界值数量，不填默认为1。
 
 
 core.getDefDamage(enemy, k, x, y, floorId)
-获得某个怪物的k防减伤值。k可不填默认为1。
+获得某个怪物的k防减伤值。k可不填默认为1，x,y,floorId为当前xy坐标和楼层。
 
 
 core.getEnemyInfo(enemy, hero, x, y, floorId)
@@ -765,10 +781,6 @@ hero可为null或一个对象，具体将使用core.getRealStatusOrDefault(hero,
 从V2.5.5开始，该函数也允许直接返回一个数字，代表战斗伤害值，此时回合数将视为0。
 
 
-core.updateEnemys()
-更新怪物数据。该函数实际被转发到了脚本编辑中。详见文档-事件-更新怪物数据。
-
-
 core.getCurrentEnemys(floorId)
 获得某个楼层不重复的怪物信息，floorId不填默认为当前楼层。该函数会被怪物手册所调用。
 该函数将返回一个列表，每一项都是一个不同的怪物，按照伤害值从小到大排序。
@@ -776,7 +788,8 @@ core.getCurrentEnemys(floorId)
 
 
 core.hasEnemyLeft(enemyId, floorId)
-检查某个楼层是否还有剩余的（指定）怪物。floorId为楼层ID，可忽略表示当前楼层。
+检查某个楼层是否还有剩余的（指定）怪物。
+floorId为楼层ID，可忽略表示当前楼层。也可以填数组如["MT0","MT1"]同时检测多个楼层。
 enemyId如果不填或null则检查是否剩余任何怪物，否则只检查是否剩余指定的某类怪物。
 ```
 
@@ -806,16 +819,16 @@ seed为开始时要设置的的种子，route为要开始播放的录像，callb
 
 core.setInitData()
 根据难度分歧来初始化难度，包括设置flag:hard，设置初始属性等。
-该函数实际被转发到了脚本编辑中。
+该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.win(reason, norank)
 游戏胜利，reason为结局名，norank如果为真则该结局不计入榜单。
-该函数实际被转发到了脚本编辑中。
+该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.lose(reason)
-游戏失败，reason为结局名。该函数实际被转发到了脚本编辑中。
+游戏失败，reason为结局名。该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.gameOver(ending, fromReplay, norank)
@@ -855,7 +868,7 @@ id为怪物的ID，x和y为怪物坐标，force如果为真将强制战斗，cal
 
 
 core.beforeBattle(enemyId, x, y)
-战前事件。实际被转发到了脚本编辑中，可以在这里加上一些战前特效。
+战前事件。实际被转发到了脚本编辑中，执行脚本编辑中的内容，可以用于加上一些战前特效。
 此函数在“检测能否战斗和自动存档”【之后】执行。
 如果需要更早的战前事件，请在插件中覆重写 core.events.doSystemEvent 函数。
 此函数返回true则将继续本次战斗，返回false将不再战斗。
@@ -863,7 +876,7 @@ core.beforeBattle(enemyId, x, y)
 
 core.afterBattle(enemyId, x, y, callback)
 战后事件，将执行扣血、加金币经验、特殊属性处理、战后事件处理等操作。
-实际被转发到了脚本编辑中。
+实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.openDoor(x, y, needKey, callback)
@@ -872,16 +885,17 @@ core.openDoor(x, y, needKey, callback)
 
 
 core.afterOpenDoor(doorId, x, y, callback)
-开完一个门后执行的事件，实际被转发到了脚本编辑中。
+开完一个门后执行的事件，实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getItem(id, num, x, y, callback)
 获得若干个道具。itemId为道具ID，itemNum为获得的道具个数，不填默认为1。
-x和y为道具点的坐标，如果设置则会擦除地图上的该点。
+x和y为道具点的坐标，如果设置则会擦除地图上的该点，也可不填。
+譬如core.getItem("yellowKey",2)会直接获得两把黄钥匙。
 
 
 core.afterGetItem(id, x, y, callback)
-获得一个道具后执行的事件，实际被转发到了脚本编辑中。
+获得一个道具后执行的事件，实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.getNextItem(noRoute)
@@ -918,7 +932,7 @@ core.pushBox(data)
 
 
 core.afterPushBox()
-推箱子之后触发的事件，实际被转发到了脚本编辑中。
+推箱子之后触发的事件，实际被转发到了脚本编辑中，执行脚本编辑中的内容。
 
 
 core.changeLight(id, x, y)
@@ -951,10 +965,11 @@ core.startEvents(list, x, y, callback)
 此函数将调用core.setEvents，然后停止勇士，再执行core.doAction()。
 
 
-core.doAction()
+core.doAction(keepUI)
 执行下一个自定义事件。
 此函数将检测事件列表是否全部执行完毕，如果是则执行回调函数。
 否则，将从事件列表中弹出下一个事件，并调用core.doEvent进行执行。
+如果keepUI为true，则不会清掉UI层和selector，适合于自己用脚本的绘制。
 
 
 core.insertAction(action, x, y, callback, addToLast)
@@ -971,6 +986,15 @@ core.getCommonEvent(name)
 
 core.recoverEvents(data)
 恢复事件现场。一般用于呼出怪物手册、呼出存读档页面等时，恢复事件执行流。
+
+
+core.checkAutoEvents()
+检测自动事件并执行。
+
+
+core.precompile(events)
+尝试预编译一段事件。
+
 
 // ------ 点击状态栏图标时执行的一些操作 ------ //
 
@@ -1019,15 +1043,21 @@ core.follow(name) / core.unfollow(name)
 
 core.setValue(name, value, prefix) / core.addValue(name, value, prefix)
 设置/增减某个数值。name可以是status:xxx，item:xxx或flag:xxx。
-value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用。
+value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用，脚本中一般忽略。
 
 
 core.doEffect(effect, need, times)
 执行一个effect操作。该函数目前仅被全局商店的status:xxx+=yyy所调用。
 
 
+core.setEnemy(id, name, value, prefix)
+设置一个怪物属性。id为怪物的ID，name为要设置的项，比如hp,atk,def等等。
+value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用，脚本中一般忽略。
+
+
 core.setFloorInfo(name, values, floorId, prefix)
-设置某层楼的楼层属性。
+设置某层楼的楼层属性，其中name为该楼层属性对应的条目，values为要设置的值，floorId为楼层id，prefix一般直接忽略。
+譬如core.setFloorInfo("name","4", "MT1")则为设置MT1显示在状态栏中的层数为4
 
 
 core.setGlobalAttribute(name, value)
@@ -1186,8 +1216,9 @@ core.addItem(itemId, itemNum)
 
 
 core.getEquipTypeByName(name)
-根据装备位名称来找到一个空的装备孔，适用于多重装备。
+根据装备位名称来找到一个空的装备孔，适用于多重装备，装备位名称可在全塔属性中设置。
 如果没有一个装备孔是该装备名称，则返回-1。
+譬如：core.getEquipTypeByName("武器")默认返回全塔属性中武器对应的装备孔号0。
 
 
 core.getEquipTypeById(equipId)
@@ -1200,11 +1231,12 @@ core.canEquip(equipId, hint)
 
 
 core.loadEquip(equipId, callback)
-穿上某个装备。
+穿上某个装备，equipId为装备id。
 
 
 core.unloadEquip(equipType, callback)
 脱下某个装备孔的装备。
+譬如core.unloadEquip(0)则为脱下0号装备孔中的装备，默认0号装备孔对应“武器”，1号装备孔对应“盾牌”
 
 
 core.compareEquipment(compareEquipId, beComparedEquipId)
@@ -1219,6 +1251,10 @@ core.quickSaveEquip(index)
 
 core.quickLoadEquip()
 读取当前套装。index为读取的套装编号。
+
+
+core.getEquippedStatus(name)
+获得装备直接增加的属性数据。
 ```
 
 ## loader.js
@@ -1276,7 +1312,7 @@ map为存档信息，如果某项在map中不存在则会从core.floors中读取
 
 
 core.getNumberById(id)
-给定一个图块ID，找到对应的数字。
+给定一个图块ID，找到图块对应的图块编号。
 
 
 core.initBlock(x, y, id, addInfo, eventFloor)
@@ -1303,6 +1339,12 @@ core.saveMap(floorId)
 
 core.loadMap(data, floorId)
 从data中读取楼层数据，并调用core.loadFloor()进行初始化。
+
+
+core.removeMaps(fromId, toId)
+删除某个区域的地图。调用此函数后，这些楼层将不可飞，不可被浏览地图，也不计入存档。
+fromId和toId为要删除的起终点楼层ID；toId也可以不填代表只删除某一层。
+此函数适用于高层塔的砍层，例如每100层一个区域且互相独立，不可再返回的情况。
 
 
 core.resizeMap(floorId)
@@ -1412,7 +1454,7 @@ toDraw为要绘制到的信息（可为null，或为一个画布名），包括�
 // ------ 获得某个点的图块信息 ------ //
 
 core.noPass(x, y, floorId)
-判定某个点是否有noPass的图块。
+判定某个点是否有noPass（不可通行）的图块。
 
 
 core.npcExists(x, y, floorId)
@@ -1420,7 +1462,7 @@ core.npcExists(x, y, floorId)
 
 
 core.terrainExists(x, y, id, floorId)
-判定某个点是否有（指定的）地形存在。
+判定某个点是否有（id对应的）地形存在。
 如果id为null，则只要存在terrains即为真，否则还会判定对应点的ID。
 
 
@@ -1433,7 +1475,7 @@ core.nearStair()
 
 
 core.enemyExists(x, y, id, floorId)
-判定某个点是否有（指定的）怪物存在。
+判定某个点是否有（id对应的）怪物存在。
 如果id为null，则只要存在怪物即为真，否则还会判定对应点的怪物ID。
 请注意，如果需要判定某个楼层是否存在怪物请使用core.hasEnemyLeft()函数。
 
@@ -1490,14 +1532,17 @@ core.removeBlock(x, y, floorId)
 
 
 core.removeBlockById(index, floorId)
+每个楼层的图块存成一个数组，index即为该数组中的索引，每个索引对应该地图中的一个图块
 根据索引从地图的block数组中尽可能删除一个图块。floorId可不填或null表示当前楼层。
 
 
 core.removeBlockByIds(floorId, ids)
+ids为由索引组成的数组，如[0,1]等
 根据索引数组从地图的block数组中尽可能删除一系列图块。floorId可不填或null表示当前楼层。
 
 
 core.canRemoveBlock(block, floorId)
+block为图块信息，可由core.getBlock获取
 判定当前能否完全删除某个图块。floorId可不填或null表示当前楼层。
 如果该点存在自定义事件，或者是重生怪，则不可进行删除。
 
@@ -1541,7 +1586,7 @@ number为要设置到的图块数字，x,y和floorId为目标点坐标和楼层�
 
 core.resetMap(floorId)
 重置某层或若干层的地图和楼层属性。
-floorId可为某个楼层ID，或者一个楼层数组（同时重置若干层）；如果不填则只重置当前楼层。
+floorId可为某个楼层ID，或者一个楼层数组如["MT1","MT2"]（同时重置若干层）；如果不填则只重置当前楼层。
 
 // ------ 移动/跳跃图块，淡入淡出图块 ------ //
 
@@ -1585,6 +1630,12 @@ core.drawAnimate(name, x, y, callback)
 此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
 
 
+core.drawHeroAnimate(name, callback)
+绘制一个跟随勇士行动的动画。name为动画名，callback为绘制完毕的回调函数。
+此函数将播放动画音效，并异步开始绘制该动画。
+此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
+
+
 core.stopAnimate(id, doCallback)
 立刻停止某个动画的播放。id为上面core.drawAnimate的返回值。
 如果doCallback为真，则会执行该动画所对应的回调函数。
@@ -1614,11 +1665,16 @@ core.clearMap(name)
 该函数的name也可以是'all'，若为'all'则为清空所有系统画布。
 
 
-core.fillText(name, text, x, y, style, font)
+core.fillText(name, text, x, y, style, font, maxWidth)
 在某个画布上绘制一段文字。
 text为要绘制的文本，x,y为要绘制的坐标，style可选为绘制的样式，font可选为绘制的字体。（下同）
+style可直接使用"red","white"等或用"rgba(255,255,255,1)"或用"#FFFFFF"等方式来获得字体对应的颜色
+font的格式为"20px Verdana"前者为字体大小，后者为字体
+如果maxWidth不为null，则视为文字最大宽度，如果超过此宽度则会自动放缩文字直到自适应为止。
 请注意textAlign和textBaseline将决定绘制的左右对齐和上下对齐方式。
 具体可详见core.setTextAlign()和core.setTextBaseline()函数。
+譬如：core.fillText("ui", "这是要描绘的文字", 10, 10, "red", "20px Verdana", 100)
+即是在ui图层上，以10,10为起始点，描绘20像素大小，Verdana字体的红色字，长度不超过100像素
 
 
 core.fillBoldText(name, text, x, y, style, font)
@@ -1626,7 +1682,7 @@ core.fillBoldText(name, text, x, y, style, font)
 
 
 core.fillRect(name, x, y, width, height, style)
-绘制一个矩形。style可选为绘制样式。如果设置将调用core.setFillStyle()。（下同）
+绘制一个矩形。width, height为矩形宽高，style可选为绘制样式。如果设置将调用core.setFillStyle()。（下同）
 
 
 core.strokeRect(name, x, y, width, height, style, lineWidth)
@@ -1635,11 +1691,11 @@ lineWidth如果设置将调用core.setLineWidth()。（下同）
 
 
 core.drawLine(name, x1, y1, x2, y2, style, lineWidth)
-绘制一条线。
+绘制一条线，x1y1为起始点像素，x2y2为终止点像素。
 
 
 core.drawArrow(name, x1, y1, x2, y2, style, lineWidth)
-绘制一个箭头。
+绘制一个箭头，x1y1为起始点像素，x2y2为终止点像素。
 
 
 core.setFont(name, font) / core.setLineWidth(name, lineWidth)
@@ -1661,7 +1717,7 @@ core.setFillStyle(name, style) / core.setStrokeStyle(name, style)
 
 
 core.setTextAlign(name, align)
-设置一个画布的文字横向对齐模式，这里的align只能为'left', 'right'和'center'。
+设置一个画布的文字横向对齐模式，这里的align只能为'left', 'right'和'center'，分别对应左对齐，右对齐，居中。
 默认为'left'。
 
 
@@ -1692,6 +1748,13 @@ core.drawImage(name, image, x, y, w, h, x1, y1, w1, h1)
 http://www.w3school.com.cn/html5/canvas_drawimage.asp
 这里的image允许传一个图片，画布。也允许传递图片名，将从你导入的图片中获取图片内容。
 
+
+core.drawIcon(name, id, x, y, w, h)
+在一张画布上绘制一个图标。
+id为注册过的图标ID，也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
+x和y为绘制的左上角坐标；w和h可选为绘制的宽高，如果不填或null则使用该图标的默认宽高。
+
+
 // ------ 具体的某个UI界面的绘制 ------ //
 core.closePanel()
 结束一切事件和UI绘制，关闭UI窗口，返回游戏。
@@ -1702,16 +1765,21 @@ core.clearUI()
 重置UI窗口。此函数将清掉所有的UI帧动画和光标，清空UI画布，并将alpha设为1。
 
 
-core.drawTip(text, id)
+core.drawTip(text, id, clear)
 在左上角以气泡的形式绘制一段提示。
 text为文字内容，仅支持${}的表达式计算，不支持换行和变色。
 id可选，为同时绘制的图标ID，如果不为null则会同时绘制该图标（仅对32x32的素材有效）。
 也可以使用状态栏的图标ID，例如lv, hp, up, save, settings等。
+如果clear为true，则会清空当前所有正在显示的提示。
+
+
+core.clearTip()
+清空当前所有正在显示的提示。
 
 
 core.drawText(content, callback)
 绘制一段文字。contents为一个字符串或一个字符串数组，callback为全部绘制完毕的回调。
-支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t和\b的语法。
 如果当前在事件处理中或录像回放中，则会自动转成core.insertAction处理。
 不建议使用该函数，如有绘制文字的需求请尽量使用core.insertAction()插入剧情文本事件。
 
@@ -1736,7 +1804,8 @@ posInfo如果不为null则是一个含position, px和py的对象，表示一个�
 core.drawTextContent(ctx, content, config)
 根据配置在某个画布上绘制一段文字。此函数会被core.drawTextBox()所调用。
 ctx为画布名或画布本身，如果不设置则会忽略该函数。
-content为要绘制的文字内容，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持支持\t和\b的语法。
+content为要绘制的文字内容，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等）
+    ，但不支持支持\t和\b的语法。
 config为绘制的配置项，目前可以包括如下几项：
  - left, top：在该画布上绘制的左上角像素位置，不设置默认为(0,0)。
    > 该函数绘制时会将textBaseline设置为'top'，因此只需要考虑第一个字的左上角位置。
@@ -1745,13 +1814,14 @@ config为绘制的配置项，目前可以包括如下几项：
  - bold：是否粗体。如果不设置默认为false。
  - align：文字对齐方式，仅在maxWidth设置时有效，默认为'left'。
  - fontSize：字体大小，如果不设置则使用剧情文本设置中的正文字体大小。
- - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3被行距）。
+ - lineHeight：绘制的行距值，如果不设置则使用fontSize*1.3（即1.3倍行距）。
  - time：打字机效果。若不为0，则会逐个字进行绘制，并设置core.status.event.interval定时器。
+ - interval：字符间的间距。值表示绘制每个字符之间间隔的距离，默认为0。
 
 
 core.drawTextBox(content, showAll)
 绘制一个对话框。content为一个字符串或一个字符串数组。
-支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t和\b的语法。
+支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t和\b的语法。
 该函数将使用用户在剧情文本设置中的配置项进行绘制。
 实际执行时，会计算文本框宽度并绘制背景，绘制标题和头像，再调用core.drawTextContent()绘制正文内容。
 showAll可选，如果为true则不会使用打字机效果而全部显示，主要用于打字机效果的点击显示全部。
@@ -1759,7 +1829,7 @@ showAll可选，如果为true则不会使用打字机效果而全部显示，主
 
 core.drawScrollText(content, time, lineHeight, callback)
 绘制一个滚动字幕。content为绘制内容，time为总时间（默认为5000），lineHeight为行距比例（默认为1.4）。
-滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i等），但不支持\t和\b效果。
+滚动字幕将绘制在UI上，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），但不支持\t和\b效果。
 可以通过剧情文本设置中的align控制是否居中绘制，offset控制其距离左边的偏移量。
 
 
@@ -1771,7 +1841,7 @@ core.textImage(content, lineHeight)
 
 core.drawChoices(content, choices)
 绘制一个选项框。
-content可选，为选项上方的提示文字，支持所有的文字效果（如\n，${}，\r，\\i等），也支持\t效果。
+content可选，为选项上方的提示文字，支持所有的文字效果（如\n，${}，\r，\\i，\\c，\\d，\\e等），也支持\t。
 choices必选，为要绘制的选项内容，是一个列表。其中的每一项：
  - 可以是一个字符串，表示选项文字，将使用剧情文本设置中的正文颜色来绘制，仅支持${}表达式计算。
  - 或者是一个包含text, color和icon的对象。
@@ -1838,11 +1908,14 @@ z值为创建的纵向高度（关系到画布之间的覆盖），z值高的将
 
 
 core.ui.relocateCanvas(name, x, y)
-重新定位一个自定义画布。x和y为画布的左上角坐标。
+重新定位一个自定义画布。x和y为画布的左上角坐标，name为画布名。
 
 
-core.ui.resizeCanvas(name, width, height)
-重新设置一个自定义画布的大小。width和height为新设置的宽高。此操作会清空画布。
+core.ui.resizeCanvas(name, width, height, styleOnly)
+重新设置一个自定义画布的大小。width和height为新设置的宽高。
+styleOnly控制是否只修改画布的显示大小（而不修改画布的内部大小）。
+如果styleOnly为true，则只修改其显示大小（即canvas.style.width）；
+否则，则会同时修改画布的显示大小和内部大小并清空画布内容。
 
 
 core.ui.deleteCanvas(name)
@@ -1860,6 +1933,11 @@ utils.js是一个工具函数库，里面有各个样板中使用到的工具函
 ```text
 core.replayText(text, need, times)
 将一段文字中的${}（表达式）进行替换。need和time一般可以直接忽略。
+
+
+core.replaceValue(value)
+对一个表达式中的特殊规则进行替换，如status:xxx等。
+请注意，此项不会对独立开关如switch:A进行替换。
 
 
 core.calValue(value, prefix, need, time)
@@ -1912,6 +1990,17 @@ core.getLocalForage(key, defaultValue, successCallback, errorCallback)
 如果获得成功，则会将core.decompress后的结果传入successCallback回调函数执行。
 errorCallback可选，如果失败，则会将错误信息传入errorCallback()。
 此函数是异步的，只能通过回调函数来获得读取的结果或错误信息。
+
+
+core.setGlobal(key, value)
+设置一个全局存储，适用于global:xxx。
+录像播放时将忽略此函数，否则直接调用core.setLocalStorage。
+
+
+core.getGlobal(key, value)
+获得一个全局存储，适用于global:xxx，支持录像。
+正常游戏时将使用core.getLocalStorage获得具体的数据，并将结果存放到录像中。
+录像播放时会直接从录像中获得对应的数据。
 
 
 core.clone(data, filter, recursion)
@@ -2013,6 +2102,7 @@ core.matchWildcard(pattern, string)
 
 core.encodeBase64(str) / core.decodeBase64(str)
 将字符串进行base64加密或解密。
+可用于解压缩录像数据
 
 
 core.convertBase(str, fromBase, toBase)
@@ -2035,8 +2125,9 @@ num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一
 即先生成一个真随机数，根据该数来推进伪随机的种子，这样就可以放心调用core.rand()啦。
 
 
-core.readFile(success, error)
+core.readFile(success, error, accept)
 读取一个本地文件内容。success和error分别为读取成功或失败的回调函数。
+accept如果设置则控制能选择的文件类型。
 iOS平台暂不支持读取文件操作。
 
 
@@ -2087,7 +2178,16 @@ core.same(a, b)
 如果a和b都是数组，则会递归依次比较数组中的值；如果都是对象亦然。
 
 
-core.utils.http(type, url, formData, success, error, mimeType, responseType)
+core.unzip(blobOrUrl, success, error, convertToText)
+解压一个zip文件。
+blobOrUrl为传入的二进制zip文件Blob格式，或zip文件的地址。
+success为成功后的回调，接收 文件名-文件内容 形式的对象，即
+{"filename1": ..., "filename2": ...}
+error为失败的回调，接收参数message为错误信息。
+convertToText如果为true则会将每个文件内容转成纯文本而不是二进制格式。
+
+
+core.http(type, url, formData, success, error, mimeType, responseType)
 发送一个异步HTTP请求。
 type为'GET'或者'POST'；url为目标地址；formData如果是POST请求则为表单数据。
 success为成功后的回调，error为失败后的回调。

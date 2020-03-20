@@ -1,3 +1,5 @@
+// ------ ColorPicker ------ //
+
 (function (window) {
     window.jsColorPicker = function(selectors, config) {
         var renderCallback = function(colors, mode) {
@@ -254,7 +256,7 @@
 })(this);
 
 // Added
-var colors = jsColorPicker('input.color', {
+jsColorPicker('input.color', {
     customBG: '#222',
     readOnly: false,
     // patch: false,
@@ -303,85 +305,5 @@ function triggerColorPicker(left, top) {
     }
 }
 
-Blockly.FieldColour.prototype.createWidget_ = function() {
-    Blockly.WidgetDiv.hide();
+// ------ AutoCompletion ------
 
-    // console.log('here')
-    var self=this;
-    var pb=self.sourceBlock_
-    var args = MotaActionBlocks[pb.type].args
-    var targetf=args[args.indexOf(self.name)-1]
-
-    var getValue=function(){
-        // return self.getValue() // css颜色
-        return pb.getFieldValue(targetf);
-        // 也可以用 pb.getFieldValue(targetf) 获得颜色块左边的域的内容
-    }
-
-    var setValue=function(newValue){ // css颜色
-        self.setValue(newValue)
-        var c=new Colors();
-        c.setColor(newValue)
-        var rgbatext = [c.colors.webSmart.r,c.colors.webSmart.g,c.colors.webSmart.b,c.colors.alpha].join(",");
-        pb.setFieldValue(rgbatext, targetf) // 放在颜色块左边的域中
-    }
-
-    setTimeout(function () {
-        document.getElementById("colorPicker").value = getValue();
-        window.jsColorPicker.confirm = setValue;
-        // 设置位置
-        triggerColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top);
-    });
-
-    return document.createElement('table');
-};
-
-Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
-  Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL, this.widgetDispose_());
-  var div = Blockly.WidgetDiv.DIV;
-  // Create the input.
-  var htmlInput =
-      goog.dom.createDom(goog.dom.TagName.INPUT, 'blocklyHtmlInput');
-  htmlInput.setAttribute('spellcheck', this.spellcheck_);
-  var fontSize =
-      (Blockly.FieldTextInput.FONTSIZE * this.workspace_.scale) + 'pt';
-  div.style.fontSize = fontSize;
-  htmlInput.style.fontSize = fontSize;
-
-  Blockly.FieldTextInput.htmlInput_ = htmlInput;
-  div.appendChild(htmlInput);
-
-  htmlInput.value = htmlInput.defaultValue = this.text_;
-  htmlInput.oldValue_ = null;
-  this.validate_();
-  this.resizeEditor_();
-  if (!quietInput) {
-    htmlInput.focus();
-    htmlInput.select();
-  }
-
-  // console.log('here')
-  var self=this;
-  var pb=self.sourceBlock_
-  var args = MotaActionBlocks[pb.type].args
-  var targetf=args[args.indexOf(self.name)+1]
-
-  if(targetf && targetf.slice(0,7)==='Colour_'){
-    var inputDom = htmlInput;
-    // var getValue=function(){ // 获得自己的字符串
-    //     return pb.getFieldValue(self.name);
-    // }
-    var setValue = function(newValue){ // 设置右边颜色块的css颜色
-        pb.setFieldValue(newValue, targetf)
-    }
-    // 给inputDom绑事件
-    inputDom.oninput=function(){
-        var value=inputDom.value
-        if(/[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?/.test(value)){
-            setValue('rgba('+value+')')
-        }
-    }
-  }
-
-  this.bindEvents_(htmlInput);
-};

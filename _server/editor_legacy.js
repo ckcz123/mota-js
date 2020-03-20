@@ -1,4 +1,6 @@
-
+// 由于历史遗留原因, 以下变量作为全局变量使用
+// exportMap mapEditArea pout mapEditArea copyMap clearMapButton deleteMap printf printe tip selectBox
+// 除对这些量的功能修改外, 误在此文件中增加新变量或函数
 exportMap = document.getElementById('exportMap')
 exportMap.isExport=false
 exportMap.onclick=function(){
@@ -206,13 +208,21 @@ printf = function (str_, type) {
 printe = function (str_) {
     printf(str_, 'error')
 }
-tip_in_showMode = [
-    '涉及图片的更改需要F5刷新浏览器来生效',
-    '文本域可以通过双击,在文本编辑器或事件编辑器中编辑',
-    '事件编辑器中的显示文本和自定义脚本的方块也可以双击',
-    "画出的地图要点击\"保存地图\"才会写入到文件中",
-];
 tip=document.getElementById('tip')
+tip.showHelp = function(value) {
+    var tips = [
+        '表格的文本域可以双击进行编辑',
+        '双击地图可以选中素材，右键可以弹出菜单',
+        '双击事件编辑器的图块可以进行长文本编辑/脚本编辑/地图选点/UI绘制预览等操作',
+        'ESC或点击空白处可以自动保存当前修改',
+        'H键可以打开操作帮助哦',
+        'tileset贴图模式可以在地图上拖动来一次绘制一个区域；右键额外素材也可以绑定宽高',
+        '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴，Delete删除',
+        'Alt+数字键保存图块，数字键读取保存的图块',
+    ];
+    if (value == null) value = Math.floor(Math.random() * tips.length);
+    printf('tips: ' + tips[value])
+}
 tip._infos= {}
 tip.infos=function(value){
     if(value!=null){
@@ -354,7 +364,6 @@ tip.whichShow=function(value){
     return tip._whichShow
 }
 selectBox=document.getElementById('selectBox')
-dataSelection=document.getElementById('dataSelection')
 selectBox._isSelected=false
 selectBox.isSelected=function(value){
     if(value!=null){
@@ -362,8 +371,9 @@ selectBox.isSelected=function(value){
         tip.isSelectedBlock(value);
         tip.whichShow(0);
         clearTimeout(tip.timer);
-        dataSelection.style.display=value?'':'none'
+        editor.dom.dataSelection.style.display=value?'':'none'
     }
     return selectBox._isSelected
 }
 
+// 修改此文件前先看文件开头的说明

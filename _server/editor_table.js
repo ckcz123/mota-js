@@ -12,34 +12,41 @@ editor_table_wrapper = function (editor) {
             values.map(function (v) {
                 return editor.table.option(v)
             }).join('')
-        return `<select>\n${content}</select>\n`
+        return /* html */`<select>\n${content}</select>\n`
     }
     editor_table.prototype.option = function (value) {
-        return `<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
+        return /* html */`<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
     }
     editor_table.prototype.text = function (value) {
-        return `<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
+        return /* html */`<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
     }
     editor_table.prototype.checkbox = function (value) {
-        return `<input type='checkbox' ${(value ? 'checked ' : '')}/>\n`
+        return /* html */`<input type='checkbox' ${(value ? 'checked ' : '')}/>\n`
     }
     editor_table.prototype.textarea = function (value, indent) {
-        return `<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
+        return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
+    }
+    editor_table.prototype.editGrid = function (showComment) {
+        var html = "";
+        if (showComment) html += "<button onclick='editor.table.onCommentBtnClick(this)'>显示完整注释</button><br/>";
+        html += "<button onclick='editor.table.onEditBtnClick(this)'>编辑表格内容</button>";
+        return html;
     }
 
     editor_table.prototype.title = function () {
-        return `\n<tr><td>条目</td><td>注释</td><td>值</td></tr>\n`
+        return /* html */`\n<tr><td>条目</td><td>注释</td><td>值</td><td>操作</td></tr>\n`
     }
 
     editor_table.prototype.gap = function (field) {
-        return `<tr><td>----</td><td>----</td><td>${field}</td></tr>\n`
+        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
     }
 
     editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr) {
-        return `<tr id="${guid}">
+        return /* html */`<tr id="${guid}">
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortCommentHTMLescape}</td>
         <td><div class="etableInputDiv">${tdstr}</div></td>
+        <td>${editor.table.editGrid(commentHTMLescape != shortCommentHTMLescape)}</td>
         </tr>\n`
     }
 
@@ -145,6 +152,7 @@ editor_table_wrapper = function (editor) {
                     if (key === '_data') continue;
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
+                pvobj[ii] = vobj = args.vobj;
                 // 标记为_hide的属性不展示
                 if (cobj._hide) continue;
                 if (!cobj._leaf) {
@@ -193,7 +201,7 @@ editor_table_wrapper = function (editor) {
         // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
+        // shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.util.HTMLescape(comment);
@@ -285,6 +293,7 @@ editor_table_wrapper = function (editor) {
         var thiseval = null;
         if (input.checked != null) input.value = input.checked;
         try {
+            if (input.value == '') input.value = 'null';
             thiseval = JSON.parse(input.value);
         } catch (ee) {
             printe(field + ' : ' + ee);
@@ -296,6 +305,25 @@ editor_table_wrapper = function (editor) {
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
         }
+    }
+
+    /**
+     * 当"显示完整注释"被按下时
+     */
+    editor_table.prototype.onCommentBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        printf(tr.children[1].getAttribute('title'));
+    }
+
+    /**
+     * 当"编辑表格内容"被按下时
+     */
+    editor_table.prototype.onEditBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        var guid = tr.getAttribute('id');
+        var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
+        if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
+        if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
     }
 
     /**
@@ -337,12 +365,22 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.addfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
 
-        var mode = document.getElementById('editModeSelect').value;
+        var mode = editor.dom.editModeSelect.value;
 
         // 1.输入id
-        var newid = prompt('请输入新项的ID（仅公共事件支持中文ID）');
-        if (newid == null || newid.length == 0) {
-            return;
+        var newid = '2';
+        if (mode == 'loc') {
+            var ae = editor.currentFloorData.autoEvent[editor_mode.pos.x + ',' + editor_mode.pos.y];
+            if (ae != null) {
+                var testid;
+                for (testid = 2; Object.hasOwnProperty.call(ae, testid); testid++); // 从3开始是因为comment中设置了始终显示012
+                newid = testid + '';
+            }
+        } else {
+            newid = prompt('请输入新项的ID（仅公共事件支持中文ID）');
+            if (newid == null || newid.length == 0) {
+                return;
+            }
         }
 
         // 检查commentEvents

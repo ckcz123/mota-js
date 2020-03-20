@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.6"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.6.6"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -74,11 +74,12 @@ function main() {
         'inputMessage': document.getElementById('inputMessage'),
         'inputBox': document.getElementById('inputBox'),
         'inputYes': document.getElementById('inputYes'),
-        'inputNo': document.getElementById('inputNo')
+        'inputNo': document.getElementById('inputNo'),
+        'next': document.getElementById('next')
     };
     this.mode = 'play';
     this.loadList = [
-        'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'core'
+        'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'extensions', 'core'
     ];
     this.pureData = [ 
         'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins'
@@ -188,8 +189,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.6";
-    this.__VERSION_CODE__ = 30;
+    this.__VERSION__ = "2.6.6";
+    this.__VERSION_CODE__ = 99;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -204,6 +205,7 @@ main.prototype.init = function (mode, callback) {
         
         main.dom.startBackground.src="project/images/"+main.startBackground;
         main.dom.startLogo.style=main.startLogoStyle;
+        main.dom.startButtonGroup.style = main.startButtonsStyle;
         main.levelChoose.forEach(function(value){
             var span = document.createElement('span');
             span.setAttribute('class','startButton');
@@ -215,6 +217,7 @@ main.prototype.init = function (mode, callback) {
             })(span,value[1]);
             main.dom.levelChooseButtons.appendChild(span);
         });
+        main.createOnChoiceAnimation();
         
         main.loadJs('libs', main.loadList, function () {
             main.core = core;
@@ -228,7 +231,7 @@ main.prototype.init = function (mode, callback) {
             main.loadFloors(function() {
                 var coreData = {};
                 ["dom", "statusBar", "canvas", "images", "tilesets", "materials",
-                "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
+                    "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
                 main.core.init(coreData, callback);
@@ -264,14 +267,14 @@ main.prototype.loadJs = function (dir, loadList, callback) {
 }
 
 ////// 加载某一个JS文件 //////
-main.prototype.loadMod = function (dir, modName, callback) {
+main.prototype.loadMod = function (dir, modName, callback, onerror) {
     var script = document.createElement('script');
     var name = modName;
     script.src = dir + '/' + modName + (this.useCompress?".min":"") + '.js?v=' + this.version;
-    main.dom.body.appendChild(script);
     script.onload = function () {
         callback(name);
     }
+    main.dom.body.appendChild(script);
 }
 
 ////// 动态加载所有楼层（剧本） //////
@@ -327,6 +330,49 @@ main.prototype.log = function (e) {
     }
 }
 
+main.prototype.createOnChoiceAnimation = function () {
+    var borderColor = main.dom.startButtonGroup.style.caretColor || "rgb(255, 215, 0)";
+    // get rgb value
+    var rgb = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(,\s*\d+\s*)?\)$/.exec(borderColor);
+    if (rgb != null) {
+        var value = rgb[1] + ", " + rgb[2] + ", " + rgb[3];
+        var style = document.createElement("style");
+        style.type = 'text/css';
+        var keyFrames = "onChoice { " +
+            "0% { border-color: rgba("+value+", 0.9); } " +
+            "50% { border-color: rgba("+value+", 0.3); } " +
+            "100% { border-color: rgba("+value+", 0.9); } " +
+            "}";
+        style.innerHTML = "@-webkit-keyframes " + keyFrames + " @keyframes " + keyFrames;
+        document.body.appendChild(style);
+    }
+}
+
+////// 选项 //////
+main.prototype.selectButton = function (index) {
+    var select = function (children) {
+        index = (index + children.length) % children.length;
+        for (var i = 0;i < children.length; ++i) {
+            children[i].classList.remove("onChoiceAnimate");
+        }
+        children[index].classList.add("onChoiceAnimate");
+        if (main.selectedButton == index) {
+            children[index].click();
+        }
+        else {
+            main.selectedButton = index;
+        }
+    }
+
+    if (core.dom.startPanel.style.display != 'block') return;
+
+    if (main.dom.startButtons.style.display == 'block') {
+        select(main.dom.startButtons.children);
+    }
+    else if (main.dom.levelChooseButtons.style.display == 'block') {
+        select(main.dom.levelChooseButtons.children);
+    }
+}
 
 main.prototype.listen = function () {
 
@@ -349,11 +395,48 @@ main.dom.body.onkeydown = function(e) {
 ////// 在界面上放开某按键时 //////
 main.dom.body.onkeyup = function(e) {
     try {
-        if (main.dom.inputDiv.style.display == 'block') return;
-        if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
+        if (main.dom.startPanel.style.display == 'block' &&
+            (main.dom.startButtons.style.display == 'block' || main.dom.levelChooseButtons.style.display == 'block')) {
+            if (e.keyCode == 38 || e.keyCode == 33) // up/pgup
+                main.selectButton((main.selectedButton||0) - 1);
+            else if (e.keyCode == 40 || e.keyCode == 34) // down/pgdn
+                main.selectButton((main.selectedButton||0) + 1);
+            else if (e.keyCode == 67 || e.keyCode == 13 || e.keyCode == 32) // C/Enter/Space
+                main.selectButton(main.selectedButton);
+            else if (e.keyCode == 27 && main.dom.levelChooseButtons.style.display == 'block') { // ESC
+                main.core.showStartAnimate(true);
+            }
+            e.stopPropagation();
+            return;
+        }
+        if (main.dom.inputDiv.style.display == 'block') {
+            if (e.keyCode == 13) {
+                setTimeout(function () {
+                    main.dom.inputYes.click();
+                }, 50);
+            }
+            else if (e.keyCode == 27) {
+                setTimeout(function () {
+                    main.dom.inputNo.click();
+                }, 50);
+            }
+            return;
+        }
+        if (main.core && main.core.isPlaying && main.core.status &&
+            (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyUp(e);
     } catch (ee) { main.log(ee); }
-}
+};
+
+[main.dom.startButtons, main.dom.levelChooseButtons].forEach(function (dom) {
+    dom.onmousemove = function (e) {
+        for (var i = 0; i < dom.children.length; ++i) {
+            if (dom.children[i] == e.target && i != (main.selectedButton || 0)) {
+                main.selectButton(i);
+            }
+        }
+    }
+});
 
 ////// 开始选择时 //////
 main.dom.body.onselectstart = function () {
@@ -381,9 +464,12 @@ main.dom.data.onmousemove = function (e) {
 }
 
 ////// 鼠标放开时 //////
-main.dom.data.onmouseup = function () {
+main.dom.data.onmouseup = function (e) {
     try {
-        main.core.onup();
+        e.stopPropagation();
+        var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     }catch (e) { main.log(e); }
 }
 
@@ -403,6 +489,7 @@ main.dom.data.ontouchstart = function (e) {
         e.preventDefault();
         var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
+        main.lastTouchLoc = loc;
         main.core.ondown(loc);
     }catch (ee) { main.log(ee); }
 }
@@ -413,6 +500,7 @@ main.dom.data.ontouchmove = function (e) {
         e.preventDefault();
         var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
+        main.lastTouchLoc = loc;
         main.core.onmove(loc);
     }catch (ee) { main.log(ee); }
 }
@@ -421,7 +509,19 @@ main.dom.data.ontouchmove = function (e) {
 main.dom.data.ontouchend = function (e) {
     try {
         e.preventDefault();
-        main.core.onup();
+        if (main.lastTouchLoc == null) return;
+        var loc = main.lastTouchLoc;
+        delete main.lastTouchLoc;
+        main.core.onup(loc);
+    } catch (e) {
+        main.log(e);
+    }
+}
+
+main.dom.statusCanvas.onclick = function (e) {
+    try {
+        e.preventDefault();
+        main.core.onStatusBarClick(e);
     } catch (e) {
         main.log(e);
     }
@@ -592,7 +692,7 @@ main.statusBar.image.settings.onclick = function (e) {
 }
 
 ////// 点击工具栏时 //////
-main.dom.toolBar.onclick = function () {
+main.dom.hard.onclick = function () {
     if (core.isReplaying())
         return;
     main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);
@@ -649,6 +749,8 @@ main.dom.playGame.onclick = function () {
     }
     else {
         main.dom.levelChooseButtons.style.display='block';
+        main.selectedButton = null;
+        main.selectButton(0);
     }
 }
 
@@ -691,19 +793,6 @@ main.dom.inputNo.onclick = function () {
     var func = core.platform.errorCallback;
     core.platform.successCallback = core.platform.errorCallback = null;
     if (func) func(null);
-}
-
-main.dom.inputDiv.onkeyup = function (e) {
-    if (e.keyCode == 13) {
-        setTimeout(function () {
-            main.dom.inputYes.click();
-        }, 50);
-    }
-    else if (e.keyCode == 27) {
-        setTimeout(function () {
-            main.dom.inputNo.click();
-        }, 50);
-    }
 }
 
 }//listen end

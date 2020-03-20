@@ -11,9 +11,12 @@ items.prototype._init = function () {
     this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
     this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEffect;
     this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
-    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip)
-        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip = {};
-    this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canEquip;
+    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition)
+        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition = {};
+    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent)
+        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent = {};
+    this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition;
+    this.useItemEvent = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent;
 }
 
 ////// 获得所有道具 //////
@@ -35,7 +38,7 @@ items.prototype._resetItems = function () {
     if (core.flags.bombFourDirections)
         core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
     if (core.flags.snowFourDirections)
-        core.material.items.bomb.text = "可以将四周的熔岩变成平地";
+        core.material.items.snow.text = "可以将四周的熔岩变成平地";
     if (core.flags.equipment) {
         core.material.items.sword1.cls = 'equips';
         core.material.items.sword2.cls = 'equips';
@@ -59,13 +62,23 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
         var curr_hp = core.status.hero.hp;
         if (itemId in this.itemEffect) {
             try {
-                eval(this.itemEffect[itemId]);
+                for (var i = 0; i < itemNum; ++i)
+                    eval(this.itemEffect[itemId]);
             }
             catch (e) {
                 main.log(e);
             }
         }
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
+
+        if (this.useItemEvent[itemId]) {
+            try {
+                core.insertAction(this.useItemEvent[itemId]);
+            }
+            catch (e) {
+                main.log(e);
+            }
+        }
     }
     else {
         core.addItem(itemId, itemNum);
@@ -115,6 +128,14 @@ items.prototype._useItemEffect = function (itemId) {
             main.log(e);
         }
     }
+    if (this.useItemEvent[itemId]) {
+        try {
+            core.insertAction(this.useItemEvent[itemId]);
+        }
+        catch (e) {
+            main.log(e);
+        }
+    }
 }
 
 items.prototype._afterUseItem = function (itemId) {
@@ -125,10 +146,8 @@ items.prototype._afterUseItem = function (itemId) {
     if (core.status.hero.items[itemCls][itemId] <= 0)
         delete core.status.hero.items[itemCls][itemId];
 
-    if (!core.status.event.id) {
-        core.status.event.data = null;
+    if (!core.status.event.id)
         core.status.event.ui = null;
-    }
     core.updateStatusBar();
 }
 
@@ -354,7 +373,7 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     }
 
     // --- 音效
-    core.playSound('equip.mp3');
+    this._realLoadEquip_playSound();
 
     // --- 实际换装
     this._loadEquipEffect(loadId, unloadId, loadPercentage == null ? unloadPercentage : loadPercentage);
@@ -369,6 +388,12 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     else if (unloadId) core.drawTip("已卸下" + unloadEquip.name, unloadId);
 
     if (callback) callback();
+}
+
+items.prototype._realLoadEquip_playSound = function () {
+    if (core.hasFlag("__quickLoadEquip__")) return;
+    core.stopSound();
+    core.playSound('equip.mp3');
 }
 
 ////// 保存装备 //////
@@ -393,20 +418,41 @@ items.prototype.quickLoadEquip = function (index) {
         if (v && !this.canEquip(v, true))
             return;
     }
+    core.setFlag("__quickLoadEquip__", true);
     // 快速换装
+    var toEquip = [];
     for (var i = 0; i < equipSize; i++) {
         var now = core.status.hero.equipment[i];
-        if (now) {
-            this.unloadEquip(i);
-            core.status.route.push("unEquip:" + i);
+        // --- 只考虑diff的装备
+        var to = current[i];
+        if (now != to) {
+            toEquip.push(to || null);
+            if (now) {
+                this.unloadEquip(i);
+                core.status.route.push("unEquip:" + i);
+            }
         }
     }
-    for (var i = 0; i < equipSize; i++) {
-        var to = current[i];
+    for (var i in toEquip) {
+        var to = toEquip[i];
         if (to) {
             this.loadEquip(to);
             core.status.route.push("equip:" + to);
         }
     }
+    core.removeFlag("__quickLoadEquip__");
+    this._realLoadEquip_playSound();
+
     core.drawTip("成功换上" + index + "号套装");
+}
+
+////// 获得装备直接增加的属性数据 //////
+items.prototype.getEquippedStatus = function (name) {
+    var value = 0;
+    core.status.hero.equipment.forEach(function (v) {
+        if (!v || !(core.material.items[v] || {}).equip) return;
+        if (core.material.items[v].equip.percentage) return;
+        value += core.material.items[v].equip[name] || 0;
+    });
+    return value;
 }

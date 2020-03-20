@@ -48,7 +48,14 @@ utils.prototype._init = function () {
             return this.substring(this_len - search.length, this_len) === search;
         };
     }
-
+    if (typeof String.prototype.startsWith != "function") {
+        String.prototype.startsWith = function (search, this_len) {
+            if (this_len === undefined || this_len > this.length) {
+                this_len = this.length;
+            }
+            return this.substring(0, search.length) === search;
+        }
+    }
 
 }
 
@@ -59,14 +66,39 @@ utils.prototype.replaceText = function (text, need, times) {
     });
 }
 
+utils.prototype.replaceValue = function (value) {
+    if (typeof value == "string" && value.indexOf(":") >= 0) {
+        if (value.indexOf('status:') >= 0)
+            value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
+        if (value.indexOf('item:') >= 0)
+            value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
+        if (value.indexOf('flag:') >= 0)
+            value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
+        //if (value.indexOf('switch:' >= 0))
+        //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
+        if (value.indexOf('global:') >= 0)
+            value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+        if (value.indexOf('enemy:')>=0)
+            value = value.replace(/enemy:([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
+        if (value.indexOf('blockId:')>=0)
+            value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
+        if (value.indexOf('blockCls:')>=0)
+            value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
+        if (value.indexOf('equip:')>=0)
+            value = value.replace(/equip:(\d)/g, "core.getEquip($1)");
+    }
+    return value;
+}
+
 ////// 计算表达式的值 //////
 utils.prototype.calValue = function (value, prefix, need, times) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        value = value.replace(/status:([\w\d_]+)/g, "core.getStatus('$1')");
-        value = value.replace(/item:([\w\d_]+)/g, "core.itemCount('$1')");
-        value = value.replace(/flag:([\w\d_]+)/g, "core.getFlag('$1', 0)");
-        value = value.replace(/switch:([\w\d_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
+        if (value.indexOf(':') >= 0) {
+            if (value.indexOf('switch:' >= 0))
+                value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
+            value = this.replaceValue(value);
+        }
         return eval(value);
     }
     if (value instanceof Function) {
@@ -246,6 +278,31 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
     })
 }
 
+utils.prototype.setGlobal = function (key, value) {
+    if (core.isReplaying()) return;
+    core.setLocalStorage(key, value);
+}
+
+utils.prototype.getGlobal = function (key, defaultValue) {
+    var value;
+    if (core.isReplaying()) {
+        // 不考虑key不一致的情况
+        var action = core.status.replay.toReplay.shift();
+        if (action.indexOf("input2:") == 0) {
+            value = JSON.parse(core.decodeBase64(action.substring(7)));
+        }
+        else {
+            core.control._replay_error(action);
+            return core.getLocalStorage(key, defaultValue);
+        }
+    }
+    else {
+        value = core.getLocalStorage(key, defaultValue);
+    }
+    core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
+    return value;
+}
+
 ////// 深拷贝一个对象 //////
 utils.prototype.clone = function (data, filter, recursion) {
     if (!core.isset(data)) return null;
@@ -282,23 +339,24 @@ utils.prototype.clone = function (data, filter, recursion) {
 
 ////// 裁剪图片 //////
 utils.prototype.splitImage = function (image, width, height) {
-    if (typeof image == "string")
+    if (typeof image == "string") {
+        image = core.getMappedName(image);
         image = core.material.images.images[image];
+    }
     if (!image) return [];
     width = width || 32;
     height = height || width;
     var canvas = document.createElement("canvas");
     var context = canvas.getContext("2d");
-    canvas.width = width;
-    canvas.height = height;
     var ans = [];
     for (var j = 0; j < image.height; j += height) {
         for (var i = 0; i < image.width; i += width) {
-            context.drawImage(image, i, j, width, height, 0, 0, width, height);
+            var w = Math.min(width, image.width - i), h = Math.min(height, image.height - j);
+            canvas.width = w; canvas.height = h;
+            context.drawImage(image, i, j, w, h, 0, 0, w, h);
             var img = new Image();
             img.src = canvas.toDataURL("image/png");
             ans.push(img);
-            context.clearRect(0, 0, width, height);
         }
     }
     return ans;
@@ -599,15 +657,25 @@ utils.prototype.getCookie = function (name) {
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (!core.statusBar[name]) return;
-    if (typeof value == 'number') value = this.formatBigNumber(value);
+    var isNumber = false;
+    if (typeof value == 'number') {
+        value = this.formatBigNumber(value);
+        isNumber = true;
+    }
     // 判定是否斜体
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
+    style += 'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
     // 判定是否需要缩放
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
-    core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+    if (isNumber) {
+        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+    } else {
+        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
+        core.statusBar[name].children[0].innerText = value;
+    }
 }
 
 utils.prototype.strlen = function (str) {
@@ -684,9 +752,8 @@ utils.prototype.rand2 = function (num) {
             value = parseInt(action.substring(7));
         }
         else {
-            core.stopReplay();
-            core.drawTip("录像文件出错");
-            return;
+            core.control._replay_error(action);
+            return 0;
         }
     }
     else {
@@ -712,7 +779,7 @@ utils.prototype.__next_rand = function (_rand) {
 }
 
 ////// 读取一个本地文件内容 //////
-utils.prototype.readFile = function (success, error, readType) {
+utils.prototype.readFile = function (success, error, accept, readType) {
 
     core.platform.successCallback = success;
     core.platform.errorCallback = error;
@@ -751,6 +818,7 @@ utils.prototype.readFile = function (success, error, readType) {
             else core.platform.fileReader.readAsDataURL(core.platform.fileInput.files[0]);
             core.platform.fileInput.value = '';
         }
+        if (accept) core.platform.fileInput.accept = accept;
     }
 
     core.platform.fileInput.click();
@@ -888,7 +956,9 @@ utils.prototype.myconfirm = function (hint, yesCallback, noCallback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'none';
-    main.dom.inputYes.focus();
+    main.dom.inputYes.blur();
+    main.dom.inputNo.blur();
+    core.status.holdingKeys = [];
 
     core.platform.successCallback = yesCallback;
     core.platform.errorCallback = noCallback;
@@ -900,9 +970,12 @@ utils.prototype.myprompt = function (hint, value, callback) {
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'block';
     main.dom.inputBox.value = value==null?"":value;
+    main.dom.inputYes.blur();
+    main.dom.inputNo.blur();
     setTimeout(function () {
         main.dom.inputBox.focus();
     });
+    core.status.holdingKeys = [];
 
     core.platform.successCallback = core.platform.errorCallback = callback;
 }
@@ -910,7 +983,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
 ////// 动画显示某对象 //////
 utils.prototype.showWithAnimate = function (obj, speed, callback) {
     obj.style.display = 'block';
-    if (!speed && main.mode != 'play') {
+    if (!speed || main.mode != 'play') {
         obj.style.opacity = 1;
         if (callback) callback();
         return;
@@ -1058,11 +1131,11 @@ utils.prototype._export = function (floorIds) {
     // map
     var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
     floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks);
+        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
         content += arr.map(function (x) {
             // check monster
             x.forEach(function (t) {
-                var block = core.maps.initBlock(null, null, t);
+                var block = core.maps.getBlockByNumber(t);
                 if (block.event.cls.indexOf("enemy") == 0) {
                     monsterMap[t] = block.event.id;
                 }
@@ -1074,7 +1147,7 @@ utils.prototype._export = function (floorIds) {
     // values
     content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
         "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x]
+        return core.values[x] || 0;
     }).join(" ") + "\n\n";
 
     // monster
@@ -1093,7 +1166,55 @@ utils.prototype._export = function (floorIds) {
     console.log(content);
 }
 
-utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
+utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
+    var _error = function (msg) {
+        main.log(msg);
+        if (error) error(msg);
+    }
+
+    if (!window.zip) {
+        return _error("zip.js not exists!");
+    }
+
+    if (typeof blobOrUrl == 'string') {
+        return core.http('GET', blobOrUrl, null, function (data) {
+            core.unzip(data, success, error, convertToText);
+        }, _error, null, 'blob', onprogress);
+    }
+
+    if (!(blobOrUrl instanceof Blob)) {
+        return _error("Should use Blob or URL as input");
+    }
+
+    zip.createReader(new zip.BlobReader(blobOrUrl), function (reader) {
+        reader.getEntries(function (entries) {
+            core.utils._unzip_readEntries(entries, function (data) {
+                reader.close(function () {
+                    if (success) success(data);
+                });
+            }, convertToText);
+        });
+    }, _error);
+}
+
+utils.prototype._unzip_readEntries = function (entries, success, convertToText) {
+    var results = {};
+    if (entries == null) {
+        return success(results);
+    }
+    var length = entries.length;
+    entries.forEach(function (entry) {
+        entry.getData(convertToText ? new zip.TextWriter('utf8') : new zip.BlobWriter(), function (data) {
+            results[entry.filename] = data;
+            length--;
+            if (length == 0) {
+                success(results);
+            }
+        });
+    });
+}
+
+utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType, onprogress) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);
     if (mimeType) xhr.overrideMimeType(mimeType);
@@ -1106,6 +1227,11 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
             if (error) error("HTTP " + xhr.status);
         }
     };
+    xhr.onprogress = function (e) {
+        if (e.lengthComputable) {
+            if (onprogress) onprogress(e.loaded / e.total);
+        }
+    }
     xhr.onabort = function () {
         if (error) error("Abort");
     }

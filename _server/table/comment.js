@@ -67,6 +67,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "即捡即用类物品在获得时提示的文字，仅对cls为items有效。"
 				},
+				"useItemEvent": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "item",
+					"_data": "碰触或使用本道具所执行的事件"
+				},
 				"useItemEffect": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -81,12 +87,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "当前能否使用该道具，仅对cls为tools或constants有效。"
 				},
-				"canEquip": {
+				"equipCondition": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
 					"_lint": true,
-					"_data": "当前能否装备某个装备，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
+					"_data": "能装备某个装备的条件，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
 				}
 			}
 		},
@@ -143,7 +149,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==null || thiseval instanceof Array || (thiseval==~~thiseval && thiseval>=0)",
-					"_data": "特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌,21:退化,22:固伤,23:重生,24:激光,25:光环\n\n多个属性例如用[1,4,11]表示先攻2连击吸血"
+					"_data": "特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌,21:退化,22:固伤,23:重生,24:激光,25:光环\n26:支援,27:捕捉\n多个属性例如用[1,4,11]表示先攻2连击吸血"
 				},
 				"value": {
 					"_leaf": true,
@@ -225,12 +231,18 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "false",
 					"_data": "图块类别"
 				},
+				"name": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_data": "图块名称"
+				},
 				"trigger": {
 					"_leaf": true,
 					"_type": "select",
 					"_select": {
 						"values": [
-							null,
+							"null",
 							"openDoor",
 							"passNet",
 							"changeLight",
@@ -245,18 +257,19 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "select",
 					"_select": {
 						"values": [
-							null,
-							true,
-							false
+							"null",
+							"true",
+							"false"
 						]
 					},
 					"_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
 				},
-				"canBreak": {
+				"script": {
 					"_leaf": true,
-					"_type": "checkbox",
-					"_bool": "bool",
-					"_data": "该图块是否可被破墙或地震"
+					"_type": "textarea",
+					"_string": true,
+					"_lint": true,
+					"_data": "触碰到该图块时自动执行的脚本内容；此脚本会在该点的触发器执行前执行"
 				},
 				"cannotOut": {
 					"_leaf": true,
@@ -269,6 +282,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_range": "thiseval==null||(thiseval instanceof Array)",
 					"_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
+				},
+				"canBreak": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_bool": "bool",
+					"_data": "该图块是否可被破墙或地震"
 				},
 				"animate": {
 					"_leaf": true,
@@ -429,6 +448,24 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_event": "event",
 							"_data": "该点的可能事件列表，可以双击进入事件编辑器。"
 						},
+						"autoEvent": {
+							"_type": "object",
+							"_leaf": false,
+							"_action": function (args) {
+								args.vobj=args.vobj||{};
+								for(var ii=0;ii<2;ii++){
+									args.vobj[ii]=args.vobj[ii]||null;
+								}
+							},
+							"_data": function (key) {
+								return {
+									"_leaf": true,
+									"_type": "event",
+									"_event": "autoEvent",
+									"_data": "自动事件页"
+								}
+							}
+						},
 						"changeFloor": {
 							"_leaf": true,
 							"_type": "event",
@@ -458,10 +495,40 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "textarea",
 							"_range": "thiseval==null||(thiseval instanceof Array)",
 							"_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表该点不能往上和左走"
-						}
+						},
 					}
 				}
 			}
+		},
+
+		"floors_template": {
+			"floorId": "to be covered",
+			"title": "new floor",
+			"name": "new floor",
+			"width": 13,
+			"height": 13,
+			"canFlyTo": true,
+			"canUseQuickShop": true,
+			"cannotViewMap": false,
+			"cannotMoveDirectly": false,
+			"images": [],
+			"item_ratio": 1,
+			"defaultGround": "ground",
+			"bgm": null,
+			"upFloor": null,
+			"downFloor": null,
+			"color": null,
+			"weather": null,
+			"firstArrive": [],
+			"eachArrive": [],
+			"parallelDo": "",
+			"events": {},
+			"changeFloor": {},
+			"afterBattle": {},
+			"afterGetItem": {},
+			"afterOpenDoor": {},
+			"autoEvent": {},
+			"cannotMove": {}
 		}
 	}
 }

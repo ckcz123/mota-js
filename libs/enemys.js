@@ -385,7 +385,11 @@ enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
             }
         }
         for (var b = 0; b < enemyId.length; b++) {
-            if (list[enemyId[b]] === true) return true;
+            if (enemyId[b] == null) {
+                if (Object.keys(list).length > 0) return true;
+                else return false;
+            }
+            if (list[enemyId[b]]) return true;
         }
     }
     return false;

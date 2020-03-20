@@ -372,15 +372,21 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
 }
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
-    if (floorId == null) floorId = core.status.floorId;
-    if (floorId instanceof Array) {
-        for (var i = 0; i < floorId.length; ++i) {
-            if (core.hasEnemyLeft(enemyId, floorId[i]))
-                return true;
+    floorId = floorId || core.status.floorId;
+    if (!(floorId instanceof Array)) floorId = [floorId];
+    if (!(enemyId instanceof Array)) enemyId = [enemyId];
+    var list;
+    for (var i = 0; i < floorId.length; ++i) {
+        list = {};
+        var mapBlocks = core.status.maps[floorId[i]].blocks;
+        for (var b = 0; b < mapBlocks.length; b++) {
+            if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
+                list[mapBlocks[b].event.id] = true;
+            }
         }
-        return false;
+        for (var b = 0; b < enemyId.length; b++) {
+            if (list[enemyId[b]] === true) return true;
+        }
     }
-    return core.getCurrentEnemys(floorId).filter(function (enemy) {
-        return enemyId == null || enemy.id == enemyId;
-    }).length > 0;
+    return false;
 }

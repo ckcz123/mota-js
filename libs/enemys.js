@@ -372,7 +372,7 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
 }
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
-    floorId = floorId || core.status.floorId;
+    if (floorId == null) floorId = core.status.floorId;
     if (!(floorId instanceof Array)) floorId = [floorId];
     if (!(enemyId instanceof Array)) enemyId = [enemyId];
     var list;

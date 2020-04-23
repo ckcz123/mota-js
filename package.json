@@ -1,0 +1,29 @@
+{
+    "name": "mota",
+    "version": "2.6.6",
+    "description": "HTML5 canvas制作的魔塔样板，支持全平台游戏",
+    "main": "app.js",
+    "directories": {
+        "doc": "docs"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/ranto2012/mota-js.git"
+    },
+    "keywords": [
+        "game"
+    ],
+    "author": "Zhang Chen",
+    "license": "BSD-3-Clause",
+    "bugs": {
+        "url": "https://github.com/ranto2012/mota-js/issues"
+    },
+    "homepage": "https://h5mota.com/",
+    "dependencies": {
+        "eslint": "^6.8.0",
+        "typescript": "^3.8.3"
+    }
+}

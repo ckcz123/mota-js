@@ -922,13 +922,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	case 118: // F7：开启debug模式
 		core.debug();
 		break;
-	/*case 87: // W：开启技能“二倍斩”
+	case 70: // F：开启技能“二倍斩”
 		// 检测是否拥有“二倍斩”这个技能道具
 		if (core.hasItem('skill1')) {
-			core.status.route.push("key:87");
+			core.status.route.push("key:70");
 			core.useItem('skill1', true);
 		}
-		break;*/
+		break;
 	// 在这里可以任意新增或编辑已有的快捷键内容
 	/*
 	case 0: // 使用该按键的keyCode

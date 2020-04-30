@@ -2305,6 +2305,7 @@ actions.prototype._clickStorageRemove_all = function () {
             core.saves.ids = {};
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
+            core.saves.autosave.now = 0;
             core.ui.closePanel();
             core.saves.saveIndex = 1;
             core.saves.favorite = [];
@@ -2330,6 +2331,7 @@ actions.prototype._clickStorageRemove_current = function () {
             core.saves.ids = {};
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
+            core.saves.autosave.now = 0;
             core.ui.closePanel();
             core.saves.saveIndex = 1;
             core.saves.favorite = [];

@@ -374,22 +374,16 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
     if (floorId == null) floorId = core.status.floorId;
     if (!(floorId instanceof Array)) floorId = [floorId];
-    if (!(enemyId instanceof Array)) enemyId = [enemyId];
-    var list;
+    var enemyMap = {};
+    if (enemyId instanceof Array) enemyId.forEach(function(v) { enemyMap[v] = true;});
+    else if (enemyId) enemyMap[enemyId] = true;
+    else enemyMap = null;
     for (var i = 0; i < floorId.length; i++) {
-        list = {};
         var mapBlocks = core.status.maps[floorId[i]].blocks;
         for (var b = 0; b < mapBlocks.length; b++) {
-            if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
-                list[mapBlocks[b].event.id] = true;
+            if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') === 0) {
+                if (enemyMap === null || enemyMap[mapBlocks[b].event.id]) return true;
             }
-        }
-        for (var b = 0; b < enemyId.length; b++) {
-            if (enemyId[b] == null) {
-                if (Object.keys(list).length > 0) return true;
-                else return false;
-            }
-            if (list[enemyId[b]]) return true;
         }
     }
     return false;

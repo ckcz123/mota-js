@@ -2378,7 +2378,7 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
     core.setFont('ui', this._buildFont(14, true));
     for (var name in compare) {
         var img = core.statusBar.icons[name];
-        var text = core.getStatusName(name);
+        var text = this._drawEquipbox_getStatusName(name);
         if (img && core.flags.iconInEquipbox) { // 绘制图标
             core.drawImage('ui', img, 0, 0, 32, 32, obj.drawOffset, obj.y - 13, 16, 16);
             obj.drawOffset += 20;
@@ -2398,6 +2398,14 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         this._drawEquipbox_drawStatusChanged_draw(newValue, compare[name]>0?'#00FF00':'#FF0000', obj);
         obj.drawOffset += 8;
     }
+}
+
+ui.prototype._drawEquipbox_getStatusName = function (name) {
+    var map = {
+        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
+        atk: "攻击", def: "防御", mdef: "魔防", money: "金币", exp: "经验", experience: "经验", steps: "步数"
+    };
+    return map[name] || name;
 }
 
 ui.prototype._drawEquipbox_drawStatusChanged_draw = function (text, color, obj) {

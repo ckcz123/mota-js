@@ -2075,14 +2075,7 @@ control.prototype.getHeroLoc = function (name) {
     return core.status.hero.loc[name];
 }
 
-////// 获得某个属性的中文名 //////
-control.prototype.getStatusName = function (name) {
-    var map = {
-        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
-        atk: "攻击", def: "防御", mdef: "魔防", money: "金币", exp: "经验", experience: "经验", steps: "步数"
-    };
-    return map[name] || name;
-}
+
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function (lv) {

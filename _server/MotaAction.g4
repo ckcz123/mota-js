@@ -459,7 +459,7 @@ return code;
 */;
 
 text_1_s
-    :   '标题' EvalString? '图像' IdString? '对话框效果' EvalString? ':' EvalString Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? ':' EvalString Newline
     
 
 /* text_1_s
@@ -468,17 +468,17 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=text%EF%BC%9A%E6%98
 default : ["小妖精","fairy","","欢迎使用事件编辑器(双击方块进入多行编辑)"]
 var title='';
 if (EvalString_0==''){
-    if (IdString_0=='')title='';
-    else title='\\t['+IdString_0+']';
+    if (EvalString_1=='' )title='';
+    else title='\\t['+EvalString_1+']';
 } else {
-    if (IdString_0=='')title='\\t['+EvalString_0+']';
-    else title='\\t['+EvalString_0+','+IdString_0+']';
+    if (EvalString_1=='')title='\\t['+EvalString_0+']';
+    else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
-if(EvalString_1 && !(/^(up|center|down|hero|null)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_1))) {
+if(EvalString_2 && !(/^(up|center|down|hero|null)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
-EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
-var code =  '"'+title+EvalString_1+EvalString_2+'",\n';
+EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
+var code =  '"'+title+EvalString_2+EvalString_3+'",\n';
 return code;
 */;
 
@@ -496,7 +496,7 @@ return code;
 */;
 
 autoText_s
-    :   '自动剧情文本: 标题' EvalString? '图像' IdString? '对话框效果' EvalString? '时间' Int BGNL? EvalString Newline
+    :   '自动剧情文本: 标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '时间' Int BGNL? EvalString Newline
     
 
 /* autoText_s
@@ -505,17 +505,17 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=autotext%EF%BC%9A%E
 default : ["小妖精","fairy","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
 var title='';
 if (EvalString_0==''){
-    if (IdString_0=='')title='';
-    else title='\\t['+IdString_0+']';
+    if (EvalString_1=='' )title='';
+    else title='\\t['+EvalString_1+']';
 } else {
-    if (IdString_0=='')title='\\t['+EvalString_0+']';
-    else title='\\t['+EvalString_0+','+IdString_0+']';
+    if (EvalString_1=='')title='\\t['+EvalString_0+']';
+    else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
-if(EvalString_1 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_1))) {
+if(EvalString_2 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
-EvalString_1 = EvalString_1 && ('\\b['+EvalString_1+']');
-var code =  '{"type": "autoText", "text": "'+title+EvalString_1+EvalString_2+'", "time" :'+Int_0+'},\n';
+EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
+var code =  '{"type": "autoText", "text": "'+title+EvalString_2+EvalString_3+'", "time" :'+Int_0+'},\n';
 return code;
 */;
 
@@ -3833,7 +3833,8 @@ ActionParser.prototype.getTitleAndPosition = function (string) {
   string = string.replace(/\\t\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3) {
     if (s3) title = s3;
     if (s2) { icon = s3; title = s2; }
-    if (icon && !/^[0-9a-zA-Z_][0-9a-zA-Z_:]*$/.test(icon)) { title += "," + icon; icon = ''; }
+    if (icon && !/^(.*)\.(jpg|jpeg|png)$/.test(icon) 
+        && !/^[0-9a-zA-Z_][0-9a-zA-Z_:]*$/.test(icon)) { title += "," + icon; icon = ''; }
     return "";
   }).replace(/\\b\[(.*?)\]/g, function (s0, s1) {
     position = s1; return "";

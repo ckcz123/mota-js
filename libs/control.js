@@ -1605,11 +1605,11 @@ control.prototype.autosave = function (removeLast) {
         core.saves.autosave.data = [];
     }
     core.saves.autosave.data.splice(core.saves.autosave.now, 0, core.saveData());
-    core.saves.autosave.now = core.saves.autosave.now + 1;
+    core.saves.autosave.now += 1;
     if (core.saves.autosave.data.length > core.saves.autosave.max) {
-        if (core.saves.autosave.now < core.saves.autosave.max / 2) core.saves.autosave.data.pop();
-        else
-        {
+        if (core.saves.autosave.now < core.saves.autosave.max / 2)
+            core.saves.autosave.data.pop();
+        else {
             core.saves.autosave.data.shift();
             core.saves.autosave.now=core.saves.autosave.now-1;
         }
@@ -1675,8 +1675,11 @@ control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
         core.saves.autosave.now -= 1;
         var data = core.saves.autosave.data.splice(core.saves.autosave.now, 1)[0];
-        if(core.saves.autosave.now==0)
-        {
+        if (core.isPlaying() && !core.status.gameOver) {
+            core.control.autosave(0);
+            core.saves.autosave.now -= 1;
+        }
+        if (core.saves.autosave.now == 0) {
             core.saves.autosave.data.unshift(core.clone(data));
             core.saves.autosave.now += 1;
         }

@@ -460,14 +460,14 @@ ui.prototype.clearUI = function () {
 }
 
 ////// 左上角绘制一段提示 //////
-ui.prototype.drawTip = function (text, id, clear) {
-    this.clearTip();
+ui.prototype.drawTip = function (text, id, frame) {
     var one = {
         text: text,
         textX: 21,
         width: 26 + core.calWidth('data', text, "16px Arial"),
         opacity: 0.1,
         stage: 1,
+        frame: frame || 0,
         time: 0
     };
     if (id != null) {
@@ -475,7 +475,7 @@ ui.prototype.drawTip = function (text, id, clear) {
         if (info == null || !info.image) {
             // 检查状态栏图标
             if (core.statusBar.icons[id] instanceof Image) {
-                id = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
+                info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
             }
             else info = null;
         }
@@ -488,25 +488,16 @@ ui.prototype.drawTip = function (text, id, clear) {
             one.width += 24;
         }
     }
-    core.animateFrame.tips.list.push(one);
-    if (core.animateFrame.tips.list.length > 3) {
-        core.animateFrame.tips.list.shift();
-    }
+    core.animateFrame.tip = one;
 }
 
-ui.prototype._drawTip_drawOne = function (one, offset) {
-    core.setAlpha('data', one.opacity);
-    core.fillRect('data', 5, offset+ 5, one.width, 42, '#000000');
-    if (one.image)
-        core.drawImage('data', one.image, one.posX * 32, one.posY * one.height, 32, 32, 10, offset + 10, 32, 32);
-    core.fillText('data', one.text, one.textX, offset + 33, '#FFFFFF');
+ui.prototype._drawTip_drawOne = function (tip) {
+    core.setAlpha('data', tip.opacity);
+    core.fillRect('data', 5, 5, tip.width, 42, '#000000');
+    if (tip.image)
+        core.drawImage('data', tip.image, (tip.posX + tip.frame) * 32, tip.posY * tip.height, 32, 32, 10, 10, 32, 32);
+    core.fillText('data', tip.text, tip.textX, 33, '#FFFFFF');
     core.setAlpha('data', 1);
-}
-
-ui.prototype.clearTip = function () {
-    core.animateFrame.tips.list = [];
-    core.animateFrame.tips.offset = 0;
-    core.animateFrame.tips.lastSize = 0;
 }
 
 ////// 地图中间绘制一段文字 //////

@@ -24,7 +24,7 @@ control.prototype._init = function () {
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
-    this.registerAnimationFrame("tips", true, this._animateFrame_tips);
+    this.registerAnimationFrame("tip", true, this._animateFrame_tip);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
     this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
     // --- 注册系统的replay
@@ -285,38 +285,31 @@ control.prototype._animationFrame_weather_fog = function () {
     }
 }
 
-control.prototype._animateFrame_tips = function (timestamp) {
-    var tips = core.animateFrame.tips;
-    if (timestamp - tips.time <= 30) return;
-    var delta = timestamp - tips.time;
-    tips.time = timestamp;
-    if (tips.list.length == 0) return;
+control.prototype._animateFrame_tip = function (timestamp) {
+    if (core.animateFrame.tip == null) return;
+    var tip = core.animateFrame.tip;
+    if (timestamp - tip.time <= 30) return;
+    var delta = timestamp - tip.time;
+    tip.time = timestamp;
 
-    var currentOffset = Math.max(tips.offset - 5, 0), firstOffset = null;
-    var currList = [];
     core.setFont('data', "16px Arial");
     core.setTextAlign('data', 'left');
-    core.clearMap('data', 0, 0, this.PIXEL, tips.lastSize * 50);
-    tips.lastLength = tips.list.length;
-
-    while (tips.list.length > 0) {
-        var one = tips.list.shift();
-        core.ui._drawTip_drawOne(one, currentOffset);
-        if (one.stage == 1) {
-            one.opacity += 0.05;
-            if (one.opacity >= 0.7) one.stage = 2;
-        } else if (one.stage == 2) {
-            one.time += delta;
-            if (one.time >= 2000) one.stage = 3;
-        } else one.opacity -= 0.05;
-        if (one.opacity > 0) {
-            currList.push(one);
-            if (firstOffset == null) firstOffset = currentOffset;
+    core.clearMap('data', 0, 0, this.PIXEL, 50);
+    core.ui._drawTip_drawOne(tip);
+    if (tip.stage == 1) {
+        tip.opacity += 0.05;
+        if (tip.opacity >= 0.6) {
+            tip.stage = 2;
+            tip.displayTime = 0;
         }
-        currentOffset += 50;
+    } else if (tip.stage == 2) {
+        tip.displayTime += delta;
+        if (tip.displayTime >= 1000) tip.stage = 3;
+    } else tip.opacity -= 0.05;
+
+    if (tip.opacity <= 0) {
+        core.animateFrame.tip = null;
     }
-    tips.list = currList;
-    tips.offset = firstOffset || 0;
 }
 
 control.prototype._animationFrame_parallelDo = function (timestamp) {

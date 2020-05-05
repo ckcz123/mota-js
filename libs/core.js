@@ -47,12 +47,7 @@ function core() {
             'data': null,
             'fog': null,
         },
-        "tips": {
-            'time': 0,
-            'offset': 0,
-            'list': [],
-            'lastSize': 0,
-        },
+        "tip": {},
         "asyncId": {}
     }
     this.musicStatus = {

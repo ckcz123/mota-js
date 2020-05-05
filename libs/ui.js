@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /**
  * ui.js：负责所有和UI界面相关的绘制
  * 包括：

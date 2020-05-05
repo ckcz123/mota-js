@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /**
  * 初始化 start
  */

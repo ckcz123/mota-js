@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 utils.js 工具类
 

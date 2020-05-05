@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 control.js：游戏主要逻辑控制
 主要负责status相关内容，以及各种变量获取/存储

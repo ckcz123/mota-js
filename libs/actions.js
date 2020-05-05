@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 actions.js：用户交互的事件的处理
 键盘、鼠标、触摸屏事件相关

@@ -438,6 +438,7 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
 
     // --- wait事件也要提供px和py
     if (core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
+        clearTimeout(core.status.event.interval);
         core.setFlag('type', 1);
         core.setFlag('x', x);
         core.setFlag('y', y);
@@ -754,6 +755,7 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // wait事件
     if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
+        clearTimeout(core.status.event.interval);
         core.setFlag('type', 0);
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
@@ -1046,6 +1048,7 @@ actions.prototype._keyUpAction = function (keycode) {
         return;
     }
     if (core.status.event.data.type == 'wait') {
+        clearTimeout(core.status.event.interval);
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
         core.status.route.push("input:" + keycode);

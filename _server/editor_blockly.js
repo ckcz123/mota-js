@@ -164,8 +164,8 @@ editor_blockly = function () {
     ],
     '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
-      MotaActionFunctions.actionParser.parseList({"type": "wait", "data": [
-        {"case": "keyboard", "keycode": 13, "action": [{"type": "comment", "text": "当按下回车(keycode=13)时执行此事件"}]},
+      MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
+        {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件"}]},
         {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),

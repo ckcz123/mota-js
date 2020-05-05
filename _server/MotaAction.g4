@@ -2007,15 +2007,17 @@ return code;
 
 
 wait_s
-    :   '等待用户操作并获得按键或点击信息' BGNL? Newline waitContext* BEND Newline
+    :   '等待用户操作并获得按键或点击信息' '超时毫秒数' Int BGNL? Newline waitContext* BEND Newline
 
 
 /* wait_s
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
+default : [0]
 colour : this.soundColor
+Int_0 = Int_0?(', "timeout": ' + Int_0):'';
 waitContext_0 = waitContext_0 ? (', "data": [\n' + waitContext_0 + ']') : '';
-var code = '{"type": "wait"' + waitContext_0 + '},\n';
+var code = '{"type": "wait"' + Int_0 + waitContext_0 + '},\n';
 return code;
 */;
 
@@ -2027,13 +2029,16 @@ waitContext
 
 
 waitContext_1
-    : '按键的场合' '键值' Int BGNL? Newline action+ BEND Newline
+    : '按键的场合' '键值' EvalString BGNL? Newline action+ BEND Newline
 
 /* waitContext_1
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
 colour : this.subColor
-var code = '{"case": "keyboard", "keycode": ' + Int_0 + ', "action": [\n' + action_0 + ']},\n';
+if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
+  throw new Error('键值必须是正整数，可以以逗号分隔');
+}
+var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '", "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
@@ -3608,7 +3613,7 @@ ActionParser.prototype.parseAction = function() {
         for(var ii=data.data.length-1,caseNow;caseNow=data.data[ii];ii--) {
           if (caseNow["case"] == "keyboard") {
             case_waitList = MotaActionBlocks['waitContext_1'].xmlText([
-              caseNow.keycode || 0, this.insertActionList(caseNow.action), case_waitList
+              caseNow.keycode || "0", this.insertActionList(caseNow.action), case_waitList
             ]);
           } else if (caseNow["case"] == "mouse") {
             case_waitList = MotaActionBlocks['waitContext_2'].xmlText([
@@ -3618,7 +3623,7 @@ ActionParser.prototype.parseAction = function() {
         }
       }
       this.next = MotaActionBlocks['wait_s'].xmlText([
-        case_waitList, this.next]);
+        data.timeout||0,case_waitList, this.next]);
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([

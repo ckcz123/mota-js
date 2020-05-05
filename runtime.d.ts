@@ -1880,7 +1880,6 @@ type core = {
         height: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
     }
-    paint: {};
     saves: {
         saveIndex: number
         ids: { [key: number]: boolean }

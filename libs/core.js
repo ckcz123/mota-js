@@ -96,7 +96,6 @@ function core() {
         height: this.__SIZE__,
         tempCanvas: null, // A temp canvas for drawing
     }
-    this.paint = {};
     this.saves = {
         "saveIndex": null,
         "ids": {},

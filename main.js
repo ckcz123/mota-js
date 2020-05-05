@@ -149,18 +149,14 @@ function main() {
             'equipbox': 24,
             'mana': 25,
             'skill': 26,
-            'paint': 27,
-            'erase': 28,
-            'empty': 29,
-            'exit': 30,
-            'btn1': 31,
-            'btn2': 32,
-            'btn3': 33,
-            'btn4': 34,
-            'btn5': 35,
-            'btn6': 36,
-            'btn7': 37,
-            'btn8': 38
+            'btn1': 27,
+            'btn2': 28,
+            'btn3': 29,
+            'btn4': 30,
+            'btn5': 31,
+            'btn6': 32,
+            'btn7': 33,
+            'btn8': 34
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
@@ -536,11 +532,6 @@ main.statusBar.image.book.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.setPaintMode('paint');
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
@@ -552,12 +543,6 @@ main.statusBar.image.fly.onclick = function (e) {
     // 播放录像时
     if (core.isReplaying()) {
         core.stopReplay();
-        return;
-    }
-
-    // 绘图模式
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.setPaintMode('erase');
         return;
     }
 
@@ -577,11 +562,6 @@ main.statusBar.image.toolbox.onclick = function (e) {
 
     if (core.isReplaying()) {
         core.rewindReplay();
-        return;
-    }
-
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.clearPaint();
         return;
     }
 
@@ -646,11 +626,6 @@ main.statusBar.image.save.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.savePaint();
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.save(true);
 }
@@ -664,11 +639,6 @@ main.statusBar.image.load.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.loadPaint();
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -679,11 +649,6 @@ main.statusBar.image.settings.onclick = function (e) {
 
     if (core.isReplaying()) {
         core.saveReplay();
-        return;
-    }
-
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.exitPaint();
         return;
     }
 

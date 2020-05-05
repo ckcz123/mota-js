@@ -500,6 +500,11 @@ ui.prototype._drawTip_drawOne = function (tip) {
     core.setAlpha('data', 1);
 }
 
+ui.prototype.clearTip = function () {
+    core.clearMap('data', 0, 0, this.PIXEL, 50);
+    core.animateFrame.tip = null;
+}
+
 ////// 地图中间绘制一段文字 //////
 ui.prototype.drawText = function (contents, callback) {
     if (contents != null) return this._drawText_setContent(contents, callback);
@@ -1509,7 +1514,7 @@ ui.prototype.drawSwitchs = function() {
 ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
     this.drawChoices(null, [
-        "系统设置", "虚拟键盘", "浏览地图", "绘图模式", "同步存档", "游戏信息", "返回标题", "返回游戏"
+        "系统设置", "虚拟键盘", "浏览地图", "同步存档", "游戏信息", "返回标题", "返回游戏"
     ]);
 }
 
@@ -2040,15 +2045,6 @@ ui.prototype.drawMaps = function (index, x, y) {
     var data = this._drawMaps_buildData(index, x, y);
     core.drawThumbnail(data.floorId, null, {damage: data.damage},
         {ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
-    // 绘图
-    if (data.paint) {
-        var offsetX = 32 * (data.x - this.HSIZE), offsetY = 32 * (data.y - this.HSIZE);
-        var value = core.paint[data.floorId];
-        if (value) value = lzw_decode(value).split(",");
-        core.utils._decodeCanvas(value, 32 * data.mw, 32 * data.mh);
-        core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX * 32, offsetY * 32,
-            this.PIXEL, this.PIXEL, 0, 0, this.PIXEL, this.PIXEL);
-    }
     core.clearMap('data');
     core.setTextAlign('data', 'left');
     core.setFont('data', '16px Arial');
@@ -2075,14 +2071,13 @@ ui.prototype._drawMaps_drawHint = function () {
     stroke(per, this.SIZE - per - 3, 9, 3); // next
     stroke(0, 0, per-1, per-1); // left top
     stroke(this.SIZE-(per - 1), 0, per-1, per-1); // right top
-    stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
+    // stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
 
     core.setTextBaseline('ui', 'middle');
     core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, '#FFD700', '20px Arial');
     core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
     core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
     core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
-    core.fillText('ui', 'M', (per-1)*16, this.PIXEL - (per-1)*16);
 
     var top = this.HPIXEL - 66, left = per * 16, right = this.PIXEL - left;
     var lt = ["左", "移", "地", "图", "[A]"], rt = ["右", "移", "地", "图", "[D]"];
@@ -2101,10 +2096,8 @@ ui.prototype._drawMaps_drawHint = function () {
 
 ui.prototype._drawMaps_buildData = function (index, x, y) {
     var damage = (core.status.event.data||{}).damage;
-    var paint =  (core.status.event.data||{}).paint;
     var all = (core.status.event.data||{all: true}).all;
     if (index.damage != null) damage=index.damage;
-    if (index.paint != null) paint=index.paint;
     if (index.all != null) all=index.all;
     if (index.index != null) { x=index.x; y=index.y; index=index.index; }
     index = core.clamp(index, 0, core.floorIds.length-1);
@@ -2117,7 +2110,7 @@ ui.prototype._drawMaps_buildData = function (index, x, y) {
     y = core.clamp(y, this.HSIZE, mh - this.HSIZE - 1);
 
     core.status.event.data = {index: index, x: x, y: y, floorId: floorId, mw: mw, mh: mh,
-                              damage: damage, paint: paint, all: all };
+                              damage: damage, all: all };
     return core.status.event.data;
 }
 
@@ -2791,47 +2784,6 @@ ui.prototype.drawAbout = function () {
     return this.uidata.drawAbout();
 }
 
-////// 绘制“画图”界面 //////
-ui.prototype.drawPaint = function () {
-    core.drawText(
-        "\t[进入绘图模式]你可以在此页面上任意进行绘图和标记操作。\nM键可以进入或退出此模式。\n\n"+
-        "绘图的内容会自动保存，且以页面为生命周期，和存读档无关，重新开始游戏或读档后绘制的内容仍有效，但刷新页面就会消失。\n"+
-        "你可以将绘制内容保存到文件，也可以从文件读取保存的绘制内容。\n"+
-        "浏览地图页面可以按楼传按钮或M键来开启/关闭该层的绘图显示。\n\n更多功能请详见文档-元件-绘图模式。",
-        this._drawPaint_draw
-    );
-}
-
-ui.prototype._drawPaint_draw = function () {
-    core.drawTip("打开绘图模式，现在可以任意在界面上绘图标记");
-
-    core.lockControl();
-    core.status.event.id = 'paint';
-    core.status.event.data = {"x": null, "y": null, "erase": false};
-
-    core.clearUI();
-    core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
-
-    // 将已有的内容绘制到route上
-    var value = core.paint[core.status.floorId];
-    if (value) value = lzw_decode(value).split(",");
-    core.utils._decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-    core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
-
-    core.setLineWidth('paint', 3);
-    core.setStrokeStyle('paint', '#FF0000');
-
-    core.statusBar.image.keyboard.style.opacity = 0;
-    core.statusBar.image.shop.style.opacity = 0;
-
-    core.statusBar.image.book.src = core.statusBar.icons.paint.src;
-    core.statusBar.image.fly.src = core.statusBar.icons.erase.src;
-    core.statusBar.image.toolbox.src = core.statusBar.icons.empty.src;
-    core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
-    core.statusBar.image.book.style.opacity = 1;
-    core.statusBar.image.fly.style.opacity = 1;
-}
-
 ////// 绘制帮助页面 //////
 ui.prototype.drawHelp = function () {
     core.clearUI();
@@ -2847,12 +2799,12 @@ ui.prototype.drawHelp = function () {
             "\t[键盘快捷键列表]"+
             "[CTRL] 跳过对话   [Z] 转向\n" +
             "[X] 怪物手册   [G] 楼层传送\n" +
-            "[A] 读取自动存档   [S/D] 存读档页面\n" +
+            "[A] 读取自动存档   [W] 撤销读取自动存档\n" + 
+            "[S/D] 存读档页面   [SPACE] 轻按\n" +
             "[V] 快捷商店   [ESC] 系统菜单\n" +
             "[T] 道具页面   [Q] 装备页面\n" +
             "[B] 数据统计   [H] 帮助页面\n" +
             "[R] 回放录像   [E] 显示光标\n" +
-            "[SPACE] 轻按   [M] 绘图模式\n" +
             "[N] 返回标题页面   [P] 游戏主页\n" +
             "[O] 查看工程   [F7] 打开debug穿墙模式\n" +
             "[PgUp/PgDn] 浏览地图\n"+

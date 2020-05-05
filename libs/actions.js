@@ -38,17 +38,14 @@ actions.prototype._init = function () {
     this.registerAction('keyUp', '_sys_keyUp', this._sys_keyUp, 0);
     // --- ondown注册
     this.registerAction('ondown', '_sys_checkReplay', this._sys_checkReplay, 100);
-    this.registerAction('ondown', '_sys_ondown_paint', this._sys_ondown_paint, 60);
     this.registerAction('ondown', '_sys_ondown_lockControl', this._sys_ondown_lockControl, 30);
     this.registerAction('ondown', '_sys_ondown', this._sys_ondown, 0);
     // --- onmove注册
     this.registerAction('onmove', '_sys_checkReplay', this._sys_checkReplay, 100);
-    this.registerAction('onmove', '_sys_onmove_paint', this._sys_onmove_paint, 50);
     this.registerAction('onmove', '_sys_onmove_choices', this._sys_onmove_choices, 30);
     this.registerAction('onmove', '_sys_onmove', this._sys_onmove, 0);
     // --- onup注册
     this.registerAction('onup', '_sys_checkReplay', this._sys_checkReplay, 100);
-    this.registerAction('onup', '_sys_onup_paint', this._sys_onup_paint, 50);
     this.registerAction('onup', '_sys_onup', this._sys_onup, 0);
     // --- onclick注册
     this.registerAction('onclick', '_sys_checkReplay', this._sys_checkReplay, 100);
@@ -400,9 +397,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'centerFly':
             this._keyUpCenterFly(keyCode);
             break;
-        case 'paint':
-            this._keyUpPaint(keyCode);
-            break;
     }
     return true;
 }
@@ -423,14 +417,6 @@ actions.prototype.ondown = function (loc) {
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
     var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
     this.doRegisteredAction('ondown', x, y, px, py);
-}
-
-actions.prototype._sys_ondown_paint = function (x, y, px, py) {
-    // 画板
-    if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this._ondownPaint(px, py);
-        return true;
-    }
 }
 
 actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
@@ -482,14 +468,6 @@ actions.prototype.onmove = function (loc) {
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
     var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
     this.doRegisteredAction('onmove', x, y, px, py);
-}
-
-actions.prototype._sys_onmove_paint = function (x, y, px, py) {
-    // 画板
-    if (core.status.played && (core.status.event || {}).id == 'paint') {
-        core.actions._onmovePaint(px, py);
-        return true;
-    }
 }
 
 actions.prototype._sys_onmove_choices = function (x, y) {
@@ -544,14 +522,6 @@ actions.prototype.onup = function (loc) {
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
     var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
     this.doRegisteredAction('onup', x, y, px, py);
-}
-
-actions.prototype._sys_onup_paint = function () {
-    // 画板
-    if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this._onupPaint();
-        return true;
-    }
 }
 
 actions.prototype._sys_onup = function () {
@@ -1222,11 +1192,6 @@ actions.prototype._clickViewMaps = function (x, y) {
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x <= per - 2 && y >= this.SIZE + 1 - per) {
-        core.status.event.data.paint = !core.status.event.data.paint;
-        core.ui.drawMaps(index, cx, cy);
-        return;
-    }
     if (x >= this.SIZE + 1 - per && y <= per - 2) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);
@@ -1307,11 +1272,6 @@ actions.prototype._keyUpViewMaps = function (keycode) {
     }
     if (keycode == 90) {
         core.status.event.data.all = !core.status.event.data.all;
-        core.ui.drawMaps(core.status.event.data);
-        return;
-    }
-    if (keycode == 77) {
-        core.status.event.data.paint = !core.status.event.data.paint;
         core.ui.drawMaps(core.status.event.data);
         return;
     }
@@ -2122,20 +2082,16 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawMaps();
                 break;
             case 3:
-                core.clearUI();
-                core.ui.drawPaint();
-                break;
-            case 4:
                 core.status.event.selection = 0;
                 core.ui.drawSyncSave();
                 break;
-            case 5:
+            case 4:
                 core.status.event.selection = 0;
                 core.ui.drawGameInfo();
                 break;
-            case 6:
+            case 5:
                 return core.confirmRestart();
-            case 7:
+            case 6:
                 core.ui.closePanel();
                 break;
         }
@@ -2628,107 +2584,3 @@ actions.prototype._keyUpCursor = function (keycode) {
         return;
     }
 }
-
-////// 绘图相关 //////
-
-actions.prototype._ondownPaint = function (x, y) {
-    x += core.bigmap.offsetX;
-    y += core.bigmap.offsetY;
-    if (!core.status.event.data.erase) {
-        core.dymCanvas.paint.beginPath();
-        core.dymCanvas.paint.moveTo(x, y);
-    }
-    core.status.event.data.x = x;
-    core.status.event.data.y = y;
-}
-
-actions.prototype._onmovePaint = function (x, y) {
-    if (core.status.event.data.x == null) return;
-    x += core.bigmap.offsetX;
-    y += core.bigmap.offsetY;
-    if (core.status.event.data.erase) {
-        core.clearMap('paint', x - 10, y - 10, 20, 20);
-        return;
-    }
-    var midx = (core.status.event.data.x + x) / 2, midy = (core.status.event.data.y + y) / 2;
-    core.dymCanvas.paint.quadraticCurveTo(midx, midy, x, y);
-    core.dymCanvas.paint.stroke();
-    core.status.event.data.x = x;
-    core.status.event.data.y = y;
-}
-
-actions.prototype._onupPaint = function () {
-    core.status.event.data.x = null;
-    core.status.event.data.y = null;
-    // 保存
-    core.paint[core.status.floorId] = lzw_encode(core.utils._encodeCanvas(core.dymCanvas.paint).join(","));
-}
-
-actions.prototype.setPaintMode = function (mode) {
-    if (mode == 'paint') core.status.event.data.erase = false;
-    else if (mode == 'erase') core.status.event.data.erase = true;
-    else return;
-
-    core.drawTip("进入" + (core.status.event.data.erase ? "擦除" : "绘图") + "模式");
-}
-
-actions.prototype.clearPaint = function () {
-    core.clearMap('paint');
-    delete core.paint[core.status.floorId];
-    core.drawTip("已清空绘图内容");
-}
-
-actions.prototype.savePaint = function () {
-    var data = {};
-    for (var floorId in core.paint) {
-        if (core.paint[floorId])
-            data[floorId] = lzw_decode(core.paint[floorId]);
-    }
-    core.download(core.firstData.name + ".h5paint", JSON.stringify({
-        'name': core.firstData.name,
-        'paint': data
-    }));
-}
-
-actions.prototype.loadPaint = function () {
-    core.readFile(function (obj) {
-        if (obj.name != core.firstData.name) {
-            alert("绘图文件和游戏不一致！");
-            return;
-        }
-        if (!obj.paint) {
-            alert("无效的绘图文件！");
-            return;
-        }
-        core.paint = {};
-        for (var floorId in obj.paint) {
-            if (obj.paint[floorId])
-                core.paint[floorId] = lzw_encode(obj.paint[floorId]);
-        }
-
-        core.clearMap('paint');
-        var value = core.paint[core.status.floorId];
-        if (value) value = lzw_decode(value).split(",");
-        core.utils._decodeCanvas(value, 32 * core.bigmap.width, 32 * core.bigmap.height);
-        core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
-
-        core.drawTip("读取绘图文件成功");
-    })
-}
-
-actions.prototype.exitPaint = function () {
-    core.deleteCanvas('paint');
-    core.ui.closePanel();
-    core.statusBar.image.keyboard.style.opacity = 1;
-    core.statusBar.image.shop.style.opacity = 1;
-    core.drawTip("退出绘图模式");
-}
-
-actions.prototype._keyUpPaint = function (keycode) {
-    if (keycode == 27 || keycode == 88 || keycode == 77 || keycode == 13 || keycode == 32 || keycode == 67) {
-        this.exitPaint();
-        return;
-    }
-}
-
-////// 绘图相关 END //////

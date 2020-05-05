@@ -832,7 +832,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	case 90: // Z：转向
 		core.turnHero();
 		break;
-	case 75:
 	case 86: // V：打开快捷商店列表
 		core.openQuickShop(true);
 		break;
@@ -845,9 +844,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	case 33:
 	case 34: // PgUp/PgDn：浏览地图
 		core.ui.drawMaps();
-		break;
-	case 77: // M：绘图模式
-		core.ui.drawPaint();
 		break;
 	case 66: // B：打开数据统计
 		core.ui.drawStatistics();

@@ -1894,8 +1894,8 @@ core.drawStatistics()
 绘制数据统计。将从脚本编辑中获得要统计的数据列表，再遍历所有地图进行统计。
 
 
-core.drawAbout() / core.drawPaint() / core.drawHelp()
-绘制关于界面，绘图模式，帮助界面。
+core.drawAbout() / core.drawHelp()
+绘制关于界面，帮助界面。
 
 // ------ 动态创建画布相关的API ------ //
 
@@ -2103,10 +2103,6 @@ core.matchWildcard(pattern, string)
 core.encodeBase64(str) / core.decodeBase64(str)
 将字符串进行base64加密或解密。
 可用于解压缩录像数据
-
-
-core.convertBase(str, fromBase, toBase)
-任意进制转换。此函数可能执行的非常慢，慎用。
 
 
 core.rand(num)

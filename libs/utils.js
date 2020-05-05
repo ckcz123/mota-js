@@ -713,26 +713,6 @@ utils.prototype.decodeBase64 = function (str) {
     }).join(''));
 }
 
-////// 任意进制转换 //////
-utils.prototype.convertBase = function (str, fromBase, toBase) {
-    var map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={}[]\\|:;<>,.?/";
-    if (fromBase == toBase) return str;
-    var len = str.length, ans = "";
-    var t = [];
-    for (var i = 0; i < len; i++) t[i] = map.indexOf(str.charAt(i));
-    t[len] = 0;
-    while (len > 0) {
-        for (var i = len; i >= 1; i--) {
-            t[i - 1] += t[i] % toBase * fromBase;
-            t[i] = parseInt(t[i] / toBase);
-        }
-        ans += map.charAt(t[0] % toBase);
-        t[0] = parseInt(t[0] / toBase);
-        while (len > 0 && t[len - 1] == 0) len--;
-    }
-    return ans;
-}
-
 utils.prototype.rand = function (num) {
     var rand = core.getFlag('__rand__');
     rand = this.__next_rand(rand);

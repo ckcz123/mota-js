@@ -1984,8 +1984,10 @@ actions.prototype._clickSwitchs = function (x, y) {
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 2 && selection != 3) return;
-        if (x != this.HSIZE - 2 && x != this.HSIZE + 2) return;
     }
+    var width = choices[selection].width;
+    var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
+    var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
     if (selection >= 0 && selection < choices.length) {
         core.status.event.selection = selection;
         switch (selection) {
@@ -1994,12 +1996,12 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                if (x == this.HSIZE - 2) return this._clickSwitchs_userVolume(-1);
-                if (x == this.HSIZE + 2) return this._clickSwitchs_userVolume(1);
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_userVolume(-1);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_userVolume(1);
                 return;
             case 3:
-                if (x == this.HSIZE - 2) return this._clickSwitchs_moveSpeed(-10);
-                if (x == this.HSIZE + 2) return this._clickSwitchs_moveSpeed(10);
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_moveSpeed(-10);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_moveSpeed(10);
                 return;
             case 4:
                 return this._clickSwitchs_displayEnemyDamage();
@@ -2032,6 +2034,7 @@ actions.prototype._clickSwitchs_sound = function () {
 
 actions.prototype._clickSwitchs_userVolume = function (delta) {
     var value = Math.round(Math.sqrt(100 * core.musicStatus.userVolume));
+    if (value == 0 && delta < 0) return;
     core.musicStatus.userVolume = core.clamp(Math.pow(value + delta, 2) / 100, 0, 1);
     //audioContext 音效 不受designVolume 影响
     if (core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;

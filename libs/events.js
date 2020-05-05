@@ -1386,6 +1386,12 @@ events.prototype._action_changeFloor = function (data, x, y, prefix) {
 
 events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
+    if (data.x == null && data.y == null && data.direction) {
+        core.setHeroLoc('direction', data.direction, true);
+        core.drawHero();
+        return core.doAction();
+    }
+
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     core.setHeroLoc('x', loc[0]);
     core.setHeroLoc('y', loc[1]);

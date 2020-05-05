@@ -1434,19 +1434,15 @@ events.prototype._precompile_moveImage = function (data) {
     return data;
 }
 
-events.prototype._action_setFg = function (data, x, y, prefix) {
-    return this._action_setCurtain(data, x, y, prefix);
-}
-
 events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
         core.setCurtain(data.color, data.time);
-        core.setFlag('__color__', data.color || null);
+        if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
         core.doAction();
     }
     else {
         core.setCurtain(data.color, data.time, function () {
-            core.setFlag('__color__', data.color || null);
+            if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
             core.doAction();
         });
     }
@@ -1458,7 +1454,7 @@ events.prototype._action_screenFlash = function (data, x, y, prefix) {
 
 events.prototype._action_setWeather = function (data, x, y, prefix) {
     core.setWeather(data.name, data.level);
-    if (data.name == 'rain' || data.name == 'snow' || data.name == 'fog')
+    if ((data.name == 'rain' || data.name == 'snow' || data.name == 'fog') && data.keep)
         core.setFlag('__weather__', [data.name, data.level]);
     else core.removeFlag('__weather__');
     core.doAction();

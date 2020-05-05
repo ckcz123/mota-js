@@ -1525,19 +1525,20 @@ return code;
 */;
 
 setCurtain_0_s
-    :   '更改画面色调' EvalString Colour '动画时间' Int? '不等待执行完毕' Bool Newline
+    :   '更改画面色调' EvalString Colour '动画时间' Int? '持续到下一个本事件' Bool '不等待执行完毕' Bool Newline
     
 
 /* setCurtain_0_s
 tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
-default : ["255,255,255,1",'rgba(255,255,255,1)',500,false]
+default : ["255,255,255,1",'rgba(255,255,255,1)',500,true,false]
 colour : this.soundColor
 var colorRe = MotaActionFunctions.pattern.colorRe;
 if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
-var async = Bool_0?', "async": true':'';
-var code = '{"type": "setCurtain", "color": ['+EvalString_0+']'+Int_0 +async+'},\n';
+Bool_0 = Bool_0 ? ', "keep": true' : '';
+var async = Bool_1?', "async": true':'';
+var code = '{"type": "setCurtain", "color": ['+EvalString_0+']'+Int_0 +Bool_0+async+'},\n';
 return code;
 */;
 
@@ -1573,16 +1574,17 @@ return code;
 */;
 
 setWeather_s
-    :   '更改天气' Weather_List '强度' Int Newline
+    :   '更改天气' Weather_List '强度' Int '持续到下个本事件' Bool Newline
     
 
 /* setWeather_s
 tooltip : setWeather：更改天气
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setweather%EF%BC%9A%E6%9B%B4%E6%94%B9%E5%A4%A9%E6%B0%94
-default : [null,1]
+default : [null,1,true]
 colour : this.soundColor
 if(Int_0<1 || Int_0>10) throw new Error('天气的强度等级, 在1-10之间');
-var code = '{"type": "setWeather", "name": "'+Weather_List_0+'", "level": '+Int_0+'},\n';
+Bool_0 = Bool_0 ? ', "keep": true' : ''
+var code = '{"type": "setWeather", "name": "'+Weather_List_0+'", "level": '+Int_0+Bool_0+'},\n';
 if(Weather_List_0===''||Weather_List_0==='null'||Weather_List_0==null)code = '{"type": "setWeather"},\n';
 return code;
 */;
@@ -3335,12 +3337,11 @@ ActionParser.prototype.parseAction = function() {
             this.next]);
         }
         break;
-    case "setFg": // 颜色渐变
-    case "setCurtain":
+    case "setCurtain": // 颜色渐变
       if(this.isset(data.color)){
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['setCurtain_0_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time||0,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time||0,data.keep||false,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setCurtain_1_s'].xmlText([
           data.time||0,data.async||false,this.next]);
@@ -3353,7 +3354,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([
-        data.name,data.level||1,this.next]);
+        data.name,data.level||1,data.keep||false,this.next]);
       break;
     case "openDoor": // 开一个门, 包括暗墙
       data.loc=data.loc||['','']

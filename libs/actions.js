@@ -995,6 +995,7 @@ actions.prototype._clickAction = function (x, y) {
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
             var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
             if (y >= topIndex && y < topIndex + choices.length) {
+                clearTimeout(core.status.event.interval);
                 // 选择
                 core.status.route.push("choices:" + (y - topIndex));
                 core.insertAction(choices[y - topIndex].action);
@@ -1006,11 +1007,13 @@ actions.prototype._clickAction = function (x, y) {
 
     if (core.status.event.data.type == 'confirm') {
         if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1) {
+            clearTimeout(core.status.event.interval);
             core.status.route.push("choices:0");
             core.insertAction(core.status.event.ui.yes);
             core.doAction();
         }
         else if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
+            clearTimeout(core.status.event.interval);
             core.status.route.push("choices:1");
             core.insertAction(core.status.event.ui.no);
             core.doAction();

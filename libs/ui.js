@@ -1409,7 +1409,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         core.fillText('ui', choices[i].text, offset, vPos.choice_top + 32 * i, color);
     }
 
-    if (choices.length>0) {
+    if (choices.length>0 && core.status.event.selection != 'none') {
         core.status.event.selection = core.status.event.selection || 0;
         while (core.status.event.selection < 0) core.status.event.selection += choices.length;
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
@@ -1435,7 +1435,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         core.status.event.data = {'yes': yesCallback, 'no': noCallback};
     }
 
-    if (core.status.event.selection != 0) core.status.event.selection = 1;
+    if (core.status.event.selection != 0 && core.status.event.selection != 'none') core.status.event.selection = 1;
     this.clearUI();
 
     core.setFont('ui', this._buildFont(19, true));
@@ -1451,14 +1451,15 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     core.fillText('ui', "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
     core.fillText('ui', "取消", this.HPIXEL + 38, rect.bottom - 35);
-    var len=core.calWidth('ui', "确定");
-    var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
-
-    if (isWindowSkin)
-        this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
-    else
-        core.strokeRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, "#FFD700", 2);
-
+    if (core.status.event.selection != 'none') {
+        var len=core.calWidth('ui', "确定");
+        var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
+    
+        if (isWindowSkin)
+            this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+        else
+            core.strokeRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, "#FFD700", 2);
+    }
 }
 
 ui.prototype._drawConfirmBox_getRect = function (contents) {

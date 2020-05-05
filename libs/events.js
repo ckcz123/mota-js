@@ -895,6 +895,7 @@ events.prototype.doAction = function (keepUI) {
         // 清空boxAnimate和UI层
         core.clearUI();
         clearInterval(core.status.event.interval);
+        clearTimeout(core.status.event.interval);
         core.status.event.interval = null;
     }
     // 判定是否执行完毕
@@ -1763,21 +1764,27 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     })
     if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
-        var action = core.status.replay.toReplay.shift(), index;
+        var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
-        if (action.indexOf("choices:") == 0 && ((index = parseInt(action.substring(8))) >= 0) && index < data.choices.length) {
-            core.status.event.selection = index;
-            setTimeout(function () {
-                core.status.route.push("choices:" + index);
-                core.insertAction(data.choices[index].action);
-                core.doAction();
-            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
+        if (action.indexOf('choices:') == 0) {
+            var index = action.substring(8);
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
+                core.status.event.selection = index;
+                setTimeout(function () {
+                    core.status.route.push("choices:"+index);
+                    if (index != 'none') {
+                        core.insertAction(data.choices[index].action);
+                    }
+                    core.doAction();
+                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+            }
         }
-        else {
-            core.control._replay_error(action);
-            return;
-        }
+    } else if (data.timeout) {
+        core.status.event.interval = setTimeout(function () {
+            core.status.route.push("choices:none");
+            core.doAction();
+        }, data.timeout);
     }
     core.ui.drawChoices(data.text, data.choices);
 }
@@ -1795,25 +1802,35 @@ events.prototype._precompile_choices = function (data) {
 events.prototype._action_confirm = function (data, x, y, prefix) {
     core.status.event.ui = {"text": data.text, "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
-        var action = core.status.replay.toReplay.shift(), index;
+        var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
-        if (action.indexOf("choices:") == 0 && ((index = parseInt(action.substring(8))) >= 0) && index < 2) {
-            core.status.event.selection = index;
-            setTimeout(function () {
-                core.status.route.push("choices:" + index);
-                if (index == 0) core.insertAction(data.yes);
-                else core.insertAction(data.no);
-                core.doAction();
-            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
-        }
-        else {
+        if (action.indexOf('choices:') == 0) {
+            var index = action.substring(8);
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < 2) {
+                core.status.event.selection = index;
+                setTimeout(function () {
+                    core.status.route.push("choices:"+index);
+                    if (index != 'none') {
+                        if (index == 0) core.insertAction(data.yes);
+                        else core.insertAction(data.no);
+                    }
+                    core.doAction();
+                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+            }
+        } else {
             core.control._replay_error(action);
             return;
         }
     }
     else {
         core.status.event.selection = data["default"] ? 0 : 1;
+        if (data.timeout) {
+            core.status.event.interval = setTimeout(function () {
+                core.status.route.push("choices:none");
+                core.doAction();
+            }, data.timeout);
+        }
     }
     core.ui.drawConfirmBox(data.text);
 }

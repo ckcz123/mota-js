@@ -1895,13 +1895,13 @@ return code;
 */;
 
 choices_s
-    :   '选项' ':' EvalString? BGNL? '标题' EvalString? '图像' IdString? BGNL? Newline choicesContext+ BEND Newline
+    :   '选项' ':' EvalString? BGNL? '标题' EvalString? '图像' IdString? '超时毫秒数' Int BGNL? Newline choicesContext+ BEND Newline
 
 
 /* choices_s
 tooltip : choices: 给用户提供选项
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["","流浪者","woman"]
+default : ["","流浪者","woman",0]
 var title='';
 if (EvalString_1==''){
     if (IdString_0=='')title='';
@@ -1912,7 +1912,8 @@ if (EvalString_1==''){
 }
 EvalString_0 = title+EvalString_0;
 EvalString_0 = EvalString_0 ?(', "text": "'+EvalString_0+'"'):'';
-var code = ['{"type": "choices"',EvalString_0,', "choices": [\n',
+Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
+var code = ['{"type": "choices"',EvalString_0,Int_0,', "choices": [\n',
     choicesContext_0,
 ']},\n'].join('');
 return code;
@@ -1941,14 +1942,15 @@ return code;
 */;
 
 confirm_s
-    :   '显示确认框' ':' EvalString BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
+    :   '显示确认框' ':' EvalString '超时毫秒数' Int BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
 
 /* confirm_s
 tooltip : 弹出确认框
 helpUrl : https://h5mota.com/games/template/_docs/#/
-default : ["确认要xxx吗?",false]
+default : ["确认要xxx吗?",0,false]
 Bool_0 = Bool_0?', "default": true':''
-var code = ['{"type": "confirm"'+Bool_0+', "text": "',EvalString_0,'",\n',
+Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
+var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_0,'",\n',
     '"yes": [\n',action_0,'],\n',
     '"no": [\n',action_1,']\n',
 '},\n'].join('');
@@ -3508,7 +3510,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "confirm": // 显示确认框
       this.next = MotaActionBlocks['confirm_s'].xmlText([
-        this.EvalString(data.text), data["default"],
+        this.EvalString(data.text), data.timeout||0, data["default"],
         this.insertActionList(data["yes"]),
         this.insertActionList(data["no"]),
         this.next]);
@@ -3534,7 +3536,7 @@ ActionParser.prototype.parseAction = function() {
       if (!this.isset(data.text)) data.text = '';
       var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['choices_s'].xmlText([
-        info[3],info[0],info[1],text_choices,this.next]);
+        info[3],info[0],info[1],data.timeout||0,text_choices,this.next]);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([

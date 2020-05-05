@@ -90,6 +90,10 @@ maps.prototype.getBlockByNumber = function (number) {
     return core.status.number2Block[number] = this.initBlock(null, null, number, true);
 }
 
+maps.prototype.getBlockById = function (id) {
+    return this.getBlockByNumber(this.getNumberById(id));
+}
+
 ////// 数字和ID的对应关系 //////
 maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable = null;

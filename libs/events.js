@@ -409,39 +409,52 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         });
         return;
     }
-    core.playSound("door.mp3");
     this._openDoor_animate(id, x, y, callback);
 }
 
 events.prototype._openDoor_check = function (id, x, y, needKey) {
-    // 是否存在门或暗墙
-    if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
-        || core.material.icons.animates[id] == null) {
+    var clearAndReturn = function () {
         core.clearContinueAutomaticRoute();
         return false;
     }
 
+    // 是否存在门或暗墙
+    if (core.material.icons.animates[id] == null) {
+        return clearAndReturn();
+    }
+
     if (id == 'steelDoor' && core.flags.steelDoorWithoutKey)
         needKey = false;
-
-    if (needKey && id.endsWith("Door")) {
-        var key = id.replace("Door", "Key");
-        if (!core.hasItem(key)) {
-            if (key != "specialKey")
-                core.drawTip("你没有" + ((core.material.items[key] || {}).name || "钥匙"), null, true);
-            else core.drawTip("无法开启此门", null, true);
-            core.clearContinueAutomaticRoute();
-            return false;
+    var doorInfo = core.getBlockById(id).event;
+    if (doorInfo == null || doorInfo.doorInfo == null)
+        return clearAndReturn();
+    doorInfo = doorInfo.doorInfo;
+    // Check all keys
+    var keyInfo = doorInfo[0];
+    if (needKey) {
+        if (keyInfo == null) {
+            core.drawTip("无法开启此门", null, true);
+            return clearAndReturn();
+        }
+        for (var keyName in keyInfo) {
+            var keyValue = keyInfo[keyName];
+            if (core.itemCount(keyName) < keyValue) {
+                core.drawTip("你没有" + ((core.material.items[keyName] || {}).name || "钥匙"), null, true);
+                return false;
+            }
         }
         if (!core.status.event.id) core.autosave(true);
-        core.removeItem(key);
+        for (var keyName in keyInfo) {
+            core.removeItem(keyName, keyInfo[keyName]);
+        }
     }
+    core.playSound(doorInfo[1] || 'door.mp3');
     return true;
 }
 
 events.prototype._openDoor_animate = function (id, x, y, callback) {
     var door = core.material.icons.animates[id];
-    var speed = id.endsWith("Door") ? 30 : 70;
+    var speed = 40;
 
     var locked = core.status.lockControl;
     core.lockControl();
@@ -2455,15 +2468,20 @@ events.prototype.setGlobalFlag = function (name, value) {
 
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
-    if (!(id.endsWith("Door") || id.endsWith("Wall"))
-        || core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
+    if (core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }
+    var doorInfo = (core.getBlockById(id).event || {}).doorInfo;
+    if (doorInfo == null) {
+        if (callback) callback();
+        return;
+    }
+
     // 关门动画
-    core.playSound('door.mp3');
+    core.playSound(doorInfo[2] || 'door.mp3');
     var door = core.material.icons.animates[id];
-    var speed = id.endsWith("Door") ? 30 : 70, state = 0;
+    var speed = 40, state = 0;
     var animate = window.setInterval(function () {
         state++;
         if (state == 4) {

@@ -295,6 +295,11 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "thiseval==~~thiseval||thiseval==null",
 					"_data": "该图块的全局动画帧数。\n如果此项为null，则对于除了npc48外，使用素材默认帧数；npc48默认是1帧（即静止）。"
 				},
+				"doorInfo": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_data": "该图块的门信息，是一个三元数组。\n第一项为所需要的钥匙信息，第二项为开此门时的音效，第三项为关此门时的音效。仅对animates生效。"
+				},
 				"faceIds": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -452,9 +457,9 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "object",
 							"_leaf": false,
 							"_action": function (args) {
-								args.vobj=args.vobj||{};
-								for(var ii=0;ii<2;ii++){
-									args.vobj[ii]=args.vobj[ii]||null;
+								args.vobj = args.vobj || {};
+								for (var ii = 0; ii < 2; ii++) {
+									args.vobj[ii] = args.vobj[ii] || null;
 								}
 							},
 							"_data": function (key) {

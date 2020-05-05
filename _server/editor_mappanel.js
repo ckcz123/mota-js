@@ -742,7 +742,13 @@ editor_mappanel_wrapper = function (editor) {
         return;
     }
 
+    editor.uifunctions.clearLastUsedBtn_click = function () {
+        if (editor.isMobile) return;
 
+        editor.uivalues.lastUsed = [];
+        editor.config.set('lastUsed', []);
+        editor.updateLastUsedMap();
+    }
 
     /////////////////////////////////////////////////////////////////////////////
 

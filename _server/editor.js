@@ -52,6 +52,7 @@ function editor() {
         left1 : document.getElementById('left1'),
         editModeSelect :document.getElementById('editModeSelect'),
         mid2 : document.getElementById('mid2'),
+        clearLastUsedBtn: document.getElementById('clearLastUsedBtn'),
         lastUsedDiv: document.getElementById('lastUsedDiv'),
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),

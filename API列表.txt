@@ -1625,7 +1625,7 @@ core.drawBoxAnimate()
 绘制UI层的box动画，如怪物手册和对话框中的帧动画等。
 
 
-core.drawAnimate(name, x, y, callback)
+core.drawAnimate(name, x, y, alignWindow, callback)
 绘制一个动画。name为动画名，x和y为绘制的基准坐标，callback为绘制完毕的回调函数。
 此函数将播放动画音效，并异步开始绘制该动画。
 此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。

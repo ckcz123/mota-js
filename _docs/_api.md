@@ -489,7 +489,7 @@ core.maps.removeBlockByIds(floorId, ids)
 根据索引删除或禁用若干块。
 
 
-core.maps.drawAnimate(name, x, y, callback)
+core.maps.drawAnimate(name, x, y, alignWindow, callback)
 播放一段动画，name为动画名（需在全塔属性注册），x和y为坐标（0-12之间），callback可选，为播放完毕的回调函数。
 播放过程是异步的，如需等待播放完毕请使用insertAction插入一条type:waitAsync事件。
 此函数将随机返回一个数字id，为此异步动画的唯一标识符。

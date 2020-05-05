@@ -1355,7 +1355,7 @@ return code;
 */;
 
 animate_s
-    :   '显示动画' IdString '位置' EvalString? '不等待执行完毕' Bool Newline
+    :   '显示动画' IdString '位置' EvalString? '相对窗口坐标' Bool '不等待执行完毕' Bool Newline
     
 
 /* animate_s
@@ -1374,8 +1374,9 @@ if (EvalString_0) {
     throw new Error('此处只能填hero或者1,2形式的位置,或者不填代表当前事件点');
   }
 }
-var async = Bool_0?', "async": true':'';
-var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+async+'},\n';
+Bool_0 = Bool_0?', "alignWindow": true':'';
+var async = Bool_1?', "async": true':'';
+var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+Bool_0+async+'},\n';
 return code;
 */;
 
@@ -3282,7 +3283,7 @@ ActionParser.prototype.parseAction = function() {
       var animate_loc = data.loc||'';
       if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
       this.next = MotaActionBlocks['animate_s'].xmlText([
-        data.name,animate_loc,data.async||false,this.next]);
+        data.name,animate_loc,data.alignWindow||false,data.async||false,this.next]);
       break;
     case "setViewport": // 设置视角
       data.loc = data.loc||['',''];

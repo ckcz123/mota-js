@@ -1333,7 +1333,7 @@ events.prototype._action_animate = function (data, x, y, prefix) {
         this.__action_doAsyncFunc(data.async, core.drawHeroAnimate, data.name);
     } else {
         data.loc = this.__action_getLoc(data.loc, x, y, prefix);
-        this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+        this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1], data.alignWindow);
     }
 }
 

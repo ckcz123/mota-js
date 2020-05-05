@@ -1203,7 +1203,7 @@ declare class maps {
      * @param callback 动画停止后的回调函数，可选
      * @returns 一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
      */
-    drawAnimate(name: string, x: number, y: number, callback?: () => void): number
+    drawAnimate(name: string, x: number, y: number, alignWindow: boolean, callback?: () => void): number
 }
 
 /** @file items.js 主要负责一切和道具相关的内容。 */

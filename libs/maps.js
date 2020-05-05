@@ -2055,7 +2055,7 @@ maps.prototype.drawBoxAnimate = function () {
 }
 
 ////// 绘制动画 //////
-maps.prototype.drawAnimate = function (name, x, y, callback) {
+maps.prototype.drawAnimate = function (name, x, y, alignWindow, callback) {
     name = core.getMappedName(name);
 
     // 正在播放录像：不显示动画
@@ -2066,6 +2066,10 @@ maps.prototype.drawAnimate = function (name, x, y, callback) {
 
     // 开始绘制
     var animate = core.material.animates[name], centerX = 32 * x + 16, centerY = 32 * y + 16;
+    if (alignWindow) {
+        centerX += core.bigmap.offsetX;
+        centerY += core.bigmap.offsetY;
+    }
     // 播放音效
     core.playSound(animate.se);
 

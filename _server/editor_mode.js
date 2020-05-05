@@ -167,6 +167,25 @@ editor_mode = function (editor) {
         return true
     }
 
+    editor_mode.prototype.checkImages = function (thiseval) {
+        if (!editor_mode.checkUnique(thiseval)) return false;
+        fs.readdir('project/images', function (err, data) {
+            if (err) {
+                printe(err);
+                throw Error(err);
+            }
+            thiseval.map(function (v) {
+                var name = v.indexOf('.') < 0 ? (v+'.png') : v;
+                if (data.indexOf(name) < 0) notExist = name;
+                return name;
+            });
+            if (notExist) {
+                alert('警告！图片' + notExist + '不存在！保存可能导致工程无法打开，请及时修改！');
+            }
+        });
+        return true;
+    }
+
     editor_mode.prototype.changeDoubleClickModeByButton = function (mode) {
         ({
             delete: function () {

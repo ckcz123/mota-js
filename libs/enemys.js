@@ -115,27 +115,6 @@ enemys.prototype.canBattle = function (enemy, x, y, floorId) {
     return damage != null && damage < core.status.hero.hp;
 }
 
-////// 获得某个怪物的伤害 //////
-enemys.prototype.getDamage = function (enemy, x, y, floorId) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = this._calDamage(enemy, null, x, y, floorId);
-    if (damage == null) return null;
-    return damage + this.getExtraDamage(enemy, x, y, floorId);
-}
-
-////// 获得某个怪物的额外伤害 //////
-enemys.prototype.getExtraDamage = function (enemy, x, y, floorId) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var extra_damage = 0;
-    if (this.hasSpecial(enemy.special, 17)) { // 仇恨
-        extra_damage += core.getFlag('hatred', 0);
-    }
-    if (this.hasSpecial(enemy.special, 22)) { // 固伤
-        extra_damage += enemy.damage || 0;
-    }
-    return extra_damage;
-}
-
 enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId);
@@ -281,8 +260,8 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     k = k || 1;
-    var nowDamage = this._calDamage(enemy, null, x, y, floorId);
-    var nextDamage = this._calDamage(enemy, {"def": core.status.hero.def + k}, x, y, floorId);
+    var nowDamage = this._getDamage(enemy, null, x, y, floorId);
+    var nextDamage = this._getDamage(enemy, {"def": core.status.hero.def + k}, x, y, floorId);
     if (nowDamage == null || nextDamage == null) return "???";
     return nowDamage - nextDamage;
 }
@@ -300,7 +279,11 @@ enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
 }
 
 ////// 获得在某个勇士属性下怪物伤害 //////
-enemys.prototype._calDamage = function (enemy, hero, x, y, floorId) {
+enemys.prototype.getDamage = function (enemy, x, y, floorId) {
+    return this._getDamage(enemy, null, x, y, floorId);
+}
+
+enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
 
     var info = this.getDamageInfo(enemy, hero, x, y, floorId);

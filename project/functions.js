@@ -768,6 +768,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (!core.flags.enableNegativeDamage)
 		damage = Math.max(0, damage);
 
+	// 最后处理仇恨和固伤（因为这两个不能被魔防减伤）
+	if (core.hasSpecial(mon_special, 17)) { // 仇恨
+		damage += core.getFlag('hatred', 0);
+	}
+	if (core.hasSpecial(mon_special, 22)) { // 固伤
+		damage += enemy.damage || 0;
+	}
+
 	return {
 		"mon_hp": Math.floor(mon_hp),
 		"mon_atk": Math.floor(mon_atk),

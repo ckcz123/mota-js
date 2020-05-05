@@ -750,8 +750,10 @@ maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y) {
 maps.prototype.generateGroundPattern = function (floorId) {
     // 生成floorId层的groundPattern（盒子内的怪物动画）
     var groundId = ((core.status.maps || core.floors)[floorId || core.status.floorId] || {}).defaultGround || "ground";
+    var groundInfo = core.getBlockInfo(groundId);
+    if (groundInfo == null) return;
     core.material.groundCanvas.clearRect(0, 0, 32, 32);
-    core.material.groundCanvas.drawImage(core.material.images.terrains, 0, 32 * core.material.icons.terrains[groundId], 32, 32, 0, 0, 32, 32);
+    core.material.groundCanvas.drawImage(groundInfo.image, 32 * groundInfo.posX, groundInfo.height * groundInfo.posY, 32, 32, 0, 0, 32, 32);
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
     // 如果需要用纯色可以直接将下面代码改成改成
     // core.material.groundPattern = '#000000';
@@ -820,11 +822,11 @@ maps.prototype.drawBg = function (floorId, ctx) {
 maps.prototype._drawBg_drawBackground = function (floorId, ctx) {
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
     var groundId = (core.status.maps || core.floors)[floorId].defaultGround || "ground";
-    var yOffset = core.material.icons.terrains[groundId];
-    if (yOffset != null) {
+    var groundInfo = core.getBlockInfo(groundId);
+    if (groundInfo != null) {
         for (var i = 0; i < width; i++) {
             for (var j = 0; j < height; j++) {
-                ctx.drawImage(core.material.images.terrains, 0, yOffset * 32, 32, 32, i * 32, j * 32, 32, 32);
+                ctx.drawImage(groundInfo.image, 32 * groundInfo.posX, groundInfo.height * groundInfo.posY, 32, 32, i * 32, j * 32, 32, 32);
             }
         }
     }

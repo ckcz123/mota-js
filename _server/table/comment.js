@@ -401,11 +401,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"defaultGround": {
 							"_leaf": true,
-							"_type": "select",
-							"_select": {
-								"values": Object.keys(editor.core.icons.icons.terrains)
-							},
-							"_data": "默认地面的图块ID，此项修改后需要刷新才能看到效果。"
+							"_type": "textarea",
+							"_data": "默认地面的图块ID，此项修改后需要刷新才能看到效果。不填则默认是ground"
 						},
 						"images": {
 							"_leaf": true,

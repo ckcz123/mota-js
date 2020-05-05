@@ -1361,7 +1361,7 @@ animate_s
 /* animate_s
 tooltip : animate：显示动画,位置填hero或者1,2形式的位置,或者不填代表当前事件点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=animate%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%8A%A8%E7%94%BB
-default : ["zone","hero",false]
+default : ["zone","hero",false,false]
 colour : this.soundColor
 if (EvalString_0) {
   if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {
@@ -1665,16 +1665,17 @@ return code;
 */;
 
 playBgm_s
-    :   '播放背景音乐' EvalString '持续到下个本事件' Bool Newline
+    :   '播放背景音乐' EvalString '开始播放秒数' Int '持续到下个本事件' Bool Newline
     
 
 /* playBgm_s
 tooltip : playBgm: 播放背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
-default : ["bgm.mp3", true]
+default : ["bgm.mp3", 0, true]
 colour : this.soundColor
+Int_0 = Int_0 ? (', "startTime": '+Int_0) : '';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
-var code = '{"type": "playBgm", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
+var code = '{"type": "playBgm", "name": "'+EvalString_0+'"'+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1691,14 +1692,15 @@ return code;
 */;
 
 resumeBgm_s
-    :   '恢复背景音乐' Newline
+    :   '恢复背景音乐' '从暂停位置继续播放' Bool Newline
     
 
 /* resumeBgm_s
 tooltip : resumeBgm: 恢复背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=resumebgm%EF%BC%9A%E6%81%A2%E5%A4%8D%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
 colour : this.soundColor
-var code = '{"type": "resumeBgm"},\n';
+Bool_0 = Bool_0 ? ', "resume": true' : '';
+var code = '{"type": "resumeBgm"' + Bool_0 + '},\n';
 return code;
 */;
 
@@ -3419,7 +3421,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
-        data.name,data.keep||false,this.next]);
+        data.name,data.startTime||0,data.keep||false,this.next]);
       break
     case "pauseBgm":
       this.next = MotaActionBlocks['pauseBgm_s'].xmlText([
@@ -3427,7 +3429,7 @@ ActionParser.prototype.parseAction = function() {
       break
     case "resumeBgm":
       this.next = MotaActionBlocks['resumeBgm_s'].xmlText([
-        this.next]);
+        data.resume||false,this.next]);
       break
     case "loadBgm":
       this.next = MotaActionBlocks['loadBgm_s'].xmlText([

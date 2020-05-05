@@ -1572,7 +1572,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
 }
 
 events.prototype._action_playBgm = function (data, x, y, prefix) {
-    core.playBgm(data.name);
+    core.playBgm(data.name, data.startTime || 0);
     core.setFlag("__bgm__", data.keep ? data.name : null);
     core.doAction();
 }
@@ -1583,7 +1583,7 @@ events.prototype._action_pauseBgm = function (data, x, y, prefix) {
 }
 
 events.prototype._action_resumeBgm = function (data, x, y, prefix) {
-    core.resumeBgm();
+    core.resumeBgm(data.resume);
     core.doAction();
 }
 

@@ -2306,6 +2306,7 @@ control.prototype.pauseBgm = function () {
     if (main.mode!='play')return;
     try {
         if (core.musicStatus.playingBgm) {
+            core.musicStatus.pauseTime = core.material.bgms[core.musicStatus.playingBgm].currentTime;
             core.material.bgms[core.musicStatus.playingBgm].pause();
             core.musicStatus.playingBgm = null;
         }
@@ -2318,10 +2319,11 @@ control.prototype.pauseBgm = function () {
 }
 
 ////// 恢复背景音乐的播放 //////
-control.prototype.resumeBgm = function () {
+control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode!='play')return;
     try {
-        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm || main.startBgm);
+        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm || main.startBgm,
+            resumeTime ? core.musicStatus.pauseTime : 0);
     }
     catch (e) {
         console.log("无法恢复BGM");

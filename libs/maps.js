@@ -618,7 +618,8 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans) {
 maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     var index = x + "," + y;
     // 该点是否有事件
-    if (blocksObj[index] && (blocksObj[index].event.trigger || blocksObj[index].event.noPass)) return false;
+    if (blocksObj[index] && (blocksObj[index].event.trigger || blocksObj[index].event.noPass
+        || blocksObj[index].event.script)) return false;
     // 是否存在阻激夹域伤害
     if (core.status.checkBlock.damage[index]) return false;
     // 是否存在捕捉

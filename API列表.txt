@@ -1142,10 +1142,6 @@ core.tryUseItem(itemId)
 对于怪物手册和楼传器，将分别调用core.openBook()和core.useFly()函数。
 对于中心对称飞行器，则会调用core.drawCenterFly()函数。
 对于其他的道具，将检查是否拥有，能否使用，并且进行使用。
-
-
-core.afterUseBomb()
-使用炸弹或圣锤后的事件。实际被转发到了脚本编辑中。
 ```
 
 ## icons.js
@@ -1532,13 +1528,13 @@ core.removeBlock(x, y, floorId)
 如果存在自定义事件，则简单的禁用它，以供以后可能的启用事件。
 
 
-core.removeBlockById(index, floorId)
+core.removeBlockByIndex(index, floorId)
 每个楼层的图块存成一个数组，index即为该数组中的索引，每个索引对应该地图中的一个图块
 根据索引从地图的block数组中尽可能删除一个图块。floorId可不填或null表示当前楼层。
 
 
-core.removeBlockByIds(floorId, ids)
-ids为由索引组成的数组，如[0,1]等
+core.removeBlockByIndexes(indexes, floorId)
+indexes为由索引组成的数组，如[0,1]等
 根据索引数组从地图的block数组中尽可能删除一系列图块。floorId可不填或null表示当前楼层。
 
 

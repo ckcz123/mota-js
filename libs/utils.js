@@ -694,9 +694,23 @@ utils.prototype.reverseDirection = function (direction) {
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {
-    return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
-        return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-    }).join('.*') + '$').test(string);
+    try {
+        return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
+            return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+        }).join('.*') + '$').test(string);
+    } catch (e) {
+        return false;
+    }
+}
+
+utils.prototype.matchRegex = function (pattern, string) {
+    try {
+        if (pattern.startsWith("^")) pattern = pattern.substring(1);
+        if (pattern.endsWith("$")) pattern = pattern.substring(0, pattern.length - 1);
+        return new RegExp("^" + pattern + "$").test(string);
+    } catch (e) {
+        return false;
+    }
 }
 
 ////// Base64加密 //////

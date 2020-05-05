@@ -481,11 +481,11 @@ core.maps.canMoveDirectly(destX, destY)
 该函数如果返回0则不可瞬间移动，大于0则可以瞬间移动，且返回值是跨度（即少走的步数）。
 
 
-core.maps.removeBlockById(index, floorId)
+core.maps.removeBlockByIndexes(index, floorId)
 根据索引删除或禁用某块。
 
 
-core.maps.removeBlockByIds(floorId, ids)
+core.maps.removeBlockByIndexes(indexes, floorId)
 根据索引删除或禁用若干块。
 
 

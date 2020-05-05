@@ -2665,26 +2665,6 @@ if (core.flags.enableAddPoint && point > 0) {
 
 除此以外，每层楼还提供了`firstArrive`和`eachArrive`事件，分别为首次到达该楼层和每次到达该楼层时执行的事件。
 
-## 使用炸弹后的事件
-
-上面的afterBattle事件只对和怪物进行战斗后才有会被处理。
-
-如果我们想在使用炸弹后也能触发一些事件（如开门），则可以在脚本编辑里面的`afterUseBomb`函数进行处理：
-
-``` js
-////// 使用炸弹/圣锤后的事件 //////
-"afterUseBomb": function () {
-    // 这是一个使用炸弹也能开门的例子
-    if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
-        && !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
-    {
-        core.insertAction([ // 插入事件
-            {"type": "openDoor", "loc": [x0,y0]} // 开门
-        ])
-    }
-}
-```
-
 ## 滑冰事件
 
 从V2.6开始，滑冰事件被重写。现在的滑冰由公共事件执行。

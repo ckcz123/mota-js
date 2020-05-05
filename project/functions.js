@@ -443,21 +443,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		*/
 	}
 },
-        "afterUseBomb": function () {
-	// 使用炸弹/圣锤后的事件
-
-	// 这是一个使用炸弹也能开门的例子
-	/*
-	if (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在
-		&& !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在
-	{
-		core.insertAction([ // 插入事件
-			{"type": "openDoor", "loc": [x0,y0]} // 开门
-		])
-	}
-	*/
-
-},
         "afterPassNet": function (x, y, id) {
 	// 经过特殊地形后的事件；x和y为当前坐标，id为当前的图块id
 
@@ -886,14 +871,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			} else {
 				core.drawTip('当前不能使用炸弹');
 			}
-		} else if (core.hasItem('hammer')) {
-			if (core.canUseItem('hammer')) {
-				core.status.route.push("key:50"); // 将按键记在录像中
-				core.useItem('hammer', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
-			} else {
-				core.drawTip('当前不能使用圣锤');
-			}
-
 		}
 		break;
 	case 51: // 快捷键3: 飞

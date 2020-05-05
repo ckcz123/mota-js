@@ -2944,11 +2944,6 @@ events.prototype.tryUseItem = function (itemId) {
     else core.drawTip("当前无法使用" + core.material.items[itemId].name);
 }
 
-////// 使用炸弹/圣锤后的事件 //////
-events.prototype.afterUseBomb = function () {
-    return this.eventdata.afterUseBomb();
-}
-
 ////// 上传当前数据 //////
 events.prototype._uploadCurrent = function (username) {
     var formData = new FormData();

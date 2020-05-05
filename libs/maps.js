@@ -685,8 +685,8 @@ maps.prototype._automaticRoute_deepAdd = function (x, y) {
         if (id == "light") deepAdd += 100;
         // 绕过路障
         if (id.endsWith("Net")) deepAdd += 100;
-        // 绕过血瓶
-        if (!core.flags.potionWhileRouting && id.endsWith("Potion")) deepAdd += 100;
+        // 绕过血瓶和绿宝石
+        if (!core.flags.potionWhileRouting && (id.endsWith("Potion") || id == 'greenJewel')) deepAdd += 100;
         // 绕过传送点
         // if (block.block.event.trigger == 'changeFloor') deepAdd+=10;
     }
@@ -1417,7 +1417,7 @@ maps.prototype.searchBlock = function (id, floorId, showDisable) {
     }
     for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
         var block = core.status.maps[floorId].blocks[i];
-        if ((showDisable || !block.disable) && core.matchWildcard(id, block.event.id)) {
+        if ((showDisable || !block.disable) && (core.matchWildcard(id, block.event.id) || core.matchRegex(id, block.event.id))) {
             result.push({floorId: floorId, index: i, block: block, x: block.x, y: block.y});
         }
     }
@@ -1486,12 +1486,12 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     }
 
     // 删除Index
-    core.removeBlockById(index, floorId);
+    core.removeBlockByIndex(index, floorId);
     core.updateStatusBar();
 }
 
 ////// 根据block的索引（尽可能）删除该块 //////
-maps.prototype.removeBlockById = function (index, floorId) {
+maps.prototype.removeBlockByIndex = function (index, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
 
@@ -1506,13 +1506,11 @@ maps.prototype.removeBlockById = function (index, floorId) {
 }
 
 ////// 一次性删除多个block //////
-maps.prototype.removeBlockByIds = function (floorId, ids) {
-    floorId = floorId || core.status.floorId;
-    if (!floorId) return;
-    ids.sort(function (a, b) {
-        return b - a
-    }).forEach(function (id) {
-        core.removeBlockById(id, floorId);
+maps.prototype.removeBlockByIndexes = function (indexes, floorId) {
+    indexes.sort(function (a, b) {
+        return b - a;
+    }).forEach(function (index) {
+        core.removeBlockByIndex(index, floorId);
     });
 }
 

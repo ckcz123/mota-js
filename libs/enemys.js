@@ -292,9 +292,6 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
     return info.damage;
 }
 
-////// 更新怪物数据。已经不再使用，这里留空进行兼容。 //////
-enemys.prototype.updateEnemys = function () {}
-
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId = floorId || core.status.floorId;

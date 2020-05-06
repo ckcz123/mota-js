@@ -269,15 +269,14 @@ editor_table_wrapper = function (editor) {
         //   >td[title=comment,cobj=cobj:json]
         //   >td>div>input[value=thiseval]
         var thisTr = document.getElementById(guid);
-        var inputs = thisTr.children[2].children[0].children; 
-        var input = thisTr.children[2].children[0].children[0];
+        var inputs = thisTr.children[2].children[0].children;
         var field = thisTr.children[0].getAttribute('title');
         var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
         var modeNode = thisTr.parentNode;
         while (!editor_mode._ids.hasOwnProperty(modeNode.getAttribute('id'))) {
             modeNode = modeNode.parentNode;
         }
-        for (var i in inputs) {
+        for (var i = 0; i < inputs.length; ++i) {
             var input = inputs[i];
             if (input.nodeName == 'INPUT' || input.nodeName == 'SELECT' || input.nodeName == 'TEXTAREA') {
                 input.onchange = function () {

@@ -702,11 +702,13 @@ events.prototype.afterChangeFloor = function (floorId, fromLoad) {
 
 ////// 是否到达过某个楼层 //////
 events.prototype.hasVisitedFloor = function (floorId) {
+    if (!core.hasFlag("__visited__")) core.setFlag("__visited__", {});
     return core.getFlag("__visited__")[floorId] || false;
 }
 
 ////// 到达某楼层 //////
 events.prototype.visitFloor = function (floorId) {
+    if (!core.hasFlag("__visited__")) core.setFlag("__visited__", {});
     core.getFlag("__visited__")[floorId] = true;
 }
 

@@ -16,12 +16,6 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "重置整个游戏"
 				},
-				"setInitData": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "设置初始属性"
-				},
 				"win": {
 					"_leaf": true,
 					"_type": "textarea",

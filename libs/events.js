@@ -53,7 +53,6 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.setFlag('__rand__', seed);
     }
     else core.utils.__init_seed();
-    this.setInitData();
     core.clearStatusBar();
 
     var todo = [];
@@ -102,11 +101,6 @@ events.prototype._startGame_upload = function () {
     formData.append('base64', 1);
 
     core.utils.http("POST", "/games/upload.php", formData);
-}
-
-////// 不同难度分别设置初始属性 //////
-events.prototype.setInitData = function () {
-    return this.eventdata.setInitData();
 }
 
 ////// 游戏获胜事件 //////

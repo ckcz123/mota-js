@@ -50,28 +50,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 隐藏右下角的音乐按钮
 	core.dom.musicBtn.style.display = 'none';
 },
-        "setInitData": function () {
-	// 不同难度分别设置初始属性
-	if (core.status.hard == 'Easy') { // 简单难度
-		core.setFlag('hard', 1); // 可以用flag:hard来获得当前难度
-		// 可以在此设置一些初始福利，比如设置初始生命值可以调用：
-		// core.setStatus("hp", 10000);
-		// 赠送一把黄钥匙可以调用
-		// core.setItem("yellowKey", 1);
-	}
-	if (core.status.hard == 'Normal') { // 普通难度
-		core.setFlag('hard', 2); // 可以用flag:hard来获得当前难度
-	}
-	if (core.status.hard == 'Hard') { // 困难难度
-		core.setFlag('hard', 3); // 可以用flag:hard来获得当前难度
-	}
-	if (core.status.hard == 'Hell') { // 噩梦难度
-		core.setFlag('hard', 4); // 可以用flag:hard来获得当前难度
-	}
-
-	// 设置已经到过的楼层
-	core.setFlag("__visited__", {});
-},
         "win": function (reason, norank, noexit) {
 	// 游戏获胜事件
 	// 请注意，成绩统计时是按照hp进行上传并排名

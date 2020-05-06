@@ -814,12 +814,7 @@ core.startGame(hard, seed, route, callback)
 开始新游戏。
 hard为难度字符串，会被设置为core.status.hard。
 seed为开始时要设置的的种子，route为要开始播放的录像，callback为回调函数。
-该函数将重置整个游戏，调用setInitData，执行startText事件，上传游戏人数统计信息等。
-
-
-core.setInitData()
-根据难度分歧来初始化难度，包括设置flag:hard，设置初始属性等。
-该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
+该函数将重置整个游戏，执行startText事件，上传游戏人数统计信息等。
 
 
 core.win(reason, norank)

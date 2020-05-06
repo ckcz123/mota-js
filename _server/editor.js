@@ -183,7 +183,6 @@ editor.prototype.init = function (callback) {
             core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
             }, true);
-            core.events.setInitData(null);
         });
     }
 

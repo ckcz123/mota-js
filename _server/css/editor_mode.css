@@ -223,7 +223,7 @@ div.etableInputDiv {
 .etableInputDiv .cannotInOutCheckbox {
     width: 16px;
     height: 16px;
-    display: inline;
+    display: inline-block;
 }
 
 .etableInputDiv textarea {

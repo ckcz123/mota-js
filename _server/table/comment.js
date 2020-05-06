@@ -95,7 +95,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				}
 			}
 		},
-		"items_template": { 'cls': 'items', 'name': '新物品' },
+		"items_template": { 'cls': 'items', 'name': '新物品', 'canPass': true },
 
 
 		// --------------------------- 【怪物】相关的表格配置 --------------------------- //
@@ -248,17 +248,10 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					},
 					"_data": "该图块的默认触发器"
 				},
-				"noPass": {
+				"canPass": {
 					"_leaf": true,
-					"_type": "select",
-					"_select": {
-						"values": [
-							"null",
-							"true",
-							"false"
-						]
-					},
-					"_data": "该图块是否不可通行；true代表不可通行，false代表可通行，null代表使用系统缺省值"
+					"_type": "checkbox",
+					"_data": "该图块是否可以通行；true代表可以通行，false代表不可通行"
 				},
 				"script": {
 					"_leaf": true,

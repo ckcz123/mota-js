@@ -109,8 +109,14 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id, "noPass": true};
     else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
 
-    if (typeof block.event.noPass === 'string')
-        block.event.noPass = JSON.parse(block.event.noPass);
+    if (block.event.noPass == null) {
+        if (block.event.canPass == null) {
+            block.event.noPass = block.event.cls != 'items';
+        } else {
+            block.event.noPass = !block.event.canPass;
+        }
+    }
+    delete block.event.canPass;
 
     if (addInfo) this._addInfo(block);
     if (eventFloor) {
@@ -129,11 +135,6 @@ maps.prototype._addInfo = function (block) {
     }
     if (block.event.cls == 'items' && !block.event.trigger) {
         block.event.trigger = 'getItem';
-    }
-    if (block.event.noPass == null) {
-        if (block.event.cls != 'items') {
-            block.event.noPass = true;
-        }
     }
     if (block.event.animate == null) {
         block.event.animate = core.icons._getAnimateFrames(block.event.cls, false);

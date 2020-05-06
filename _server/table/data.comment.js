@@ -436,205 +436,171 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"enableFloor": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏显示当前楼层"
 				},
 				"enableName": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏显示勇士名字"
 				},
 				"enableLv": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏显示当前等级"
 				},
 				"enableHPMax": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否是否启用生命上限"
 				},
 				"enableMana": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否开启魔力值"
 				},
 				"enableMDef": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏及战斗界面显示魔防（护盾）"
 				},
 				"enableMoney": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏、怪物手册及战斗界面显示金币"
 				},
 				"enableExperience": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏、怪物手册及战斗界面显示经验"
 				},
 				"enableLevelUp": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false"
 				},
 				"levelUpLeftMode": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "进阶使用扣除模式，即在状态栏显示距离下个等级所需要的经验值；只有enableExperience和enableLevelUp均开启时才有效。"
 				},
 				"enableKeys": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏显示三色钥匙数量"
 				},
 				"enablePZF": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏显示破炸飞数量"
 				},
 				"enableDebuff": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在状态栏显示毒衰咒"
 				},
 				"enableSkill": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否启用技能栏"
 				},
 				"flyNearStair": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "传送器是否需要在楼梯边使用；如果flyRecordPosition开启，则此项对箭头也有效。"
 				},
 				"flyRecordPosition": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "传送器平面塔模式；此模式下楼层传送器将飞到上次离开该楼层的位置。"
 				},
 				"pickaxeFourDirections": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁"
 				},
 				"bombFourDirections": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）"
 				},
 				"snowFourDirections": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "使用冰冻徽章是否四个方向都会消除熔岩；如果false则只消除面前的熔岩"
 				},
 				"bigKeyIsBox": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙"
 				},
 				"steelDoorWithoutKey": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "铁门是否不需要钥匙开启。如果此项为true，则无需钥匙也可以开铁门。"
 				},
 				"itemFirstText": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "首次获得道具是否提示"
 				},
 				"equipment": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "剑和盾是否作为装备。如果此项为true，则作为装备，需要在装备栏使用，否则将直接加属性。"
 				},
 				"equipboxButton": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
 				},
 				"iconInEquipbox": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "在装备栏中的属性变化，是否绘制图标；如果此项开启，则会绘制图标而不是文字"
 				},
 				"enableAddPoint": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否支持加点"
 				},
 				"enableNegativeDamage": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否支持负伤害（回血）"
 				},
 				"hatredDecrease": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在和仇恨怪战斗后减一半的仇恨值，此项为false则和仇恨怪不会扣减仇恨值。"
 				},
 				"betweenAttackCeil": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "夹击上整还是下整。如果此项为true则夹击伤害值向上取整，为false则为向下取整"
 				},
 				"betweenAttackMax": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "夹击伤害是否不超过怪物伤害值。"
 				},
 				"useLoop": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否循环计算临界；如果此项为true则使用循环法（而不是回合数计算法）来算临界\n从V2.5.3开始，对于大数据的循环法将改为使用二分法进行计算"
 				},
 				"startUsingCanvas": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否开始菜单canvas化；如果此项为true，则将使用canvas来绘制开始菜单"
 				},
 				"startDirectly": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面"
 				},
 				"statusCanvas": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否状态栏canvas化，即手动自定义绘制状态栏。\n如果此项开启，则可在脚本编辑的drawStatusBar中自定义绘制菜单栏。"
 				},
 				"statusCanvasRowsOnMobile": {
@@ -646,73 +612,61 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"displayEnemyDamage": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否地图怪物显伤；用户可以手动在菜单栏中开关"
 				},
 				"displayCritical": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否地图显示临界；用户可以手动在菜单栏中开关"
 				},
 				"displayExtraDamage": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关"
 				},
 				"enableGentleClick": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否允许轻触（获得面前物品）"
 				},
 				"potionWhileRouting": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶"
 				},
 				"ignoreChangeFloor": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "经过楼梯、传送门时是否能“穿透”。\n穿透的意思是，自动寻路得到的的路径中间经过了楼梯，行走时是否触发楼层转换事件"
 				},
 				"canGoDeadZone": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否允许走到将死的领域上。如果此项为true，则可以走到将死的领域上"
 				},
 				"enableMoveDirectly": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否允许瞬间移动"
 				},
 				"enableDisabledShop": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否允许查看未开启状态的快捷商店内容；如果此项为真，则对于未开启状态的商店允许查看其内容（但不能购买）"
 				},
 				"disableShopOnDamage": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否在经过领域/夹击/路障等伤害后禁用快捷商店。"
 				},
 				"blurFg": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否虚化前景层；如果此项开启，则在游戏中事件层有东西（如宝石等）时虚化前景层。"
 				},
 				"checkConsole": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "是否检查控制台的开启情况。"
 				}
 			}

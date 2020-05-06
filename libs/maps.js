@@ -515,6 +515,7 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
         }
         return false;
     }
+    if (name == 'cannotIn') direction = core.reverseDirection(direction);
     return core.inArray((this.getBlockByNumber(number).event || {})[name], direction);
 }
 

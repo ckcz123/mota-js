@@ -21,10 +21,17 @@ editor_table_wrapper = function (editor) {
         return /* html */`<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
     }
     editor_table.prototype.checkbox = function (value) {
-        return /* html */`<input type='checkbox' ${(value ? 'checked ' : '')}/>\n`
+        return /* html */`<input type='checkbox' class='checkbox' ${(value ? 'checked ' : '')}/>\n`
     }
     editor_table.prototype.textarea = function (value, indent) {
         return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
+    }
+    editor_table.prototype.cannotInOutCheckbox = function (value) {
+        if (!(value instanceof Array)) value = [];
+        return /* html */`上：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('up')>=0 ? 'checked ' : ''} />
+        &nbsp;下：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('down')>=0 ? 'checked ' : ''} /><br/>
+        左：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('left')>=0 ? 'checked ' : ''} />
+        &nbsp;右：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('right')>=0 ? 'checked ' : ''} /><br/>`;
     }
     editor_table.prototype.editGrid = function (showComment) {
         var html = "";
@@ -220,16 +227,15 @@ editor_table_wrapper = function (editor) {
 
     editor_table.prototype.objToTd = function (obj, commentObj, field, cfield, vobj, cobj) {
         var thiseval = vobj;
-        if (cobj._select) {
-            var values = cobj._select.values;
-            return editor.table.select(thiseval, values);
-        } else if (cobj._input) {
-            return editor.table.text(thiseval);
-        } else if (cobj._bool) {
-            return editor.table.checkbox(thiseval);
-        } else {
-            var indent = 0;
-            return editor.table.textarea(thiseval, indent);
+        switch (cobj._type) {
+            case 'select':
+                return editor.table.select(thiseval, cobj._select.values);
+            case 'checkbox':
+                return editor.table.checkbox(thiseval);
+            case 'cannotInOutCheckbox':
+                return editor.table.cannotInOutCheckbox(thiseval);
+            default: 
+                return editor.table.textarea(thiseval, cobj.indent || 0);
         }
     }
 
@@ -263,6 +269,7 @@ editor_table_wrapper = function (editor) {
         //   >td[title=comment,cobj=cobj:json]
         //   >td>div>input[value=thiseval]
         var thisTr = document.getElementById(guid);
+        var inputs = thisTr.children[2].children[0].children; 
         var input = thisTr.children[2].children[0].children[0];
         var field = thisTr.children[0].getAttribute('title');
         var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
@@ -270,8 +277,17 @@ editor_table_wrapper = function (editor) {
         while (!editor_mode._ids.hasOwnProperty(modeNode.getAttribute('id'))) {
             modeNode = modeNode.parentNode;
         }
-        input.onchange = function () {
-            editor.table.onchange(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
+        for (var i in inputs) {
+            var input = inputs[i];
+            if (input.nodeName == 'INPUT' || input.nodeName == 'SELECT' || input.nodeName == 'TEXTAREA') {
+                input.onchange = function () {
+                    if (cobj._type == 'cannotInOutCheckbox') {
+                        editor.table.onCannotInOutChange(guid, obj, commentObj, thisTr, inputs, field, cobj, modeNode);
+                    } else {
+                        editor.table.onchange(guid, obj, commentObj, thisTr, input, field, cobj, modeNode);
+                    }
+                }
+            }
         }
         // 用检测两次单击的方式来实现双击(以支持手机端的双击)
         var doubleClickCheck = [0];
@@ -305,6 +321,31 @@ editor_table_wrapper = function (editor) {
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
         }
+    }
+
+    /**
+     * 当“cannotOut / cannotIn”的表格值变化时
+     */
+    editor_table.prototype.onCannotInOutChange = function (guid, obj, commentObj, thisTr, inputs, field, cobj, modeNode) {
+        editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+        var value = [];
+        var directions = ['up', 'down', 'left', 'right'];
+        var index = 0;
+        for (var i in inputs) {
+            if (inputs[i].nodeName == 'INPUT') {
+                if (inputs[i].checked) value.push(directions[index]);
+                index++;
+            }
+        }
+        if (value.length == 0) thiseval = null;
+        else thiseval = value;
+        if (editor.table.checkRange(cobj, thiseval)) {
+            editor_mode.addAction(['change', field, thiseval]);
+            editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
+        } else {
+            printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
+        }
+
     }
 
     /**

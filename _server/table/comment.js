@@ -48,7 +48,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"hideInReplay": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_bool": "bool",
 							"_data": "是否回放时绘制道具栏。\n如果此项为true，则在回放录像时使用本道具将不会绘制道具栏页面，而是直接使用。\n此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
 						}
 					}
@@ -159,7 +158,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"zoneSquare": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "领域怪是否九宫格伤害"
 				},
 				"range": {
@@ -171,7 +169,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"notBomb": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "该怪物不可被炸"
 				},
 				"n": {
@@ -183,7 +180,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"add": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "吸血后是否加到自身；光环是否叠加"
 				},
 				"atkValue": {
@@ -273,20 +269,17 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"cannotOut": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==null||(thiseval instanceof Array)",
+					"_type": "cannotInOutCheckbox",
 					"_data": "该图块的不可出方向\n可以在这里定义在该图块时不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表在该图块时不能往上和左走\n此值对背景层、事件层、前景层上的图块均有效"
 				},
 				"cannotIn": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==null||(thiseval instanceof Array)",
+					"_type": "cannotInOutCheckbox",
 					"_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
 				},
 				"canBreak": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_bool": "bool",
 					"_data": "该图块是否可被破墙或地震"
 				},
 				"animate": {
@@ -347,25 +340,21 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"canFlyTo": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_bool": "bool",
 							"_data": "该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）"
 						},
 						"canUseQuickShop": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_bool": "bool",
 							"_data": "该层是否允许使用快捷商店"
 						},
 						"cannotViewMap": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_bool": "bool",
 							"_data": "该层是否不允许被浏览地图看到；如果勾上则浏览地图会跳过该层"
 						},
 						"cannotMoveDirectly": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_bool": "bool",
 							"_data": "该层是否不允许瞬间移动；如果勾上则不可在此层进行瞬移"
 						},
 						"firstArrive": {
@@ -436,7 +425,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"underGround": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_bool": "bool",
 							"_data": "是否是地下层；如果该项为true则同层传送将传送至上楼梯"
 						}
 					}

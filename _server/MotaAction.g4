@@ -2235,13 +2235,13 @@ return code;
 */;
 
 fillBoldText_s
-    :   '绘制描边文本' 'x' PosString 'y' PosString '样式' EvalString? Colour '字体' EvalString? BGNL? EvalString Newline
+    :   '绘制描边文本' 'x' PosString 'y' PosString '样式' EvalString? Colour '描边颜色' EvalString? Colour '字体' EvalString? BGNL? EvalString Newline
 
 /* fillBoldText_s
 tooltip : fillBoldText：绘制一行描边文本
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillBoldText%ef%bc%9a%e7%bb%98%e5%88%b6%e6%8f%8f%e8%be%b9%e6%96%87%e6%9c%ac
 colour : this.subColor
-default : ["0","0","",'rgba(255,255,255,1)',"","绘制一行描边文本"]
+default : ["0","0","",'rgba(255,255,255,1)',"",'rgba(0,0,0,1)',"","绘制一行描边文本"]
 var colorRe = MotaActionFunctions.pattern.colorRe;
 var fontRe = MotaActionFunctions.pattern.fontRe;
 if (EvalString_0) {
@@ -2249,10 +2249,14 @@ if (EvalString_0) {
   EvalString_0 = ', "style": ['+EvalString_0+']';
 }
 if (EvalString_1) {
-  if (!fontRe.test(EvalString_1)) throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
-  EvalString_1 = ', "font": "' + EvalString_1 + '"';
+  if (!colorRe.test(EvalString_1))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  EvalString_1 = ', "strokeStyle": ['+EvalString_1+']';
 }
-var code = '{"type": "fillBoldText", "x": '+PosString_0+', "y": '+PosString_1+EvalString_0+EvalString_1+', "text": "'+EvalString_2+'"},\n';
+if (EvalString_2) {
+  if (!fontRe.test(EvalString_2)) throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
+  EvalString_2 = ', "font": "' + EvalString_2 + '"';
+}
+var code = '{"type": "fillBoldText", "x": '+PosString_0+', "y": '+PosString_1+EvalString_0+EvalString_1+EvalString_2+', "text": "'+EvalString_3+'"},\n';
 return code;
 */;
 
@@ -2490,17 +2494,18 @@ return code;
 */;
 
 drawIcon_s
-    :   '绘制图标' 'ID' IdString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
+    :   '绘制图标' 'ID' IdString '帧' Int '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
 
 
 /* drawIcon_s
 tooltip : drawIcon：绘制图标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawIcon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e6%a0%87
-default : ["yellowKey","0","0","",""]
+default : ["yellowKey",0,"0","0","",""]
 colour : this.subColor
+Int_0 = Int_0 ? (', "frame": '+Int_0) : '';
 PosString_2 = PosString_2 ? (', "width": '+PosString_2) : '';
 PosString_3 = PosString_3 ? (', "height": '+PosString_3) : '';
-var code = '{"type": "drawIcon", "id": "'+IdString_0+'", "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
+var code = '{"type": "drawIcon", "id": "'+IdString_0+'"'+Int_0+', "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
 return code;
 */;
 
@@ -2794,8 +2799,8 @@ TextAlign_List
     /*TextAlign_List ['null','left','center','right']*/;
 
 TextBaseline_List
-    :   '不改变'|'顶部'|'居中'|'标准值'|'底部'
-    /*TextBaseline_List ['null','top','middle','alphabetic','bottom']*/;
+    :   '不改变'|'顶部'|'悬挂'|'居中'|'标准值'|'ideographic'|'底部'
+    /*TextBaseline_List ['null','top','hanging','middle','alphabetic','ideographic','bottom']*/;
 
 ShopUse_List
     :   '金币' | '经验'
@@ -2893,8 +2898,8 @@ Id_List
     /*Id_List ['flag','status','item', 'switch', 'global']*/;
 
 EnemyId_List
-    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'
-    /*EnemyId_List ['hp','atk','def','money','experience','point','special','name']*/;
+    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
+    /*EnemyId_List ['hp','atk','def','money','experience','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -3684,7 +3689,8 @@ ActionParser.prototype.parseAction = function() {
     case "fillBoldText": // 绘制一行描边文本
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['fillBoldText_s'].xmlText([
-        data.x, data.y, data.style, 'rgba('+data.style+')', data.font, this.EvalString(data.text), this.next
+        data.x, data.y, data.style, 'rgba('+data.style+')', data.strokeStyle, 'rgba('+(data.strokeStyle||"0,0,0,1")+')', 
+        data.font, this.EvalString(data.text), this.next
       ]);
       break;
     case "drawTextContent": // 绘制多行文本
@@ -3766,7 +3772,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "drawIcon": // 绘制图标
       this.next = MotaActionBlocks['drawIcon_s'].xmlText([
-        data.id, data.x, data.y, data.width, data.height, this.next
+        data.id, data.frame||0, data.x, data.y, data.width, data.height, this.next
       ]);
       break;
     case "drawBackground": // 绘制背景

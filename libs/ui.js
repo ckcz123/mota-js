@@ -103,13 +103,15 @@ ui.prototype._fillTextWithMaxWidth = function (ctx, text, x, y, maxWidth) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
+ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (font) ctx.font = font;
     if (!style) style = ctx.fillStyle;
     if (style instanceof Array) style = core.arrayToRGBA(style);
-    ctx.fillStyle = '#000000';
+    if (!strokeStyle) strokeStyle = '#000000';
+    if (strokeStyle instanceof Array) strokeStyle = core.arrayToRGBA(strokeStyle);
+    ctx.fillStyle = strokeStyle;
     ctx.fillText(text, x-1, y-1);
     ctx.fillText(text, x-1, y+1);
     ctx.fillText(text, x+1, y-1);
@@ -120,7 +122,7 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
 
 ui.prototype._uievent_fillBoldText = function (data) {
     this._createUIEvent();
-    this.fillBoldText('uievent', core.replaceText(data.text), core.calValue(data.x), core.calValue(data.y), data.style, data.font);
+    this.fillBoldText('uievent', core.replaceText(data.text), core.calValue(data.x), core.calValue(data.y), data.style, data.strokeStyle, data.font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
@@ -413,7 +415,8 @@ ui.prototype._uievent_drawImage = function (data) {
         core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1));
 }
 
-ui.prototype.drawIcon = function (name, id, x, y, w, h) {
+ui.prototype.drawIcon = function (name, id, x, y, w, h, frame) {
+    frame = frame || 0;
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     var info = core.getBlockInfo(id);
@@ -423,7 +426,7 @@ ui.prototype.drawIcon = function (name, id, x, y, w, h) {
             info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
         else return;
     }
-    ctx.drawImage(info.image, 32 * info.posX, info.height * info.posY, 32, info.height, x, y, w || 32, h || info.height);
+    ctx.drawImage(info.image, 32 * (info.posX + frame), info.height * info.posY, 32, info.height, x, y, w || 32, h || info.height);
 }
 
 ui.prototype._uievent_drawIcon = function (data) {
@@ -433,7 +436,7 @@ ui.prototype._uievent_drawIcon = function (data) {
         id = core.calValue(data.id);
         if (typeof id !== 'string') id = data.id;
     } catch (e) { id = data.id; }
-    this.drawIcon('uievent', id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
+    this.drawIcon('uievent', id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.frame||0);
 }
 
 ///////////////// UI绘制

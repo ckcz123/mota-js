@@ -1954,7 +1954,7 @@ return '{"type": "for", "name": "'+expression_0+'", "from": "'+EvalString_0+'", 
 */;    
 
 forEach_s
-    :   '循环遍历' ': ' expression '在列表' JsonEvalString '中' BGNL? Newline action+ BEND Newline
+    :   '循环遍历' ': 以' expression '逐项读取列表' JsonEvalString BGNL? Newline action+ BEND Newline
 
 /* forEach_s
 tooltip : forEach：循环遍历列表

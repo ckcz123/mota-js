@@ -1858,15 +1858,16 @@ events.prototype._action_for = function (data, x, y, prefix) {
     core.setFlag(toName, data.to);
     core.setFlag(stepName, data.step);
     var condition = "(function () {"+
+        "var clearAndReturn = function (v) { if (!v) { core.removeFlag('"+toName+"'); core.removeFlag('"+stepName+"'); } return v; };"+
         "var to = core.calValue(core.getFlag('" + toName + "'));"+
         "var step = core.calValue(core.getFlag('" + stepName + "'));"+
-        "if (typeof step != 'number' || typeof to != 'number') return false;"+
-        "if (step == 0) return true;"+
+        "if (typeof step != 'number' || typeof to != 'number') return clearAndReturn(false);"+
+        "if (step == 0) return clearAndReturn(true);"+
         "var currentValue = core.calValue('switch:'+'" + data.name.substring(7) + "', '"+prefix+"');"+
         "currentValue += step;"+
         "core.events._setValue_setSwitch('switch:'+'" + data.name.substring(7) + "', currentValue, '"+prefix+"');"+
-        "if (step > 0) { return currentValue <= to; }"+
-        "else { return currentValue >= to; }"+
+        "if (step > 0) { return clearAndReturn(currentValue <= to); }"+
+        "else { return clearAndReturn(currentValue >= to); }"+
         "})()";
     return this._action_dowhile({"condition": condition, "data": data.data}, x, y, prefix);
 }

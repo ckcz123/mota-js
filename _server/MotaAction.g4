@@ -101,23 +101,15 @@ return code;
 */;
 
 shopcommonevent
-    :   '公共事件版商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' EvalString?
+    :   '公共事件版商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' JsonEvalString?
     
 /* shopcommonevent
 tooltip : 全局商店, 执行一个公共事件
 helpUrl : https://h5mota.com/games/template/_docs/#/
 default : ["shop1","回收钥匙商店",false,"回收钥匙商店",""]
-if (EvalString_2) {
-    if (EvalString_2.indexOf('"')>=0)
-        throw new Error('请勿在此处使用双引号！尝试使用单引号吧~');
-    // 检查是不是数组
-    try {
-        EvalString_2 = JSON.parse(EvalString_2.replace(/'/g, '"'));
-        if (!(EvalString_2 instanceof Array)) throw new Error();
-    }
-    catch (e) {
+if (JsonEvalString_0) {
+    if (!(JSON.parse(JsonEvalString_0) instanceof Array))
         throw new Error('参数列表必须是个有效的数组！');
-    }
 }
 var code = {
     'id': IdString_0,
@@ -125,7 +117,7 @@ var code = {
     'mustEnable': Bool_0,
     'commonEvent': EvalString_1
 }
-if (EvalString_2) code.args = EvalString_2;
+if (JsonEvalString_0) code.args = JSON.parse(JsonEvalString_0);
 code=JSON.stringify(code,null,2)+',\n';
 return code;
 */;
@@ -779,7 +771,7 @@ return code;
 */;
 
 insert_1_s
-    :   '插入公共事件' EvalString '参数列表' EvalString? Newline
+    :   '插入公共事件' EvalString '参数列表' JsonEvalString? Newline
 
 
 /* insert_1_s
@@ -787,24 +779,17 @@ tooltip : insert: 插入公共事件并执行
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%85%ac%e5%85%b1%e4%ba%8b%e4%bb%b6%e6%88%96%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%b9%b6%e6%89%a7%e8%a1%8c
 default : ["加点事件", ""]
 colour : this.eventColor
-if (EvalString_1) {
-    if (EvalString_1.indexOf('"')>=0)
-        throw new Error('请勿在此处使用双引号！尝试使用单引号吧~');
-    // 检查是不是数组
-    try {
-        if (!(JSON.parse(EvalString_1.replace(/'/g, '"')) instanceof Array)) throw new Error();
-    }
-    catch (e) {
+if (JsonEvalString_0) {
+    if (!(JSON.parse(JsonEvalString_0) instanceof Array))
         throw new Error('参数列表必须是个有效的数组！');
-    }
-    EvalString_1 = ', "args": ' +EvalString_1;
+    JsonEvalString_0 = ', "args": ' +JsonEvalString_0;
 }
-var code = '{"type": "insert", "name": "'+EvalString_0+'"'+EvalString_1+'},\n';
+var code = '{"type": "insert", "name": "'+EvalString_0+'"'+JsonEvalString_0+'},\n';
 return code;
 */;
 
 insert_2_s
-    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' EvalString? Newline
+    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' JsonEvalString? Newline
 
 
 /* insert_2_s
@@ -813,21 +798,15 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=insert%ef%bc%9a%e6%
 default : ["0","0",null,"",""]
 colour : this.eventColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-if (EvalString_0) {
-    if (EvalString_0.indexOf('"')>=0)
-        throw new Error('请勿在此处使用双引号！尝试使用单引号吧~');
-    try {
-        if (!(JSON.parse(EvalString_0.replace(/'/g, '"')) instanceof Array)) throw new Error();
-    }
-    catch (e) {
+if (JsonEvalString_0) {
+    if (!(JSON.parse(JsonEvalString_0) instanceof Array))
         throw new Error('参数列表必须是个有效的数组！');
-    }
-    EvalString_0 = ', "args": ' +EvalString_0;
+    JsonEvalString_0 = ', "args": ' +JsonEvalString_0;
 }
 if (Event_List_0 && Event_List_0 !=='null')
     Event_List_0 = ', "which": "'+Event_List_0+'"';
 else Event_List_0 = '';
-var code = '{"type": "insert", "loc": ['+PosString_0+','+PosString_1+']'+Event_List_0+IdString_0+EvalString_0+'},\n';
+var code = '{"type": "insert", "loc": ['+PosString_0+','+PosString_1+']'+Event_List_0+IdString_0+JsonEvalString_0+'},\n';
 return code;
 */;
 
@@ -2559,7 +2538,7 @@ return code;
 */;
 
 unknown_s
-    :   '自定义事件' BGNL? RawEvalString
+    :   '自定义事件' BGNL? JsonEvalString
 
 /* unknown_s
 tooltip : 通过脚本自定义的事件类型, 以及编辑器不识别的事件类型
@@ -2567,7 +2546,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/
 default : ['{"type":"test", "data": "这是自定义的参数"}']
 colour : this.dataColor
 try {
-    var tempobj = JSON.parse(RawEvalString_0);
+    var tempobj = JSON.parse(JsonEvalString_0);
 } catch (e) {throw new Error("不合法的JSON格式！");}
 if (!tempobj.type) throw new Error("自定义事件需要一个type:xxx");
 var code = JSON.stringify(tempobj) +',\n';
@@ -2777,6 +2756,10 @@ IdText
 RawEvalString
     :   'sdeirughvuiyasdbe'+ //为了被识别为复杂词法规则
     ;
+
+JsonEvalString
+    :   'sdeirughvuiyasdbe'+ //为了被识别为复杂词法规则
+    ;  
 
 PosString
     :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
@@ -3038,8 +3021,7 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       var buildcommentevent = function(obj,parser,next){
         if (obj.args instanceof Array) {
-          try { obj.args = JSON.stringify(obj.args).replace(/"/g, "'"); }
-          catch (e) {obj.args = '';}
+          obj.args = JSON.stringify(obj.args);
         }
         else obj.args = null;
         return MotaActionBlocks['shopcommonevent'].xmlText([
@@ -3415,8 +3397,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
       if (data.args instanceof Array) {
-        try { data.args = JSON.stringify(data.args).replace(/"/g, "'"); }
-        catch (e) {data.args = '';}
+        data.args = JSON.stringify(data.args);
       }
       else data.args = null;
       if (this.isset(data.name)) {
@@ -3890,6 +3871,16 @@ MotaActionFunctions.EvalString_pre = function(EvalString){
   if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   EvalString = MotaActionFunctions.replaceFromName(EvalString);
   return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"');
+}
+
+MotaActionFunctions.JsonEvalString_pre = function (JsonEvalString) {
+  if (JsonEvalString == '') return '';
+  JsonEvalString = MotaActionFunctions.replaceFromName(JsonEvalString);
+  try {
+    return JSON.stringify(JSON.parse(JsonEvalString));
+  } catch (e) {
+    throw new Error('此处需要填写一个合法的JSON内容');
+  }
 }
 
 MotaActionFunctions.IdString_pre = function(IdString){

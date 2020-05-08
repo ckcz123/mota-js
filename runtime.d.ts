@@ -1506,7 +1506,7 @@ declare class utils {
      * @param times 全局商店已购次数，一般可省略
      * @returns 替换完毕后的字符串
      */
-    replaceText(text: string, need?: number, times?: number): string
+    replaceText(text: string, prefix?: string, need?: number, times?: number): string
 
     /**
      * 对一个表达式中的特殊规则进行替换，如status:xxx等。

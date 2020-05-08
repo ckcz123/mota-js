@@ -2023,12 +2023,12 @@ ui.prototype.drawShop = function (shopId) {
     core.status.event.selection = selection;
 
     var times = shop.times, need=core.calValue(shop.need, null, null, times);
-    var content = "\t["+shop.name+","+shop.icon+"]" + core.replaceText(shop.text, need, times);
+    var content = "\t["+shop.name+","+shop.icon+"]" + core.replaceText(shop.text, null, need, times);
     var use = shop.use=='experience'?'经验':'金币';
     var choices = [];
     for (var i=0;i<shop.choices.length;i++) {
         var choice = shop.choices[i];
-        var text = core.replaceText(choice.text, need, times);
+        var text = core.replaceText(choice.text, null, need, times);
         if (choice.need != null)
             text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
         choices.push({"text": text, "color":shop.visited?null:"#999999"});

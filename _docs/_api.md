@@ -287,7 +287,7 @@ core.closePanel()
 结束一切事件和绘制，关闭UI窗口，返回游戏进程。
 
 
-core.replaceText(text)
+core.replaceText(text, prefix, need, times)
 将一段文字中的${}进行计算并替换。
 
 

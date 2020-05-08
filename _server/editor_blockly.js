@@ -93,9 +93,6 @@ editor_blockly = function () {
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',0,MotaActionBlocks['choicesContext'].xmlText([
           '剑','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
-          MotaActionBlocks['choicesContext'].xmlText([
-            '盾','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
-          ])
         ])
       ]),
     ],
@@ -149,9 +146,10 @@ editor_blockly = function () {
       MotaActionBlocks['if_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "switch", "condition": "判别值", "caseList": [
         {"action": [{"type": "comment", "text": "当判别值是值的场合执行此事件"}]},
-        {"action": [], "nobreak": true},
         {"case": "default", "action": [{"type": "comment", "text": "当没有符合的值的场合执行default事件"}]},
       ]}),
+      MotaActionFunctions.actionParser.parseList({"type": "for", "name": "switch:A", "from": "0", "to": "12", "step": "1", "data": []}),
+      MotaActionFunctions.actionParser.parseList({"type": "forEach", "name": "switch:A", "list": ["status:atk","status:def"], "data": []}),
       MotaActionBlocks['while_s'].xmlText(),
       MotaActionBlocks['dowhile_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),

@@ -1,3 +1,5 @@
+// 编辑此文件用的vscode插件: https://marketplace.visualstudio.com/items?itemName=zhaouv.vscode-mota-js-extension
+
 grammar MotaAction;
 
 //===============parser===============
@@ -400,6 +402,8 @@ action
     |   if_s
     |   if_1_s
     |   switch_s
+    |   for_s
+    |   forEach_s
     |   while_s
     |   dowhile_s
     |   break_s
@@ -1934,6 +1938,35 @@ var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_0,'",\n',
     '"no": [\n',action_1,']\n',
 '},\n'].join('');
 return code;
+*/;
+
+for_s
+    :   '循环遍历' ': ' expression '从' EvalString '到' EvalString '步增' EvalString BGNL? Newline action+ BEND Newline
+
+/* for_s
+tooltip : for：循环遍历
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=while%ef%bc%9a%e5%89%8d%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
+colour : this.eventColor
+if (!/^switch:[A-Z]$/.test(expression_0)) {
+  throw new Error('循环遍历仅允许使用独立开关！');
+}
+return '{"type": "for", "name": "'+expression_0+'", "from": "'+EvalString_0+'", "to": "'+EvalString_1+'", "step": "'+EvalString_2+'",\n"data": [\n'+action_0+']},\n';
+*/;    
+
+forEach_s
+    :   '循环遍历' ': ' expression '在列表' JsonEvalString '中' BGNL? Newline action+ BEND Newline
+
+/* forEach_s
+tooltip : forEach：循环遍历列表
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=while%ef%bc%9a%e5%89%8d%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
+colour : this.eventColor
+if (!/^switch:[A-Z]$/.test(expression_0)) {
+  throw new Error('循环遍历仅允许使用独立开关！');
+}
+if (JsonEvalString_0 == '' || !(JSON.parse(JsonEvalString_0) instanceof Array)) {
+  throw new Error('参数列表必须是个有效的数组！');
+}
+return '{"type": "forEach", "name": "'+expression_0+'", "list": '+JsonEvalString_0 + ',\n"data": [\n'+action_0+']},\n';
 */;
 
 while_s
@@ -3529,16 +3562,30 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['choices_s'].xmlText([
         info[3],info[0],info[1],data.timeout||0,text_choices,this.next]);
       break;
+    case "for": // 循环遍历
+      this.next = MotaActionBlocks['for_s'].xmlText([
+        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        data.from || 0, data.to || 0, data.step || 0,
+        this.insertActionList(data.data),
+        this.next]);
+      break;
+    case "forEach": // 循环遍历列表
+      this.next = MotaActionBlocks['forEach_s'].xmlText([
+        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        JSON.stringify(data.list),
+        this.insertActionList(data.data),
+        this.next]);
+      break;
     case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
         this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-        this.insertActionList(data["data"]),
+        this.insertActionList(data.data),
         this.next]);
       break;
     case "dowhile": // 后置条件循环处理
       this.next = MotaActionBlocks['dowhile_s'].xmlText([
-        this.insertActionList(data["data"]),
+        this.insertActionList(data.data),
         // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
         this.tryToUseEvFlag_e('evalString_e', [data.condition]),
         this.next]);

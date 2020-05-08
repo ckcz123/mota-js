@@ -1210,17 +1210,20 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
+    data.text = core.replaceText(data.text, prefix);
     core.ui.drawTextBox(data.text, data.showAll);
 }
 
 events.prototype._action_autoText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
+    data.text = core.replaceText(data.text, prefix);
     core.ui.drawTextBox(data.text);
     setTimeout(core.doAction, data.time || 3000);
 }
 
 events.prototype._action_scrollText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doAsyncFunc(data.async, core.drawScrollText, data.text, data.time || 5000, data.lineHeight || 1.4);
 }
 
@@ -1250,7 +1253,7 @@ events.prototype._action_setText = function (data, x, y, prefix) {
 }
 
 events.prototype._action_tip = function (data, x, y, prefix) {
-    core.drawTip(core.replaceText(data.text), data.icon);
+    core.drawTip(core.replaceText(data.text, prefix), data.icon);
     core.doAction();
 }
 
@@ -1412,6 +1415,7 @@ events.prototype._precompile_showImage = function (data) {
 events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
         data.code, core.ui.textImage(data.text), null, loc, data.opacity, data.time);
 }
@@ -1676,7 +1680,7 @@ events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
 }
 
 events.prototype._action_input = function (data, x, y, prefix) {
-    this.__action_getInput(data.text, false, function (value) {
+    this.__action_getInput(core.replaceText(data.text, prefix), false, function (value) {
         value = Math.abs(parseInt(value) || 0);
         core.status.route.push("input:" + value);
         core.setFlag("input", value);
@@ -1685,7 +1689,7 @@ events.prototype._action_input = function (data, x, y, prefix) {
 }
 
 events.prototype._action_input2 = function (data, x, y, prefix) {
-    this.__action_getInput(data.text, true, function (value) {
+    this.__action_getInput(core.replaceText(data.text, prefix), true, function (value) {
         value = value || "";
         core.status.route.push("input2:" + core.encodeBase64(value));
         core.setFlag("input", value);
@@ -1782,7 +1786,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
             core.doAction();
         }, data.timeout);
     }
-    core.ui.drawChoices(data.text, data.choices);
+    core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices);
 }
 
 events.prototype._precompile_choices = function (data) {
@@ -1796,7 +1800,7 @@ events.prototype._precompile_choices = function (data) {
 }
 
 events.prototype._action_confirm = function (data, x, y, prefix) {
-    core.status.event.ui = {"text": data.text, "yes": data.yes, "no": data.no};
+    core.status.event.ui = {"text": core.replaceText(data.text, prefix), "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
@@ -1834,6 +1838,66 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
 events.prototype._precompile_confirm = function (data) {
     data.yes = this.precompile(data.yes);
     data.no = this.precompile(data.no);
+    return data;
+}
+
+events.prototype._action_for = function (data, x, y, prefix) {
+    // Only support switch:A
+    if (!/^switch:[A-Z]$/.test(data.name)) {
+        core.insertAction(['循环遍历事件只支持独立开关！']);
+        return core.doAction();
+    }
+    var from = core.calValue(data.from);
+    if (typeof from != 'number') {
+        core.insertAction('循环遍历事件要求【起始点】仅能是数字！');
+        return core.doAction();
+    }
+    this._setValue_setSwitch(data.name, from, prefix);
+    var toName = '__for@to@' + prefix + '@' + data.name.substring(7) + '__';
+    var stepName = '__for@step@' + prefix + '@' + data.name.substring(7) + '__';
+    core.setFlag(toName, data.to);
+    core.setFlag(stepName, data.step);
+    var condition = "(function () {"+
+        "var to = core.calValue(core.getFlag('" + toName + "'));"+
+        "var step = core.calValue(core.getFlag('" + stepName + "'));"+
+        "if (typeof step != 'number' || typeof to != 'number') return false;"+
+        "if (step == 0) return true;"+
+        "var currentValue = core.calValue('switch:'+'" + data.name.substring(7) + "', '"+prefix+"');"+
+        "currentValue += step;"+
+        "core.events._setValue_setSwitch('switch:'+'" + data.name.substring(7) + "', currentValue, '"+prefix+"');"+
+        "if (step > 0) { return currentValue <= to; }"+
+        "else { return currentValue >= to; }"+
+        "})()";
+    return this._action_dowhile({"condition": condition, "data": data.data}, x, y, prefix);
+}
+
+events.prototype._precompile_for = function (data) {
+    data.from = core.replaceValue(data.from);
+    data.to = core.replaceValue(data.to);
+    data.step = core.replaceValue(data.step);
+    data.data = this.precompile(data.data);
+    return data;
+}
+
+events.prototype._action_forEach = function (data, x, y, prefix) {
+    // Only support switch:A
+    if (!/^switch:[A-Z]$/.test(data.name)) {
+        core.insertAction(['循环遍历事件只支持独立开关！']);
+        return core.doAction();
+    }
+    var listName = '__forEach@' + prefix + '@' + data.name.substring(7) + '__';
+    core.setFlag(listName, core.clone(data.list));
+    var condition = "(function () {" +
+        "var list = core.getFlag('"+listName+"', []);"+
+        "if (list.length == 0) { core.removeFlag('" + listName + "'); return false; }"+
+        "core.events._setValue_setSwitch('switch:'+'" + data.name.substring(7) + "', list.shift(), '"+prefix+"');"+
+        "return true;"+
+        "})()";
+    return this._action_while({"condition": condition, "data": data.data}, x, y, prefix);
+}
+
+events.prototype._precompile_forEach = function (data) {
+    data.data = this.precompile(data.data);
     return data;
 }
 
@@ -1881,11 +1945,11 @@ events.prototype._action_continue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_win = function (data, x, y, prefix) {
-    this.win(core.replaceText(data.reason), data.norank, data.noexit);
+    this.win(core.replaceText(data.reason, prefix), data.norank, data.noexit);
 }
 
 events.prototype._action_lose = function (data, x, y, prefix) {
-    this.lose(core.replaceText(data.reason));
+    this.lose(core.replaceText(data.reason, prefix));
 }
 
 events.prototype._action_restart = function (data, x, y, prefix) {
@@ -2129,10 +2193,12 @@ events.prototype._action_clearMap = function (data, x, y, prefix) {
 }
 
 events.prototype._action_fillText = function (data, x, y, prefix) {
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doUIEvent(data);
 }
 
 events.prototype._action_fillBoldText = function (data, x, y, prefix) {
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doUIEvent(data);
 }
 
@@ -2199,6 +2265,7 @@ events.prototype._action_drawBackground = function (data, x, y, prefix) {
 }
 
 events.prototype._action_drawTextContent = function (data, x, y, prefix) {
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doUIEvent(data);
 }
 

@@ -192,7 +192,7 @@ return code;
 */;
 
 shopItemChoices
-    :   '道具名' IdString '存量' EvalString? '买入价格' EvalString? '卖出价格' EvalString? '出现条件' EvalString? BEND
+    :   '道具名' IdString '存量' IntString? '买入价格' EvalString? '卖出价格' EvalString? '出现条件' EvalString? BEND
 
 
 
@@ -201,13 +201,12 @@ tooltip : 道具商店选项，每一项是道具名；买入或卖出可以不�
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
 default : ["yellowKey","","10","",""]
 colour : this.subColor
-if (EvalString_0 && !/^\d+$/.test(EvalString_0)) throw "存量必须不填或非负整数";
-EvalString_0 = EvalString_0 ? (', "number": '+EvalString_0) : '';
-EvalString_1 = EvalString_1 ? (', "money": "'+EvalString_1+'"') : '';
-EvalString_2 = EvalString_2 ? (', "sell": "'+EvalString_2+'"') : '';
-if (!EvalString_1 && !EvalString_2) throw "买入金额和卖出金额至少需要填写一个";
-EvalString_3 = EvalString_3 ? (', "condition": "'+EvalString_3+'"') : '';
-var code = '{"id": "' + IdString_0 + '"' + EvalString_0 + EvalString_1 + EvalString_2 + EvalString_3 + '},\n';
+IntString_0 = IntString_0 ? (', "number": '+IntString_0) : '';
+EvalString_0 = EvalString_0 ? (', "money": "'+EvalString_0+'"') : '';
+EvalString_1 = EvalString_1 ? (', "sell": "'+EvalString_1+'"') : '';
+if (!EvalString_0 && !EvalString_1) throw "买入金额和卖出金额至少需要填写一个";
+EvalString_2 = EvalString_2 ? (', "condition": "'+EvalString_3+'"') : '';
+var code = '{"id": "' + IdString_0 + '"' + IntString_0 + EvalString_0 + EvalString_1 + EvalString_2 + '},\n';
 return code;
 */;
 
@@ -273,22 +272,26 @@ return code;
 
 //changeFloor 事件编辑器入口之一
 changeFloor_m
-    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' Int? '允许穿透' Bool BEND
+    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' IntString? '穿透性' IgnoreChangeFloor_List BEND
     
 
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://h5mota.com/games/template/_docs/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : [null,"MTx",null,0,0,null,500,null]
+default : [null,"MTx",null,0,0,null,"",null]
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
-Bool_0 = Bool_0 ?'':(', "ignoreChangeFloor": false');
-var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+Int_0+Bool_0+' }\n';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+if (IgnoreChangeFloor_List_0!='null') {
+  IgnoreChangeFloor_List_0 = ', "ignoreChangeFloor": '+IgnoreChangeFloor_List_0;
+} else {
+  IgnoreChangeFloor_List_0 = '';
+}
+var code = '{"floorId": "'+toFloorId+'"'+loc+DirectionEx_List_0+IntString_0+IgnoreChangeFloor_List_0+' }\n';
 return code;
 */;
 
@@ -511,7 +514,7 @@ if(EvalString_2 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalStr
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '{"type": "autoText", "text": "'+title+EvalString_2+EvalString_3+'", "time" :'+Int_0+'},\n';
+var code =  '{"type": "autoText", "text": "'+title+EvalString_2+EvalString_3+'", "time": '+Int_0+'},\n';
 return code;
 */;
 
@@ -529,7 +532,7 @@ return code;
 */;
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' EvalString? '对齐' TextAlign_List? BGNL? '标题颜色' EvalString? Colour '正文颜色' EvalString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' EvalString? '正文字体大小' EvalString? '打字间隔' EvalString? '字符间距' EvalString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' IntString? '对齐' TextAlign_List? BGNL? '标题颜色' ColorString? Colour '正文颜色' ColorString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' IntString? '正文字体大小' IntString? '打字间隔' IntString? '字符间距' IntString? Newline
     
 
 /* setText_s
@@ -539,47 +542,26 @@ default : [null,"",null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rg
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 var colorRe = MotaActionFunctions.pattern.colorRe;
+IntString_0 = IntString_0 ? (', "offset": '+IntString_0) : '';
+ColorString_0 = ColorString_0 ? (', "title": ['+ColorString_0+']') : '';
+ColorString_1 = ColorString_1 ? (', "text": ['+ColorString_1+']') : '';
 if (EvalString_0) {
-  if (!/^\d+$/.test(EvalString_0))throw new Error('像素偏移量必须是整数或不填');
-  EvalString_0 = ', "offset": '+EvalString_0;
-}
-if (EvalString_1) {
-  if (!colorRe.test(EvalString_1))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_1 = ', "title": ['+EvalString_1+']';
-}
-if (EvalString_2) {
-  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_2 = ', "text": ['+EvalString_2+']';
-}
-if (EvalString_3) {
-  if (colorRe.test(EvalString_3)) {
-    EvalString_3 = ', "background": ['+EvalString_3+']';
+  if (colorRe.test(EvalString_0)) {
+    EvalString_0 = ', "background": ['+EvalString_0+']';
   }
-  else if (/^\w+\.png$/.test(EvalString_3)) {
-    EvalString_3 = ', "background": "'+EvalString_3+'"';
+  else if (/^\w+\.png$/.test(EvalString_0)) {
+    EvalString_0 = ', "background": "'+EvalString_0+'"';
   }
   else {
     throw new Error('背景格式错误,必须是形如0~255,0~255,0~255,0~1的颜色，或一个WindowSkin的png图片名称');
   }
 }
-if (EvalString_4) {
-  if (!/^\d+$/.test(EvalString_4))throw new Error('字体大小必须是整数或不填');
-  EvalString_4 = ', "titlefont": '+EvalString_4;
-}
-if (EvalString_5) {
-  if (!/^\d+$/.test(EvalString_5))throw new Error('字体大小必须是整数或不填');
-  EvalString_5 = ', "textfont": '+EvalString_5;
-}
-if (EvalString_6) {
-  if (!/^\d+$/.test(EvalString_6))throw new Error('打字时间间隔必须是整数或不填');
-  EvalString_6 = ', "time": '+EvalString_6;
-}
-if (EvalString_7) {
-  if (!/^\d+$/.test(EvalString_7))throw new Error('字符间距必须是整数或不填');
-  EvalString_7 = ', "interval": '+EvalString_7;
-}
+IntString_1 = IntString_1 ? (', "titlefont": '+IntString_1) : '';
+IntString_2 = IntString_2 ? (', "textfont": '+IntString_2) : '';
+IntString_3 = IntString_3 ? (', "time": '+IntString_3) : '';
+IntString_4 = IntString_4 ? (', "interval": '+IntString_4) : '';
 B_1_List_0 = B_1_List_0==='null'?'':', "bold": '+B_1_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+EvalString_0+TextAlign_List_0+EvalString_1+EvalString_2+B_1_List_0+EvalString_3+EvalString_4+EvalString_5+EvalString_6+EvalString_7+'},\n';
+var code = '{"type": "setText"'+SetTextPosition_List_0+IntString_0+TextAlign_List_0+ColorString_0+ColorString_1+B_1_List_0+EvalString_0+IntString_1+IntString_2+IntString_3+IntString_4+'},\n';
 return code;
 */;
 
@@ -695,13 +677,13 @@ return code;
 
 
 show_s
-    :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? '不等待执行完毕' Bool? Newline
+    :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool? Newline
     
 
 /* show_s
 tooltip : show: 将禁用事件启用,楼层和动画时间可不填,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=show%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E7%A6%81%E7%94%A8%E4%BA%8B%E4%BB%B6%E5%90%AF%E7%94%A8
-default : ["","","",500,false]
+default : ["","","","",false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -721,20 +703,20 @@ if (EvalString_0 && EvalString_1) {
   floorstr = ', "loc": ['+EvalString_0.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "async": true':'';
-var code = '{"type": "show"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
+var code = '{"type": "show"'+floorstr+IdString_0+''+IntString_0+Bool_0+'},\n';
 return code;
 */;
 
 hide_s
-    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' Int? '不等待执行完毕' Bool? Newline
+    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool? Newline
     
 
 /* hide_s
 tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hide%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E5%90%AF%E7%94%A8%E4%BA%8B%E4%BB%B6%E7%A6%81%E7%94%A8
-default : ["","","",500,false]
+default : ["","","","",false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -754,9 +736,9 @@ if (EvalString_0 && EvalString_1) {
   floorstr = ', "loc": ['+EvalString_0.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "async": true':'';
-var code = '{"type": "hide"'+floorstr+IdString_0+''+Int_0+Bool_0+'},\n';
+var code = '{"type": "hide"'+floorstr+IdString_0+''+IntString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1185,21 +1167,21 @@ return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' IdString? 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' Int? Newline
+    :   '楼层切换' IdString? 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? Newline
     
 
 /* changeFloor_s
 tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changefloor%EF%BC%9A%E6%A5%BC%E5%B1%82%E5%88%87%E6%8D%A2
-default : ["MTx","0","0",null,500]
+default : ["MTx","0","0",null,""]
 colour : this.dataColor
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-Int_0 = (Int_0!=='')  ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0  ?(', "time": '+IntString_0):'';
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'"'+floorstr+DirectionEx_List_0+Int_0+' },\n';
+var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'"'+floorstr+DirectionEx_List_0+IntString_0+' },\n';
 return code;
 */;
 
@@ -1381,7 +1363,7 @@ return code;
 */;
 
 moveViewport_s
-    :   '移动视角' '动画时间' Int? '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '移动视角' '动画时间' IntString_0 '不等待执行完毕' Bool BGNL? StepString Newline
 
 
 /* moveViewport_s
@@ -1389,9 +1371,9 @@ tooltip : moveViewport：移动视角
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=movehero%EF%BC%9A%E7%A7%BB%E5%8A%A8%E5%8B%87%E5%A3%AB
 default : [300,false,"上右3下2左"]
 colour : this.soundColor
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "moveViewport"'+Int_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "moveViewport"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
 return code;
 */;
 
@@ -1508,7 +1490,7 @@ return code;
 */;
 
 setCurtain_0_s
-    :   '更改画面色调' EvalString Colour '动画时间' Int? '持续到下一个本事件' Bool '不等待执行完毕' Bool Newline
+    :   '更改画面色调' ColorString Colour '动画时间' IntString '持续到下一个本事件' Bool '不等待执行完毕' Bool Newline
     
 
 /* setCurtain_0_s
@@ -1516,17 +1498,16 @@ tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,true,false]
 colour : this.soundColor
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+if (ColorString_0 == '') throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
 var async = Bool_1?', "async": true':'';
-var code = '{"type": "setCurtain", "color": ['+EvalString_0+']'+Int_0 +Bool_0+async+'},\n';
+var code = '{"type": "setCurtain", "color": ['+ColorString_0+']'+IntString_0 +Bool_0+async+'},\n';
 return code;
 */;
 
 setCurtain_1_s
-    :   '恢复画面色调' '动画时间' Int? '不等待执行完毕' Bool Newline
+    :   '恢复画面色调' '动画时间' IntString? '不等待执行完毕' Bool Newline
     
 
 /* setCurtain_1_s
@@ -1534,25 +1515,24 @@ tooltip : setCurtain: 恢复画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : [500,false]
 colour : this.soundColor
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setCurtain"'+Int_0 +async+'},\n';
+var code = '{"type": "setCurtain"'+IntString_0 +async+'},\n';
 return code;
 */;
 
 screenFlash_s
-    :   '画面闪烁' EvalString Colour '单次时间' Int '执行次数' Int? '不等待执行完毕' Bool Newline
+    :   '画面闪烁' ColorString Colour '单次时间' Int '执行次数' IntString? '不等待执行完毕' Bool Newline
 
 /* screenFlash_s
 tooltip : screenFlash: 画面闪烁,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=screenFlash%EF%BC%9A%E7%94%BB%E9%9D%A2%E9%97%AA%E7%83%81
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,1,false]
 colour : this.soundColor
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-Int_1 = Int_1!=='' ?(', "times": '+Int_1):'';
+if (ColorString_0 == '') throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+IntString_0 = IntString_0 ? (', "times": '+IntString_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "screenFlash", "color": ['+EvalString_0+'], "time": '+Int_0 +Int_1+async+'},\n';
+var code = '{"type": "screenFlash", "color": ['+ColorString_0+'], "time": '+Int_0 +IntString_0+async+'},\n';
 return code;
 */;
 
@@ -1573,7 +1553,7 @@ return code;
 */;
 
 move_s
-    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool BGNL? StepString Newline
     
 
 /* move_s
@@ -1585,30 +1565,30 @@ var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "keep": true':'';
 Bool_1 = Bool_1?', "async": true':'';
-var code = '{"type": "move"'+floorstr+Int_0+Bool_0+Bool_1+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "move"'+floorstr+IntString_0+Bool_0+Bool_1+', "steps": '+JSON.stringify(StepString_0)+'},\n';
 return code;
 */;
 
 moveHero_s
-    :   '移动勇士' '动画时间' Int? '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? StepString Newline
     
 
 /* moveHero_s
 tooltip : moveHero：移动勇士,用这种方式移动勇士的过程中将无视一切地形, 无视一切事件, 中毒状态也不会扣血
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=movehero%EF%BC%9A%E7%A7%BB%E5%8A%A8%E5%8B%87%E5%A3%AB
-default : [500,false,"上右3下2后4左前2"]
+default : ["",false,"上右3下2后4左前2"]
 colour : this.dataColor
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "moveHero"'+Int_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "moveHero"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
 return code;
 */;
 
 jump_s
-    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? '动画时间' Int? '不消失' Bool '不等待执行完毕' Bool Newline
+    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '终止 x' PosString? ',' 'y' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool Newline
 
 
 /* jump_s
@@ -1623,15 +1603,15 @@ if (PosString_0 && PosString_1) {
 if (PosString_2 && PosString_3) {
     floorstr += ', "to": ['+PosString_2+','+PosString_3+']';
 }
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "keep": true':'';
 Bool_1 = Bool_1?', "async": true':'';
-var code = '{"type": "jump"'+floorstr+''+Int_0+Bool_0+Bool_1+'},\n';
+var code = '{"type": "jump"'+floorstr+''+IntString_0+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
 jumpHero_s
-    :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' Int? '不等待执行完毕' Bool Newline
+    :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不等待执行完毕' Bool Newline
 
 
 /* jumpHero_s
@@ -1643,9 +1623,9 @@ var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-Int_0 = Int_0!=='' ?(', "time": '+Int_0):'';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "jumpHero"'+floorstr+Int_0+Bool_0+'},\n';
+var code = '{"type": "jumpHero"'+floorstr+IntString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1742,7 +1722,7 @@ return code;
 */;
 
 setVolume_s
-    :   '设置音量' Int '渐变时间' Int? '不等待执行完毕' Bool Newline
+    :   '设置音量' Int '渐变时间' IntString? '不等待执行完毕' Bool Newline
     
 
 /* setVolume_s
@@ -1750,9 +1730,9 @@ tooltip : setVolume: 设置音量
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setvolume%EF%BC%9A%E8%AE%BE%E7%BD%AE%E9%9F%B3%E9%87%8F
 default : [90, 500, false]
 colour : this.soundColor
-Int_1 = Int_1!==''?(', "time": '+Int_1):""
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setVolume", "value": '+Int_0+Int_1+async+'},\n';
+var code = '{"type": "setVolume", "value": '+Int_0+IntString_0+async+'},\n';
 return code;
 */;
 
@@ -1903,7 +1883,7 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' EvalString? Colour '出现条件' EvalString? BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' ColorString? Colour '出现条件' EvalString? BGNL? Newline action+
 
 
 /* choicesContext
@@ -1911,16 +1891,10 @@ tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
 default : ["提示文字:红钥匙","","",""]
 colour : this.subColor
-if (EvalString_1) {
-  var colorRe = MotaActionFunctions.pattern.colorRe;
-  if (colorRe.test(EvalString_1))
-      EvalString_1 = ', "color": ['+EvalString_1+']';
-  else
-      EvalString_1 = ', "color": "'+EvalString_1+'"';
-}
-EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"')
+ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
+EvalString_1 = EvalString_1 && (', "condition": "'+EvalString_1+'"')
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+EvalString_1+EvalString_2+', "action": [\n'+action_0+']},\n';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2180,7 +2154,7 @@ return code;
 
 
 setAttribute_s
-    : '设置画布属性' '字体' EvalString? '填充样式' EvalString? Colour '边框样式' EvalString? Colour BGNL? '线宽度' EvalString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List 'z值' EvalString? Newline
+    : '设置画布属性' '字体' FontString? '填充样式' ColorString? Colour '边框样式' ColorString? Colour BGNL? '线宽度' IntString? '不透明度' EvalString? '对齐' TextAlign_List '基准线' TextBaseline_List 'z值' IntString? Newline
 
 /* setAttribute_s
 tooltip : setAttribute：设置画布属性
@@ -2189,287 +2163,189 @@ colour : this.subColor
 default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null,""]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 TextBaseline_List_0 = TextBaseline_List_0==='null'?'': ', "baseline": "'+TextBaseline_List_0+'"';
-var colorRe = MotaActionFunctions.pattern.colorRe;
-var fontRe = MotaActionFunctions.pattern.fontRe;
+FontString_0 = FontString_0 ? (', "font": "' + FontString_0 + '"') : '';
+ColorString_0 = ColorString_0 ? (', "fillStyle": ['+ColorString_0+']') : '';
+ColorString_1 = ColorString_1 ? (', "strokeStyle": ['+ColorString_1+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
 if (EvalString_0) {
-  if (!fontRe.test(EvalString_0)) throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
-  EvalString_0 = ', "font": "' + EvalString_0 + '"';
-}
-if (EvalString_1) {
-  if (!colorRe.test(EvalString_1))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_1 = ', "fillStyle": ['+EvalString_1+']';
-}
-if (EvalString_2) {
-  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_2 = ', "strokeStyle": ['+EvalString_2+']';
-}
-if (EvalString_3) {
-  if (!/^\d+$/.test(EvalString_3))throw new Error('线宽必须是整数或不填');
-  EvalString_3 = ', "lineWidth": '+EvalString_3;
-}
-if (EvalString_4) {
-  var f = parseFloat(EvalString_4);
+  var f = parseFloat(EvalString_0);
   if (isNaN(f) || f<0 || f>1) throw new Error('不透明度必须是0到1的浮点数或不填');
-  EvalString_4 = ', "alpha": '+EvalString_4;
+  EvalString_0 = ', "alpha": '+EvalString_0;
 }
-if (EvalString_5) {
-  if (!/^\d+$/.test(EvalString_5))throw new Error('z值必须是整数或不填');
-  EvalString_5 = ', "z": '+EvalString_5;
-}
-var code = '{"type": "setAttribute"'+EvalString_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+TextAlign_List_0+TextBaseline_List_0+EvalString_5+'},\n';
+IntString_1 = IntString_1 ? (', "z": '+IntString_1) : '';
+var code = '{"type": "setAttribute"'+FontString_0+ColorString_0+ColorString_1+IntString_0+
+  EvalString_0+TextAlign_List_0+TextBaseline_List_0+IntString_1+'},\n';
 return code;
 */;
 
 fillText_s
-    :   '绘制文本' 'x' PosString 'y' PosString '样式' EvalString? Colour '字体' EvalString? '最大宽度' EvalString? BGNL? EvalString Newline
+    :   '绘制文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '字体' FontString? '最大宽度' IntString? BGNL? EvalString Newline
 
 /* fillText_s
 tooltip : fillText：绘制一行文本；可以设置最大宽度进行放缩
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillText%ef%bc%9a%e7%bb%98%e5%88%b6%e6%96%87%e6%9c%ac
 colour : this.subColor
 default : ["0","0","",'rgba(255,255,255,1)',"","","绘制一行文本"]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-var fontRe = MotaActionFunctions.pattern.fontRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-if (EvalString_1) {
-  if (!fontRe.test(EvalString_1)) throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
-  EvalString_1 = ', "font": "' + EvalString_1 + '"';
-}
-if (EvalString_2) {
-  if (!/^\d+$/.test(EvalString_2)) throw new Error('最大宽度必须是整数或不填');
-  EvalString_2 = ', "maxWidth": ' + EvalString_2;
-}
-var code = '{"type": "fillText", "x": '+PosString_0+', "y": '+PosString_1+EvalString_0+EvalString_1+EvalString_2+', "text": "'+EvalString_3+'"},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+FontString_0 = FontString_0 ? (', "font": "' + FontString_0 + '"') : '';
+IntString_0 = IntString_0 ? (', "maxWidth": '+IntString_0) : '';
+var code = '{"type": "fillText", "x": '+PosString_0+', "y": '+PosString_1+ColorString_0+FontString_0+IntString_0+', "text": "'+EvalString_0+'"},\n';
 return code;
 */;
 
 fillBoldText_s
-    :   '绘制描边文本' 'x' PosString 'y' PosString '样式' EvalString? Colour '描边颜色' EvalString? Colour '字体' EvalString? BGNL? EvalString Newline
+    :   '绘制描边文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '描边颜色' ColorString? Colour '字体' FontString? BGNL? EvalString Newline
 
 /* fillBoldText_s
 tooltip : fillBoldText：绘制一行描边文本
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillBoldText%ef%bc%9a%e7%bb%98%e5%88%b6%e6%8f%8f%e8%be%b9%e6%96%87%e6%9c%ac
 colour : this.subColor
 default : ["0","0","",'rgba(255,255,255,1)',"",'rgba(0,0,0,1)',"","绘制一行描边文本"]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-var fontRe = MotaActionFunctions.pattern.fontRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-if (EvalString_1) {
-  if (!colorRe.test(EvalString_1))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_1 = ', "strokeStyle": ['+EvalString_1+']';
-}
-if (EvalString_2) {
-  if (!fontRe.test(EvalString_2)) throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
-  EvalString_2 = ', "font": "' + EvalString_2 + '"';
-}
-var code = '{"type": "fillBoldText", "x": '+PosString_0+', "y": '+PosString_1+EvalString_0+EvalString_1+EvalString_2+', "text": "'+EvalString_3+'"},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+ColorString_1 = ColorString_1 ? (', "strokeStyle": ['+ColorString_1+']') : '';
+FontString_0 = FontString_0 ? (', "font": "' + FontString_0 + '"') : '';
+var code = '{"type": "fillBoldText", "x": '+PosString_0+', "y": '+PosString_1+ColorString_0+ColorString_1+FontString_0+', "text": "'+EvalString_0+'"},\n';
 return code;
 */;
 
 drawTextContent_s
-    :   '绘制多行文本'  EvalString BGNL? '起点像素' 'x' PosString 'y' PosString '最大宽度' EvalString? '颜色' EvalString? Colour BGNL? '对齐' TextAlign_List '字体大小' EvalString? '行距' EvalString? '粗体' Bool Newline
+    :   '绘制多行文本'  EvalString BGNL? '起点像素' 'x' PosString 'y' PosString '最大宽度' IntString? '颜色' ColorString? Colour BGNL? '对齐' TextAlign_List '字体大小' IntString? '行距' IntString? '粗体' Bool Newline
 
 /* drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawTextContent%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%a1%8c%e6%96%87%e6%9c%ac
 colour : this.subColor
 default : ["绘制多行文本\\n可双击编辑","0","0","","",'rgba(255,255,255,1)',null,"","",false]
-var colorRe = MotaActionFunctions.pattern.colorRe;
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 Bool_0 = Bool_0 ?  (', "bold": true') : '';
-if (EvalString_1) {
-  if (!/^\d+$/.test(EvalString_1)) throw new Error('最大宽度必须是整数或不填');
-  EvalString_1 = ', "maxWidth": ' + EvalString_1;
-}
-if (EvalString_2) {
-  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_2 = ', "color": ['+EvalString_2+']';
-}
-if (EvalString_3) {
-  if (!/^\d+$/.test(EvalString_3)) throw new Error('字体大小必须是整数或不填');
-  EvalString_3 = ', "fontSize": ' + EvalString_3;
-}
-if (EvalString_4) {
-  if (!/^\d+$/.test(EvalString_4)) throw new Error('行距必须是整数或不填');
-  EvalString_4 = ', "lineHeight": ' + EvalString_4;
-}
-var code = '{"type": "drawTextContent", "text": "'+EvalString_0+'", "left": '+PosString_0+', "top": '+PosString_1+TextAlign_List_0+EvalString_1+EvalString_2+EvalString_3+EvalString_4+Bool_0+'},\n';
+IntString_0 = IntString_0 ? (', "maxWidth": '+IntString_0) : '';
+IntString_1 = IntString_1 ? (', "fontSize": '+IntString_1) : '';
+IntString_2 = IntString_2 ? (', "lineHeight": '+IntString_2) : '';
+ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
+var code = '{"type": "drawTextContent", "text": "'+EvalString_0+'", "left": '+PosString_0+', "top": '+PosString_1+TextAlign_List_0+IntString_0+IntString_1+IntString_2+ColorString_0+Bool_0+'},\n';
 return code;
 */;
 
 fillRect_s
-    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour Newline
+    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour Newline
 
 /* fillRect_s
 tooltip : fillRect：绘制矩形
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2
 colour : this.subColor
 default : ["0","0","flag:x","300","",null]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+EvalString_0+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+'},\n';
 return code;
 */;
 
 strokeRect_s
-    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2%e8%be%b9%e6%a1%86
 colour : this.subColor
 default : ["0","0","flag:x","300","",null,""]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-if (EvalString_1) {
-  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
-  EvalString_1 = ', "lineWidth": '+EvalString_1;
-}
-var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+EvalString_0+EvalString_1+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
 drawLine_s
-    :   '绘制线段' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制线段' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* drawLine_s
 tooltip : drawLine：绘制线段
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawLine%ef%bc%9a%e7%bb%98%e5%88%b6%e7%ba%bf%e6%ae%b5
 colour : this.subColor
 default : ["0","0","flag:x","300","",null,""]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-if (EvalString_1) {
-  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
-  EvalString_1 = ', "lineWidth": '+EvalString_1;
-}
-var code = '{"type": "drawLine", "x1": '+PosString_0+', "y1": '+PosString_1+', "x2": '+PosString_2+', "y2": '+PosString_3+EvalString_0+EvalString_1+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "drawLine", "x1": '+PosString_0+', "y1": '+PosString_1+', "x2": '+PosString_2+', "y2": '+PosString_3+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
 drawArrow_s
-    :   '绘制箭头' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制箭头' '起点像素' 'x' PosString 'y' PosString '终点像素' 'x' PosString 'y' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* drawArrow_s
 tooltip : drawArrow：绘制箭头
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawArrow%ef%bc%9a%e7%bb%98%e5%88%b6%e7%ae%ad%e5%a4%b4
 colour : this.subColor
 default : ["0","0","flag:x","300","",null,""]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-if (EvalString_1) {
-  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
-  EvalString_1 = ', "lineWidth": '+EvalString_1;
-}
-var code = '{"type": "drawArrow", "x1": '+PosString_0+', "y1": '+PosString_1+', "x2": '+PosString_2+', "y2": '+PosString_3+EvalString_0+EvalString_1+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "drawArrow", "x1": '+PosString_0+', "y1": '+PosString_1+', "x2": '+PosString_2+', "y2": '+PosString_3+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
 
 fillPolygon_s
-    :   '绘制多边形' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' EvalString? Colour Newline
+    :   '绘制多边形' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' ColorString? Colour Newline
 
 /* fillPolygon_s
 tooltip : fillPolygon：绘制多边形
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillPolygon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%be%b9%e5%bd%a2
 colour : this.subColor
 default : ["0,0,100","0,100,0","",null]
-var colorRe = MotaActionFunctions.pattern.colorRe;
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
 if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
 EvalString_0=EvalString_0.split(',');
 EvalString_1=EvalString_1.split(',');
 if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
 for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
-if (EvalString_2) {
-  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_2 = ', "style": ['+EvalString_2+']';
-}
-var code = '{"type": "fillPolygon", "nodes": ['+EvalString_0+']'+EvalString_2+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+var code = '{"type": "fillPolygon", "nodes": ['+EvalString_0+']'+ColorString_0+'},\n';
 return code;
 */;
 
 
 strokePolygon_s
-    :   '绘制多边形边框' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制多边形边框' '顶点像素列表' 'x' EvalString 'y' EvalString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokePolygon_s
 tooltip : strokePolygon：绘制多边形边框
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokePolygon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%be%b9%e5%bd%a2%e8%be%b9%e6%a1%86
 colour : this.subColor
 default : ["0,0,100","0,100,0","",null,""]
-var colorRe = MotaActionFunctions.pattern.colorRe;
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
 if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
 EvalString_0=EvalString_0.split(',');
 EvalString_1=EvalString_1.split(',');
 if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
 for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
-if (EvalString_2) {
-  if (!colorRe.test(EvalString_2))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_2 = ', "style": ['+EvalString_2+']';
-}
-if (EvalString_3) {
-  if (!/^\d+$/.test(EvalString_3))throw new Error('线宽必须是整数或不填');
-  EvalString_3 = ', "lineWidth": '+EvalString_3;
-}
-var code = '{"type": "strokePolygon", "nodes": ['+EvalString_0+']'+EvalString_2+EvalString_3+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "strokePolygon", "nodes": ['+EvalString_0+']'+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
 fillCircle_s
-    :   '绘制圆' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' EvalString? Colour Newline
+    :   '绘制圆' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour Newline
 
 /* fillCircle_s
 tooltip : fillCircle：绘制圆
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
 colour : this.subColor
 default : ["0","0","100","",null]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-var code = '{"type": "fillCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+EvalString_0+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+var code = '{"type": "fillCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+'},\n';
 return code;
 */;
 
 strokeCircle_s
-    :   '绘制圆边框' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' EvalString? Colour '线宽' EvalString? Newline
+    :   '绘制圆边框' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeCircle_s
 tooltip : strokeCircle：绘制圆边框
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
 colour : this.subColor
 default : ["0","0","100","",null,""]
-var colorRe = MotaActionFunctions.pattern.colorRe;
-if (EvalString_0) {
-  if (!colorRe.test(EvalString_0))throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  EvalString_0 = ', "style": ['+EvalString_0+']';
-}
-if (EvalString_1) {
-  if (!/^\d+$/.test(EvalString_1))throw new Error('线宽必须是整数或不填');
-  EvalString_1 = ', "lineWidth": '+EvalString_1;
-}
-var code = '{"type": "strokeCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+EvalString_0+EvalString_1+'},\n';
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "strokeCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
@@ -2798,6 +2674,18 @@ PosString
     :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
     ;
 
+IntString
+    :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
+    ;
+
+ColorString
+    :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
+    ;
+
+FontString
+    :   'sdeirughvuiyasbde'+ //为了被识别为复杂词法规则
+    ;
+
 Floor_List
     :   '楼层ID'|'前一楼'|'后一楼'
     /*Floor_List ['floorId',':before',':next']*/;
@@ -2841,6 +2729,10 @@ B_1_List
 Bg_Fg_List
     :   '背景层'|'前景层'
     /*Bg_Fg_List ['bg','fg']*/;
+
+IgnoreChangeFloor_List
+    :   '全局默认值' | '可穿透' | '不可穿透'
+    /*IgnoreChangeFloor_List ['null','true','false']*/;
 
 Event_List
     :   '事件'|'战后事件'|'道具后事件'|'开门后事件'
@@ -3015,10 +2907,9 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.floorType=obj.floorId;
         delete obj.floorId;
       }
-      if (!this.isset(obj.time)) obj.time=500;
       return MotaActionBlocks['changeFloor_m'].xmlText([
         obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,
-        obj.time,!this.isset(obj.ignoreChangeFloor)
+        obj.time,obj.ignoreChangeFloor
       ]);
 
     case 'level':
@@ -3377,7 +3268,7 @@ ActionParser.prototype.parseAction = function() {
     case "screenFlash": // 画面闪烁
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time||500,data.times||1,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time,data.times||1,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([
@@ -3930,6 +3821,11 @@ MotaActionFunctions.JsonEvalString_pre = function (JsonEvalString) {
   }
 }
 
+MotaActionFunctions.IntString_pre = function (IntString) {
+  if (!/^\d*$/.test(IntString)) throw new Error('此项必须是整数或不填');
+  return IntString;
+}
+
 MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   IdString = MotaActionFunctions.replaceFromName(IdString);
@@ -3980,6 +3876,18 @@ MotaActionFunctions.StepString_pre = function(StepString){
     }
   }
   return ans;
+}
+
+MotaActionFunctions.ColorString_pre = function (ColorString) {
+  if (ColorString && !MotaActionFunctions.pattern.colorRe.test(ColorString))
+    throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
+  return ColorString;
+}
+
+MotaActionFunctions.FontString_pre = function (FontString) {
+  if (FontString && !MotaActionFunctions.pattern.fontRe.test(FontString))
+    throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
+  return FontString;
 }
 
 MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};

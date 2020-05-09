@@ -1335,11 +1335,6 @@ actions.prototype._clickQuickShop = function (x, y) {
     if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
         var topIndex = this.HSIZE - parseInt(keys.length / 2) + (core.status.event.ui.offset || 0);
         if (y >= topIndex && y < topIndex + keys.length) {
-            var reason = core.events.canUseQuickShop(keys[y - topIndex]);
-            if (!core.flags.enableDisabledShop && reason) {
-                core.drawText(reason);
-                return;
-            }
             core.events.openShop(keys[y - topIndex], true);
             if (core.status.event.id == 'shop')
                 core.status.event.data.fromList = true;

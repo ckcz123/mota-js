@@ -138,7 +138,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (selectItem != null) {
 			core.setTextAlign('uievent', 'center');
 			core.fillText("uievent", type == 0 ? "买入个数" : "卖出个数", 364, 320, null, bigFont);
-			core.fillText("uievent", "◀   " + selectCount + "   ▶", 364, 350);
+			core.fillText("uievent", "<   " + selectCount + "   >", 364, 350);
 			core.fillText("uievent", "确定", 364, 380);
 		}
 
@@ -319,7 +319,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 		if (px >= 222 && px <= 282 && py >= 71 && py <= 102) // 离开
 			return core.insertAction({ "type": "break" });
-		// ◀，▶
+		// < >
 		if (px >= 318 && px <= 341 && py >= 348 && py <= 376)
 			return _add(item, -1);
 		if (px >= 388 && px <= 416 && py >= 348 && py <= 376)
@@ -330,11 +330,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		// 上一页/下一页
 		if (px >= 45 && px <= 105 && py >= 388) {
-			if (page > 1) selectItem -= 6;
+			if (page > 1) {
+				selectItem -= 6;
+				selectCount = 0;
+			}
 			return;
 		}
 		if (px >= 208 && px <= 268 && py >= 388) {
-			if (page < totalPage) selectItem = Math.min(selectItem + 6, list.length - 1);
+			if (page < totalPage) {
+				selectItem = Math.min(selectItem + 6, list.length - 1);
+				selectCount = 0;
+			}
 			return;
 		}
 

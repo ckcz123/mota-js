@@ -2366,11 +2366,6 @@ events.prototype.openQuickShop = function (fromUserAction) {
     if (Object.keys(core.status.shops).length == 1) {
         var shopId = Object.keys(core.status.shops)[0];
         if (core.status.event.id != null || !this._checkStatus('shop', false)) return;
-        var reason = core.events.canUseQuickShop(shopId);
-        if (!core.flags.enableDisabledShop && reason) {
-            core.drawText(reason);
-            return;
-        }
         core.events.openShop(shopId, true);
         return;
     }
@@ -2881,6 +2876,9 @@ events.prototype.openShop = function (shopId, needVisited) {
     var shop = core.status.shops[shopId];
     shop.times = shop.times || 0;
     if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
+    var reason = core.events.canUseQuickShop(shop.id);
+    if (reason != null) return core.drawTip(reason);
+
     if (needVisited && !shop.visited) {
         if (!core.flags.enableDisabledShop || shop.commonEvent || shop.item) {
             if (shop.times == 0) core.drawTip("该项尚未开启");
@@ -2911,10 +2909,8 @@ events.prototype.openShop = function (shopId, needVisited) {
 }
 
 events.prototype._useShop = function (shop, index) {
-    var reason = core.events.canUseQuickShop(shop.id);
-    if (!reason && !shop.visited) reason = shop.times ? "该商店已失效" : "该商店尚未开启";
-    if (reason) {
-        core.drawTip(reason);
+    if (!shop.visited) {
+        core.drawTip(shop.times ? "该商店已失效" : "该商店尚未开启");
         return false;
     }
     var use = shop.use, choice = shop.choices[index];

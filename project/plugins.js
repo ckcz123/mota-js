@@ -181,7 +181,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				var text = core.material.items[item.id].text || "该道具暂无描述";
 				try { text = core.replaceText(text); } catch (e) {}
 				for (var fontSize = 20; fontSize >= 8; fontSize -= 2) {
-					var config = { left: 10, fontSize: fontSize, maxWidth: 403, lineHeight: 1.4 };
+					var config = { left: 10, fontSize: fontSize, maxWidth: 403 };
 					var height = core.getTextContentHeight(text, config);
 					if (height <= 50) {
 						config.top = (56 - height) / 2;

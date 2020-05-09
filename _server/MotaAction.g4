@@ -531,13 +531,13 @@ return code;
 */;
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' IntString? '对齐' TextAlign_List? BGNL? '标题颜色' ColorString? Colour '正文颜色' ColorString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' IntString? '正文字体大小' IntString? '打字间隔' IntString? '字符间距' IntString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' IntString? '对齐' TextAlign_List? BGNL? '标题颜色' ColorString? Colour '正文颜色' ColorString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' IntString? '正文字体大小' IntString? '行距' IntString? '打字间隔' IntString? '字符间距' IntString? Newline
     
 
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=settext%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%89%A7%E6%83%85%E6%96%87%E6%9C%AC%E7%9A%84%E5%B1%9E%E6%80%A7
-default : [null,"",null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',null,"","","",""]
+default : [null,"",null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',null,"","","","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 var colorRe = MotaActionFunctions.pattern.colorRe;
@@ -557,10 +557,11 @@ if (EvalString_0) {
 }
 IntString_1 = IntString_1 ? (', "titlefont": '+IntString_1) : '';
 IntString_2 = IntString_2 ? (', "textfont": '+IntString_2) : '';
-IntString_3 = IntString_3 ? (', "time": '+IntString_3) : '';
-IntString_4 = IntString_4 ? (', "interval": '+IntString_4) : '';
+IntString_3 = IntString_3 ? (', "lineHeight": '+IntString_3) : '';
+IntString_4 = IntString_4 ? (', "time": '+IntString_4) : '';
+IntString_5 = IntString_5 ? (', "interval": '+IntString_5) : '';
 B_1_List_0 = B_1_List_0==='null'?'':', "bold": '+B_1_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+IntString_0+TextAlign_List_0+ColorString_0+ColorString_1+B_1_List_0+EvalString_0+IntString_1+IntString_2+IntString_3+IntString_4+'},\n';
+var code = '{"type": "setText"'+SetTextPosition_List_0+IntString_0+TextAlign_List_0+ColorString_0+ColorString_1+B_1_List_0+EvalString_0+IntString_1+IntString_2+IntString_3+IntString_4+IntString_5+'},\n';
 return code;
 */;
 
@@ -3047,7 +3048,7 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setText_s'].xmlText([
         data.position,data.offset,data.align,data.title,'rgba('+data.title+')',
         data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
-        data.bold,data.titlefont,data.textfont,data.time,data.interval,this.next]);
+        data.bold,data.titlefont,data.textfont,data.lineHeight,data.time,data.interval,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([

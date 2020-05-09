@@ -1166,7 +1166,7 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, 
 
 ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, posInfo, validWidth) {
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
-    var lineHeight = textAttribute.textfont + 6;
+    var lineHeight = textAttribute.lineHeight || (textAttribute.textfont + 6);
     var height = 45 + this.getTextContentHeight(content, {
         lineHeight: lineHeight, maxWidth: validWidth
     });

@@ -1232,7 +1232,7 @@ events.prototype._action_comment = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setText = function (data, x, y, prefix) {
-    ["position", "offset", "align", "bold", "titlefont", "textfont", "time", "interval"].forEach(function (t) {
+    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "interval"].forEach(function (t) {
         if (data[t] != null) core.status.textAttribute[t] = data[t];
     });
     ["background", "title", "text"].forEach(function (t) {

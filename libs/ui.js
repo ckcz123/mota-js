@@ -907,9 +907,11 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
     var _drawNext = function () {
         if (config.index >= config.blocks.length) return false;
         var block = config.blocks[config.index++];
-        ctx.drawImage(tempCtx.canvas, block.left, block.top, block.width, block.height,
-            config.left + block.left + block.marginLeft, config.top + block.top + block.marginTop,
-            block.width, block.height);
+        if (block != null) {
+            ctx.drawImage(tempCtx.canvas, block.left, block.top, block.width, block.height,
+                config.left + block.left + block.marginLeft, config.top + block.top + block.marginTop,
+                block.width, block.height);
+        }
         return true;
     }
     if (config.time == 0) {
@@ -961,6 +963,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
             tempCtx.font = this._buildFont(config.currfont, config.bold, config.italic);
             return true;
         }
+        if (c == 'z') return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // \\e 斜体切换
     if (ch == '\\' && content.charAt(config.index)=='e') {
@@ -994,6 +997,7 @@ ui.prototype._drawTextContent_newLine = function (tempCtx, config) {
         marginLeft = totalWidth - width;
 
     config.blocks.forEach(function (b) {
+        if (b == null) return;
         if (b.line == config.line) {
             b.marginLeft = marginLeft;
             // b.marginTop = 0; // 上对齐
@@ -1038,6 +1042,23 @@ ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
     return this._drawTextContent_next(tempCtx, content, config);
 }
 
+ui.prototype._drawTextContent_emptyChar = function (tempCtx, content, config) {
+    config.index++;
+    var index = config.index, index2;
+    if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
+        var str = content.substring(index+1, index2);
+        if (/^\d+$/.test(str)) {
+            var value = parseInt(str);
+            for (var i = 0; i < value; ++i) {
+                config.blocks.push(null); // Empty char
+            }
+        } else config.blocks.push(null);
+        config.index = index2 + 1;
+    }
+    else config.blocks.push(null);
+    return this._drawTextContent_next(tempCtx, content, config);
+}
+
 ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
     // 绘制一个 \i 效果
     var index = config.index, index2;
@@ -1072,7 +1093,7 @@ ui.prototype.getTextContentHeight = function (content, config) {
 }
 
 ui.prototype._getRealContent = function (content) {
-    return content.replace(/(\r|\\(r|c|d|e))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
+    return content.replace(/(\r|\\(r|c|d|e|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
 }
 
 ////// 绘制一个对话框 //////

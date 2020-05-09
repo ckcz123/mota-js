@@ -1363,7 +1363,7 @@ return code;
 */;
 
 moveViewport_s
-    :   '移动视角' '动画时间' IntString_0 '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '移动视角' '动画时间' IntString '不等待执行完毕' Bool BGNL? StepString Newline
 
 
 /* moveViewport_s
@@ -1498,7 +1498,6 @@ tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,true,false]
 colour : this.soundColor
-if (ColorString_0 == '') throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
 var async = Bool_1?', "async": true':'';
@@ -3071,7 +3070,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['show_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time,data.async||false,this.next]);
       break;
     case "hide": // 消失
       data.loc=data.loc||[];
@@ -3083,7 +3082,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['hide_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time||0,data.async||false,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.time,data.async||false,this.next]);
       break;
     case "setBlock": // 设置图块
       data.loc=data.loc||[];
@@ -3164,27 +3163,27 @@ ActionParser.prototype.parseAction = function() {
     case "move": // 移动事件
       data.loc=data.loc||['',''];
       this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0],data.loc[1],data.time||0,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
+        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
       break;
     case "moveHero": // 移动勇士
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
-        data.time||0,data.async||false,this.StepString(data.steps),this.next]);
+        data.time,data.async||false,this.StepString(data.steps),this.next]);
       break;
     case "jump": // 跳跃事件
       data.from=data.from||['',''];
       data.to=data.to||['',''];
       this.next = MotaActionBlocks['jump_s'].xmlText([
-        data.from[0],data.from[1],data.to[0],data.to[1],data.time||0,data.keep||false,data.async||false,this.next]);
+        data.from[0],data.from[1],data.to[0],data.to[1],data.time,data.keep||false,data.async||false,this.next]);
       break;
     case "jumpHero": // 跳跃勇士
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['jumpHero_s'].xmlText([
-        data.loc[0],data.loc[1],data.time||0,data.async||false,this.next]);
+        data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
       break;
     case "changeFloor": // 楼层转换
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['changeFloor_s'].xmlText([
-        data.floorId,data.loc[0],data.loc[1],data.direction,data.time||0,this.next]);
+        data.floorId,data.loc[0],data.loc[1],data.direction,data.time,this.next]);
       break;
     case "changePos": // 直接更换勇士位置, 不切换楼层
       if(this.isset(data.loc)){
@@ -3214,7 +3213,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "moveViewport": // 移动视角
       this.next = MotaActionBlocks['moveViewport_s'].xmlText([
-        data.time||0,data.async||false,this.StepString(data.steps),this.next]);
+        data.time,data.async||false,this.StepString(data.steps),this.next]);
       break;
     case "vibrate": // 画面震动
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
@@ -3259,16 +3258,16 @@ ActionParser.prototype.parseAction = function() {
       if(this.isset(data.color)){
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['setCurtain_0_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time||0,data.keep||false,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time,data.keep||false,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setCurtain_1_s'].xmlText([
-          data.time||0,data.async||false,this.next]);
+          data.time,data.async||false,this.next]);
       }
       break;
     case "screenFlash": // 画面闪烁
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time,data.times||1,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time||500,data.times,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([
@@ -3363,7 +3362,7 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setVolume":
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
-        data.value, data.time||0, data.async||false, this.next]);
+        data.value, data.time, data.async||false, this.next]);
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
@@ -3747,16 +3746,25 @@ ActionParser.prototype.StepString = function(steplist) {
     'forward': '前',
     'backward': '后'
   }
-  var StepString = [];
-  for(var ii=0,obj;obj=steplist[ii];ii++) {
-    if(typeof(obj)===typeof('')) {
-      StepString.push(stepchar[obj]);
+  var StepString = '';
+  var last = null, number = 0;
+  steplist.forEach(function (v) {
+    if (v != last) {
+      if (last != null) {
+        StepString += stepchar[last];
+        if (number > 1) StepString += number;
+      }
+      last = v;
+      number = 1;
     } else {
-      StepString.push(stepchar[obj['direction']]);
-      StepString.push(obj['value']);
+      number++;
     }
+  });
+  if (last != null) {
+      StepString += stepchar[last];
+      if (number > 1) StepString += number;
   }
-  return StepString.join('');
+  return StepString;
 }
 
 ActionParser.prototype.EvalString = function(EvalString) {

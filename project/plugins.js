@@ -558,8 +558,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	};
 
 	// 更变楼层的行为追加，重置镜头
-	events.prototype.changingFloor = function (floorId, heroLoc, fromLoad) {
-		this.eventdata.changingFloor(floorId, heroLoc, fromLoad);
+	events.prototype.changingFloor = function (floorId, heroLoc) {
+		this.eventdata.changingFloor(floorId, heroLoc);
 		core.plugin.camera.resetCamera();
 	};
 

@@ -563,13 +563,12 @@ events.prototype._sys_changeFloor = function (data, callback) {
 }
 
 ////// 楼层切换 //////
-events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
+events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
     var info = this._changeFloor_getInfo(floorId, stair, heroLoc, time);
     if (info == null) {
         if (callback) callback();
         return;
     }
-    info.fromLoad = fromLoad;
     floorId = info.floorId;
     info.locked = core.status.lockControl;
 
@@ -666,7 +665,7 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
 }
 
 events.prototype._changeFloor_changing = function (info, callback) {
-    this.changingFloor(info.floorId, info.heroLoc, info.fromLoad);
+    this.changingFloor(info.floorId, info.heroLoc);
 
     if (info.time == 0)
         this._changeFloor_afterChange(info, callback);
@@ -679,19 +678,19 @@ events.prototype._changeFloor_changing = function (info, callback) {
 events.prototype._changeFloor_afterChange = function (info, callback) {
     if (!info.locked) core.unLockControl();
     core.status.replay.animate = false;
-    core.events.afterChangeFloor(info.floorId, info.fromLoad);
+    core.events.afterChangeFloor(info.floorId);
 
     if (callback) callback();
 }
 
-events.prototype.changingFloor = function (floorId, heroLoc, fromLoad) {
-    this.eventdata.changingFloor(floorId, heroLoc, fromLoad);
+events.prototype.changingFloor = function (floorId, heroLoc) {
+    this.eventdata.changingFloor(floorId, heroLoc);
 }
 
 ////// 转换楼层结束的事件 //////
-events.prototype.afterChangeFloor = function (floorId, fromLoad) {
+events.prototype.afterChangeFloor = function (floorId) {
     if (main.mode != 'play') return;
-    return this.eventdata.afterChangeFloor(floorId, fromLoad);
+    return this.eventdata.afterChangeFloor(floorId);
 }
 
 ////// 是否到达过某个楼层 //////

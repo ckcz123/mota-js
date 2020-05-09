@@ -838,8 +838,8 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
             "width": core.material.images.images[t.name].width/4,
             "height": core.material.images.images[t.name].height/4,
             "heroIcon": heroIconArr[t.direction],
-            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
-            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*offset),
+            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*Math.abs(offset)),
+            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*Math.abs(offset)),
             "status": t.stop?"stop":status,
             "index": index++
         });
@@ -1723,6 +1723,7 @@ control.prototype._doSL_load_afterGet = function (id, data) {
     }
     core.ui.closePanel();
     core.loadData(data, function() {
+        core.removeFlag('__fromLoad__');
         core.drawTip("读档成功");
         if (id!="autoSave") {
             core.saves.saveIndex=id;

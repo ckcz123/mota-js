@@ -92,15 +92,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		});
 	})
 },
-        "changingFloor": function (floorId, heroLoc, fromLoad) {
+        "changingFloor": function (floorId, heroLoc) {
 	// 正在切换楼层过程中执行的操作；此函数的执行时间是“屏幕完全变黑“的那一刻
-	// floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置；fromLoad表示是否是从读档造成的切换
+	// floorId为要切换到的楼层ID；heroLoc表示勇士切换到的位置
 
 	// ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
 	var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
+	var fromLoad = core.hasFlag('__fromLoad__'); // 是否是读档造成的切换
 	if (!fromLoad) {
 		if (!core.hasFlag("__leaveLoc__")) core.setFlag("__leaveLoc__", {});
-		if (currentId != null) core.getFlag("__leaveLoc__")[currentId] = core.status.hero.loc;
+		if (currentId != null) core.getFlag("__leaveLoc__")[currentId] = core.clone(core.status.hero.loc);
 	}
 
 	// 可以对currentId进行判定，比如删除某些自定义图层等
@@ -110,6 +111,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 重置画布尺寸
 	core.maps.resizeMap(floorId);
+	// 设置勇士的位置
+	core.status.hero.loc = heroLoc;
 	// 检查重生怪并重置
 	if (!fromLoad) {
 		core.status.maps[floorId].blocks.forEach(function (block) {
@@ -117,10 +120,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				block.disable = false;
 			}
 		});
+		core.control.gatherFollowers();
 	}
-	// 设置勇士的位置
-	core.status.hero.loc = heroLoc;
-	core.control.gatherFollowers();
 
 	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
 	core.drawMap(floorId);
@@ -149,12 +150,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// ...可以新增一些其他内容，比如创建个画布在右上角显示什么内容等等
 
 },
-        "afterChangeFloor": function (floorId, fromLoad) {
+        "afterChangeFloor": function (floorId) {
 	// 转换楼层结束的事件；此函数会在整个楼层切换完全结束后再执行
-	// floorId是切换到的楼层；fromLoad若为true则代表是从读档行为造成的楼层切换
+	// floorId是切换到的楼层
 
 	// 如果是读档，则进行检查（是否需要恢复事件）
-	if (fromLoad) {
+	if (core.hasFlag('__fromLoad__')) {
 		core.events.recoverEvents(core.getFlag("__events__"));
 		core.removeFlag("__events__");
 	} else {
@@ -989,6 +990,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.material.icons.hero.width = core.material.images.images[icon].width / 4;
 		core.material.icons.hero.height = core.material.images.images[icon].height / 4;
 	}
+	core.setFlag('__fromLoad__', true);
 
 	// TODO：增加自己的一些读档处理
 
@@ -1000,7 +1002,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 
 		if (callback) callback();
-	}, true);
+	});
 },
         "updateStatusBar": function () {
 	// 更新状态栏

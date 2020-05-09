@@ -1127,7 +1127,7 @@ events.prototype.__precompile_getArray = function () {
         "closeDoor", "battle", "trigger", "insert"
     ];
     var values = [
-        "setValue", "setValue2", "addValue", "setEnemy", "setFloor", "setGlobalValue",
+        "setValue", "setEnemy", "setFloor", "setGlobalValue",
     ];
     var uievents = [
         "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "strokeCircle",
@@ -1618,25 +1618,7 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
-    this.setValue(data.name, data.value, prefix);
-    if (!data.norefresh) {
-        if (core.status.hero.hp <= 0) {
-            core.status.hero.hp = 0;
-            core.updateStatusBar();
-            core.events.lose();
-        } else {
-            core.updateStatusBar();
-        }
-    }
-    core.doAction();
-}
-
-events.prototype._action_setValue2 = function (data, x, y, prefix) {
-    this._action_addValue(data, x, y, prefix);
-}
-
-events.prototype._action_addValue = function (data, x, y, prefix) {
-    this.addValue(data.name, data.value, prefix);
+    this.setValue(data.name, data.operator, data.value, prefix);
     if (!data.norefresh) {
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp = 0;
@@ -2459,9 +2441,19 @@ events.prototype.unfollow = function (name) {
 }
 
 ////// 数值操作 //////
-events.prototype.setValue = function (name, value, prefix, add) {
-    var value = core.calValue(value, prefix);
-    if (add) value += core.calValue(name, prefix);
+events.prototype.setValue = function (name, operator, value, prefix) {
+    value = core.calValue(value, prefix);
+    var originValue = core.calValue(name, prefix);
+    switch (operator) {
+        case '+=': value = originValue + value; break;
+        case '-=': value = originValue - value; break;
+        case '*=': value = originValue * value; break;
+        case '/=': value = originValue / value; break;
+        case '**=': value = Math.pow(originValue, value); break;
+        case '//=': value = Math.trunc(originValue / value); break;
+        case '%=': value = originValue % value; break;
+        default: break;
+    }
     this._setValue_setStatus(name, value);
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
@@ -2498,7 +2490,7 @@ events.prototype._setValue_setGlobal = function (name, value) {
 
 ////// 数值增减 //////
 events.prototype.addValue = function (name, value, prefix) {
-    this.setValue(name, value, prefix, true);
+    this.setValue(name, '+=', value, prefix);
 }
 
 ////// 执行一个表达式的effect操作 //////

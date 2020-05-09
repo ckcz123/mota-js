@@ -491,27 +491,6 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 在刷新的情况下，如果hp被设置成了0或以下，将触发lose事件，直接死亡。
 
-### addValue：增减勇士的某个属性、道具个数，或某个变量/Flag的值
-
-和`{"type": "setValue"}`的写法完全相同，不过此项是可以直接将值加减到原始数值上。
-
-即下面的写法是等价的：
-
-``` js
-[
-    {"type": "setValue", "name": "status:atk", "value": "status:atk+10" } // 攻击提高10点
-    {"type": "addVakue", "name": "status:atk", "value": "10" } // 和上面写法等价
-    {"type": "setValue", "name": "item:yellowKey", "value": "item:yellowKey-3" } // 黄钥匙个数-3
-    {"type": "addValue", "name": "item:yellowKey", "value": "-3" } // 和上面写法等价
-    {"type": "setValue", "name": "flag:door2", "value": "flag:door2+1" } // 将变量door值+1
-    {"type": "addValue", "name": "flag:door2", "value": "01" } // 和上面写法等价
-]
-```
-
-![](img/events/14.jpg)
-
-从V2.6.5开始，当设置了`"norefresh": true`后可以不刷新状态栏、地图显伤和自动事件，从而加速事件执行。
-
 ### setEnemy：设置怪物属性
 
 使用`{"type":"setEnemy"}`可以设置某个怪物的某个属性
@@ -1672,7 +1651,7 @@ text为提示文字，可以在这里给输入提示文字。这里同样可以�
         ],
         "false": [ // 条件不成立则执行false里的事件
             "你当前攻击力为${status:atk}, 不足500！\n给你增加100点攻击力！",
-            {"type": "addValue", "name": "status:atk", "value": "100"}, // 攻击力加100， 接着会执行revisit事件
+            {"type": "setValue", "name": "status:atk", "operator": "+=", "value": "100"}, // 攻击力加100， 接着会执行revisit事件
         ]
     },
     {"type", "revisit"}, // 立刻重启本事件， 直到攻击力大于500后结束
@@ -1874,7 +1853,7 @@ yes和no均为必填项，即用户点击确认或取消后执行的事件。
 [
     {"type":"while", "condition": "flag:i<=10", // 循环处理；注意flag未设置则默认为0
         "data":[
-            {"type": "addValue", "name": "flag:i", "value": "1"}, // 递增i
+            {"type": "setValue", "name": "flag:i", "operator": "+=", "value": "1"}, // 递增i
             "${flag:i}", // 输出i
             {"type": "sleep","time":1000}, // 等待1秒
         ]
@@ -1908,7 +1887,7 @@ yes和no均为必填项，即用户点击确认或取消后执行的事件。
 [
     {"type":"while", "condition": "true", // 循环处理；永远为真
         "data":[
-            {"type": "addValue", "name": "flag:i", "value": "1"}, // 递增i
+            {"type": "setValue", "name": "flag:i", "operator": "+=", "value": "1"}, // 递增i
             "${flag:i}", // 输出i
             {"type": "sleep","time":1000}, // 等待1秒
             {"type": "if", "condition": "flag:i<10", // 测试i是否小于10

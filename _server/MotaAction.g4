@@ -330,7 +330,6 @@ action
     |   setText_s
     |   tip_s
     |   setValue_s
-    |   addValue_s
     |   setEnemy_s
     |   setFloor_s
     |   setGlobalAttribute_s
@@ -579,28 +578,18 @@ return code;
 */;
 
 setValue_s
-    :   '数值操作' ':' '名称' idString_e '值' expression '不刷新状态栏' Bool Newline
+    :   '数值操作' ':' '名称' idString_e AssignOperator_List expression '不刷新状态栏' Bool Newline
     
 
 /* setValue_s
 tooltip : setValue：设置勇士的某个属性、道具个数, 或某个变量/Flag的值
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setvalue%EF%BC%9A%E8%AE%BE%E7%BD%AE%E5%8B%87%E5%A3%AB%E7%9A%84%E6%9F%90%E4%B8%AA%E5%B1%9E%E6%80%A7%E3%80%81%E9%81%93%E5%85%B7%E4%B8%AA%E6%95%B0%EF%BC%8C%E6%88%96%E6%9F%90%E4%B8%AA%E5%8F%98%E9%87%8Fflag%E7%9A%84%E5%80%BC
 colour : this.dataColor
+if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
+  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
+} else AssignOperator_List_0 = '';
 Bool_0 = Bool_0 ? ', "norefresh": true' : '';
-var code = '{"type": "setValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"' + Bool_0 + '},\n';
-return code;
-*/;
-
-addValue_s
-    :   '数值增减' ':' '名称' idString_e '+=' expression '不刷新状态栏' Bool  Newline
-
-
-/* addValue_s
-tooltip : addValue：增减勇士的某个属性、道具个数, 或某个变量/Flag的值
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=addValue%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
-colour : this.dataColor
-Bool_0 = Bool_0 ? ', "norefresh": true' : '';
-var code = '{"type": "addValue", "name": "'+idString_e_0+'", "value": "'+expression_0+'"' + Bool_0 + '},\n';
+var code = '{"type": "setValue", "name": "'+idString_e_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"' + Bool_0 + '},\n';
 return code;
 */;
 
@@ -612,7 +601,7 @@ setEnemy_s
 /* setEnemy_s
 tooltip : setEnemy：设置某个怪物的属性
 default : ["greenSlime", "atk", "0"]
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=addValue%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setEnemy%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
 colour : this.dataColor
 var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'", "value": "'+expression_0+'"},\n';
 return code;
@@ -2713,6 +2702,10 @@ Arithmetic_List
     :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'>'|'<'|'>='|'<='|'和'|'或'
     ;
 
+AssignOperator_List
+    :   '='|'+='|'-='|'*='|'/='|'**='|'//='|'%='
+    ;  
+
 Weather_List
     :   '无'|'雨'|'雪'|'雾'
     /*Weather_List ['null','rain','snow','fog']*/;
@@ -3366,15 +3359,7 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        this.tryToUseEvFlag_e('idString_e', [data.name]),
-        MotaActionBlocks['evalString_e'].xmlText([data.value]),
-        data.norefresh || false,
-        this.next]);
-      break;
-    case "setValue2":
-    case "addValue":
-      this.next = MotaActionBlocks['addValue_s'].xmlText([
-        this.tryToUseEvFlag_e('idString_e', [data.name]),
+        this.tryToUseEvFlag_e('idString_e', [data.name]), data["operator"]||'=',
         MotaActionBlocks['evalString_e'].xmlText([data.value]),
         data.norefresh || false,
         this.next]);

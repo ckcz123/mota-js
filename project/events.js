@@ -15,7 +15,8 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 							{
 								"type": "setValue",
 								"name": "status:atk",
-								"value": "status:atk+1*flag:arg1"
+								"operator": "+=",
+								"value": "1*flag:arg1"
 							}
 						]
 					},
@@ -25,7 +26,8 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 							{
 								"type": "setValue",
 								"name": "status:def",
-								"value": "status:def+2*flag:arg1"
+								"operator": "+=",
+								"value": "2*flag:arg1"
 							}
 						]
 					},
@@ -35,7 +37,8 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 							{
 								"type": "setValue",
 								"name": "status:hp",
-								"value": "status:hp+200*flag:arg1"
+								"operator": "+=",
+								"value": "200*flag:arg1"
 							}
 						]
 					}
@@ -97,14 +100,16 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 												"text": ">=1：直接扣数值"
 											},
 											{
-												"type": "addValue",
+												"type": "setValue",
 												"name": "status:atk",
-												"value": "-core.values.weakValue"
+												"operator": "-=",
+												"value": "core.values.weakValue"
 											},
 											{
-												"type": "addValue",
+												"type": "setValue",
 												"name": "status:def",
-												"value": "-core.values.weakValue"
+												"operator": "-=",
+												"value": "core.values.weakValue"
 											}
 										],
 										"false": [
@@ -273,13 +278,15 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 										"condition": "item:yellowKey >= 1",
 										"true": [
 											{
-												"type": "addValue",
+												"type": "setValue",
 												"name": "item:yellowKey",
-												"value": "-1"
+												"operator": "-=",
+												"value": "1"
 											},
 											{
-												"type": "addValue",
+												"type": "setValue",
 												"name": "status:money",
+												"operator": "+=",
 												"value": "10"
 											}
 										],
@@ -303,13 +310,15 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 										"condition": "item:blueKey >= 1",
 										"true": [
 											{
-												"type": "addValue",
+												"type": "setValue",
 												"name": "item:blueKey",
-												"value": "-1"
+												"operator": "-=",
+												"value": "1"
 											},
 											{
-												"type": "addValue",
+												"type": "setValue",
 												"name": "status:money",
+												"operator": "+=",
 												"value": "50"
 											}
 										],

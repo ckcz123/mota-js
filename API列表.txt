@@ -1037,7 +1037,7 @@ core.follow(name) / core.unfollow(name)
 跟随和取消跟随都会调用core.gatherFollowers()来聚集所有的跟随者。
 
 
-core.setValue(name, value, prefix) / core.addValue(name, value, prefix)
+core.setValue(name, operator, value, prefix) / core.addValue(name, value, prefix)
 设置/增减某个数值。name可以是status:xxx，item:xxx或flag:xxx。
 value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用，脚本中一般忽略。
 

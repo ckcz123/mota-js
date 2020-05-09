@@ -97,11 +97,8 @@ editor_blockly = function () {
       ]),
     ],
     '数据相关':[
-      MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
-      ]),
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
@@ -220,11 +217,8 @@ editor_blockly = function () {
       MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
-      MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
-      ]),
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
       MotaActionBlocks['evFlag_e'].xmlText(),
@@ -254,8 +248,8 @@ editor_blockly = function () {
             {"text": "黄钥匙（\\\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
                 {"type": "if", "condition": "status:money>=9+flag:shop_times",
                     "true": [
-                        {"type": "addValue", "name": "status:money", "value": "-(9+flag:shop_times)"},
-                        {"type": "addValue", "name": "item:yellowKey", "value": "1"},
+                        {"type": "setValue", "name": "status:money", "operator": "-=", "value": "9+flag:shop_times"},
+                        {"type": "setValue", "name": "item:yellowKey", "operator": "+=", "value": "1"},
                     ],
                     "false": [
                         "\\t[老人,man]你的金钱不足！",
@@ -270,7 +264,7 @@ editor_blockly = function () {
             ]}
         ]
     },
-    {"type": "addValue", "name": "flag:shop_times", "value": "1"},
+    {"type": "setValue", "name": "flag:shop_times", "operator": "+=", "value": "1"},
     {"type": "revisit"}
       ], 'event'),  
       '<label text="战前剧情"></label>',
@@ -293,7 +287,7 @@ editor_blockly = function () {
       ],'afterBattle'),
       '<label text="打怪开门"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "addValue", "name": "flag:__door__", "value": "1"},
+        {"type": "setValue", "name": "flag:__door__", "operator": "+=", "value": "1"},
         {"type": "if", "condition": "flag:__door__==2", 
           "true": [
             {"type": "openDoor", "loc": [10,5]}
@@ -313,7 +307,7 @@ editor_blockly = function () {
           {"type": "if", "condition": "flag:hasSuperPotion", 
             "true": [], 
             "false": [
-              {"type":"setValue", "name":"status:hp", "value":"status:hp*2"}, 
+              {"type":"setValue", "name":"status:hp", "operator": "*=", "value": "2"}, 
               {"type":"setBlock", "number": 1}, 
               {"type":"setValue", "name":"flag:hasSuperPotion", "value": "true"} 
             ]
@@ -755,7 +749,7 @@ function omitedcheckUpdateFunction(event) {
         'comment_s',
         'show_s',
         'hide_s',
-        'addValue_s',
+        'setValue_s',
         'if_s',
         'battle_s',
         'openDoor_s',

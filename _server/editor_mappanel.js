@@ -472,7 +472,7 @@ editor_mappanel_wrapper = function (editor) {
         };
         bindSpecialDoor.enemys.forEach(function (loc) {
             editor.currentFloorData.afterBattle[loc] = [
-                {"type": "addValue", "name": doorFlag, "value": "1"}
+                {"type": "setValue", "name": doorFlag, "operator": "+=", "value": "1"}
             ]
         });
         editor.file.saveFloorFile(function (err) {

@@ -32,7 +32,7 @@ main.floors.sample1=
     [  0,  0,  0,  0,  0,  0,  0,164,  0,  0,163,  0,  0],
     [  1,  1,  1,  1,  0, 20,  0,  0,  0,162,  0,161,  0],
     [  1,  0,123,  1,  0, 20,124,  0,121,  0,122,  0,126],
-    [  1,  0,  0,  1, 88, 20, 86,  0,  0,  0,  0,  0,122]
+    [  1,  0,  0,  1, 88, 20, 86,  0,  0,  0,  0,  0,  0]
 ],
 "firstArrive": [],
 "events": {
@@ -111,12 +111,14 @@ main.floors.sample1=
         {
             "type": "setValue",
             "name": "status:atk",
-            "value": "status:atk/10"
+            "operator": "/=",
+            "value": "10"
         },
         {
             "type": "setValue",
             "name": "status:def",
-            "value": "status:def/10"
+            "operator": "/=",
+            "value": "10"
         },
         {
             "type": "hide",
@@ -344,7 +346,8 @@ main.floors.sample1=
         {
             "type": "setValue",
             "name": "flag:man_times",
-            "value": "flag:man_times+1"
+            "operator": "+=",
+            "value": "1"
         },
         "\t[老人,man]在文字中使用$+{}可以计算并显示一个表达式的结果。\n",
         "\t[老人,man]例如：\n你的当前攻击力是${status:atk}，防御力是${status:def}。\n攻防和的十倍是${10*(status:atk+status:def)}，攻防之积是${status:atk*status:def}。\n你有${item:yellowKey}把黄钥匙，${item:blueKey}把蓝钥匙，${item:redKey}把红钥匙。\n你有${item:pickaxe}个破，${item:bomb}个炸，${item:centerFly}个飞。\n这是你第${flag:man_times}次和我对话。",
@@ -353,43 +356,51 @@ main.floors.sample1=
         {
             "type": "setValue",
             "name": "status:atk",
-            "value": "status:atk*1.5"
+            "operator": "*=",
+            "value": "1.5"
         },
         {
             "type": "setValue",
             "name": "status:def",
-            "value": "status:def*1.5"
+            "operator": "*=",
+            "value": "1.5"
         },
         {
             "type": "setValue",
             "name": "status:hp",
-            "value": "status:hp+10*(status:atk+status:def)"
+            "operator": "+=",
+            "value": "10*(status:atk+status:def)"
         },
         "\t[老人,man]再送你500金币，1000经验，1破2炸3飞！",
         {
             "type": "setValue",
             "name": "status:money",
-            "value": "status:money+500"
+            "operator": "+=",
+            "value": "500"
         },
         {
             "type": "setValue",
             "name": "status:experience",
-            "value": "status:experience+1000"
+            "operator": "+=",
+            "value": "1000"
         },
         {
             "type": "setValue",
             "name": "item:pickaxe",
-            "value": "item:pickaxe+1"
+            "operator": "+=",
+            "value": "1"
         },
         {
             "type": "setValue",
             "name": "item:bomb",
-            "value": "item:bomb+2"
+            "operator": "+=",
+            "value": "2"
         },
         {
             "type": "setValue",
             "name": "item:centerFly",
-            "value": "item:centerFly+3"
+            "operator": "+=",
+            "value": "3"
         },
         "\t[老人,man]status:xxx 代表勇士的某个属性。\n其中xxx可取hp, atk, def, mdef, money,experience这几项。\n\nitem:xxx 代表勇士的某个道具的个数。\nxxx为道具ID，具体可参见items.js中的定义。\n\nflag:xxx 代表某个自定义Flag或变量。\nxxx为Flag/变量名，可以自行定义，由字母、数字和下划线组成。\n未定义过而直接取用的Flag默认值为false。",
         "\t[老人,man]你现在可以重新和我进行对话，进一步看到属性值的改变。"
@@ -413,7 +424,8 @@ main.floors.sample1=
                         {
                             "type": "setValue",
                             "name": "item:bigKey",
-                            "value": "item:bigKey+1"
+                            "operator": "+=",
+                            "value": "1"
                         },
                         "\t[老人,woman]我先走了，拜拜~",
                         {
@@ -439,12 +451,14 @@ main.floors.sample1=
                                                 {
                                                     "type": "setValue",
                                                     "name": "status:money",
-                                                    "value": "status:money-(9+flag:woman_times)"
+                                                    "operator": "-=",
+                                                    "value": "9+flag:woman_times"
                                                 },
                                                 {
                                                     "type": "setValue",
                                                     "name": "item:yellowKey",
-                                                    "value": "item:yellowKey+1"
+                                                    "operator": "+=",
+                                                    "value": "1"
                                                 }
                                             ],
                                             "false": [
@@ -466,12 +480,14 @@ main.floors.sample1=
                                                 {
                                                     "type": "setValue",
                                                     "name": "status:money",
-                                                    "value": "status:money-(18+2*flag:woman_times)"
+                                                    "operator": "-=",
+                                                    "value": "18+2*flag:woman_times"
                                                 },
                                                 {
                                                     "type": "setValue",
                                                     "name": "item:blueKey",
-                                                    "value": "item:blueKey+1"
+                                                    "operator": "+=",
+                                                    "value": "1"
                                                 }
                                             ],
                                             "false": [
@@ -493,12 +509,14 @@ main.floors.sample1=
                                                 {
                                                     "type": "setValue",
                                                     "name": "status:money",
-                                                    "value": "status:money-(36+4*flag:woman_times)"
+                                                    "operator": "-=",
+                                                    "value": "36+4*flag:woman_times"
                                                 },
                                                 {
                                                     "type": "setValue",
                                                     "name": "item:redKey",
-                                                    "value": "item:redKey+1"
+                                                    "operator": "+=",
+                                                    "value": "1"
                                                 }
                                             ],
                                             "false": [
@@ -527,7 +545,8 @@ main.floors.sample1=
         {
             "type": "setValue",
             "name": "flag:woman_times",
-            "value": "flag:woman_times+1"
+            "operator": "+=",
+            "value": "1"
         },
         {
             "type": "revisit"
@@ -547,7 +566,8 @@ main.floors.sample1=
                 {
                     "type": "setValue",
                     "name": "status:atk",
-                    "value": "status:atk+flag:input"
+                    "operator": "+=",
+                    "value": "flag:input"
                 },
                 {
                     "type": "tip",
@@ -559,153 +579,6 @@ main.floors.sample1=
         },
         "\t[老人,womanMagician]具体可参见样板中本事件的写法。"
     ],
-    "10,12": null,
-    "12,12": [
-        {
-            "type": "switch",
-            "condition": "flag:woman_times",
-            "caseList": [
-                {
-                    "case": "0",
-                    "action": [
-                        "\t[老人,woman]现在使用switch改写这个例子"
-                    ]
-                },
-                {
-                    "case": "8",
-                    "action": [
-                        "\t[老人,woman]你购买的钥匙已经够多了，再继续卖给你的话我会有危险的。",
-                        "\t[老人,woman]看在你贡献给我这么多钱的份上，送你一把大黄门钥匙吧，希望你能好好用它。",
-                        {
-                            "type": "setValue",
-                            "name": "item:bigKey",
-                            "value": "item:bigKey+1"
-                        },
-                        "\t[老人,woman]我先走了，拜拜~",
-                        {
-                            "type": "hide",
-                            "time": 500
-                        },
-                        {
-                            "type": "exit"
-                        }
-                    ]
-                },
-                {
-                    "case": "default",
-                    "action": [
-                        {
-                            "type": "comment",
-                            "text": "当没有符合的值的场合执行此事件"
-                        },
-                        {
-                            "type": "choices",
-                            "text": "\t[老人,woman]少年，你需要钥匙吗？\n我这里有大把的！",
-                            "choices": [
-                                {
-                                    "text": "黄钥匙（${9+flag:woman_times}金币）",
-                                    "action": [
-                                        {
-                                            "type": "if",
-                                            "condition": "status:money>=9+flag:woman_times",
-                                            "true": [
-                                                {
-                                                    "type": "setValue",
-                                                    "name": "status:money",
-                                                    "value": "status:money-(9+flag:woman_times)"
-                                                },
-                                                {
-                                                    "type": "setValue",
-                                                    "name": "item:yellowKey",
-                                                    "value": "item:yellowKey+1"
-                                                }
-                                            ],
-                                            "false": [
-                                                "\t[老人,woman]你的金钱不足！",
-                                                {
-                                                    "type": "revisit"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "text": "蓝钥匙（${18+2*flag:woman_times}金币）",
-                                    "action": [
-                                        {
-                                            "type": "if",
-                                            "condition": "status:money>=18+2*flag:woman_times",
-                                            "true": [
-                                                {
-                                                    "type": "setValue",
-                                                    "name": "status:money",
-                                                    "value": "status:money-(18+2*flag:woman_times)"
-                                                },
-                                                {
-                                                    "type": "setValue",
-                                                    "name": "item:blueKey",
-                                                    "value": "item:blueKey+1"
-                                                }
-                                            ],
-                                            "false": [
-                                                "\t[老人,woman]你的金钱不足！",
-                                                {
-                                                    "type": "revisit"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "text": "红钥匙（${36+4*flag:woman_times}金币）",
-                                    "action": [
-                                        {
-                                            "type": "if",
-                                            "condition": "status:money>=36+4*flag:woman_times",
-                                            "true": [
-                                                {
-                                                    "type": "setValue",
-                                                    "name": "status:money",
-                                                    "value": "status:money-(36+4*flag:woman_times)"
-                                                },
-                                                {
-                                                    "type": "setValue",
-                                                    "name": "item:redKey",
-                                                    "value": "item:redKey+1"
-                                                }
-                                            ],
-                                            "false": [
-                                                "\t[老人,woman]你的金钱不足！",
-                                                {
-                                                    "type": "revisit"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    "text": "离开",
-                                    "action": [
-                                        {
-                                            "type": "exit"
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "type": "setValue",
-            "name": "flag:woman_times",
-            "value": "flag:woman_times+1"
-        },
-        {
-            "type": "revisit"
-        }
-    ]
 },
 "changeFloor": {
     "4,12": {
@@ -727,14 +600,16 @@ main.floors.sample1=
         {
             "type": "setValue",
             "name": "flag:door",
-            "value": "flag:door+1"
+            "operator": "+=",
+            "value": "1"
         }
     ],
     "11,6": [
         {
             "type": "setValue",
             "name": "flag:door",
-            "value": "flag:door+1"
+            "operator": "+=",
+            "value": "1"
         }
     ]
 },

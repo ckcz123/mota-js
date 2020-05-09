@@ -370,17 +370,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"need": "20",
-				"title": "第二级",
+				"title": "",
 				"action": [
 					{
 						"type": "setValue",
 						"name": "status:atk",
-						"value": "status:atk+10"
+						"operator": "+=",
+						"value": "10"
 					},
 					{
 						"type": "setValue",
 						"name": "status:def",
-						"value": "status:def+10"
+						"operator": "+=",
+						"value": "10"
 					}
 				]
 			},

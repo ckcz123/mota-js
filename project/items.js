@@ -429,7 +429,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 							{
 								"type": "setValue",
 								"name": "status:atk",
-								"value": "status:atk+1"
+								"operator": "+=",
+								"value": "1"
 							}
 						]
 					},
@@ -439,7 +440,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 							{
 								"type": "setValue",
 								"name": "status:def",
-								"value": "status:def+2"
+								"operator": "+=",
+								"value": "2"
 							}
 						]
 					},
@@ -449,7 +451,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 							{
 								"type": "setValue",
 								"name": "status:hp",
-								"value": "status:hp+200"
+								"operator": "+=",
+								"value": "200"
 							}
 						]
 					}
@@ -476,12 +479,14 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 					{
 						"type": "setValue",
 						"name": "item:lifeWand",
-						"value": "item:lifeWand-flag:input"
+						"operator": "-=",
+						"value": "flag:input"
 					},
 					{
 						"type": "setValue",
 						"name": "status:hp",
-						"value": "status:hp+flag:input*100"
+						"operator": "+=",
+						"value": "flag:input*100"
 					},
 					"成功使用${flag:input}次生命魔杖，恢复${flag:input*100}点生命。"
 				],

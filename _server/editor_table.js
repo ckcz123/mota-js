@@ -49,7 +49,7 @@ editor_table_wrapper = function (editor) {
         var list = [];
         if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
         if (showEdit) list.push("<button onclick='editor.table.onEditBtnClick(this)'>编辑</button>");
-        return list.join('&nbsp;');
+        return list.join(' ');
     }
 
     editor_table.prototype.title = function () {
@@ -64,7 +64,7 @@ editor_table_wrapper = function (editor) {
         return /* html */`<tr id="${guid}">
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
-        <td><div class="etableInputDiv">${tdstr}</div></td>
+        <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
         <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet')}</td>
         </tr>\n`
     }

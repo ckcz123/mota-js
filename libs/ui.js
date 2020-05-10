@@ -1762,9 +1762,9 @@ ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, posi
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
     // 获得第二行绘制的内容
     var second_line = [];
-    if (core.flags.enableMoney) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
     if (core.flags.enableAddPoint) second_line.push(["加点", core.formatBigNumber(enemy.point || 0)]);
-    if (core.flags.enableExperience) second_line.push(["经验", core.formatBigNumber(enemy.experience || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableExperience')>=0) second_line.push(["经验", core.formatBigNumber(enemy.experience || 0)]);
 
     var damage_offset = col1 + (this.PIXEL - col1) / 2 - 12;
     // 第一列
@@ -2650,7 +2650,7 @@ ui.prototype.drawStatistics = function (floorIds) {
         +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.experience)+"点经验。\n\n"
         +"受到的总伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
-        +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
+        +(core.flags.statusBarItems.indexOf('enableDebuff')>=0?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
         "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 不会计算“不可被浏览地图”的隐藏层的数据。\n" +
         "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n"+
@@ -2765,8 +2765,8 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
 ui.prototype._drawStatistics_generateText = function (obj, type, data) {
     var text = type+"地图中：\n";
     text += "共有怪物"+data.monster.count+"个";
-    if (core.flags.enableMoney) text+="，总金币数"+data.monster.money;
-    if (core.flags.enableExperience) text+="，总经验数"+data.monster.experience;
+    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) text+="，总金币数"+data.monster.money;
+    if (core.flags.statusBarItems.indexOf('enableExperience')>=0) text+="，总经验数"+data.monster.experience;
     if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
     text+="。\n";
 

@@ -494,11 +494,8 @@ this.myfunc = function(x) {
 3. 在脚本编辑-updateStatusBar中可以直接替换技能栏的显示内容
 
 ```
-	// 设置技能栏
-	if (core.flags.enableSkill) {
-		// 替换成你想显示的内容，比如你定义的一个flag:abc。
-		core.setStatusBarInnerHTML('skill', core.getFlag("abc", 0));
-	}
+	// 替换成你想显示的内容，比如你定义的一个flag:abc。
+	core.setStatusBarInnerHTML('skill', core.getFlag("abc", 0));
 ```
 
 ### 额外新增新项目
@@ -568,22 +565,17 @@ core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
 在脚本编辑-updateStatusBar中，可以对状态栏显示内容进行修改。
 
 ``` js
-// 设置魔力值
-if (core.flags.enableMana) {
-    // status:manamax 只有在非负时才生效。
-    if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
-        core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
-        core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
-    }
-    else {
-        core.setStatusBarInnerHTML("mana", core.status.hero.mana);
-    }
+// 设置魔力值; status:manamax 只有在非负时才生效。
+if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
+    core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
+    core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
+}
+else {
+    core.setStatusBarInnerHTML("mana", core.status.hero.mana);
 }
 // 设置技能栏
-if (core.flags.enableSkill) {
-    // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名
-    core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
-}
+// 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名
+core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
 ```
 
 ### 技能的触发
@@ -628,8 +620,8 @@ else { // 关闭技能
 
 ``` js
 case 87: // W：开启技能“二倍斩”
-    // 检测技能栏是否开启，是否拥有“二倍斩”这个技能道具
-    if (core.flags.enableSkill && core.hasItem('skill1')) {
+    // 是否拥有“二倍斩”这个技能道具
+    if (core.hasItem('skill1')) {
         core.status.route.push("key:87");
         core.useItem('skill1', true);
     }
@@ -668,7 +660,7 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 
 ``` js
 // 战后的技能处理，比如扣除魔力值
-if (core.flags.enableSkill) {
+if (core.flags.statusBarItems.indexOf('enableSkill')>=0) {
     // 检测当前开启的技能类型
     var skill = core.getFlag('skill', 0);
     if (skill==1) { // 技能1：二倍斩

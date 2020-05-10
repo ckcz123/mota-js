@@ -2535,8 +2535,15 @@ events.prototype.setGlobalAttribute = function (name, value) {
 ////// 设置全局开关 //////
 events.prototype.setGlobalFlag = function (name, value) {
     var flags = core.getFlag("globalFlags", {});
-    flags[name] = value;
-    core.flags[name] = value;
+    if (name.startsWith('s:')) {
+        name = name.substring(2);
+        var statusBarItems = core.flags.statusBarItems.filter(function (v) {return v!=name;});
+        if (value) statusBarItems.push(name);
+        core.flags.statusBarItems = statusBarItems;
+        flags.statusBarItems = core.clone(statusBarItems);
+    } else {
+        flags[name] = core.flags.name = value;
+    }
     core.setFlag("globalFlags", flags);
     core.resize();
     if (name == 'blurFg')
@@ -2963,7 +2970,7 @@ events.prototype.checkLvUp = function () {
 }
 
 events.prototype._checkLvUp_check = function () {
-    if (!core.flags.enableLevelUp || !core.firstData.levelUp
+    if (core.flags.statusBarItems.indexOf('enableLevelUp')>=0 || !core.firstData.levelUp
         || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});

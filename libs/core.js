@@ -282,8 +282,6 @@ core.prototype._init_flags = function () {
 }
 
 core.prototype._init_sys_flags = function () {
-    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
-    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
     if (core.flags.equipboxButton) core.flags.equipment = true;
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);

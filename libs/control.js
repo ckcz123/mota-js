@@ -2612,20 +2612,25 @@ control.prototype._shouldDisplayStatus = function(id) {
         }
         return toDraw;
     }
+    var obj = {};
+    core.flags.statusBarItems.forEach(function (v) { obj[v] = true; })
     switch (id) {
-        case 'floor': return core.flags.enableFloor;
-        case 'name': return core.flags.enableName;
-        case 'lv': return core.flags.enableLv;
-        case 'hpmax': return core.flags.enableHPMax;
-        case 'mana': return core.flags.enableMana;
-        case 'mdef': return core.flags.enableMDef;
-        case 'money': return core.flags.enableMoney;
-        case 'experience': return core.flags.enableExperience && !core.flags.levelUpLeftMode;
-        case 'up': return core.flags.enableLevelUp;
-        case 'skill': return core.flags.enableSkill;
-        case 'key': return core.flags.enableKeys;
-        case 'pzf': return core.flags.enablePZF;
-        case 'debuff': return core.flags.enableDebuff;
+        case 'floor': return obj.enableFloor;
+        case 'name': return obj.enableName;
+        case 'lv': return obj.enableLv;
+        case 'hp': return obj.enableHP;
+        case 'hpmax': return obj.enableHPMax;
+        case 'mana': return obj.enableMana;
+        case 'atk': return obj.enableAtk;
+        case 'def': return obj.enableDef;
+        case 'mdef': return obj.enableMDef;
+        case 'money': return obj.enableMoney;
+        case 'experience': return obj.enableExperience && !obj.levelUpLeftMode;
+        case 'up': return obj.enableLevelUp;
+        case 'skill': return obj.enableSkill;
+        case 'key': return obj.enableKeys;
+        case 'pzf': return obj.enablePZF;
+        case 'debuff': return obj.enableDebuff;
         default: return true;
     }
 }
@@ -2822,7 +2827,7 @@ control.prototype._resize_status = function (obj) {
         core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
     }
     // keys
-    if (core.flags.enableGreenKey) {
+    if (core.flags.statusBarItems.indexOf('enableGreenKey')>=0) {
         core.dom.keyCol.style.fontSize = '0.75em';
         core.statusBar.greenKey.style.display = '';
     } else {

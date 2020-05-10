@@ -150,11 +150,11 @@
 }
 
 .etable tr > :nth-child(1) {
-    width: 20%
+    width: 17%
 }
 
 .etable tr > :nth-child(2) {
-    width: 22%
+    width: 23%
 }
 
 .etable tr > :nth-child(3) {
@@ -162,7 +162,7 @@
 }
 
 .etable tr > :nth-child(4) {
-    width: 23%;
+    width: 25%;
     padding: 0;
 }
 
@@ -199,6 +199,10 @@ div.etableInputDiv {
     bottom: 0;
     left: 0;
     right: 0;
+}
+
+div.checkboxSet {
+    position: relative !important;
 }
 
 .etableInputDiv > * {

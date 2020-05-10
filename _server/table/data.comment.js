@@ -470,80 +470,52 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 		"flags": {
 			"_type": "object",
 			"_data": {
-				"enableFloor": {
+				"statusBarItems": {
 					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏显示当前楼层"
-				},
-				"enableName": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏显示勇士名字"
-				},
-				"enableLv": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏显示当前等级"
-				},
-				"enableHPMax": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否是否启用生命上限"
-				},
-				"enableMana": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否开启魔力值"
-				},
-				"enableMDef": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏及战斗界面显示魔防（护盾）"
-				},
-				"enableMoney": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏、怪物手册及战斗界面显示金币"
-				},
-				"enableExperience": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏、怪物手册及战斗界面显示经验"
-				},
-				"enableLevelUp": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否允许等级提升（进阶）；如果上面enableExperience为false，则此项恒视为false"
-				},
-				"levelUpLeftMode": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "进阶使用扣除模式，即在状态栏显示距离下个等级所需要的经验值；只有enableExperience和enableLevelUp均开启时才有效。"
-				},
-				"enableKeys": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏显示三色钥匙数量"
-				},
-				"enableGreenKey": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏显示绿钥匙"
-				},
-				"enablePZF": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏显示破炸飞数量"
-				},
-				"enableDebuff": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在状态栏显示毒衰咒"
-				},
-				"enableSkill": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否启用技能栏"
+					"_type": "checkboxSet",
+					"_checkboxSet": {
+						"prefix": [
+							"楼层",
+							"名字",
+							"<br>等级",
+							"血限",
+							"<br>生命",
+							"魔力",
+							"<br>攻击",
+							"防御",
+							"<br>护盾",
+							"金币",
+							"<br>经验",
+							"升级",
+							"<br>升级扣除模式",
+							"<br>钥匙",
+							"绿钥",
+							"<br>破炸",
+							"负面",
+							"<br>技能"
+						],
+						"key": [
+							"enableFloor",
+							"enableName",
+							"enableLv",
+							"enableHPMax",
+							"enableHP",
+							"enableMana",
+							"enableAtk",
+							"enableDef",
+							"enableMDef",
+							"enableMoney",
+							"enableExperience",
+							"enableLevelUp",
+							"levelUpLeftMode",
+							"enableKeys",
+							"enableGreenKey",
+							"enablePZF",
+							"enableDebuff",
+							"enableSkill"
+						]
+					},
+					"_data": "状态栏显示"
 				},
 				"flyNearStair": {
 					"_leaf": true,

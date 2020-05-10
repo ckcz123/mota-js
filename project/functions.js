@@ -295,8 +295,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hero.statistics.experience += experience;
 
 	var hint = "打败 " + enemy.name;
-	if (core.flags.enableMoney) hint += "，金币+" + money;
-	if (core.flags.enableExperience) hint += "，经验+" + experience;
+	if (core.flags.statusBarItems.indexOf('enableMoney')>=0) hint += "，金币+" + money;
+	if (core.flags.statusBarItems.indexOf('enableExperience')>=0) hint += "，经验+" + experience;
 	core.drawTip(hint, enemy.id);
 
 	// 事件的处理
@@ -335,7 +335,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.setFlag('hatred', core.getFlag('hatred', 0) + core.values.hatred);
 
 	// 战后的技能处理，比如扣除魔力值
-	if (core.flags.enableSkill) {
+	if (core.flags.statusBarItems.indexOf('enableSkill') >=0 ) {
 		// 检测当前开启的技能类型
 		var skill = core.getFlag('skill', 0);
 		if (skill == 1) { // 技能1：二倍斩
@@ -1008,7 +1008,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.events.checkLvUp();
 
 	// 检查HP上限
-	if (core.flags.enableHPMax) {
+	if (core.flags.statusBarItems.indexOf('enableHPMax') >= 0) {
 		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
 	}
 
@@ -1031,22 +1031,17 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setStatusBarInnerHTML(item, core.getRealStatus(item));
 	});
 
-	// 设置魔力值
-	if (core.flags.enableMana) {
-		// status:manamax 只有在非负时才生效。
-		if (core.status.hero.manamax != null && core.getRealStatus('manamax') >= 0) {
-			core.status.hero.mana = Math.min(core.status.hero.mana, core.getRealStatus('manamax'));
-			core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.getRealStatus('manamax'));
-		}
-		else {
-			core.setStatusBarInnerHTML("mana", core.status.hero.mana);
-		}
+	// 设置魔力值; status:manamax 只有在非负时才生效。
+	if (core.status.hero.manamax != null && core.getRealStatus('manamax') >= 0) {
+		core.status.hero.mana = Math.min(core.status.hero.mana, core.getRealStatus('manamax'));
+		core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.getRealStatus('manamax'));
+	}
+	else {
+		core.setStatusBarInnerHTML("mana", core.status.hero.mana);
 	}
 	// 设置技能栏
-	if (core.flags.enableSkill) {
-		// 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
-		core.setStatusBarInnerHTML('skill', core.getFlag('skillName', '无'));
-	}
+	// 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名；详见文档-个性化-技能塔的支持
+	core.setStatusBarInnerHTML('skill', core.getFlag('skillName', '无'));
 
 	// 可以在这里添加自己额外的状态栏信息，比如想攻击显示 +0.5 可以这么写：
 	// if (core.hasFlag('halfAtk')) core.setStatusBarInnerHTML('atk', core.statusBar.atk.innerText + "+0.5");
@@ -1054,9 +1049,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
 	// 进阶
-	if (core.flags.enableLevelUp && core.status.hero.lv < core.firstData.levelUp.length) {
+	if (core.flags.statusBarItems.indexOf('enableLevelUp')>=0 && core.status.hero.lv < core.firstData.levelUp.length) {
 		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
-		if (core.flags.levelUpLeftMode)
+		if (core.flags.statusBarItems.indexOf('levelUpLeftMode')>=0)
 			core.setStatusBarInnerHTML('up', core.formatBigNumber(need - core.getStatus('experience')) || "");
 		else
 			core.setStatusBarInnerHTML('up', core.formatBigNumber(need) || "");
@@ -1068,17 +1063,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setStatusBarInnerHTML(key, core.setTwoDigits(core.itemCount(key)));
 	});
 	// 毒衰咒
-	if (core.flags.enableDebuff) {
-		core.setStatusBarInnerHTML('poison', core.hasFlag('poison') ? "毒" : "");
-		core.setStatusBarInnerHTML('weak', core.hasFlag('weak') ? "衰" : "");
-		core.setStatusBarInnerHTML('curse', core.hasFlag('curse') ? "咒" : "");
-	}
+	core.setStatusBarInnerHTML('poison', core.hasFlag('poison') ? "毒" : "");
+	core.setStatusBarInnerHTML('weak', core.hasFlag('weak') ? "衰" : "");
+	core.setStatusBarInnerHTML('curse', core.hasFlag('curse') ? "咒" : "");
 	// 破炸飞
-	if (core.flags.enablePZF) {
-		core.setStatusBarInnerHTML('pickaxe', "破" + core.itemCount('pickaxe'));
-		core.setStatusBarInnerHTML('bomb', "炸" + core.itemCount('bomb'));
-		core.setStatusBarInnerHTML('fly', "飞" + core.itemCount('centerFly'));
-	}
+	core.setStatusBarInnerHTML('pickaxe', "破" + core.itemCount('pickaxe'));
+	core.setStatusBarInnerHTML('bomb', "炸" + core.itemCount('bomb'));
+	core.setStatusBarInnerHTML('fly', "飞" + core.itemCount('centerFly'));
 
 	// 难度
 	core.statusBar.hard.innerText = core.status.hard;

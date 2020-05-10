@@ -2388,15 +2388,8 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
     // --- 变化值...
     core.setFont('ui', this._buildFont(14, true));
     for (var name in compare) {
-        var img = core.statusBar.icons[name];
         var text = this._drawEquipbox_getStatusName(name);
-        if (img && core.flags.iconInEquipbox) { // 绘制图标
-            core.drawImage('ui', img, 0, 0, 32, 32, obj.drawOffset, obj.y - 13, 16, 16);
-            obj.drawOffset += 20;
-        }
-        else { // 绘制文字
-            this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
-        }
+        this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
         var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (core.getStatus(name) + compare[name]) * core.getBuff(name);
         if (equip.equip.percentage) {
             var nowBuff = core.getBuff(name), newBuff = nowBuff + compare[name] / 100;

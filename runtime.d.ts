@@ -81,8 +81,6 @@ type SystemFlags = {
     enableXxx: boolean
     flyNearStair: boolean
     steelDoorWithoutKey: boolean
-    hatredDecrease: boolean
-    betweenAttackCeil: boolean
     betweenAttackMax: boolean
     ignoreChangeFloor: boolean
     disableShopOnDamage: boolean

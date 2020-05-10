@@ -553,11 +553,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
 				},
-				"iconInEquipbox": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "在装备栏中的属性变化，是否绘制图标；如果此项开启，则会绘制图标而不是文字"
-				},
 				"enableAddPoint": {
 					"_leaf": true,
 					"_type": "checkbox",
@@ -567,16 +562,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_data": "是否支持负伤害（回血）"
-				},
-				"hatredDecrease": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否在和仇恨怪战斗后减一半的仇恨值，此项为false则和仇恨怪不会扣减仇恨值。"
-				},
-				"betweenAttackCeil": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "夹击上整还是下整。如果此项为true则夹击伤害值向上取整，为false则为向下取整"
 				},
 				"betweenAttackMax": {
 					"_leaf": true,
@@ -632,7 +617,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"potionWhileRouting": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_data": "寻路算法是否经过血瓶；如果该项为false，则寻路算法会自动尽量绕过血瓶"
+					"_data": "寻路算法是否经过血瓶和绿钥匙；如果该项为false，则寻路算法会自动尽量绕过血瓶和绿钥匙"
 				},
 				"ignoreChangeFloor": {
 					"_leaf": true,

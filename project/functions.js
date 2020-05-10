@@ -315,8 +315,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.enemys.hasSpecial(special, 14)) {
 		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理", "args": [2] }]);
 	}
-	// 仇恨属性：减半
-	if (core.flags.hatredDecrease && core.enemys.hasSpecial(special, 17)) {
+	// 仇恨属性
+	if (core.enemys.hasSpecial(special, 17)) {
 		core.setFlag('hatred', Math.floor(core.getFlag('hatred', 0) / 2));
 	}
 	// 自爆
@@ -464,7 +464,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],
 		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }],
 		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半"],
-		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害" + (core.flags.hatredDecrease ? "；战斗后，释放一半的仇恨值" : "") + "。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）"],
+		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）"],
 		[18, "阻击", function (enemy) { return "经过怪物的十字领域时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }],
 		[19, "自爆", "战斗后勇士的生命值变成1"],
 		[20, "无敌", "勇士无法打败怪物，除非拥有十字架"],
@@ -1189,7 +1189,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 		// 捕捉
 		// 如果要防止捕捉效果，可以直接简单的将 flag:no_ambush 设为true
-		if (enemy && core.enemys.hasSpecial(enemy.special, 27)) {
+		if (enemy && core.enemys.hasSpecial(enemy.special, 27) && !core.hasFlag("no_ambush")) {
 			// 给周围格子加上【捕捉】记号
 			for (var dir in core.utils.scan) {
 				var nx = x + core.utils.scan[dir].x,
@@ -1229,8 +1229,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				if (enemyId1 != null || enemyId2 != null) {
 					var leftHp = core.status.hero.hp - (damage[loc] || 0);
 					if (leftHp > 1) {
-						// 上整/下整
-						var value = Math.floor((leftHp + (core.flags.betweenAttackCeil ? 1 : 0)) / 2);
+						// 夹击伤害值
+						var value = Math.floor(leftHp / 2);
 						// 是否不超过怪物伤害值
 						if (core.flags.betweenAttackMax) {
 							var enemyDamage1 = core.getDamage(enemyId1, x, y, floorId);

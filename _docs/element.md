@@ -199,8 +199,6 @@ N连击怪物的special是6，且我们可以为它定义n代表实际连击数�
 
 退化怪需要设置'atkValue'和'defValue'表示退化的数值；也可以不设置默认为0。
 
-夹击可以通过全塔属性中的`betweenAttackCeil`设为true可以将伤害向上取整。
-
 **将`flag:no_betweenAttack`设置为true可以免疫夹击效果。**
 
 固伤怪则需要设置`damage`选项，代表战前扣血数值。

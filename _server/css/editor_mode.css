@@ -203,6 +203,8 @@ div.etableInputDiv {
 
 div.checkboxSet {
     position: relative !important;
+    max-height: 250px;
+    overflow: auto;
 }
 
 .etableInputDiv > * {

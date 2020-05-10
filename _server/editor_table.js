@@ -43,7 +43,7 @@ editor_table_wrapper = function (editor) {
         return /* html */`<div class='checkboxSet'>${content.join('')}</div>\n`;
     }
     editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
-        return /* html */`${prefixString}<input key='${key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
+        return /* html */`${prefixString}<input key='${key}' ctype='${typeof key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
     }
     editor_table.prototype.editGrid = function (showComment, showEdit) {
         var list = [];
@@ -79,7 +79,11 @@ editor_table_wrapper = function (editor) {
         var value=[]
         for (var i in inputs) {
             if (inputs[i].nodeName == 'INPUT') {
-                if (inputs[i].checked) value.push(inputs[i].getAttribute('key'));
+                if (inputs[i].checked) {
+                    var one = inputs[i].getAttribute('key');
+                    if (inputs[i].getAttribute('ctype') == 'number') one = parseFloat(one);
+                    value.push(one);
+                }
             }
         }
         thiseval = value;
@@ -342,31 +346,6 @@ editor_table_wrapper = function (editor) {
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
         }
-    }
-
-    /**
-     * 当“cannotOut / cannotIn”的表格值变化时
-     */
-    editor_table.prototype.onCannotInOutChange = function (guid, obj, commentObj, thisTr, inputs, field, cobj, modeNode) {
-        editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
-        var value = [];
-        var directions = ['up', 'down', 'left', 'right'];
-        var index = 0;
-        for (var i in inputs) {
-            if (inputs[i].nodeName == 'INPUT') {
-                if (inputs[i].checked) value.push(directions[index]);
-                index++;
-            }
-        }
-        if (value.length == 0) thiseval = null;
-        else thiseval = value;
-        if (editor.table.checkRange(cobj, thiseval)) {
-            editor_mode.addAction(['change', field, thiseval]);
-            editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
-        } else {
-            printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
-        }
-
     }
 
     /**

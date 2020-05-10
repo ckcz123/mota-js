@@ -1,5 +1,21 @@
 editor_materialpanel_wrapper = function (editor) {
 
+    // 由于历史遗留原因, 以下变量作为全局变量使用
+    // selectBox
+
+    window.selectBox=document.getElementById('selectBox')
+    selectBox._isSelected=false
+    selectBox.isSelected=function(value){
+        if(value!=null){
+            selectBox._isSelected=value;
+            tip.isSelectedBlock(value);
+            tip.whichShow(0);
+            clearTimeout(tip.timer);
+            editor.dom.dataSelection.style.display=value?'':'none'
+        }
+        return selectBox._isSelected
+    }
+
     editor.uifunctions.getScrollBarHeight = function () {
         var outer = document.createElement("div");
         outer.style.visibility = "hidden";

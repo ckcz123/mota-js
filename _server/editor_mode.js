@@ -97,12 +97,14 @@ editor_mode = function (editor) {
     }
 
     editor_mode.prototype.onmode = function (mode, callback) {
-        if (editor_mode.mode != mode) {
-            if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
-            if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
-            if (mode !== 'save') editor_mode.mode = mode;
-            editor_mode.actionList = [];
-        }
+        setTimeout(function(){
+            if (editor_mode.mode != mode) {
+                if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
+                if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
+                if (mode !== 'save') editor_mode.mode = mode;
+                editor_mode.actionList = [];
+            }
+        })
     }
 
     editor_mode.prototype.showMode = function (mode) {

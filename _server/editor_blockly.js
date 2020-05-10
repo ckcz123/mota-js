@@ -91,20 +91,14 @@ editor_blockly = function () {
       MotaActionBlocks['restart_s'].xmlText(),
       MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
-        '选择剑或者盾','流浪者','man',MotaActionBlocks['choicesContext'].xmlText([
+        '选择剑或者盾','流浪者','man',0,MotaActionBlocks['choicesContext'].xmlText([
           '剑','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
-          MotaActionBlocks['choicesContext'].xmlText([
-            '盾','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [9,3]}]),
-          ])
         ])
       ]),
     ],
     '数据相关':[
-      MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
-      ]),
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
@@ -149,9 +143,10 @@ editor_blockly = function () {
       MotaActionBlocks['if_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "switch", "condition": "判别值", "caseList": [
         {"action": [{"type": "comment", "text": "当判别值是值的场合执行此事件"}]},
-        {"action": [], "nobreak": true},
         {"case": "default", "action": [{"type": "comment", "text": "当没有符合的值的场合执行default事件"}]},
       ]}),
+      MotaActionFunctions.actionParser.parseList({"type": "for", "name": "switch:A", "from": "0", "to": "12", "step": "1", "data": []}),
+      MotaActionFunctions.actionParser.parseList({"type": "forEach", "name": "switch:A", "list": ["status:atk","status:def"], "data": []}),
       MotaActionBlocks['while_s'].xmlText(),
       MotaActionBlocks['dowhile_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),
@@ -164,8 +159,8 @@ editor_blockly = function () {
     ],
     '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
-      MotaActionFunctions.actionParser.parseList({"type": "wait", "data": [
-        {"case": "keyboard", "keycode": 13, "action": [{"type": "comment", "text": "当按下回车(keycode=13)时执行此事件"}]},
+      MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
+        {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件"}]},
         {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),
@@ -222,11 +217,8 @@ editor_blockly = function () {
       MotaActionBlocks['unknown_s'].xmlText(),
     ],
     '值块':[
-      MotaActionBlocks['addValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
-      ]),
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '', false
+        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
       MotaActionBlocks['evFlag_e'].xmlText(),
@@ -256,8 +248,8 @@ editor_blockly = function () {
             {"text": "黄钥匙（\\\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
                 {"type": "if", "condition": "status:money>=9+flag:shop_times",
                     "true": [
-                        {"type": "addValue", "name": "status:money", "value": "-(9+flag:shop_times)"},
-                        {"type": "addValue", "name": "item:yellowKey", "value": "1"},
+                        {"type": "setValue", "name": "status:money", "operator": "-=", "value": "9+flag:shop_times"},
+                        {"type": "setValue", "name": "item:yellowKey", "operator": "+=", "value": "1"},
                     ],
                     "false": [
                         "\\t[老人,man]你的金钱不足！",
@@ -272,7 +264,7 @@ editor_blockly = function () {
             ]}
         ]
     },
-    {"type": "addValue", "name": "flag:shop_times", "value": "1"},
+    {"type": "setValue", "name": "flag:shop_times", "operator": "+=", "value": "1"},
     {"type": "revisit"}
       ], 'event'),  
       '<label text="战前剧情"></label>',
@@ -295,7 +287,7 @@ editor_blockly = function () {
       ],'afterBattle'),
       '<label text="打怪开门"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "addValue", "name": "flag:__door__", "value": "1"},
+        {"type": "setValue", "name": "flag:__door__", "operator": "+=", "value": "1"},
         {"type": "if", "condition": "flag:__door__==2", 
           "true": [
             {"type": "openDoor", "loc": [10,5]}
@@ -315,7 +307,7 @@ editor_blockly = function () {
           {"type": "if", "condition": "flag:hasSuperPotion", 
             "true": [], 
             "false": [
-              {"type":"setValue", "name":"status:hp", "value":"status:hp*2"}, 
+              {"type":"setValue", "name":"status:hp", "operator": "*=", "value": "2"}, 
               {"type":"setBlock", "number": 1}, 
               {"type":"setValue", "name":"flag:hasSuperPotion", "value": "true"} 
             ]
@@ -418,7 +410,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\(i|c|d|e)/g, '\\\\\\\\$1');
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\(i|c|d|e|z)/g, '\\\\\\\\$1');
     codeAreaHL.setValue(code);
   } catch (error) {
     codeAreaHL.setValue(String(error));
@@ -573,7 +565,7 @@ function omitedcheckUpdateFunction(event) {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\(r|f|i|c|d|e)/g,'\\\\$1')),
+            }).replace(/\\(r|f|i|c|d|e|z)/g,'\\\\$1')),
             document.getElementById('entryType').value
         );
     }
@@ -647,7 +639,7 @@ function omitedcheckUpdateFunction(event) {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
-        code = code.replace(/\\(i|c|d|e)/g, '\\\\$1');
+        code = code.replace(/\\(i|c|d|e|z)/g, '\\\\$1');
         eval('var obj=' + code);
         if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
             "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
@@ -698,7 +690,7 @@ function omitedcheckUpdateFunction(event) {
         ];
         if (b && types.indexOf(b.type)>=0) {
             try {
-                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e)/g, '\\\\$1') + "]";
+                var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|z)/g, '\\\\$1') + "]";
                 eval("var obj="+code);
                 if (obj.length > 0 && b.type == 'waitContext_2') {
                     var dt = obj[0];
@@ -757,7 +749,7 @@ function omitedcheckUpdateFunction(event) {
         'comment_s',
         'show_s',
         'hide_s',
-        'addValue_s',
+        'setValue_s',
         'if_s',
         'battle_s',
         'openDoor_s',
@@ -936,7 +928,7 @@ function omitedcheckUpdateFunction(event) {
                     if (index2 >= 0) {
                         before = content.substring(0, index2);
                         if (before.endsWith("怪物") || (ch == ':' && ch2 == ':' && before.endsWith("enemy"))) {
-                            var list = ["name", "hp", "atk", "def", "money", "experience", "point", "special"];
+                            var list = ["name", "hp", "atk", "def", "money", "exp", "point", "special"];
                             if (before.endsWith("怪物") && MotaActionFunctions) {
                                 list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
                                     return v[1];

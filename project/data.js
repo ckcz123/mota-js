@@ -91,14 +91,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"def": 100,
 			"mdef": 0,
 			"money": 0,
-			"experience": 0,
+			"exp": 0,
 			"equipment": [],
 			"items": {
-				"keys": {
-					"yellowKey": 0,
-					"blueKey": 0,
-					"redKey": 0
-				},
 				"constants": {},
 				"tools": {},
 				"equips": {}
@@ -109,6 +104,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"y": 10
 			},
 			"flags": {},
+			"followers": [],
 			"steps": 0
 		},
 		"startCanvas": [
@@ -128,8 +124,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					0,
 					0
 				],
-				"dw": 100,
-				"dh": 100,
 				"opacity": 1,
 				"time": 0
 			},
@@ -165,11 +159,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 										"true": [
 											{
 												"type": "comment",
-												"text": "直接开始游戏，设置初始化数据"
-											},
-											{
-												"type": "function",
-												"function": "function(){\ncore.events.setInitData('')\n}"
+												"text": "直接开始游戏"
 											}
 										],
 										"false": [
@@ -179,7 +169,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 											},
 											{
 												"type": "function",
-												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
+												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one[0],\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + one[1] + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
 											}
 										]
 									},
@@ -232,8 +222,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 												"type": "function",
 												"function": "function(){\ncore.chooseReplayFile()\n}"
 											}
-										],
-										"false": []
+										]
 									}
 								]
 							}
@@ -247,9 +236,66 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			}
 		],
 		"startText": [
+			{
+				"type": "comment",
+				"text": "根据难度分歧设置<flag:hard>并给其他初始值"
+			},
+			{
+				"type": "switch",
+				"condition": "core.status.hard",
+				"caseList": [
+					{
+						"case": "'Easy'",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "flag:hard",
+								"value": "1"
+							},
+							{
+								"type": "comment",
+								"text": "可以在这里修改初始道具或属性，比如赠送黄钥匙等"
+							}
+						]
+					},
+					{
+						"case": "'Normal'",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "flag:hard",
+								"value": "2"
+							}
+						]
+					},
+					{
+						"case": "'Hard'",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "flag:hard",
+								"value": "3"
+							}
+						]
+					},
+					{
+						"case": "'Hell'",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "flag:hard",
+								"value": "4"
+							}
+						]
+					}
+				]
+			},
+			{
+				"type": "comment",
+				"text": "初始剧情"
+			},
 			"Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
-			"这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
-			"赶快来试一试吧！"
+			"这里游戏开始时的剧情。\n\n你可以在这里写上自己的内容。\n赶快来试一试吧！"
 		],
 		"shops": [
 			{
@@ -276,7 +322,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"textInList": "1F经验商店",
 				"commonTimes": false,
 				"mustEnable": false,
-				"use": "experience",
+				"use": "exp",
 				"need": "-1",
 				"text": "勇敢的武士啊，给我若干经验就可以：",
 				"choices": [
@@ -320,17 +366,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"need": "20",
-				"title": "第二级",
+				"title": "",
 				"action": [
 					{
 						"type": "setValue",
 						"name": "status:atk",
-						"value": "status:atk+10"
+						"operator": "+=",
+						"value": "10"
 					},
 					{
 						"type": "setValue",
 						"name": "status:def",
-						"value": "status:def+10"
+						"operator": "+=",
+						"value": "10"
 					}
 				]
 			},
@@ -361,25 +409,18 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"counterAttack": 0.1,
 		"purify": 3,
 		"hatred": 2,
-		"moveSpeed": 100,
-		"animateSpeed": 400,
-		"floorChangeTime": 800
+		"animateSpeed": 400
 	},
 	"flags": {
-		"enableFloor": true,
-		"enableName": false,
-		"enableLv": false,
-		"enableHPMax": false,
-		"enableMana": false,
-		"enableMDef": true,
-		"enableMoney": true,
-		"enableExperience": false,
-		"enableLevelUp": false,
-		"levelUpLeftMode": false,
-		"enableKeys": true,
-		"enablePZF": false,
-		"enableDebuff": false,
-		"enableSkill": false,
+		"statusBarItems": [
+			"enableFloor",
+			"enableHP",
+			"enableAtk",
+			"enableDef",
+			"enableMDef",
+			"enableMoney",
+			"enableKeys"
+		],
 		"flyNearStair": true,
 		"flyRecordPosition": false,
 		"pickaxeFourDirections": false,
@@ -390,11 +431,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"itemFirstText": false,
 		"equipment": false,
 		"equipboxButton": false,
-		"iconInEquipbox": false,
 		"enableAddPoint": false,
 		"enableNegativeDamage": false,
-		"hatredDecrease": true,
-		"betweenAttackCeil": false,
 		"betweenAttackMax": false,
 		"useLoop": false,
 		"startUsingCanvas": false,
@@ -405,13 +443,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"displayCritical": true,
 		"displayExtraDamage": true,
 		"enableGentleClick": true,
-		"potionWhileRouting": false,
 		"ignoreChangeFloor": true,
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
 		"enableDisabledShop": true,
 		"disableShopOnDamage": false,
-		"blurFg": false,
-		"checkConsole": false
+		"blurFg": false
 	}
 }

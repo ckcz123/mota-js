@@ -144,7 +144,7 @@
 
 .etable table th,
 .etable table td {
-    padding: 6px 13px;
+    padding: 5px;
     border: 1px solid #dfe2e5;
 }
 
@@ -172,11 +172,11 @@
 }
 
 .etable tr > :nth-child(3) {
-    width: 30%;
+    width: 38%;
 }
 
 .etable tr > :nth-child(4) {
-    width: 30%;
+    width: 22%;
     text-align: center;
 }
 
@@ -211,6 +211,10 @@ div.etableInputDiv {
     right: 0;
 }
 
+div.checkboxSet {
+    position: relative !important;
+}
+
 .etableInputDiv > * {
     margin: 0;
     padding: 0;
@@ -220,11 +224,7 @@ div.etableInputDiv {
     border: none;
 }
 
-.etableInputDiv input[type="text"] {
-
-}
-
-.etableInputDiv input[type="checkbox"] {
+.etableInputDiv .checkbox {
     width: 16px;
     height: 16px;
     position: absolute;
@@ -234,8 +234,10 @@ div.etableInputDiv {
     margin-top: -8px;
 }
 
-.etableInputDiv select {
-
+.etableInputDiv .checkboxSetMember {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
 }
 
 .etableInputDiv textarea {

@@ -219,6 +219,7 @@
 }
 #statusBar span{
     font: bold italic 1.1em Verdana;
+    display: inline;
 }
 #statusBar p {
     display: inline-block;

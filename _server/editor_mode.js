@@ -97,12 +97,14 @@ editor_mode = function (editor) {
     }
 
     editor_mode.prototype.onmode = function (mode, callback) {
-        if (editor_mode.mode != mode) {
-            if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
-            if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
-            if (mode !== 'save') editor_mode.mode = mode;
-            editor_mode.actionList = [];
-        }
+        setTimeout(function(){
+            if (editor_mode.mode != mode) {
+                if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
+                if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
+                if (mode !== 'save') editor_mode.mode = mode;
+                editor_mode.actionList = [];
+            }
+        })
     }
 
     editor_mode.prototype.showMode = function (mode) {
@@ -165,6 +167,25 @@ editor_mode = function (editor) {
             }
         });
         return true
+    }
+
+    editor_mode.prototype.checkImages = function (thiseval) {
+        if (!editor_mode.checkUnique(thiseval)) return false;
+        fs.readdir('project/images', function (err, data) {
+            if (err) {
+                printe(err);
+                throw Error(err);
+            }
+            thiseval.map(function (v) {
+                var name = v.indexOf('.') < 0 ? (v+'.png') : v;
+                if (data.indexOf(name) < 0) notExist = name;
+                return name;
+            });
+            if (notExist) {
+                alert('警告！图片' + notExist + '不存在！保存可能导致工程无法打开，请及时修改！');
+            }
+        });
+        return true;
     }
 
     editor_mode.prototype.changeDoubleClickModeByButton = function (mode) {

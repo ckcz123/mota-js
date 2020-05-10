@@ -23,18 +23,16 @@
       // basepath: '../docs/',
       
         // Search Support
-      // search: {
-      //   maxAge: 43200000, // 过期时间，单位毫秒，默认一天
-      //   paths: 'auto',
-      //   placeholder: {
-      //     '/en/': 'Search',
-      //     '/': '搜索',
-      //   },
-      //   noData: {
-      //     '/en/': 'No Results',
-      //     '/': '找不到结果',
-      //   },
-      // },
+      search: {
+        maxAge: 43200000, // 过期时间，单位毫秒，默认一天
+        paths: 'auto',
+        placeholder: {
+          '/': '搜索文档...',
+        },
+        noData: {
+          '/': '找不到结果',
+        },
+      },
 
        // load sidebar from _sidebar.md
       loadSidebar: '_sidebar',
@@ -46,5 +44,6 @@
     }
   </script>
   <script src="https://cdn.bootcss.com/docsify/4.5.5/docsify.min.js"></script>
+  <script src="https://cdn.bootcss.com/docsify/4.5.5/plugins/search.min.js"></script>
 </body>
 </html>

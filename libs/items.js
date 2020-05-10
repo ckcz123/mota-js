@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 "use strict";
 
 function items() {
@@ -145,9 +147,6 @@ items.prototype._afterUseItem = function (itemId) {
         core.status.hero.items[itemCls][itemId]--;
     if (core.status.hero.items[itemCls][itemId] <= 0)
         delete core.status.hero.items[itemCls][itemId];
-
-    if (!core.status.event.id)
-        core.status.event.ui = null;
     core.updateStatusBar();
 }
 
@@ -156,21 +155,15 @@ items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
 
-    var able = false;
     if (itemId in this.canUseItemEffect) {
         try {
-            able = eval(this.canUseItemEffect[itemId]);
+            return eval(this.canUseItemEffect[itemId]);
         }
         catch (e) {
             main.log(e);
+            return false;
         }
     }
-    if (!able) {
-        core.status.event.data = null;
-        core.status.event.ui = null;
-    }
-
-    return able;
 }
 
 ////// 获得某个物品的个数 //////
@@ -209,8 +202,7 @@ items.prototype.setItem = function (itemId, itemNum) {
 
     core.status.hero.items[itemCls][itemId] = itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
 }
@@ -226,8 +218,7 @@ items.prototype.addItem = function (itemId, itemNum) {
     }
     core.status.hero.items[itemCls][itemId] += itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     // 永久道具只能有一个
     if (itemCls == 'constants' && core.status.hero.items[itemCls][itemId] > 1)
@@ -242,8 +233,7 @@ items.prototype.removeItem = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId] -= itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
     return true;

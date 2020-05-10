@@ -2,19 +2,22 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 {
 	"items": {
 		"yellowKey": {
-			"cls": "keys",
+			"cls": "tools",
 			"name": "黄钥匙",
-			"text": "可以打开一扇黄门"
+			"text": "可以打开一扇黄门",
+			"hideInToolbox": true
 		},
 		"blueKey": {
-			"cls": "keys",
+			"cls": "tools",
 			"name": "蓝钥匙",
-			"text": "可以打开一扇蓝门"
+			"text": "可以打开一扇蓝门",
+			"hideInToolbox": true
 		},
 		"redKey": {
-			"cls": "keys",
+			"cls": "tools",
 			"name": "红钥匙",
-			"text": "可以打开一扇红门"
+			"text": "可以打开一扇红门",
+			"hideInToolbox": true
 		},
 		"redJewel": {
 			"cls": "items",
@@ -29,7 +32,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"greenJewel": {
 			"cls": "items",
 			"name": "绿宝石",
-			"text": "'，魔防+${core.values.greenJewel}'"
+			"text": "'，护盾+${core.values.greenJewel}'"
 		},
 		"yellowJewel": {
 			"cls": "items",
@@ -182,13 +185,15 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"book": {
 			"cls": "constants",
 			"name": "怪物手册",
-			"text": "可以查看当前楼层各怪物属性"
+			"text": "可以查看当前楼层各怪物属性",
+			"hideInToolbox": true
 		},
 		"fly": {
 			"cls": "constants",
 			"name": "楼层传送器",
 			"text": "可以自由往来去过的楼层",
-			"hideInReplay": true
+			"hideInReplay": true,
+			"hideInToolbox": true
 		},
 		"coin": {
 			"cls": "constants",
@@ -288,7 +293,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"hammer": {
 			"cls": "tools",
 			"name": "圣锤",
-			"text": "可以炸掉勇士面前的怪物"
+			"text": "该道具尚未被定义"
 		},
 		"lifeWand": {
 			"cls": "tools",
@@ -339,7 +344,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"itemEffectTip": {
 		"redJewel": "'，攻击+'+core.values.redJewel * ratio",
 		"blueJewel": "'，防御+'+core.values.blueJewel * ratio",
-		"greenJewel": "'，魔防+'+core.values.greenJewel * ratio",
+		"greenJewel": "'，护盾+'+core.values.greenJewel * ratio",
 		"yellowJewel": "'，全属性提升'",
 		"redPotion": "'，生命+'+core.values.redPotion * ratio",
 		"bluePotion": "'，生命+'+core.values.bluePotion * ratio",
@@ -356,7 +361,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield2": "'，防御+20'",
 		"shield3": "'，防御+40'",
 		"shield4": "'，防御+80'",
-		"shield5": "'，防御+100，魔防+100'",
+		"shield5": "'，防御+100，护盾+100'",
 		"bigKey": "'，全钥匙+1'",
 		"superPotion": "'，生命值翻倍'",
 		"moneyPocket": "'，金币+500'"
@@ -364,22 +369,21 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"useItemEffect": {
 		"book": "core.ui.drawBook(0);",
 		"fly": "core.ui.drawFly(core.floorIds.indexOf(core.status.floorId));",
-		"earthquake": "core.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-		"pickaxe": "core.playSound('pickaxe.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-		"icePickaxe": "core.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-		"snow": "core.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n});",
-		"bigKey": "(function () {\n\tvar actions = core.status.event.ui.map(function (id) {\n\t\tvar block = core.status.thisMap.blocks[id];\n\t\treturn { \"type\": \"openDoor\", \"loc\": [block.x, block.y], \"async\": true };\n\t});\n\tactions.push({ \"type\": \"waitAsync\" });\n\tactions.push({ \"type\": \"tip\", \"text\": core.material.items[itemId].name + \"使用成功\" });\n\tcore.insertAction(actions);\n})();",
-		"bomb": "core.playSound('bomb.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
-		"hammer": "core.playSound('bomb.mp3');\ncore.removeBlockByIds(core.status.floorId, core.status.event.ui);\ncore.drawMap(core.status.floorId, function () {\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\tcore.events.afterUseBomb();\n});",
-		"centerFly": "core.playSound('centerFly.mp3');\ncore.clearMap('hero');\ncore.setHeroLoc('x', core.bigmap.width-1-core.getHeroLoc('x'));\ncore.setHeroLoc('y', core.bigmap.height-1-core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
-		"upFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.ui.x, 'y': core.status.event.ui.y};\nif (core.status.event.id == 'action') {\n\tcore.insertAction([\n\t\t{\"type\": \"changeFloor\", \"loc\": [loc.x, loc.y], \"direction\": loc.direction, \"floorId\": core.status.event.ui.id},\n\t\t{\"type\": \"tip\", \"text\": core.material.items[itemId].name + '使用成功'}\n\t]);\n}\nelse {\n\tcore.changeFloor(core.status.event.ui.id, null, loc, null, function (){\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t\tcore.replay();\n\t});\n}",
-		"downFly": "var loc = {'direction': core.status.hero.loc.direction, 'x': core.status.event.ui.x, 'y': core.status.event.ui.y};\nif (core.status.event.id == 'action') {\n\tcore.insertAction([\n\t\t{\"type\": \"changeFloor\", \"loc\": [loc.x, loc.y], \"direction\": loc.direction, \"floorId\": core.status.event.ui.id},\n\t\t{\"type\": \"tip\", \"text\": core.material.items[itemId].name + '使用成功'}\n\t]);\n}\nelse {\n\tcore.changeFloor(core.status.event.ui.id, null, loc, null, function (){\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t\tcore.replay();\n\t});\n}\n",
+		"earthquake": "(function () {\n\tvar indexes = [];\n\tfor (var index in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[index];\n\t\tif (!block.disable && block.event.canBreak) {\n\t\t\tindexes.push(index);\n\t\t}\n\t}\n\tcore.removeBlockByIndexes(indexes);\n\tcore.drawMap(core.status.floorId, function () {\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t});\n})();",
+		"pickaxe": "(function () {\n\tvar canBreak = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable) return false;\n\t\treturn block.block.event.canBreak;\n\t};\n\n\tcore.playSound('pickaxe.mp3');\n\tif (core.flags.pickaxeFourDirections) {\n\t\t// 四方向破\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (canBreak(nx, ny)) {\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t}\n\t\t}\n\t} else {\n\t\t// 仅破当前\n\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t}\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
+		"icePickaxe": "(function () {\n\tcore.removeBlock(core.nextX(), core.nextY());\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
+		"snow": "(function () {\n\tif (core.flags.snowFourDirections) {\n\t\t// 四方向雪花\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (core.getBlockId(nx, ny) == 'lava') {\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t}\n\t\t}\n\t} else {\n\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t}\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
+		"bigKey": "(function () {\n\tvar actions = core.searchBlock(\"yellowDoor\").map(function (block) {\n\t\treturn { \"type\": \"openDoor\", \"loc\": [block.x, block.y], \"async\": true };\n\t});\n\tactions.push({ \"type\": \"waitAsync\" });\n\tactions.push({ \"type\": \"tip\", \"text\": core.material.items[itemId].name + \"使用成功\" });\n\tcore.insertAction(actions);\n})();",
+		"bomb": "(function () {\n\tvar canBomb = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable || block.block.event.cls.indexOf('enemy') != 0) return false;\n\t\tvar enemy = core.material.enemys[block.block.event.id];\n\t\treturn enemy && !enemy.notBomb;\n\t};\n\n\tcore.playSound('bomb.mp3');\n\tvar bombList = []; // 炸掉的怪物坐标列表\n\tif (core.flags.bombFourDirections) {\n\t\t// 四方向炸\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (canBomb(nx, ny)) {\n\t\t\t\tbombList.push([nx, ny]);\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t}\n\t\t}\n\t} else {\n\t\t// 仅炸当前\n\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\tbombList.push([core.nextX(), core.nextY()]);\n\t}\n\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t// 炸弹后事件\n\t// 这是一个使用炸弹也能开门的例子\n\t/*\n\tif (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在\n\t\t&& !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在\n\t{\n\t\tcore.insertAction([ // 插入事件\n\t\t\t{\"type\": \"openDoor\", \"loc\": [x0,y0]} // 开门\n\t\t])\n\t}\n\t*/\n})();",
+		"centerFly": "core.playSound('centerFly.mp3');\ncore.clearMap('hero');\ncore.setHeroLoc('x', core.bigmap.width - 1 - core.getHeroLoc('x'));\ncore.setHeroLoc('y', core.bigmap.height - 1 - core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
+		"upFly": "(function () {\n\tvar floorId = core.floorIds[core.floorIds.indexOf(core.status.floorId) + 1];\n\tif (core.status.event.id == 'action') {\n\t\tcore.insertAction([\n\t\t\t{ \"type\": \"changeFloor\", \"loc\": [core.getHeroLoc('x'), core.getHeroLoc('y')], \"floorId\": floorId },\n\t\t\t{ \"type\": \"tip\", \"text\": core.material.items[itemId].name + '使用成功' }\n\t\t]);\n\t} else {\n\t\tcore.changeFloor(floorId, null, core.status.hero.loc, null, function () {\n\t\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t\t\tcore.replay();\n\t\t});\n\t}\n})();",
+		"downFly": "(function () {\n\tvar floorId = core.floorIds[core.floorIds.indexOf(core.status.floorId) - 1];\n\tif (core.status.event.id == 'action') {\n\t\tcore.insertAction([\n\t\t\t{ \"type\": \"changeFloor\", \"loc\": [core.getHeroLoc('x'), core.getHeroLoc('y')], \"floorId\": floorId },\n\t\t\t{ \"type\": \"tip\", \"text\": core.material.items[itemId].name + '使用成功' }\n\t\t]);\n\t} else {\n\t\tcore.changeFloor(floorId, null, core.status.hero.loc, null, function () {\n\t\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t\t\tcore.replay();\n\t\t});\n\t}\n})();",
 		"poisonWine": "core.removeFlag('poison');",
 		"weakWine": "core.removeFlag('weak');\nif (core.values.weakValue>=1) { // >=1：直接扣数值\n\tcore.status.hero.atk += core.values.weakValue;\n\tcore.status.hero.def += core.values.weakValue;\n}\nelse { // <1：扣比例\n\tcore.addBuff(\"atk\", core.values.weakValue);\n\tcore.addBuff(\"def\", core.values.weakValue);\n}",
 		"curseWine": "core.removeFlag('curse');",
 		"superWine": "core.removeFlag('poison');\nif (core.hasFlag('weak')) {\n\tcore.removeFlag('weak');\n\tif (core.values.weakValue>=1) { // >=1：直接扣数值\n\t\tcore.status.hero.atk += core.values.weakValue;\n\t\tcore.status.hero.def += core.values.weakValue;\n\t}\n\telse { // <1：扣比例\n\t\tcore.addBuff(\"atk\", core.values.weakValue);\n\t\tcore.addBuff(\"def\", core.values.weakValue);\n\t}\n}\ncore.removeFlag('curse');",
-		"lifeWand": "core.insertAction([\n\t{\"type\": \"input\", \"text\": \"请输入生命魔杖使用次数：(0-${item:lifeWand})\"},\n\t{\"type\": \"if\", \"condition\": \"flag:input<=item:lifeWand\",\n\t\t\"true\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"item:lifeWand\", \"value\": \"item:lifeWand-flag:input\"},\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+flag:input*100\"},\n\t\t\t\"成功使用${flag:input}次生命魔杖，恢复${flag:input*100}点生命。\"\n\t\t],\n\t\t\"false\": [\"输入不合法！\"]\n\t},\n]);\ncore.addItem('lifeWand', 1);",
-		"jumpShoes": "core.insertAction({\"type\":\"jumpHero\",\"loc\":[core.nextX(2),core.nextY(2)]});",
+		"lifeWand": null,
+		"jumpShoes": "core.insertAction({ \"type\": \"jumpHero\", \"loc\": [core.nextX(2), core.nextY(2)] });",
 		"redPotion": "core.status.hero.hp += core.values.redPotion",
 		"bluePotion": "core.status.hero.hp += core.values.bluePotion",
 		"greenPotion": "core.status.hero.hp += core.values.greenPotion",
@@ -387,28 +391,27 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"redJewel": "core.status.hero.atk += core.values.redJewel",
 		"blueJewel": "core.status.hero.def += core.values.blueJewel",
 		"greenJewel": "core.status.hero.mdef += core.values.greenJewel",
-		"yellowJewel": "core.insertAction([\n\t{\"type\": \"choices\", \"choices\": [\n\t\t{\"text\": \"攻击+1\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:atk\", \"value\": \"status:atk+1\"}\n\t\t]},\n\t\t{\"text\": \"防御+2\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:def\", \"value\": \"status:def+2\"}\n\t\t]},\n\t\t{\"text\": \"生命+200\", \"action\": [\n\t\t\t{\"type\": \"setValue\", \"name\": \"status:hp\", \"value\": \"status:hp+200\"}\n\t\t]},\n\t]}\n]);",
+		"yellowJewel": null,
 		"skill1": "// 二倍斩的flag:skill为1\nif (core.getFlag('skill', 0)==0) { // 判断当前是否已经开了技能\n\tif (core.getStatus('mana')>=5) { // 这里要写当前能否开技能的条件判断，比如魔力值至少要多少\n\t\tcore.setFlag('skill', 1); // 开技能1\n\t\tcore.setFlag('skillName', '二倍斩'); // 设置技能名\n\t}\n\telse {\n\t\tcore.drawTip(\"魔力不足，无法开启技能\");\n\t}\n}\nelse { // 关闭技能\n\tcore.setFlag('skill', 0); // 关闭技能状态\n\tcore.setFlag('skillName', '无');\n}"
 	},
 	"canUseItemEffect": {
 		"book": "true",
 		"fly": "(function () {\n\treturn core.status.maps[core.status.floorId].canFlyTo;\n})();",
-		"pickaxe": "(function() {\n\tvar ids = [], id2s = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && core.nearHero(block.x, block.y) && \n\t\t\t(block.event.canBreak || block.event.id == 'yellowWall' || block.event.id=='whiteWall' || block.event.id=='blueWall')) { // 能破哪些墙\n\t\t\t// 四个方向\n\t\t\tif (core.flags.pickaxeFourDirections || (block.x == core.nextX() && block.y == core.nextY()))\n\t\t\t\tids.push(i);\n\t\t\telse id2s.push(i);\n\t\t}\n\t}\n\tif (ids.length>0) {\n\t\tcore.status.event.ui = ids;\n\t\treturn true;\n\t}\n\telse if (id2s.length==1) {\n\t\tcore.status.event.ui = id2s;\n\t\treturn true;\n\t}\n\treturn false;\n})();",
-		"icePickaxe": "(function() {\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.x==core.nextX() && block.y==core.nextY() && block.event.id=='ice') {\n\t\t\tcore.status.event.ui = [i];\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
-		"bomb": "(function () {\n\tvar ids = [], id2s = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.event.cls.indexOf('enemy')==0 && core.nearHero(block.x, block.y)) {\n\t\t\tvar enemy = core.material.enemys[block.event.id];\n\t\t\tif (core.isset(enemy) && enemy.notBomb) continue;\n\t\t\tif (core.flags.bombFourDirections || (block.x==core.nextX() && block.y==core.nextY()))\n\t\t\t\tids.push(i);\n\t\t\telse\n\t\t\t\tid2s.push(i);\n\t\t}\n\t}\n\tif (ids.length>0) {\n\t\tcore.status.event.ui = ids;\n\t\treturn true;\n\t}\n\tif (id2s.length==1) {\n\t\tcore.status.event.ui = id2s;\n\t\treturn true;\n\t}\n\treturn false;\n})();",
-		"hammer": "(function() {\n\tvar ids = [], id2s = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.event.cls.indexOf('enemy')==0 && core.nearHero(block.x, block.y)) {\n\t\t\tvar enemy = core.material.enemys[block.event.id];\n\t\t\tif (core.isset(enemy) && enemy.notBomb) continue;\n\t\t\tif (block.x==core.nextX() && block.y==core.nextY())\n\t\t\t\tids.push(i);\n\t\t\telse\n\t\t\t\tid2s.push(i);\n\t\t}\n\t}\n\tif (ids.length>0) {\n\t\tcore.status.event.ui = ids;\n\t\treturn true;\n\t}\n\telse if (id2s.length==1) {\n\t\tcore.status.event.ui = id2s;\n\t\treturn true;\n\t}\n\treturn false;\n})();",
-		"earthquake": "(function () {\n\tvar able=false;\n\tvar ids = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable &&\n\t\t\t(block.event.canBreak || block.event.id == 'yellowWall' || block.event.id == 'blueWall' || block.event.id == 'whiteWall')) { // 能炸的墙壁\n\t\t\tids.push(i);\n\t\t}\n\t}\n\tif (ids.length>0) {\n\t\tcore.status.event.ui = ids;\n\t\table=true;\n\t}\n\treturn able;\n})();",
-		"centerFly": "(function () {\n\tvar toX = core.bigmap.width-1-core.getHeroLoc('x'), toY = core.bigmap.height-1-core.getHeroLoc('y');\n\tvar id = core.getBlockId(toX, toY);\n\treturn id == null;\n})();",
-		"upFly": "(function() {\n\tvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\n\tif (index<core.floorIds.length-1) {\n\t\tvar toId = core.floorIds[index+1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width, mh = core.floors[toId].height;\n\t\tif (toX>=0 && toX<mw && toY>=0 && toY<mh && core.getBlock(toX, toY, toId)==null) {\n\t\t\tcore.status.event.ui = {'id': toId, 'x': toX, 'y': toY};\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
-		"downFly": "(function() {\n\tvar floorId = core.status.floorId, index = core.floorIds.indexOf(floorId);\n\tif (index>0) {\n\t\tvar toId = core.floorIds[index-1], toX = core.getHeroLoc('x'), toY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width, mh = core.floors[toId].height;\n\t\tif (toX>=0 && toX<mw && toY>=0 && toY<mh && core.getBlock(toX, toY, toId)==null) {\n\t\t\tcore.status.event.ui = {'id': toId, 'x': toX, 'y': toY};\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
-		"snow": "(function () {\n\tvar ids = [], id2s = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.event.id == 'lava' && core.nearHero(block.x, block.y)) {\n\t\t\tif (core.flags.snowFourDirections || (block.x == core.nextX() && block.y == core.nextY()))\n\t\t\t\tids.push(i);\n\t\t\telse id2s.push(i);\n\t\t}\n\t}\n\tif (ids.length>0) {\n\t\tcore.status.event.ui = ids;\n\t\treturn true;\n\t}\n\tif (id2s.length==1) {\n\t\tcore.status.event.ui = id2s;\n\t\treturn true;\n\t}\n\treturn false;\n})();",
-		"bigKey": "(function () {\n\tvar able = false,\n\t\tids = [];\n\tfor (var i in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[i];\n\t\tif (!block.disable && block.event.id == 'yellowDoor') {\n\t\t\tids.push(i);\n\t\t}\n\t}\n\tif (ids.length > 0) {\n\t\tcore.status.event.ui = ids;\n\t\table = true;\n\t}\n\treturn able;\n})();",
+		"pickaxe": "(function () {\n\tvar canBreak = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable) return false;\n\t\treturn block.block.event.canBreak;\n\t};\n\n\tif (core.flags.pickaxeFourDirections) {\n\t\t// 四方向破\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tif (canBreak(core.getHeroLoc('x') + delta.x, core.getHeroLoc('y') + delta.y)) {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t} else {\n\t\t// 仅破当前\n\t\treturn canBreak(core.nextX(), core.nextY());\n\t}\n})();",
+		"icePickaxe": "(function () {\n\treturn core.getBlockId(core.nextX(), core.nextY()) == 'ice';\n})();",
+		"bomb": "(function () {\n\tvar canBomb = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable || block.block.event.cls.indexOf('enemy') != 0) return false;\n\t\tvar enemy = core.material.enemys[block.block.event.id];\n\t\treturn enemy && !enemy.notBomb;\n\t};\n\n\tif (core.flags.bombFourDirections) {\n\t\t// 四方向炸\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tif (canBomb(core.getHeroLoc('x') + delta.x, core.getHeroLoc('y') + delta.y)) {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t} else {\n\t\t// 仅炸当前\n\t\treturn canBomb(core.nextX(), core.nextY());\n\t}\n})();",
+		"earthquake": "(function () {\n\treturn core.status.thisMap.blocks.filter(function (block) {\n\t\treturn !block.disable && block.event.canBreak;\n\t}).length > 0;\n})();",
+		"centerFly": "(function () {\n\tvar toX = core.bigmap.width - 1 - core.getHeroLoc('x'),\n\t\ttoY = core.bigmap.height - 1 - core.getHeroLoc('y');\n\tvar id = core.getBlockId(toX, toY);\n\treturn id == null;\n})();",
+		"upFly": "(function () {\n\tvar floorId = core.status.floorId,\n\t\tindex = core.floorIds.indexOf(floorId);\n\tif (index < core.floorIds.length - 1) {\n\t\tvar toId = core.floorIds[index + 1],\n\t\t\ttoX = core.getHeroLoc('x'),\n\t\t\ttoY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width,\n\t\t\tmh = core.floors[toId].height;\n\t\tif (toX >= 0 && toX < mw && toY >= 0 && toY < mh && core.getBlock(toX, toY, toId) == null) {\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
+		"downFly": "(function () {\n\tvar floorId = core.status.floorId,\n\t\tindex = core.floorIds.indexOf(floorId);\n\tif (index > 0) {\n\t\tvar toId = core.floorIds[index - 1],\n\t\t\ttoX = core.getHeroLoc('x'),\n\t\t\ttoY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width,\n\t\t\tmh = core.floors[toId].height;\n\t\tif (toX >= 0 && toX < mw && toY >= 0 && toY < mh && core.getBlock(toX, toY, toId) == null) {\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
+		"snow": "(function () {\n\tif (core.flags.snowFourDirections) {\n\t\t// 四方向雪花\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tif (core.getBlockId(core.getHeroLoc('x') + delta.x, core.getHeroLoc('y') + delta.y) == 'lava') {\n\t\t\t\treturn true;\n\t\t\t}\n\t\t}\n\t\treturn false;\n\t} else {\n\t\treturn core.getBlockId(core.nextX(), core.nextY()) == 'lava';\n\t}\n})();",
+		"bigKey": "(function () {\n\treturn core.searchBlock('yellowDoor').length > 0;\n})();",
 		"poisonWine": "core.hasFlag('poison');",
 		"weakWine": "core.hasFlag('weak');",
 		"curseWine": "core.hasFlag('curse');",
 		"superWine": "(function() {\n\treturn core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse');\n})();",
 		"lifeWand": "true",
-		"jumpShoes": "(function() {\n\tvar nx=core.nextX(2), ny=core.nextY(2);\n\treturn nx>=0 && nx<core.bigmap.width && ny>=0 && ny<core.bigmap.height && core.getBlockId(nx,ny)==null;\n})();",
+		"jumpShoes": "(function () {\n\tvar nx = core.nextX(2),\n\t\tny = core.nextY(2);\n\treturn nx >= 0 && nx < core.bigmap.width && ny >= 0 && ny < core.bigmap.height && core.getBlockId(nx, ny) == null;\n})();",
 		"redPotion": "true",
 		"bluePotion": "true",
 		"greenPotion": "true",
@@ -419,5 +422,83 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"yellowJewel": "true",
 		"skill1": "true"
 	},
-	"equipCondition": {}
+	"equipCondition": {},
+	"useItemEvent": {
+		"yellowJewel": [
+			{
+				"type": "choices",
+				"choices": [
+					{
+						"text": "攻击+1",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "status:atk",
+								"operator": "+=",
+								"value": "1"
+							}
+						]
+					},
+					{
+						"text": "防御+2",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "status:def",
+								"operator": "+=",
+								"value": "2"
+							}
+						]
+					},
+					{
+						"text": "生命+200",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "status:hp",
+								"operator": "+=",
+								"value": "200"
+							}
+						]
+					}
+				]
+			}
+		],
+		"lifeWand": [
+			{
+				"type": "comment",
+				"text": "先恢复一个魔杖（因为使用道具必须消耗一个）"
+			},
+			{
+				"type": "function",
+				"function": "function(){\ncore.addItem('lifeWand', 1);\n}"
+			},
+			{
+				"type": "input",
+				"text": "请输入生命魔杖使用次数：(0-${item:lifeWand})"
+			},
+			{
+				"type": "if",
+				"condition": "flag:input<=item:lifeWand",
+				"true": [
+					{
+						"type": "setValue",
+						"name": "item:lifeWand",
+						"operator": "-=",
+						"value": "flag:input"
+					},
+					{
+						"type": "setValue",
+						"name": "status:hp",
+						"operator": "+=",
+						"value": "flag:input*100"
+					},
+					"成功使用${flag:input}次生命魔杖，恢复${flag:input*100}点生命。"
+				],
+				"false": [
+					"输入不合法！"
+				]
+			}
+		]
+	}
 }

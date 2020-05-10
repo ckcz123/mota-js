@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 utils.js 工具类
 
@@ -60,9 +62,10 @@ utils.prototype._init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text, need, times) {
+utils.prototype.replaceText = function (text, prefix, need, times) {
+    if (typeof text != 'string') return text;
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value, null, need, times);
+        return core.calValue(value, prefix, need, times);
     });
 }
 
@@ -692,9 +695,23 @@ utils.prototype.reverseDirection = function (direction) {
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {
-    return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
-        return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-    }).join('.*') + '$').test(string);
+    try {
+        return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
+            return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+        }).join('.*') + '$').test(string);
+    } catch (e) {
+        return false;
+    }
+}
+
+utils.prototype.matchRegex = function (pattern, string) {
+    try {
+        if (pattern.startsWith("^")) pattern = pattern.substring(1);
+        if (pattern.endsWith("$")) pattern = pattern.substring(0, pattern.length - 1);
+        return new RegExp("^" + pattern + "$").test(string);
+    } catch (e) {
+        return false;
+    }
 }
 
 ////// Base64加密 //////
@@ -709,26 +726,6 @@ utils.prototype.decodeBase64 = function (str) {
     return decodeURIComponent(atob(str).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
-}
-
-////// 任意进制转换 //////
-utils.prototype.convertBase = function (str, fromBase, toBase) {
-    var map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={}[]\\|:;<>,.?/";
-    if (fromBase == toBase) return str;
-    var len = str.length, ans = "";
-    var t = [];
-    for (var i = 0; i < len; i++) t[i] = map.indexOf(str.charAt(i));
-    t[len] = 0;
-    while (len > 0) {
-        for (var i = len; i >= 1; i--) {
-            t[i - 1] += t[i] % toBase * fromBase;
-            t[i] = parseInt(t[i] / toBase);
-        }
-        ans += map.charAt(t[0] % toBase);
-        t[0] = parseInt(t[0] / toBase);
-        while (len > 0 && t[len - 1] == 0) len--;
-    }
-    return ans;
 }
 
 utils.prototype.rand = function (num) {
@@ -1073,17 +1070,6 @@ utils.prototype._decodeCanvas = function (arr, width, height) {
     tempCanvas.putImageData(imgData, 0, 0);
 }
 
-utils.prototype.consoleOpened = function () {
-    if (!core.flags.checkConsole) return false;
-    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
-        return true;
-    if (!core.platform.isPC) return false;
-    var threshold = 160;
-    var zoom = Math.min(window.outerWidth / window.innerWidth, window.outerHeight / window.innerHeight);
-    return window.outerWidth - zoom * window.innerWidth > threshold
-        || window.outerHeight - zoom * window.innerHeight > threshold;
-}
-
 utils.prototype.hashCode = function (obj) {
     if (typeof obj == 'string') {
         var hash = 0, i, chr;
@@ -1244,12 +1230,6 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     if (formData)
         xhr.send(formData);
     else xhr.send();
-}
-
-utils.prototype.httpAndZip = function (url, success, error) {
-    this.http('GET', url, null, function (data) {
-
-    }, error, null, 'blob');
 }
 
 // LZW-compress

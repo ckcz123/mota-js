@@ -8,7 +8,7 @@ editor_table_wrapper = function (editor) {
     // HTML模板
 
     editor_table.prototype.select = function (value, values) {
-        let content = editor.table.option(value) +
+        var content = editor.table.option(value) +
             values.map(function (v) {
                 return editor.table.option(v)
             }).join('')
@@ -21,16 +21,35 @@ editor_table_wrapper = function (editor) {
         return /* html */`<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
     }
     editor_table.prototype.checkbox = function (value) {
-        return /* html */`<input type='checkbox' ${(value ? 'checked ' : '')}/>\n`
+        return /* html */`<input type='checkbox' class='checkbox' ${(value ? 'checked ' : '')}/>\n`
     }
     editor_table.prototype.textarea = function (value, indent) {
         return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
-    editor_table.prototype.editGrid = function (showComment) {
-        var html = "";
-        if (showComment) html += "<button onclick='editor.table.onCommentBtnClick(this)'>显示完整注释</button><br/>";
-        html += "<button onclick='editor.table.onEditBtnClick(this)'>编辑表格内容</button>";
-        return html;
+    editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
+        if (!(value instanceof Array)) value = [];
+        keys=Array.from(keys)
+        prefixStrings=Array.from(prefixStrings)
+        for (var index = 0; index < value.length; index++) {
+            if (keys.indexOf(value[index])==-1) {
+                keys.push(value[index])
+                prefixStrings.push('<br>'+value[index]+': ')
+            }
+        }
+        var content=[]
+        for (var index = 0; index < keys.length; index++) {
+            content.push(editor.table.checkboxSetMember(value.indexOf(keys[index])!=-1,keys[index],prefixStrings[index]))
+        }
+        return /* html */`<div class='checkboxSet'>${content.join('')}</div>\n`;
+    }
+    editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
+        return /* html */`${prefixString}<input key='${key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
+    }
+    editor_table.prototype.editGrid = function (showComment, showEdit) {
+        var list = [];
+        if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
+        if (showEdit) list.push("<button onclick='editor.table.onEditBtnClick(this)'>编辑</button>");
+        return list.join(' ');
     }
 
     editor_table.prototype.title = function () {
@@ -41,13 +60,32 @@ editor_table_wrapper = function (editor) {
         return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
     }
 
-    editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr) {
+    editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortComment, tdstr, type) {
         return /* html */`<tr id="${guid}">
         <td title="${field}">${shortField}</td>
-        <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortCommentHTMLescape}</td>
-        <td><div class="etableInputDiv">${tdstr}</div></td>
-        <td>${editor.table.editGrid(commentHTMLescape != shortCommentHTMLescape)}</td>
+        <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
+        <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
+        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet')}</td>
         </tr>\n`
+    }
+
+
+    /**
+     * checkboxset中checkbox的onchange
+     */
+    editor_table.prototype.checkboxSetMemberOnchange = function (onemember) {
+        var thisset=onemember.parentNode
+        var inputs=thisset.children
+        var value=[]
+        for (var i in inputs) {
+            if (inputs[i].nodeName == 'INPUT') {
+                if (inputs[i].checked) value.push(inputs[i].getAttribute('key'));
+            }
+        }
+        thiseval = value;
+        // if (value.length == 0) thiseval = null;
+        thisset.value=JSON.stringify(thiseval)
+        thisset.onchange()
     }
 
 
@@ -197,16 +235,16 @@ editor_table_wrapper = function (editor) {
         var thiseval = vobj;
         var comment = String(cobj._data);
 
-        var charlength = 10;
+        var charlength = 15;
         // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        // shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
+        shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.util.HTMLescape(comment);
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.util.HTMLescape(comment.slice(0, charlength)) + '...');
+        // var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.util.HTMLescape(comment.slice(0, charlength)) + '...');
 
         var cobjstr = Object.assign({}, cobj);
         delete cobjstr._data;
@@ -214,22 +252,21 @@ editor_table_wrapper = function (editor) {
         cobjstr = editor.util.HTMLescape(JSON.stringify(cobjstr));
 
         var tdstr = editor.table.objToTd(obj, commentObj, field, cfield, vobj, cobj)
-        var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr)
+        var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, cobj._docs, tdstr, cobj._type)
         return [outstr, guid];
     }
 
     editor_table.prototype.objToTd = function (obj, commentObj, field, cfield, vobj, cobj) {
         var thiseval = vobj;
-        if (cobj._select) {
-            var values = cobj._select.values;
-            return editor.table.select(thiseval, values);
-        } else if (cobj._input) {
-            return editor.table.text(thiseval);
-        } else if (cobj._bool) {
-            return editor.table.checkbox(thiseval);
-        } else {
-            var indent = 0;
-            return editor.table.textarea(thiseval, indent);
+        switch (cobj._type) {
+            case 'select':
+                return editor.table.select(thiseval, cobj._select.values);
+            case 'checkbox':
+                return editor.table.checkbox(thiseval);
+            case 'checkboxSet':
+                return editor.table.checkboxSet(thiseval, cobj._checkboxSet.key, cobj._checkboxSet.prefix);
+            default: 
+                return editor.table.textarea(thiseval, cobj.indent || 0);
         }
     }
 
@@ -305,6 +342,31 @@ editor_table_wrapper = function (editor) {
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
         }
+    }
+
+    /**
+     * 当“cannotOut / cannotIn”的表格值变化时
+     */
+    editor_table.prototype.onCannotInOutChange = function (guid, obj, commentObj, thisTr, inputs, field, cobj, modeNode) {
+        editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+        var value = [];
+        var directions = ['up', 'down', 'left', 'right'];
+        var index = 0;
+        for (var i in inputs) {
+            if (inputs[i].nodeName == 'INPUT') {
+                if (inputs[i].checked) value.push(directions[index]);
+                index++;
+            }
+        }
+        if (value.length == 0) thiseval = null;
+        else thiseval = value;
+        if (editor.table.checkRange(cobj, thiseval)) {
+            editor_mode.addAction(['change', field, thiseval]);
+            editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
+        } else {
+            printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
+        }
+
     }
 
     /**

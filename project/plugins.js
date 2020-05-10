@@ -138,7 +138,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (selectItem != null) {
 			core.setTextAlign('uievent', 'center');
 			core.fillText("uievent", type == 0 ? "买入个数" : "卖出个数", 364, 320, null, bigFont);
-			core.fillText("uievent", "◀   " + selectCount + "   ▶", 364, 350);
+			core.fillText("uievent", "<   " + selectCount + "   >", 364, 350);
 			core.fillText("uievent", "确定", 364, 380);
 		}
 
@@ -181,7 +181,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				var text = core.material.items[item.id].text || "该道具暂无描述";
 				try { text = core.replaceText(text); } catch (e) {}
 				for (var fontSize = 20; fontSize >= 8; fontSize -= 2) {
-					var config = { left: 10, fontSize: fontSize, maxWidth: 403, lineHeight: 1.4 };
+					var config = { left: 10, fontSize: fontSize, maxWidth: 403 };
 					var height = core.getTextContentHeight(text, config);
 					if (height <= 50) {
 						config.top = (56 - height) / 2;
@@ -319,7 +319,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 		if (px >= 222 && px <= 282 && py >= 71 && py <= 102) // 离开
 			return core.insertAction({ "type": "break" });
-		// ◀，▶
+		// < >
 		if (px >= 318 && px <= 341 && py >= 348 && py <= 376)
 			return _add(item, -1);
 		if (px >= 388 && px <= 416 && py >= 348 && py <= 376)
@@ -330,11 +330,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		// 上一页/下一页
 		if (px >= 45 && px <= 105 && py >= 388) {
-			if (page > 1) selectItem -= 6;
+			if (page > 1) {
+				selectItem -= 6;
+				selectCount = 0;
+			}
 			return;
 		}
 		if (px >= 208 && px <= 268 && py >= 388) {
-			if (page < totalPage) selectItem = Math.min(selectItem + 6, list.length - 1);
+			if (page < totalPage) {
+				selectItem = Math.min(selectItem + 6, list.length - 1);
+				selectCount = 0;
+			}
 			return;
 		}
 
@@ -552,8 +558,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	};
 
 	// 更变楼层的行为追加，重置镜头
-	events.prototype.changingFloor = function (floorId, heroLoc, fromLoad) {
-		this.eventdata.changingFloor(floorId, heroLoc, fromLoad);
+	events.prototype.changingFloor = function (floorId, heroLoc) {
+		this.eventdata.changingFloor(floorId, heroLoc);
 		core.plugin.camera.resetCamera();
 	};
 

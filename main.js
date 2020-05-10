@@ -61,7 +61,7 @@ function main() {
         'defCol': document.getElementById('defCol'),
         'mdefCol': document.getElementById('mdefCol'),
         'moneyCol': document.getElementById('moneyCol'),
-        'experienceCol': document.getElementById('experienceCol'),
+        'expCol': document.getElementById('expCol'),
         'upCol': document.getElementById('upCol'),
         'keyCol': document.getElementById('keyCol'),
         'pzfCol': document.getElementById('pzfCol'),
@@ -100,7 +100,7 @@ function main() {
             'def': document.getElementById("img-def"),
             'mdef': document.getElementById("img-mdef"),
             'money': document.getElementById("img-money"),
-            'experience': document.getElementById("img-experience"),
+            'exp': document.getElementById("img-exp"),
             'up': document.getElementById("img-up"),
             'skill': document.getElementById('img-skill'),
             'book': document.getElementById("img-book"),
@@ -130,7 +130,7 @@ function main() {
             'def': 5,
             'mdef': 6,
             'money': 7,
-            'experience': 8,
+            'exp': 8,
             'up': 9,
             'book': 10,
             'fly': 11,
@@ -149,18 +149,14 @@ function main() {
             'equipbox': 24,
             'mana': 25,
             'skill': 26,
-            'paint': 27,
-            'erase': 28,
-            'empty': 29,
-            'exit': 30,
-            'btn1': 31,
-            'btn2': 32,
-            'btn3': 33,
-            'btn4': 34,
-            'btn5': 35,
-            'btn6': 36,
-            'btn7': 37,
-            'btn8': 38
+            'btn1': 27,
+            'btn2': 28,
+            'btn3': 29,
+            'btn4': 30,
+            'btn5': 31,
+            'btn6': 32,
+            'btn7': 33,
+            'btn8': 34
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
@@ -172,12 +168,13 @@ function main() {
         'def': document.getElementById("def"),
         'mdef': document.getElementById('mdef'),
         'money': document.getElementById("money"),
-        'experience': document.getElementById("experience"),
+        'exp': document.getElementById("exp"),
         'up': document.getElementById('up'),
         'skill': document.getElementById('skill'),
         'yellowKey': document.getElementById("yellowKey"),
         'blueKey': document.getElementById("blueKey"),
         'redKey': document.getElementById("redKey"),
+        'greenKey': document.getElementById("greenKey"),
         'poison': document.getElementById('poison'),
         'weak':document.getElementById('weak'),
         'curse': document.getElementById('curse'),
@@ -536,11 +533,6 @@ main.statusBar.image.book.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.setPaintMode('paint');
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
@@ -552,12 +544,6 @@ main.statusBar.image.fly.onclick = function (e) {
     // 播放录像时
     if (core.isReplaying()) {
         core.stopReplay();
-        return;
-    }
-
-    // 绘图模式
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.setPaintMode('erase');
         return;
     }
 
@@ -577,11 +563,6 @@ main.statusBar.image.toolbox.onclick = function (e) {
 
     if (core.isReplaying()) {
         core.rewindReplay();
-        return;
-    }
-
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.clearPaint();
         return;
     }
 
@@ -646,11 +627,6 @@ main.statusBar.image.save.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.savePaint();
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.save(true);
 }
@@ -664,11 +640,6 @@ main.statusBar.image.load.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.loadPaint();
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -679,11 +650,6 @@ main.statusBar.image.settings.onclick = function (e) {
 
     if (core.isReplaying()) {
         core.saveReplay();
-        return;
-    }
-
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.exitPaint();
         return;
     }
 

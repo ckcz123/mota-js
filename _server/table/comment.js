@@ -262,12 +262,20 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"cannotOut": {
 					"_leaf": true,
-					"_type": "cannotInOutCheckbox",
+					"_type": "checkboxSet",
+					"_checkboxSet": {
+						"prefix":["上: ","下: ","<br>左: ","右: "],
+						"key":["up","down","left","right"]
+					},
 					"_data": "该图块的不可出方向\n可以在这里定义在该图块时不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表在该图块时不能往上和左走\n此值对背景层、事件层、前景层上的图块均有效"
 				},
 				"cannotIn": {
 					"_leaf": true,
-					"_type": "cannotInOutCheckbox",
+					"_type": "checkboxSet",
+					"_checkboxSet": {
+						"prefix":["上: ","下: ","<br>左: ","右: "],
+						"key":["up","down","left","right"]
+					},
 					"_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
 				},
 				"canBreak": {

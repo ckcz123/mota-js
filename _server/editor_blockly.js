@@ -83,8 +83,7 @@ editor_blockly = function () {
       MotaActionBlocks['hideImage_s'].xmlText(),
       MotaActionBlocks['showTextImage_s'].xmlText(),
       MotaActionBlocks['moveImage_s'].xmlText(),
-      MotaActionBlocks['showGif_0_s'].xmlText(),
-      MotaActionBlocks['showGif_1_s'].xmlText(),
+      MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),
       MotaActionBlocks['lose_s'].xmlText(),
@@ -111,8 +110,7 @@ editor_blockly = function () {
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['jumpHero_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),
-      MotaActionBlocks['changePos_0_s'].xmlText(),
-      MotaActionBlocks['changePos_1_s'].xmlText(),
+      MotaActionBlocks['changePos_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
       MotaActionBlocks['useItem_s'].xmlText(),
       MotaActionBlocks['loadEquip_s'].xmlText(),
@@ -829,7 +827,7 @@ function omitedcheckUpdateFunction(event) {
         "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
         "jumpHero_s": ["PosString_0", "PosString_1"],
         "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
-        "changePos_0_s": ["PosString_0", "PosString_1"],
+        "changePos_s": ["PosString_0", "PosString_1"],
         "battle_1_s": ["PosString_0", "PosString_1"],
         "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
         "closeDoor_s": ["PosString_0", "PosString_1"],
@@ -883,7 +881,7 @@ function omitedcheckUpdateFunction(event) {
         });
     }
 
-    editor_blockly.getAutoCompletions = function (content) {
+    editor_blockly.getAutoCompletions = function (content, type, name) {
         // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
 
         // 检查 status:xxx，item:xxx和flag:xxx
@@ -976,6 +974,61 @@ function omitedcheckUpdateFunction(event) {
                     && /^[a-zA-Z_]\w*$/.test(one);
             }).sort();
         }
+
+        // 对任意图块提供补全
+        if ((type == 'text_1_s' && name == 'EvalString_1') || (type == 'autoText_s' && name == 'EvalString_1')
+          || (type == 'choices_s' && name == 'IdString_0') || (type == 'choicesContext' && name == 'IdString_0')
+          || (type == 'closeDoor_s' && name == 'IdString_0') || (type == 'setBlock_s' && name == 'EvalString_0')
+          || (type == 'setBgFgBlock_s' && name == 'EvalString_0') || (type == 'drawIcon_s' && name == 'IdString_0')
+          ) {
+          return core.getAllIconIds().filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
+        // 对怪物ID提供补全
+        if ((type == 'idString_3_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
+          return Object.keys(core.material.enemys).filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
+        // 对道具ID进行补全
+        if ((type == 'useItem_s' || type == 'loadEquip_s') && name == 'IdString_0') {
+          return Object.keys(core.material.items).filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
+        // 对图片名进行补全
+        if ((type == 'showImage_s' || type == 'showImage_1_s' || type == 'showGif_s' || type == 'setHeroIcon_s'
+          || type == 'follow_s' || type == 'unfollow_s' || type == 'drawImage_s' || type == 'drawImage_1_s') && name == 'EvalString_0') {
+          return Object.keys(core.material.images.images).filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
+        // 对动画进行补全
+        if (type == 'animate_s' && name == 'IdString_0') {
+          return Object.keys(core.material.animates).filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
+        // 对音乐进行补全
+        if ((type == 'playBgm_s' || type == 'loadBgm_s' || type == 'freeBgm_s') && name == 'EvalString_0') {
+          return Object.keys(core.material.bgms).filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
+        // 对音效进行补全
+        if (type == 'playSound_s' && name == 'EvalString_0') {
+          return Object.keys(core.material.sounds).filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
 
         return [];
     }
@@ -1079,7 +1132,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
 
         // --- awesomplete
         var awesomplete = new Awesomplete(htmlInput, {
-            minChars: pb.type == "idString_3_e" ? 1 : 2,
+            minChars: 1,
             maxItems: 12,
             autoFirst: true,
             replace: function (text) {
@@ -1124,7 +1177,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
             if (index == null) index = value.length;
             value = value.substring(0, index);
             // cal prefix
-            awesomplete.prefix = "";
+            awesomplete.prefix = value;
             for (var i = index - 1; i>=0; i--) {
                 var c = value.charAt(i);
                 if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
@@ -1133,13 +1186,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
                 }
             }
 
-            var list = editor_blockly.getAutoCompletions(value);
-            if (pb.type == "idString_3_e") {
-                list = list.concat(Object.keys(core.material.enemys).filter(function (one) {
-                    return one != value && one.startsWith(value);
-                }));
-                list.sort();
-            }
+            var list = editor_blockly.getAutoCompletions(value, pb.type, self.name);
 
             awesomplete.list = list;
             awesomplete.ul.style.marginLeft = getCaretCoordinates(htmlInput, htmlInput.selectionStart).left -

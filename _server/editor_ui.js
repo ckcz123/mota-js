@@ -545,7 +545,8 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPoint.style.display = 'block';
         uievent.elements.yes.style.display = 'inline';
         uievent.elements.selectBackground.style.display = 'none';
-        uievent.elements.selectFloor.style.display = hideFloor ? 'none' : 'inline';
+        // uievent.elements.selectFloor.style.display = hideFloor ? 'none' : 'inline';
+        uievent.elements.selectFloor.style.display = 'inline';
         uievent.elements.selectPointBox.style.display = 'block';
         uievent.elements.canvas.style.display = 'block';
         uievent.elements.usedFlags.style.display = 'none';
@@ -646,7 +647,8 @@ editor_ui_wrapper = function (editor) {
     })();
 
     uievent.elements.div.onmousewheel = function (e) {
-        if (uievent.mode != 'selectPoint' || uievent.values.hideFloor) return;
+        // if (uievent.mode != 'selectPoint' || uievent.values.hideFloor) return;
+        if (uievent.mode != 'selectPoint') return;
         var index = core.floorIds.indexOf(uievent.values.floorId);
         try {
             if (e.wheelDelta)

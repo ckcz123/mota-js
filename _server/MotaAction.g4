@@ -362,8 +362,7 @@ action
     |   openDoor_s
     |   closeDoor_s
     |   changeFloor_s
-    |   changePos_0_s
-    |   changePos_1_s
+    |   changePos_s
     |   setViewport_s
     |   moveViewport_s
     |   useItem_s
@@ -380,8 +379,7 @@ action
     |   hideImage_s
     |   showTextImage_s
     |   moveImage_s
-    |   showGif_0_s
-    |   showGif_1_s
+    |   showGif_s
     |   setCurtain_0_s
     |   setCurtain_1_s
     |   screenFlash_s
@@ -1175,30 +1173,18 @@ var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'"'+floorstr+Direct
 return code;
 */;
 
-changePos_0_s
-    :   '位置切换' 'x' PosString ',' 'y' PosString '朝向' DirectionEx_List Newline
+changePos_s
+    :   '位置朝向切换' 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List Newline
     
 
-/* changePos_0_s
+/* changePos_s
 tooltip : changePos: 当前位置切换
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changepos%EF%BC%9A%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E5%88%87%E6%8D%A2%E5%8B%87%E5%A3%AB%E8%BD%AC%E5%90%91
-default : ["0","0",null]
+default : ["","",null]
 colour : this.dataColor
+var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-var code = '{"type": "changePos", "loc": ['+PosString_0+','+PosString_1+']'+DirectionEx_List_0+'},\n';
-return code;
-*/;
-
-changePos_1_s
-    :   '勇士转向' Direction_List Newline
-    
-
-/* changePos_1_s
-tooltip : changePos: 勇士转向
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changepos%EF%BC%9A%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E5%88%87%E6%8D%A2%E5%8B%87%E5%A3%AB%E8%BD%AC%E5%90%91
-colour : this.dataColor
-default : [null]
-var code = '{"type": "changePos", "direction": "'+Direction_List_0+'"},\n';
+var code = '{"type": "changePos"'+loc+DirectionEx_List_0+'},\n';
 return code;
 */;
 
@@ -1434,28 +1420,18 @@ var code = '{"type": "hideImage", "code": '+Int_0+', "time": '+Int_1+async+'},\n
 return code;
 */;
 
-showGif_0_s
-    :   '显示动图' EvalString '起点像素位置' 'x' PosString 'y' PosString Newline
+showGif_s
+    :   '显示动图' EvalString? '起点像素位置' 'x' PosString? 'y' PosString? Newline
     
 
-/* showGif_0_s
+/* showGif_s
 tooltip : showGif：显示动图
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showgif%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%8A%A8%E5%9B%BE
-default : ["bg.gif","0","0"]
+default : ["","",""]
 colour : this.printColor
-var code = '{"type": "showGif", "name": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+']},\n';
-return code;
-*/;
-
-showGif_1_s
-    :   '清除所有动图' Newline
-    
-
-/* showGif_1_s
-tooltip : showGif：清除所有显示的动图
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showgif%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%8A%A8%E5%9B%BE
-colour : this.printColor
-var code = '{"type": "showGif"},\n';
+EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
+var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
+var code = '{"type": "showGif"'+EvalString_0+loc+'},\n';
 return code;
 */;
 
@@ -2579,7 +2555,7 @@ idString_3_e
 colour : this.idstring_eColor
 default : ['greenSlime',"攻击"]
 //todo 将其output改成'idString_e'
-var code = 'enemy:'+IdString_0+'.'+EnemyId_List_0;
+var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -3180,13 +3156,9 @@ ActionParser.prototype.parseAction = function() {
         data.floorId,data.loc[0],data.loc[1],data.direction,data.time,this.next]);
       break;
     case "changePos": // 直接更换勇士位置, 不切换楼层
-      if(this.isset(data.loc)){
-        this.next = MotaActionBlocks['changePos_0_s'].xmlText([
-          data.loc[0],data.loc[1],data.direction,this.next]);
-      } else {
-        this.next = MotaActionBlocks['changePos_1_s'].xmlText([
-          data.direction,this.next]);
-      }
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['changePos_s'].xmlText([
+        data.loc[0],data.loc[1],data.direction,this.next]);
       break;
     case "follow": // 跟随勇士
       this.next = MotaActionBlocks['follow_s'].xmlText([data.name||"", this.next]);
@@ -3240,14 +3212,10 @@ ActionParser.prototype.parseAction = function() {
         data.code, data.to[0], data.to[1], data.opacity, data.time||0, data.async||false, this.next]);
       break;
     case "showGif": // 显示动图
-      if(this.isset(data.name)){
-        this.next = MotaActionBlocks['showGif_0_s'].xmlText([
-          data.name,data.loc[0],data.loc[1],this.next]);
-        } else {
-          this.next = MotaActionBlocks['showGif_1_s'].xmlText([
-            this.next]);
-        }
-        break;
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['showGif_s'].xmlText([
+        data.name,data.loc[0],data.loc[1],this.next]);
+      break;
     case "setCurtain": // 颜色渐变
       if(this.isset(data.color)){
         data.color = this.Colour(data.color);

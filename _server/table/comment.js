@@ -19,14 +19,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "select",
 							"_select": {
 								"values": [
-									"keys",
 									"items",
 									"constants",
 									"tools",
 									"equips"
 								]
 							},
-							"_data": "只能取keys(钥匙) items(宝石、血瓶) constants(永久物品) tools(消耗道具) equips(装备)"
+							"_data": "只能取items(宝石、血瓶) constants(永久物品) tools(消耗道具) equips(装备)"
 						},
 						"name": {
 							"_leaf": true,
@@ -40,6 +39,11 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_string": true,
 							"_data": "道具在道具栏中显示的描述"
 						},
+						"hideInToolbox": {
+							"_leaf": true,
+							"_type": "checkbox",
+							"_data": "是否不显示在道具栏中"
+						},
 						"equip": {
 							"_leaf": true,
 							"_type": "textarea",
@@ -48,7 +52,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"hideInReplay": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_data": "是否回放时绘制道具栏。\n如果此项为true，则在回放录像时使用本道具将不会绘制道具栏页面，而是直接使用。\n此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
+							"_data": "是否回放时不绘制道具栏。\n如果此项为true，则在回放录像时使用本道具将不会绘制道具栏页面，而是直接使用。\n此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
 						}
 					}
 				},

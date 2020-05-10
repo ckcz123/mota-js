@@ -2,19 +2,22 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 {
 	"items": {
 		"yellowKey": {
-			"cls": "keys",
+			"cls": "tools",
 			"name": "黄钥匙",
-			"text": "可以打开一扇黄门"
+			"text": "可以打开一扇黄门",
+			"hideInToolbox": true
 		},
 		"blueKey": {
-			"cls": "keys",
+			"cls": "tools",
 			"name": "蓝钥匙",
-			"text": "可以打开一扇蓝门"
+			"text": "可以打开一扇蓝门",
+			"hideInToolbox": true
 		},
 		"redKey": {
-			"cls": "keys",
+			"cls": "tools",
 			"name": "红钥匙",
-			"text": "可以打开一扇红门"
+			"text": "可以打开一扇红门",
+			"hideInToolbox": true
 		},
 		"redJewel": {
 			"cls": "items",
@@ -182,13 +185,15 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"book": {
 			"cls": "constants",
 			"name": "怪物手册",
-			"text": "可以查看当前楼层各怪物属性"
+			"text": "可以查看当前楼层各怪物属性",
+			"hideInToolbox": true
 		},
 		"fly": {
 			"cls": "constants",
 			"name": "楼层传送器",
 			"text": "可以自由往来去过的楼层",
-			"hideInReplay": true
+			"hideInReplay": true,
+			"hideInToolbox": true
 		},
 		"coin": {
 			"cls": "constants",

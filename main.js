@@ -174,6 +174,7 @@ function main() {
         'yellowKey': document.getElementById("yellowKey"),
         'blueKey': document.getElementById("blueKey"),
         'redKey': document.getElementById("redKey"),
+        'greenKey': document.getElementById("greenKey"),
         'poison': document.getElementById('poison'),
         'weak':document.getElementById('weak'),
         'curse': document.getElementById('curse'),

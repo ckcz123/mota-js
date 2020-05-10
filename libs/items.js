@@ -202,8 +202,7 @@ items.prototype.setItem = function (itemId, itemNum) {
 
     core.status.hero.items[itemCls][itemId] = itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
 }
@@ -219,8 +218,7 @@ items.prototype.addItem = function (itemId, itemNum) {
     }
     core.status.hero.items[itemCls][itemId] += itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     // 永久道具只能有一个
     if (itemCls == 'constants' && core.status.hero.items[itemCls][itemId] > 1)
@@ -235,8 +233,7 @@ items.prototype.removeItem = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId] -= itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
     return true;

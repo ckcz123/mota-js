@@ -2171,8 +2171,10 @@ ui.prototype._drawToolbox_getInfo = function (index) {
     if (!core.status.event.data || core.status.event.data.toolsPage == null)
         core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
     // 获取物品列表
-    var tools = Object.keys(core.status.hero.items.tools).sort();
-    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
     // 处理页数
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
@@ -2675,7 +2677,7 @@ ui.prototype._drawStatistics_buildObj = function () {
         else cls[e] = core.material.items[e].cls;
         cnt[e] = 0;
     })
-    var order = ["doors", "keys", "items", "tools", "constants", "equips"];
+    var order = ["doors", "items", "tools", "constants", "equips"];
     ids.sort(function (a, b) {
         var c1 = order.indexOf(cls[a]), c2 = order.indexOf(cls[b]);
         if (c1==c2) return ori.indexOf(a)-ori.indexOf(b);

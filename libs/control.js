@@ -1439,8 +1439,10 @@ control.prototype._replayAction_item = function (action) {
         core.useItem(itemId, false, core.replay);
         return true;
     }
-    var tools = Object.keys(core.status.hero.items.tools).sort();
-    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
     var index, per = core.__SIZE__-1;
     if ((index=tools.indexOf(itemId))>=0) {
         core.status.event.data = {"toolsPage": Math.floor(index/per)+1, "constantsPage":1};
@@ -2827,6 +2829,14 @@ control.prototype._resize_status = function (obj) {
     }
     for (var i = 0; i < core.dom.statusTexts.length; ++i) {
         core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
+    }
+    // keys
+    if (core.flags.enableGreenKey) {
+        core.dom.keyCol.style.fontSize = '0.75em';
+        core.statusBar.greenKey.style.display = '';
+    } else {
+        core.dom.keyCol.style.fontSize = '';
+        core.statusBar.greenKey.style.display = 'none';
     }
 }
 

@@ -243,12 +243,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"items": {
 							"_type": "object",
 							"_data": {
-								"keys": {
-									"_leaf": true,
-									"_type": "textarea",
-									"_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
-									"_data": "初始三种钥匙个数"
-								},
 								"constants": {
 									"_leaf": true,
 									"_type": "textarea",
@@ -487,6 +481,11 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_data": "是否在状态栏显示三色钥匙数量"
+				},
+				"enableGreenKey": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_data": "是否在状态栏显示绿钥匙"
 				},
 				"enablePZF": {
 					"_leaf": true,

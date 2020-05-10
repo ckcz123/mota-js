@@ -1362,6 +1362,11 @@ actions.prototype._keyUpQuickShop = function (keycode) {
 
 ////// 工具栏界面时的点击操作 //////
 actions.prototype._clickToolbox = function (x, y) {
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+
     // 装备栏
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
@@ -1391,11 +1396,11 @@ actions.prototype._clickToolbox = function (x, y) {
     }
     // 下一页
     if (x == this.HSIZE+2 || x == this.HSIZE+3) {
-        if (y == this.LAST - 5 && toolsPage < Math.ceil(Object.keys(core.status.hero.items.tools).length / this.LAST)) {
+        if (y == this.LAST - 5 && toolsPage < Math.ceil(tools.length / this.LAST)) {
             core.status.event.data.toolsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == this.LAST && constantsPage < Math.ceil(Object.keys(core.status.hero.items.constants).length / this.LAST)) {
+        if (y == this.LAST && constantsPage < Math.ceil(constants.length / this.LAST)) {
             core.status.event.data.constantsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
@@ -1413,15 +1418,20 @@ actions.prototype._clickToolbox = function (x, y) {
 
 ////// 选择工具栏界面中某个Index后的操作 //////
 actions.prototype._clickToolboxIndex = function (index) {
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+
     var items = null;
     var select;
     if (index < this.LAST) {
         select = index + this.LAST * (core.status.event.data.toolsPage - 1);
-        items = Object.keys(core.status.hero.items.tools).sort();
+        items = tools;
     }
     else {
         select = index % this.LAST + this.LAST * (core.status.event.data.constantsPage - 1);
-        items = Object.keys(core.status.hero.items.constants).sort();
+        items = constants;
     }
     if (items == null) return;
     if (select >= items.length) return;
@@ -1441,8 +1451,10 @@ actions.prototype._keyDownToolbox = function (keycode) {
 
     var last_index = this.LAST - 1;
 
-    var tools = Object.keys(core.status.hero.items.tools).sort();
-    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
     var index = core.status.event.selection;
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;

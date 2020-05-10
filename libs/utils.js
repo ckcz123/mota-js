@@ -63,6 +63,7 @@ utils.prototype._init = function () {
 
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text, prefix, need, times) {
+    if (typeof text != 'string') return text;
     return text.replace(/\${(.*?)}/g, function (word, value) {
         return core.calValue(value, prefix, need, times);
     });

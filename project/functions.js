@@ -1066,7 +1066,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	} else core.setStatusBarInnerHTML('up', "");
 
 	// 钥匙
-	var keys = ['yellowKey', 'blueKey', 'redKey'];
+	var keys = ['yellowKey', 'blueKey', 'redKey', 'greenKey'];
 	keys.forEach(function (key) {
 		core.setStatusBarInnerHTML(key, core.setTwoDigits(core.itemCount(key)));
 	});

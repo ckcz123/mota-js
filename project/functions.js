@@ -1210,32 +1210,35 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			for (var y = 0; y < height; y++) {
 				var loc = x + "," + y;
 				// 夹击怪物的ID
-				var enemyId = null;
+				var enemyId1 = null, enemyId2 = null;
 				// 检查左右夹击
 				var leftBlock = blocks[(x - 1) + "," + y],
 					rightBlock = blocks[(x + 1) + "," + y];
 				if (leftBlock && rightBlock && leftBlock.id == rightBlock.id) {
 					if (core.hasSpecial(leftBlock.event.id, 16))
-						enemyId = leftBlock.event.id;
+						enemyId1 = leftBlock.event.id;
 				}
 				// 检查上下夹击
 				var topBlock = blocks[x + "," + (y - 1)],
 					bottomBlock = blocks[x + "," + (y + 1)];
 				if (topBlock && bottomBlock && topBlock.id == bottomBlock.id) {
 					if (core.hasSpecial(topBlock.event.id, 16))
-						enemyId = topBlock.event.id;
+						enemyId2 = topBlock.event.id;
 				}
 
-				if (enemyId != null) {
+				if (enemyId1 != null || enemyId2 != null) {
 					var leftHp = core.status.hero.hp - (damage[loc] || 0);
 					if (leftHp > 1) {
 						// 上整/下整
 						var value = Math.floor((leftHp + (core.flags.betweenAttackCeil ? 1 : 0)) / 2);
 						// 是否不超过怪物伤害值
 						if (core.flags.betweenAttackMax) {
-							var enemyDamage = core.getDamage(enemyId, x, y, floorId);
-							if (enemyDamage != null && enemyDamage < value)
-								value = enemyDamage;
+							var enemyDamage1 = core.getDamage(enemyId1, x, y, floorId);
+							if (enemyDamage1 != null && enemyDamage1 < value)
+								value = enemyDamage1;
+							var enemyDamage2 = core.getDamage(enemyId2, x, y, floorId);
+							if (enemyDamage2 != null && enemyDamage2 < value)
+								value = enemyDamage2;
 						}
 						if (value > 0) {
 							damage[loc] = (damage[loc] || 0) + value;

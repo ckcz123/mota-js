@@ -162,8 +162,8 @@ editor_datapanel_wrapper = function (editor) {
                     printe('不合法的idnum');
                     return;
                 }
-                if (!/^[0-9a-zA-Z_]+$/.test(id)) {
-                    printe('不合法的id，请使用字母、数字或下划线')
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) {
+                    printe('不合法的id，请使用字母、数字或下划线，且不能以数字开头');
                     return;
                 }
                 editor.file.changeIdAndIdnum(id, idnum, editor_mode.info, function (err) {
@@ -193,8 +193,8 @@ editor_datapanel_wrapper = function (editor) {
         changeId.children[1].onclick = function () {
             var id = changeId.children[0].value;
             if (id) {
-                if (!/^[0-9a-zA-Z_]+$/.test(id)) {
-                    printe('不合法的id，请使用字母、数字或下划线')
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) {
+                    printe('不合法的id，请使用字母、数字或下划线，且不能以数字开头')
                     return;
                 }
                 editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {

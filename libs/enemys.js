@@ -267,12 +267,14 @@ enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
 }
 
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
+    if (enemy == null) return null;
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     return this.enemydata.getEnemyInfo(enemy, hero, x, y, floorId)
 }
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
+    if (enemy == null) return null;
     // 移动到了脚本编辑 - getDamageInfo中
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     return this.enemydata.getDamageInfo(enemy, hero, x, y, floorId);
@@ -284,6 +286,7 @@ enemys.prototype.getDamage = function (enemy, x, y, floorId) {
 }
 
 enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
+    if (enemy == null) return null;
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
 
     var info = this.getDamageInfo(enemy, hero, x, y, floorId);

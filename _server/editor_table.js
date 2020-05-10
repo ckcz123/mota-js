@@ -8,7 +8,7 @@ editor_table_wrapper = function (editor) {
     // HTML模板
 
     editor_table.prototype.select = function (value, values) {
-        let content = editor.table.option(value) +
+        var content = editor.table.option(value) +
             values.map(function (v) {
                 return editor.table.option(v)
             }).join('')
@@ -26,12 +26,24 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.textarea = function (value, indent) {
         return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
-    editor_table.prototype.cannotInOutCheckbox = function (value) {
+    editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
         if (!(value instanceof Array)) value = [];
-        return /* html */`上：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('up')>=0 ? 'checked ' : ''} />
-        &nbsp;下：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('down')>=0 ? 'checked ' : ''} /><br/>
-        左：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('left')>=0 ? 'checked ' : ''} />
-        &nbsp;右：<input type='checkbox' class='cannotInOutCheckbox' ${value.indexOf('right')>=0 ? 'checked ' : ''} /><br/>`;
+        keys=Array.from(keys)
+        prefixStrings=Array.from(prefixStrings)
+        for (var index = 0; index < value.length; index++) {
+            if (keys.indexOf(value[index])==-1) {
+                keys.push(value[index])
+                prefixStrings.push('<br>'+value[index]+': ')
+            }
+        }
+        var content=[]
+        for (var index = 0; index < keys.length; index++) {
+            content.push(editor.table.checkboxSetMember(value.indexOf(keys[index])!=-1,keys[index],prefixStrings[index]))
+        }
+        return /* html */`<div class='checkboxSet'>${content.join('')}</div>\n`;
+    }
+    editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
+        return /* html */`${prefixString}<input key='${key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
     }
     editor_table.prototype.editGrid = function (showComment) {
         var html = "";
@@ -55,6 +67,25 @@ editor_table_wrapper = function (editor) {
         <td><div class="etableInputDiv">${tdstr}</div></td>
         <td>${editor.table.editGrid(commentHTMLescape != shortCommentHTMLescape)}</td>
         </tr>\n`
+    }
+
+
+    /**
+     * checkboxset中checkbox的onchange
+     */
+    editor_table.prototype.checkboxSetMemberOnchange = function (onemember) {
+        var thisset=onemember.parentNode
+        var inputs=thisset.children
+        var value=[]
+        for (var i in inputs) {
+            if (inputs[i].nodeName == 'INPUT') {
+                if (inputs[i].checked) value.push(inputs[i].getAttribute('key'));
+            }
+        }
+        thiseval = value;
+        // if (value.length == 0) thiseval = null;
+        thisset.value=JSON.stringify(thiseval)
+        thisset.onchange()
     }
 
 
@@ -232,8 +263,8 @@ editor_table_wrapper = function (editor) {
                 return editor.table.select(thiseval, cobj._select.values);
             case 'checkbox':
                 return editor.table.checkbox(thiseval);
-            case 'cannotInOutCheckbox':
-                return editor.table.cannotInOutCheckbox(thiseval);
+            case 'checkboxSet':
+                return editor.table.checkboxSet(thiseval, cobj._checkboxSet.key, cobj._checkboxSet.prefix);
             default: 
                 return editor.table.textarea(thiseval, cobj.indent || 0);
         }
@@ -269,24 +300,15 @@ editor_table_wrapper = function (editor) {
         //   >td[title=comment,cobj=cobj:json]
         //   >td>div>input[value=thiseval]
         var thisTr = document.getElementById(guid);
-        var inputs = thisTr.children[2].children[0].children;
+        var input = thisTr.children[2].children[0].children[0];
         var field = thisTr.children[0].getAttribute('title');
         var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
         var modeNode = thisTr.parentNode;
         while (!editor_mode._ids.hasOwnProperty(modeNode.getAttribute('id'))) {
             modeNode = modeNode.parentNode;
         }
-        for (var i = 0; i < inputs.length; ++i) {
-            var input = inputs[i];
-            if (input.nodeName == 'INPUT' || input.nodeName == 'SELECT' || input.nodeName == 'TEXTAREA') {
-                input.onchange = function () {
-                    if (cobj._type == 'cannotInOutCheckbox') {
-                        editor.table.onCannotInOutChange(guid, obj, commentObj, thisTr, inputs, field, cobj, modeNode);
-                    } else {
-                        editor.table.onchange(guid, obj, commentObj, thisTr, input, field, cobj, modeNode);
-                    }
-                }
-            }
+        input.onchange = function () {
+            editor.table.onchange(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
         // 用检测两次单击的方式来实现双击(以支持手机端的双击)
         var doubleClickCheck = [0];

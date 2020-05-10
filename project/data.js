@@ -408,9 +408,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"counterAttack": 0.1,
 		"purify": 3,
 		"hatred": 2,
-		"moveSpeed": 100,
-		"animateSpeed": 400,
-		"floorChangeTime": 800
+		"animateSpeed": 400
 	},
 	"flags": {
 		"enableFloor": true,
@@ -450,13 +448,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"displayCritical": true,
 		"displayExtraDamage": true,
 		"enableGentleClick": true,
-		"potionWhileRouting": false,
 		"ignoreChangeFloor": true,
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
 		"enableDisabledShop": true,
 		"disableShopOnDamage": false,
-		"blurFg": false,
-		"checkConsole": false
+		"blurFg": false
 	}
 }

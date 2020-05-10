@@ -26,7 +26,6 @@ control.prototype._init = function () {
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("tip", true, this._animateFrame_tip);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
-    this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
     // --- 注册系统的replay
     this.registerReplayAction("move", this._replayAction_move);
     this.registerReplayAction("item", this._replayAction_item);
@@ -183,7 +182,7 @@ control.prototype._animationFrame_animate = function (timestamp) {
 control.prototype._animationFrame_heroMoving = function (timestamp) {
     if (core.status.heroMoving <= 0) return;
     // 换腿
-    if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {
+    if (timestamp - core.animateFrame.moveTime > core.values.moveSpeed) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
@@ -314,10 +313,6 @@ control.prototype._animateFrame_tip = function (timestamp) {
 
 control.prototype._animationFrame_parallelDo = function (timestamp) {
     core.control.controldata.parallelDo(timestamp);
-}
-
-control.prototype._animationFrame_checkConsoleOpened = function (timestamp) {
-    if (core.consoleOpened()) core.setFlag('__consoleOpened__', true);
 }
 
 // ------ 标题界面的处理 ------ //
@@ -493,7 +488,7 @@ control.prototype._setAutomaticRoute_isMoving = function (destX, destY) {
                     core.control.tryMoveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
-            }, core.values.moveSpeed || 100);
+            }, core.values.moveSpeed);
         }
         return true;
     }
@@ -609,7 +604,7 @@ control.prototype.setHeroMoveInterval = function (callback) {
             core.moveOneStep(core.nextX(), core.nextY());
             if (callback) callback();
         }
-    }, (core.values.moveSpeed||100) / 8 * toAdd / core.status.replay.speed);
+    }, core.values.moveSpeed / 8 * toAdd / core.status.replay.speed);
 }
 
 ////// 每移动一格后执行的事件 //////
@@ -904,7 +899,7 @@ control.prototype.setViewport = function (x, y) {
 
 ////// 移动视野范围 //////
 control.prototype.moveViewport = function (steps, time, callback) {
-    time = time || core.values.moveSpeed || 300;
+    time = time || core.values.moveSpeed;
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right'].indexOf(t)>=0;
     });
@@ -1715,10 +1710,6 @@ control.prototype._doSL_load_afterGet = function (id, data) {
     var _replay = function () {
         core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
     };
-    if (core.flags.checkConsole && data.hashCode != null && data.hashCode != core.hashCode(data.hero)) {
-        core.myconfirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。", _replay);
-        return;
-    }
     if (data.version != core.firstData.version) {
         core.myconfirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。", _replay);
         return;

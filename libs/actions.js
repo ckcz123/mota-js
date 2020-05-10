@@ -841,12 +841,6 @@ actions.prototype._selectChoices = function (length, keycode, callback) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
-    //左右方向键调整 音量 行走速度
-    if(core.status.event.id == "switchs" && (core.status.event.selection == 2 || core.status.event.selection == 3))
-    {
-        if (keycode == 37) callback.apply(this, [this.HSIZE - 2, topIndex + core.status.event.selection]);
-        if (keycode == 39) callback.apply(this, [this.HSIZE + 2, topIndex + core.status.event.selection]);
-    }
 
     if (keycode >= 49 && keycode <= 57) {
         var index = keycode - 49;
@@ -1956,7 +1950,7 @@ actions.prototype._clickSwitchs = function (x, y) {
     var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
-        if (selection != 2 && selection != 3) return;
+        if (selection != 2 && selection != 3 && selection != 4) return;
     }
     var width = choices[selection].width;
     var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
@@ -1977,16 +1971,20 @@ actions.prototype._clickSwitchs = function (x, y) {
                 if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_moveSpeed(10);
                 return;
             case 4:
-                return this._clickSwitchs_displayEnemyDamage();
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_floorChangeTime(-100);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_floorChangeTime(100);
+                return;
             case 5:
-                return this._clickSwitchs_displayCritical();
+                return this._clickSwitchs_displayEnemyDamage();
             case 6:
-                return this._clickSwitchs_displayExtraDamage();
+                return this._clickSwitchs_displayCritical();
             case 7:
-                return this._clickSwitchs_localForage();
+                return this._clickSwitchs_displayExtraDamage();
             case 8:
-                return this._clickSwitchs_clickMove();
+                return this._clickSwitchs_potionNoRouting();
             case 9:
+                return this._clickSwitchs_clickMove();
+            case 10:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -2022,6 +2020,12 @@ actions.prototype._clickSwitchs_moveSpeed = function (delta) {
     core.ui.drawSwitchs();
 }
 
+actions.prototype._clickSwitchs_floorChangeTime = function (delta) {
+    core.values.floorChangeTime = core.clamp(core.values.floorChangeTime + delta, 0, 2000);
+    core.setLocalStorage("floorChangeTime", core.values.floorChangeTime);
+    core.ui.drawSwitchs();
+}
+
 actions.prototype._clickSwitchs_displayEnemyDamage = function () {
     core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
     core.updateDamage();
@@ -2043,12 +2047,9 @@ actions.prototype._clickSwitchs_displayExtraDamage = function () {
     core.ui.drawSwitchs();
 }
 
-actions.prototype._clickSwitchs_localForage = function () {
-    core.platform.useLocalForage = !core.platform.useLocalForage;
-    core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
-    core.control.getSaveIndexes(function (indexes) {
-        core.saves.ids = indexes;
-    });
+actions.prototype._clickSwitchs_potionNoRouting = function () {
+    if (core.hasFlag('__potionNoRouting__')) core.removeFlag('__potionNoRouting__');
+    else core.setFlag('__potionNoRouting__', true);
     core.ui.drawSwitchs();
 }
 
@@ -2064,6 +2065,19 @@ actions.prototype._keyUpSwitchs = function (keycode) {
         core.status.event.selection = 0;
         core.ui.drawSettings();
         return;
+    }
+    if (keycode == 37) {
+        switch (core.status.event.selection) {
+            case 2: return this._clickSwitchs_userVolume(-1);
+            case 3: return this._clickSwitchs_moveSpeed(-10);
+            case 4: this._clickSwitchs_floorChangeTime(-100);
+        }
+    } else if (keycode == 39) {
+        switch (core.status.event.selection) {
+            case 2: return this._clickSwitchs_userVolume(1);
+            case 3: return this._clickSwitchs_moveSpeed(10);
+            case 4: this._clickSwitchs_floorChangeTime(100);
+        }
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs);
 }

@@ -709,7 +709,7 @@ if (core.flags.enableSkill) {
 - **`flag:textAttribute`**, **`flag:globalAttribute`**, **`flag:globalFlags`**: 当前的剧情文本属性，当前的全局属性，当前的全局开关。
 - **`flag:cannotMoveDirectly`**, **`flag:__noClickMove__`**: 当前是否不允许瞬间移动，当前用户是否开启了单击瞬移。
 - **`flag:hideStatusBar`**, **`flag:showToolbox`**: 是否隐藏状态栏，是否显示工具栏。
-- **`flag:debug`**, **`flag:__consoleOpened__`**: 当前是否开启了调试模式，是否开启了控制台。
+- **`flag:debug`**: 当前是否开启了调试模式。
 - **`flag:__seed__`**, **`flag:__rand__`**: 伪随机数生成种子和当前的状态
 
 ==========================================================================================

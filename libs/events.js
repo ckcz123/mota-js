@@ -133,7 +133,6 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
     var reason = null;
     if (fromReplay) reason = "录像回放完毕！";
     else if (core.hasFlag("debug")) reason = "\t[系统提示]调试模式下无法上传成绩";
-    else if (core.hasFlag("__consoleOpened__")) reason = "\t[系统提示]本存档开启过控制台，无法上传成绩";
 
     if (reason != null)
         core.drawText(reason, core.restart);
@@ -602,8 +601,6 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
 
     if (main.mode != 'play' || core.isReplaying()) time = 0;
     if (time == null) time = core.values.floorChangeTime;
-    if (time == null) time = 800;
-    if (time < 100) time = 0;
     time /= 20;
 
     return {
@@ -2770,7 +2767,7 @@ events.prototype._vibrate_update = function (shakeInfo) {
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 events.prototype.eventMoveHero = function(steps, time, callback) {
-    time = time || core.values.moveSpeed || 100;
+    time = time || core.values.moveSpeed;
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });

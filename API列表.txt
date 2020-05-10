@@ -2146,11 +2146,6 @@ core.showWithAnimate(obj, speed, callback) / core.hideWithAnimate(obj, speed, ca
 动画淡入或淡出一个对象。
 
 
-core.consoleOpened()
-检测当前的控制台是否处于开启状态。仅在全塔属性中的检查控制台开关开启时有效。
-此函数有可能会存在误伤行为，即没开过控制台仍认为开启过。
-
-
 core.hashCode(obj)
 计算一个对象的哈希值。
 

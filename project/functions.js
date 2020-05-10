@@ -947,9 +947,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		'version': core.firstData.version,
 		"time": new Date().getTime()
 	};
-	if (core.flags.checkConsole) {
-		data.hashCode = core.utils.hashCode(data.hero);
-	}
 	// 设置商店次数
 	for (var shopId in core.status.shops) {
 		data.shops[shopId] = {

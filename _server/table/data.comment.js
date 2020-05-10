@@ -407,20 +407,10 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_data": "仇恨属性中，每杀死一个怪物获得的仇恨值"
 				},
-				"moveSpeed": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_data": "行走速度，即勇士每走一格的时间，一般100比较合适"
-				},
 				"animateSpeed": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_data": "全局动画时间，即怪物振动频率，一般300比较合适"
-				},
-				"floorChangeTime": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_data": "默认楼层切换时间"
 				}
 			}
 		},
@@ -613,11 +603,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_data": "是否允许轻触（获得面前物品）"
 				},
-				"potionWhileRouting": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "寻路算法是否经过血瓶和绿钥匙；如果该项为false，则寻路算法会自动尽量绕过血瓶和绿钥匙"
-				},
 				"ignoreChangeFloor": {
 					"_leaf": true,
 					"_type": "checkbox",
@@ -647,11 +632,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_data": "是否虚化前景层；如果此项开启，则在游戏中事件层有东西（如宝石等）时虚化前景层。"
-				},
-				"checkConsole": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "是否检查控制台的开启情况。"
 				}
 			}
 		}

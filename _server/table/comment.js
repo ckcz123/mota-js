@@ -51,7 +51,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_leaf": true,
 							"_type": "textarea",
 							"_docs": "道具的装备属性",
-							"_data": "装备属性设置，仅对cls为equips有效。\n如果此项不为null，需要是一个对象，里面可含\"type\"，\"atk\"，\"def\"，\"mdef\"，\"animate\"五项，分别对应装备部位、攻防魔防和动画。\n具体详见文档（元件说明-装备）和已有的几个装备的写法。"
+							"_data": "装备属性设置，仅对cls为equips有效。\n如果此项不为null，需要是一个对象，里面可含\"type\"，\"atk\"，\"def\"，\"mdef\"，\"animate\"五项，分别对应装备部位、攻防护盾和动画。\n具体详见文档（元件说明-装备）和已有的几个装备的写法。"
 						},
 						"hideInReplay": {
 							"_leaf": true,
@@ -150,7 +150,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_data": "金币"
 				},
-				"experience": {
+				"exp": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_data": "经验"
@@ -228,7 +228,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				}
 			}
 		},
-		"enemys_template": { 'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'experience': 0, 'point': 0, 'special': 0 },
+		"enemys_template": { 'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'exp': 0, 'point': 0, 'special': 0 },
 
 
 		// --------------------------- 【图块属性】相关的表格配置 --------------------------- //

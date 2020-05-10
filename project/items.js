@@ -32,7 +32,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"greenJewel": {
 			"cls": "items",
 			"name": "绿宝石",
-			"text": "'，魔防+${core.values.greenJewel}'"
+			"text": "'，护盾+${core.values.greenJewel}'"
 		},
 		"yellowJewel": {
 			"cls": "items",
@@ -344,7 +344,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"itemEffectTip": {
 		"redJewel": "'，攻击+'+core.values.redJewel * ratio",
 		"blueJewel": "'，防御+'+core.values.blueJewel * ratio",
-		"greenJewel": "'，魔防+'+core.values.greenJewel * ratio",
+		"greenJewel": "'，护盾+'+core.values.greenJewel * ratio",
 		"yellowJewel": "'，全属性提升'",
 		"redPotion": "'，生命+'+core.values.redPotion * ratio",
 		"bluePotion": "'，生命+'+core.values.bluePotion * ratio",
@@ -361,7 +361,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield2": "'，防御+20'",
 		"shield3": "'，防御+40'",
 		"shield4": "'，防御+80'",
-		"shield5": "'，防御+100，魔防+100'",
+		"shield5": "'，防御+100，护盾+100'",
 		"bigKey": "'，全钥匙+1'",
 		"superPotion": "'，生命值翻倍'",
 		"moneyPocket": "'，金币+500'"

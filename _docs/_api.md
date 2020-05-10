@@ -52,7 +52,7 @@ core.updateStatusBar()
 
 
 core.setStatus('atk', 1000)
-将攻击力设置为1000；这里把atk可以改成hp, def, mdef, money, experience等等。
+将攻击力设置为1000；这里把atk可以改成hp, def, mdef, money, exp等等。
 本句等价于 core.status.hero.atk = 1000
 
 
@@ -383,10 +383,6 @@ core.enemys.canBattle(enemyId, x, y, floorId)
 core.enemys.getDamage(enemyId, x, y, floorId)
 返回当前对某个怪物的战斗伤害。如果无法战斗，返回null。
 后面三个参数是怪物坐标和楼层。
-
-
-core.enemys.getExtraDamage(enemyId)
-返回某个怪物会对勇士造成的额外伤害（不可被魔防抵消），例如仇恨、固伤等等。
 
 
 core.enemys.nextCriticals(enemyId, number, x, y, floorId)

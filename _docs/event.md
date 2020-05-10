@@ -332,7 +332,7 @@
 
 ![](img/events/7.png)
 
-- `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（魔防值），money（金币），experience（经验），x（勇士的横坐标），y（勇士的纵坐标），direction（勇士的方向）。
+- `status:xxx` 获取勇士属性时只能使用如下几个：hp（生命值），atk（攻击力），def（防御力），mdef（护盾值），money（金币），exp（经验），x（勇士的横坐标），y（勇士的纵坐标），direction（勇士的方向）。
 - `item:xxx` 中的xxx为道具ID。所有道具的ID定义在items.js中，请自行查看。例如，`item:centerFly` 代表中心对称飞行器的个数。
 - `flag:xxx` 中的xxx为一个自定义的变量/Flag（支持中文）；如果没有对其进行赋值则默认值为0。
 - `global:xxx` 中的xxx为一个全局存储的名称（支持中文）；如果没有对其进行赋值则默认值为0。
@@ -507,7 +507,7 @@ value是一个表达式，将通过这个表达式计算出的结果赋值给nam
 
 id为必填项，代表要修改的怪物ID。
 
-name为必填项，代表要修改的项，例如`hp`, `atk`, `def`, `money`, `experience`, `point`, `special`, `name`。
+name为必填项，代表要修改的项，例如`hp`, `atk`, `def`, `money`, `exp`, `point`, `special`, `name`。
 
 value为必填项，代表要修改到的内容。对于修改名称的，必须加单引号。
 
@@ -575,7 +575,7 @@ value为必填项，代表要修改到的结果。该项必须是个数值。
 
 ``` js
 [
-  {"type": "setGlobalFlag", "name": "enableMDef", "value": false}, // 不在状态栏显示魔防值
+  {"type": "setGlobalFlag", "name": "enableMDef", "value": false}, // 不在状态栏显示护盾值
 ]
 ```
 
@@ -2523,7 +2523,7 @@ if (core.flags.enableAddPoint && point > 0) {
         "name": "贪婪之神", // 商店名称（标题）
         "icon": "blueShop", // 商店图标，blueShop为蓝色商店，pinkShop为粉色商店
         "textInList": "1F金币商店", // 在快捷商店栏中显示的名称
-        "use": "money", // 商店所要使用的。只能是"money"或"experience"。
+        "use": "money", // 商店所要使用的。只能是"money"或"exp"。
         "commonTimes": true, // 是否使用全局次数
         "mustEnable": false, // 如果未开启则不显示在状态栏中
         "need": "20+10*times*(times+1)",  // 商店需要的金币/经验数值；可以是一个表达式，以times（访问次数）作为参数计算。
@@ -2532,7 +2532,7 @@ if (core.flags.enableAddPoint && point > 0) {
             // effect可以对status，item和flag进行操作；必须是X+=Y的形式，其中Y可以是一个表达式
             {"text": "生命+800", "effect": "status:hp+=800"}, // 生命+800
             {"text": "攻击+4", "need": 30, "effect": "status:atk+=4"}, // 规定具体的数值
-            {"text": "防御+2，魔防+4", "effect": "status:def+=2;status:mdef+=4"}, // 多个效果用分号分开
+            {"text": "防御+2，护盾+4", "effect": "status:def+=2;status:mdef+=4"}, // 多个效果用分号分开
         ]
     }
 ],
@@ -2544,7 +2544,7 @@ if (core.flags.enableAddPoint && point > 0) {
 - name 为商店的名称（打开商店后的标题）
 - icon 为商店的图标，在icons.js的npcs中定义。如woman可代表一个商人。
 - textInList 为其在快捷商店栏中显示的名称，如"3楼金币商店"等
-- use 为消耗的类型，是金币（money）还是经验（experience）。
+- use 为消耗的类型，是金币（money）还是经验（exp）。
 - commonTimes 是否使用全局次数；如果为true则可以多个快捷商店共享相同的次数
 - mustEnable 是否必须是只在开启状态才在列表显示；如果此项为true则未开启的快捷商店不予显示
 - need 是一个表达式，计算商店所需要用到的数值。
@@ -2710,7 +2710,7 @@ if (core.flags.enableAddPoint && point > 0) {
 
 本塔也支持经验升级，即用户杀怪获得经验后，可以到达某些数值自动进阶，全面提升属性。
 
-要经验升级，你需要先在`data.js`中的全局变量中启用。你需要将`enableExperience`启用经验，且`enableLevelUp`启用进阶。同时你也可以将`enableLv`置为true以在状态栏中显示当前等级（境界）。
+要经验升级，你需要先在`data.js`中的全局变量中启用。你需要将`enableExp`启用经验，且`enableLevelUp`启用进阶。同时你也可以将`enableLv`置为true以在状态栏中显示当前等级（境界）。
 
 同时，你还需要在`data.js`中的`levelUp`来定义每一个进阶所需要的经验值，以及进阶时的效果。
 

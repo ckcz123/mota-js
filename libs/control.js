@@ -389,7 +389,7 @@ control.prototype._initStatistics = function (totalTime) {
             'hp': 0,
             "battle": 0,
             'money': 0,
-            'experience': 0,
+            'exp': 0,
             'battleDamage': 0,
             'poisonDamage': 0,
             'extraDamage': 0,
@@ -1995,7 +1995,6 @@ control.prototype._updateFavoriteSaves = function () {
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (name, value) {
     if (!core.status.hero) return;
-    if (name == 'exp') name = 'experience';
     if (name == 'x' || name == 'y' || name == 'direction')
         this.setHeroLoc(name, value);
     else
@@ -2012,7 +2011,6 @@ control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
         return this.getHeroLoc(name);
-    if (name == 'exp') name = 'experience';
     return core.status.hero[name];
 }
 
@@ -2625,7 +2623,7 @@ control.prototype._shouldDisplayStatus = function(id) {
         case 'def': return obj.enableDef;
         case 'mdef': return obj.enableMDef;
         case 'money': return obj.enableMoney;
-        case 'experience': return obj.enableExperience && !obj.levelUpLeftMode;
+        case 'exp': return obj.enableExp && !obj.levelUpLeftMode;
         case 'up': return obj.enableLevelUp;
         case 'skill': return obj.enableSkill;
         case 'key': return obj.enableKeys;

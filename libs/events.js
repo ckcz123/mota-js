@@ -183,7 +183,7 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     formData.append('def', core.status.hero.def);
     formData.append('mdef', core.status.hero.mdef);
     formData.append('money', core.status.hero.money);
-    formData.append('experience', core.status.hero.experience);
+    formData.append('experience', core.status.hero.exp);
     formData.append('steps', core.status.hero.steps);
     formData.append('norank', norank ? 1 : 0);
     formData.append('seed', core.getFlag('__seed__'));
@@ -2976,10 +2976,10 @@ events.prototype._checkLvUp_check = function () {
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});
     var need = core.calValue(next.need);
     if (need == null) return null;
-    if (core.status.hero.experience >= need) {
+    if (core.status.hero.exp >= need) {
         // 升级
         core.status.hero.lv++;
-        if (next.clear) core.status.hero.experience -= need;
+        if (next.clear) core.status.hero.exp -= need;
         return next.action || [];
     }
     return null;
@@ -2995,31 +2995,4 @@ events.prototype.tryUseItem = function (itemId) {
 
     if (core.canUseItem(itemId)) core.useItem(itemId);
     else core.drawTip("当前无法使用" + core.material.items[itemId].name);
-}
-
-////// 上传当前数据 //////
-events.prototype._uploadCurrent = function (username) {
-    var formData = new FormData();
-
-    formData.append('type', 'score');
-    formData.append('name', core.firstData.name);
-    formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.string);
-    formData.append('hard', core.encodeBase64(core.status.hard));
-    formData.append('username', core.encodeBase64(username || "current"));
-    formData.append('lv', core.status.hero.lv);
-    formData.append('hp', Math.min(core.status.hero.hp, Math.pow(2, 63)));
-    formData.append('atk', core.status.hero.atk);
-    formData.append('def', core.status.hero.def);
-    formData.append('mdef', core.status.hero.mdef);
-    formData.append('money', core.status.hero.money);
-    formData.append('experience', core.status.hero.experience);
-    formData.append('steps', core.status.hero.steps);
-    formData.append('seed', core.getFlag('__seed__'));
-    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime / 1000));
-    formData.append('route', core.encodeRoute(core.status.route));
-    formData.append('deler', 'current');
-    formData.append('base64', 1);
-
-    core.http("POST", "/games/upload.php", formData);
 }

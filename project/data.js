@@ -91,7 +91,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"def": 100,
 			"mdef": 0,
 			"money": 0,
-			"experience": 0,
+			"exp": 0,
 			"equipment": [],
 			"items": {
 				"constants": {},
@@ -322,7 +322,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"textInList": "1F经验商店",
 				"commonTimes": false,
 				"mustEnable": false,
-				"use": "experience",
+				"use": "exp",
 				"need": "-1",
 				"text": "勇敢的武士啊，给我若干经验就可以：",
 				"choices": [

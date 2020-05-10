@@ -1764,7 +1764,7 @@ ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, posi
     var second_line = [];
     if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
     if (core.flags.enableAddPoint) second_line.push(["加点", core.formatBigNumber(enemy.point || 0)]);
-    if (core.flags.statusBarItems.indexOf('enableExperience')>=0) second_line.push(["经验", core.formatBigNumber(enemy.experience || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableExp')>=0) second_line.push(["经验", core.formatBigNumber(enemy.exp || 0)]);
 
     var damage_offset = col1 + (this.PIXEL - col1) / 2 - 12;
     // 第一列
@@ -2046,7 +2046,7 @@ ui.prototype.drawShop = function (shopId) {
 
     var times = shop.times, need=core.calValue(shop.need, null, null, times);
     var content = "\t["+shop.name+","+shop.icon+"]" + core.replaceText(shop.text, null, need, times);
-    var use = shop.use=='experience'?'经验':'金币';
+    var use = shop.use=='exp'?'经验':'金币';
     var choices = [];
     for (var i=0;i<shop.choices.length;i++) {
         var choice = shop.choices[i];
@@ -2410,7 +2410,7 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
 ui.prototype._drawEquipbox_getStatusName = function (name) {
     var map = {
         name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
-        atk: "攻击", def: "防御", mdef: "魔防", money: "金币", exp: "经验", experience: "经验", steps: "步数"
+        atk: "攻击", def: "防御", mdef: "护盾", money: "金币", exp: "经验", exp: "经验", steps: "步数"
     };
     return map[name] || name;
 }
@@ -2647,7 +2647,7 @@ ui.prototype.drawStatistics = function (floorIds) {
         +"，总游戏时长"+core.formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
-        +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.experience)+"点经验。\n\n"
+        +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.exp)+"点经验。\n\n"
         +"受到的总伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
         +(core.flags.statusBarItems.indexOf('enableDebuff')>=0?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
@@ -2686,7 +2686,7 @@ ui.prototype._drawStatistics_buildObj = function () {
     });
     var obj = {
         'monster': {
-            'count': 0, 'money': 0, 'experience': 0, 'point': 0,
+            'count': 0, 'money': 0, 'exp': 0, 'point': 0,
         },
         'count': cnt,
         'add': {
@@ -2723,7 +2723,7 @@ ui.prototype._drawStatistics_floorId = function (floorId, obj) {
 ui.prototype._drawStatistics_enemy = function (floorId, id, obj) {
     var enemy = core.material.enemys[id];
     this._drawStatistics_add(floorId, obj, 'monster', 'money', enemy.money);
-    this._drawStatistics_add(floorId, obj, 'monster', 'experience', enemy.experience);
+    this._drawStatistics_add(floorId, obj, 'monster', 'exp', enemy.exp);
     this._drawStatistics_add(floorId, obj, 'monster', 'point', enemy.point);
     this._drawStatistics_add(floorId, obj, 'monster', 'count', 1);
 }
@@ -2752,7 +2752,7 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
         var t = "";
         if (atk > 0) t += atk + "攻";
         if (def > 0) t += def + "防";
-        if (mdef > 0) t += mdef + "魔防";
+        if (mdef > 0) t += mdef + "护盾";
         if (t != "") obj.ext[id] = t;
     }
     this._drawStatistics_add(floorId, obj, 'count', id, 1);
@@ -2766,7 +2766,7 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
     var text = type+"地图中：\n";
     text += "共有怪物"+data.monster.count+"个";
     if (core.flags.statusBarItems.indexOf('enableMoney')>=0) text+="，总金币数"+data.monster.money;
-    if (core.flags.statusBarItems.indexOf('enableExperience')>=0) text+="，总经验数"+data.monster.experience;
+    if (core.flags.statusBarItems.indexOf('enableExp')>=0) text+="，总经验数"+data.monster.exp;
     if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
     text+="。\n";
 
@@ -2789,7 +2789,7 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
     text+="\n\n";
     text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
         +core.formatBigNumber(data.add.atk)+"点，防御"
-        +core.formatBigNumber(data.add.def)+"点，魔防"
+        +core.formatBigNumber(data.add.def)+"点，护盾"
         +core.formatBigNumber(data.add.mdef)+"点。";
     return text;
 }

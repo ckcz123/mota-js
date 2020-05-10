@@ -249,14 +249,14 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"mdef": {
 							"_leaf": true,
 							"_type": "textarea",
-							"_data": "初始魔防"
+							"_data": "初始护盾"
 						},
 						"money": {
 							"_leaf": true,
 							"_type": "textarea",
 							"_data": "初始金币"
 						},
-						"experience": {
+						"exp": {
 							"_leaf": true,
 							"_type": "textarea",
 							"_data": "初始经验"
@@ -409,7 +409,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "绿宝石效果",
-					"_data": "绿宝石加魔防的数值"
+					"_data": "绿宝石加护盾的数值"
 				},
 				"redPotion": {
 					"_leaf": true,
@@ -451,7 +451,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "净化比例",
-					"_data": "净化的比例（战斗前，怪物附加勇士魔防的x倍作为伤害）"
+					"_data": "净化的比例（战斗前，怪物附加勇士护盾的x倍作为伤害）"
 				},
 				"hatred": {
 					"_leaf": true,
@@ -505,7 +505,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"enableDef",
 							"enableMDef",
 							"enableMoney",
-							"enableExperience",
+							"enableExp",
 							"enableLevelUp",
 							"levelUpLeftMode",
 							"enableKeys",

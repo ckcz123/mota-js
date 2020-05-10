@@ -2697,7 +2697,7 @@ TextBaseline_List
 
 ShopUse_List
     :   '金币' | '经验'
-    /*ShopUse_List ['money','experience']*/;
+    /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
     :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'>'|'<'|'>='|'<='|'和'|'或'
@@ -2745,8 +2745,8 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示魔防值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'虚化前景层'|'检查控制台'
-    /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExperience', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'blurFg']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'虚化前景层'|'检查控制台'
+    /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'blurFg']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -2791,8 +2791,8 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'攻击'|'防御'|'魔防'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'
-    /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:experience']*/;
+    :   '生命'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'
+    /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp']*/;
 
 Id_List
     :   '变量' | '状态' | '物品' | '独立开关' | '全局存储'
@@ -2800,7 +2800,7 @@ Id_List
 
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
-    /*EnemyId_List ['hp','atk','def','money','experience','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
+    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -3900,11 +3900,11 @@ MotaActionFunctions.pattern.replaceStatusList = [
   ["lv", "等级"],
   ["atk", "攻击"],
   ["def", "防御"],
-  ["mdef", "魔防"],
+  ["mdef", "护盾"],
   ["manamax", "魔力上限"],
   ["mana", "魔力"],
   ["money", "金币"],
-  ["experience", "经验"],
+  ["exp", "经验"],
   ["steps", "步数"],
 ];
 
@@ -3965,7 +3965,7 @@ MotaActionFunctions.pattern.replaceEnemyList = [
   ["atk", "攻击"],
   ["def", "防御"],
   ["money", "金币"],
-  ["experience", "经验"],
+  ["exp", "经验"],
   ["point", "加点"],
   ["special", "属性"],
 ];

@@ -99,9 +99,9 @@ core.status.hero    （勇士信息；此项和全塔属性中的hero大体是�
     core.status.hero.mana    当前魔力值
     core.status.hero.atk     当前攻击力
     core.status.hero.def     当前防御力
-    core.status.hero.mdef    当前魔防值
+    core.status.hero.mdef    当前护盾值
     core.status.hero.money   当前金币值
-    core.status.hero.experience    当前经验值
+    core.status.hero.exp    当前经验值
     core.status.hero.loc     当前的位置信息
     core.status.hero.equipment     当前装上的装备
     core.status.hero.items   当前拥有的道具信息
@@ -747,11 +747,6 @@ core.getDamage(enemy, x, y, floorId)
 如果没有破防或无法战斗则返回null，否则返回具体的伤害值。
 
 
-core.getExtraDamage(enemy, x, y, floorId)
-获得某个怪物的额外伤害值（不可被魔防减伤）。
-目前暂时只包含了仇恨和固伤两者，如有需要可复写该函数。
-
-
 core.getDamageString(enemy, x, y, floorId)
 获得某个怪物伤害字符串和颜色信息，以便于在地图上绘制显伤。
 
@@ -1232,7 +1227,7 @@ core.unloadEquip(equipType, callback)
 
 core.compareEquipment(compareEquipId, beComparedEquipId)
 比较两个套装的差异。
-此函数将对所有的勇士属性包括生命魔力攻防魔防金币等进行比较。
+此函数将对所有的勇士属性包括生命魔力攻防护盾金币等进行比较。
 如果存在差异的，将作为一个对象返回其差异内容。
 
 

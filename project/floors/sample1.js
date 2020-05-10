@@ -380,7 +380,7 @@ main.floors.sample1=
         },
         {
             "type": "setValue",
-            "name": "status:experience",
+            "name": "status:exp",
             "operator": "+=",
             "value": "1000"
         },
@@ -402,7 +402,7 @@ main.floors.sample1=
             "operator": "+=",
             "value": "3"
         },
-        "\t[老人,man]status:xxx 代表勇士的某个属性。\n其中xxx可取hp, atk, def, mdef, money,experience这几项。\n\nitem:xxx 代表勇士的某个道具的个数。\nxxx为道具ID，具体可参见items.js中的定义。\n\nflag:xxx 代表某个自定义Flag或变量。\nxxx为Flag/变量名，可以自行定义，由字母、数字和下划线组成。\n未定义过而直接取用的Flag默认值为false。",
+        "\t[老人,man]status:xxx 代表勇士的某个属性。\n其中xxx可取hp, atk, def, mdef, money,exp这几项。\n\nitem:xxx 代表勇士的某个道具的个数。\nxxx为道具ID，具体可参见items.js中的定义。\n\nflag:xxx 代表某个自定义Flag或变量。\nxxx为Flag/变量名，可以自行定义，由字母、数字和下划线组成。\n未定义过而直接取用的Flag默认值为false。",
         "\t[老人,man]你现在可以重新和我进行对话，进一步看到属性值的改变。"
     ],
     "10,11": [

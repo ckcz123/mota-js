@@ -287,16 +287,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hero.money += money;
 	core.status.hero.statistics.money += money;
 
-	var experience = guards.reduce(function (curr, g) {
-		return curr + core.material.enemys[g[2]].experience;
-	}, enemy.experience);
-	if (core.hasFlag('curse')) experience = 0;
-	core.status.hero.experience += experience;
-	core.status.hero.statistics.experience += experience;
+	var exp = guards.reduce(function (curr, g) {
+		return curr + core.material.enemys[g[2]].exp;
+	}, enemy.exp);
+	if (core.hasFlag('curse')) exp = 0;
+	core.status.hero.exp += exp;
+	core.status.hero.statistics.exp += exp;
 
 	var hint = "打败 " + enemy.name;
 	if (core.flags.statusBarItems.indexOf('enableMoney')>=0) hint += "，金币+" + money;
-	if (core.flags.statusBarItems.indexOf('enableExperience')>=0) hint += "，经验+" + experience;
+	if (core.flags.statusBarItems.indexOf('enableExp')>=0) hint += "，经验+" + exp;
 	core.drawTip(hint, enemy.id);
 
 	// 事件的处理
@@ -456,7 +456,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[6, function (enemy) { return (enemy.n || 4) + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
 		[7, "破甲", "战斗前，怪物附加角色防御的" + Math.floor(100 * core.values.breakArmor || 0) + "%作为伤害"],
 		[8, "反击", "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * core.values.counterAttack || 0) + "%作为伤害，无视角色防御"],
-		[9, "净化", "战斗前，怪物附加勇士魔防的" + core.values.purify + "倍作为伤害"],
+		[9, "净化", "战斗前，怪物附加勇士护盾的" + core.values.purify + "倍作为伤害"],
 		[10, "模仿", "怪物的攻防和勇士攻防相等"],
 		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }],
 		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点"],
@@ -469,7 +469,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[19, "自爆", "战斗后勇士的生命值变成1"],
 		[20, "无敌", "勇士无法打败怪物，除非拥有十字架"],
 		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }],
-		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，无视勇士魔防。"; }],
+		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，无视勇士护盾。"; }],
 		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"],
 		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }],
 		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }],
@@ -483,7 +483,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 
 	// 参数说明：
 	// enemy：该怪物信息
-	// hero_hp,hero_atk,hero_def,hero_mdef：勇士的生命攻防魔防数据
+	// hero_hp,hero_atk,hero_def,hero_mdef：勇士的生命攻防护盾数据
 	// x,y：该怪物的坐标（查看手册和强制战斗时为undefined）
 	// floorId：该怪物所在的楼层
 	// 后面三个参数主要是可以在光环等效果上可以适用（也可以按需制作部分范围光环效果）
@@ -498,7 +498,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		mon_def = enemy.def,
 		mon_special = enemy.special;
 	var mon_money = enemy.money,
-		mon_experience = enemy.experience,
+		mon_exp = enemy.exp,
 		mon_point = enemy.point;
 	// 模仿
 	if (core.hasSpecial(mon_special, 10)) {
@@ -589,7 +589,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		"atk": Math.floor(mon_atk),
 		"def": Math.floor(mon_def),
 		"money": Math.floor(mon_money),
-		"experience": Math.floor(mon_experience),
+		"exp": Math.floor(mon_exp),
 		"point": Math.floor(mon_point),
 		"special": mon_special,
 		"guards": guards, // 返回支援情况
@@ -637,7 +637,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.hasSpecial(mon_special, 20) && !core.hasItem("cross"))
 		return null; // 不可战斗
 
-	// 战前造成的额外伤害（可被魔防抵消）
+	// 战前造成的额外伤害（可被护盾抵消）
 	var init_damage = 0;
 
 	// 吸血
@@ -725,14 +725,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 最终伤害：初始伤害 + 怪物对勇士造成的伤害 + 反击伤害
 	var damage = init_damage + (turn - 1) * per_damage + turn * counterDamage;
-	// 再扣去魔防
+	// 再扣去护盾
 	damage -= hero_mdef;
 
 	// 检查是否允许负伤
 	if (!core.flags.enableNegativeDamage)
 		damage = Math.max(0, damage);
 
-	// 最后处理仇恨和固伤（因为这两个不能被魔防减伤）
+	// 最后处理仇恨和固伤（因为这两个不能被护盾减伤）
 	if (core.hasSpecial(mon_special, 17)) { // 仇恨
 		damage += core.getFlag('hatred', 0);
 	}
@@ -1022,8 +1022,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 设置等级名称
 	core.setStatusBarInnerHTML('lv', core.getLvName());
 
-	// 设置生命上限、生命值、攻防魔防金币和经验值
-	var statusList = ['hpmax', 'hp', 'mana', 'atk', 'def', 'mdef', 'money', 'experience'];
+	// 设置生命上限、生命值、攻防护盾金币和经验值
+	var statusList = ['hpmax', 'hp', 'mana', 'atk', 'def', 'mdef', 'money', 'exp'];
 	statusList.forEach(function (item) {
 		// 向下取整
 		core.status.hero[item] = Math.floor(core.status.hero[item]);
@@ -1052,7 +1052,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.statusBarItems.indexOf('enableLevelUp')>=0 && core.status.hero.lv < core.firstData.levelUp.length) {
 		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
 		if (core.flags.statusBarItems.indexOf('levelUpLeftMode')>=0)
-			core.setStatusBarInnerHTML('up', core.formatBigNumber(need - core.getStatus('experience')) || "");
+			core.setStatusBarInnerHTML('up', core.formatBigNumber(need - core.getStatus('exp')) || "");
 		else
 			core.setStatusBarInnerHTML('up', core.formatBigNumber(need) || "");
 	} else core.setStatusBarInnerHTML('up', "");
@@ -1331,7 +1331,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是隐藏状态栏模式，直接返回
 	if (!core.domStyle.showStatusBar) return;
 
-	// 作为样板，只绘制楼层、生命、攻击、防御、魔防、金币、钥匙这七个内容
+	// 作为样板，只绘制楼层、生命、攻击、防御、护盾、金币、钥匙这七个内容
 	// 需要其他的请自行进行修改；横竖屏都需要进行适配绘制。
 	// （可以使用Chrome浏览器开控制台来模拟手机上的竖屏模式的显示效果，具体方式自行百度）
 	// 横屏模式下的画布大小是 129*416

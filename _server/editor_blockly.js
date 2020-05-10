@@ -928,7 +928,7 @@ function omitedcheckUpdateFunction(event) {
                     if (index2 >= 0) {
                         before = content.substring(0, index2);
                         if (before.endsWith("怪物") || (ch == ':' && ch2 == ':' && before.endsWith("enemy"))) {
-                            var list = ["name", "hp", "atk", "def", "money", "experience", "point", "special"];
+                            var list = ["name", "hp", "atk", "def", "money", "exp", "point", "special"];
                             if (before.endsWith("怪物") && MotaActionFunctions) {
                                 list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
                                     return v[1];

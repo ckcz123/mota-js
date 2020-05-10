@@ -607,7 +607,7 @@ ui.prototype._getPosition = function (content) {
                 var str = s3.split(',');
                 px = py = null;
                 if (str.length == 1) {
-                    var follower = (core.status.hero.followers||[])[parseInt(str[0])-1];
+                    var follower = core.status.hero.followers[parseInt(str[0])-1];
                     if (follower) {
                         px = follower.x;
                         py = follower.y;

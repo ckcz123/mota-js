@@ -827,7 +827,7 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
         "status": status,
         "index": index++,
     });
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         drawObjs.push({
             "img": core.material.images.images[t.name],
             "width": core.material.images.images[t.name].width/4,
@@ -949,7 +949,7 @@ control.prototype.nearHero = function (x, y, n) {
 ////// 聚集跟随者 //////
 control.prototype.gatherFollowers = function () {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), dir=core.getHeroLoc('direction');
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         t.x = x;
         t.y = y;
         t.stop = true;
@@ -959,7 +959,7 @@ control.prototype.gatherFollowers = function () {
 
 ////// 更新跟随者坐标 //////
 control.prototype.updateFollowers = function () {
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         if (!t.stop) {
             t.x += core.utils.scan[t.direction].x;
             t.y += core.utils.scan[t.direction].y;
@@ -967,7 +967,7 @@ control.prototype.updateFollowers = function () {
     })
 
     var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         t.stop = true;
         var dx = nowx - t.x, dy = nowy - t.y;
         for (var dir in core.utils.scan) {

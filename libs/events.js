@@ -2406,7 +2406,6 @@ events.prototype.hasAsync = function () {
 
 ////// 跟随 //////
 events.prototype.follow = function (name) {
-    core.status.hero.followers = core.status.hero.followers || [];
     name = core.getMappedName(name);
     if (core.material.images.images[name]) {
         core.status.hero.followers.push({"name": name});
@@ -2418,7 +2417,6 @@ events.prototype.follow = function (name) {
 
 ////// 取消跟随 //////
 events.prototype.unfollow = function (name) {
-    core.status.hero.followers = core.status.hero.followers || [];
     if (!name) {
         core.status.hero.followers = [];
     }

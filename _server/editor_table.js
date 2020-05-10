@@ -45,11 +45,11 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
         return /* html */`${prefixString}<input key='${key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
     }
-    editor_table.prototype.editGrid = function (showComment) {
-        var html = "";
-        if (showComment) html += "<button onclick='editor.table.onCommentBtnClick(this)'>显示完整注释</button><br/>";
-        html += "<button onclick='editor.table.onEditBtnClick(this)'>编辑表格内容</button>";
-        return html;
+    editor_table.prototype.editGrid = function (showComment, showEdit) {
+        var list = [];
+        if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
+        if (showEdit) list.push("<button onclick='editor.table.onEditBtnClick(this)'>编辑</button>");
+        return list.join('&nbsp;');
     }
 
     editor_table.prototype.title = function () {
@@ -60,12 +60,12 @@ editor_table_wrapper = function (editor) {
         return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
     }
 
-    editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr) {
+    editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortComment, tdstr, type) {
         return /* html */`<tr id="${guid}">
         <td title="${field}">${shortField}</td>
-        <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortCommentHTMLescape}</td>
+        <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
         <td><div class="etableInputDiv">${tdstr}</div></td>
-        <td>${editor.table.editGrid(commentHTMLescape != shortCommentHTMLescape)}</td>
+        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet')}</td>
         </tr>\n`
     }
 
@@ -235,16 +235,16 @@ editor_table_wrapper = function (editor) {
         var thiseval = vobj;
         var comment = String(cobj._data);
 
-        var charlength = 10;
+        var charlength = 15;
         // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        // shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
+        shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.util.HTMLescape(comment);
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.util.HTMLescape(comment.slice(0, charlength)) + '...');
+        // var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.util.HTMLescape(comment.slice(0, charlength)) + '...');
 
         var cobjstr = Object.assign({}, cobj);
         delete cobjstr._data;
@@ -252,7 +252,7 @@ editor_table_wrapper = function (editor) {
         cobjstr = editor.util.HTMLescape(JSON.stringify(cobjstr));
 
         var tdstr = editor.table.objToTd(obj, commentObj, field, cfield, vobj, cobj)
-        var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr)
+        var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, cobj._docs, tdstr, cobj._type)
         return [outstr, guid];
     }
 

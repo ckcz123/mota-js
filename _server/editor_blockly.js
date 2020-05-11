@@ -39,15 +39,18 @@ editor_blockly = function () {
       MotaActionBlocks['changeFloor_m'].xmlText(),
       MotaActionFunctions.actionParser.parse([{
         "id": "moneyShop1",
-        "name": "贪婪之神", 
-        "icon": "blueShop",
+        "text": "\t[贪婪之神,blueShop]勇敢的武士啊, 给我\${temp:B}金币就可以：", 
         "textInList": "1F金币商店", 
-        "use": "money",
-        "need": "20+10*times*(times+1)",  
-        "text": "勇敢的武士啊，给我\\\${need}金币就可以：", 
+        "need": "20+10*temp:A*(temp:A+1)",  
         "choices": [ 
-          {"text": "生命+800", "effect": "status:hp+=800"},
-          {"text": "攻击+4", "effect": "status:atk+=4"},
+          {"text": "生命+800", "need": "status:money>=temp:B", "effect": [
+            {"name": "status:money", "operator": "-=", "value": "temp:B"},
+						{"name": "status:hp", "operator": "+=", "value": "800"},
+          ]},
+          {"text": "攻击+4", "need": "status:money>=temp:B", "effect": [
+            {"name": "status:money", "operator": "-=", "value": "temp:B"},
+						{"name": "status:atk", "operator": "+=", "value": "4"},
+          ]},
         ]
       },{
         "id": "itemShop",
@@ -727,7 +730,7 @@ function omitedcheckUpdateFunction(event) {
             'choices_s': 'EvalString_0',
             'showTextImage_s': 'EvalString_0',
             'function_s': 'RawEvalString_0',
-            'shopsub': 'EvalString_3',
+            'shopsub': 'EvalString_1',
             'confirm_s': 'EvalString_0',
             'drawTextContent_s': 'EvalString_0',
         }

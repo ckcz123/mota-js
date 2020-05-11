@@ -103,7 +103,7 @@ return code;
 */;
 
 shopcommonevent
-    :   '公共事件版商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' JsonEvalString?
+    :   '公共事件版商店 id' IdString '快捷名称' EvalString '未开启不显示' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' JsonEvalString?
     
 /* shopcommonevent
 tooltip : 全局商店, 执行一个公共事件
@@ -125,55 +125,61 @@ return code;
 */;
 
 shopsub
-    :   '商店 id' IdString '标题' EvalString '图标' IdString BGNL? Newline '快捷商店栏中名称' EvalString '共用times' Bool BGNL? Newline '未开启状态则不显示在列表中' Bool BGNL? Newline '使用' ShopUse_List '消耗' EvalString BGNL? Newline '显示文字' EvalString BGNL? Newline shopChoices+ BEND
+    :   '商店 id' IdString '标题' EvalString? '图像' IdString? BGNL? Newline '文字' EvalString? BGNL? Newline '快捷名称' EvalString '共用次数' Bool '未开启不显示' Bool BGNL? Newline '消耗' EvalString BGNL? Newline '（访问次数：临时变量A；当前消耗：临时变量B）' BGNL? Newline shopChoices+ BEND
     
 
 /* shopsub
 tooltip : 全局商店,消耗填-1表示每个选项的消耗不同,正数表示消耗数值
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
-default : ["shop1","贪婪之神","blueShop","1F金币商店",false,false,null,"20+10*times*(times+1)","勇敢的武士啊, 给我${need}金币就可以："]
+default : ["shop1","贪婪之神","blueShop","勇敢的武士啊, 给我${temp:B}金币就可以：","1F金币商店",false,false,"20+10*temp:A*(temp:A+1)"]
+var title='';
+if (EvalString_0==''){
+    if (IdString_1=='') title='';
+    else title='\t['+IdString_1+']';
+} else {
+    if (IdString_1=='')title='\t['+EvalString_0+']';
+    else title='\t['+EvalString_0+','+IdString_1+']';
+}
 var code = {
     'id': IdString_0,
-    'name': EvalString_0,
-    'icon': IdString_1,
-    'textInList': EvalString_1,
+    'text': title+EvalString_1,
+    'textInList': EvalString_2,
     'commonTimes': Bool_0,
     'mustEnable': Bool_1,
-    'use': ShopUse_List_0,
-    'need': EvalString_2,
-    'text': EvalString_3,
+    'need': EvalString_3,
     'choices': 'choices_asdfefw'
 }
-code=JSON.stringify(code,null,2).split('"choices_asdfefw"').join('[\n'+shopChoices_0+']\n')+',\n';
+code=JSON.stringify(code,null,2).split('"choices_asdfefw"').join('[\n'+shopChoices_0+']')+',\n';
 return code;
 */;
 
 shopChoices
-    :   '商店选项' EvalString '消耗' EvalString? BGNL? Newline shopEffect+
+    :   '商店选项' EvalString '使用条件' EvalString BGNL? Newline '图标' IdString? '颜色' ColorString? Colour '出现条件' EvalString? BGNL? Newline shopEffect+
     
 
 /* shopChoices
 tooltip : 商店选项,商店消耗是-1时,这里的消耗对应各自选项的消耗,商店消耗不是-1时这里的消耗不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
-default : ["攻击+1",""]
+default : ["攻击+1","status:money>=temp:B","","","rgba(255,255,255,1)",""]
 colour : this.subColor
-EvalString_1 = EvalString_1 && (', "need": "'+EvalString_1+'"');
-var code = '{"text": "'+EvalString_0+'"'+EvalString_1+', "effect": "'+shopEffect_0.slice(2,-1)+'"},\n';
+ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
+EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_1+'"')
+IdString_0 = IdString_0? (', "icon": "'+IdString_0+'"'):'';
+var code = '{"text": "'+EvalString_0+'", "need": "'+EvalString_1+'"'+IdString_0+ColorString_0+EvalString_2+', "effect": [\n'+shopEffect_0+']},\n';
 return code;
 */;
 
 shopEffect
-    :   idString_e '+=' expression
+    :   idString_e AssignOperator_List expression
     
 
 /* shopEffect
 colour : this.subColor
-var code = idString_e_0+'+='+expression_0+';'
-return code;
+return '{"name": "'+idString_e_0+'", "operator": "'+AssignOperator_List_0+'", "value": "'+expression_0+'"},\n';
 */;
 
 shopitem
-    :   '道具商店 id' IdString '快捷商店栏中名称' EvalString BGNL? '未开启状态则不显示在列表中' Bool BGNL? Newline shopItemChoices+ BEND
+    :   '道具商店 id' IdString '快捷名称' EvalString '未开启不显示' Bool BGNL? Newline shopItemChoices+ BEND
 
 
 /* shopitem
@@ -187,7 +193,7 @@ var code = {
     'mustEnable': Bool_0,
     'choices': 'choices_aqwedsa'
 }
-code=JSON.stringify(code,null,2).split('"choices_aqwedsa"').join('[\n'+shopItemChoices_0+']\n')+',\n';
+code=JSON.stringify(code,null,2).split('"choices_aqwedsa"').join('[\n'+shopItemChoices_0+']')+',\n';
 return code;
 */;
 
@@ -2911,21 +2917,19 @@ ActionParser.prototype.parse = function (obj,type) {
         var text_choices = null;
         for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
           var text_effect = null;
-          var effectList = choice.effect.split(';');
-          for(var jj=effectList.length-1,effect;effect=effectList[jj];jj--) {
-            if(effect.split('+=').length!==2){
-              throw new Error('一个商店效果中必须包含恰好一个"+="');
-            }
-            text_effect=MotaActionBlocks['shopEffect'].xmlText([
-              MotaActionBlocks['idString_e'].xmlText([effect.split('+=')[0]]),
-              MotaActionBlocks['evalString_e'].xmlText([effect.split('+=')[1]]),
-              text_effect]);
+          choice.effect = choice.effect || [];
+          for (var jj=choice.effect.length-1,effect;effect=choice.effect[jj];jj--) {
+            text_effect = MotaActionBlocks['shopEffect'].xmlText([
+              parser.tryToUseEvFlag_e('idString_e', [effect.name]), effect.operator || '=',
+              MotaActionBlocks['evalString_e'].xmlText([effect.value]), text_effect
+            ]);
           }
           text_choices=MotaActionBlocks['shopChoices'].xmlText([
-            choice.text,choice.need||'',text_effect,text_choices]);
+            choice.text,choice.need||'',choice.icon,choice.color,'rgba('+choice.color+')',choice.condition,text_effect,text_choices]);
         }
+        var info = parser.getTitleAndPosition(obj.text || '');
         return MotaActionBlocks['shopsub'].xmlText([
-          obj.id,obj.name,obj.icon,obj.textInList,obj.commonTimes,obj.mustEnable,obj.use,obj.need,parser.EvalString(obj.text),text_choices,next
+          obj.id,obj[0],info[1],info[3],obj.textInList,obj.commonTimes,obj.mustEnable,obj.need,text_choices,next
         ]);
       }
       var buildcommentevent = function(obj,parser,next){

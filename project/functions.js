@@ -1269,9 +1269,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.status.hero.hp = 0;
 			core.updateStatusBar();
 			core.events.lose();
-			return;
+		} else {
+			core.updateStatusBar();
 		}
 	}
+
+	// 从v2.7开始，每一步行走不会再刷新状态栏。
+	// 如果有特殊要求（如每走一步都加buff之类），可手动取消注释下面这一句：
+	// core.updateStatusBar(true);
+	
+	// 检查自动事件
+	core.checkAutoEvents();
+
 	// 如需强行终止行走可以在这里条件判定：
 	// core.stopAutomaticRoute();
 },

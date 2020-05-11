@@ -1009,14 +1009,16 @@ return code;
 */;
 
 update_s
-    :   '更新状态栏和地图显伤' Newline
+    :   '更新状态栏和地图显伤' '不检查自动事件' Bool Newline
     
 
 /* update_s
 tooltip : update: 立刻更新状态栏和地图显伤
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=update%EF%BC%9A%E7%AB%8B%E5%88%BB%E6%9B%B4%E6%96%B0%E7%8A%B6%E6%80%81%E6%A0%8F%E5%92%8C%E5%9C%B0%E5%9B%BE%E6%98%BE%E4%BC%A4
+default : [false]
 colour : this.dataColor
-var code = '{"type": "update"},\n';
+Bool_0 = Bool_0 ? (', "doNotCheckAutoEvents": true') : ''
+var code = '{"type": "update"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -3462,7 +3464,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "update":
       this.next = MotaActionBlocks['update_s'].xmlText([
-        this.next]);
+        this.next, this.doNotCheckAutoEvents||false]);
       break;
     case "showStatusBar":
       this.next = MotaActionBlocks['showStatusBar_s'].xmlText([

@@ -672,7 +672,7 @@ function omitedcheckUpdateFunction(event) {
                     }
                 }
             }
-            if (one.async && one.type != 'animate') hasAsync = true;
+            if (one.async && one.type != 'animate' && one.type != 'function') hasAsync = true;
             if (one.type == 'waitAsync') hasAsync = false;
         }
         return hasAsync;

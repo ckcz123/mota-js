@@ -402,7 +402,16 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         });
         return;
     }
-    this._openDoor_animate(id, x, y, callback);
+    if (core.status.replay.speed == 24) {
+        core.status.replay.animate = true;
+        core.removeBlock(x, y);
+        setTimeout(function () {
+            core.status.replay.animate = false;
+            core.events.afterOpenDoor(id, x, y, callback);
+        });
+    } else {
+        this._openDoor_animate(id, x, y, callback);
+    }
 }
 
 events.prototype._openDoor_check = function (id, x, y, needKey) {
@@ -485,8 +494,8 @@ events.prototype.getItem = function (id, num, x, y, callback) {
     if (num == null) num = 1;
     num = num || 1;
     var itemCls = core.material.items[id].cls;
-    core.items.getItemEffect(id, num);
     core.removeBlock(x, y);
+    core.items.getItemEffect(id, num);
     var text = '获得 ' + core.material.items[id].name;
     if (num > 1) text += "x" + num;
     if (itemCls === 'items' && num == 1) text += core.items.getItemEffectTip(id);
@@ -509,9 +518,6 @@ events.prototype.getItem = function (id, num, x, y, callback) {
         }
         itemHint.push(id);
     }
-
-
-    core.updateStatusBar();
 
     this.afterGetItem(id, x, y, callback);
 }
@@ -753,8 +759,6 @@ events.prototype.pushBox = function (data) {
         core.removeBlock(data.x, data.y);
     else
         core.setBlock(168, data.x, data.y);
-
-    core.updateStatusBar();
     this._pushBox_moveHero(direction);
 }
 
@@ -1949,7 +1953,7 @@ events.prototype._action_function = function (data, x, y, prefix) {
 }
 
 events.prototype._action_update = function (data, x, y, prefix) {
-    core.updateStatusBar();
+    core.updateStatusBar(data.doNotCheckAutoEvents);
     core.doAction();
 }
 

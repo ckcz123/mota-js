@@ -1471,10 +1471,10 @@ maps.prototype.hideBlock = function (x, y, floorId) {
 ////// 将某个块从启用变成禁用状态 //////
 maps.prototype.removeBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
-    if (!floorId) return;
+    if (!floorId) return false;
 
     var block = core.getBlock(x, y, floorId, true);
-    if (block == null) return; // 不存在
+    if (block == null) return false; // 不存在
 
     var index = block.index;
 
@@ -1490,6 +1490,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     // 删除Index
     core.removeBlockByIndex(index, floorId);
     core.updateStatusBar();
+    return true;
 }
 
 ////// 根据block的索引（尽可能）删除该块 //////
@@ -1778,6 +1779,7 @@ maps.prototype._getAndRemoveBlock = function (x, y) {
 
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
+    if (core.status.replay.speed == 24) time = 1;
     time = time || 500;
     var blockArr = this._getAndRemoveBlock(x, y);
     if (blockArr == null) {
@@ -1939,6 +1941,7 @@ maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, an
 
 ////// 显示/隐藏某个块时的动画效果 //////
 maps.prototype.animateBlock = function (loc, type, time, callback) {
+    if (core.status.replay.speed == 24) time = 1;
     var isHide = type == 'hide';
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];

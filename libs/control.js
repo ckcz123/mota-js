@@ -656,7 +656,6 @@ control.prototype._moveAction_moving = function (callback) {
         // 执行该点事件
         if (!hasTrigger)
             core.events._trigger(nowx, nowy);
-        core.updateStatusBar();
 
         // 检查该点是否是滑冰
         if (core.getBgNumber() == 167) {
@@ -745,7 +744,7 @@ control.prototype.waitHeroToStop = function(callback) {
                 core.setHeroLoc('direction', lastDirection);
             core.drawHero();
             callback();
-        }, 30);
+        }, core.status.replay.speed == 24 ? 0 : 30);
     }
 }
 
@@ -1000,6 +999,8 @@ control.prototype.checkBlock = function () {
             core.updateStatusBar();
             core.events.lose();
             return;
+        } else {
+            core.updateStatusBar();
         }
     }
     this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
@@ -1020,7 +1021,7 @@ control.prototype._checkBlock_snipe = function (snipe) {
     if (!snipe || snipe.length == 0) return;
     var actions = [];
     snipe.forEach(function (t) {
-        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": true, "async": true});
+        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": true, "async": true});
     });
     actions.push({"type": "waitAsync"});
     core.insertAction(actions);
@@ -1032,12 +1033,14 @@ control.prototype._checkBlock_ambush = function (ambush) {
     // 捕捉效果
     var actions = [];
     ambush.forEach(function (t) {
-        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": false, "async":true});
+        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": false, "async":true});
     });
     actions.push({"type": "waitAsync"});
     // 强制战斗
     ambush.forEach(function (t) {
-        actions.push({"type": "battle", "id": t[2]});
+        actions.push({"type": "function", "function": "function() { "+
+            "core.battle('" + t[2] + "', " + t[0]+ "," + t[1] + ", true, core.doAction); "+
+            "}", "async": true});
     });
     core.insertAction(actions);
 }
@@ -1430,7 +1433,7 @@ control.prototype._replayAction_item = function (action) {
     if (action.indexOf("item:")!=0) return false;
     var itemId = action.substring(5);
     if (!core.canUseItem(itemId)) return false;
-    if (core.material.items[itemId].hideInReplay) {
+    if (core.material.items[itemId].hideInReplay || core.status.replay.speed == 24) {
         core.useItem(itemId, false, core.replay);
         return true;
     }
@@ -1463,7 +1466,7 @@ control.prototype._replayAction_equip = function (action) {
     var index = ownEquipment.indexOf(equipId), per = core.__SIZE__-1;
     if (index<0) return false;
     core.status.route.push(action);
-    if (core.material.items[equipId].hideInReplay) {
+    if (core.material.items[equipId].hideInReplay || core.status.replay.speed == 24) {
         core.loadEquip(equipId, core.replay);
         return true;
     }
@@ -1483,6 +1486,10 @@ control.prototype._replayAction_unEquip = function (action) {
     if (!core.isset(equipType)) return false;
     core.ui.drawEquipbox(equipType);
     core.status.route.push(action);
+    if (core.status.replay.speed == 24) {
+        core.unloadEquip(equipType, core.replay);
+        return true;
+    }
     setTimeout(function () {
         core.ui.closePanel();
         core.unloadEquip(equipType, core.replay);
@@ -1496,6 +1503,11 @@ control.prototype._replayAction_fly = function (action) {
     var toIndex=core.floorIds.indexOf(floorId);
     if (!core.canUseItem('fly')) return false;
     core.ui.drawFly(toIndex);
+    if (core.status.replay.speed == 24) {
+        if (!core.flyTo(floorId, core.replay))
+            core.control._replay_error(action);
+        return true;
+    }
     setTimeout(function () {
         if (!core.flyTo(floorId, core.replay))
             core.control._replay_error(action);
@@ -1513,7 +1525,7 @@ control.prototype._replayAction_shop = function (action) {
     // --- 判定commonEvent或item
     if (shop.commonEvent || shop.item) {
         core.openShop(shopId, false);
-        setTimeout(core.replay);
+        core.replay();
         return true;
     }
     var choices = shop.choices;
@@ -1542,14 +1554,14 @@ control.prototype._replayAction_turn = function (action) {
     if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
-    setTimeout(core.replay);
+    core.replay();
     return true;
 }
 
 control.prototype._replayAction_getNext = function (action) {
     if (action != "getNext") return false;
     if (!core.getNextItem()) return false;
-    setTimeout(core.replay);
+    core.replay();
     return true;
 }
 
@@ -1566,6 +1578,11 @@ control.prototype._replayAction_moveDirectly = function (action) {
     var x=parseInt(pos[0]), y=parseInt(pos[1]);
     var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
     if (!core.moveDirectly(x, y)) return false;
+    if (core.status.replay.speed == 24) {
+        core.replay();
+        return true;
+    }
+
     core.ui.drawArrow('ui', 32*nowx+16-core.bigmap.offsetX, 32*nowy+16-core.bigmap.offsetY,
         32*x+16-core.bigmap.offsetX, 32*y+16-core.bigmap.offsetY, '#FF0000', 3);
     setTimeout(function () {
@@ -1578,7 +1595,7 @@ control.prototype._replayAction_moveDirectly = function (action) {
 control.prototype._replayAction_key = function (action) {
     if (action.indexOf("key:") != 0) return false;
     core.actions.keyUp(parseInt(action.substring(4)), false, true);
-    setTimeout(core.replay);
+    core.replay();
     return true;
 }
 

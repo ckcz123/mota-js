@@ -81,6 +81,7 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
                 main.log(e);
             }
         }
+        core.updateStatusBar();
     }
     else {
         core.addItem(itemId, itemNum);

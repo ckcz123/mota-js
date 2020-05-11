@@ -443,6 +443,12 @@ ui.prototype._uievent_drawIcon = function (data) {
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
+    // 清除全部临时变量
+    Object.keys(core.status.hero.flags).forEach(function (name) {
+        if (name.startsWith("@temp@")) {
+            delete core.status.hero.flags[name];
+        }
+    });
     this.clearUI();
     core.maps.generateGroundPattern();
     core.updateStatusBar(true);

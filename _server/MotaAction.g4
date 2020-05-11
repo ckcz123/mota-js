@@ -1888,8 +1888,8 @@ for_s
 tooltip : for：循环遍历
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=while%ef%bc%9a%e5%89%8d%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
 colour : this.eventColor
-if (!/^switch:[A-Z]$/.test(expression_0)) {
-  throw new Error('循环遍历仅允许使用独立开关！');
+if (!/^temp:[A-Z]$/.test(expression_0)) {
+  throw new Error('循环遍历仅允许使用临时变量！');
 }
 return '{"type": "for", "name": "'+expression_0+'", "from": "'+EvalString_0+'", "to": "'+EvalString_1+'", "step": "'+EvalString_2+'",\n"data": [\n'+action_0+']},\n';
 */;    
@@ -1901,8 +1901,8 @@ forEach_s
 tooltip : forEach：循环遍历列表
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=while%ef%bc%9a%e5%89%8d%e7%bd%ae%e6%9d%a1%e4%bb%b6%e5%be%aa%e7%8e%af
 colour : this.eventColor
-if (!/^switch:[A-Z]$/.test(expression_0)) {
-  throw new Error('循环遍历仅允许使用独立开关！');
+if (!/^temp:[A-Z]$/.test(expression_0)) {
+  throw new Error('循环遍历仅允许使用临时变量！');
 }
 if (JsonEvalString_0 == '' || !(JSON.parse(JsonEvalString_0) instanceof Array)) {
   throw new Error('参数列表必须是个有效的数组！');
@@ -2461,6 +2461,7 @@ expression
     |   bool_e
     |   idString_e
     |   evFlag_e
+    |   evTemp_e
     |   evalString_e
     
 
@@ -2609,6 +2610,18 @@ evFlag_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "switch:"+Letter_List_0;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+evTemp_e
+    :   '临时变量' Letter_List
+
+
+/* evTemp_e
+colour : this.idstring_eColor
+default : ["A"]
+var code = "temp:"+Letter_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -2773,8 +2786,8 @@ FixedId_List
     /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp']*/;
 
 Id_List
-    :   '变量' | '状态' | '物品' | '独立开关' | '全局存储'
-    /*Id_List ['flag','status','item', 'switch', 'global']*/;
+    :   '变量' | '状态' | '物品' | '独立开关' | '临时变量' |'全局存储'
+    /*Id_List ['flag','status','item', 'switch', 'temp', 'global']*/;
 
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
@@ -2845,6 +2858,7 @@ this.block('idString_4_e').output='idString_e';
 this.block('idString_5_e').output='idString_e';
 this.block('idString_6_e').output='idString_e';
 this.block('evFlag_e').output='idString_e';
+this.block('evTemp_e').output='idString_e';
 */
 
 /* Functions
@@ -3752,6 +3766,11 @@ ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, 
     args[0]=match[1]
     return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
   }
+  match=/^temp:([A-Z])$/.exec(args[0])
+  if(match){
+    args[0]=match[1]
+    return MotaActionBlocks['evTemp_e'].xmlText(args, isShadow, comment);
+  }
   return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
 }
 
@@ -3958,7 +3977,7 @@ MotaActionFunctions.replaceToName = function (str) {
   str = str.replace(new RegExp("item:(" + list.join("|") + ")", "g"), function (a, b) {
     return map[b] ? ("物品：" + map[b]) : b;
   }).replace(/item:/g, "物品：");
-  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：");
+  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：").replace(/temp:/g, "临时变量：");
 
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
@@ -3988,7 +4007,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
-  str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
+  str = str.replace(/临时变量[:：]/g, "temp:").replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
 
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {

@@ -89,6 +89,8 @@ utils.prototype.replaceValue = function (value) {
             value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
         if (value.indexOf('equip:')>=0)
             value = value.replace(/equip:(\d)/g, "core.getEquip($1)");
+        if (value.indexOf('temp:')>=0)
+            value = value.replace(/temp:([a-zA-Z0-9_]+)/g, "core.getFlag('@temp@$1', 0)");
     }
     return value;
 }

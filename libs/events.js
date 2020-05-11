@@ -1824,9 +1824,9 @@ events.prototype._precompile_confirm = function (data) {
 }
 
 events.prototype._action_for = function (data, x, y, prefix) {
-    // Only support switch:A
-    if (!/^switch:[A-Z]$/.test(data.name)) {
-        core.insertAction(['循环遍历事件只支持独立开关！']);
+    // Only support temp:A
+    if (!/^temp:[A-Z]$/.test(data.name)) {
+        core.insertAction('循环遍历事件只支持临时变量！');
         return core.doAction();
     }
     var from = core.calValue(data.from);
@@ -1834,22 +1834,22 @@ events.prototype._action_for = function (data, x, y, prefix) {
         core.insertAction('循环遍历事件要求【起始点】仅能是数字！');
         return core.doAction();
     }
-    this._setValue_setSwitch(data.name, from, prefix);
-    var toName = '__for@to@' + prefix + '@' + data.name.substring(7) + '__';
-    var stepName = '__for@step@' + prefix + '@' + data.name.substring(7) + '__';
+    var letter = data.name.substring(5);
+    core.setFlag('@temp@' + letter, from);
+    var toName = '@temp@for-to@' + letter;
+    var stepName = '@temp@for-step@' + letter;
     core.setFlag(toName, data.to);
     core.setFlag(stepName, data.step);
     var condition = "(function () {"+
-        "var clearAndReturn = function (v) { if (!v) { core.removeFlag('"+toName+"'); core.removeFlag('"+stepName+"'); } return v; };"+
         "var to = core.calValue(core.getFlag('" + toName + "'));"+
         "var step = core.calValue(core.getFlag('" + stepName + "'));"+
-        "if (typeof step != 'number' || typeof to != 'number') return clearAndReturn(false);"+
-        "if (step == 0) return clearAndReturn(true);"+
-        "var currentValue = core.calValue('switch:'+'" + data.name.substring(7) + "', '"+prefix+"');"+
+        "if (typeof step != 'number' || typeof to != 'number') return false;"+
+        "if (step == 0) return true;"+
+        "var currentValue = core.getFlag('@temp@" + letter + "');"+
         "currentValue += step;"+
-        "core.events._setValue_setSwitch('switch:'+'" + data.name.substring(7) + "', currentValue, '"+prefix+"');"+
-        "if (step > 0) { return clearAndReturn(currentValue <= to); }"+
-        "else { return clearAndReturn(currentValue >= to); }"+
+        "core.setFlag('@temp@" + letter + "', currentValue);"+
+        "if (step > 0) { return currentValue <= to; }"+
+        "else { return currentValue >= to; }"+
         "})()";
     return this._action_dowhile({"condition": condition, "data": data.data}, x, y, prefix);
 }
@@ -1863,17 +1863,17 @@ events.prototype._precompile_for = function (data) {
 }
 
 events.prototype._action_forEach = function (data, x, y, prefix) {
-    // Only support switch:A
-    if (!/^switch:[A-Z]$/.test(data.name)) {
-        core.insertAction(['循环遍历事件只支持独立开关！']);
+    // Only support temp:A
+    if (!/^temp:[A-Z]$/.test(data.name)) {
+        core.insertAction(['循环遍历事件只支持临时变量！']);
         return core.doAction();
     }
-    var listName = '__forEach@' + prefix + '@' + data.name.substring(7) + '__';
+    var listName = '@temp@forEach@' + data.name.substring(5);
     core.setFlag(listName, core.clone(data.list));
     var condition = "(function () {" +
         "var list = core.getFlag('"+listName+"', []);"+
-        "if (list.length == 0) { core.removeFlag('" + listName + "'); return false; }"+
-        "core.events._setValue_setSwitch('switch:'+'" + data.name.substring(7) + "', list.shift(), '"+prefix+"');"+
+        "if (list.length == 0) return false;"+
+        "core.setFlag('@temp@'+'" + data.name.substring(5) + "', list.shift());"+
         "return true;"+
         "})()";
     return this._action_while({"condition": condition, "data": data.data}, x, y, prefix);
@@ -2456,6 +2456,7 @@ events.prototype.setValue = function (name, operator, value, prefix) {
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
+    this._setValue_setTemp(name, value, prefix);
     this._setValue_setGlobal(name, value);
 }
 
@@ -2479,6 +2480,11 @@ events.prototype._setValue_setFlag = function (name, value) {
 events.prototype._setValue_setSwitch = function (name, value, prefix) {
     if (name.indexOf("switch:") !== 0) return;
     core.setFlag((prefix || ":f@x@y") + "@" + name.substring(7), value);
+}
+
+events.prototype._setValue_setTemp = function (name, value) {
+    if (name.indexOf("temp:") !== 0) return;
+    core.setFlag("@temp@" + name.substring(5), value);
 }
 
 events.prototype._setValue_setGlobal = function (name, value) {

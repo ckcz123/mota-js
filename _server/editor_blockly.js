@@ -1030,6 +1030,12 @@ function omitedcheckUpdateFunction(event) {
           }).sort();
         }
 
+        // 对全局商店进行补全
+        if ((type == 'openShop_s' || type == 'disableShop_s') && name == 'IdString_0') {
+          return Object.keys(core.status.shops).filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
 
         return [];
     }

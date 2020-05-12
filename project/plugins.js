@@ -39,7 +39,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// core.plugin.drawLight('ui', 0.95, [[25,11,46]]); // 在ui层绘制全图不透明度0.95，其中在(25,11)点存在一个半径为46的灯光效果。
 	// core.plugin.drawLight('test', 0.2, [[25,11,46,0.1]]); // 创建一个test图层，不透明度0.2，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。
 	// core.plugin.drawLight('test2', 0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 创建test2图层，且存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。
-	// core.plugin.drawLight('xxx', 0.3, [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，且40%后才开始衰减。
+	// core.plugin.drawLight('xxx', 0.3, [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，40%后才开始衰减。
 	this.drawLight = function (name, color, lights, lightDec) {
 
 		// 清空色调层；也可以修改成其它层比如animate/weather层，或者用自己创建的canvas
@@ -245,16 +245,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// Step 1: 背景和固定的几个文字
 		core.ui._createUIEvent();
 		core.clearMap('uievent');
-		core.ui._uievent_drawSelector({ "code": 1 });
-		core.ui._uievent_drawSelector({ "code": 2 });
+		core.ui._clearUIEventSelector([1, 2]);
 		core.setTextAlign('uievent', 'left');
 		core.setTextBaseline('uievent', 'top');
 		core.fillRect('uievent', 0, 0, 416, 416, 'black');
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 0, width: 416, height: 56 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 56, width: 312, height: 56 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 112, width: 312, height: 304 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 312, y: 56, width: 104, height: 56 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 312, y: 112, width: 104, height: 304 });
+		core.drawWindowSkin('winskin.png', 'uievent', 0, 0, 416, 56);
+		core.drawWindowSkin('winskin.png', 'uievent', 0, 56, 312, 56);
+		core.drawWindowSkin('winskin.png', 'uievent', 0, 112, 312, 304);
+		core.drawWindowSkin('winskin.png', 'uievent', 312, 56, 104, 56);
+		core.drawWindowSkin('winskin.png', 'uievent', 312, 112, 104, 304);
 		core.setFillStyle('uievent', 'white');
 		core.setStrokeStyle('uievent', 'white');
 		core.fillText("uievent", "购买", 32, 74, 'white', bigFont);
@@ -519,11 +518,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					{ "type": "function", "function": "function() { core.performItemShopAction(); }" }
 				]
 			},
-			{ "type": "function", "function": "function () { " +
-					"core.deleteCanvas('uievent'); " +
-					"core.ui._uievent_drawSelector({ \"code\": 1 }); " +
-					"core.ui._uievent_drawSelector({ \"code\": 2 }); " +
-					"}" }
+			{
+				"type": "function",
+				"function": "function () { core.deleteCanvas('uievent'); core.ui._clearUIEventSelector([1, 2]); }"
+			}
 		]);
 	}
 

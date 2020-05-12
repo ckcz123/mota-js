@@ -660,6 +660,14 @@ ui.prototype._uievent_drawSelector = function (data) {
     this._drawSelector(ctx, background, w, h);
 }
 
+ui.prototype._clearUIEventSelector = function (codes) {
+    if (codes instanceof Array) {
+        codes.forEach(function (code) { core.ui._clearUIEventSelector(code); });
+        return;
+    }
+    core.deleteCanvas('_uievent_selector_' + (codes || 0));
+}
+
 ui.prototype._drawSelector = function (ctx, background, w, h, left, top) {
     left = left || 0;
     top = top || 0;

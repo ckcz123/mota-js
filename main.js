@@ -597,7 +597,7 @@ main.statusBar.image.keyboard.onclick = function (e) {
         main.core.openKeyBoard(true);
 }
 
-////// 点击状态栏中的快捷商店键盘时 //////
+////// 点击状态栏中的快捷商店时 //////
 main.statusBar.image.shop.onclick = function (e) {
     e.stopPropagation();
 
@@ -610,7 +610,7 @@ main.statusBar.image.shop.onclick = function (e) {
         main.core.openQuickShop(true);
 }
 
-////// 点击金币时也可以开启虚拟键盘 //////
+////// 点击金币时也可以开启快捷商店 //////
 main.statusBar.image.money.onclick = function (e) {
     e.stopPropagation();
 

@@ -38,19 +38,16 @@ editor_blockly = function () {
       },'autoEvent'),
       MotaActionBlocks['changeFloor_m'].xmlText(),
       MotaActionFunctions.actionParser.parse([{
-        "id": "moneyShop1",
-        "text": "\t[贪婪之神,blueShop]勇敢的武士啊, 给我\${temp:B}金币就可以：", 
-        "textInList": "1F金币商店", 
-        "need": "20+10*temp:A*(temp:A+1)",  
+        "id": "shop1",
+        "text": "\t[贪婪之神,blueShop]勇敢的武士啊, 给我\${20+2*flag:shop1}金币就可以：", 
+        "textInList": "1F金币商店",  
         "choices": [ 
-          {"text": "生命+800", "need": "status:money>=temp:B", "effect": [
-            {"name": "status:money", "operator": "-=", "value": "temp:B"},
-						{"name": "status:hp", "operator": "+=", "value": "800"},
-          ]},
-          {"text": "攻击+4", "need": "status:money>=temp:B", "effect": [
-            {"name": "status:money", "operator": "-=", "value": "temp:B"},
-						{"name": "status:atk", "operator": "+=", "value": "4"},
-          ]},
+          {"text": "生命+800", "need": "status:money>=20+2*flag:shop1", "action": [
+            {"type": "comment", "text": "新版商店中需要手动扣减金币和增加访问次数"},
+            {"type": "setValue", "name": "status:money", "operator": "-=", "value": "20+2*flag:shop1"},
+            {"type": "setValue", "name": "flag:shop1", "operator": "+=", "value": "1"},
+            {"type": "setValue", "name": "status:hp", "operator": "+=", "value": "800"}
+          ]}
         ]
       },{
         "id": "itemShop",

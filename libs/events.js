@@ -1506,16 +1506,13 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 }
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    core.status.shops[data.id].visited = true;
-    this.setEvents([]);
-    if (!core.isReplaying())
-        this.openShop(data.id);
-    if (core.status.event.id == 'action')
-        core.doAction();
+    core.setShopVisited(data.id, true);
+    if (data.open) core.openShop(data.id, true);
+    core.doAction();
 }
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    this.disableQuickShop(data.id);
+    core.setShopVisited(data.id, false);
     core.doAction();
 }
 
@@ -2347,8 +2344,17 @@ events.prototype.openQuickShop = function (fromUserAction) {
     // --- 如果只有一个商店，则直接打开之
     if (Object.keys(core.status.shops).length == 1) {
         var shopId = Object.keys(core.status.shops)[0];
-        if (core.status.event.id != null || !this._checkStatus('shop', false)) return;
-        core.events.openShop(shopId, true);
+        if (core.status.event.id != null) return;
+        if (!core.canOpenShop(shopId)) {
+            core.drawTip("当前无法打开快捷商店！");
+            return;
+        }
+        var message = core.canUseQuickShop(shopId);
+        if (message != null) {
+            core.drawTip(message);
+            return;
+        }
+        core.openShop(shopId, false);
         return;
     }
 
@@ -2495,16 +2501,6 @@ events.prototype._setValue_setGlobal = function (name, value) {
 ////// 数值增减 //////
 events.prototype.addValue = function (name, value, prefix) {
     this.setValue(name, '+=', value, prefix);
-}
-
-////// 执行一个表达式的effect操作 //////
-events.prototype.doEffect = function (effect, need, times) {
-    effect.split(";").forEach(function (expression) {
-        var arr = expression.split("+=");
-        if (arr.length != 2) return;
-        var name=arr[0], value=core.calValue(arr[1], null, need, times);
-        core.addValue(name, value);
-    });
 }
 
 ////// 设置一个怪物属性 //////
@@ -2872,87 +2868,6 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
     core.setHeroLoc('y', ey);
     core.drawHero();
     if (callback) callback();
-}
-
-////// 打开一个全局商店 //////
-events.prototype.openShop = function (shopId, needVisited) {
-    var shop = core.status.shops[shopId];
-    shop.times = shop.times || 0;
-    if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
-    var reason = core.events.canUseQuickShop(shop.id);
-    if (reason != null) return core.drawTip(reason);
-
-    if (needVisited && !shop.visited) {
-        if (!core.flags.enableDisabledShop || shop.commonEvent || shop.item) {
-            if (shop.times == 0) core.drawTip("该项尚未开启");
-            else core.drawTip("该项已失效");
-            core.ui.closePanel();
-            return;
-        }
-        else {
-            core.drawTip("该商店尚未开启，只能浏览不可使用");
-        }
-    }
-    else shop.visited = true;
-
-    if (shop.item) {
-        core.status.route.push("shop:" + shopId + ":0");
-        if (core.openItemShop) {
-            core.openItemShop(shopId);
-        } else {
-            core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
-        }
-        return;
-    } else if (shop.commonEvent) {
-        core.status.route.push("shop:"+shopId+":0");
-        core.insertAction({"type": "insert", "name": shop.commonEvent, "args": shop.args});
-        return;
-    }
-    core.ui.drawShop(shopId);
-}
-
-events.prototype._useShop = function (shop, index) {
-    if (!shop.visited) {
-        core.drawTip(shop.times ? "该商店已失效" : "该商店尚未开启");
-        return false;
-    }
-    var use = shop.use, choice = shop.choices[index];
-    var times = shop.times, need = core.calValue(choice.need || shop.need, null, null, times);
-    if (need > core.getStatus(use)) {
-        core.drawTip("你的" + (use == 'money' ? "金币" : "经验") + "不足");
-        return false;
-    }
-    core.status.event.selection = index;
-    core.status.event.data.actions.push(index);
-    core.setStatus(use, core.getStatus(use) - need);
-    core.doEffect(choice.effect, need, times);
-    core.updateStatusBar();
-    shop.times++;
-    if (shop.commonTimes) core.setFlag('commonTimes', shop.times);
-    this.openShop(shop.id);
-    return true;
-}
-
-events.prototype._exitShop = function () {
-    if (core.status.event.data.actions.length > 0) {
-        core.status.route.push("shop:" + core.status.event.data.id + ":" + core.status.event.data.actions.join(""));
-    }
-    core.status.event.data.actions = [];
-    core.status.boxAnimateObjs = [];
-    if (core.status.event.data.fromList)
-        core.ui.drawQuickShop();
-    else
-        core.ui.closePanel();
-}
-
-////// 禁用一个全局商店 //////
-events.prototype.disableQuickShop = function (shopId) {
-    core.status.shops[shopId].visited = false;
-}
-
-////// 能否使用快捷商店 //////
-events.prototype.canUseQuickShop = function (shopId) {
-    return this.eventdata.canUseQuickShop(shopId);
 }
 
 ////// 设置角色行走图 //////

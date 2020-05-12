@@ -62,10 +62,10 @@ utils.prototype._init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text, prefix, need, times) {
+utils.prototype.replaceText = function (text, prefix) {
     if (typeof text != 'string') return text;
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value, prefix, need, times);
+        return core.calValue(value, prefix);
     });
 }
 
@@ -96,7 +96,7 @@ utils.prototype.replaceValue = function (value) {
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value, prefix, need, times) {
+utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
         if (value.indexOf(':') >= 0) {
@@ -596,7 +596,7 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             decodeObj.ans.push("choices:" + nxt);
             break;
         case "S":
-            decodeObj.ans.push("shop:" + nxt + ":" + this._decodeRoute_getNumber(decodeObj, true));
+            decodeObj.ans.push("shop:" + nxt);
             break;
         case "T":
             decodeObj.ans.push("turn");

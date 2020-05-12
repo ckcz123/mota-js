@@ -1010,9 +1010,9 @@ control.prototype.checkBlock = function () {
 control.prototype._checkBlock_disableQuickShop = function () {
     // 禁用快捷商店
     if (core.flags.disableShopOnDamage) {
-        for (var shopId in core.status.shops) {
-            core.status.shops[shopId].visited = false;
-        }
+        Object.keys(core.status.shops).forEach(function (shopId) {
+            core.setShopVisited(shopId, false);
+        });
     }
 }
 
@@ -1517,36 +1517,13 @@ control.prototype._replayAction_fly = function (action) {
 
 control.prototype._replayAction_shop = function (action) {
     if (action.indexOf("shop:")!=0) return false;
-    var sps=action.substring(5).split(":");
-    var shopId=sps[0], selections=sps[1].split("");
-    if (selections.length == 0) return false;
-    var shop=core.status.shops[shopId];
-    if (!shop || !shop.visited) return false;
-    // --- 判定commonEvent或item
-    if (shop.commonEvent || shop.item) {
-        core.openShop(shopId, false);
-        core.replay();
+    var shopId = action.substring(5);
+    if (core.canUseQuickShop(shopId) != null || !core.canOpenShop(shopId)) {
+        this._replay_error(shopId);
         return true;
     }
-    var choices = shop.choices;
-    core.status.event.selection = parseInt(selections.shift());
-    core.events.openShop(shopId, false);
-    var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2) + (core.status.event.ui.offset || 0);
-    var shopInterval = setInterval(function () {
-        if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
-            clearInterval(shopInterval);
-            core.control._replay_error(action);
-            return;
-        }
-        if (selections.length==0) {
-            clearInterval(shopInterval);
-            core.actions._clickShop(core.__HALF_SIZE__, topIndex+choices.length);
-            core.replay();
-            return;
-        }
-        core.status.event.selection = parseInt(selections.shift());
-        core.events.openShop(shopId, false);
-    }, core.control.__replay_getTimeout());
+    core.openShop(shopId, false);
+    core.replay();
     return true;
 }
 

@@ -244,7 +244,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 		"回收钥匙商店": [
 			{
 				"type": "comment",
-				"text": "此事件在全局商店中被引用了(全局商店keyShop1)"
+				"text": "此事件在全局商店中被引用了(全局商店keyShop)"
 			},
 			{
 				"type": "comment",

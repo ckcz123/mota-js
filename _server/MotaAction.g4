@@ -102,36 +102,14 @@ var code = ' \n';
 return code;
 */;
 
-shopcommonevent
-    :   '公共事件版商店 id' IdString '快捷名称' EvalString '未开启不显示' Bool BGNL? '执行的公共事件 id' EvalString '参数列表' JsonEvalString?
-    
-/* shopcommonevent
-tooltip : 全局商店, 执行一个公共事件
-helpUrl : https://h5mota.com/games/template/_docs/#/
-default : ["shop1","回收钥匙商店",false,"回收钥匙商店",""]
-if (JsonEvalString_0) {
-    if (!(JSON.parse(JsonEvalString_0) instanceof Array))
-        throw new Error('参数列表必须是个有效的数组！');
-}
-var code = {
-    'id': IdString_0,
-    'textInList': EvalString_0,
-    'mustEnable': Bool_0,
-    'commonEvent': EvalString_1
-}
-if (JsonEvalString_0) code.args = JSON.parse(JsonEvalString_0);
-code=JSON.stringify(code,null,2)+',\n';
-return code;
-*/;
-
 shopsub
-    :   '商店 id' IdString '标题' EvalString? '图像' IdString? BGNL? Newline '文字' EvalString? BGNL? Newline '快捷名称' EvalString '共用次数' Bool '未开启不显示' Bool BGNL? Newline '消耗' EvalString BGNL? Newline '（访问次数：临时变量A；当前消耗：临时变量B）' BGNL? Newline shopChoices+ BEND
+    :   '商店 id' IdString '标题' EvalString? '图像' IdString? BGNL? Newline '文字' EvalString? BGNL? Newline '快捷名称' EvalString '未开启不显示' Bool '不可预览' Bool BGNL? Newline shopChoices+ BEND
     
 
 /* shopsub
-tooltip : 全局商店,消耗填-1表示每个选项的消耗不同,正数表示消耗数值
+tooltip : 全局商店
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
-default : ["shop1","贪婪之神","blueShop","勇敢的武士啊, 给我${temp:B}金币就可以：","1F金币商店",false,false,"20+10*temp:A*(temp:A+1)"]
+default : ["shop1","贪婪之神","blueShop","勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：","金币商店",false,false]
 var title='';
 if (EvalString_0==''){
     if (IdString_1=='') title='';
@@ -144,9 +122,8 @@ var code = {
     'id': IdString_0,
     'text': title+EvalString_1,
     'textInList': EvalString_2,
-    'commonTimes': Bool_0,
-    'mustEnable': Bool_1,
-    'need': EvalString_3,
+    'mustEnable': Bool_0,
+    'disablePreview': Bool_1,
     'choices': 'choices_asdfefw'
 }
 code=JSON.stringify(code,null,2).split('"choices_asdfefw"').join('[\n'+shopChoices_0+']')+',\n';
@@ -154,28 +131,19 @@ return code;
 */;
 
 shopChoices
-    :   '商店选项' EvalString '使用条件' EvalString BGNL? Newline '图标' IdString? '颜色' ColorString? Colour '出现条件' EvalString? BGNL? Newline shopEffect+
+    :   '商店选项' EvalString '使用条件' EvalString BGNL? Newline '图标' IdString? '颜色' ColorString? Colour '出现条件' EvalString? BGNL? Newline action+ BEND
     
 
 /* shopChoices
 tooltip : 商店选项,商店消耗是-1时,这里的消耗对应各自选项的消耗,商店消耗不是-1时这里的消耗不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
-default : ["攻击+1","status:money>=temp:B","","","rgba(255,255,255,1)",""]
+default : ["攻击+1","status:money>=20+2*flag:shop1","","","rgba(255,255,255,1)",""]
 colour : this.subColor
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
 EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_1+'"')
 IdString_0 = IdString_0? (', "icon": "'+IdString_0+'"'):'';
-var code = '{"text": "'+EvalString_0+'", "need": "'+EvalString_1+'"'+IdString_0+ColorString_0+EvalString_2+', "effect": [\n'+shopEffect_0+']},\n';
+var code = '{"text": "'+EvalString_0+'", "need": "'+EvalString_1+'"'+IdString_0+ColorString_0+EvalString_2+', "action": [\n'+action_0+']},\n';
 return code;
-*/;
-
-shopEffect
-    :   idString_e AssignOperator_List expression
-    
-
-/* shopEffect
-colour : this.subColor
-return '{"name": "'+idString_e_0+'", "operator": "'+AssignOperator_List_0+'", "value": "'+expression_0+'"},\n';
 */;
 
 shopitem
@@ -213,6 +181,28 @@ EvalString_1 = EvalString_1 ? (', "sell": "'+EvalString_1+'"') : '';
 if (!EvalString_0 && !EvalString_1) throw "买入金额和卖出金额至少需要填写一个";
 EvalString_2 = EvalString_2 ? (', "condition": "'+EvalString_3+'"') : '';
 var code = '{"id": "' + IdString_0 + '"' + IntString_0 + EvalString_0 + EvalString_1 + EvalString_2 + '},\n';
+return code;
+*/;
+
+shopcommonevent
+    :   '公共事件商店 id' IdString '快捷名称' EvalString '未开启不显示' Bool BGNL? '执行的公共事件名' EvalString '参数列表' JsonEvalString?
+    
+/* shopcommonevent
+tooltip : 全局商店, 执行一个公共事件
+helpUrl : https://h5mota.com/games/template/_docs/#/
+default : ["shop1","回收钥匙商店",false,"回收钥匙商店",""]
+if (JsonEvalString_0) {
+    if (!(JSON.parse(JsonEvalString_0) instanceof Array))
+        throw new Error('参数列表必须是个有效的数组！');
+}
+var code = {
+    'id': IdString_0,
+    'textInList': EvalString_0,
+    'mustEnable': Bool_0,
+    'commonEvent': EvalString_1
+}
+if (JsonEvalString_0) code.args = JSON.parse(JsonEvalString_0);
+code=JSON.stringify(code,null,2)+',\n';
 return code;
 */;
 
@@ -1236,15 +1226,16 @@ return code;
 */;
 
 openShop_s
-    :   '打开全局商店' IdString Newline
+    :   '启用全局商店' IdString '同时打开' Bool Newline
     
 
 /* openShop_s
 tooltip : 全局商店
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=openshop%EF%BC%9A%E6%89%93%E5%BC%80%E4%B8%80%E4%B8%AA%E5%85%A8%E5%B1%80%E5%95%86%E5%BA%97
 colour : this.dataColor
-default : ["shop1"]
-var code = '{"type": "openShop", "id": "'+IdString_0+'"},\n';
+default : ["shop1", true]
+Bool_0 = Bool_0 ? (', "open": true') : '';
+var code = '{"type": "openShop", "id": "'+IdString_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -2742,8 +2733,8 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'允许查看禁用商店'|'阻激夹域后禁用快捷商店'|'虚化前景层'|'检查控制台'
-    /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'enableDisabledShop', 'disableShopOnDamage', 'blurFg']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'|'虚化前景层'|'检查控制台'
+    /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage', 'blurFg']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -2916,20 +2907,12 @@ ActionParser.prototype.parse = function (obj,type) {
       var buildsub = function(obj,parser,next){
         var text_choices = null;
         for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
-          var text_effect = null;
-          choice.effect = choice.effect || [];
-          for (var jj=choice.effect.length-1,effect;effect=choice.effect[jj];jj--) {
-            text_effect = MotaActionBlocks['shopEffect'].xmlText([
-              parser.tryToUseEvFlag_e('idString_e', [effect.name]), effect.operator || '=',
-              MotaActionBlocks['evalString_e'].xmlText([effect.value]), text_effect
-            ]);
-          }
           text_choices=MotaActionBlocks['shopChoices'].xmlText([
-            choice.text,choice.need||'',choice.icon,choice.color,'rgba('+choice.color+')',choice.condition,text_effect,text_choices]);
+            choice.text,choice.need||'',choice.icon,choice.color,'rgba('+choice.color+')',choice.condition,parser.parseList(choice.action),text_choices]);
         }
         var info = parser.getTitleAndPosition(obj.text || '');
         return MotaActionBlocks['shopsub'].xmlText([
-          obj.id,obj[0],info[1],info[3],obj.textInList,obj.commonTimes,obj.mustEnable,obj.need,text_choices,next
+          obj.id,obj[0],info[1],info[3],obj.textInList,obj.mustEnable,obj.disablePreview,text_choices,next
         ]);
       }
       var buildcommentevent = function(obj,parser,next){
@@ -3279,7 +3262,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "openShop": // 打开一个全局商店
       this.next = MotaActionBlocks['openShop_s'].xmlText([
-        data.id,this.next]);
+        data.id,data.open||false,this.next]);
       break;
     case "disableShop": // 禁用一个全局商店
       this.next = MotaActionBlocks['disableShop_s'].xmlText([

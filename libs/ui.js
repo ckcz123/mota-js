@@ -443,12 +443,14 @@ ui.prototype._uievent_drawIcon = function (data) {
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
-    // 清除全部临时变量
-    Object.keys(core.status.hero.flags).forEach(function (name) {
-        if (name.startsWith("@temp@")) {
-            delete core.status.hero.flags[name];
-        }
-    });
+    if (core.status.hero && core.status.hero.flags) {
+        // 清除全部临时变量
+        Object.keys(core.status.hero.flags).forEach(function (name) {
+            if (name.startsWith("@temp@")) {
+                delete core.status.hero.flags[name];
+            }
+        });
+    }
     this.clearUI();
     core.maps.generateGroundPattern();
     core.updateStatusBar(true);
@@ -1552,11 +1554,9 @@ ui.prototype.drawSettings = function () {
 ////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function () {
     core.status.event.id = 'selectShop';
-    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
-        return shopList[shopId].visited || !shopList[shopId].mustEnable
-    });
+    var shopList = core.status.shops, keys = core.listShopIds();
     var choices = keys.map(function (shopId) {
-        return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
+        return {"text": shopList[shopId].textInList, "color": core.isShopVisited(shopId) ? null : "#999999"};
     });
     choices.push("返回游戏");
     this.drawChoices(null, choices);
@@ -2036,33 +2036,6 @@ ui.prototype.drawCenterFly = function () {
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
     core.drawTip("请确认当前中心对称飞行器的位置");
     return;
-}
-
-////// 绘制全局商店
-ui.prototype.drawShop = function (shopId) {
-    var shop = core.status.shops[shopId];
-    var actions = [], fromList = (core.status.event.data||{}).fromList, selection = core.status.event.selection;
-    if (core.status.event.data && core.status.event.data.actions) actions=core.status.event.data.actions;
-
-    core.ui.closePanel();
-    core.lockControl();
-    core.status.event.id = 'shop';
-    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions, 'fromList': fromList};
-    core.status.event.selection = selection;
-
-    var times = shop.times, need=core.calValue(shop.need, null, null, times);
-    var content = "\t["+shop.name+","+shop.icon+"]" + core.replaceText(shop.text, null, need, times);
-    var use = shop.use=='exp'?'经验':'金币';
-    var choices = [];
-    for (var i=0;i<shop.choices.length;i++) {
-        var choice = shop.choices[i];
-        var text = core.replaceText(choice.text, null, need, times);
-        if (choice.need != null)
-            text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
-        choices.push({"text": text, "color":shop.visited?null:"#999999"});
-    }
-    choices.push("离开");
-    core.ui.drawChoices(content, choices);
 }
 
 ////// 绘制浏览地图界面 //////

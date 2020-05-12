@@ -229,13 +229,15 @@ main.floors.sample1=
     "1,0": [
         {
             "type": "openShop",
-            "id": "moneyShop1"
+            "id": "shop1",
+            "open": true
         }
     ],
     "5,0": [
         {
             "type": "openShop",
-            "id": "expShop1"
+            "id": "shop2",
+            "open": true
         }
     ],
     "7,7": [

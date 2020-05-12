@@ -429,18 +429,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// if (id == 'lavaNet') core.removeBlock(x, y);
 
 },
-        "canUseQuickShop": function(shopId) {
-	// 当前能否使用某个快捷商店
-	// shopId：快捷商店ID
-	// 如果返回一个字符串，表示不能，字符串为不能使用的提示
-	// 返回null代表可以使用
-
-	// 检查当前楼层的canUseQuickShop选项是否为false
-	if (core.status.thisMap.canUseQuickShop === false)
-		return '当前楼层不能使用快捷商店。';
-
-	return null;
-}
     },
     "enemys": {
         "getSpecials": function () {
@@ -943,17 +931,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		'maps': core.maps.saveMap(),
 		'route': core.encodeRoute(core.status.route),
 		'values': values,
-		'shops': {},
 		'version': core.firstData.version,
 		"time": new Date().getTime()
 	};
-	// 设置商店次数
-	for (var shopId in core.status.shops) {
-		data.shops[shopId] = {
-			'times': core.status.shops[shopId].times || 0,
-			'visited': core.status.shops[shopId].visited || false
-		};
-	}
 
 	return data;
 },
@@ -963,13 +943,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置游戏和路线
 	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
 	core.status.route = core.decodeRoute(data.route);
-	// 加载商店信息
-	for (var shopId in core.status.shops) {
-		if (data.shops[shopId]) {
-			core.status.shops[shopId].times = data.shops[shopId].times;
-			core.status.shops[shopId].visited = data.shops[shopId].visited;
-		}
-	}
 	// 文字属性，全局属性
 	core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
 	var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);

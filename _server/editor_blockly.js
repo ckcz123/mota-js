@@ -975,65 +975,104 @@ function omitedcheckUpdateFunction(event) {
             }).sort();
         }
 
+        var allIds = core.getAllIconIds();
+        var allIconIds = allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
+          return core.statusBar.icons[x] instanceof Image;
+        }));
+        var allImages = Object.keys(core.material.images.images);
+        var allEnemys = Object.keys(core.material.enemys);
+        var allItems = Object.keys(core.material.items);
+        var allAnimates = Object.keys(core.material.animates);
+        var allBgms = Object.keys(core.material.bgms);
+        var allSounds = Object.keys(core.material.sounds);
+        var allShops = Object.keys(core.status.shops);
+        var allColors = ["aqua（湖绿色）", "black（黑色）", "blue（蓝色）", "fuchsia（红紫色）", "gray（灰色）", "green（绿色）", "lime（石灰色）",
+           "maroon（紫褐色）", "navy（深蓝色）", "gold（金色）",
+            "olive（黄褐色）", "orange（橙色）", "purple（紫色）", "red（红色）", "silver（银色）", "teal（蓝绿色）", "white（白色）", "yellow（黄色）"];
+
+        var filter = function (list, content) {
+          return list.filter(function (one) {
+            return one != content && one.startsWith(content);
+          }).sort();
+        }
+
         // 对任意图块提供补全
         if ((type == 'text_1_s' && name == 'EvalString_1') || (type == 'autoText_s' && name == 'EvalString_1')
           || (type == 'choices_s' && name == 'IdString_0') || (type == 'choicesContext' && name == 'IdString_0')
           || (type == 'closeDoor_s' && name == 'IdString_0') || (type == 'setBlock_s' && name == 'EvalString_0')
           || (type == 'setBgFgBlock_s' && name == 'EvalString_0') || (type == 'drawIcon_s' && name == 'IdString_0')
           ) {
-          return core.getAllIconIds().filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allIds, content);
         }
 
         // 对怪物ID提供补全
         if ((type == 'idString_3_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
-          return Object.keys(core.material.enemys).filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allEnemys, content);
         }
 
         // 对道具ID进行补全
         if ((type == 'useItem_s' || type == 'loadEquip_s') && name == 'IdString_0') {
-          return Object.keys(core.material.items).filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allItems, content);
         }
 
         // 对图片名进行补全
         if ((type == 'showImage_s' || type == 'showImage_1_s' || type == 'showGif_s' || type == 'setHeroIcon_s'
           || type == 'follow_s' || type == 'unfollow_s' || type == 'drawImage_s' || type == 'drawImage_1_s') && name == 'EvalString_0') {
-          return Object.keys(core.material.images.images).filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allImages, content);
         }
 
         // 对动画进行补全
         if (type == 'animate_s' && name == 'IdString_0') {
-          return Object.keys(core.material.animates).filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allAnimates, content);
         }
 
         // 对音乐进行补全
         if ((type == 'playBgm_s' || type == 'loadBgm_s' || type == 'freeBgm_s') && name == 'EvalString_0') {
-          return Object.keys(core.material.bgms).filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allBgms, content);
         }
 
         // 对音效进行补全
         if (type == 'playSound_s' && name == 'EvalString_0') {
-          return Object.keys(core.material.sounds).filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allSounds, content);
         }
 
         // 对全局商店进行补全
         if ((type == 'openShop_s' || type == 'disableShop_s') && name == 'IdString_0') {
-          return Object.keys(core.status.shops).filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+          return filter(allShops, content);
+        }
+
+        // 对\f进行自动补全
+        index = Math.max(content.lastIndexOf("\f["), content.lastIndexOf("\\f["));
+        if (index >= 0) {
+          if (content.charAt(index) == '\\') index++;
+          var after = content.substring(index + 2);
+          if (after.indexOf(",") < 0 && after.indexOf("]") < 0) {
+            return filter(allImages, after);
+          }
+        }
+
+        // 对\\i进行补全
+        index = content.lastIndexOf("\\i[");
+        if (index >= 0) {
+          var after = content.substring(index + 3);
+          if (after.indexOf("]") < 0) {
+            return filter(allIconIds, after);
+          }
+        }
+
+        // 对\r进行补全
+        index = Math.max(content.lastIndexOf("\r["), content.lastIndexOf("\\r["));
+        if (index >= 0) {
+          if (content.charAt(index) == '\\') index++;
+          var after = content.substring(index + 2);
+          if (after.indexOf("]") < 0) {
+            return filter(allColors, after);
+          }
+        }
+
+        // 对\进行补全！
+        if (content.charAt(content.length - 1) == '\\') {
+          return ["n（换行）", "f（立绘）", "r（变色）", "i（图标）", "z（暂停打字）", "t（标题图标）", "b（对话框）", "c（字体大小）", "d（粗体）", "e（斜体）"];
         }
 
         return [];
@@ -1143,6 +1182,8 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
             autoFirst: true,
             replace: function (text) {
                 text = text.toString();
+                var index = text.indexOf("（");
+                if (index >= 0) text = text.substring(0, index);
                 var value = this.input.value, index = this.input.selectionEnd;
                 if (index == null) index = value.length;
                 if (index < awesomplete.prefix.length) index = awesomplete.prefix.length;

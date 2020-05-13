@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 control.js：游戏主要逻辑控制
 主要负责status相关内容，以及各种变量获取/存储
@@ -22,9 +24,8 @@ control.prototype._init = function () {
     this.registerAnimationFrame("animate", true, this._animationFrame_animate);
     this.registerAnimationFrame("heroMoving", true, this._animationFrame_heroMoving);
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
-    this.registerAnimationFrame("tips", true, this._animateFrame_tips);
+    this.registerAnimationFrame("tip", true, this._animateFrame_tip);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
-    this.registerAnimationFrame("checkConsoleOpened", true, this._animationFrame_checkConsoleOpened);
     // --- 注册系统的replay
     this.registerReplayAction("move", this._replayAction_move);
     this.registerReplayAction("item", this._replayAction_item);
@@ -181,7 +182,7 @@ control.prototype._animationFrame_animate = function (timestamp) {
 control.prototype._animationFrame_heroMoving = function (timestamp) {
     if (core.status.heroMoving <= 0) return;
     // 换腿
-    if (timestamp - core.animateFrame.moveTime > (core.values.moveSpeed||100)) {
+    if (timestamp - core.animateFrame.moveTime > core.values.moveSpeed) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
@@ -283,46 +284,35 @@ control.prototype._animationFrame_weather_fog = function () {
     }
 }
 
-control.prototype._animateFrame_tips = function (timestamp) {
-    var tips = core.animateFrame.tips;
-    if (timestamp - tips.time <= 30) return;
-    var delta = timestamp - tips.time;
-    tips.time = timestamp;
-    if (tips.list.length == 0) return;
+control.prototype._animateFrame_tip = function (timestamp) {
+    if (core.animateFrame.tip == null) return;
+    var tip = core.animateFrame.tip;
+    if (timestamp - tip.time <= 30) return;
+    var delta = timestamp - tip.time;
+    tip.time = timestamp;
 
-    var currentOffset = Math.max(tips.offset - 5, 0), firstOffset = null;
-    var currList = [];
     core.setFont('data', "16px Arial");
     core.setTextAlign('data', 'left');
-    core.clearMap('data', 0, 0, this.PIXEL, tips.lastSize * 50);
-    tips.lastLength = tips.list.length;
-
-    while (tips.list.length > 0) {
-        var one = tips.list.shift();
-        core.ui._drawTip_drawOne(one, currentOffset);
-        if (one.stage == 1) {
-            one.opacity += 0.05;
-            if (one.opacity >= 0.7) one.stage = 2;
-        } else if (one.stage == 2) {
-            one.time += delta;
-            if (one.time >= 2000) one.stage = 3;
-        } else one.opacity -= 0.05;
-        if (one.opacity > 0) {
-            currList.push(one);
-            if (firstOffset == null) firstOffset = currentOffset;
+    core.clearMap('data', 0, 0, core.__PIXELS__, 50);
+    core.ui._drawTip_drawOne(tip);
+    if (tip.stage == 1) {
+        tip.opacity += 0.05;
+        if (tip.opacity >= 0.6) {
+            tip.stage = 2;
+            tip.displayTime = 0;
         }
-        currentOffset += 50;
+    } else if (tip.stage == 2) {
+        tip.displayTime += delta;
+        if (tip.displayTime >= 1000) tip.stage = 3;
+    } else tip.opacity -= 0.05;
+
+    if (tip.opacity <= 0) {
+        core.animateFrame.tip = null;
     }
-    tips.list = currList;
-    tips.offset = firstOffset || 0;
 }
 
 control.prototype._animationFrame_parallelDo = function (timestamp) {
     core.control.controldata.parallelDo(timestamp);
-}
-
-control.prototype._animationFrame_checkConsoleOpened = function (timestamp) {
-    if (core.consoleOpened()) core.setFlag('__consoleOpened__', true);
 }
 
 // ------ 标题界面的处理 ------ //
@@ -399,7 +389,7 @@ control.prototype._initStatistics = function (totalTime) {
             'hp': 0,
             "battle": 0,
             'money': 0,
-            'experience': 0,
+            'exp': 0,
             'battleDamage': 0,
             'poisonDamage': 0,
             'extraDamage': 0,
@@ -498,7 +488,7 @@ control.prototype._setAutomaticRoute_isMoving = function (destX, destY) {
                     core.control.tryMoveDirectly(destX, destY);
                 }
                 core.status.automaticRoute.moveDirectly = false;
-            }, core.values.moveSpeed || 100);
+            }, core.values.moveSpeed);
         }
         return true;
     }
@@ -614,7 +604,7 @@ control.prototype.setHeroMoveInterval = function (callback) {
             core.moveOneStep(core.nextX(), core.nextY());
             if (callback) callback();
         }
-    }, (core.values.moveSpeed||100) / 8 * toAdd / core.status.replay.speed);
+    }, core.values.moveSpeed / 8 * toAdd / core.status.replay.speed);
 }
 
 ////// 每移动一格后执行的事件 //////
@@ -666,10 +656,9 @@ control.prototype._moveAction_moving = function (callback) {
         // 执行该点事件
         if (!hasTrigger)
             core.events._trigger(nowx, nowy);
-        core.updateStatusBar();
 
         // 检查该点是否是滑冰
-        if (core.getBgNumber() == 167) {
+        if (core.onSki()) {
             core.insertAction("滑冰事件", null, null, null, true);
         }
 
@@ -755,7 +744,7 @@ control.prototype.waitHeroToStop = function(callback) {
                 core.setHeroLoc('direction', lastDirection);
             core.drawHero();
             callback();
-        }, 30);
+        }, core.status.replay.speed == 24 ? 0 : 30);
     }
 }
 
@@ -837,14 +826,14 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
         "status": status,
         "index": index++,
     });
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         drawObjs.push({
             "img": core.material.images.images[t.name],
             "width": core.material.images.images[t.name].width/4,
             "height": core.material.images.images[t.name].height/4,
             "heroIcon": heroIconArr[t.direction],
-            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*offset),
-            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*offset),
+            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*Math.abs(offset)),
+            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*Math.abs(offset)),
             "status": t.stop?"stop":status,
             "index": index++
         });
@@ -909,7 +898,7 @@ control.prototype.setViewport = function (x, y) {
 
 ////// 移动视野范围 //////
 control.prototype.moveViewport = function (steps, time, callback) {
-    time = time || core.values.moveSpeed || 300;
+    time = time || core.values.moveSpeed;
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right'].indexOf(t)>=0;
     });
@@ -959,7 +948,7 @@ control.prototype.nearHero = function (x, y, n) {
 ////// 聚集跟随者 //////
 control.prototype.gatherFollowers = function () {
     var x=core.getHeroLoc('x'), y=core.getHeroLoc('y'), dir=core.getHeroLoc('direction');
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         t.x = x;
         t.y = y;
         t.stop = true;
@@ -969,7 +958,7 @@ control.prototype.gatherFollowers = function () {
 
 ////// 更新跟随者坐标 //////
 control.prototype.updateFollowers = function () {
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         if (!t.stop) {
             t.x += core.utils.scan[t.direction].x;
             t.y += core.utils.scan[t.direction].y;
@@ -977,7 +966,7 @@ control.prototype.updateFollowers = function () {
     })
 
     var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
-    (core.status.hero.followers||[]).forEach(function (t) {
+    core.status.hero.followers.forEach(function (t) {
         t.stop = true;
         var dx = nowx - t.x, dy = nowy - t.y;
         for (var dir in core.utils.scan) {
@@ -1010,6 +999,8 @@ control.prototype.checkBlock = function () {
             core.updateStatusBar();
             core.events.lose();
             return;
+        } else {
+            core.updateStatusBar();
         }
     }
     this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
@@ -1019,9 +1010,9 @@ control.prototype.checkBlock = function () {
 control.prototype._checkBlock_disableQuickShop = function () {
     // 禁用快捷商店
     if (core.flags.disableShopOnDamage) {
-        for (var shopId in core.status.shops) {
-            core.status.shops[shopId].visited = false;
-        }
+        Object.keys(core.status.shops).forEach(function (shopId) {
+            core.setShopVisited(shopId, false);
+        });
     }
 }
 
@@ -1030,7 +1021,7 @@ control.prototype._checkBlock_snipe = function (snipe) {
     if (!snipe || snipe.length == 0) return;
     var actions = [];
     snipe.forEach(function (t) {
-        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": true, "async": true});
+        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": true, "async": true});
     });
     actions.push({"type": "waitAsync"});
     core.insertAction(actions);
@@ -1042,12 +1033,14 @@ control.prototype._checkBlock_ambush = function (ambush) {
     // 捕捉效果
     var actions = [];
     ambush.forEach(function (t) {
-        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 500, "keep": false, "async":true});
+        actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": false, "async":true});
     });
     actions.push({"type": "waitAsync"});
     // 强制战斗
     ambush.forEach(function (t) {
-        actions.push({"type": "battle", "id": t[2]});
+        actions.push({"type": "function", "function": "function() { "+
+            "core.battle('" + t[2] + "', " + t[0]+ "," + t[1] + ", true, core.doAction); "+
+            "}", "async": true});
     });
     core.insertAction(actions);
 }
@@ -1440,12 +1433,14 @@ control.prototype._replayAction_item = function (action) {
     if (action.indexOf("item:")!=0) return false;
     var itemId = action.substring(5);
     if (!core.canUseItem(itemId)) return false;
-    if (core.material.items[itemId].hideInReplay) {
+    if (core.material.items[itemId].hideInReplay || core.status.replay.speed == 24) {
         core.useItem(itemId, false, core.replay);
         return true;
     }
-    var tools = Object.keys(core.status.hero.items.tools).sort();
-    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
     var index, per = core.__SIZE__-1;
     if ((index=tools.indexOf(itemId))>=0) {
         core.status.event.data = {"toolsPage": Math.floor(index/per)+1, "constantsPage":1};
@@ -1471,7 +1466,7 @@ control.prototype._replayAction_equip = function (action) {
     var index = ownEquipment.indexOf(equipId), per = core.__SIZE__-1;
     if (index<0) return false;
     core.status.route.push(action);
-    if (core.material.items[equipId].hideInReplay) {
+    if (core.material.items[equipId].hideInReplay || core.status.replay.speed == 24) {
         core.loadEquip(equipId, core.replay);
         return true;
     }
@@ -1491,6 +1486,10 @@ control.prototype._replayAction_unEquip = function (action) {
     if (!core.isset(equipType)) return false;
     core.ui.drawEquipbox(equipType);
     core.status.route.push(action);
+    if (core.status.replay.speed == 24) {
+        core.unloadEquip(equipType, core.replay);
+        return true;
+    }
     setTimeout(function () {
         core.ui.closePanel();
         core.unloadEquip(equipType, core.replay);
@@ -1504,6 +1503,11 @@ control.prototype._replayAction_fly = function (action) {
     var toIndex=core.floorIds.indexOf(floorId);
     if (!core.canUseItem('fly')) return false;
     core.ui.drawFly(toIndex);
+    if (core.status.replay.speed == 24) {
+        if (!core.flyTo(floorId, core.replay))
+            core.control._replay_error(action);
+        return true;
+    }
     setTimeout(function () {
         if (!core.flyTo(floorId, core.replay))
             core.control._replay_error(action);
@@ -1513,36 +1517,13 @@ control.prototype._replayAction_fly = function (action) {
 
 control.prototype._replayAction_shop = function (action) {
     if (action.indexOf("shop:")!=0) return false;
-    var sps=action.substring(5).split(":");
-    var shopId=sps[0], selections=sps[1].split("");
-    if (selections.length == 0) return false;
-    var shop=core.status.shops[shopId];
-    if (!shop || !shop.visited) return false;
-    // --- 判定commonEvent或item
-    if (shop.commonEvent || shop.item) {
-        core.openShop(shopId, false);
-        setTimeout(core.replay);
+    var shopId = action.substring(5);
+    if (core.canUseQuickShop(shopId) != null || !core.canOpenShop(shopId)) {
+        this._replay_error(shopId);
         return true;
     }
-    var choices = shop.choices;
-    core.status.event.selection = parseInt(selections.shift());
-    core.events.openShop(shopId, false);
-    var topIndex = core.__HALF_SIZE__ - parseInt(choices.length / 2) + (core.status.event.ui.offset || 0);
-    var shopInterval = setInterval(function () {
-        if (!core.actions._clickShop(core.__HALF_SIZE__, topIndex+core.status.event.selection)) {
-            clearInterval(shopInterval);
-            core.control._replay_error(action);
-            return;
-        }
-        if (selections.length==0) {
-            clearInterval(shopInterval);
-            core.actions._clickShop(core.__HALF_SIZE__, topIndex+choices.length);
-            core.replay();
-            return;
-        }
-        core.status.event.selection = parseInt(selections.shift());
-        core.events.openShop(shopId, false);
-    }, core.control.__replay_getTimeout());
+    core.openShop(shopId, false);
+    core.replay();
     return true;
 }
 
@@ -1550,14 +1531,14 @@ control.prototype._replayAction_turn = function (action) {
     if (action != 'turn' && action.indexOf('turn:') != 0) return false;
     if (action == 'turn') core.turnHero();
     else core.turnHero(action.substring(5));
-    setTimeout(core.replay);
+    core.replay();
     return true;
 }
 
 control.prototype._replayAction_getNext = function (action) {
     if (action != "getNext") return false;
     if (!core.getNextItem()) return false;
-    setTimeout(core.replay);
+    core.replay();
     return true;
 }
 
@@ -1574,6 +1555,11 @@ control.prototype._replayAction_moveDirectly = function (action) {
     var x=parseInt(pos[0]), y=parseInt(pos[1]);
     var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
     if (!core.moveDirectly(x, y)) return false;
+    if (core.status.replay.speed == 24) {
+        core.replay();
+        return true;
+    }
+
     core.ui.drawArrow('ui', 32*nowx+16-core.bigmap.offsetX, 32*nowy+16-core.bigmap.offsetY,
         32*x+16-core.bigmap.offsetX, 32*y+16-core.bigmap.offsetY, '#FF0000', 3);
     setTimeout(function () {
@@ -1586,7 +1572,7 @@ control.prototype._replayAction_moveDirectly = function (action) {
 control.prototype._replayAction_key = function (action) {
     if (action.indexOf("key:") != 0) return false;
     core.actions.keyUp(parseInt(action.substring(4)), false, true);
-    setTimeout(core.replay);
+    core.replay();
     return true;
 }
 
@@ -1604,9 +1590,15 @@ control.prototype.autosave = function (removeLast) {
     if (core.saves.autosave.data == null) {
         core.saves.autosave.data = [];
     }
-    core.saves.autosave.data.push(core.saveData());
+    core.saves.autosave.data.splice(core.saves.autosave.now, 0, core.saveData());
+    core.saves.autosave.now += 1;
     if (core.saves.autosave.data.length > core.saves.autosave.max) {
-        core.saves.autosave.data.shift();
+        if (core.saves.autosave.now < core.saves.autosave.max / 2)
+            core.saves.autosave.data.pop();
+        else {
+            core.saves.autosave.data.shift();
+            core.saves.autosave.now=core.saves.autosave.now-1;
+        }
     }
     core.saves.autosave.updated = true;
     core.saves.ids[0] = true;
@@ -1625,7 +1617,7 @@ control.prototype.checkAutosave = function () {
     if (autosave.data == null || !autosave.updated || !autosave.storage) return;
     autosave.updated = false;
     if (autosave.data.length >= 1) {
-        core.setLocalForage("autoSave", autosave.data[autosave.data.length - 1]);
+        core.setLocalForage("autoSave", autosave.data[autosave.now - 1]);
     }
 }
 
@@ -1634,6 +1626,7 @@ control.prototype.doSL = function (id, type) {
     switch (type) {
         case 'save': this._doSL_save(id); break;
         case 'load': this._doSL_load(id, this._doSL_load_afterGet); break;
+        case 'reload': this._doSL_reload(id, this._doSL_load_afterGet); break;
         case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
         case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
     }
@@ -1645,7 +1638,7 @@ control.prototype._doSL_save = function (id) {
     if (core.status.event.interval != null)
         core.setFlag("__events__", core.status.event.interval);
     core.setLocalForage("save"+id, core.saveData(), function() {
-        core.saves.saveIndex=id;
+        core.saves.saveIndex = id;
         core.setLocalStorage('saveIndex', core.saves.saveIndex);
         // 恢复事件
         if (!core.events.recoverEvents(core.status.event.interval))
@@ -1666,9 +1659,15 @@ control.prototype._doSL_save = function (id) {
 
 control.prototype._doSL_load = function (id, callback) {
     if (id == 'autoSave' && core.saves.autosave.data != null) {
-        var data = core.saves.autosave.data.pop();
-        if (core.saves.autosave.data.length == 0) {
-            core.saves.autosave.data.push(core.clone(data));
+        core.saves.autosave.now -= 1;
+        var data = core.saves.autosave.data.splice(core.saves.autosave.now, 1)[0];
+        if (core.isPlaying() && !core.status.gameOver) {
+            core.control.autosave(0);
+            core.saves.autosave.now -= 1;
+        }
+        if (core.saves.autosave.now == 0) {
+            core.saves.autosave.data.unshift(core.clone(data));
+            core.saves.autosave.now += 1;
         }
         callback(id, data);
     }
@@ -1679,6 +1678,7 @@ control.prototype._doSL_load = function (id, callback) {
                 if (!(core.saves.autosave.data instanceof Array)) {
                     core.saves.autosave.data = [core.saves.autosave.data];
                 }
+                core.saves.autosave.now = core.saves.autosave.data.length;
                 return core.control._doSL_load(id, callback);
             }
             callback(id, data);
@@ -1690,21 +1690,27 @@ control.prototype._doSL_load = function (id, callback) {
     return;
 }
 
+control.prototype._doSL_reload = function (id, callback) {
+    if (core.saves.autosave.data != null && core.saves.autosave.now < core.saves.autosave.data.length) {
+        var data = core.saves.autosave.data.splice(core.saves.autosave.now, 1)[0];
+        core.control.autosave(false);
+        callback(id, data);
+    }
+    return;
+}
+
 control.prototype._doSL_load_afterGet = function (id, data) {
     if (!data) return alert("无效的存档");
     var _replay = function () {
         core.startGame(data.hard, data.hero.flags.__seed__, core.decodeRoute(data.route));
     };
-    if (core.flags.checkConsole && data.hashCode != null && data.hashCode != core.hashCode(data.hero)) {
-        core.myconfirm("存档校验失败，请勿修改存档文件！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。", _replay);
-        return;
-    }
     if (data.version != core.firstData.version) {
         core.myconfirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。", _replay);
         return;
     }
     core.ui.closePanel();
     core.loadData(data, function() {
+        core.removeFlag('__fromLoad__');
         core.drawTip("读档成功");
         if (id!="autoSave") {
             core.saves.saveIndex=id;
@@ -1868,6 +1874,7 @@ control.prototype.getSave = function (index, callback) {
                     if (!(core.saves.autosave.data instanceof Array)) {
                         core.saves.autosave.data = [core.saves.autosave.data];
                     }
+                    core.saves.autosave.now = core.saves.autosave.data.length;
                 }
                 callback(core.saves.autosave.data);
             }, function(err) {
@@ -1982,7 +1989,6 @@ control.prototype._updateFavoriteSaves = function () {
 ////// 设置勇士属性 //////
 control.prototype.setStatus = function (name, value) {
     if (!core.status.hero) return;
-    if (name == 'exp') name = 'experience';
     if (name == 'x' || name == 'y' || name == 'direction')
         this.setHeroLoc(name, value);
     else
@@ -1999,7 +2005,6 @@ control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
         return this.getHeroLoc(name);
-    if (name == 'exp') name = 'experience';
     return core.status.hero[name];
 }
 
@@ -2051,14 +2056,7 @@ control.prototype.getHeroLoc = function (name) {
     return core.status.hero.loc[name];
 }
 
-////// 获得某个属性的中文名 //////
-control.prototype.getStatusName = function (name) {
-    var map = {
-        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
-        atk: "攻击", def: "防御", mdef: "魔防", money: "金币", exp: "经验", experience: "经验", steps: "步数"
-    };
-    return map[name] || name;
-}
+
 
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function (lv) {
@@ -2294,6 +2292,7 @@ control.prototype.pauseBgm = function () {
     if (main.mode!='play')return;
     try {
         if (core.musicStatus.playingBgm) {
+            core.musicStatus.pauseTime = core.material.bgms[core.musicStatus.playingBgm].currentTime;
             core.material.bgms[core.musicStatus.playingBgm].pause();
             core.musicStatus.playingBgm = null;
         }
@@ -2306,10 +2305,11 @@ control.prototype.pauseBgm = function () {
 }
 
 ////// 恢复背景音乐的播放 //////
-control.prototype.resumeBgm = function () {
+control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode!='play')return;
     try {
-        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm || main.startBgm);
+        core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm || main.startBgm,
+            resumeTime ? core.musicStatus.pauseTime : 0);
     }
     catch (e) {
         console.log("无法恢复BGM");
@@ -2604,20 +2604,25 @@ control.prototype._shouldDisplayStatus = function(id) {
         }
         return toDraw;
     }
+    var obj = {};
+    core.flags.statusBarItems.forEach(function (v) { obj[v] = true; })
     switch (id) {
-        case 'floor': return core.flags.enableFloor;
-        case 'name': return core.flags.enableName;
-        case 'lv': return core.flags.enableLv;
-        case 'hpmax': return core.flags.enableHPMax;
-        case 'mana': return core.flags.enableMana;
-        case 'mdef': return core.flags.enableMDef;
-        case 'money': return core.flags.enableMoney;
-        case 'experience': return core.flags.enableExperience && !core.flags.levelUpLeftMode;
-        case 'up': return core.flags.enableLevelUp;
-        case 'skill': return core.flags.enableSkill;
-        case 'key': return core.flags.enableKeys;
-        case 'pzf': return core.flags.enablePZF;
-        case 'debuff': return core.flags.enableDebuff;
+        case 'floor': return obj.enableFloor;
+        case 'name': return obj.enableName;
+        case 'lv': return obj.enableLv;
+        case 'hp': return obj.enableHP;
+        case 'hpmax': return obj.enableHPMax;
+        case 'mana': return obj.enableMana;
+        case 'atk': return obj.enableAtk;
+        case 'def': return obj.enableDef;
+        case 'mdef': return obj.enableMDef;
+        case 'money': return obj.enableMoney;
+        case 'exp': return obj.enableExp && !obj.levelUpLeftMode;
+        case 'up': return obj.enableLevelUp;
+        case 'skill': return obj.enableSkill;
+        case 'key': return obj.enableKeys;
+        case 'pzf': return obj.enablePZF;
+        case 'debuff': return obj.enableDebuff;
         default: return true;
     }
 }
@@ -2812,6 +2817,14 @@ control.prototype._resize_status = function (obj) {
     }
     for (var i = 0; i < core.dom.statusTexts.length; ++i) {
         core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
+    }
+    // keys
+    if (core.flags.statusBarItems.indexOf('enableGreenKey')>=0) {
+        core.dom.keyCol.style.fontSize = '0.75em';
+        core.statusBar.greenKey.style.display = '';
+    } else {
+        core.dom.keyCol.style.fontSize = '';
+        core.statusBar.greenKey.style.display = 'none';
     }
 }
 

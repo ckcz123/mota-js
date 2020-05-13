@@ -39,7 +39,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// core.plugin.drawLight('ui', 0.95, [[25,11,46]]); // 在ui层绘制全图不透明度0.95，其中在(25,11)点存在一个半径为46的灯光效果。
 	// core.plugin.drawLight('test', 0.2, [[25,11,46,0.1]]); // 创建一个test图层，不透明度0.2，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。
 	// core.plugin.drawLight('test2', 0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 创建test2图层，且存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。
-	// core.plugin.drawLight('xxx', 0.3, [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，且40%后才开始衰减。
+	// core.plugin.drawLight('xxx', 0.3, [[25,11,46],[105,121,88,0.2]], 0.4); // 存在两个灯光效果，它们在内圈40%范围内保持全亮，40%后才开始衰减。
 	this.drawLight = function (name, color, lights, lightDec) {
 
 		// 清空色调层；也可以修改成其它层比如animate/weather层，或者用自己创建的canvas
@@ -85,6 +85,142 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
 	}
 },
+    "shop": function () {
+	// 【全局商店】相关的功能
+	// 
+	// 打开一个全局商店
+	// shopId：要打开的商店id；noRoute：是否不计入录像
+	this.openShop = function (shopId, noRoute) {
+		var shop = core.status.shops[shopId];
+		// Step 1: 检查能否打开此商店
+		if (!this.canOpenShop(shopId)) {
+			core.drawTip("该商店尚未开启");
+			return false;
+		}
+
+		// Step 2: （如有必要）记录打开商店的脚本事件
+		if (!noRoute) {
+			core.status.route.push("shop:" + shopId);
+		}
+
+		// Step 3: 检查道具商店 or 公共事件
+		if (shop.item) {
+			if (core.openItemShop) {
+				core.openItemShop(shopId);
+			} else {
+				core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
+			}
+			return;
+		}
+		if (shop.commonEvent) {
+			core.insertAction({ "type": "insert", "name": shop.commonEvent, "args": shop.args });
+			return;
+		}
+
+		// Step 4: 执行标准公共商店    
+		core.insertAction(this._convertShop(shop));
+		return true;
+	}
+
+	////// 将一个全局商店转变成可预览的公共事件 //////
+	this._convertShop = function (shop) {
+		return [{
+			"type": "while",
+			"condition": "true",
+			"data": [
+				// 检测能否访问该商店
+				{
+					"type": "if",
+					"condition": "core.isShopVisited('" + shop.id + "')",
+					"true": [
+						// 可以访问，直接插入执行效果
+						{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', false) }" },
+					],
+					"false": [
+						// 不能访问的情况下：检测能否预览
+						{
+							"type": "if",
+							"condition": shop.disablePreview,
+							"true": [
+								// 不可预览，提示并退出
+								"当前无法访问该商店！",
+								{ "type": "break" },
+							],
+							"false": [
+								// 可以预览：将商店全部内容进行替换
+								{ "type": "tip", "text": "当前处于预览模式，不可购买" },
+								{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', true) }" },
+							]
+						}
+					]
+				}
+			]
+		}];
+	}
+
+	this._convertShop_replaceChoices = function (shopId, previewMode) {
+		var shop = core.status.shops[shopId];
+		var choices = (shop.choices || []).filter(function (choice) {
+			if (choice.condition == null || choice.condition == '') return true;
+			try { return core.calValue(choice.condition); } catch (e) { return true; }
+		}).map(function (choice) {
+			var ableToBuy = core.calValue(choice.need);
+			return {
+				"text": choice.text,
+				"icon": choice.icon,
+				"color": ableToBuy && !previewMode ? choice.color : [153, 153, 153, 1],
+				"action": ableToBuy && !previewMode ? choice.action : [
+					{ "type": "tip", "text": previewMode ? "预览模式下不可购买" : "购买条件不足" }
+				]
+			};
+		}).concat({ "text": "离开", "action": [{ "type": "break" }] });
+		core.insertAction({ "type": "choices", "text": shop.text, "choices": choices });
+	}
+
+	/// 是否访问过某个快捷商店
+	this.isShopVisited = function (id) {
+		if (!core.hasFlag("__shops__")) core.setFlag("__shops__", {});
+		var shops = core.getFlag("__shops__");
+		if (!shops[id]) shops[id] = {};
+		return shops[id].visited;
+	}
+
+	/// 当前应当显示的快捷商店列表
+	this.listShopIds = function () {
+		return Object.keys(core.status.shops).filter(function (id) {
+			return core.isShopVisited(id) || !core.status.shops[id].mustEnable;
+		});
+	}
+
+	/// 是否能够打开某个商店
+	this.canOpenShop = function (id) {
+		if (this.isShopVisited(id)) return true;
+		var shop = core.status.shops[id];
+		if (shop.item || shop.commonEvent || shop.mustEnable) return false;
+		return true;
+	}
+
+	/// 启用或禁用某个快捷商店
+	this.setShopVisited = function (id, visited) {
+		if (!core.hasFlag("__shops__")) core.setFlag("__shops__", {});
+		var shops = core.getFlag("__shops__");
+		if (!shops[id]) shops[id] = {};
+		if (visited) shops[id].visited = true;
+		else delete shops[id].visited;
+	}
+
+	/// 能否使用快捷商店
+	this.canUseQuickShop = function (id) {
+		// 如果返回一个字符串，表示不能，字符串为不能使用的提示
+		// 返回null代表可以使用
+
+		// 检查当前楼层的canUseQuickShop选项是否为false
+		if (core.status.thisMap.canUseQuickShop === false)
+			return '当前楼层不能使用快捷商店。';
+		return null;
+	}
+
+},
     "itemShop": function () {
 	// 道具商店相关的插件
 	// 可在全塔属性-全局商店中使用「道具商店」事件块进行编辑（如果找不到可以在入口方块中找）
@@ -97,6 +233,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	var totalPage = 0;
 	var totalMoney = 0;
 	var list = [];
+	var shopInfo = null; // 商店信息
+	var choices = []; // 商店选项
 
 	var bigFont = core.ui._buildFont(20, false),
 		middleFont = core.ui._buildFont(18, false);
@@ -107,16 +245,15 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// Step 1: 背景和固定的几个文字
 		core.ui._createUIEvent();
 		core.clearMap('uievent');
-		core.ui._uievent_drawSelector({ "code": 1 });
-		core.ui._uievent_drawSelector({ "code": 2 });
+		core.ui._clearUIEventSelector([1, 2]);
 		core.setTextAlign('uievent', 'left');
 		core.setTextBaseline('uievent', 'top');
 		core.fillRect('uievent', 0, 0, 480, 480, 'black');
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 0, width: 480, height: 64 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 64, width: 360, height: 64 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 0, y: 128, width: 360, height: 352 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 360, y: 64, width: 120, height: 64 });
-		core.ui._uievent_drawBackground({ background: 'winskin.png', x: 360, y: 128, width: 120, height: 352 });
+		core.drawWindowSkin('winskin.png', 'uievent', 0, 0, 480, 64);
+		core.drawWindowSkin('winskin.png', 'uievent', 0, 64, 360, 64);
+		core.drawWindowSkin('winskin.png', 'uievent', 0, 128, 360, 352);
+		core.drawWindowSkin('winskin.png', 'uievent', 360, 64, 120, 64);
+		core.drawWindowSkin('winskin.png', 'uievent', 360, 128, 120, 352);
 		core.setFillStyle('uievent', 'white');
 		core.setStrokeStyle('uievent', 'white');
 		core.fillText("uievent", "购买", 32, 84, 'white', bigFont);
@@ -138,14 +275,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (selectItem != null) {
 			core.setTextAlign('uievent', 'center');
 			core.fillText("uievent", type == 0 ? "买入个数" : "卖出个数", 420, 360, null, bigFont);
-			core.fillText("uievent", "◀   " + selectCount + "   ▶", 420, 390);
+			core.fillText("uievent", "<   " + selectCount + "   >", 420, 390);
 			core.fillText("uievent", "确定", 420, 420);
 		}
 
 		// Step 2：获得列表并展示
-		var choices = core.status.shops[shopId].choices;
 		list = choices.filter(function (one) {
-			if (one.condition != null) {
+			if (one.condition != null && one.condition != '') {
 				try { if (!core.calValue(one.condition)) return false; } catch (e) {}
 			}
 			return (type == 0 && one.money != null) || (type == 1 && one.sell != null);
@@ -181,7 +317,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				var text = core.material.items[item.id].text || "该道具暂无描述";
 				try { text = core.replaceText(text); } catch (e) {}
 				for (var fontSize = 20; fontSize >= 8; fontSize -= 2) {
-					var config = { left: 10, fontSize: fontSize, maxWidth: 467, lineHeight: 1.4 };
+					var config = { left: 10, fontSize: fontSize, maxWidth: 467 };
 					var height = core.getTextContentHeight(text, config);
 					if (height <= 60) {
 						config.top = (64 - height) / 2;
@@ -319,7 +455,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 		if (px >= 262 && px <= 322 && py >= 81 && py <= 112) // 离开
 			return core.insertAction({ "type": "break" });
-		// ◀，▶
+		// <，>
 		if (px >= 370 && px <= 395 && py >= 392 && py <= 415)
 			return _add(item, -1);
 		if (px >= 445 && px <= 470 && py >= 302 && py <= 415)
@@ -330,11 +466,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		// 上一页/下一页
 		if (px >= 70 && px <= 130 && py >= 450) {
-			if (page > 1) selectItem -= 7
+			if (page > 1) {
+				selectItem -= 7;
+				selectCount = 0;
+			}
 			return;
 		}
 		if (px >= 230 && px <= 290 && py >= 450) {
-			if (page < totalPage) selectItem = Math.min(selectItem + 7, list.length - 1);
+			if (page < totalPage) {
+				selectItem = Math.min(selectItem + 7, list.length - 1);
+				selectCount = 0;
+			}
 			return;
 		}
 
@@ -363,6 +505,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		page = 0;
 		selectItem = null;
 		selectCount = 0;
+		shopInfo = flags.__shops__[shopId];
+		if (shopInfo.choices == null) shopInfo.choices = core.clone(core.status.shops[shopId].choices);
+		choices = shopInfo.choices;
+
 		core.insertAction([{
 				"type": "while",
 				"condition": "true",
@@ -372,42 +518,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					{ "type": "function", "function": "function() { core.performItemShopAction(); }" }
 				]
 			},
-			{ "type": "function", "function": "function () { " +
-					"core.deleteCanvas('uievent'); " +
-					"core.ui._uievent_drawSelector({ \"code\": 1 }); " +
-					"core.ui._uievent_drawSelector({ \"code\": 2 }); " +
-					"}" }
+			{
+				"type": "function",
+				"function": "function () { core.deleteCanvas('uievent'); core.ui._clearUIEventSelector([1, 2]); }"
+			}
 		]);
-	}
-
-	// Write item number to save
-	core.control.saveData = function () {
-		var data = this.controldata.saveData();
-		for (var shopId in core.status.shops) {
-			if (core.status.shops[shopId].item) {
-				data.shops[shopId].choices = core.status.shops[shopId].choices.map(function (t) {
-					return {
-						number: t.number,
-						money_count: t.money_count || 0,
-						sell_count: t.sell_count || 0
-					}
-				});
-			}
-		}
-		return data;
-	}
-
-	core.control.loadData = function (data, callback) {
-		this.controldata.loadData(data, callback);
-		for (var shopId in data.shops) {
-			if (data.shops[shopId].choices) {
-				for (var i = 0; i < data.shops[shopId].choices.length; ++i) {
-					core.status.shops[shopId].choices[i].number = data.shops[shopId].choices[i].number;
-					core.status.shops[shopId].choices[i].money_count = data.shops[shopId].choices[i].money_count;
-					core.status.shops[shopId].choices[i].sell_count = data.shops[shopId].choices[i].sell_count;
-				}
-			}
-		}
 	}
 
 },
@@ -552,8 +667,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	};
 
 	// 更变楼层的行为追加，重置镜头
-	events.prototype.changingFloor = function (floorId, heroLoc, fromLoad) {
-		this.eventdata.changingFloor(floorId, heroLoc, fromLoad);
+	events.prototype.changingFloor = function (floorId, heroLoc) {
+		this.eventdata.changingFloor(floorId, heroLoc);
 		core.plugin.camera.resetCamera();
 	};
 

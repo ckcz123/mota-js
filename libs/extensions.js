@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 extensions.js：负责拓展插件
  */

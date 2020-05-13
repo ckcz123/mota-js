@@ -19,7 +19,6 @@ HTML5魔塔是使用画布（canvas）来绘制，存在若干个图层，它们
 - animate：动画层；主要用来绘制动画。 (z-index: 70)
 - weather**[D]**：天气层；主要用来绘制天气（雨/雪/雾） (z-index: 80)
 - route**[D]**：路线层；主要用来绘制勇士的行走路线图。 (z-index: 95)
-- paint**[D]**：绘图层；主要用来进行绘图模式。（z-index: 95)
 - curtain：色调层；用来控制当前楼层的画面色调 (z-index: 125)
 - image1\~50**[D]**：图片层；用来绘制图片等操作。（z-index: 100+code, 101~150）
 - uievent**[D]**：自定义UI绘制层；用来进行自定义UI绘制等操作。（z-index：135，可以通过事件设置该值）
@@ -495,11 +494,8 @@ this.myfunc = function(x) {
 3. 在脚本编辑-updateStatusBar中可以直接替换技能栏的显示内容
 
 ```
-	// 设置技能栏
-	if (core.flags.enableSkill) {
-		// 替换成你想显示的内容，比如你定义的一个flag:abc。
-		core.setStatusBarInnerHTML('skill', core.getFlag("abc", 0));
-	}
+	// 替换成你想显示的内容，比如你定义的一个flag:abc。
+	core.setStatusBarInnerHTML('skill', core.getFlag("abc", 0));
 ```
 
 ### 额外新增新项目
@@ -569,22 +565,17 @@ core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
 在脚本编辑-updateStatusBar中，可以对状态栏显示内容进行修改。
 
 ``` js
-// 设置魔力值
-if (core.flags.enableMana) {
-    // status:manamax 只有在非负时才生效。
-    if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
-        core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
-        core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
-    }
-    else {
-        core.setStatusBarInnerHTML("mana", core.status.hero.mana);
-    }
+// 设置魔力值; status:manamax 只有在非负时才生效。
+if (core.status.hero.manamax != null && core.status.hero.manamax >= 0) {
+    core.status.hero.mana = Math.min(core.status.hero.mana, core.status.hero.manamax);
+    core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.status.hero.manamax);
+}
+else {
+    core.setStatusBarInnerHTML("mana", core.status.hero.mana);
 }
 // 设置技能栏
-if (core.flags.enableSkill) {
-    // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名
-    core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
-}
+// 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名
+core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
 ```
 
 ### 技能的触发
@@ -629,8 +620,8 @@ else { // 关闭技能
 
 ``` js
 case 87: // W：开启技能“二倍斩”
-    // 检测技能栏是否开启，是否拥有“二倍斩”这个技能道具
-    if (core.flags.enableSkill && core.hasItem('skill1')) {
+    // 是否拥有“二倍斩”这个技能道具
+    if (core.hasItem('skill1')) {
         core.status.route.push("key:87");
         core.useItem('skill1', true);
     }
@@ -669,7 +660,7 @@ if (core.getFlag('skill', 0)==1) { // 开启了技能1
 
 ``` js
 // 战后的技能处理，比如扣除魔力值
-if (core.flags.enableSkill) {
+if (core.flags.statusBarItems.indexOf('enableSkill')>=0) {
     // 检测当前开启的技能类型
     var skill = core.getFlag('skill', 0);
     if (skill==1) { // 技能1：二倍斩
@@ -704,13 +695,13 @@ if (core.flags.enableSkill) {
 - **`flag:heroIcon`**: 当前的勇士行走图名称。
 - **`flag:saveEquips`**: 快速换装时保存的套装。
 - **`flag:__visited__`**: 当前访问过的楼层。
-- **`flag:__atk_buff__`**, **`flag:__def_buff__`**, **`flag:__mdef_buff__`**: 当前攻防魔防的实际计算比例加成。
+- **`flag:__atk_buff__`**, **`flag:__def_buff__`**, **`flag:__mdef_buff__`**: 当前攻防护盾的实际计算比例加成。
 - **`flag:__color__`**, **`flag:__weather__`**, **`flag:__volume__`**: 当前的画面色调、天气和音量。
 - **`flag:__events__`**: 当前保存的事件列表，读档时会恢复（适用于在事件中存档）
 - **`flag:textAttribute`**, **`flag:globalAttribute`**, **`flag:globalFlags`**: 当前的剧情文本属性，当前的全局属性，当前的全局开关。
 - **`flag:cannotMoveDirectly`**, **`flag:__noClickMove__`**: 当前是否不允许瞬间移动，当前用户是否开启了单击瞬移。
 - **`flag:hideStatusBar`**, **`flag:showToolbox`**: 是否隐藏状态栏，是否显示工具栏。
-- **`flag:debug`**, **`flag:__consoleOpened__`**: 当前是否开启了调试模式，是否开启了控制台。
+- **`flag:debug`**: 当前是否开启了调试模式。
 - **`flag:__seed__`**, **`flag:__rand__`**: 伪随机数生成种子和当前的状态
 
 ==========================================================================================

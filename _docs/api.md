@@ -99,9 +99,9 @@ core.status.hero    （勇士信息；此项和全塔属性中的hero大体是�
     core.status.hero.mana    当前魔力值
     core.status.hero.atk     当前攻击力
     core.status.hero.def     当前防御力
-    core.status.hero.mdef    当前魔防值
+    core.status.hero.mdef    当前护盾值
     core.status.hero.money   当前金币值
-    core.status.hero.experience    当前经验值
+    core.status.hero.exp    当前经验值
     core.status.hero.loc     当前的位置信息
     core.status.hero.equipment     当前装上的装备
     core.status.hero.items   当前拥有的道具信息
@@ -747,11 +747,6 @@ core.getDamage(enemy, x, y, floorId)
 如果没有破防或无法战斗则返回null，否则返回具体的伤害值。
 
 
-core.getExtraDamage(enemy, x, y, floorId)
-获得某个怪物的额外伤害值（不可被魔防减伤）。
-目前暂时只包含了仇恨和固伤两者，如有需要可复写该函数。
-
-
 core.getDamageString(enemy, x, y, floorId)
 获得某个怪物伤害字符串和颜色信息，以便于在地图上绘制显伤。
 
@@ -814,12 +809,7 @@ core.startGame(hard, seed, route, callback)
 开始新游戏。
 hard为难度字符串，会被设置为core.status.hard。
 seed为开始时要设置的的种子，route为要开始播放的录像，callback为回调函数。
-该函数将重置整个游戏，调用setInitData，执行startText事件，上传游戏人数统计信息等。
-
-
-core.setInitData()
-根据难度分歧来初始化难度，包括设置flag:hard，设置初始属性等。
-该函数实际被转发到了脚本编辑中，执行脚本编辑中的内容。
+该函数将重置整个游戏，执行startText事件，上传游戏人数统计信息等。
 
 
 core.win(reason, norank)
@@ -1041,7 +1031,7 @@ core.follow(name) / core.unfollow(name)
 跟随和取消跟随都会调用core.gatherFollowers()来聚集所有的跟随者。
 
 
-core.setValue(name, value, prefix) / core.addValue(name, value, prefix)
+core.setValue(name, operator, value, prefix) / core.addValue(name, value, prefix)
 设置/增减某个数值。name可以是status:xxx，item:xxx或flag:xxx。
 value可以是一个表达式，将调用core.calValue()计算。prefix为前缀，独立开关使用，脚本中一般忽略。
 
@@ -1141,10 +1131,6 @@ core.tryUseItem(itemId)
 对于怪物手册和楼传器，将分别调用core.openBook()和core.useFly()函数。
 对于中心对称飞行器，则会调用core.drawCenterFly()函数。
 对于其他的道具，将检查是否拥有，能否使用，并且进行使用。
-
-
-core.afterUseBomb()
-使用炸弹或圣锤后的事件。实际被转发到了脚本编辑中。
 ```
 
 ## icons.js
@@ -1241,7 +1227,7 @@ core.unloadEquip(equipType, callback)
 
 core.compareEquipment(compareEquipId, beComparedEquipId)
 比较两个套装的差异。
-此函数将对所有的勇士属性包括生命魔力攻防魔防金币等进行比较。
+此函数将对所有的勇士属性包括生命魔力攻防护盾金币等进行比较。
 如果存在差异的，将作为一个对象返回其差异内容。
 
 
@@ -1531,13 +1517,13 @@ core.removeBlock(x, y, floorId)
 如果存在自定义事件，则简单的禁用它，以供以后可能的启用事件。
 
 
-core.removeBlockById(index, floorId)
+core.removeBlockByIndex(index, floorId)
 每个楼层的图块存成一个数组，index即为该数组中的索引，每个索引对应该地图中的一个图块
 根据索引从地图的block数组中尽可能删除一个图块。floorId可不填或null表示当前楼层。
 
 
-core.removeBlockByIds(floorId, ids)
-ids为由索引组成的数组，如[0,1]等
+core.removeBlockByIndexes(indexes, floorId)
+indexes为由索引组成的数组，如[0,1]等
 根据索引数组从地图的block数组中尽可能删除一系列图块。floorId可不填或null表示当前楼层。
 
 
@@ -1624,7 +1610,7 @@ core.drawBoxAnimate()
 绘制UI层的box动画，如怪物手册和对话框中的帧动画等。
 
 
-core.drawAnimate(name, x, y, callback)
+core.drawAnimate(name, x, y, alignWindow, callback)
 绘制一个动画。name为动画名，x和y为绘制的基准坐标，callback为绘制完毕的回调函数。
 此函数将播放动画音效，并异步开始绘制该动画。
 此函数会返回一个动画id，可以通过core.stopAnimate()立刻停止该动画的播放。
@@ -1894,8 +1880,8 @@ core.drawStatistics()
 绘制数据统计。将从脚本编辑中获得要统计的数据列表，再遍历所有地图进行统计。
 
 
-core.drawAbout() / core.drawPaint() / core.drawHelp()
-绘制关于界面，绘图模式，帮助界面。
+core.drawAbout() / core.drawHelp()
+绘制关于界面，帮助界面。
 
 // ------ 动态创建画布相关的API ------ //
 
@@ -2105,10 +2091,6 @@ core.encodeBase64(str) / core.decodeBase64(str)
 可用于解压缩录像数据
 
 
-core.convertBase(str, fromBase, toBase)
-任意进制转换。此函数可能执行的非常慢，慎用。
-
-
 core.rand(num)
 使用伪种子生成伪随机数。该随机函数能被录像支持。
 num如果设置大于0，则生成一个[0, num-1]之间的数；否则生成一个0到1之间的浮点数。
@@ -2162,11 +2144,6 @@ callback为用户点击确认或取消后的回调。
 
 core.showWithAnimate(obj, speed, callback) / core.hideWithAnimate(obj, speed, callback)
 动画淡入或淡出一个对象。
-
-
-core.consoleOpened()
-检测当前的控制台是否处于开启状态。仅在全塔属性中的检查控制台开关开启时有效。
-此函数有可能会存在误伤行为，即没开过控制台仍认为开启过。
 
 
 core.hashCode(obj)

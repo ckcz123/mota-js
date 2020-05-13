@@ -14,23 +14,29 @@ var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"_range": "typeof(thiseval)=='string'",
 				"_data": "自定义插件"
 			},
+			"shop": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string'",
+				"_data": "全局商店"
+			},
 			"drawLight": {
 				"_leaf": true,
 				"_type": "textarea",
 				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "绘制灯光效果"
+				"_data": "灯光效果"
 			},
-			"drawItemShop": {
+			"itemShop": {
 				"_leaf": true,
 				"_type": "textarea",
 				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "道具商店插件"
+				"_data": "道具商店"
 			},
 			"smoothCamera": {
 				"_leaf": true,
 				"_type": "textarea",
 				"_range": "typeof(thiseval)=='string' || thiseval==null",
-				"_data": "平滑移动镜头效果"
+				"_data": "平滑移动镜头"
 			},
 		}
 		if (obj[key]) return obj[key];

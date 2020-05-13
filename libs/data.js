@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 "use strict";
 
 function data() {

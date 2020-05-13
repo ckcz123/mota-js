@@ -1,15 +1,15 @@
 main.floors.MT0=
 {
-"floorId": "MT0",
-"title": "主塔 0 层",
-"name": "0",
-"canFlyTo": true,
-"canUseQuickShop": true,
-"cannotViewMap": false,
-"defaultGround": "ground",
-"images": [],
-"item_ratio": 1,
-"map": [
+    "floorId": "MT0",
+    "title": "主塔 0 层",
+    "name": "0",
+    "canFlyTo": true,
+    "canUseQuickShop": true,
+    "cannotViewMap": false,
+    "defaultGround": "ground",
+    "images": [],
+    "item_ratio": 1,
+    "map": [
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
@@ -26,18 +26,21 @@ main.floors.MT0=
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0]
 ],
-"firstArrive": [],
-"parallelDo": "",
-"events": {},
-"changeFloor": {},
-"afterBattle": {},
-"afterGetItem": {},
-"afterOpenDoor": {},
-"cannotMove": {},
-"bgmap": [
+    "firstArrive": [],
+    "parallelDo": "",
+    "events": {},
+    "changeFloor": {},
+    "afterBattle": {},
+    "afterGetItem": {},
+    "afterOpenDoor": {},
+    "cannotMove": {},
+    "bgmap": [
 
 ],
-"fgmap": [
+    "fgmap": [
 
 ],
+    "width": 15,
+    "height": 15,
+    "autoEvent": {}
 }

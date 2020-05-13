@@ -24,7 +24,7 @@ except:
 	p("需要flask才可使用本服务。\n安装方式：%s install flask" % ("pip3" if isPy3 else "pip"))
 	exit(1)
 
-app = Flask(__name__, static_folder='')
+app = Flask(__name__, static_folder='__static__')
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 @app.after_request
@@ -45,7 +45,7 @@ def get_mimetype(path):
 	return mimetypes.guess_type(path)[0] or 'application/octet-stream'
 
 def get_file(path):
-	if not os.path.exists(path):
+	if not os.path.isfile(path):
 		abort(404)
 		return None
 	if not is_sub(path):
@@ -61,6 +61,12 @@ def root():
 
 @app.route('/<path:path>', methods=['GET'])
 def static_file(path):
+	if os.path.isdir(path): 
+		if not path.endswith('/'): path += '/'
+		path += 'index.html'
+	if not os.path.isfile(path):
+		abort(404)
+		return None
 	return Response(get_file(path), mimetype = get_mimetype(path))
 
 def process_request():

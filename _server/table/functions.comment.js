@@ -14,25 +14,19 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "重置整个游戏"
-				},
-				"setInitData": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "设置初始属性"
+					"_data": "重置游戏"
 				},
 				"win": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "游戏获胜事件"
+					"_data": "游戏获胜"
 				},
 				"lose": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "游戏失败事件"
+					"_data": "游戏失败"
 				},
 				"changingFloor": {
 					"_leaf": true,
@@ -56,55 +50,31 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "战前事件"
+					"_data": "战前判定"
 				},
 				"afterBattle": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "战后事件"
+					"_data": "战后脚本"
 				},
 				"afterOpenDoor": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "开门后事件"
+					"_data": "开门后脚本"
 				},
 				"afterGetItem": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "获得道具后事件"
-				},
-				"afterChangeLight": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "改变亮灯事件"
+					"_data": "道具后脚本"
 				},
 				"afterPushBox": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "推箱子事件"
-				},
-				"afterUseBomb": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "炸弹事件"
-				},
-				"afterPassNet": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "经过特殊地形后的事件"
-				},
-				"canUseQuickShop": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "能否用快捷商店"
+					"_data": "推箱子后"
 				}
 			}
 		},
@@ -115,19 +85,19 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "怪物特殊属性定义"
+					"_data": "怪物特殊属性"
 				},
 				"getEnemyInfo": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "获得怪物真实属性"
+					"_data": "怪物真实属性"
 				},
 				"getDamageInfo": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "获得战斗伤害信息"
+					"_data": "战斗伤害信息"
 				}
 			}
 		},
@@ -144,6 +114,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
+					"_docs": "点击状态栏",
 					"_data": "状态栏点击事件，仅在开启自绘状态栏时生效"
 				}
 			}
@@ -179,19 +150,19 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "每一步后的操作"
+					"_data": "每步后操作"
 				},
 				"moveDirectly": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "瞬间移动处理"
+					"_data": "瞬间移动"
 				},
 				"parallelDo": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "并行事件处理"
+					"_data": "并行脚本"
 				}
 			}
 		},
@@ -208,13 +179,13 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "地图数据统计"
+					"_data": "数据统计"
 				},
 				"drawAbout": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "绘制关于界面"
+					"_data": "关于界面"
 				}
 			}
 		}

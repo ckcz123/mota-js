@@ -481,6 +481,9 @@ actions.prototype._sys_onmove_choices = function (x, y) {
         case 'gameInfo':
             this._onMoveChoices(x, y);
             return true;
+        case 'confirmBox':
+            this._onMoveConfirmBox(x, y);
+            return true;
         default:
             break;
     }
@@ -920,6 +923,22 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
         if (core.status.event.selection == 1 && core.status.event.data.no) {
             core.status.event.selection = null;
             core.status.event.data.no();
+            return;
+        }
+    }
+}
+
+////// 鼠标在确认框上移动时 //////
+actions.prototype._onMoveConfirmBox = function (x, y) {
+    if (y == this.HSIZE + 1) {
+        if (x == this.HSIZE - 2 || x == this.HSIZE - 1) {
+            core.status.event.selection = 0;
+            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            return;
+        }
+        if (x == this.HSIZE + 2 || x == this.HSIZE + 1) {
+            core.status.event.selection = 1;
+            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
             return;
         }
     }

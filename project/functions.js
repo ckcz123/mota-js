@@ -1190,7 +1190,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 						if (value > 0) {
 							damage[loc] = (damage[loc] || 0) + value;
 							type[loc] = type[loc] || {};
-							type[loc]["激光伤害"] = true;
+							type[loc]["夹击伤害"] = true;
 						}
 					}
 				}

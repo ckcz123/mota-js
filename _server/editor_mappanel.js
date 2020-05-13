@@ -48,7 +48,7 @@ editor_mappanel_wrapper = function (editor) {
         if (editor.uivalues.bindSpecialDoor.loc != null) return;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
-        editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x]);
+        editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x], true);
         return;
     }
 
@@ -514,7 +514,7 @@ editor_mappanel_wrapper = function (editor) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
         var thisevent = editor[editor.layerMod][editor.pos.y][editor.pos.x];
-        editor.setSelectBoxFromInfo(thisevent);
+        editor.setSelectBoxFromInfo(thisevent, true);
     }
 
     /**

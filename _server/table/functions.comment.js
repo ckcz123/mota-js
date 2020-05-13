@@ -70,23 +70,11 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "道具后脚本"
 				},
-				"afterChangeLight": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "改变亮灯后"
-				},
 				"afterPushBox": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
 					"_data": "推箱子后"
-				},
-				"afterPassNet": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "特殊地形后"
 				}
 			}
 		},

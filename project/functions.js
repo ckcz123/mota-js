@@ -405,10 +405,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	if (callback) callback();
 },
-        "afterChangeLight": function(x,y) {
-	// 改变亮灯之后，可以触发的事件
-
-},
         "afterPushBox": function () {
 	// 推箱子后的事件
 	if (core.searchBlock('box').length == 0) {
@@ -421,13 +417,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 		*/
 	}
-},
-        "afterPassNet": function (x, y, id) {
-	// 经过特殊地形后的事件；x和y为当前坐标，id为当前的图块id
-
-	// 这是个一次性血网的例子
-	// if (id == 'lavaNet') core.removeBlock(x, y);
-
 },
     },
     "enemys": {
@@ -1077,7 +1066,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			enemy = core.material.enemys[id];
 
 		// 血网
-		if (id == 'lavaNet' && block.event.trigger == 'passNet' && !core.hasItem('shoes')) {
+		if (id == 'lavaNet' && !core.hasItem('shoes')) {
 			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
 			type[loc] = "血网伤害";
 		}

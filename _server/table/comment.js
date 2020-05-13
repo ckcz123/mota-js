@@ -278,9 +278,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"values": [
 							"null",
 							"openDoor",
-							"passNet",
-							"changeLight",
 							"pushBox",
+							"ski",
 							"custom"
 						]
 					},

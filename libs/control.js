@@ -658,7 +658,7 @@ control.prototype._moveAction_moving = function (callback) {
             core.events._trigger(nowx, nowy);
 
         // 检查该点是否是滑冰
-        if (core.getBgNumber() == 167) {
+        if (core.onSki()) {
             core.insertAction("滑冰事件", null, null, null, true);
         }
 

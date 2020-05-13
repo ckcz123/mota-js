@@ -596,7 +596,7 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans) {
             if (!core.inArray(canMoveArray[x][y], direction)) continue;
             var nx = x + core.utils.scan[direction].x, ny = y + core.utils.scan[direction].y, nindex = nx + "," + ny;
             if (visited[nindex]) continue;
-            if (bgMap[ny][nx] == 167) continue;
+            if (core.onSki(bgMap[ny][nx])) continue;
             if (!this._canMoveDirectly_checkNextPoint(blocksObj, nx, ny)) continue;
             visited[nindex] = visited[now] + 1;
             // if (nx == ex && ny == ey) return visited[nindex];

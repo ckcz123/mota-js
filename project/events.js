@@ -163,7 +163,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 			},
 			{
 				"type": "if",
-				"condition": "core.getBgNumber() == 167",
+				"condition": "core.onSki()",
 				"true": [
 					{
 						"type": "if",

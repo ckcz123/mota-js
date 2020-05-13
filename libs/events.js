@@ -317,7 +317,7 @@ events.prototype._trigger = function (x, y) {
         eval(block.event.script);
     } catch (e) { main.log(e); }
 
-    if (block.event.trigger) {
+    if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
 
@@ -708,33 +708,6 @@ events.prototype.visitFloor = function (floorId) {
     core.getFlag("__visited__")[floorId] = true;
 }
 
-events.prototype._sys_passNet = function (data, callback) {
-    this.passNet(data);
-    if (callback) callback();
-}
-
-////// 经过一个路障 //////
-events.prototype.passNet = function (data) {
-    if (!core.hasItem('shoes')) {
-        // 血网 lavaNet 移动到 checkBlock 中处理
-        if (data.event.id == 'poisonNet') { // 毒网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[0]});
-        }
-        else if (data.event.id == 'weakNet') { // 衰网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[1]});
-        }
-        else if (data.event.id == 'curseNet') { // 咒网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[2]});
-        }
-    }
-    this.afterPassNet(data.x, data.y, data.event.id);
-    core.updateStatusBar();
-}
-
-events.prototype.afterPassNet = function (x, y, id) {
-    if (this.eventdata.afterPassNet) this.eventdata.afterPassNet(x, y, id);
-}
-
 events.prototype._sys_pushBox = function (data, callback) {
     this.pushBox(data);
     if (callback) callback();
@@ -749,7 +722,15 @@ events.prototype.pushBox = function (data) {
         nx = data.x + core.utils.scan[direction].x, ny = data.y + core.utils.scan[direction].y;
 
     // 检测能否推上去
-    if (!core.canMoveHero() || !core.canMoveHero(data.x, data.y, direction)) return;
+    if (!core.canMoveHero()) return;
+    var canGoDeadZone = core.flags.canGoDeadZone;
+    core.flags.canGoDeadZone = false;
+    if (!core.canMoveHero(data.x, data.y, direction)) {
+        core.flags.canGoDeadZone = canGoDeadZone;
+        return;
+    }
+    core.flags.canGoDeadZone = canGoDeadZone;
+
     var nextId = core.getBlockId(nx, ny);
     if (nextId != null && nextId != 'flower') return;
 
@@ -784,20 +765,15 @@ events.prototype.afterPushBox = function () {
     return this.eventdata.afterPushBox();
 }
 
-events.prototype._sys_changeLight = function (data, callback) {
-    core.events.changeLight(data.event.id, data.x, data.y);
-    if (callback) callback();
-}
-
-////// 改变亮灯（感叹号）的事件 //////
-events.prototype.changeLight = function (id, x, y) {
-    if (id != null && id != 'light') return;
-    core.setBlock(core.getNumberById('darkLight'), x, y);
-    return this.eventdata.afterChangeLight(x, y);
-}
-
 events.prototype._sys_ski = function (data, callback) {
     core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
+}
+
+/// 当前是否在冰上
+events.prototype.onSki = function (number) {
+    if (number == null) number = core.getBgNumber();
+    var block = core.getBlockByNumber(number);
+    return block && block.event && block.event.trigger == 'ski';
 }
 
 events.prototype._sys_action = function (data, callback) {

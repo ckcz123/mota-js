@@ -360,23 +360,56 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
     if (!ctx) return [text];
     if (font) core.setFont(name, font);
 
+    // 不能在行首的标点
+    var forbidStart = "）)】》＞﹞>)]»›〕〉}］」｝〗』" + "，。？！：；·…,.?!:;、……~&@#～＆＠＃";
+    // 不能在行尾的标点
+    var forbidEnd = "（(【《＜﹝<([«‹〔〈{［「｛〖『";
+
     var contents = [];
     var last = 0;
+    var forceChangeLine = false; // 是否强制换行，避免多个连续forbidStart存在
     for (var i = 0; i < text.length; i++) {
         if (text.charAt(i) == '\n') {
             contents.push(text.substring(last, i));
             last = i + 1;
+            forceChangeLine = false;
         }
         else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
             contents.push(text.substring(last, i));
             last = i + 2;
+            forceChangeLine = false;
         }
         else {
+            var curr = text.charAt(i);
             var toAdd = text.substring(last, i + 1);
             var width = core.calWidth(name, toAdd);
             if (maxWidth && width > maxWidth) {
+                // --- 当前应当换行，然而还是检查一下是否是forbidStart
+                if (!forceChangeLine && forbidStart.indexOf(curr) >= 0) {
+                    forceChangeLine = true;
+                    continue;
+                }
                 contents.push(text.substring(last, i));
                 last = i;
+                forceChangeLine = false;
+            } else {
+                // --- 当前不应该换行；但是提前检查一下是否是行尾标点
+                var curr = text.charAt(i);
+                if (forbidEnd.indexOf(curr) >= 0 && i < text.length -1) {
+                    // 检查是否是行尾
+                    var nextcurr = text.charAt(i+1);
+                    // 确认不是手动换行
+                    if (nextcurr != '\n' && !(nextcurr == '\\' && text.charAt(i+2) == 'n')) {
+                        var toAdd = text.substring(last, i+2);
+                        var width = core.calWidth(name, toAdd);
+                        if (maxWidth && width > maxWidth) {
+                            // 下一项会换行，因此在此处换行
+                            contents.push(text.substring(last, i));
+                            last = i;
+                            forceChangeLine = false;
+                        }
+                    }
+                }
             }
         }
     }

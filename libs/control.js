@@ -990,7 +990,8 @@ control.prototype.checkBlock = function () {
     var damage = core.status.checkBlock.damage[loc];
     if (damage) {
         core.status.hero.hp -= damage;
-        core.drawTip("受到"+(core.status.checkBlock.type[loc]||"伤害")+damage+"点");
+        var text = (Object.keys(core.status.checkBlock.type[loc] || {}).join("，")) || "伤害";
+        core.drawTip("受到"+text+damage+"点");
         core.drawHeroAnimate("zone");
         this._checkBlock_disableQuickShop();
         core.status.hero.statistics.extraDamage += damage;
@@ -1268,7 +1269,7 @@ control.prototype.bookReplay = function () {
     if (core.isMoving() || core.status.replay.animate
         || (core.status.event.id && core.status.event.id != 'viewMaps'))
         return core.drawTip("请等待当前事件的处理结束");
-    if (!core.hasItem('book')) return core.drawTip('你没有怪物手册');
+    if (!core.hasItem('book')) return core.drawTip('你没有'+core.material.items['book'].name);
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')

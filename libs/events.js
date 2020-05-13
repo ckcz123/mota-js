@@ -2266,14 +2266,14 @@ events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
-        core.drawTip("只有在楼梯边才能使用传送器");
+        core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name);
         core.unLockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
     if (!core.canUseItem('fly')) {
-        core.drawTip("楼层传送器好像失效了");
+        core.drawTip(core.material.items['fly'].name + "好像失效了");
         core.unLockControl();
         core.status.event.data = null;
         core.status.event.id = null;

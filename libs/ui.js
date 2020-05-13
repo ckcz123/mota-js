@@ -2042,7 +2042,7 @@ ui.prototype.drawCenterFly = function () {
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
-    core.drawTip("请确认当前中心对称飞行器的位置");
+    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置");
     return;
 }
 
@@ -2101,7 +2101,7 @@ ui.prototype._drawMaps_drawHint = function () {
     core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - (32 * per + 48));
 
     core.fillText('ui', "退出 [ESC / ENTER]", this.HPIXEL, this.HPIXEL);
-    core.fillText('ui', "[X] 可查看怪物手册", this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
+    core.fillText('ui', "[X] 可查看" + core.material.items['book'].name, this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
 
     core.setTextBaseline('ui', 'alphabetic');
 }
@@ -2767,23 +2767,19 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
         }
         else text += "，";
         prev = obj.cls[key];
-        text+=core.ui._drawStatistics_getName(key)+value+"个";
+        var name = ((core.material.items[key] || (core.getBlockById(key) || {}).event)||{}).name || key;
+        text+=name+value+"个";
         if (obj.ext[key])
             text+="("+obj.ext[key]+")";
     })
     if (prev!="") text+="。";
 
-    text+="\n\n";
+    text+="\n";
     text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
         +core.formatBigNumber(data.add.atk)+"点，防御"
         +core.formatBigNumber(data.add.def)+"点，护盾"
         +core.formatBigNumber(data.add.mdef)+"点。";
     return text;
-}
-
-ui.prototype._drawStatistics_getName = function (key) {
-    return {"yellowDoor": "黄门", "blueDoor": "蓝门", "redDoor": "红门", "greenDoor": "绿门",
-            "steelDoor": "铁门"}[key] || core.material.items[key].name;
 }
 
 ////// 绘制“关于”界面 //////
@@ -2805,7 +2801,7 @@ ui.prototype.drawHelp = function () {
         core.drawText([
             "\t[键盘快捷键列表]"+
             "[CTRL] 跳过对话   [Z] 转向\n" +
-            "[X] 怪物手册   [G] 楼层传送\n" +
+            "[X] "+core.material.items['book'].name + "   [G] "+core.material.items['fly'].name+"\n" +
             "[A] 读取自动存档   [W] 撤销读取自动存档\n" + 
             "[S/D] 存读档页面   [SPACE] 轻按\n" +
             "[V] 快捷商店   [ESC] 系统菜单\n" +

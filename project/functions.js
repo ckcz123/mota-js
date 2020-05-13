@@ -29,7 +29,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 初始化怪物和道具
 	core.material.enemys = core.enemys.getEnemys();
 	core.material.items = core.items.getItems();
-	core.items._resetItems();
 	// 初始化全局数值和全局开关
 	core.values = core.clone(core.data.values);
 	for (var key in values || {})
@@ -811,22 +810,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		break;
 	case 49: // 快捷键1: 破
 		if (core.hasItem('pickaxe')) {
-			if (core.canUseItem('pickaxe')) {
-				core.status.route.push("key:49"); // 将按键记在录像中
-				core.useItem('pickaxe', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
-			} else {
-				core.drawTip('当前不能使用破墙镐');
-			}
+			core.status.route.push("key:49"); // 将按键记在录像中
+			core.useItem('pickaxe', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
 		}
 		break;
 	case 50: // 快捷键2: 炸
 		if (core.hasItem('bomb')) {
-			if (core.canUseItem('bomb')) {
-				core.status.route.push("key:50"); // 将按键记在录像中
-				core.useItem('bomb', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
-			} else {
-				core.drawTip('当前不能使用炸弹');
-			}
+			core.status.route.push("key:50"); // 将按键记在录像中
+			core.useItem('bomb', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
 		}
 		break;
 	case 51: // 快捷键3: 飞
@@ -1065,10 +1056,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			id = block.event.id,
 			enemy = core.material.enemys[id];
 
+		type[loc] = type[loc] || {};
+
 		// 血网
 		if (id == 'lavaNet' && !core.hasItem('shoes')) {
 			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
-			type[loc] = "血网伤害";
+			type[loc]["血网伤害"] = true;
 		}
 
 		// 领域
@@ -1090,7 +1083,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
 					if (!zoneSquare && Math.abs(dx) + Math.abs(dy) > range) continue;
 					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-					type[currloc] = "领域伤害";
+					type[currloc] = type[currloc] || {};
+					type[currloc]["领域伤害"] = true;
 				}
 			}
 		}
@@ -1104,7 +1098,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					currloc = nx + "," + ny;
 				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
 				damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-				type[currloc] = "阻击伤害";
+				type[currloc] = type[currloc] || {};
+				type[currloc]["阻击伤害"] = true;
 
 				var rdir = core.reverseDirection(dir);
 				// 检查下一个点是否存在事件（从而判定是否移动）
@@ -1125,14 +1120,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var currloc = nx + "," + y;
 				if (nx != x) {
 					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-					type[currloc] = "激光伤害";
+					type[currloc] = type[currloc] || {};
+					type[currloc]["激光伤害"] = true;
 				}
 			}
 			for (var ny = 0; ny < height; ny++) {
 				var currloc = x + "," + ny;
 				if (ny != y) {
 					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-					type[currloc] = "激光伤害";
+					type[currloc] = type[currloc] || {};
+					type[currloc]["激光伤害"] = true;
 				}
 			}
 		}
@@ -1192,7 +1189,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 						}
 						if (value > 0) {
 							damage[loc] = (damage[loc] || 0) + value;
-							type[loc] = "夹击伤害";
+							type[loc] = type[loc] || {};
+							type[loc]["激光伤害"] = true;
 						}
 					}
 				}

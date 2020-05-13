@@ -529,29 +529,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "楼传平面模式",
 					"_data": "传送器平面塔模式；此模式下楼层传送器将飞到上次离开该楼层的位置。"
 				},
-				"pickaxeFourDirections": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "四向破墙镐",
-					"_data": "使用破墙镐是否四个方向都破坏；如果false则只破坏面前的墙壁"
-				},
-				"bombFourDirections": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "四向炸弹",
-					"_data": "使用炸弹是否四个方向都会炸；如果false则只炸面前的怪物（即和圣锤等价）"
-				},
-				"snowFourDirections": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "四向破冰稿",
-					"_data": "使用冰冻徽章是否四个方向都会消除熔岩；如果false则只消除面前的熔岩"
-				},
-				"bigKeyIsBox": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_data": "如果此项为true，则视为钥匙盒，红黄蓝钥匙+1；若为false，则视为大黄门钥匙"
-				},
 				"steelDoorWithoutKey": {
 					"_leaf": true,
 					"_type": "checkbox",
@@ -563,12 +540,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_docs": "首次道具提示",
 					"_data": "首次获得道具是否提示"
-				},
-				"equipment": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "剑盾装备",
-					"_data": "剑和盾是否作为装备。如果此项为true，则作为装备，需要在装备栏使用，否则将直接加属性。"
 				},
 				"equipboxButton": {
 					"_leaf": true,

@@ -872,7 +872,7 @@ actions.prototype._clickCenterFly = function (x, y) {
             core.useItem('centerFly');
         }
         else {
-            core.drawTip('当前不能使用中心对称飞行器');
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
 }
@@ -884,7 +884,7 @@ actions.prototype._keyUpCenterFly = function (keycode) {
             core.useItem('centerFly');
         }
         else {
-            core.drawTip('当前不能使用中心对称飞行器');
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
 }

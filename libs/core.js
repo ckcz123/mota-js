@@ -277,7 +277,6 @@ core.prototype._init_flags = function () {
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
-    core.items._resetItems();
     core.material.icons = core.icons.getIcons();
 }
 

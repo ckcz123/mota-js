@@ -149,7 +149,6 @@ editor_blockly = function () {
       MotaActionBlocks['dowhile_s'].xmlText(),
       MotaActionBlocks['break_s'].xmlText(),
       MotaActionBlocks['continue_s'].xmlText(),
-      MotaActionBlocks['revisit_s'].xmlText(),
       MotaActionBlocks['exit_s'].xmlText(),
       MotaActionBlocks['trigger_s'].xmlText(),
       MotaActionBlocks['insert_1_s'].xmlText(),
@@ -242,30 +241,30 @@ editor_blockly = function () {
       }),
       '<label text="商店购买属性/钥匙"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "choices", "text": "\\t[老人,man]少年，你需要钥匙吗？\\n我这里有大把的！",
-        "choices": [
-            {"text": "黄钥匙（\\\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
-                {"type": "if", "condition": "status:money>=9+flag:shop_times",
-                    "true": [
-                        {"type": "setValue", "name": "status:money", "operator": "-=", "value": "9+flag:shop_times"},
-                        {"type": "setValue", "name": "item:yellowKey", "operator": "+=", "value": "1"},
-                    ],
-                    "false": [
-                        "\\t[老人,man]你的金钱不足！",
-                        {"type": "revisit"}
-                    ]
-                }
-            ]},
-            {"text": "蓝钥匙（\\\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
-            ]},
-            {"text": "离开", "action": [
-                {"type": "exit"}
-            ]}
-        ]
-    },
-    {"type": "setValue", "name": "flag:shop_times", "operator": "+=", "value": "1"},
-    {"type": "revisit"}
-      ], 'event'),  
+        {"type": "while", "condition": "true", "data": [
+          {"type": "choices", "text": "\\t[老人,man]少年，你需要钥匙吗？\\n我这里有大把的！",
+          "choices": [
+              {"text": "黄钥匙（\\\${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
+                  {"type": "if", "condition": "status:money>=9+flag:shop_times",
+                      "true": [
+                          {"type": "setValue", "name": "status:money", "operator": "-=", "value": "9+flag:shop_times"},
+                          {"type": "setValue", "name": "item:yellowKey", "operator": "+=", "value": "1"},
+                      ],
+                      "false": [
+                          "\\t[老人,man]你的金钱不足！",
+                          {"type": "continue"}
+                      ]
+                  }
+              ]},
+              {"text": "蓝钥匙（\\\${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
+              ]},
+              {"text": "离开", "action": [
+                  {"type": "break"}
+              ]}
+          ]
+        },
+        {"type": "setValue", "name": "flag:shop_times", "operator": "+=", "value": "1"}
+      ]}], 'event'),  
       '<label text="战前剧情"></label>',
       MotaActionFunctions.actionParser.parse({ 
         "trigger": "action", 
@@ -750,12 +749,12 @@ function omitedcheckUpdateFunction(event) {
         'hide_s',
         'setValue_s',
         'if_s',
+        'while_s',
         'battle_s',
         'openDoor_s',
         'choices_s',
         'setText_s',
         'exit_s',
-        'revisit_s',
         'sleep_s',
         'setBlock_s',
         'insert_1_s'

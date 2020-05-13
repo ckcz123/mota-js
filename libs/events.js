@@ -2063,13 +2063,6 @@ events.prototype._action_waitAsync = function (data, x, y, prefix) {
     }, 50);
 }
 
-events.prototype._action_revisit = function (data, x, y, prefix) {
-    var block = core.getBlock(x, y);
-    if (block != null && block.block.event.trigger == 'action')
-        this.setEvents(block.block.event.data);
-    core.doAction();
-}
-
 events.prototype._action_callBook = function (data, x, y, prefix) {
     if (core.isReplaying() || !core.hasItem('book')) {
         core.doAction();

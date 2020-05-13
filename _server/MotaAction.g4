@@ -336,7 +336,6 @@ action
     |   trigger_s
     |   insert_1_s
     |   insert_2_s
-    |   revisit_s
     |   exit_s
     |   setBlock_s
     |   showFloorImg_s
@@ -777,18 +776,6 @@ if (Event_List_0 && Event_List_0 !=='null')
     Event_List_0 = ', "which": "'+Event_List_0+'"';
 else Event_List_0 = '';
 var code = '{"type": "insert", "loc": ['+PosString_0+','+PosString_1+']'+Event_List_0+IdString_0+JsonEvalString_0+'},\n';
-return code;
-*/;
-
-revisit_s
-    :   '重启当前事件' Newline
-    
-
-/* revisit_s
-tooltip : revisit: 立即重启当前事件
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=revisit%EF%BC%9A%E7%AB%8B%E5%8D%B3%E9%87%8D%E5%90%AF%E5%BD%93%E5%89%8D%E4%BA%8B%E4%BB%B6
-colour : this.eventColor
-var code = '{"type": "revisit"},\n';
 return code;
 */;
 
@@ -3507,10 +3494,6 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
-        this.next]);
-      break;
-    case "revisit": // 立刻重新执行该事件
-      this.next = MotaActionBlocks['revisit_s'].xmlText([
         this.next]);
       break;
     case "callBook": // 呼出怪物手册

@@ -835,6 +835,7 @@ function omitedcheckUpdateFunction(event) {
         "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "setBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
+        "turnBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
         "move_s": ["PosString_0", "PosString_1"],
         "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
         "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],

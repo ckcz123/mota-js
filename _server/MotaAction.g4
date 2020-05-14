@@ -698,13 +698,13 @@ return code;
 */;
 
 hide_s
-    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool? Newline
+    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '同时删除' Bool '动画时间' IntString? '不等待执行完毕' Bool? Newline
     
 
 /* hide_s
-tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身,xy可用逗号分隔表示多个点
+tooltip : hide: 隐藏事件，同时可删除
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hide%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E5%90%AF%E7%94%A8%E4%BA%8B%E4%BB%B6%E7%A6%81%E7%94%A8
-default : ["","","","",false]
+default : ["","","",true,"",false]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -725,8 +725,9 @@ if (EvalString_0 && EvalString_1) {
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
-Bool_0 = Bool_0 ?', "async": true':'';
-var code = '{"type": "hide"'+floorstr+IdString_0+''+IntString_0+Bool_0+'},\n';
+Bool_0 = Bool_0 ?', "remove": true':'';
+Bool_1 = Bool_1 ?', "async": true':'';
+var code = '{"type": "hide"'+floorstr+IdString_0+Bool_0+IntString_0+Bool_1+'},\n';
 return code;
 */;
 
@@ -3091,7 +3092,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['hide_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time,data.async||false,this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.remove||false,data.time,data.async||false,this.next]);
       break;
     case "setBlock": // 设置图块
       data.loc=data.loc||[];

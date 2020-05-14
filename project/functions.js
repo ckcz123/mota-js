@@ -273,7 +273,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 删除该块
 	var guards = []; // 支援
 	if (x != null && y != null) {
-		core.removeBlock(x, y);
+		// 检查是否是重生怪物；如果是则仅隐藏不删除
+		if (core.hasSpecial(enemy.special, 23)) {
+			core.hideBlock(x, y);
+		} else {
+			core.removeBlock(x, y);
+		}
 		guards = core.getFlag("__guards__" + x + "_" + y, []);
 		core.removeFlag("__guards__" + x + "_" + y);
 	}

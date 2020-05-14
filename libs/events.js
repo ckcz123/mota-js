@@ -1251,14 +1251,12 @@ events.prototype._action_show = function (data, x, y, prefix) {
 events.prototype._action_hide = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     if (data.time > 0 && data.floorId == core.status.floorId) {
-        data.loc.forEach(function (t) {
-            core.hideBlock(t[0], t[1], data.floorId);
-        });
-        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'hide', data.time);
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, data.remove ? 'remove' : 'hide', data.time);
     }
     else {
         data.loc.forEach(function (t) {
-            core.removeBlock(t[0], t[1], data.floorId)
+            if (data.remove) core.removeBlock(t[0], t[1], data.floorId);
+            else core.hideBlock(t[0], t[1], data.floorId);
         });
         core.doAction();
     }
@@ -1268,6 +1266,14 @@ events.prototype._action_setBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
         core.setBlock(data.number, t[0], t[1], data.floorId);
+    });
+    core.doAction();
+}
+
+events.prototype._action_turnBlock = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.turnBlock(data.number, t[0], t[1], data.floorId);
     });
     core.doAction();
 }

@@ -1,4 +1,4 @@
-var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
+var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = 
 {
 	"greenSlime": {"name":"绿头怪","hp":100,"atk":120,"def":0,"money":1,"exp":1,"point":0,"special":[1,5,7,8]},
 	"redSlime": {"name":"红头怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[16,18],"value":10},
@@ -36,7 +36,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"poisonSkeleton": {"name":"紫骷髅","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"poisonBat": {"name":"紫蝙蝠","hp":100,"atk":120,"def":0,"money":14,"exp":0,"point":0,"special":[13]},
 	"steelRock": {"name":"铁面人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
-	"skeletonPriest": {"name":"骷髅法师","hp":100,"atk":100,"def":0,"money":0,"exp":0,"point":0,"special":[18],"value":20},
+	"skeletonPriest": {"name":"骷髅法师","hp":100,"atk":100,"def":0,"money":0,"exp":0,"point":0,"special":[18,23],"value":20},
 	"skeletonKing": {"name":"骷髅王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"skeletonWizard": {"name":"骷髅巫师","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"redSkeletonCaption": {"name":"骷髅武士","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},

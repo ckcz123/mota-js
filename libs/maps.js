@@ -1464,19 +1464,35 @@ maps.prototype.hideBlock = function (x, y, floorId) {
             core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
     }
 
-    block.block.disable = true;
+    core.hideBlockByIndex(block.index, floorId);
     core.updateStatusBar();
 }
 
-////// 将某个块从启用变成禁用状态 //////
+////// 根据图块的索引来隐藏图块 //////
+maps.prototype.hideBlockByIndex = function (index, floorId) {
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return;
+
+    var blocks = core.status.maps[floorId].blocks, block = blocks[index];
+    block.disable = true;
+}
+
+////// 一次性隐藏多个block //////
+maps.prototype.hideBlockByIndexes = function (indexes, floorId) {
+    indexes.sort(function (a, b) {
+        return b - a;
+    }).forEach(function (index) {
+        core.hideBlockByIndex(index, floorId);
+    });
+}
+
+////// 删除某个图块 //////
 maps.prototype.removeBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return false;
 
     var block = core.getBlock(x, y, floorId, true);
     if (block == null) return false; // 不存在
-
-    var index = block.index;
 
     // 删除动画，清除地图
     if (floorId == core.status.floorId) {
@@ -1487,8 +1503,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
             core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
     }
 
-    // 删除Index
-    core.removeBlockByIndex(index, floorId);
+    core.removeBlockByIndex(block.index, floorId);
     core.updateStatusBar();
     return true;
 }
@@ -1499,13 +1514,7 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
     if (!floorId) return;
 
     var blocks = core.status.maps[floorId].blocks, block = blocks[index];
-
-    if (this.canRemoveBlock(block, floorId)) { // 能否彻底删除该图块
-        blocks.splice(index, 1);
-    }
-    else {
-        block.disable = true;
-    }
+    blocks.splice(index, 1);
 }
 
 ////// 一次性删除多个block //////
@@ -1515,19 +1524,6 @@ maps.prototype.removeBlockByIndexes = function (indexes, floorId) {
     }).forEach(function (index) {
         core.removeBlockByIndex(index, floorId);
     });
-}
-
-////// 能否彻底从地图中删除一个图块 //////
-maps.prototype.canRemoveBlock = function (block, floorId) {
-    var x = block.x, y = block.y;
-    // 检查该点是否存在事件
-    if (core.floors[floorId].events[x + "," + y] || core.floors[floorId].changeFloor[x + "," + y])
-        return false;
-    // 检查是否存在重生
-    if (block.event && block.event.cls.indexOf('enemy') == 0 && core.hasSpecial(block.event.id, 23))
-        return false;
-
-    return true;
 }
 
 ////// 显示前景/背景地图 //////
@@ -1612,7 +1608,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
 
     var block = this.initBlock(x, y, number, true, core.floors[floorId]);
     if (block.id == 0 && !block.event.trigger) {
-        // 转变图块为0且该点无事件，视为隐藏
+        // 转变图块为0且该点无事件，视为删除
         core.removeBlock(x, y, floorId);
         return;
     }
@@ -1647,7 +1643,7 @@ maps.prototype.turnBlock = function (direction, x, y, floorId) {
     var id = core.getBlockId(x, y, floorId, true);
     var blockInfo = core.getBlockInfo(id);
     if (blockInfo == null) return;
-    var faceIds = blockInfo.faceIds;
+    var faceIds = blockInfo.faceIds || {};
     var currDirection = null;
     for (var dir in core.utils.scan) {
         if (faceIds[dir] == id) {
@@ -1962,24 +1958,23 @@ maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, an
 ////// 显示/隐藏某个块时的动画效果 //////
 maps.prototype.animateBlock = function (loc, type, time, callback) {
     if (core.status.replay.speed == 24) time = 1;
-    var isHide = type == 'hide';
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];
     // --- 检测所有是0的点
-    var list = this._animateBlock_getList(loc);
+    var list = this._animateBlock_getList(loc, type);
     if (list.length == 0) {
         if (callback) callback();
         return;
     }
-    this._animateBlock_drawList(list, isHide ? 1 : 0);
+    this._animateBlock_drawList(list, type != 'show' ? 1 : 0);
     time /= Math.max(core.status.replay.speed, 1)
-    this._animateBlock_doAnimate(loc, list, isHide, 10 / time, callback);
+    this._animateBlock_doAnimate(loc, list, type, 10 / time, callback);
 }
 
-maps.prototype._animateBlock_doAnimate = function (loc, list, isHide, delta, callback) {
-    var opacity = isHide ? 1 : 0;
+maps.prototype._animateBlock_doAnimate = function (loc, list, type, delta, callback) {
+    var opacity = type != 'show' ? 1 : 0;
     var animate = setInterval(function () {
-        opacity += isHide ? -delta : delta;
+        opacity += type != 'show' ? -delta : delta;
         core.maps._animateBlock_drawList(list, opacity);
         if (opacity >= 1 || opacity <= 0) {
             delete core.animateFrame.asyncId[animate];
@@ -1989,8 +1984,9 @@ maps.prototype._animateBlock_doAnimate = function (loc, list, isHide, delta, cal
                     core.maps._deleteDetachedBlock(t.canvases);
             });
             loc.forEach(function (t) {
-                if (isHide) core.removeBlock(t[0], t[1]);
-                else core.showBlock(t[0], t[1]);
+                if (type == 'show') core.showBlock(t[0], t[1]);
+                else if (type == 'hide') core.hideBlock(t[0], t[1]);
+                else if (type == 'remove') core.removeBlock(t[0], t[1]);
             });
             if (callback) callback();
         }
@@ -1999,7 +1995,7 @@ maps.prototype._animateBlock_doAnimate = function (loc, list, isHide, delta, cal
     core.animateFrame.asyncId[animate] = true;
 }
 
-maps.prototype._animateBlock_getList = function (loc) {
+maps.prototype._animateBlock_getList = function (loc, type) {
     var list = [];
     loc.forEach(function (t) {
         var block = core.getBlock(t[0], t[1], null, true);
@@ -2011,6 +2007,16 @@ maps.prototype._animateBlock_getList = function (loc) {
             list.push({ 'x': t[0], 'y': t[1] });
             return;
         }
+        // 该点是否已经被启用/删除
+        if ((type == 'show' && !block.disable) || ((type == 'hide' || type == 'remove') && block.disable)) {
+            list.push({ 'x': t[0], 'y': t[1] });
+            return;
+        }
+
+        if (type == 'hide' || type == 'remove') {
+            core.hideBlock(t[0], t[1]); // 暂时先隐藏
+        }
+
         var canvases = core.maps._initDetachedBlock(blockInfo, t[0], t[1], block.event.displayDamage !== false);
 
         list.push({

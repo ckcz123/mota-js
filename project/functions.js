@@ -111,6 +111,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置画布尺寸
 	core.maps.resizeMap(floorId);
 	// 设置勇士的位置
+	heroLoc.direction = core.turnDirection(heroLoc.direction);
 	core.status.hero.loc = heroLoc;
 	// 检查重生怪并重置
 	if (!fromLoad) {
@@ -1107,7 +1108,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				type[currloc] = type[currloc] || {};
 				type[currloc]["阻击伤害"] = true;
 
-				var rdir = core.reverseDirection(dir);
+				var rdir = core.turnDirection(":back", dir);
 				// 检查下一个点是否存在事件（从而判定是否移动）
 				var rnx = x + core.utils.scan[rdir].x,
 					rny = y + core.utils.scan[rdir].y;

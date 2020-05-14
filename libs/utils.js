@@ -691,9 +691,19 @@ utils.prototype.strlen = function (str) {
     return count;
 };
 
-utils.prototype.reverseDirection = function (direction) {
+utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
-    return {"left":"right","right":"left","down":"up","up":"down"}[direction] || direction;
+    var directionList = ["left", "up", "right", "down"];
+    if (directionList.indexOf(turn) >= 0) return turn;
+    switch (turn) {
+        case ':left': turn = 3; break; // turn left
+        case ':right': turn = 1; break; // turn right
+        case ':back': turn = 2; break; // turn back
+        default: turn = 0; break;
+    }
+    var index = directionList.indexOf(direction);
+    if (index < 0) return direction;
+    return directionList[(index + (turn || 0)) % 4];
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {

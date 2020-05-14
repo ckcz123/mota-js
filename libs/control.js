@@ -756,8 +756,7 @@ control.prototype.turnHero = function(direction) {
         core.status.route.push("turn:"+direction);
         return;
     }
-    var dirs = {'up':'right','right':'down','down':'left','left':'up'};
-    core.setHeroLoc('direction', dirs[core.getHeroLoc('direction')]);
+    core.setHeroLoc('direction', core.turnDirection(':right'));
     core.drawHero();
     core.status.route.push("turn");
 }

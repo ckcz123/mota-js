@@ -283,6 +283,7 @@ if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
 var loc = ', "loc": ['+Number_0+', '+Number_1+']';
 if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 if (IgnoreChangeFloor_List_0!='null') {
@@ -341,6 +342,7 @@ action
     |   insert_2_s
     |   exit_s
     |   setBlock_s
+    |   turnBlock_s
     |   showFloorImg_s
     |   hideFloorImg_s
     |   showBgFgMap_s
@@ -825,6 +827,39 @@ var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString
 return code;
 */;
 
+turnBlock_s
+    :   '事件转向' DirectionEx_List 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    
+
+/* turnBlock_s
+tooltip : turnBlock：事件转向；自动检索faceIds
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
+colour : this.mapColor
+default : [null,"","",""]
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
+DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "turnBlock"'+DirectionEx_List_0+floorstr+IdString_0+'},\n';
+return code;
+*/;
+
 showFloorImg_s
     :   '显示贴图' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
@@ -1143,21 +1178,24 @@ return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' IdString? 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? Newline
+    :   '楼层切换' Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' IntString? Newline
     
 
 /* changeFloor_s
 tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changefloor%EF%BC%9A%E6%A5%BC%E5%B1%82%E5%88%87%E6%8D%A2
-default : ["MTx","0","0",null,""]
+default : [null,"",null,"","",null,"",null]
 colour : this.dataColor
+var toFloorId = IdString_0;
+if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
+toFloorId = toFloorId ? (', "floorId": ' + toFloorId) : '';
+var loc = ', "loc": ['+Number_0+', '+Number_1+']';
+if (Stair_List_0===':now') loc = '';
+else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-IntString_0 = IntString_0  ?(', "time": '+IntString_0):'';
-var floorstr = '';
-if (PosString_0 && PosString_1) {
-    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
-}
-var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'"'+floorstr+DirectionEx_List_0+IntString_0+' },\n';
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+var code = '{"type": "changeFloor"'+toFloorId+loc+DirectionEx_List_0+IntString_0+' }\n';
 return code;
 */;
 
@@ -1171,6 +1209,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changepos%EF%BC%9A%
 default : ["","",null]
 colour : this.dataColor
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 var code = '{"type": "changePos"'+loc+DirectionEx_List_0+'},\n';
 return code;
@@ -2654,8 +2693,8 @@ FontString
     ;
 
 Floor_List
-    :   '楼层ID'|'前一楼'|'后一楼'
-    /*Floor_List ['floorId',':before',':next']*/;
+    :   '楼层ID'|'前一楼'|'后一楼'|'当前楼'
+    /*Floor_List ['floorId',':before',':next',':now']*/;
 
 Stair_List
     :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'|'中心对称点'|'x对称点'|'y对称点'
@@ -2757,8 +2796,8 @@ Direction_List
     /*Direction_List ['up','down','left','right']*/;
 
 DirectionEx_List
-    :   '不变'|'上'|'下'|'左'|'右'
-    /*DirectionEx_List ['','up','down','left','right']*/;
+    :   '不变'|'朝上'|'朝下'|'朝左'|'朝右'|'左转'|'右转'|'背对'
+    /*DirectionEx_List ['null','up','down','left','right',':left',':right',':back']*/;
 
 StepString
     :   (Direction_List Int?)+
@@ -2875,7 +2914,7 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.loc=[0,0];
         if (!this.isset(obj.stair)) obj.stair=':now';
       }
-      if (obj.floorId==':before'||obj.floorId==':next') {
+      if (obj.floorId==':before'||obj.floorId==':next'||obj.floorId==':now') {
         obj.floorType=obj.floorId;
         delete obj.floorId;
       }
@@ -3066,6 +3105,18 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setBlock_s'].xmlText([
         data.number||0,x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
       break;
+    case "turnBlock": // 事件转向
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['turnBlock_s'].xmlText([
+        data.direction,x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
+      break;
     case "showFloorImg": // 显示贴图
       data.loc=data.loc||[];
       if (!(data.loc[0] instanceof Array))
@@ -3151,9 +3202,17 @@ ActionParser.prototype.parseAction = function() {
         data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
       break;
     case "changeFloor": // 楼层转换
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['changeFloor_s'].xmlText([
-        data.floorId,data.loc[0],data.loc[1],data.direction,data.time,this.next]);
+      if (!data.loc) {
+        data.loc = data.loc || ['',''];
+        data.stair = data.stair || ':now';
+      }
+      if (data.floorId==':before'||data.floorId==':next'||data.floorId==':now') {
+        data.floorType=data.floorId;
+        delete data.floorId;
+      }
+      return MotaActionBlocks['changeFloor_s'].xmlText([
+        data.floorType||'floorId',data.floorId,data.stair||'loc',data.loc[0],data.loc[1],obj.direction,
+        data.time, this.next]);
       break;
     case "changePos": // 直接更换勇士位置, 不切换楼层
       data.loc=data.loc||['','']

@@ -516,7 +516,7 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
         }
         return false;
     }
-    if (name == 'cannotIn') direction = core.reverseDirection(direction);
+    if (name == 'cannotIn') direction = core.turnDirection(":back", direction);
     return core.inArray((this.getBlockByNumber(number).event || {})[name], direction);
 }
 
@@ -1639,6 +1639,26 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         if (block.event.cls != 'autotile')
             core.addGlobalAnimate(block);
         core.updateStatusBar();
+    }
+}
+
+////// 事件转向 //////
+maps.prototype.turnBlock = function (direction, x, y, floorId) {
+    var id = core.getBlockId(x, y, floorId, true);
+    var blockInfo = core.getBlockInfo(id);
+    if (blockInfo == null) return;
+    var faceIds = blockInfo.faceIds;
+    var currDirection = null;
+    for (var dir in core.utils.scan) {
+        if (faceIds[dir] == id) {
+            currDirection = dir;
+        }
+    }
+    if (currDirection == null) return;
+    var nextDirection = core.turnDirection(direction, currDirection);
+    var nextId = faceIds[nextDirection];
+    if (nextId != null && nextId != id) {
+        this.setBlock(nextId, x, y, floorId);
     }
 }
 

@@ -599,6 +599,8 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
         var index = core.floorIds.indexOf(core.status.floorId);
         if (index < core.floorIds.length - 1) floorId = core.floorIds[index + 1];
         else floorId = core.status.floorId;
+    } else if (floorId == ':now') {
+        floorId = core.status.floorId;
     }
     if (!core.status.maps[floorId]) {
         main.log("不存在的楼层：" + floorId);
@@ -780,7 +782,7 @@ events.prototype._sys_action = function (data, callback) {
     var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
     // 检查是否需要改变朝向
     if (ex == core.nextX() && ey == core.nextY()) {
-        var dir = core.reverseDirection();
+        var dir = core.turnDirection(":back");
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
             var number = core.getNumberById(toId);
@@ -1363,7 +1365,7 @@ events.prototype._action_changeFloor = function (data, x, y, prefix) {
 events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
     if (data.x == null && data.y == null && data.direction) {
-        core.setHeroLoc('direction', data.direction, true);
+        core.setHeroLoc('direction', core.turnDirection(data.direction), true);
         core.drawHero();
         return core.doAction();
     }
@@ -1371,7 +1373,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     core.setHeroLoc('x', loc[0]);
     core.setHeroLoc('y', loc[1]);
-    if (data.direction) core.setHeroLoc('direction', data.direction);
+    if (data.direction) core.setHeroLoc('direction', core.turnDirection(data.direction));
     core.drawHero();
     core.doAction();
 }

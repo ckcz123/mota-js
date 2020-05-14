@@ -486,11 +486,11 @@ events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
 }
 
 events.prototype._sys_getItem = function (data, callback) {
-    this.getItem(data.event.id, 1, data.x, data.y, callback);
+    this.getItem(data.event.id, 1, data.x, data.y, false, callback);
 }
 
 ////// 获得某个物品 //////
-events.prototype.getItem = function (id, num, x, y, callback) {
+events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
     if (num == null) num = 1;
     num = num || 1;
     var itemCls = core.material.items[id].cls;
@@ -519,11 +519,11 @@ events.prototype.getItem = function (id, num, x, y, callback) {
         itemHint.push(id);
     }
 
-    this.afterGetItem(id, x, y, callback);
+    this.afterGetItem(id, x, y, isGentleClick, callback);
 }
 
-events.prototype.afterGetItem = function (id, x, y, callback) {
-    this.eventdata.afterGetItem(id, x, y, callback);
+events.prototype.afterGetItem = function (id, x, y, isGentleClick, callback) {
+    this.eventdata.afterGetItem(id, x, y, isGentleClick, callback);
 }
 
 ////// 获得面前的物品（轻按） //////
@@ -551,7 +551,7 @@ events.prototype._getNextItem = function (direction, noRoute) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     if (!noRoute) core.status.route.push("getNext");
-    this.getItem(core.getBlockId(nx, ny), 1, nx, ny);
+    this.getItem(core.getBlockId(nx, ny), 1, nx, ny, true);
     return true;
 }
 

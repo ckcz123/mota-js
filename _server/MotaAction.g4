@@ -34,7 +34,7 @@ autoEvent_m
     
 
 /* autoEvent_m
-tooltip : ?????
+tooltip : 自动事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event
 default : ["flag:__door__==2",0,true,false,false,null]
 var code = {
@@ -140,7 +140,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%
 default : ["攻击+1","status:money>=20+2*flag:shop1","","","rgba(255,255,255,1)",""]
 colour : this.subColor
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
-EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_1+'"')
+EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"')
 IdString_0 = IdString_0? (', "icon": "'+IdString_0+'"'):'';
 var code = '{"text": "'+EvalString_0+'", "need": "'+EvalString_1+'"'+IdString_0+ColorString_0+EvalString_2+', "action": [\n'+action_0+']},\n';
 return code;
@@ -220,14 +220,17 @@ return code;
 
 //afterGetItem 事件编辑器入口之一
 afterGetItem_m
-    :   '获取道具后' BGNL? Newline action+ BEND
+    :   '获取道具后' '轻按时不触发' Bool BGNL? Newline action+ BEND
     
 
 /* afterGetItem_m
 tooltip : 系统引发的自定义事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e7%b3%bb%e7%bb%9f%e5%bc%95%e5%8f%91%e7%9a%84%e8%87%aa%e5%ae%9a%e4%b9%89%e4%ba%8b%e4%bb%b6
-var code = '[\n'+action_0+']\n';
-return code;
+if (Bool_0) {
+  return '{"disableOnGentleClick": true, "data": [\n'+action_0+']\n}';
+} else {
+  return '[\n'+action_0+']\n';
+}
 */;
 
 //afterOpenDoor 事件编辑器入口之一
@@ -2703,7 +2706,7 @@ IgnoreChangeFloor_List
     /*IgnoreChangeFloor_List ['null','true','false']*/;
 
 Event_List
-    :   '事件'|'战后事件'|'道具后事件'|'开门后事件'
+    :   '普通事件'|'战后事件'|'道具后事件'|'开门后事件'
     /*Event_List ['null','afterBattle','afterGetItem','afterOpenDoor']*/;
 
 Floor_Meta_List
@@ -2879,6 +2882,13 @@ ActionParser.prototype.parse = function (obj,type) {
       return MotaActionBlocks['changeFloor_m'].xmlText([
         obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,
         obj.time,obj.ignoreChangeFloor
+      ]);
+    
+    case 'afterGetItem':
+      if (!obj) obj = [];
+      if (obj instanceof Array) obj = {'data': obj};
+      return MotaActionBlocks['afterGetItem_m'].xmlText([
+        obj.disableOnGentleClick||false, this.parseList(obj.data)
       ]);
 
     case 'level':

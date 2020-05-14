@@ -239,6 +239,10 @@ core.prototype._init_flags = function () {
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
+    
+    // 让你总是拼错！
+    window.on = true;
+    window.off = false;
 
     core.dom.versionLabel.innerText = core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;

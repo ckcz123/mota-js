@@ -884,6 +884,8 @@ function omitedcheckUpdateFunction(event) {
     editor_blockly.getAutoCompletions = function (content, type, name) {
         // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
 
+        // console.log(type, name);
+
         // 检查 status:xxx，item:xxx和flag:xxx
         var index = Math.max(content.lastIndexOf(":"), content.lastIndexOf("："));
         if (index >= 0) {
@@ -986,10 +988,9 @@ function omitedcheckUpdateFunction(event) {
         var allBgms = Object.keys(core.material.bgms);
         var allSounds = Object.keys(core.material.sounds);
         var allShops = Object.keys(core.status.shops);
-        var allColors = ["aqua（湖绿色）", "black（黑色）", "blue（蓝色）", "fuchsia（红紫色）", "gray（灰色）", "green（绿色）", "lime（石灰色）",
-           "maroon（紫褐色）", "navy（深蓝色）", "gold（金色）",
-            "olive（黄褐色）", "orange（橙色）", "purple（紫色）", "red（红色）", "silver（银色）", "teal（蓝绿色）", "white（白色）", "yellow（黄色）"];
-
+        var allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
+                         "maroon（深红色）", "navy（深蓝色）", "gold（金色）",  "olive（黄褐色）", "orange（橙色）", "purple（品红色）", 
+                         "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
         var filter = function (list, content) {
           return list.filter(function (one) {
             return one != content && one.startsWith(content);
@@ -1001,7 +1002,7 @@ function omitedcheckUpdateFunction(event) {
           || (type == 'choices_s' && name == 'IdString_0') || (type == 'choicesContext' && name == 'IdString_0')
           || (type == 'closeDoor_s' && name == 'IdString_0') || (type == 'setBlock_s' && name == 'EvalString_0')
           || (type == 'setBgFgBlock_s' && name == 'EvalString_0') || (type == 'drawIcon_s' && name == 'IdString_0')
-          ) {
+          || (type == 'shopsub' && name == 'IdString_1') || (type == 'shopChoices' && name == 'IdString_0')) {
           return filter(allIds, content);
         }
 

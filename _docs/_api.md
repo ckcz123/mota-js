@@ -52,7 +52,7 @@ core.updateStatusBar()
 
 
 core.setStatus('atk', 1000)
-将攻击力设置为1000；这里把atk可以改成hp, def, mdef, money, experience等等。
+将攻击力设置为1000；这里把atk可以改成hp, def, mdef, money, exp等等。
 本句等价于 core.status.hero.atk = 1000
 
 
@@ -287,7 +287,7 @@ core.closePanel()
 结束一切事件和绘制，关闭UI窗口，返回游戏进程。
 
 
-core.replaceText(text)
+core.replaceText(text, prefix, need, times)
 将一段文字中的${}进行计算并替换。
 
 
@@ -385,10 +385,6 @@ core.enemys.getDamage(enemyId, x, y, floorId)
 后面三个参数是怪物坐标和楼层。
 
 
-core.enemys.getExtraDamage(enemyId)
-返回某个怪物会对勇士造成的额外伤害（不可被魔防抵消），例如仇恨、固伤等等。
-
-
 core.enemys.nextCriticals(enemyId, number, x, y, floorId)
 返回一个列表，为接下来number（可忽略，默认为1）个该怪物的临界值和临界减伤。
 列表每一项类似 [x,y] 表示临界值为x，且临界减伤为y。
@@ -481,15 +477,15 @@ core.maps.canMoveDirectly(destX, destY)
 该函数如果返回0则不可瞬间移动，大于0则可以瞬间移动，且返回值是跨度（即少走的步数）。
 
 
-core.maps.removeBlockById(index, floorId)
+core.maps.removeBlockByIndexes(index, floorId)
 根据索引删除或禁用某块。
 
 
-core.maps.removeBlockByIds(floorId, ids)
+core.maps.removeBlockByIndexes(indexes, floorId)
 根据索引删除或禁用若干块。
 
 
-core.maps.drawAnimate(name, x, y, callback)
+core.maps.drawAnimate(name, x, y, alignWindow, callback)
 播放一段动画，name为动画名（需在全塔属性注册），x和y为坐标（0-12之间），callback可选，为播放完毕的回调函数。
 播放过程是异步的，如需等待播放完毕请使用insertAction插入一条type:waitAsync事件。
 此函数将随机返回一个数字id，为此异步动画的唯一标识符。

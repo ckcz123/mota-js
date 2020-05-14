@@ -58,7 +58,7 @@ type Enemy = {
     atk: number
     def: number
     money: number
-    experience: number
+    exp: number
     point: number
     [key: string]: any
 }
@@ -81,8 +81,6 @@ type SystemFlags = {
     enableXxx: boolean
     flyNearStair: boolean
     steelDoorWithoutKey: boolean
-    hatredDecrease: boolean
-    betweenAttackCeil: boolean
     betweenAttackMax: boolean
     ignoreChangeFloor: boolean
     disableShopOnDamage: boolean
@@ -105,7 +103,7 @@ type HeroStatus = {
     def: number
     mdef: number
     money: number
-    experience: number
+    exp: number
     loc: {
         direction: direction
         x: number
@@ -123,7 +121,7 @@ type HeroStatus = {
         battle: number
         battleDamage: number
         currTime: number
-        experience: number
+        exp: number
         extraDamage: number
         hp: number
         ignoreSteps: number
@@ -407,7 +405,7 @@ declare class control {
     /**
      * 设置主角的某个属性
      * @example core.setStatus('loc', {x : 0, y : 0, direction : 'up'}); // 设置主角位置为地图左上角，脸朝上
-     * @param name 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.setHeroLoc(name, value)，其他的('exp'被视为'experience')会直接对 core.status.hero[name] 赋值
+     * @param name 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.setHeroLoc(name, value)，其他的('exp'被视为'exp')会直接对 core.status.hero[name] 赋值
      * @param value 属性的新值
      */
     setStatus<K extends keyof HeroStatus>(name: K, value: HeroStatus[K]): void
@@ -423,7 +421,7 @@ declare class control {
     /**
      * 读取主角的某个属性，不包括百分比修正
      * @example core.getStatus('loc'); // 读取主角的坐标和朝向
-     * @param name 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.getHeroLoc(name)，其他的('exp'被视为'experience')会直接读取 core.status.hero[name]
+     * @param name 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.getHeroLoc(name)，其他的('exp'被视为'exp')会直接读取 core.status.hero[name]
      * @returns 属性值
      */
     getStatus<K extends keyof HeroStatus>(name: K): HeroStatus[K]
@@ -834,17 +832,6 @@ declare class enemys {
     getDamage(enemy: string | Enemy, x?: number, y?: number, floorId?: string): number
 
     /**
-     * 获得某只敌人的固伤加仇恨伤害
-     * @example core.getExtraDamage('greenSlime',0,0,'MT0') // 绿头怪的固伤加仇恨伤害
-     * @param enemy 敌人id或敌人对象
-     * @param x 敌人的横坐标，可选
-     * @param y 敌人的纵坐标，可选
-     * @param floorId 敌人所在的地图，可选
-     * @returns 伤害值，【关闭负伤】时不可被魔防抵挡
-     */
-    getExtraDamage(enemy: string | Enemy, x?: number, y?: number, floorId?: string): number
-
-    /**
      * 获得某只敌人的地图显伤，包括颜色
      * @example core.getDamageString('greenSlime', 0, 0, 'MT0') // 绿头怪的地图显伤
      * @param enemy 敌人id或敌人对象
@@ -1203,7 +1190,7 @@ declare class maps {
      * @param callback 动画停止后的回调函数，可选
      * @returns 一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
      */
-    drawAnimate(name: string, x: number, y: number, callback?: () => void): number
+    drawAnimate(name: string, x: number, y: number, alignWindow: boolean, callback?: () => void): number
 }
 
 /** @file items.js 主要负责一切和道具相关的内容。 */
@@ -1506,7 +1493,7 @@ declare class utils {
      * @param times 全局商店已购次数，一般可省略
      * @returns 替换完毕后的字符串
      */
-    replaceText(text: string, need?: number, times?: number): string
+    replaceText(text: string, prefix?: string, need?: number, times?: number): string
 
     /**
      * 对一个表达式中的特殊规则进行替换，如status:xxx等。
@@ -1880,7 +1867,6 @@ type core = {
         height: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
     }
-    paint: {};
     saves: {
         saveIndex: number
         ids: { [key: number]: boolean }

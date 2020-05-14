@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /**
  * 初始化 start
  */
@@ -45,12 +47,7 @@ function core() {
             'data': null,
             'fog': null,
         },
-        "tips": {
-            'time': 0,
-            'offset': 0,
-            'list': [],
-            'lastSize': 0,
-        },
+        "tip": null,
         "asyncId": {}
     }
     this.musicStatus = {
@@ -58,6 +55,7 @@ function core() {
         'bgmStatus': false, // 是否播放BGM
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
+        'pauseTime': 0, // 上次暂停的时间
         'lastBgm': null, // 上次播放的bgm
         'gainNode': null,
         'playingSounds': {}, // 正在播放的SE
@@ -98,7 +96,6 @@ function core() {
         height: this.__SIZE__,
         tempCanvas: null, // A temp canvas for drawing
     }
-    this.paint = {};
     this.saves = {
         "saveIndex": null,
         "ids": {},
@@ -280,19 +277,17 @@ core.prototype._init_flags = function () {
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
-    core.items._resetItems();
     core.material.icons = core.icons.getIcons();
 }
 
 core.prototype._init_sys_flags = function () {
-    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
-    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
     if (core.flags.equipboxButton) core.flags.equipment = true;
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
     // 行走速度
-    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed);
+    core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
+    core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', 500);
 }
 
 core.prototype._init_platform = function () {

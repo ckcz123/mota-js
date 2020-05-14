@@ -48,7 +48,7 @@ editor_mappanel_wrapper = function (editor) {
         if (editor.uivalues.bindSpecialDoor.loc != null) return;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
-        editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x]);
+        editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x], true);
         return;
     }
 
@@ -472,7 +472,7 @@ editor_mappanel_wrapper = function (editor) {
         };
         bindSpecialDoor.enemys.forEach(function (loc) {
             editor.currentFloorData.afterBattle[loc] = [
-                {"type": "addValue", "name": doorFlag, "value": "1"}
+                {"type": "setValue", "name": doorFlag, "operator": "+=", "value": "1"}
             ]
         });
         editor.file.saveFloorFile(function (err) {
@@ -514,7 +514,7 @@ editor_mappanel_wrapper = function (editor) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
         var thisevent = editor[editor.layerMod][editor.pos.y][editor.pos.x];
-        editor.setSelectBoxFromInfo(thisevent);
+        editor.setSelectBoxFromInfo(thisevent, true);
     }
 
     /**
@@ -742,7 +742,13 @@ editor_mappanel_wrapper = function (editor) {
         return;
     }
 
+    editor.uifunctions.clearLastUsedBtn_click = function () {
+        if (editor.isMobile) return;
 
+        editor.uivalues.lastUsed = [];
+        editor.config.set('lastUsed', []);
+        editor.updateLastUsedMap();
+    }
 
     /////////////////////////////////////////////////////////////////////////////
 

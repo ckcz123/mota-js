@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 actions.js：用户交互的事件的处理
 键盘、鼠标、触摸屏事件相关
@@ -36,17 +38,14 @@ actions.prototype._init = function () {
     this.registerAction('keyUp', '_sys_keyUp', this._sys_keyUp, 0);
     // --- ondown注册
     this.registerAction('ondown', '_sys_checkReplay', this._sys_checkReplay, 100);
-    this.registerAction('ondown', '_sys_ondown_paint', this._sys_ondown_paint, 60);
     this.registerAction('ondown', '_sys_ondown_lockControl', this._sys_ondown_lockControl, 30);
     this.registerAction('ondown', '_sys_ondown', this._sys_ondown, 0);
     // --- onmove注册
     this.registerAction('onmove', '_sys_checkReplay', this._sys_checkReplay, 100);
-    this.registerAction('onmove', '_sys_onmove_paint', this._sys_onmove_paint, 50);
     this.registerAction('onmove', '_sys_onmove_choices', this._sys_onmove_choices, 30);
     this.registerAction('onmove', '_sys_onmove', this._sys_onmove, 0);
     // --- onup注册
     this.registerAction('onup', '_sys_checkReplay', this._sys_checkReplay, 100);
-    this.registerAction('onup', '_sys_onup_paint', this._sys_onup_paint, 50);
     this.registerAction('onup', '_sys_onup', this._sys_onup, 0);
     // --- onclick注册
     this.registerAction('onclick', '_sys_checkReplay', this._sys_checkReplay, 100);
@@ -261,9 +260,6 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'replayRemain':
             this._keyDownSL(keyCode);
             break;
-        case 'shop':
-            this._keyDownShop(keyCode);
-            break;
         case 'selectShop':
         case 'switchs':
         case 'settings':
@@ -347,9 +343,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'viewMaps':
             this._keyUpViewMaps(keyCode);
             break;
-        case 'shop':
-            this._keyUpShop(keyCode);
-            break;
         case 'selectShop':
             this._keyUpQuickShop(keyCode);
             break;
@@ -398,9 +391,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'centerFly':
             this._keyUpCenterFly(keyCode);
             break;
-        case 'paint':
-            this._keyUpPaint(keyCode);
-            break;
     }
     return true;
 }
@@ -423,19 +413,12 @@ actions.prototype.ondown = function (loc) {
     this.doRegisteredAction('ondown', x, y, px, py);
 }
 
-actions.prototype._sys_ondown_paint = function (x, y, px, py) {
-    // 画板
-    if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this._ondownPaint(px, py);
-        return true;
-    }
-}
-
 actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
     if (core.status.played && !core.status.lockControl) return false;
 
     // --- wait事件也要提供px和py
     if (core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
+        clearTimeout(core.status.event.interval);
         core.setFlag('type', 1);
         core.setFlag('x', x);
         core.setFlag('y', y);
@@ -481,21 +464,12 @@ actions.prototype.onmove = function (loc) {
     this.doRegisteredAction('onmove', x, y, px, py);
 }
 
-actions.prototype._sys_onmove_paint = function (x, y, px, py) {
-    // 画板
-    if (core.status.played && (core.status.event || {}).id == 'paint') {
-        core.actions._onmovePaint(px, py);
-        return true;
-    }
-}
-
 actions.prototype._sys_onmove_choices = function (x, y) {
     if (!core.status.lockControl) return false;
 
     switch (core.status.event.id) {
         case 'action':
             if (core.status.event.data.type != 'choices') break;
-        case 'shop':
         case 'selectShop':
         case 'switchs':
         case 'settings':
@@ -506,6 +480,9 @@ actions.prototype._sys_onmove_choices = function (x, y) {
         case 'replay':
         case 'gameInfo':
             this._onMoveChoices(x, y);
+            return true;
+        case 'confirmBox':
+            this._onMoveConfirmBox(x, y);
             return true;
         default:
             break;
@@ -541,14 +518,6 @@ actions.prototype.onup = function (loc) {
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
     var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
     this.doRegisteredAction('onup', x, y, px, py);
-}
-
-actions.prototype._sys_onup_paint = function () {
-    // 画板
-    if (core.status.played && (core.status.event || {}).id == 'paint') {
-        this._onupPaint();
-        return true;
-    }
 }
 
 actions.prototype._sys_onup = function () {
@@ -640,9 +609,6 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
             break;
         case 'settings':
             this._clickSettings(x, y);
-            break;
-        case 'shop':
-            this._clickShop(x, y);
             break;
         case 'selectShop':
             this._clickQuickShop(x, y);
@@ -752,6 +718,7 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // wait事件
     if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
+        clearTimeout(core.status.event.interval);
         core.setFlag('type', 0);
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
@@ -818,10 +785,6 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
             return true;
         }
     }
-    // 长按商店连续购买
-    if (core.status.event.id == 'shop' && x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        return this._clickShop(x, y);
-    }
     // 长按可以跳过等待事件
     if (core.status.event.id == 'action' && core.status.event.data.type == 'sleep'
         && !core.status.event.data.current.noSkip) {
@@ -866,12 +829,6 @@ actions.prototype._selectChoices = function (length, keycode, callback) {
     var topIndex = this.HSIZE - parseInt((length - 1) / 2) + (core.status.event.ui.offset || 0);
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
-    }
-    //左右方向键调整 音量 行走速度
-    if(core.status.event.id == "switchs" && (core.status.event.selection == 2 || core.status.event.selection == 3))
-    {
-        if (keycode == 37) callback.apply(this, [this.HSIZE - 2, topIndex + core.status.event.selection]);
-        if (keycode == 39) callback.apply(this, [this.HSIZE + 2, topIndex + core.status.event.selection]);
     }
 
     if (keycode >= 49 && keycode <= 57) {
@@ -918,7 +875,7 @@ actions.prototype._clickCenterFly = function (x, y) {
             core.useItem('centerFly');
         }
         else {
-            core.drawTip('当前不能使用中心对称飞行器');
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
 }
@@ -930,7 +887,7 @@ actions.prototype._keyUpCenterFly = function (keycode) {
             core.useItem('centerFly');
         }
         else {
-            core.drawTip('当前不能使用中心对称飞行器');
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
 }
@@ -971,6 +928,22 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
     }
 }
 
+////// 鼠标在确认框上移动时 //////
+actions.prototype._onMoveConfirmBox = function (x, y) {
+    if (y == this.HSIZE + 1) {
+        if (x == this.HSIZE - 2 || x == this.HSIZE - 1) {
+            core.status.event.selection = 0;
+            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            return;
+        }
+        if (x == this.HSIZE + 2 || x == this.HSIZE + 1) {
+            core.status.event.selection = 1;
+            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            return;
+        }
+    }
+}
+
 ////// 自定义事件时的点击操作 //////
 actions.prototype._clickAction = function (x, y) {
     if (core.status.event.data.type == 'text') {
@@ -993,6 +966,7 @@ actions.prototype._clickAction = function (x, y) {
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
             var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
             if (y >= topIndex && y < topIndex + choices.length) {
+                clearTimeout(core.status.event.interval);
                 // 选择
                 core.status.route.push("choices:" + (y - topIndex));
                 core.insertAction(choices[y - topIndex].action);
@@ -1004,11 +978,13 @@ actions.prototype._clickAction = function (x, y) {
 
     if (core.status.event.data.type == 'confirm') {
         if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1) {
+            clearTimeout(core.status.event.interval);
             core.status.route.push("choices:0");
             core.insertAction(core.status.event.ui.yes);
             core.doAction();
         }
         else if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
+            clearTimeout(core.status.event.interval);
             core.status.route.push("choices:1");
             core.insertAction(core.status.event.ui.no);
             core.doAction();
@@ -1041,6 +1017,7 @@ actions.prototype._keyUpAction = function (keycode) {
         return;
     }
     if (core.status.event.data.type == 'wait') {
+        clearTimeout(core.status.event.interval);
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
         core.status.route.push("input:" + keycode);
@@ -1214,11 +1191,6 @@ actions.prototype._clickViewMaps = function (x, y) {
         core.ui.drawMaps(index, cx, cy);
         return;
     }
-    if (x <= per - 2 && y >= this.SIZE + 1 - per) {
-        core.status.event.data.paint = !core.status.event.data.paint;
-        core.ui.drawMaps(index, cx, cy);
-        return;
-    }
     if (x >= this.SIZE + 1 - per && y <= per - 2) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);
@@ -1302,11 +1274,6 @@ actions.prototype._keyUpViewMaps = function (keycode) {
         core.ui.drawMaps(core.status.event.data);
         return;
     }
-    if (keycode == 77) {
-        core.status.event.data.paint = !core.status.event.data.paint;
-        core.ui.drawMaps(core.status.event.data);
-        return;
-    }
     if (keycode == 88 || (core.isReplaying() && keycode == 67)) {
         if (core.isReplaying()) {
             core.bookReplay();
@@ -1318,66 +1285,28 @@ actions.prototype._keyUpViewMaps = function (keycode) {
     return;
 }
 
-////// 商店界面时的点击操作 //////
-actions.prototype._clickShop = function (x, y) {
-    var shop = core.status.event.data.shop;
-    var choices = shop.choices;
-    if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        var topIndex = this.HSIZE - parseInt(choices.length / 2) + (core.status.event.ui.offset || 0);
-        if (y >= topIndex && y < topIndex + choices.length) {
-            return core.events._useShop(shop, y - topIndex);
-        }
-        // 离开
-        else if (y == topIndex + choices.length) {
-            core.events._exitShop();
-        }
-        else return false;
-    }
-    return true;
-}
-
-actions.prototype._keyDownShop = function (keycode) {
-    // 商店界面长按空格连续购买
-    if (keycode == 32 && core.status.event.selection != core.status.event.data.shop.choices.length) {
-        this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
-        return;
-    }
-    this._keyDownChoices(keycode);
-}
-
-////// 商店界面时，放开某个键的操作 //////
-actions.prototype._keyUpShop = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.events._exitShop();
-        return;
-    }
-    if (keycode != 32 || core.status.event.selection == core.status.event.data.shop.choices.length) {
-        this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
-        return;
-    }
-    return;
-}
-
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype._clickQuickShop = function (x, y) {
-    var keys = Object.keys(core.status.shops).filter(function (shopId) {
-        return core.status.shops[shopId].visited || !core.status.shops[shopId].mustEnable
-    });
+    var shopIds = core.listShopIds();
 
     if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        var topIndex = this.HSIZE - parseInt(keys.length / 2) + (core.status.event.ui.offset || 0);
-        if (y >= topIndex && y < topIndex + keys.length) {
-            var reason = core.events.canUseQuickShop(keys[y - topIndex]);
-            if (!core.flags.enableDisabledShop && reason) {
-                core.drawText(reason);
+        var topIndex = this.HSIZE - parseInt(shopIds.length / 2) + (core.status.event.ui.offset || 0);
+        if (y >= topIndex && y < topIndex + shopIds.length) {
+            var shopId = shopIds[y - topIndex];
+            if (!core.canOpenShop(shopId)) {
+                core.drawTip('当前项尚未开启');
                 return;
             }
-            core.events.openShop(keys[y - topIndex], true);
-            if (core.status.event.id == 'shop')
-                core.status.event.data.fromList = true;
+            var message = core.canUseQuickShop(shopId);
+            if (message == null) {
+                // core.ui.closePanel();
+                core.openShop(shopIds[y - topIndex], false);
+            } else {
+                core.drawTip(message);
+            }
         }
         // 离开
-        else if (y == topIndex + keys.length)
+        else if (y == topIndex + shopIds.length)
             core.ui.closePanel();
         return;
     }
@@ -1390,15 +1319,17 @@ actions.prototype._keyUpQuickShop = function (keycode) {
         core.ui.closePanel();
         return;
     }
-    var keys = Object.keys(core.status.shops).filter(function (shopId) {
-        return core.status.shops[shopId].visited || !core.status.shops[shopId].mustEnable
-    });
-    this._selectChoices(keys.length + 1, keycode, this._clickQuickShop);
+    this._selectChoices(core.listShopIds().length + 1, keycode, this._clickQuickShop);
     return;
 }
 
 ////// 工具栏界面时的点击操作 //////
 actions.prototype._clickToolbox = function (x, y) {
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+
     // 装备栏
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
@@ -1428,11 +1359,11 @@ actions.prototype._clickToolbox = function (x, y) {
     }
     // 下一页
     if (x == this.HSIZE+2 || x == this.HSIZE+3) {
-        if (y == this.LAST - 5 && toolsPage < Math.ceil(Object.keys(core.status.hero.items.tools).length / this.LAST)) {
+        if (y == this.LAST - 5 && toolsPage < Math.ceil(tools.length / this.LAST)) {
             core.status.event.data.toolsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
-        if (y == this.LAST && constantsPage < Math.ceil(Object.keys(core.status.hero.items.constants).length / this.LAST)) {
+        if (y == this.LAST && constantsPage < Math.ceil(constants.length / this.LAST)) {
             core.status.event.data.constantsPage++;
             core.ui.drawToolbox(core.status.event.selection);
         }
@@ -1450,15 +1381,20 @@ actions.prototype._clickToolbox = function (x, y) {
 
 ////// 选择工具栏界面中某个Index后的操作 //////
 actions.prototype._clickToolboxIndex = function (index) {
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+
     var items = null;
     var select;
     if (index < this.LAST) {
         select = index + this.LAST * (core.status.event.data.toolsPage - 1);
-        items = Object.keys(core.status.hero.items.tools).sort();
+        items = tools;
     }
     else {
         select = index % this.LAST + this.LAST * (core.status.event.data.constantsPage - 1);
-        items = Object.keys(core.status.hero.items.constants).sort();
+        items = constants;
     }
     if (items == null) return;
     if (select >= items.length) return;
@@ -1478,8 +1414,10 @@ actions.prototype._keyDownToolbox = function (keycode) {
 
     var last_index = this.LAST - 1;
 
-    var tools = Object.keys(core.status.hero.items.tools).sort();
-    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
     var index = core.status.event.selection;
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
@@ -1981,9 +1919,11 @@ actions.prototype._clickSwitchs = function (x, y) {
     var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
-        if (selection != 2 && selection != 3) return;
-        if (x != this.HSIZE - 2 && x != this.HSIZE + 2) return;
+        if (selection != 2 && selection != 3 && selection != 4) return;
     }
+    var width = choices[selection].width;
+    var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
+    var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
     if (selection >= 0 && selection < choices.length) {
         core.status.event.selection = selection;
         switch (selection) {
@@ -1992,24 +1932,28 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 1:
                 return this._clickSwitchs_sound();
             case 2:
-                if (x == this.HSIZE - 2) return this._clickSwitchs_userVolume(-1);
-                if (x == this.HSIZE + 2) return this._clickSwitchs_userVolume(1);
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_userVolume(-1);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_userVolume(1);
                 return;
             case 3:
-                if (x == this.HSIZE - 2) return this._clickSwitchs_moveSpeed(-10);
-                if (x == this.HSIZE + 2) return this._clickSwitchs_moveSpeed(10);
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_moveSpeed(-10);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_moveSpeed(10);
                 return;
             case 4:
-                return this._clickSwitchs_displayEnemyDamage();
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_floorChangeTime(-100);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_floorChangeTime(100);
+                return;
             case 5:
-                return this._clickSwitchs_displayCritical();
+                return this._clickSwitchs_displayEnemyDamage();
             case 6:
-                return this._clickSwitchs_displayExtraDamage();
+                return this._clickSwitchs_displayCritical();
             case 7:
-                return this._clickSwitchs_localForage();
+                return this._clickSwitchs_displayExtraDamage();
             case 8:
-                return this._clickSwitchs_clickMove();
+                return this._clickSwitchs_potionNoRouting();
             case 9:
+                return this._clickSwitchs_clickMove();
+            case 10:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -2030,6 +1974,7 @@ actions.prototype._clickSwitchs_sound = function () {
 
 actions.prototype._clickSwitchs_userVolume = function (delta) {
     var value = Math.round(Math.sqrt(100 * core.musicStatus.userVolume));
+    if (value == 0 && delta < 0) return;
     core.musicStatus.userVolume = core.clamp(Math.pow(value + delta, 2) / 100, 0, 1);
     //audioContext 音效 不受designVolume 影响
     if (core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
@@ -2041,6 +1986,12 @@ actions.prototype._clickSwitchs_userVolume = function (delta) {
 actions.prototype._clickSwitchs_moveSpeed = function (delta) {
     core.values.moveSpeed = core.clamp(core.values.moveSpeed + delta, 50, 200);
     core.setLocalStorage("moveSpeed", core.values.moveSpeed);
+    core.ui.drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_floorChangeTime = function (delta) {
+    core.values.floorChangeTime = core.clamp(core.values.floorChangeTime + delta, 0, 2000);
+    core.setLocalStorage("floorChangeTime", core.values.floorChangeTime);
     core.ui.drawSwitchs();
 }
 
@@ -2065,12 +2016,9 @@ actions.prototype._clickSwitchs_displayExtraDamage = function () {
     core.ui.drawSwitchs();
 }
 
-actions.prototype._clickSwitchs_localForage = function () {
-    core.platform.useLocalForage = !core.platform.useLocalForage;
-    core.setLocalStorage('useLocalForage', core.platform.useLocalForage);
-    core.control.getSaveIndexes(function (indexes) {
-        core.saves.ids = indexes;
-    });
+actions.prototype._clickSwitchs_potionNoRouting = function () {
+    if (core.hasFlag('__potionNoRouting__')) core.removeFlag('__potionNoRouting__');
+    else core.setFlag('__potionNoRouting__', true);
     core.ui.drawSwitchs();
 }
 
@@ -2086,6 +2034,19 @@ actions.prototype._keyUpSwitchs = function (keycode) {
         core.status.event.selection = 0;
         core.ui.drawSettings();
         return;
+    }
+    if (keycode == 37) {
+        switch (core.status.event.selection) {
+            case 2: return this._clickSwitchs_userVolume(-1);
+            case 3: return this._clickSwitchs_moveSpeed(-10);
+            case 4: this._clickSwitchs_floorChangeTime(-100);
+        }
+    } else if (keycode == 39) {
+        switch (core.status.event.selection) {
+            case 2: return this._clickSwitchs_userVolume(1);
+            case 3: return this._clickSwitchs_moveSpeed(10);
+            case 4: this._clickSwitchs_floorChangeTime(100);
+        }
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs);
 }
@@ -2111,20 +2072,16 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui.drawMaps();
                 break;
             case 3:
-                core.clearUI();
-                core.ui.drawPaint();
-                break;
-            case 4:
                 core.status.event.selection = 0;
                 core.ui.drawSyncSave();
                 break;
-            case 5:
+            case 4:
                 core.status.event.selection = 0;
                 core.ui.drawGameInfo();
                 break;
-            case 6:
+            case 5:
                 return core.confirmRestart();
-            case 7:
+            case 6:
                 core.ui.closePanel();
                 break;
         }
@@ -2617,107 +2574,3 @@ actions.prototype._keyUpCursor = function (keycode) {
         return;
     }
 }
-
-////// 绘图相关 //////
-
-actions.prototype._ondownPaint = function (x, y) {
-    x += core.bigmap.offsetX;
-    y += core.bigmap.offsetY;
-    if (!core.status.event.data.erase) {
-        core.dymCanvas.paint.beginPath();
-        core.dymCanvas.paint.moveTo(x, y);
-    }
-    core.status.event.data.x = x;
-    core.status.event.data.y = y;
-}
-
-actions.prototype._onmovePaint = function (x, y) {
-    if (core.status.event.data.x == null) return;
-    x += core.bigmap.offsetX;
-    y += core.bigmap.offsetY;
-    if (core.status.event.data.erase) {
-        core.clearMap('paint', x - 10, y - 10, 20, 20);
-        return;
-    }
-    var midx = (core.status.event.data.x + x) / 2, midy = (core.status.event.data.y + y) / 2;
-    core.dymCanvas.paint.quadraticCurveTo(midx, midy, x, y);
-    core.dymCanvas.paint.stroke();
-    core.status.event.data.x = x;
-    core.status.event.data.y = y;
-}
-
-actions.prototype._onupPaint = function () {
-    core.status.event.data.x = null;
-    core.status.event.data.y = null;
-    // 保存
-    core.paint[core.status.floorId] = lzw_encode(core.utils._encodeCanvas(core.dymCanvas.paint).join(","));
-}
-
-actions.prototype.setPaintMode = function (mode) {
-    if (mode == 'paint') core.status.event.data.erase = false;
-    else if (mode == 'erase') core.status.event.data.erase = true;
-    else return;
-
-    core.drawTip("进入" + (core.status.event.data.erase ? "擦除" : "绘图") + "模式");
-}
-
-actions.prototype.clearPaint = function () {
-    core.clearMap('paint');
-    delete core.paint[core.status.floorId];
-    core.drawTip("已清空绘图内容");
-}
-
-actions.prototype.savePaint = function () {
-    var data = {};
-    for (var floorId in core.paint) {
-        if (core.paint[floorId])
-            data[floorId] = lzw_decode(core.paint[floorId]);
-    }
-    core.download(core.firstData.name + ".h5paint", JSON.stringify({
-        'name': core.firstData.name,
-        'paint': data
-    }));
-}
-
-actions.prototype.loadPaint = function () {
-    core.readFile(function (obj) {
-        if (obj.name != core.firstData.name) {
-            alert("绘图文件和游戏不一致！");
-            return;
-        }
-        if (!obj.paint) {
-            alert("无效的绘图文件！");
-            return;
-        }
-        core.paint = {};
-        for (var floorId in obj.paint) {
-            if (obj.paint[floorId])
-                core.paint[floorId] = lzw_encode(obj.paint[floorId]);
-        }
-
-        core.clearMap('paint');
-        var value = core.paint[core.status.floorId];
-        if (value) value = lzw_decode(value).split(",");
-        core.utils._decodeCanvas(value, 32 * core.bigmap.width, 32 * core.bigmap.height);
-        core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
-
-        core.drawTip("读取绘图文件成功");
-    })
-}
-
-actions.prototype.exitPaint = function () {
-    core.deleteCanvas('paint');
-    core.ui.closePanel();
-    core.statusBar.image.keyboard.style.opacity = 1;
-    core.statusBar.image.shop.style.opacity = 1;
-    core.drawTip("退出绘图模式");
-}
-
-actions.prototype._keyUpPaint = function (keycode) {
-    if (keycode == 27 || keycode == 88 || keycode == 77 || keycode == 13 || keycode == 32 || keycode == 67) {
-        this.exitPaint();
-        return;
-    }
-}
-
-////// 绘图相关 END //////

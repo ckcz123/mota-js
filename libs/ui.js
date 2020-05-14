@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /**
  * ui.js：负责所有和UI界面相关的绘制
  * 包括：
@@ -101,13 +103,15 @@ ui.prototype._fillTextWithMaxWidth = function (ctx, text, x, y, maxWidth) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
+ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (font) ctx.font = font;
     if (!style) style = ctx.fillStyle;
     if (style instanceof Array) style = core.arrayToRGBA(style);
-    ctx.fillStyle = '#000000';
+    if (!strokeStyle) strokeStyle = '#000000';
+    if (strokeStyle instanceof Array) strokeStyle = core.arrayToRGBA(strokeStyle);
+    ctx.fillStyle = strokeStyle;
     ctx.fillText(text, x-1, y-1);
     ctx.fillText(text, x-1, y+1);
     ctx.fillText(text, x+1, y-1);
@@ -118,7 +122,7 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, font) {
 
 ui.prototype._uievent_fillBoldText = function (data) {
     this._createUIEvent();
-    this.fillBoldText('uievent', core.replaceText(data.text), core.calValue(data.x), core.calValue(data.y), data.style, data.font);
+    this.fillBoldText('uievent', core.replaceText(data.text), core.calValue(data.x), core.calValue(data.y), data.style, data.strokeStyle, data.font);
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
@@ -356,23 +360,56 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
     if (!ctx) return [text];
     if (font) core.setFont(name, font);
 
+    // 不能在行首的标点
+    var forbidStart = "）)】》＞﹞>)]»›〕〉}］」｝〗』" + "，。？！：；·…,.?!:;、……~&@#～＆＠＃";
+    // 不能在行尾的标点
+    var forbidEnd = "（(【《＜﹝<([«‹〔〈{［「｛〖『";
+
     var contents = [];
     var last = 0;
+    var forceChangeLine = false; // 是否强制换行，避免多个连续forbidStart存在
     for (var i = 0; i < text.length; i++) {
         if (text.charAt(i) == '\n') {
             contents.push(text.substring(last, i));
             last = i + 1;
+            forceChangeLine = false;
         }
         else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
             contents.push(text.substring(last, i));
             last = i + 2;
+            forceChangeLine = false;
         }
         else {
+            var curr = text.charAt(i);
             var toAdd = text.substring(last, i + 1);
             var width = core.calWidth(name, toAdd);
             if (maxWidth && width > maxWidth) {
+                // --- 当前应当换行，然而还是检查一下是否是forbidStart
+                if (!forceChangeLine && forbidStart.indexOf(curr) >= 0) {
+                    forceChangeLine = true;
+                    continue;
+                }
                 contents.push(text.substring(last, i));
                 last = i;
+                forceChangeLine = false;
+            } else {
+                // --- 当前不应该换行；但是提前检查一下是否是行尾标点
+                var curr = text.charAt(i);
+                if (forbidEnd.indexOf(curr) >= 0 && i < text.length -1) {
+                    // 检查是否是行尾
+                    var nextcurr = text.charAt(i+1);
+                    // 确认不是手动换行
+                    if (nextcurr != '\n' && !(nextcurr == '\\' && text.charAt(i+2) == 'n')) {
+                        var toAdd = text.substring(last, i+2);
+                        var width = core.calWidth(name, toAdd);
+                        if (maxWidth && width > maxWidth) {
+                            // 下一项会换行，因此在此处换行
+                            contents.push(text.substring(last, i));
+                            last = i;
+                            forceChangeLine = false;
+                        }
+                    }
+                }
             }
         }
     }
@@ -411,7 +448,8 @@ ui.prototype._uievent_drawImage = function (data) {
         core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1));
 }
 
-ui.prototype.drawIcon = function (name, id, x, y, w, h) {
+ui.prototype.drawIcon = function (name, id, x, y, w, h, frame) {
+    frame = frame || 0;
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     var info = core.getBlockInfo(id);
@@ -421,7 +459,7 @@ ui.prototype.drawIcon = function (name, id, x, y, w, h) {
             info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
         else return;
     }
-    ctx.drawImage(info.image, 32 * info.posX, info.height * info.posY, 32, info.height, x, y, w || 32, h || info.height);
+    ctx.drawImage(info.image, 32 * (info.posX + frame), info.height * info.posY, 32, info.height, x, y, w || 32, h || info.height);
 }
 
 ui.prototype._uievent_drawIcon = function (data) {
@@ -431,13 +469,21 @@ ui.prototype._uievent_drawIcon = function (data) {
         id = core.calValue(data.id);
         if (typeof id !== 'string') id = data.id;
     } catch (e) { id = data.id; }
-    this.drawIcon('uievent', id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
+    this.drawIcon('uievent', id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.frame||0);
 }
 
 ///////////////// UI绘制
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
+    if (core.status.hero && core.status.hero.flags) {
+        // 清除全部临时变量
+        Object.keys(core.status.hero.flags).forEach(function (name) {
+            if (name.startsWith("@temp@")) {
+                delete core.status.hero.flags[name];
+            }
+        });
+    }
     this.clearUI();
     core.maps.generateGroundPattern();
     core.updateStatusBar(true);
@@ -458,14 +504,14 @@ ui.prototype.clearUI = function () {
 }
 
 ////// 左上角绘制一段提示 //////
-ui.prototype.drawTip = function (text, id, clear) {
-    this.clearTip();
+ui.prototype.drawTip = function (text, id, frame) {
     var one = {
         text: text,
         textX: 21,
         width: 26 + core.calWidth('data', text, "16px Arial"),
         opacity: 0.1,
         stage: 1,
+        frame: frame || 0,
         time: 0
     };
     if (id != null) {
@@ -473,7 +519,7 @@ ui.prototype.drawTip = function (text, id, clear) {
         if (info == null || !info.image) {
             // 检查状态栏图标
             if (core.statusBar.icons[id] instanceof Image) {
-                id = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
+                info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
             }
             else info = null;
         }
@@ -486,25 +532,21 @@ ui.prototype.drawTip = function (text, id, clear) {
             one.width += 24;
         }
     }
-    core.animateFrame.tips.list.push(one);
-    if (core.animateFrame.tips.list.length > 3) {
-        core.animateFrame.tips.list.shift();
-    }
+    core.animateFrame.tip = one;
 }
 
-ui.prototype._drawTip_drawOne = function (one, offset) {
-    core.setAlpha('data', one.opacity);
-    core.fillRect('data', 5, offset+ 5, one.width, 42, '#000000');
-    if (one.image)
-        core.drawImage('data', one.image, one.posX * 32, one.posY * one.height, 32, 32, 10, offset + 10, 32, 32);
-    core.fillText('data', one.text, one.textX, offset + 33, '#FFFFFF');
+ui.prototype._drawTip_drawOne = function (tip) {
+    core.setAlpha('data', tip.opacity);
+    core.fillRect('data', 5, 5, tip.width, 42, '#000000');
+    if (tip.image)
+        core.drawImage('data', tip.image, (tip.posX + tip.frame) * 32, tip.posY * tip.height, 32, 32, 10, 10, 32, 32);
+    core.fillText('data', tip.text, tip.textX, 33, '#FFFFFF');
     core.setAlpha('data', 1);
 }
 
 ui.prototype.clearTip = function () {
-    core.animateFrame.tips.list = [];
-    core.animateFrame.tips.offset = 0;
-    core.animateFrame.tips.lastSize = 0;
+    core.clearMap('data', 0, 0, this.PIXEL, 50);
+    core.animateFrame.tip = null;
 }
 
 ////// 地图中间绘制一段文字 //////
@@ -606,7 +648,7 @@ ui.prototype._getPosition = function (content) {
                 var str = s3.split(',');
                 px = py = null;
                 if (str.length == 1) {
-                    var follower = (core.status.hero.followers||[])[parseInt(str[0])-1];
+                    var follower = core.status.hero.followers[parseInt(str[0])-1];
                     if (follower) {
                         px = follower.x;
                         py = follower.y;
@@ -649,6 +691,14 @@ ui.prototype._uievent_drawSelector = function (data) {
     var ctx = core.createCanvas(canvasName, x, y, w, h, z);
     ctx.canvas.classList.add('_uievent_selector');
     this._drawSelector(ctx, background, w, h);
+}
+
+ui.prototype._clearUIEventSelector = function (codes) {
+    if (codes instanceof Array) {
+        codes.forEach(function (code) { core.ui._clearUIEventSelector(code); });
+        return;
+    }
+    core.deleteCanvas('_uievent_selector_' + (codes || 0));
 }
 
 ui.prototype._drawSelector = function (ctx, background, w, h, left, top) {
@@ -866,7 +916,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.index = 0;
     config.currcolor = config.color;
     config.currfont = config.fontSize;
-    config.lineMargin = Math.max(0, config.lineHeight - config.fontSize);
+    config.lineMargin = Math.max(Math.round(config.fontSize / 4), config.lineHeight - config.fontSize);
     config.topMargin = parseInt(config.lineMargin / 2);
     config.lineMaxHeight = config.lineMargin + config.fontSize;
     config.offsetX = 0;
@@ -906,9 +956,11 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
     var _drawNext = function () {
         if (config.index >= config.blocks.length) return false;
         var block = config.blocks[config.index++];
-        ctx.drawImage(tempCtx.canvas, block.left, block.top, block.width, block.height,
-            config.left + block.left + block.marginLeft, config.top + block.top + block.marginTop,
-            block.width, block.height);
+        if (block != null) {
+            ctx.drawImage(tempCtx.canvas, block.left, block.top, block.width, block.height,
+                config.left + block.left + block.marginLeft, config.top + block.top + block.marginTop,
+                block.width, block.height);
+        }
         return true;
     }
     if (config.time == 0) {
@@ -960,6 +1012,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
             tempCtx.font = this._buildFont(config.currfont, config.bold, config.italic);
             return true;
         }
+        if (c == 'z') return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // \\e 斜体切换
     if (ch == '\\' && content.charAt(config.index)=='e') {
@@ -993,6 +1046,7 @@ ui.prototype._drawTextContent_newLine = function (tempCtx, config) {
         marginLeft = totalWidth - width;
 
     config.blocks.forEach(function (b) {
+        if (b == null) return;
         if (b.line == config.line) {
             b.marginLeft = marginLeft;
             // b.marginTop = 0; // 上对齐
@@ -1037,6 +1091,23 @@ ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
     return this._drawTextContent_next(tempCtx, content, config);
 }
 
+ui.prototype._drawTextContent_emptyChar = function (tempCtx, content, config) {
+    config.index++;
+    var index = config.index, index2;
+    if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
+        var str = content.substring(index+1, index2);
+        if (/^\d+$/.test(str)) {
+            var value = parseInt(str);
+            for (var i = 0; i < value; ++i) {
+                config.blocks.push(null); // Empty char
+            }
+        } else config.blocks.push(null);
+        config.index = index2 + 1;
+    }
+    else config.blocks.push(null);
+    return this._drawTextContent_next(tempCtx, content, config);
+}
+
 ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
     // 绘制一个 \i 效果
     var index = config.index, index2;
@@ -1071,7 +1142,7 @@ ui.prototype.getTextContentHeight = function (content, config) {
 }
 
 ui.prototype._getRealContent = function (content) {
-    return content.replace(/(\r|\\(r|c|d|e))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
+    return content.replace(/(\r|\\(r|c|d|e|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
 }
 
 ////// 绘制一个对话框 //////
@@ -1165,7 +1236,7 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, 
 
 ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, posInfo, validWidth) {
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
-    var lineHeight = textAttribute.textfont + 6;
+    var lineHeight = textAttribute.lineHeight || (textAttribute.textfont + 6);
     var height = 45 + this.getTextContentHeight(content, {
         lineHeight: lineHeight, maxWidth: validWidth
     });
@@ -1416,7 +1487,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         core.fillText('ui', choices[i].text, offset, vPos.choice_top + 32 * i, color);
     }
 
-    if (choices.length>0) {
+    if (choices.length>0 && core.status.event.selection != 'none') {
         core.status.event.selection = core.status.event.selection || 0;
         while (core.status.event.selection < 0) core.status.event.selection += choices.length;
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
@@ -1442,7 +1513,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         core.status.event.data = {'yes': yesCallback, 'no': noCallback};
     }
 
-    if (core.status.event.selection != 0) core.status.event.selection = 1;
+    if (core.status.event.selection != 0 && core.status.event.selection != 'none') core.status.event.selection = 1;
     this.clearUI();
 
     core.setFont('ui', this._buildFont(19, true));
@@ -1458,14 +1529,15 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
 
     core.fillText('ui', "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
     core.fillText('ui', "取消", this.HPIXEL + 38, rect.bottom - 35);
-    var len=core.calWidth('ui', "确定");
-    var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
-
-    if (isWindowSkin)
-        this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
-    else
-        core.strokeRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, "#FFD700", 2);
-
+    if (core.status.event.selection != 'none') {
+        var len=core.calWidth('ui', "确定");
+        var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
+    
+        if (isWindowSkin)
+            this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+        else
+            core.strokeRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, "#FFD700", 2);
+    }
 }
 
 ui.prototype._drawConfirmBox_getRect = function (contents) {
@@ -1501,10 +1573,11 @@ ui.prototype.drawSwitchs = function() {
         " <     音量：" + Math.round(Math.sqrt(100 * core.musicStatus.userVolume)) + "     > ",
         //数值越大耗时越长
         " <   步时：" + core.values.moveSpeed + "   > ",
+        " <   转场：" + core.values.floorChangeTime + "   > ",
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
-        "新版存档： "+(core.platform.useLocalForage ? "[ON]":"[OFF]"),
+        "血瓶绕路： "+(core.hasFlag('__potionNoRouting__') ? "[ON]":"[OFF]"),
         "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];
@@ -1515,18 +1588,16 @@ ui.prototype.drawSwitchs = function() {
 ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
     this.drawChoices(null, [
-        "系统设置", "虚拟键盘", "浏览地图", "绘图模式", "同步存档", "游戏信息", "返回标题", "返回游戏"
+        "系统设置", "虚拟键盘", "浏览地图", "同步存档", "游戏信息", "返回标题", "返回游戏"
     ]);
 }
 
 ////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function () {
     core.status.event.id = 'selectShop';
-    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
-        return shopList[shopId].visited || !shopList[shopId].mustEnable
-    });
+    var shopList = core.status.shops, keys = core.listShopIds();
     var choices = keys.map(function (shopId) {
-        return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
+        return {"text": shopList[shopId].textInList, "color": core.isShopVisited(shopId) ? null : "#999999"};
     });
     choices.push("返回游戏");
     this.drawChoices(null, choices);
@@ -1738,9 +1809,9 @@ ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, posi
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
     // 获得第二行绘制的内容
     var second_line = [];
-    if (core.flags.enableMoney) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
     if (core.flags.enableAddPoint) second_line.push(["加点", core.formatBigNumber(enemy.point || 0)]);
-    if (core.flags.enableExperience) second_line.push(["经验", core.formatBigNumber(enemy.experience || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableExp')>=0) second_line.push(["经验", core.formatBigNumber(enemy.exp || 0)]);
 
     var damage_offset = col1 + (this.PIXEL - col1) / 2 - 12;
     // 第一列
@@ -2004,35 +2075,8 @@ ui.prototype.drawCenterFly = function () {
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
-    core.drawTip("请确认当前中心对称飞行器的位置");
+    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置");
     return;
-}
-
-////// 绘制全局商店
-ui.prototype.drawShop = function (shopId) {
-    var shop = core.status.shops[shopId];
-    var actions = [], fromList = (core.status.event.data||{}).fromList, selection = core.status.event.selection;
-    if (core.status.event.data && core.status.event.data.actions) actions=core.status.event.data.actions;
-
-    core.ui.closePanel();
-    core.lockControl();
-    core.status.event.id = 'shop';
-    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions, 'fromList': fromList};
-    core.status.event.selection = selection;
-
-    var times = shop.times, need=core.calValue(shop.need, null, null, times);
-    var content = "\t["+shop.name+","+shop.icon+"]" + core.replaceText(shop.text, need, times);
-    var use = shop.use=='experience'?'经验':'金币';
-    var choices = [];
-    for (var i=0;i<shop.choices.length;i++) {
-        var choice = shop.choices[i];
-        var text = core.replaceText(choice.text, need, times);
-        if (choice.need != null)
-            text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
-        choices.push({"text": text, "color":shop.visited?null:"#999999"});
-    }
-    choices.push("离开");
-    core.ui.drawChoices(content, choices);
 }
 
 ////// 绘制浏览地图界面 //////
@@ -2046,15 +2090,6 @@ ui.prototype.drawMaps = function (index, x, y) {
     var data = this._drawMaps_buildData(index, x, y);
     core.drawThumbnail(data.floorId, null, {damage: data.damage},
         {ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
-    // 绘图
-    if (data.paint) {
-        var offsetX = 32 * (data.x - this.HSIZE), offsetY = 32 * (data.y - this.HSIZE);
-        var value = core.paint[data.floorId];
-        if (value) value = lzw_decode(value).split(",");
-        core.utils._decodeCanvas(value, 32 * data.mw, 32 * data.mh);
-        core.drawImage('ui', core.bigmap.tempCanvas.canvas, offsetX * 32, offsetY * 32,
-            this.PIXEL, this.PIXEL, 0, 0, this.PIXEL, this.PIXEL);
-    }
     core.clearMap('data');
     core.setTextAlign('data', 'left');
     core.setFont('data', '16px Arial');
@@ -2081,14 +2116,13 @@ ui.prototype._drawMaps_drawHint = function () {
     stroke(per, this.SIZE - per - 3, 9, 3); // next
     stroke(0, 0, per-1, per-1); // left top
     stroke(this.SIZE-(per - 1), 0, per-1, per-1); // right top
-    stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
+    // stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
 
     core.setTextBaseline('ui', 'middle');
     core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, '#FFD700', '20px Arial');
     core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
     core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
     core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
-    core.fillText('ui', 'M', (per-1)*16, this.PIXEL - (per-1)*16);
 
     var top = this.HPIXEL - 66, left = per * 16, right = this.PIXEL - left;
     var lt = ["左", "移", "地", "图", "[A]"], rt = ["右", "移", "地", "图", "[D]"];
@@ -2100,17 +2134,15 @@ ui.prototype._drawMaps_drawHint = function () {
     core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - (32 * per + 48));
 
     core.fillText('ui', "退出 [ESC / ENTER]", this.HPIXEL, this.HPIXEL);
-    core.fillText('ui', "[X] 可查看怪物手册", this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
+    core.fillText('ui', "[X] 可查看" + core.material.items['book'].name, this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
 
     core.setTextBaseline('ui', 'alphabetic');
 }
 
 ui.prototype._drawMaps_buildData = function (index, x, y) {
     var damage = (core.status.event.data||{}).damage;
-    var paint =  (core.status.event.data||{}).paint;
     var all = (core.status.event.data||{all: true}).all;
     if (index.damage != null) damage=index.damage;
-    if (index.paint != null) paint=index.paint;
     if (index.all != null) all=index.all;
     if (index.index != null) { x=index.x; y=index.y; index=index.index; }
     index = core.clamp(index, 0, core.floorIds.length-1);
@@ -2123,7 +2155,7 @@ ui.prototype._drawMaps_buildData = function (index, x, y) {
     y = core.clamp(y, this.HSIZE, mh - this.HSIZE - 1);
 
     core.status.event.data = {index: index, x: x, y: y, floorId: floorId, mw: mw, mh: mh,
-                              damage: damage, paint: paint, all: all };
+                              damage: damage, all: all };
     return core.status.event.data;
 }
 
@@ -2160,8 +2192,10 @@ ui.prototype._drawToolbox_getInfo = function (index) {
     if (!core.status.event.data || core.status.event.data.toolsPage == null)
         core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
     // 获取物品列表
-    var tools = Object.keys(core.status.hero.items.tools).sort();
-    var constants = Object.keys(core.status.hero.items.constants).sort();
+    var tools = Object.keys(core.status.hero.items.tools)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var constants = Object.keys(core.status.hero.items.constants)
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
     // 处理页数
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
@@ -2377,15 +2411,8 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
     // --- 变化值...
     core.setFont('ui', this._buildFont(14, true));
     for (var name in compare) {
-        var img = core.statusBar.icons[name];
-        var text = core.getStatusName(name);
-        if (img && core.flags.iconInEquipbox) { // 绘制图标
-            core.drawImage('ui', img, 0, 0, 32, 32, obj.drawOffset, obj.y - 13, 16, 16);
-            obj.drawOffset += 20;
-        }
-        else { // 绘制文字
-            this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
-        }
+        var text = this._drawEquipbox_getStatusName(name);
+        this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
         var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (core.getStatus(name) + compare[name]) * core.getBuff(name);
         if (equip.equip.percentage) {
             var nowBuff = core.getBuff(name), newBuff = nowBuff + compare[name] / 100;
@@ -2398,6 +2425,14 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         this._drawEquipbox_drawStatusChanged_draw(newValue, compare[name]>0?'#00FF00':'#FF0000', obj);
         obj.drawOffset += 8;
     }
+}
+
+ui.prototype._drawEquipbox_getStatusName = function (name) {
+    var map = {
+        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
+        atk: "攻击", def: "防御", mdef: "护盾", money: "金币", exp: "经验", exp: "经验", steps: "步数"
+    };
+    return map[name] || name;
 }
 
 ui.prototype._drawEquipbox_drawStatusChanged_draw = function (text, color, obj) {
@@ -2531,7 +2566,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
         core.fillText('ui', v, x, y+30+size, '#FFD700');
-        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.__consoleOpened__||data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
+        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
     }
     else {
         core.fillRect('ui', x-size/2, y+15, size, size, '#333333', 2);
@@ -2632,10 +2667,10 @@ ui.prototype.drawStatistics = function (floorIds) {
         +"，总游戏时长"+core.formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
         +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
-        +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.experience)+"点经验。\n\n"
+        +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.exp)+"点经验。\n\n"
         +"受到的总伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
         +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
-        +(core.flags.enableDebuff?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
+        +(core.flags.statusBarItems.indexOf('enableDebuff')>=0?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
         +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
         "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 不会计算“不可被浏览地图”的隐藏层的数据。\n" +
         "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n"+
@@ -2663,7 +2698,7 @@ ui.prototype._drawStatistics_buildObj = function () {
         else cls[e] = core.material.items[e].cls;
         cnt[e] = 0;
     })
-    var order = ["doors", "keys", "items", "tools", "constants", "equips"];
+    var order = ["doors", "items", "tools", "constants", "equips"];
     ids.sort(function (a, b) {
         var c1 = order.indexOf(cls[a]), c2 = order.indexOf(cls[b]);
         if (c1==c2) return ori.indexOf(a)-ori.indexOf(b);
@@ -2671,7 +2706,7 @@ ui.prototype._drawStatistics_buildObj = function () {
     });
     var obj = {
         'monster': {
-            'count': 0, 'money': 0, 'experience': 0, 'point': 0,
+            'count': 0, 'money': 0, 'exp': 0, 'point': 0,
         },
         'count': cnt,
         'add': {
@@ -2708,7 +2743,7 @@ ui.prototype._drawStatistics_floorId = function (floorId, obj) {
 ui.prototype._drawStatistics_enemy = function (floorId, id, obj) {
     var enemy = core.material.enemys[id];
     this._drawStatistics_add(floorId, obj, 'monster', 'money', enemy.money);
-    this._drawStatistics_add(floorId, obj, 'monster', 'experience', enemy.experience);
+    this._drawStatistics_add(floorId, obj, 'monster', 'exp', enemy.exp);
     this._drawStatistics_add(floorId, obj, 'monster', 'point', enemy.point);
     this._drawStatistics_add(floorId, obj, 'monster', 'count', 1);
 }
@@ -2737,7 +2772,7 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
         var t = "";
         if (atk > 0) t += atk + "攻";
         if (def > 0) t += def + "防";
-        if (mdef > 0) t += mdef + "魔防";
+        if (mdef > 0) t += mdef + "护盾";
         if (t != "") obj.ext[id] = t;
     }
     this._drawStatistics_add(floorId, obj, 'count', id, 1);
@@ -2750,8 +2785,8 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
 ui.prototype._drawStatistics_generateText = function (obj, type, data) {
     var text = type+"地图中：\n";
     text += "共有怪物"+data.monster.count+"个";
-    if (core.flags.enableMoney) text+="，总金币数"+data.monster.money;
-    if (core.flags.enableExperience) text+="，总经验数"+data.monster.experience;
+    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) text+="，总金币数"+data.monster.money;
+    if (core.flags.statusBarItems.indexOf('enableExp')>=0) text+="，总经验数"+data.monster.exp;
     if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
     text+="。\n";
 
@@ -2765,69 +2800,24 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
         }
         else text += "，";
         prev = obj.cls[key];
-        text+=core.ui._drawStatistics_getName(key)+value+"个";
+        var name = ((core.material.items[key] || (core.getBlockById(key) || {}).event)||{}).name || key;
+        text+=name+value+"个";
         if (obj.ext[key])
             text+="("+obj.ext[key]+")";
     })
     if (prev!="") text+="。";
 
-    text+="\n\n";
+    text+="\n";
     text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
         +core.formatBigNumber(data.add.atk)+"点，防御"
-        +core.formatBigNumber(data.add.def)+"点，魔防"
+        +core.formatBigNumber(data.add.def)+"点，护盾"
         +core.formatBigNumber(data.add.mdef)+"点。";
     return text;
-}
-
-ui.prototype._drawStatistics_getName = function (key) {
-    return {"yellowDoor": "黄门", "blueDoor": "蓝门", "redDoor": "红门", "greenDoor": "绿门",
-            "steelDoor": "铁门"}[key] || core.material.items[key].name;
 }
 
 ////// 绘制“关于”界面 //////
 ui.prototype.drawAbout = function () {
     return this.uidata.drawAbout();
-}
-
-////// 绘制“画图”界面 //////
-ui.prototype.drawPaint = function () {
-    core.drawText(
-        "\t[进入绘图模式]你可以在此页面上任意进行绘图和标记操作。\nM键可以进入或退出此模式。\n\n"+
-        "绘图的内容会自动保存，且以页面为生命周期，和存读档无关，重新开始游戏或读档后绘制的内容仍有效，但刷新页面就会消失。\n"+
-        "你可以将绘制内容保存到文件，也可以从文件读取保存的绘制内容。\n"+
-        "浏览地图页面可以按楼传按钮或M键来开启/关闭该层的绘图显示。\n\n更多功能请详见文档-元件-绘图模式。",
-        this._drawPaint_draw
-    );
-}
-
-ui.prototype._drawPaint_draw = function () {
-    core.drawTip("打开绘图模式，现在可以任意在界面上绘图标记");
-
-    core.lockControl();
-    core.status.event.id = 'paint';
-    core.status.event.data = {"x": null, "y": null, "erase": false};
-
-    core.clearUI();
-    core.createCanvas('paint', -core.bigmap.offsetX, -core.bigmap.offsetY, 32*core.bigmap.width, 32*core.bigmap.height, 95);
-
-    // 将已有的内容绘制到route上
-    var value = core.paint[core.status.floorId];
-    if (value) value = lzw_decode(value).split(",");
-    core.utils._decodeCanvas(value, 32*core.bigmap.width, 32*core.bigmap.height);
-    core.drawImage('paint', core.bigmap.tempCanvas.canvas, 0, 0);
-
-    core.setLineWidth('paint', 3);
-    core.setStrokeStyle('paint', '#FF0000');
-
-    core.statusBar.image.keyboard.style.opacity = 0;
-    core.statusBar.image.shop.style.opacity = 0;
-
-    core.statusBar.image.book.src = core.statusBar.icons.paint.src;
-    core.statusBar.image.fly.src = core.statusBar.icons.erase.src;
-    core.statusBar.image.toolbox.src = core.statusBar.icons.empty.src;
-    core.statusBar.image.settings.src = core.statusBar.icons.exit.src;
-    core.statusBar.image.book.style.opacity = 1;
-    core.statusBar.image.fly.style.opacity = 1;
 }
 
 ////// 绘制帮助页面 //////
@@ -2844,13 +2834,13 @@ ui.prototype.drawHelp = function () {
         core.drawText([
             "\t[键盘快捷键列表]"+
             "[CTRL] 跳过对话   [Z] 转向\n" +
-            "[X] 怪物手册   [G] 楼层传送\n" +
-            "[A] 读取自动存档   [S/D] 存读档页面\n" +
+            "[X] "+core.material.items['book'].name + "   [G] "+core.material.items['fly'].name+"\n" +
+            "[A] 读取自动存档   [W] 撤销读取自动存档\n" + 
+            "[S/D] 存读档页面   [SPACE] 轻按\n" +
             "[V] 快捷商店   [ESC] 系统菜单\n" +
             "[T] 道具页面   [Q] 装备页面\n" +
             "[B] 数据统计   [H] 帮助页面\n" +
             "[R] 回放录像   [E] 显示光标\n" +
-            "[SPACE] 轻按   [M] 绘图模式\n" +
             "[N] 返回标题页面   [P] 游戏主页\n" +
             "[O] 查看工程   [F7] 打开debug穿墙模式\n" +
             "[PgUp/PgDn] 浏览地图\n"+

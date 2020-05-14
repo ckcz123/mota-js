@@ -52,6 +52,7 @@ function editor() {
         left1 : document.getElementById('left1'),
         editModeSelect :document.getElementById('editModeSelect'),
         mid2 : document.getElementById('mid2'),
+        clearLastUsedBtn: document.getElementById('clearLastUsedBtn'),
         lastUsedDiv: document.getElementById('lastUsedDiv'),
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
@@ -182,7 +183,6 @@ editor.prototype.init = function (callback) {
             core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
                 afterCoreReset();
             }, true);
-            core.events.setInitData(null);
         });
     }
 
@@ -298,7 +298,7 @@ editor.prototype.drawEventBlock = function () {
                 && loc == firstData.hero.loc.x + "," + firstData.hero.loc.y) {
                 fg.textAlign = 'center';
                 editor.game.doCoreFunc('fillBoldText', fg, 'S',
-                    32 * i + 16, 32 * j + 28, '#FFFFFF', 'bold 30px Verdana');
+                    32 * i + 16, 32 * j + 28, '#FFFFFF', null, 'bold 30px Verdana');
             }
             if (editor.currentFloorData.events[loc])
                 color.push('#FF0000');
@@ -329,7 +329,7 @@ editor.prototype.drawEventBlock = function () {
             if (index >= 0) {
                 fg.textAlign = 'right';
                 editor.game.doCoreFunc("fillBoldText", fg, index + 1,
-                    32 * i + 28, 32 * j + 15, '#FF7F00', '14px Verdana');
+                    32 * i + 28, 32 * j + 15, '#FF7F00', null, '14px Verdana');
             }
         }
     }
@@ -629,7 +629,7 @@ editor.prototype.buildMark = function(){
     }
 }
 
-editor.prototype.setSelectBoxFromInfo=function(thisevent){
+editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
     var pos={x: 0, y: 0, images: "terrains"};
     var ysize = 32;
     if(thisevent==0){
@@ -645,6 +645,10 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
             pos.y %= editor.uivalues.foldPerCol;
         }
         if(pos.x == 0) pos.y+=2;
+    }
+    if (!editor.isMobile && scrollTo) {
+        editor.dom.iconLib.scrollLeft = pos.x * 32 - editor.dom.iconLib.offsetWidth / 2;
+        editor.dom.iconLib.scrollTop = pos.y * ysize - editor.dom.iconLib.offsetHeight / 2;
     }
     editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
     editor.dom.dataSelection.style.top = pos.y * ysize + 'px';

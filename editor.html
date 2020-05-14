@@ -359,7 +359,7 @@
         </div>
     </div>
     <div id="mid2">
-        <p style="margin: 10px">最近使用的图块列表：</p>
+        <p style="margin: 10px">最近使用的图块列表（Ctrl+滚轮放缩） <button id='clearLastUsedBtn'>清除</button></p>
         <div class="map" id="lastUsedDiv">
             <canvas id='lastUsed' width='416' height='416' style="overflow: hidden"></canvas>
         </div>
@@ -453,9 +453,9 @@
             <img id="img-money">
             <p class='statusLabel statusText' id='money'></p>
         </div>
-        <div class="status" id="experienceCol">
-            <img id="img-experience">
-            <p class='statusLabel statusText' id='experience'></p>
+        <div class="status" id="expCol">
+            <img id="img-exp">
+            <p class='statusLabel statusText' id='exp'></p>
         </div>
         <div class="status" id="upCol">
             <img id="img-up">
@@ -469,6 +469,7 @@
             <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
             <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
             <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
+            <span class='statusLabel' id='greenKey' style="color:#88FF88"></span>
         </div>
         <div class="status" id='pzfCol'>
             <span class='statusLabel' id='pickaxe' style="color: #BC6E27"></span>
@@ -572,7 +573,6 @@
 <script src='_server/editor_util.js'></script>
 <script src='_server/editor_game.js'></script>
 <script src='_server/editor_file.js'></script>
-<script src='_server/editor_file_unsorted.js'></script>
 <script src='_server/editor_table.js'></script>
 <script src='_server/editor_mode.js'></script>
 <script src='_server/editor_ui.js'></script>
@@ -580,7 +580,6 @@
 <script src='_server/editor_datapanel.js'></script>
 <script src='_server/editor_materialpanel.js'></script>
 <script src='_server/editor_listen.js'></script>
-<script src='_server/editor_legacy.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
 <script src='libs/thirdparty/zip.min.js'></script>

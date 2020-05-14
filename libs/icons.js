@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 "use strict";
 
 function icons() {
@@ -23,6 +25,15 @@ icons.prototype.getClsFromId = function (id) {
             return cls;
     }
     return null;
+}
+
+icons.prototype.getAllIconIds = function () {
+    if (this.allIconIds) return this.allIconIds;
+    this.allIconIds = [];
+    for (var type in this.icons) {
+        this.allIconIds = this.allIconIds.concat(Object.keys(this.icons[type]));
+    }
+    return this.allIconIds;
 }
 
 icons.prototype._getAnimateFrames = function (cls, useOriginValue) {

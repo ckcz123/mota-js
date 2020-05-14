@@ -6,6 +6,197 @@ editor_datapanel_wrapper = function (editor) {
     //////////////////// 地图编辑 //////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
+    // 由于历史遗留原因, 以下变量作为全局变量使用
+    // pout exportMap mapEditArea mapEditArea copyMap clearMapButton deleteMap
+    window.pout = document.getElementById('pout')
+    window.exportMap = document.getElementById('exportMap')
+    exportMap.isExport=false
+    exportMap.onclick=function(){
+        editor.updateMap();
+        var sx=editor.map.length-1,sy=editor.map[0].length-1;
+
+        var filestr = '';
+        for (var yy = 0; yy <= sy; yy++) {
+            filestr += '['
+            for (var xx = 0; xx <= sx; xx++) {
+                var mapxy = editor.map[yy][xx];
+                if (typeof(mapxy) == typeof({})) {
+                    if ('idnum' in mapxy) mapxy = mapxy.idnum;
+                    else {
+                        // mapxy='!!?';
+                        tip.whichShow(3);
+                        return;
+                    }
+                } else if (typeof(mapxy) == 'undefined') {
+                    tip.whichShow(3);
+                    return;
+                }
+                mapxy = String(mapxy);
+                mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
+                filestr += mapxy + (xx == sx ? '' : ',')
+            }
+
+            filestr += ']' + (yy == sy ? '' : ',\n');
+        }
+        pout.value = filestr;
+        mapEditArea.mapArr(filestr);
+        exportMap.isExport = true;
+        mapEditArea.error(0);
+        tip.whichShow(2);
+    }
+    window.mapEditArea = document.getElementById('mapEditArea')
+    mapEditArea.errors=[ // 编号1,2
+        "格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)",
+        "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！"
+    ]
+    mapEditArea.formatTimer=null
+    mapEditArea._mapArr=''
+    mapEditArea.mapArr=function(value){
+        if(value!=null){
+            var val=value
+            var oldval=mapEditArea._mapArr
+            if (val==oldval) return;
+
+            if (exportMap.isExport) {
+                exportMap.isExport = false;
+                return;
+            }
+            if (mapEditArea.formatArr()) {
+                mapEditArea.error(0);
+
+                setTimeout(function () {
+                    if (mapEditArea.formatArr())mapEditArea.mapArr(mapEditArea.formatArr());
+                    mapEditArea.drawMap();
+                    tip.whichShow(8)
+                }, 1000);
+                clearTimeout(mapEditArea.formatTimer);
+                mapEditArea.formatTimer = setTimeout(function () {
+                    pout.value = mapEditArea.formatArr();
+                }, 5000); //5s后再格式化，不然光标跳到最后很烦
+            } else {
+                mapEditArea.error(1);
+            }
+
+            mapEditArea._mapArr=value
+        }
+        return mapEditArea._mapArr
+    }
+    pout.oninput=function(){
+        mapEditArea.mapArr(pout.value)
+    }
+    mapEditArea._error=0
+    mapEditArea.error=function(value){
+        if(value!=null){
+            mapEditArea._error=value
+            if (value>0)
+            printe(mapEditArea.errors[value-1])
+        }
+        return mapEditArea._error
+    }
+    mapEditArea.drawMap= function () {
+        // var mapArray = mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ');
+        var mapArray = JSON.parse('[' + mapEditArea.mapArr() + ']');
+        var sy=editor.map.length,sx=editor.map[0].length;
+        for (var y = 0; y < sy; y++)
+            for (var x = 0; x < sx; x++) {
+                var num = mapArray[y][x];
+                if (num == 0)
+                    editor.map[y][x] = 0;
+                else if (typeof(editor.indexs[num][0]) == 'undefined') {
+                    mapEditArea.error(2);
+                    editor.map[y][x] = undefined;
+                } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
+            }
+
+        editor.updateMap();
+
+    }
+    mapEditArea.formatArr= function () {
+        var formatArrStr = '';
+        console.log(1)
+        
+        var si=editor.map.length,sk=editor.map[0].length;
+        if (mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
+        var arr = mapEditArea.mapArr().replace(/\s+/g, '').split('],[');
+
+        if (arr.length != si) return;
+        for (var i = 0; i < si; i++) {
+            var a = [];
+            formatArrStr += '[';
+            if (i == 0 || i == si-1) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+            else a = arr[i].split(/\D+/);
+            if (a.length != sk) {
+                formatArrStr = '';
+                return;
+            }
+
+            for (var k = 0; k < sk; k++) {
+                var num = parseInt(a[k]);
+                formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk-1 ? '' : ',');
+            }
+            formatArrStr += ']' + (i == si-1 ? '' : ',\n');
+        }
+        return formatArrStr;
+    }
+    window.copyMap=document.getElementById('copyMap')
+    copyMap.err=''
+    copyMap.onclick=function(){
+        tip.whichShow(0);
+        if (pout.value.trim() != '') {
+            if (mapEditArea.error()) {
+                copyMap.err = mapEditArea.errors[mapEditArea.error() - 1];
+                tip.whichShow(5)
+                return;
+            }
+            try {
+                pout.focus();
+                pout.setSelectionRange(0, pout.value.length);
+                document.execCommand("Copy");
+                tip.whichShow(6);
+            } catch (e) {
+                copyMap.err = e;
+                tip.whichShow(5);
+            }
+        } else {
+            tip.whichShow(7);
+        }
+    }
+    window.clearMapButton=document.getElementById('clearMapButton')
+    clearMapButton.onclick=function () {
+        editor.mapInit();
+        editor_mode.onmode('');
+        editor.file.saveFloorFile(function (err) {
+            if (err) {
+                printe(err);
+                throw(err)
+            }
+            ;printf('地图清除成功');
+        });
+        editor.updateMap();
+        clearTimeout(mapEditArea.formatTimer);
+        clearTimeout(tip.timer);
+        pout.value = '';
+        mapEditArea.mapArr('');
+        tip.whichShow(4);
+        mapEditArea.error(0);
+    }
+    window.deleteMap=document.getElementById('deleteMap')
+    deleteMap.onclick=function () {
+        editor_mode.onmode('');
+        var index = core.floorIds.indexOf(editor.currentFloorId);
+        if (index>=0) {
+            core.floorIds.splice(index,1);
+            editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
+                if (objs_.slice(-1)[0] != null) {
+                    printe(objs_.slice(-1)[0]);
+                    throw(objs_.slice(-1)[0])
+                }
+                ;printe('删除成功,请F5刷新编辑器生效');
+            });
+        }
+        else printe('删除成功,请F5刷新编辑器生效');
+    }
+
 
     editor.uifunctions.newMap_func = function () {
 
@@ -162,8 +353,8 @@ editor_datapanel_wrapper = function (editor) {
                     printe('不合法的idnum');
                     return;
                 }
-                if (!/^[0-9a-zA-Z_]+$/.test(id)) {
-                    printe('不合法的id，请使用字母、数字或下划线')
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) {
+                    printe('不合法的id，请使用字母、数字或下划线，且不能以数字开头');
                     return;
                 }
                 editor.file.changeIdAndIdnum(id, idnum, editor_mode.info, function (err) {
@@ -193,8 +384,8 @@ editor_datapanel_wrapper = function (editor) {
         changeId.children[1].onclick = function () {
             var id = changeId.children[0].value;
             if (id) {
-                if (!/^[0-9a-zA-Z_]+$/.test(id)) {
-                    printe('不合法的id，请使用字母、数字或下划线')
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(id)) {
+                    printe('不合法的id，请使用字母、数字或下划线，且不能以数字开头')
                     return;
                 }
                 editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {

@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 "use strict";
 
 function items() {
@@ -22,35 +24,6 @@ items.prototype._init = function () {
 ////// 获得所有道具 //////
 items.prototype.getItems = function () {
     return core.clone(this.items);
-}
-
-items.prototype._resetItems = function () {
-    // 只有运行时才能执行此函数！
-    if (main.mode != 'play') return;
-
-    // 根据flag来对道具进行修改
-    if (core.flags.bigKeyIsBox) {
-        core.material.items.bigKey.cls = 'items';
-        core.material.items.bigKey.name = '钥匙盒';
-    }
-    if (core.flags.pickaxeFourDirections)
-        core.material.items.pickaxe.text = "可以破坏勇士四周的墙";
-    if (core.flags.bombFourDirections)
-        core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
-    if (core.flags.snowFourDirections)
-        core.material.items.snow.text = "可以将四周的熔岩变成平地";
-    if (core.flags.equipment) {
-        core.material.items.sword1.cls = 'equips';
-        core.material.items.sword2.cls = 'equips';
-        core.material.items.sword3.cls = 'equips';
-        core.material.items.sword4.cls = 'equips';
-        core.material.items.sword5.cls = 'equips';
-        core.material.items.shield1.cls = 'equips';
-        core.material.items.shield2.cls = 'equips';
-        core.material.items.shield3.cls = 'equips';
-        core.material.items.shield4.cls = 'equips';
-        core.material.items.shield5.cls = 'equips';
-    }
 }
 
 ////// “即捡即用类”道具的使用效果 //////
@@ -79,6 +52,7 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
                 main.log(e);
             }
         }
+        core.updateStatusBar();
     }
     else {
         core.addItem(itemId, itemNum);
@@ -145,9 +119,6 @@ items.prototype._afterUseItem = function (itemId) {
         core.status.hero.items[itemCls][itemId]--;
     if (core.status.hero.items[itemCls][itemId] <= 0)
         delete core.status.hero.items[itemCls][itemId];
-
-    if (!core.status.event.id)
-        core.status.event.ui = null;
     core.updateStatusBar();
 }
 
@@ -156,21 +127,15 @@ items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
 
-    var able = false;
     if (itemId in this.canUseItemEffect) {
         try {
-            able = eval(this.canUseItemEffect[itemId]);
+            return eval(this.canUseItemEffect[itemId]);
         }
         catch (e) {
             main.log(e);
+            return false;
         }
     }
-    if (!able) {
-        core.status.event.data = null;
-        core.status.event.ui = null;
-    }
-
-    return able;
 }
 
 ////// 获得某个物品的个数 //////
@@ -209,8 +174,7 @@ items.prototype.setItem = function (itemId, itemNum) {
 
     core.status.hero.items[itemCls][itemId] = itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
 }
@@ -226,8 +190,7 @@ items.prototype.addItem = function (itemId, itemNum) {
     }
     core.status.hero.items[itemCls][itemId] += itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     // 永久道具只能有一个
     if (itemCls == 'constants' && core.status.hero.items[itemCls][itemId] > 1)
@@ -242,8 +205,7 @@ items.prototype.removeItem = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     core.status.hero.items[itemCls][itemId] -= itemNum;
     if (core.status.hero.items[itemCls][itemId] <= 0) {
-        if (itemCls != 'keys') delete core.status.hero.items[itemCls][itemId];
-        else core.status.hero.items[itemCls][itemId] = 0;
+        delete core.status.hero.items[itemCls][itemId];
     }
     core.updateStatusBar();
     return true;

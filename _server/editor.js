@@ -149,7 +149,7 @@ editor.prototype.init = function (callback) {
     var useCompress = main.useCompress;
     main.useCompress = false;
     editor.airwallImg = new Image();
-    editor.airwallImg.src = './project/images/airwall.png';
+    editor.airwallImg.src = './project/materials/airwall.png';
 
     main.init('editor', function () {
         editor.config = new editor_config();

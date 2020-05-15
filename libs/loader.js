@@ -39,7 +39,7 @@ loader.prototype._load = function (callback) {
 }
 
 loader.prototype._loadIcons = function () {
-    this.loadImage("icons.png", function (id, image) {
+    this.loadImage("materials", "icons.png", function (id, image) {
         var images = core.splitImage(image);
         for (var key in core.statusBar.icons) {
             if (typeof core.statusBar.icons[key] == 'number') {
@@ -54,9 +54,9 @@ loader.prototype._loadIcons = function () {
 loader.prototype._loadMaterialImages = function (callback) {
     this._setStartLoadTipText("正在加载资源文件...");
     if (main.useCompress) {
-        this.loadImagesFromZip('project/images/materials.h5data', core.materials, core.material.images, callback);
+        this.loadImagesFromZip('project/materials/materials.h5data', core.materials, core.material.images, callback);
     } else {
-        this.loadImages(core.materials, core.material.images, callback);
+        this.loadImages("materials", core.materials, core.material.images, callback);
     }
 }
 
@@ -64,8 +64,6 @@ loader.prototype._loadExtraImages = function (callback) {
     core.material.images.images = {};
 
     var images = core.clone(core.images);
-    if (images.indexOf("hero.png") < 0)
-        images.push("hero.png");
 
     this._setStartLoadTipText("正在加载图片文件...");
     if (main.useCompress) {
@@ -79,14 +77,14 @@ loader.prototype._loadExtraImages = function (callback) {
 
         this.loadImagesFromZip('project/images/images.h5data', images, core.material.images.images, callback);
         gifs.forEach(function (gif) {
-            this.loadImage(gif, function (id, image) {
+            this.loadImage("images", gif, function (id, image) {
                 if (image != null) {
                     core.material.images.images[gif] = image;
                 }
             });
         }, this);
     } else {
-        this.loadImages(images, core.material.images.images, callback);
+        this.loadImages("images", images, core.material.images.images, callback);
     }
 }
 
@@ -107,9 +105,9 @@ loader.prototype._loadAutotiles = function (callback) {
     }
     this._setStartLoadTipText("正在加载自动元件...");
     if (main.useCompress) {
-        this.loadImagesFromZip('project/images/autotiles.h5data', keys, autotiles, _callback);
+        this.loadImagesFromZip('project/autotiles/autotiles.h5data', keys, autotiles, _callback);
     } else {
-        this.loadImages(keys, autotiles, _callback);
+        this.loadImages("autotiles", keys, autotiles, _callback);
     }
 }
 
@@ -131,20 +129,20 @@ loader.prototype._loadTilesets = function (callback) {
     }
     this._setStartLoadTipText("正在加载额外素材...");
     if (main.useCompress) {
-        this.loadImagesFromZip('project/images/tilesets.h5data', core.tilesets, core.material.images.tilesets, _callback);
+        this.loadImagesFromZip('project/tilesets/tilesets.h5data', core.tilesets, core.material.images.tilesets, _callback);
     } else {
-        this.loadImages(core.tilesets, core.material.images.tilesets, _callback);
+        this.loadImages("tilesets", core.tilesets, core.material.images.tilesets, _callback);
     }
 }
 
-loader.prototype.loadImages = function (names, toSave, callback) {
+loader.prototype.loadImages = function (dir, names, toSave, callback) {
     if (!names || names.length == 0) {
         if (callback) callback();
         return;
     }
     var items = 0;
     for (var i = 0; i < names.length; i++) {
-        this.loadImage(names[i], function (id, image) {
+        this.loadImage(dir, names[i], function (id, image) {
             core.loader._setStartLoadTipText('正在加载图片 ' + id + "...");
             if (toSave[id] !== undefined) {
                 if (image != null)
@@ -192,7 +190,7 @@ loader.prototype.loadImagesFromZip = function (url, names, toSave, callback) {
     });
 }
 
-loader.prototype.loadImage = function (imgName, callback) {
+loader.prototype.loadImage = function (dir, imgName, callback) {
     try {
         var name = imgName;
         if (name.indexOf(".") < 0)
@@ -204,7 +202,7 @@ loader.prototype.loadImage = function (imgName, callback) {
         image.onerror = function () {
             callback(imgName, null);
         }
-        image.src = 'project/images/' + name + "?v=" + main.version;
+        image.src = 'project/' + dir + '/' + name + "?v=" + main.version;
         if (name.endsWith('.gif'))
             callback(imgName, null);
     }
@@ -313,7 +311,7 @@ loader.prototype.loadOneMusic = function (name) {
     var music = new Audio();
     music.preload = 'none';
     if (main.bgmRemote) music.src = main.bgmRemoteRoot + core.firstData.name + '/' + name;
-    else music.src = 'project/sounds/' + name;
+    else music.src = 'project/bgms/' + name;
     music.loop = 'loop';
     core.material.bgms[name] = music;
 }

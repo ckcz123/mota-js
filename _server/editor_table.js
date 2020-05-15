@@ -61,7 +61,7 @@ editor_table_wrapper = function (editor) {
         var rule = tokenlist.join("-");
         tokenlist.pop();
         var self = tokenlist.join("-");
-        var status = tokenPool.check(rule);
+        var status = !!tokenPool[rule];
         return /* html */`<tr data-gap="${rule}" data-field="${self}">
             <td>----</td>
             <td>----</td>
@@ -359,35 +359,16 @@ editor_table_wrapper = function (editor) {
         }
     }
 
-    tokenPool = new class {
+    var tokenPool = {};
+    var tokenstyle = document.createElement("style");
+    document.body.appendChild(tokenstyle);
 
-        constructor() {
-            this.pool = new Set();
-            this.style = document.createElement("style");
-            document.body.appendChild(this.style);
-        }
-
-        add(token) {
-            this.pool.add(token);
-            this.render();
-        }
-
-        remove(token) {
-            this.pool.delete(token);
-            this.render();
-        }
-
-        render() {
-            var content = "";
-            this.pool.forEach((k) => {
-                content += /* CSS */`[data-field|=${k}]{ display: none }`;
-            })
-            this.style.innerHTML = content;
-        }
-
-        check(token) {
-            return this.pool.has(token);
-        }
+    tokenPoolRender = function() {
+        var content = "";
+        Object.keys(tokenPool).forEach(function(k) {
+            content += /* CSS */`[data-field|=${k}]{ display: none }`;
+        })
+        tokenstyle.innerHTML = content;
     }
 
     /**
@@ -396,12 +377,13 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.onFoldBtnClick = function (button) {
         var tr = button.parentNode.parentNode;
         if (button.dataset.fold == "true") {
-            tokenPool.remove(tr.dataset.gap);
+            delete tokenPool[tr.dataset.gap];
+            tokenPoolRender();
             button.dataset.fold = "false";
             button.innerText = "折叠";
         } else {
-            var style = document.createElement("style");
-            tokenPool.add(tr.dataset.gap);
+            tokenPool[tr.dataset.gap] = true;
+            tokenPoolRender();
             button.dataset.fold = "true";
             button.innerText = "展开";
         }

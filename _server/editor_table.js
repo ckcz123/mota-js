@@ -192,6 +192,7 @@ editor_table_wrapper = function (editor) {
                 // 当cobj的参数为函数时,代入args算出值
                 for (var key in cobj) {
                     if (key === '_data') continue;
+                    if (key === '_transform' || key == '_onconfirm') cobj[key] = cobj[key].toString();
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
                 pvobj[ii] = vobj = args.vobj;
@@ -363,8 +364,10 @@ editor_table_wrapper = function (editor) {
         var tr = button.parentNode.parentNode;
         var guid = tr.getAttribute('id');
         var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
+        var input = tr.children[2].children[0].children[0];
         if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
         if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+        if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
     }
 
     /**
@@ -378,6 +381,7 @@ editor_table_wrapper = function (editor) {
         if (editor_mode.doubleClickMode === 'change') {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
             if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+            if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -385,6 +389,17 @@ editor_table_wrapper = function (editor) {
             editor_mode.doubleClickMode = 'change';
             editor.table.deletefunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
+    }
+
+    editor_table.prototype.selectMaterial = function (input, cobj) {
+        editor.uievent.selectMaterial(input.value, cobj._docs || cobj._data || '请选择素材', cobj._directory, function (one) {
+            if (!/^[-A-Za-z0-9_.]+$/.test(one)) return null;
+            if (cobj._transform) return eval("("+cobj._transform+")(one)");
+            return one;
+        }, function (data) {
+            input.value = JSON.stringify(cobj._onconfirm ? eval("("+cobj._onconfirm+")(JSON.parse(input.value), data)") : data);
+            input.onchange();
+        })
     }
 
     /**

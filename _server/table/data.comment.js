@@ -19,36 +19,75 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"images": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "material",
 					"_range": "editor.mode.checkImages(thiseval)",
+					"_directory": "./project/images/",
+					"_transform": function (one) {
+						if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || end.endsWith('.gif'))
+							return one;
+						return null;
+					},
 					"_docs": "本塔使用图片",
-					"_data": "在此存放所有可能使用的图片（tilesets除外） \n图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加"
+					"_data": "在此存放所有可能使用的图片（tilesets除外） \n图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加",
 				},
 				"tilesets": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "material",
 					"_range": "editor.mode.checkImages(thiseval)",
+					"_directory": "./project/images/",
+					"_transform": function (one) {
+						if (one.endsWith('.png'))
+							return one;
+						return null;
+					},
+					"_onconfirm": function (previous, current) {
+						// 额外素材是有序的，因此根据之前的内容进行排序，然后在之后追加新的
+						previous = previous || [];
+						return current.sort(function (a, b) {
+							var i = previous.indexOf(a);
+							var j = previous.indexOf(b);
+							if (i >= 0 && j >= 0) return i - j;
+							return j >= 0 ? 1 : -1;
+						});
+					},
 					"_docs": "本塔额外素材",
 					"_data": "在此存放额外素材的图片名, \n可以自定导入任意张素材图片，无需PS，无需注册，即可直接在游戏中使用 \n 形式如[\"1.png\", \"2.png\"] ,将需要的素材图片放在images目录下 \n 素材的宽高必须都是32的倍数，且图片上的总图块数不超过1000（即最多有1000个32*32的图块在该图片上）"
 				},
 				"animates": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "material",
 					"_range": "editor.mode.checkUnique(thiseval)",
+					"_directory": "./project/animates/",
+					"_transform": function (one) {
+						if (one.endsWith(".animate")) return one.substring(0, one.lastIndexOf('.'));
+						return null;
+					},
 					"_docs": "本塔使用动画",
 					"_data": "在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名 \n动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符 \n \"jianji\", \"thunder\" 根据需求自行添加"
 				},
 				"bgms": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "material",
 					"_range": "editor.mode.checkUnique(thiseval)",
+					"_directory": "./project/sounds/",
+					"_transform": function (one) {
+						if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || end.endsWith('.wav'))
+							return one;
+						return null;
+					},
 					"_docs": "本塔使用音乐",
 					"_data": "在此存放所有的bgm，和文件名一致。 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
 				},
 				"sounds": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "material",
 					"_range": "editor.mode.checkUnique(thiseval)",
+					"_directory": "./project/sounds/",
+					"_transform": function (one) {
+						if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || end.endsWith('.wav'))
+							return one;
+						return null;
+					},
 					"_docs": "本塔使用音效",
 					"_data": "在此存放所有的SE，和文件名一致 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
 				},

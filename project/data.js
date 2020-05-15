@@ -473,7 +473,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"counterAttack": 0.1,
 		"purify": 3,
 		"hatred": 2,
-		"animateSpeed": 400
+		"animateSpeed": 400,
+		"statusCanvasRowsOnMobile": 3
 	},
 	"flags": {
 		"statusBarItems": [
@@ -497,7 +498,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startUsingCanvas": false,
 		"startDirectly": false,
 		"statusCanvas": false,
-		"statusCanvasRowsOnMobile": 3,
 		"displayEnemyDamage": true,
 		"displayCritical": true,
 		"displayExtraDamage": true,

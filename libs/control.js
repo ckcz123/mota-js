@@ -2671,7 +2671,7 @@ control.prototype.resize = function() {
     }
 
     var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
-    var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.flags.statusCanvasRowsOnMobile || 3;
+    var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.values.statusCanvasRowsOnMobile || 3;
     var col = statusCanvas ? statusCanvasRows : Math.ceil(count / 3);
     if (col > 4) {
         if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过4！");

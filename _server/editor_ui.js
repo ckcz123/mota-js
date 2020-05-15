@@ -781,19 +781,60 @@ editor_ui_wrapper = function (editor) {
 
             // 显示每一项内容
             var html = "<p style='margin-left: 10px; line-height: 25px'>";
-            html += "<button onclick='editor.uievent._selectAll(true)'>全选</button><button style='margin-left: 10px' onclick='editor.uievent._selectAll(false)'>全不选</button><br/>";
+            html += "<button onclick='editor.uievent._selectAllMaterial(true)'>全选</button>"+
+                    "<button style='margin-left: 10px' onclick='editor.uievent._selectAllMaterial(false)'>全不选</button><br/>";
             data.forEach(function (one) {
-                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${value.indexOf(one) >= 0? 'checked' : ''} /> ${one}<br/>`;
+                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${value.indexOf(one) >= 0? 'checked' : ''} /> ${one}`;
+                // 预览图片
+                if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
+                    html += "<button onclick='editor.uievent._previewMaterialImage(this)' style='margin-left: 10px'>预览</button>";
+                    html += '<br style="display:none"/><img key="'+directory+one+'" style="display:none; max-width: 100%"/>';
+                }
+                // 试听音频
+                if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || one.endsWith('.wav')) {
+                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>试听</button>";
+                    html += '<br style="display:none"/><audio controls preload="none" src="'+directory+one+'" style="display:none; max-width: 100%"></audio>';
+                }
+                html += '<br/>';
             });
             html += "</p>";
             uievent.elements.materialList.innerHTML = html;
         });
     }
 
-    uievent._selectAll = function (checked) {
+    uievent._selectAllMaterial = function (checked) {
         Array.from(document.getElementsByClassName('materialCheckbox')).forEach(function (one) {
             one.checked = checked;
         })
+    }
+
+    uievent._previewMaterialImage = function (button) {
+        var br = button.nextElementSibling;
+        var img = br.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '折叠';
+            br.style.display = 'block';
+            img.style.display = 'block';
+            img.src = img.getAttribute('key');
+        } else {
+            button.innerText = '预览';
+            br.style.display = 'none';
+            img.style.display = 'none';
+        }
+    }
+
+    uievent._previewMaterialAudio = function (button) {
+        var br = button.nextElementSibling;
+        var audio = br.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '折叠';
+            br.style.display = 'block';
+            audio.style.display = 'block';
+        } else {
+            button.innerText = '试听';
+            br.style.display = 'none';
+            audio.style.display = 'none';
+        }
     }
 
     editor.constructor.prototype.uievent=uievent;

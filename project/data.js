@@ -10,7 +10,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"images": [
 			"bg.jpg",
-			"winskin.png"
+			"winskin.png",
+			"hero.png"
 		],
 		"tilesets": [
 			"magictower.png"
@@ -81,6 +82,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"version": "Ver 2.6.6",
 		"floorId": "sample0",
 		"hero": {
+			"image": "hero.png",
 			"name": "阳光",
 			"lv": 1,
 			"hpmax": 9999,

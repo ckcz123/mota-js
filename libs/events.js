@@ -2851,8 +2851,11 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
 events.prototype.setHeroIcon = function (name, noDraw) {
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
-    if (!img) return;
-    core.setFlag("heroIcon", name);
+    if (!img) {
+        console.error("找不到图片: "+img);
+        return;
+    }
+    core.status.hero.image = name;
     core.material.images.hero = img;
     core.material.icons.hero.width = img.width / 4;
     core.material.icons.hero.height = img.height / 4;

@@ -57,11 +57,21 @@ editor_table_wrapper = function (editor) {
     }
 
     editor_table.prototype.gap = function (field) {
-        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
+        var tokenlist = field.slice(2, -2).split("']['");
+        var rule = tokenlist.join("-");
+        tokenlist.pop();
+        var self = tokenlist.join("-");
+        var status = tokenPool.check(rule);
+        return /* html */`<tr data-gap="${rule}" data-field="${self}">
+            <td>----</td>
+            <td>----</td>
+            <td>${field}</td>
+            <td><button style="background: #FFCCAA" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
+        </tr>\n`
     }
 
     editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortComment, tdstr, type) {
-        return /* html */`<tr id="${guid}">
+        return /* html */`<tr id="${guid}" data-field="${field.slice(2, -2).split("']['").join("-")}">
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
         <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
@@ -346,6 +356,54 @@ editor_table_wrapper = function (editor) {
             editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
+        }
+    }
+
+    tokenPool = new class {
+
+        constructor() {
+            this.pool = new Set();
+            this.style = document.createElement("style");
+            document.body.appendChild(this.style);
+        }
+
+        add(token) {
+            this.pool.add(token);
+            this.render();
+        }
+
+        remove(token) {
+            this.pool.delete(token);
+            this.render();
+        }
+
+        render() {
+            var content = "";
+            this.pool.forEach((k) => {
+                content += /* CSS */`[data-field|=${k}]{ display: none }`;
+            })
+            this.style.innerHTML = content;
+        }
+
+        check(token) {
+            return this.pool.has(token);
+        }
+    }
+
+    /**
+     * 当"折叠"被按下时
+     */
+    editor_table.prototype.onFoldBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        if (button.dataset.fold == "true") {
+            tokenPool.remove(tr.dataset.gap);
+            button.dataset.fold = "false";
+            button.innerText = "折叠";
+        } else {
+            var style = document.createElement("style");
+            tokenPool.add(tr.dataset.gap);
+            button.dataset.fold = "true";
+            button.innerText = "展开";
         }
     }
 

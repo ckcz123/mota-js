@@ -251,7 +251,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "false",
-					"_data": "图块ID"
+					"_docs": "图块ID",
+					"_data": "图块唯一ID，可在页面底部修改"
 				},
 				"idnum": {
 					"_leaf": true,
@@ -361,7 +362,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "textarea",
 							"_range": "false",
 							"_docs": "楼层ID",
-							"_data": "文件名和floorId需要保持完全一致 \n楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头 \n推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等 \n楼层唯一标识符，需要和名字完全一致 \n这里不能更改floorId,请通过另存为来实现"
+							"_data": "文件名和floorId需要保持完全一致，可在页面底部修改 \n楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头 \n推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等"
 						},
 						"title": {
 							"_leaf": true,
@@ -380,14 +381,14 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "textarea",
 							"_range": "false",
 							"_docs": "宽度",
-							"_data": "地图x方向大小,这里不能更改,仅能在新建地图时设置,null视为13"
+							"_data": "地图x方向大小,请在表格最下方修改,null视为13"
 						},
 						"height": {
 							"_leaf": true,
 							"_type": "textarea",
 							"_range": "false",
 							"_docs": "高度",
-							"_data": "地图y方向大小,这里不能更改,仅能在新建地图时设置,null视为13"
+							"_data": "地图y方向大小,请在表格最下方修改,null视为13"
 						},
 						"canFlyTo": {
 							"_leaf": true,

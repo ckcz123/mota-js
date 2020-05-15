@@ -148,6 +148,7 @@ editor_listen_wrapper = function (editor) {
         editor.uifunctions.createNewMaps_func()
 
         editor.uifunctions.changeFloorId_func()
+        editor.uifunctions.changeFloorSize_func()
 
         editor.uifunctions.fixCtx_func()
 

@@ -49,6 +49,7 @@ function editor() {
         selectAppend : document.getElementById('selectAppend'),
         selectFileBtn :document.getElementById('selectFileBtn'),
         changeFloorId :document.getElementById('changeFloorId'),
+        changeFloorSize: document.getElementById('changeFloorSize'),
         left1 : document.getElementById('left1'),
         editModeSelect :document.getElementById('editModeSelect'),
         mid2 : document.getElementById('mid2'),

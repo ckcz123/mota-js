@@ -503,8 +503,71 @@ editor_datapanel_wrapper = function (editor) {
         }
     }
 
+    editor.uifunctions.changeFloorSize_func = function () {
+        var children = editor.dom.changeFloorSize.children;
+        children[4].onclick = function () {
+            var width = parseInt(children[0].value);
+            var height = parseInt(children[1].value);
+            var x = parseInt(children[2].value);
+            var y = parseInt(children[3].value);
+            if (!(width >= core.__SIZE__ && height >= core.__SIZE__ && x >=0 && y >=0)) {
+                printe("参数错误！宽高不得小于"+core.__SIZE__+"，偏移量不得小于0");
+                return;
+            }
+            var currentFloorData = editor.currentFloorData;
+            var currWidth = currentFloorData.width;
+            var currHeight = currentFloorData.height;
+            if (width < currWidth) x = -x;
+            if (height < currHeight) y = -y;
+            // Step 1:创建一个新的地图
+            var newFloorData = core.clone(currentFloorData);
+            newFloorData.width = width;
+            newFloorData.height = height;
 
+            // Step 2:更新map, bgmap和fgmap
+            ["bgmap", "fgmap", "map"].forEach(function (name) {
+                newFloorData[name] = [];
+                if (currentFloorData[name] && currentFloorData[name].length > 0) {
+                    for (var j = 0; j < height; ++j) {
+                        newFloorData[name][j] = [];
+                        for (var i = 0; i < width; ++i) {
+                            var oi = i - x;
+                            var oj = j - y;
+                            if (oi >= 0 && oi < currWidth && oj >= 0 && oj < currHeight) {
+                                newFloorData[name][j].push(currentFloorData[name][oj][oi]);
+                            } else {
+                                newFloorData[name][j].push(0);
+                            }
+                        }
+                    }
+                }
+            });
 
+            // Step 3:更新所有坐标
+            ["afterBattle", "afterGetItem", "afterOpenDoor", "changeFloor", "autoEvent", "cannotMove"].forEach(function (name) {
+                newFloorData[name] = {};
+                if (!currentFloorData[name]) return;
+                for (var loc in currentFloorData[name]) {
+                    var oxy = loc.split(','), ox = parseInt(oxy[0]), oy = parseInt(oxy[1]);
+                    var nx = ox + x, ny = oy + y;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        newFloorData[name][nx+","+ny] = core.clone(currentFloorData[name][loc]);
+                    }
+                }
+            });
+
+            // Step 4:上楼点&下楼点
+            ["upFloor", "downFloor"].forEach(function (name) {
+                if (newFloorData[name] && newFloorData[name].length == 2) {
+                    newFloorData[name][0]+=x;
+                    newFloorData[name][1]+=y;
+                }
+            });
+
+            console.log(currentFloorData);
+            console.log(newFloorData);
+        }
+    }
 
 
 

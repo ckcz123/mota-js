@@ -300,16 +300,22 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 }
 
 ////// 触发(x,y)点的事件 //////
-events.prototype._trigger = function (x, y) {
-    if (core.status.gameOver) return;
-    if (core.status.event.id == 'action') {
-        core.insertAction({"type": "trigger", "loc": [x, y]}, x, y, null, true);
+events.prototype.trigger = function (x, y, callback) {
+    var _executeCallback = function () {
+        // 因为trigger之后还有可能触发其他同步脚本（比如阻激夹域检测）
+        // 所以这里强制callback被异步触发
+        if (callback) {
+            setTimeout(callback, 1); // +1是为了录像检测系统 
+        }
         return;
     }
-    if (core.status.event.id) return;
+    if (core.status.gameOver) return _executeCallback();
+    if (core.status.event.id && core.status.event.id != 'action') return _executeCallback();
+
+    var inAction = core.status.event.id == 'action';
 
     var block = core.getBlock(x, y);
-    if (block == null) return;
+    if (block == null) return _executeCallback();
     block = block.block;
 
     // 执行该点的脚本
@@ -322,11 +328,24 @@ events.prototype._trigger = function (x, y) {
         if (noPass) core.clearAutomaticRouteNode(x, y);
 
         // 转换楼层能否穿透
-        if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
+        if (!inAction && trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
             return;
         core.status.automaticRoute.moveDirectly = false;
-        this.doSystemEvent(trigger, block);
+        if (inAction) {
+            // 切换事件点的坐标
+            this.setEvents(null, block.x, block.y);
+            if (block.event.trigger == 'action') {
+                this.insertAction(block.event.data);
+            }
+            else {
+                this.doSystemEvent(block.event.trigger, block, _executeCallback);
+                return;
+            }
+        } else {
+            this.doSystemEvent(trigger, block);
+        }
     }
+    return _executeCallback();
 }
 
 events.prototype._trigger_ignoreChangeFloor = function (block) {
@@ -370,7 +389,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!this.beforeBattle(id, x, y))
         return core.clearContinueAutomaticRoute(callback);
     // 战后事件
-    this.afterBattle(id, x, y, callback);
+    this.afterBattle(id, x, y);
+    if (callback) callback();
 }
 
 ////// 战斗前触发的事件 //////
@@ -379,8 +399,8 @@ events.prototype.beforeBattle = function (enemyId, x, y) {
 }
 
 ////// 战斗结束后触发的事件 //////
-events.prototype.afterBattle = function (enemyId, x, y, callback) {
-    return this.eventdata.afterBattle(enemyId, x, y, callback);
+events.prototype.afterBattle = function (enemyId, x, y) {
+    return this.eventdata.afterBattle(enemyId, x, y);
 }
 
 events.prototype._sys_openDoor = function (data, callback) {
@@ -408,7 +428,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         setTimeout(function () {
             core.status.replay.animate = false;
             core.events.afterOpenDoor(id, x, y, callback);
-        });
+        }, 1); // +1是为了录像检测系统
     } else {
         this._openDoor_animate(id, x, y, callback);
     }
@@ -472,7 +492,8 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
             delete core.animateFrame.asyncId[animate];
             if (!locked) core.unLockControl();
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(id, x, y, callback);
+            core.events.afterOpenDoor(id, x, y);
+            if (callback) callback();
             return;
         }
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
@@ -481,8 +502,8 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
 }
 
 ////// 开一个门后触发的事件 //////
-events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
-    return this.eventdata.afterOpenDoor(doorId, x, y, callback);
+events.prototype.afterOpenDoor = function (doorId, x, y) {
+    return this.eventdata.afterOpenDoor(doorId, x, y);
 }
 
 events.prototype._sys_getItem = function (data, callback) {
@@ -519,11 +540,12 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
         itemHint.push(id);
     }
 
-    this.afterGetItem(id, x, y, isGentleClick, callback);
+    this.afterGetItem(id, x, y, isGentleClick);
+    if (callback) callback();
 }
 
-events.prototype.afterGetItem = function (id, x, y, isGentleClick, callback) {
-    this.eventdata.afterGetItem(id, x, y, isGentleClick, callback);
+events.prototype.afterGetItem = function (id, x, y, isGentleClick) {
+    this.eventdata.afterGetItem(id, x, y, isGentleClick);
 }
 
 ////// 获得面前的物品（轻按） //////
@@ -736,30 +758,17 @@ events.prototype.pushBox = function (data) {
     var nextId = core.getBlockId(nx, ny);
     if (nextId != null && nextId != 'flower') return;
 
-    core.setBlock(nextId == null ? 169 : 170, nx, ny);
+    core.setBlock(nextId == null ? 'box' : 'boxed', nx, ny);
 
     if (data.event.id == 'box')
         core.removeBlock(data.x, data.y);
     else
-        core.setBlock(168, data.x, data.y);
-    this._pushBox_moveHero(direction);
-}
-
-events.prototype._pushBox_moveHero = function (direction) {
-    core.status.replay.animate = true;
-    core.lockControl();
-    setTimeout(function () {
-        core.moveHero(direction, function () {
-            core.status.replay.animate = false;
-            core.status.route.pop();
-            core.events.afterPushBox();
-            // 可能有阻击...
-            if (core.status.event.id == null) {
-                core.unLockControl();
-                core.replay();
-            }
-        });
-    });
+        core.setBlock('flower', data.x, data.y);
+    // 勇士前进一格，然后触发推箱子后事件
+    core.insertAction([
+        {"type": "moveAction"},
+        {"type": "function", "function": "function() { core.afterPushBox(); }"}
+    ]);
 }
 
 ////// 推箱子后的事件 //////
@@ -768,7 +777,8 @@ events.prototype.afterPushBox = function () {
 }
 
 events.prototype._sys_ski = function (data, callback) {
-    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
+    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y);
+    if (callback) callback();
 }
 
 /// 当前是否在冰上
@@ -795,7 +805,8 @@ events.prototype._sys_action = function (data, callback) {
 
 events.prototype._sys_custom = function (data, callback) {
     core.insertAction(["请使用\r[yellow]core.registerSystemEvent('custom', func)\r来处理自己添加的系统触发器！"],
-        data.x, data.y, callback);
+        data.x, data.y);
+    if (callback) callback();
 }
 
 // ------ 自定义事件的处理 ------ //
@@ -1341,6 +1352,26 @@ events.prototype._action_move = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.moveBlock, loc[0], loc[1], data.steps, data.time, data.keep);
 }
 
+events.prototype._action_moveAction = function (data, x, y, prefix) {
+    // 检查下一个点是否可通行
+    if (core.canMoveHero()) {
+        var nx = core.nextX(), ny = core.nextY();
+        // 检查noPass决定是撞击还是移动
+        if (core.noPass(nx, ny)) {
+            core.insertAction([
+                {"type": "trigger", "loc": [nx, ny]}
+            ]);
+        } else {
+            // 先移动一格，然后尝试触发事件
+            core.insertAction([
+                {"type": "moveHero", "steps": ["forward"]},
+                {"type": "function", "function": "function() { core.moveOneStep(core.doAction); }", "async": true},
+            ]);
+        }
+    }
+    core.doAction();
+}
+
 events.prototype._action_moveHero = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.eventMoveHero, data.steps, data.time);
 }
@@ -1516,18 +1547,7 @@ events.prototype._action_battle = function (data, x, y, prefix) {
 
 events.prototype._action_trigger = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    var block = core.getBlock(loc[0], loc[1]);
-    if (block != null && block.block.event.trigger) {
-        block = block.block;
-        this.setEvents(data.keep ? null : [], block.x, block.y);
-        if (block.event.trigger == 'action')
-            this.insertAction(block.event.data);
-        else {
-            core.doSystemEvent(block.event.trigger, block, core.doAction);
-            return;
-        }
-    }
-    core.doAction();
+    core.trigger(loc[0], loc[1], core.doAction);
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {

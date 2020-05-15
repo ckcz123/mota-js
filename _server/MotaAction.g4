@@ -385,6 +385,7 @@ action
     |   screenFlash_s
     |   setWeather_s
     |   move_s
+    |   moveAction_s
     |   moveHero_s
     |   jump_s
     |   jumpHero_s
@@ -732,16 +733,19 @@ return code;
 */;
 
 trigger_s
-    :   '触发事件' 'x' PosString ',' 'y' PosString '不结束当前事件' Bool Newline
+    :   '触发系统事件' 'x' PosString? ',' 'y' PosString? Newline
     
 
 /* trigger_s
 tooltip : trigger: 立即触发另一个地点的事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=trigger%EF%BC%9A%E7%AB%8B%E5%8D%B3%E8%A7%A6%E5%8F%91%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%9C%B0%E7%82%B9%E7%9A%84%E4%BA%8B%E4%BB%B6
-default : ["0","0",false]
+default : ["",""]
 colour : this.eventColor
-Bool_0 = Bool_0 ?', "keep": true':'';
-var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']'+Bool_0+'},\n';
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "trigger"'+floorstr+'},\n';
 return code;
 */;
 
@@ -764,7 +768,7 @@ return code;
 */;
 
 insert_2_s
-    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' JsonEvalString? Newline
+    :   '插入事件' 'x' PosString? ',' 'y' PosString? Event_List? '楼层' IdString? '参数列表' JsonEvalString? Newline
 
 
 /* insert_2_s
@@ -781,7 +785,11 @@ if (JsonEvalString_0) {
 if (Event_List_0 && Event_List_0 !=='null')
     Event_List_0 = ', "which": "'+Event_List_0+'"';
 else Event_List_0 = '';
-var code = '{"type": "insert", "loc": ['+PosString_0+','+PosString_1+']'+Event_List_0+IdString_0+JsonEvalString_0+'},\n';
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "insert"'+floorstr+Event_List_0+IdString_0+JsonEvalString_0+'},\n';
 return code;
 */;
 
@@ -1566,8 +1574,21 @@ var code = '{"type": "move"'+floorstr+IntString_0+Bool_0+Bool_1+', "steps": '+JS
 return code;
 */;
 
+moveAction_s
+    :   '勇士前进一格或撞击' Newline
+    
+
+/* moveAction_s
+tooltip : moveAction: 前进一格或撞击
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
+colour : this.dataColor
+return '{"type": "moveAction"},\n';
+*/;
+
+
+
 moveHero_s
-    :   '移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '无视地形移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? StepString Newline
     
 
 /* moveHero_s
@@ -3187,7 +3208,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['move_s'].xmlText([
         data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
       break;
-    case "moveHero": // 移动勇士
+    case "moveAction": // 前进一格或撞击
+      this.next = MotaActionBlocks['moveAction_s'].xmlText([this.next]);
+      break;
+    case "moveHero": // 无视地形移动勇士
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
         data.time,data.async||false,this.StepString(data.steps),this.next]);
       break;
@@ -3336,9 +3360,10 @@ ActionParser.prototype.parseAction = function() {
           data.loc[0],data.loc[1],this.next]);
       }
       break;
-    case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
+    case "trigger": // 触发另一个事件
+      data.loc = data.loc || [];
       this.next = MotaActionBlocks['trigger_s'].xmlText([
-        data.loc[0],data.loc[1],data.keep,this.next]);
+        data.loc[0],data.loc[1],this.next]);
       break;
     case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
       if (data.args instanceof Array) {
@@ -3350,6 +3375,7 @@ ActionParser.prototype.parseAction = function() {
           data.name, data.args||"", this.next]);
       }
       else {
+        data.loc = data.loc || [];
         this.next = MotaActionBlocks['insert_2_s'].xmlText([
           data.loc[0],data.loc[1],data.which,data.floorId||'',data.args||"",this.next]);
       }

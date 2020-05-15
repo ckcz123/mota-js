@@ -584,7 +584,6 @@ control.prototype.setAutoHeroMove = function (steps) {
 control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.heroMoving > 0) return;
     if (core.status.replay.speed == 24) {
-        core.moveOneStep(core.nextX(), core.nextY());
         if (callback) callback();
         return;
     }
@@ -601,15 +600,14 @@ control.prototype.setHeroMoveInterval = function (callback) {
         if (core.status.heroMoving>=8) {
             clearInterval(core.interval.heroMoveInterval);
             core.status.heroMoving = 0;
-            core.moveOneStep(core.nextX(), core.nextY());
             if (callback) callback();
         }
     }, core.values.moveSpeed / 8 * toAdd / core.status.replay.speed);
 }
 
 ////// 每移动一格后执行的事件 //////
-control.prototype.moveOneStep = function(x, y) {
-    return this.controldata.moveOneStep(x, y);
+control.prototype.moveOneStep = function (callback) {
+    return this.controldata.moveOneStep(callback);
 }
 
 ////// 实际每一步的行走过程 //////
@@ -625,7 +623,7 @@ control.prototype._moveAction_noPass = function (canMove, callback) {
     core.status.route.push(core.getHeroLoc('direction'));
     core.status.automaticRoute.moveStepBeforeStop = [];
     core.status.automaticRoute.lastDirection = core.getHeroLoc('direction');
-    if (canMove) core.events._trigger(core.nextX(), core.nextY());
+    if (canMove) core.trigger(core.nextX(), core.nextY());
     core.drawHero();
 
     if (core.status.automaticRoute.moveStepBeforeStop.length==0) {
@@ -637,31 +635,14 @@ control.prototype._moveAction_noPass = function (canMove, callback) {
 
 control.prototype._moveAction_moving = function (callback) {
     core.setHeroMoveInterval(function () {
+        core.setHeroLoc('x', core.nextX(), true);
+        core.setHeroLoc('y', core.nextY(), true);
+
         var direction = core.getHeroLoc('direction');
         core.control._moveAction_popAutomaticRoute();
         core.status.route.push(direction);
-
-        // 无事件的道具（如血瓶）需要优先于阻激夹域判定
-        var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
-        var block = core.getBlock(nowx,nowy);
-        var hasTrigger = false;
-        if (block!=null && block.block.event.trigger=='getItem' &&
-            !core.floors[core.status.floorId].afterGetItem[nowx+","+nowy]) {
-            hasTrigger = true;
-            core.events._trigger(nowx, nowy);
-        }
-        // 执行该点的阻激夹域事件
-        core.checkBlock();
-
-        // 执行该点事件
-        if (!hasTrigger)
-            core.events._trigger(nowx, nowy);
-
-        // 检查该点是否是滑冰
-        if (core.onSki()) {
-            core.insertAction("滑冰事件", null, null, null, true);
-        }
-
+        
+        core.moveOneStep();
         if (callback) callback();
     });
 }

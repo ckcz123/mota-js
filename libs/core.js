@@ -239,6 +239,10 @@ core.prototype._init_flags = function () {
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
+    
+    // 让你总是拼错！
+    window.on = true;
+    window.off = false;
 
     core.dom.versionLabel.innerText = core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;
@@ -277,7 +281,6 @@ core.prototype._init_flags = function () {
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
-    core.items._resetItems();
     core.material.icons = core.icons.getIcons();
 }
 

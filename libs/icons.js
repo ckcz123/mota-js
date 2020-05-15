@@ -27,6 +27,15 @@ icons.prototype.getClsFromId = function (id) {
     return null;
 }
 
+icons.prototype.getAllIconIds = function () {
+    if (this.allIconIds) return this.allIconIds;
+    this.allIconIds = [];
+    for (var type in this.icons) {
+        this.allIconIds = this.allIconIds.concat(Object.keys(this.icons[type]));
+    }
+    return this.allIconIds;
+}
+
 icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
     if (cls == 'enemys' || cls == 'npcs') {
         return 2;

@@ -260,9 +260,6 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'replayRemain':
             this._keyDownSL(keyCode);
             break;
-        case 'shop':
-            this._keyDownShop(keyCode);
-            break;
         case 'selectShop':
         case 'switchs':
         case 'settings':
@@ -345,9 +342,6 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
             break;
         case 'viewMaps':
             this._keyUpViewMaps(keyCode);
-            break;
-        case 'shop':
-            this._keyUpShop(keyCode);
             break;
         case 'selectShop':
             this._keyUpQuickShop(keyCode);
@@ -476,7 +470,6 @@ actions.prototype._sys_onmove_choices = function (x, y) {
     switch (core.status.event.id) {
         case 'action':
             if (core.status.event.data.type != 'choices') break;
-        case 'shop':
         case 'selectShop':
         case 'switchs':
         case 'settings':
@@ -487,6 +480,9 @@ actions.prototype._sys_onmove_choices = function (x, y) {
         case 'replay':
         case 'gameInfo':
             this._onMoveChoices(x, y);
+            return true;
+        case 'confirmBox':
+            this._onMoveConfirmBox(x, y);
             return true;
         default:
             break;
@@ -613,9 +609,6 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
             break;
         case 'settings':
             this._clickSettings(x, y);
-            break;
-        case 'shop':
-            this._clickShop(x, y);
             break;
         case 'selectShop':
             this._clickQuickShop(x, y);
@@ -792,10 +785,6 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
             return true;
         }
     }
-    // 长按商店连续购买
-    if (core.status.event.id == 'shop' && x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        return this._clickShop(x, y);
-    }
     // 长按可以跳过等待事件
     if (core.status.event.id == 'action' && core.status.event.data.type == 'sleep'
         && !core.status.event.data.current.noSkip) {
@@ -886,7 +875,7 @@ actions.prototype._clickCenterFly = function (x, y) {
             core.useItem('centerFly');
         }
         else {
-            core.drawTip('当前不能使用中心对称飞行器');
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
 }
@@ -898,7 +887,7 @@ actions.prototype._keyUpCenterFly = function (keycode) {
             core.useItem('centerFly');
         }
         else {
-            core.drawTip('当前不能使用中心对称飞行器');
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
 }
@@ -934,6 +923,22 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
         if (core.status.event.selection == 1 && core.status.event.data.no) {
             core.status.event.selection = null;
             core.status.event.data.no();
+            return;
+        }
+    }
+}
+
+////// 鼠标在确认框上移动时 //////
+actions.prototype._onMoveConfirmBox = function (x, y) {
+    if (y == this.HSIZE + 1) {
+        if (x == this.HSIZE - 2 || x == this.HSIZE - 1) {
+            core.status.event.selection = 0;
+            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            return;
+        }
+        if (x == this.HSIZE + 2 || x == this.HSIZE + 1) {
+            core.status.event.selection = 1;
+            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
             return;
         }
     }
@@ -1280,61 +1285,28 @@ actions.prototype._keyUpViewMaps = function (keycode) {
     return;
 }
 
-////// 商店界面时的点击操作 //////
-actions.prototype._clickShop = function (x, y) {
-    var shop = core.status.event.data.shop;
-    var choices = shop.choices;
-    if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        var topIndex = this.HSIZE - parseInt(choices.length / 2) + (core.status.event.ui.offset || 0);
-        if (y >= topIndex && y < topIndex + choices.length) {
-            return core.events._useShop(shop, y - topIndex);
-        }
-        // 离开
-        else if (y == topIndex + choices.length) {
-            core.events._exitShop();
-        }
-        else return false;
-    }
-    return true;
-}
-
-actions.prototype._keyDownShop = function (keycode) {
-    // 商店界面长按空格连续购买
-    if (keycode == 32 && core.status.event.selection != core.status.event.data.shop.choices.length) {
-        this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
-        return;
-    }
-    this._keyDownChoices(keycode);
-}
-
-////// 商店界面时，放开某个键的操作 //////
-actions.prototype._keyUpShop = function (keycode) {
-    if (keycode == 27 || keycode == 88) {
-        core.events._exitShop();
-        return;
-    }
-    if (keycode != 32 || core.status.event.selection == core.status.event.data.shop.choices.length) {
-        this._selectChoices(core.status.event.data.shop.choices.length + 1, keycode, this._clickShop);
-        return;
-    }
-    return;
-}
-
 ////// 快捷商店界面时的点击操作 //////
 actions.prototype._clickQuickShop = function (x, y) {
-    var keys = Object.keys(core.status.shops).filter(function (shopId) {
-        return core.status.shops[shopId].visited || !core.status.shops[shopId].mustEnable
-    });
+    var shopIds = core.listShopIds();
 
     if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-        var topIndex = this.HSIZE - parseInt(keys.length / 2) + (core.status.event.ui.offset || 0);
-        if (y >= topIndex && y < topIndex + keys.length) {
-            core.events.openShop(keys[y - topIndex], true);
-            if (core.status.event.id == 'shop')
-                core.status.event.data.fromList = true;
+        var topIndex = this.HSIZE - parseInt(shopIds.length / 2) + (core.status.event.ui.offset || 0);
+        if (y >= topIndex && y < topIndex + shopIds.length) {
+            var shopId = shopIds[y - topIndex];
+            if (!core.canOpenShop(shopId)) {
+                core.drawTip('当前项尚未开启');
+                return;
+            }
+            var message = core.canUseQuickShop(shopId);
+            if (message == null) {
+                // core.ui.closePanel();
+                core.openShop(shopIds[y - topIndex], false);
+            } else {
+                core.drawTip(message);
+            }
         }
         // 离开
-        else if (y == topIndex + keys.length)
+        else if (y == topIndex + shopIds.length)
             core.ui.closePanel();
         return;
     }
@@ -1347,10 +1319,7 @@ actions.prototype._keyUpQuickShop = function (keycode) {
         core.ui.closePanel();
         return;
     }
-    var keys = Object.keys(core.status.shops).filter(function (shopId) {
-        return core.status.shops[shopId].visited || !core.status.shops[shopId].mustEnable
-    });
-    this._selectChoices(keys.length + 1, keycode, this._clickQuickShop);
+    this._selectChoices(core.listShopIds().length + 1, keycode, this._clickQuickShop);
     return;
 }
 

@@ -360,23 +360,56 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
     if (!ctx) return [text];
     if (font) core.setFont(name, font);
 
+    // 不能在行首的标点
+    var forbidStart = "）)】》＞﹞>)]»›〕〉}］」｝〗』" + "，。？！：；·…,.?!:;、……~&@#～＆＠＃";
+    // 不能在行尾的标点
+    var forbidEnd = "（(【《＜﹝<([«‹〔〈{［「｛〖『";
+
     var contents = [];
     var last = 0;
+    var forceChangeLine = false; // 是否强制换行，避免多个连续forbidStart存在
     for (var i = 0; i < text.length; i++) {
         if (text.charAt(i) == '\n') {
             contents.push(text.substring(last, i));
             last = i + 1;
+            forceChangeLine = false;
         }
         else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
             contents.push(text.substring(last, i));
             last = i + 2;
+            forceChangeLine = false;
         }
         else {
+            var curr = text.charAt(i);
             var toAdd = text.substring(last, i + 1);
             var width = core.calWidth(name, toAdd);
             if (maxWidth && width > maxWidth) {
+                // --- 当前应当换行，然而还是检查一下是否是forbidStart
+                if (!forceChangeLine && forbidStart.indexOf(curr) >= 0) {
+                    forceChangeLine = true;
+                    continue;
+                }
                 contents.push(text.substring(last, i));
                 last = i;
+                forceChangeLine = false;
+            } else {
+                // --- 当前不应该换行；但是提前检查一下是否是行尾标点
+                var curr = text.charAt(i);
+                if (forbidEnd.indexOf(curr) >= 0 && i < text.length -1) {
+                    // 检查是否是行尾
+                    var nextcurr = text.charAt(i+1);
+                    // 确认不是手动换行
+                    if (nextcurr != '\n' && !(nextcurr == '\\' && text.charAt(i+2) == 'n')) {
+                        var toAdd = text.substring(last, i+2);
+                        var width = core.calWidth(name, toAdd);
+                        if (maxWidth && width > maxWidth) {
+                            // 下一项会换行，因此在此处换行
+                            contents.push(text.substring(last, i));
+                            last = i;
+                            forceChangeLine = false;
+                        }
+                    }
+                }
             }
         }
     }
@@ -443,6 +476,14 @@ ui.prototype._uievent_drawIcon = function (data) {
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
 ui.prototype.closePanel = function () {
+    if (core.status.hero && core.status.hero.flags) {
+        // 清除全部临时变量
+        Object.keys(core.status.hero.flags).forEach(function (name) {
+            if (name.startsWith("@temp@")) {
+                delete core.status.hero.flags[name];
+            }
+        });
+    }
     this.clearUI();
     core.maps.generateGroundPattern();
     core.updateStatusBar(true);
@@ -650,6 +691,14 @@ ui.prototype._uievent_drawSelector = function (data) {
     var ctx = core.createCanvas(canvasName, x, y, w, h, z);
     ctx.canvas.classList.add('_uievent_selector');
     this._drawSelector(ctx, background, w, h);
+}
+
+ui.prototype._clearUIEventSelector = function (codes) {
+    if (codes instanceof Array) {
+        codes.forEach(function (code) { core.ui._clearUIEventSelector(code); });
+        return;
+    }
+    core.deleteCanvas('_uievent_selector_' + (codes || 0));
 }
 
 ui.prototype._drawSelector = function (ctx, background, w, h, left, top) {
@@ -1546,11 +1595,9 @@ ui.prototype.drawSettings = function () {
 ////// 绘制快捷商店选择栏 //////
 ui.prototype.drawQuickShop = function () {
     core.status.event.id = 'selectShop';
-    var shopList = core.status.shops, keys = Object.keys(shopList).filter(function (shopId) {
-        return shopList[shopId].visited || !shopList[shopId].mustEnable
-    });
+    var shopList = core.status.shops, keys = core.listShopIds();
     var choices = keys.map(function (shopId) {
-        return {"text": shopList[shopId].textInList, "color": shopList[shopId].visited?null:"#999999"};
+        return {"text": shopList[shopId].textInList, "color": core.isShopVisited(shopId) ? null : "#999999"};
     });
     choices.push("返回游戏");
     this.drawChoices(null, choices);
@@ -1828,8 +1875,8 @@ ui.prototype.drawBookDetail = function (index) {
 
     var left = 10, width = this.PIXEL - 2 * left, right = left + width;
     var content_left = left + 25, validWidth = right - content_left - 13;
-    var contents = core.splitLines("data", content, validWidth, this._buildFont(16, false));
-    var height = Math.max(24 * contents.length + 55, 80), top = (this.PIXEL - height) / 2, bottom = top + height;
+    var height = Math.max(this.getTextContentHeight(content, {fontSize: 16, lineHeight: 24, maxWidth: validWidth}) + 58, 80), 
+        top = (this.PIXEL - height) / 2, bottom = top + height;
 
     core.setAlpha('data', 0.9);
     core.fillRect('data', left, top, width, height, '#000000');
@@ -1837,7 +1884,7 @@ ui.prototype.drawBookDetail = function (index) {
     core.strokeRect('data', left - 1, top - 1, width + 1, height + 1,
         core.status.globalAttribute.borderColor, 2);
 
-    this._drawBookDetail_drawContent(enemy, contents, {top: top, content_left: content_left, bottom: bottom});
+    this._drawBookDetail_drawContent(enemy, content, {top: top, content_left: content_left, bottom: bottom, validWidth: validWidth});
 }
 
 ui.prototype._drawBookDetail_getInfo = function (index) {
@@ -1870,7 +1917,7 @@ ui.prototype._drawBookDetail_mofang = function (enemy, texts) {
         var hp = enemy.hp;
         var delta = core.status.hero.atk - core.status.hero.def;
         if (delta<hp && hp<=10000 && hp>0) {
-            texts.push("模仿临界计算器：（当前攻防差"+core.formatBigNumber(delta)+"）");
+            texts.push("\r[#FF6A6A]\\d模仿临界计算器：\\d\r[]（当前攻防差"+core.formatBigNumber(delta)+"）");
             var u = [];
             this._drawBookDetail_mofang_getArray(hp).forEach(function (t) {
                 if (u.length < 20) u.push(t);
@@ -1921,7 +1968,7 @@ ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
             }
             core.status.hero.hp = start;
             if (core.canBattle(enemy.id)) {
-                texts.push("打死该怪物最低需要生命值："+core.formatBigNumber(start));
+                texts.push("\r[#FF6A6A]\\d打死该怪物最低需要生命值：\\d\r[]"+core.formatBigNumber(start));
             }
             core.status.hero.hp = nowHp;
         }
@@ -1930,19 +1977,19 @@ ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
 
 ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
     if (core.enemys.hasSpecial(enemy.special, 17)) {
-        texts.push("当前仇恨伤害值："+core.getFlag('hatred', 0));
+        texts.push("\r[#FF6A6A]\\d当前仇恨伤害值：\\d\r[]"+core.getFlag('hatred', 0));
     }
 }
 
 ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
     var damageInfo = core.getDamageInfo(enemy, null, null, null, floorId);
-    texts.push("战斗回合数："+((damageInfo||{}).turn||0));
+    texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]"+((damageInfo||{}).turn||0));
     // 临界表
     var criticals = core.enemys.nextCriticals(enemy, 8, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
-    texts.push("临界表："+JSON.stringify(criticals));
+    texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]"+JSON.stringify(criticals));
     var prevInfo = core.getDamageInfo(enemy, {atk: core.status.hero.atk-1}, null, null, floorId);
     if (prevInfo != null && damageInfo != null) {
         if (damageInfo.damage != null) damageInfo = damageInfo.damage;
@@ -1953,26 +2000,14 @@ ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts)
     }
 }
 
-ui.prototype._drawBookDetail_drawContent = function (enemy, contents, pos) {
+ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
     // 名称
     core.setTextAlign('data', 'left');
     core.fillText('data', enemy.name, pos.content_left, pos.top + 30, '#FFD700', this._buildFont(22, true));
-    var content_top = pos.top + 57;
+    var content_top = pos.top + 44;
 
-    for (var i=0;i<contents.length;i++) {
-        var text=contents[i];
-        var index=text.indexOf("：");
-        if (index>=0) {
-            var x1 = text.substring(0, index+1);
-            core.fillText('data', x1, pos.content_left, content_top, '#FF6A6A', this._buildFont(16, true));
-            var len=core.calWidth('data', x1);
-            core.fillText('data', text.substring(index+1), pos.content_left+len, content_top, '#FFFFFF', this._buildFont(16, false));
-        }
-        else {
-            core.fillText('data', contents[i], pos.content_left, content_top, '#FFFFFF', this._buildFont(16, false));
-        }
-        content_top+=24;
-    }
+    this.drawTextContent('data', content, {left: pos.content_left, top: content_top, maxWidth: pos.validWidth,
+        fontSize: 16, lineHeight: 24});
 }
 
 ////// 绘制楼层传送器 //////
@@ -2028,35 +2063,8 @@ ui.prototype.drawCenterFly = function () {
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
-    core.drawTip("请确认当前中心对称飞行器的位置");
+    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置");
     return;
-}
-
-////// 绘制全局商店
-ui.prototype.drawShop = function (shopId) {
-    var shop = core.status.shops[shopId];
-    var actions = [], fromList = (core.status.event.data||{}).fromList, selection = core.status.event.selection;
-    if (core.status.event.data && core.status.event.data.actions) actions=core.status.event.data.actions;
-
-    core.ui.closePanel();
-    core.lockControl();
-    core.status.event.id = 'shop';
-    core.status.event.data = {'id': shopId, 'shop': shop, 'actions': actions, 'fromList': fromList};
-    core.status.event.selection = selection;
-
-    var times = shop.times, need=core.calValue(shop.need, null, null, times);
-    var content = "\t["+shop.name+","+shop.icon+"]" + core.replaceText(shop.text, null, need, times);
-    var use = shop.use=='exp'?'经验':'金币';
-    var choices = [];
-    for (var i=0;i<shop.choices.length;i++) {
-        var choice = shop.choices[i];
-        var text = core.replaceText(choice.text, null, need, times);
-        if (choice.need != null)
-            text += "（"+core.calValue(choice.need, null, null, times)+use+"）";
-        choices.push({"text": text, "color":shop.visited?null:"#999999"});
-    }
-    choices.push("离开");
-    core.ui.drawChoices(content, choices);
 }
 
 ////// 绘制浏览地图界面 //////
@@ -2114,7 +2122,7 @@ ui.prototype._drawMaps_drawHint = function () {
     core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - (32 * per + 48));
 
     core.fillText('ui', "退出 [ESC / ENTER]", this.HPIXEL, this.HPIXEL);
-    core.fillText('ui', "[X] 可查看怪物手册", this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
+    core.fillText('ui', "[X] 可查看" + core.material.items['book'].name, this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
 
     core.setTextBaseline('ui', 'alphabetic');
 }
@@ -2780,23 +2788,19 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
         }
         else text += "，";
         prev = obj.cls[key];
-        text+=core.ui._drawStatistics_getName(key)+value+"个";
+        var name = ((core.material.items[key] || (core.getBlockById(key) || {}).event)||{}).name || key;
+        text+=name+value+"个";
         if (obj.ext[key])
             text+="("+obj.ext[key]+")";
     })
     if (prev!="") text+="。";
 
-    text+="\n\n";
+    text+="\n";
     text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
         +core.formatBigNumber(data.add.atk)+"点，防御"
         +core.formatBigNumber(data.add.def)+"点，护盾"
         +core.formatBigNumber(data.add.mdef)+"点。";
     return text;
-}
-
-ui.prototype._drawStatistics_getName = function (key) {
-    return {"yellowDoor": "黄门", "blueDoor": "蓝门", "redDoor": "红门", "greenDoor": "绿门",
-            "steelDoor": "铁门"}[key] || core.material.items[key].name;
 }
 
 ////// 绘制“关于”界面 //////
@@ -2818,7 +2822,7 @@ ui.prototype.drawHelp = function () {
         core.drawText([
             "\t[键盘快捷键列表]"+
             "[CTRL] 跳过对话   [Z] 转向\n" +
-            "[X] 怪物手册   [G] 楼层传送\n" +
+            "[X] "+core.material.items['book'].name + "   [G] "+core.material.items['fly'].name+"\n" +
             "[A] 读取自动存档   [W] 撤销读取自动存档\n" + 
             "[S/D] 存读档页面   [SPACE] 轻按\n" +
             "[V] 快捷商店   [ESC] 系统菜单\n" +

@@ -29,7 +29,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 初始化怪物和道具
 	core.material.enemys = core.enemys.getEnemys();
 	core.material.items = core.items.getItems();
-	core.items._resetItems();
 	// 初始化全局数值和全局开关
 	core.values = core.clone(core.data.values);
 	for (var key in values || {})
@@ -112,6 +111,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置画布尺寸
 	core.maps.resizeMap(floorId);
 	// 设置勇士的位置
+	heroLoc.direction = core.turnDirection(heroLoc.direction);
 	core.status.hero.loc = heroLoc;
 	// 检查重生怪并重置
 	if (!fromLoad) {
@@ -273,7 +273,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 删除该块
 	var guards = []; // 支援
 	if (x != null && y != null) {
-		core.removeBlock(x, y);
+		// 检查是否是重生怪物；如果是则仅隐藏不删除
+		if (core.hasSpecial(enemy.special, 23)) {
+			core.hideBlock(x, y);
+		} else {
+			core.removeBlock(x, y);
+		}
 		guards = core.getFlag("__guards__" + x + "_" + y, []);
 		core.removeFlag("__guards__" + x + "_" + y);
 	}
@@ -381,6 +386,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 开一个门后触发的事件
 
 	var todo = [];
+	// 检查该点的获得开门后事件。
 	var event = core.floors[core.status.floorId].afterOpenDoor[x + "," + y];
 	if (event) core.unshift(todo, event);
 
@@ -393,21 +399,22 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	if (callback) callback();
 },
-        "afterGetItem": function (itemId, x, y, callback) {
+        "afterGetItem": function (itemId, x, y, isGentleClick, callback) {
 	// 获得一个道具后触发的事件
+	// itemId：获得的道具ID；x和y是该道具所在的坐标
+	// isGentleClick：是否是轻按触发的
 	core.playSound('item.mp3');
 
 	var todo = [];
+	// 检查该点的获得道具后事件。
 	var event = core.floors[core.status.floorId].afterGetItem[x + "," + y];
-	if (event) core.unshift(todo, event);
+	if (event && (event instanceof Array || !isGentleClick || !event.disableOnGentleClick)) {
+		core.unshift(todo, event);
+	}
 
 	if (todo.length > 0) core.insertAction(todo, x, y);
 
 	if (callback) callback();
-},
-        "afterChangeLight": function(x,y) {
-	// 改变亮灯之后，可以触发的事件
-
 },
         "afterPushBox": function () {
 	// 推箱子后的事件
@@ -422,25 +429,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		*/
 	}
 },
-        "afterPassNet": function (x, y, id) {
-	// 经过特殊地形后的事件；x和y为当前坐标，id为当前的图块id
-
-	// 这是个一次性血网的例子
-	// if (id == 'lavaNet') core.removeBlock(x, y);
-
-},
-        "canUseQuickShop": function(shopId) {
-	// 当前能否使用某个快捷商店
-	// shopId：快捷商店ID
-	// 如果返回一个字符串，表示不能，字符串为不能使用的提示
-	// 返回null代表可以使用
-
-	// 检查当前楼层的canUseQuickShop选项是否为false
-	if (core.status.thisMap.canUseQuickShop === false)
-		return '当前楼层不能使用快捷商店。';
-
-	return null;
-}
     },
     "enemys": {
         "getSpecials": function () {
@@ -453,7 +441,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[3, "坚固", "勇士每回合最多只能对怪物造成1点伤害"],
 		[4, "2连击", "怪物每回合攻击2次"],
 		[5, "3连击", "怪物每回合攻击3次"],
-		[6, function (enemy) { return (enemy.n || 4) + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
+		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
 		[7, "破甲", "战斗前，怪物附加角色防御的" + Math.floor(100 * core.values.breakArmor || 0) + "%作为伤害"],
 		[8, "反击", "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * core.values.counterAttack || 0) + "%作为伤害，无视角色防御"],
 		[9, "净化", "战斗前，怪物附加勇士护盾的" + core.values.purify + "倍作为伤害"],
@@ -834,22 +822,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		break;
 	case 49: // 快捷键1: 破
 		if (core.hasItem('pickaxe')) {
-			if (core.canUseItem('pickaxe')) {
-				core.status.route.push("key:49"); // 将按键记在录像中
-				core.useItem('pickaxe', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
-			} else {
-				core.drawTip('当前不能使用破墙镐');
-			}
+			core.status.route.push("key:49"); // 将按键记在录像中
+			core.useItem('pickaxe', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
 		}
 		break;
 	case 50: // 快捷键2: 炸
 		if (core.hasItem('bomb')) {
-			if (core.canUseItem('bomb')) {
-				core.status.route.push("key:50"); // 将按键记在录像中
-				core.useItem('bomb', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
-			} else {
-				core.drawTip('当前不能使用炸弹');
-			}
+			core.status.route.push("key:50"); // 将按键记在录像中
+			core.useItem('bomb', true); // 第二个参数true代表该次使用道具是被按键触发的，使用过程不计入录像
 		}
 		break;
 	case 51: // 快捷键3: 飞
@@ -943,17 +923,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		'maps': core.maps.saveMap(),
 		'route': core.encodeRoute(core.status.route),
 		'values': values,
-		'shops': {},
 		'version': core.firstData.version,
 		"time": new Date().getTime()
 	};
-	// 设置商店次数
-	for (var shopId in core.status.shops) {
-		data.shops[shopId] = {
-			'times': core.status.shops[shopId].times || 0,
-			'visited': core.status.shops[shopId].visited || false
-		};
-	}
 
 	return data;
 },
@@ -963,13 +935,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置游戏和路线
 	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
 	core.status.route = core.decodeRoute(data.route);
-	// 加载商店信息
-	for (var shopId in core.status.shops) {
-		if (data.shops[shopId]) {
-			core.status.shops[shopId].times = data.shops[shopId].times;
-			core.status.shops[shopId].visited = data.shops[shopId].visited;
-		}
-	}
 	// 文字属性，全局属性
 	core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
 	var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
@@ -1103,10 +1068,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			id = block.event.id,
 			enemy = core.material.enemys[id];
 
+		type[loc] = type[loc] || {};
+
 		// 血网
-		if (id == 'lavaNet' && block.event.trigger == 'passNet' && !core.hasItem('shoes')) {
+		if (id == 'lavaNet' && !core.hasItem('shoes')) {
 			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
-			type[loc] = "血网伤害";
+			type[loc]["血网伤害"] = true;
 		}
 
 		// 领域
@@ -1128,7 +1095,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
 					if (!zoneSquare && Math.abs(dx) + Math.abs(dy) > range) continue;
 					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-					type[currloc] = "领域伤害";
+					type[currloc] = type[currloc] || {};
+					type[currloc]["领域伤害"] = true;
 				}
 			}
 		}
@@ -1142,9 +1110,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					currloc = nx + "," + ny;
 				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
 				damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-				type[currloc] = "阻击伤害";
+				type[currloc] = type[currloc] || {};
+				type[currloc]["阻击伤害"] = true;
 
-				var rdir = core.reverseDirection(dir);
+				var rdir = core.turnDirection(":back", dir);
 				// 检查下一个点是否存在事件（从而判定是否移动）
 				var rnx = x + core.utils.scan[rdir].x,
 					rny = y + core.utils.scan[rdir].y;
@@ -1163,14 +1132,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var currloc = nx + "," + y;
 				if (nx != x) {
 					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-					type[currloc] = "激光伤害";
+					type[currloc] = type[currloc] || {};
+					type[currloc]["激光伤害"] = true;
 				}
 			}
 			for (var ny = 0; ny < height; ny++) {
 				var currloc = x + "," + ny;
 				if (ny != y) {
 					damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
-					type[currloc] = "激光伤害";
+					type[currloc] = type[currloc] || {};
+					type[currloc]["激光伤害"] = true;
 				}
 			}
 		}
@@ -1230,7 +1201,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 						}
 						if (value > 0) {
 							damage[loc] = (damage[loc] || 0) + value;
-							type[loc] = "夹击伤害";
+							type[loc] = type[loc] || {};
+							type[loc]["夹击伤害"] = true;
 						}
 					}
 				}
@@ -1269,9 +1241,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.status.hero.hp = 0;
 			core.updateStatusBar();
 			core.events.lose();
-			return;
+		} else {
+			core.updateStatusBar();
 		}
 	}
+
+	// 从v2.7开始，每一步行走不会再刷新状态栏。
+	// 如果有特殊要求（如每走一步都加buff之类），可手动取消注释下面这一句：
+	// core.updateStatusBar(true);
+	
+	// 检查自动事件
+	core.checkAutoEvents();
+
 	// 如需强行终止行走可以在这里条件判定：
 	// core.stopAutomaticRoute();
 },

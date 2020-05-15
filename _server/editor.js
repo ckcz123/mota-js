@@ -629,7 +629,7 @@ editor.prototype.buildMark = function(){
     }
 }
 
-editor.prototype.setSelectBoxFromInfo=function(thisevent){
+editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
     var pos={x: 0, y: 0, images: "terrains"};
     var ysize = 32;
     if(thisevent==0){
@@ -645,6 +645,10 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
             pos.y %= editor.uivalues.foldPerCol;
         }
         if(pos.x == 0) pos.y+=2;
+    }
+    if (!editor.isMobile && scrollTo) {
+        editor.dom.iconLib.scrollLeft = pos.x * 32 - editor.dom.iconLib.offsetWidth / 2;
+        editor.dom.iconLib.scrollTop = pos.y * ysize - editor.dom.iconLib.offsetHeight / 2;
     }
     editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
     editor.dom.dataSelection.style.top = pos.y * ysize + 'px';

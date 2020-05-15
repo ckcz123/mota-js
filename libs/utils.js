@@ -62,10 +62,10 @@ utils.prototype._init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text, prefix, need, times) {
+utils.prototype.replaceText = function (text, prefix) {
     if (typeof text != 'string') return text;
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value, prefix, need, times);
+        return core.calValue(value, prefix);
     });
 }
 
@@ -82,19 +82,21 @@ utils.prototype.replaceValue = function (value) {
         if (value.indexOf('global:') >= 0)
             value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
         if (value.indexOf('enemy:')>=0)
-            value = value.replace(/enemy:([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
+            value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
             value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
         if (value.indexOf('blockCls:')>=0)
             value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
         if (value.indexOf('equip:')>=0)
             value = value.replace(/equip:(\d)/g, "core.getEquip($1)");
+        if (value.indexOf('temp:')>=0)
+            value = value.replace(/temp:([a-zA-Z0-9_]+)/g, "core.getFlag('@temp@$1', 0)");
     }
     return value;
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value, prefix, need, times) {
+utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
         if (value.indexOf(':') >= 0) {
@@ -594,7 +596,7 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             decodeObj.ans.push("choices:" + nxt);
             break;
         case "S":
-            decodeObj.ans.push("shop:" + nxt + ":" + this._decodeRoute_getNumber(decodeObj, true));
+            decodeObj.ans.push("shop:" + nxt);
             break;
         case "T":
             decodeObj.ans.push("turn");
@@ -689,9 +691,19 @@ utils.prototype.strlen = function (str) {
     return count;
 };
 
-utils.prototype.reverseDirection = function (direction) {
+utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
-    return {"left":"right","right":"left","down":"up","up":"down"}[direction] || direction;
+    var directionList = ["left", "up", "right", "down"];
+    if (directionList.indexOf(turn) >= 0) return turn;
+    switch (turn) {
+        case ':left': turn = 3; break; // turn left
+        case ':right': turn = 1; break; // turn right
+        case ':back': turn = 2; break; // turn back
+        default: turn = 0; break;
+    }
+    var index = directionList.indexOf(direction);
+    if (index < 0) return direction;
+    return directionList[(index + (turn || 0)) % 4];
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {

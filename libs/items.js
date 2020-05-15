@@ -26,35 +26,6 @@ items.prototype.getItems = function () {
     return core.clone(this.items);
 }
 
-items.prototype._resetItems = function () {
-    // 只有运行时才能执行此函数！
-    if (main.mode != 'play') return;
-
-    // 根据flag来对道具进行修改
-    if (core.flags.bigKeyIsBox) {
-        core.material.items.bigKey.cls = 'items';
-        core.material.items.bigKey.name = '钥匙盒';
-    }
-    if (core.flags.pickaxeFourDirections)
-        core.material.items.pickaxe.text = "可以破坏勇士四周的墙";
-    if (core.flags.bombFourDirections)
-        core.material.items.bomb.text = "可以炸掉勇士四周的怪物";
-    if (core.flags.snowFourDirections)
-        core.material.items.snow.text = "可以将四周的熔岩变成平地";
-    if (core.flags.equipment) {
-        core.material.items.sword1.cls = 'equips';
-        core.material.items.sword2.cls = 'equips';
-        core.material.items.sword3.cls = 'equips';
-        core.material.items.sword4.cls = 'equips';
-        core.material.items.sword5.cls = 'equips';
-        core.material.items.shield1.cls = 'equips';
-        core.material.items.shield2.cls = 'equips';
-        core.material.items.shield3.cls = 'equips';
-        core.material.items.shield4.cls = 'equips';
-        core.material.items.shield5.cls = 'equips';
-    }
-}
-
 ////// “即捡即用类”道具的使用效果 //////
 items.prototype.getItemEffect = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
@@ -81,6 +52,7 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
                 main.log(e);
             }
         }
+        core.updateStatusBar();
     }
     else {
         core.addItem(itemId, itemNum);

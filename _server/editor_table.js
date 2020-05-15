@@ -43,7 +43,7 @@ editor_table_wrapper = function (editor) {
         return /* html */`<div class='checkboxSet'>${content.join('')}</div>\n`;
     }
     editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
-        return /* html */`${prefixString}<input key='${key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
+        return /* html */`${prefixString}<input key='${key}' ctype='${typeof key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
     }
     editor_table.prototype.editGrid = function (showComment, showEdit) {
         var list = [];
@@ -79,7 +79,11 @@ editor_table_wrapper = function (editor) {
         var value=[]
         for (var i in inputs) {
             if (inputs[i].nodeName == 'INPUT') {
-                if (inputs[i].checked) value.push(inputs[i].getAttribute('key'));
+                if (inputs[i].checked) {
+                    var one = inputs[i].getAttribute('key');
+                    if (inputs[i].getAttribute('ctype') == 'number') one = parseFloat(one);
+                    value.push(one);
+                }
             }
         }
         thiseval = value;
@@ -188,6 +192,7 @@ editor_table_wrapper = function (editor) {
                 // 当cobj的参数为函数时,代入args算出值
                 for (var key in cobj) {
                     if (key === '_data') continue;
+                    if (key === '_transform' || key == '_onconfirm') cobj[key] = cobj[key].toString();
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
                 pvobj[ii] = vobj = args.vobj;
@@ -345,31 +350,6 @@ editor_table_wrapper = function (editor) {
     }
 
     /**
-     * 当“cannotOut / cannotIn”的表格值变化时
-     */
-    editor_table.prototype.onCannotInOutChange = function (guid, obj, commentObj, thisTr, inputs, field, cobj, modeNode) {
-        editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
-        var value = [];
-        var directions = ['up', 'down', 'left', 'right'];
-        var index = 0;
-        for (var i in inputs) {
-            if (inputs[i].nodeName == 'INPUT') {
-                if (inputs[i].checked) value.push(directions[index]);
-                index++;
-            }
-        }
-        if (value.length == 0) thiseval = null;
-        else thiseval = value;
-        if (editor.table.checkRange(cobj, thiseval)) {
-            editor_mode.addAction(['change', field, thiseval]);
-            editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
-        } else {
-            printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
-        }
-
-    }
-
-    /**
      * 当"显示完整注释"被按下时
      */
     editor_table.prototype.onCommentBtnClick = function (button) {
@@ -384,8 +364,10 @@ editor_table_wrapper = function (editor) {
         var tr = button.parentNode.parentNode;
         var guid = tr.getAttribute('id');
         var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
+        var input = tr.children[2].children[0].children[0];
         if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
         if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+        if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
     }
 
     /**
@@ -399,6 +381,7 @@ editor_table_wrapper = function (editor) {
         if (editor_mode.doubleClickMode === 'change') {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
             if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+            if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -406,6 +389,17 @@ editor_table_wrapper = function (editor) {
             editor_mode.doubleClickMode = 'change';
             editor.table.deletefunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
+    }
+
+    editor_table.prototype.selectMaterial = function (input, cobj) {
+        editor.uievent.selectMaterial(input.value, cobj._docs || cobj._data || '请选择素材', cobj._directory, function (one) {
+            if (!/^[-A-Za-z0-9_.]+$/.test(one)) return null;
+            if (cobj._transform) return eval("("+cobj._transform+")(one)");
+            return one;
+        }, function (data) {
+            input.value = JSON.stringify(cobj._onconfirm ? eval("("+cobj._onconfirm+")(JSON.parse(input.value), data)") : data);
+            input.onchange();
+        })
     }
 
     /**

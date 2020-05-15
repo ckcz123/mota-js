@@ -162,10 +162,22 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"special": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==null || thiseval instanceof Array || (thiseval==~~thiseval && thiseval>=0)",
-					"_docs": "特殊属性",
-					"_data": "特殊属性\n\n0:无,1:先攻,2:魔攻,3:坚固,4:2连击,\n5:3连击,6:n连击,7:破甲,8:反击,9:净化,\n10:模仿,11:吸血,12:中毒,13:衰弱,14:诅咒,\n15:领域,16:夹击,17:仇恨,18:阻击,19:自爆,\n20:无敌,21:退化,22:固伤,23:重生,24:激光,25:光环\n26:支援,27:捕捉\n多个属性例如用[1,4,11]表示先攻2连击吸血"
+					"_type": "checkboxSet",
+					"_checkboxSet":function(){
+						var array=functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials()
+						var b=[],c=[];
+						for (var index = 0; index < array.length; index++) {
+							b.push(array[index][0])
+							var name = array[index][1];
+							if (name instanceof Function) name = name({});
+							c.push((index%2==0&&index>0?'<br>':'')+name+'')
+						}
+						return {
+							"prefix":c,
+							"key":b
+						}
+					},
+					"_data": "特殊属性"
 				},
 				"value": {
 					"_leaf": true,
@@ -228,7 +240,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				}
 			}
 		},
-		"enemys_template": { 'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'exp': 0, 'point': 0, 'special': 0 },
+		"enemys_template": { 'name': '新敌人', 'hp': 0, 'atk': 0, 'def': 0, 'money': 0, 'exp': 0, 'point': 0, 'special': [] },
 
 
 		// --------------------------- 【图块属性】相关的表格配置 --------------------------- //
@@ -266,9 +278,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"values": [
 							"null",
 							"openDoor",
-							"passNet",
-							"changeLight",
 							"pushBox",
+							"ski",
 							"custom"
 						]
 					},

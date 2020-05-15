@@ -317,7 +317,7 @@ events.prototype._trigger = function (x, y) {
         eval(block.event.script);
     } catch (e) { main.log(e); }
 
-    if (block.event.trigger) {
+    if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
 
@@ -402,7 +402,16 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         });
         return;
     }
-    this._openDoor_animate(id, x, y, callback);
+    if (core.status.replay.speed == 24) {
+        core.status.replay.animate = true;
+        core.removeBlock(x, y);
+        setTimeout(function () {
+            core.status.replay.animate = false;
+            core.events.afterOpenDoor(id, x, y, callback);
+        });
+    } else {
+        this._openDoor_animate(id, x, y, callback);
+    }
 }
 
 events.prototype._openDoor_check = function (id, x, y, needKey) {
@@ -477,16 +486,16 @@ events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
 }
 
 events.prototype._sys_getItem = function (data, callback) {
-    this.getItem(data.event.id, 1, data.x, data.y, callback);
+    this.getItem(data.event.id, 1, data.x, data.y, false, callback);
 }
 
 ////// 获得某个物品 //////
-events.prototype.getItem = function (id, num, x, y, callback) {
+events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
     if (num == null) num = 1;
     num = num || 1;
     var itemCls = core.material.items[id].cls;
-    core.items.getItemEffect(id, num);
     core.removeBlock(x, y);
+    core.items.getItemEffect(id, num);
     var text = '获得 ' + core.material.items[id].name;
     if (num > 1) text += "x" + num;
     if (itemCls === 'items' && num == 1) text += core.items.getItemEffectTip(id);
@@ -510,14 +519,11 @@ events.prototype.getItem = function (id, num, x, y, callback) {
         itemHint.push(id);
     }
 
-
-    core.updateStatusBar();
-
-    this.afterGetItem(id, x, y, callback);
+    this.afterGetItem(id, x, y, isGentleClick, callback);
 }
 
-events.prototype.afterGetItem = function (id, x, y, callback) {
-    this.eventdata.afterGetItem(id, x, y, callback);
+events.prototype.afterGetItem = function (id, x, y, isGentleClick, callback) {
+    this.eventdata.afterGetItem(id, x, y, isGentleClick, callback);
 }
 
 ////// 获得面前的物品（轻按） //////
@@ -545,7 +551,7 @@ events.prototype._getNextItem = function (direction, noRoute) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     if (!noRoute) core.status.route.push("getNext");
-    this.getItem(core.getBlockId(nx, ny), 1, nx, ny);
+    this.getItem(core.getBlockId(nx, ny), 1, nx, ny, true);
     return true;
 }
 
@@ -593,6 +599,8 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
         var index = core.floorIds.indexOf(core.status.floorId);
         if (index < core.floorIds.length - 1) floorId = core.floorIds[index + 1];
         else floorId = core.status.floorId;
+    } else if (floorId == ':now') {
+        floorId = core.status.floorId;
     }
     if (!core.status.maps[floorId]) {
         main.log("不存在的楼层：" + floorId);
@@ -702,33 +710,6 @@ events.prototype.visitFloor = function (floorId) {
     core.getFlag("__visited__")[floorId] = true;
 }
 
-events.prototype._sys_passNet = function (data, callback) {
-    this.passNet(data);
-    if (callback) callback();
-}
-
-////// 经过一个路障 //////
-events.prototype.passNet = function (data) {
-    if (!core.hasItem('shoes')) {
-        // 血网 lavaNet 移动到 checkBlock 中处理
-        if (data.event.id == 'poisonNet') { // 毒网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[0]});
-        }
-        else if (data.event.id == 'weakNet') { // 衰网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[1]});
-        }
-        else if (data.event.id == 'curseNet') { // 咒网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[2]});
-        }
-    }
-    this.afterPassNet(data.x, data.y, data.event.id);
-    core.updateStatusBar();
-}
-
-events.prototype.afterPassNet = function (x, y, id) {
-    if (this.eventdata.afterPassNet) this.eventdata.afterPassNet(x, y, id);
-}
-
 events.prototype._sys_pushBox = function (data, callback) {
     this.pushBox(data);
     if (callback) callback();
@@ -743,7 +724,15 @@ events.prototype.pushBox = function (data) {
         nx = data.x + core.utils.scan[direction].x, ny = data.y + core.utils.scan[direction].y;
 
     // 检测能否推上去
-    if (!core.canMoveHero() || !core.canMoveHero(data.x, data.y, direction)) return;
+    if (!core.canMoveHero()) return;
+    var canGoDeadZone = core.flags.canGoDeadZone;
+    core.flags.canGoDeadZone = false;
+    if (!core.canMoveHero(data.x, data.y, direction)) {
+        core.flags.canGoDeadZone = canGoDeadZone;
+        return;
+    }
+    core.flags.canGoDeadZone = canGoDeadZone;
+
     var nextId = core.getBlockId(nx, ny);
     if (nextId != null && nextId != 'flower') return;
 
@@ -753,8 +742,6 @@ events.prototype.pushBox = function (data) {
         core.removeBlock(data.x, data.y);
     else
         core.setBlock(168, data.x, data.y);
-
-    core.updateStatusBar();
     this._pushBox_moveHero(direction);
 }
 
@@ -780,27 +767,22 @@ events.prototype.afterPushBox = function () {
     return this.eventdata.afterPushBox();
 }
 
-events.prototype._sys_changeLight = function (data, callback) {
-    core.events.changeLight(data.event.id, data.x, data.y);
-    if (callback) callback();
-}
-
-////// 改变亮灯（感叹号）的事件 //////
-events.prototype.changeLight = function (id, x, y) {
-    if (id != null && id != 'light') return;
-    core.setBlock(core.getNumberById('darkLight'), x, y);
-    return this.eventdata.afterChangeLight(x, y);
-}
-
 events.prototype._sys_ski = function (data, callback) {
     core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
+}
+
+/// 当前是否在冰上
+events.prototype.onSki = function (number) {
+    if (number == null) number = core.getBgNumber();
+    var block = core.getBlockByNumber(number);
+    return block && block.event && block.event.trigger == 'ski';
 }
 
 events.prototype._sys_action = function (data, callback) {
     var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
     // 检查是否需要改变朝向
     if (ex == core.nextX() && ey == core.nextY()) {
-        var dir = core.reverseDirection();
+        var dir = core.turnDirection(":back");
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
             var number = core.getNumberById(toId);
@@ -1269,14 +1251,12 @@ events.prototype._action_show = function (data, x, y, prefix) {
 events.prototype._action_hide = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     if (data.time > 0 && data.floorId == core.status.floorId) {
-        data.loc.forEach(function (t) {
-            core.hideBlock(t[0], t[1], data.floorId);
-        });
-        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'hide', data.time);
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, data.remove ? 'remove' : 'hide', data.time);
     }
     else {
         data.loc.forEach(function (t) {
-            core.removeBlock(t[0], t[1], data.floorId)
+            if (data.remove) core.removeBlock(t[0], t[1], data.floorId);
+            else core.hideBlock(t[0], t[1], data.floorId);
         });
         core.doAction();
     }
@@ -1286,6 +1266,14 @@ events.prototype._action_setBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
         core.setBlock(data.number, t[0], t[1], data.floorId);
+    });
+    core.doAction();
+}
+
+events.prototype._action_turnBlock = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.turnBlock(data.number, t[0], t[1], data.floorId);
     });
     core.doAction();
 }
@@ -1383,7 +1371,7 @@ events.prototype._action_changeFloor = function (data, x, y, prefix) {
 events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
     if (data.x == null && data.y == null && data.direction) {
-        core.setHeroLoc('direction', data.direction, true);
+        core.setHeroLoc('direction', core.turnDirection(data.direction), true);
         core.drawHero();
         return core.doAction();
     }
@@ -1391,7 +1379,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     core.setHeroLoc('x', loc[0]);
     core.setHeroLoc('y', loc[1]);
-    if (data.direction) core.setHeroLoc('direction', data.direction);
+    if (data.direction) core.setHeroLoc('direction', core.turnDirection(data.direction));
     core.drawHero();
     core.doAction();
 }
@@ -1502,16 +1490,13 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 }
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    core.status.shops[data.id].visited = true;
-    this.setEvents([]);
-    if (!core.isReplaying())
-        this.openShop(data.id);
-    if (core.status.event.id == 'action')
-        core.doAction();
+    core.setShopVisited(data.id, true);
+    if (data.open) core.openShop(data.id, true);
+    core.doAction();
 }
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    this.disableQuickShop(data.id);
+    core.setShopVisited(data.id, false);
     core.doAction();
 }
 
@@ -1820,9 +1805,9 @@ events.prototype._precompile_confirm = function (data) {
 }
 
 events.prototype._action_for = function (data, x, y, prefix) {
-    // Only support switch:A
-    if (!/^switch:[A-Z]$/.test(data.name)) {
-        core.insertAction(['循环遍历事件只支持独立开关！']);
+    // Only support temp:A
+    if (!/^temp:[A-Z]$/.test(data.name)) {
+        core.insertAction('循环遍历事件只支持临时变量！');
         return core.doAction();
     }
     var from = core.calValue(data.from);
@@ -1830,22 +1815,22 @@ events.prototype._action_for = function (data, x, y, prefix) {
         core.insertAction('循环遍历事件要求【起始点】仅能是数字！');
         return core.doAction();
     }
-    this._setValue_setSwitch(data.name, from, prefix);
-    var toName = '__for@to@' + prefix + '@' + data.name.substring(7) + '__';
-    var stepName = '__for@step@' + prefix + '@' + data.name.substring(7) + '__';
+    var letter = data.name.substring(5);
+    core.setFlag('@temp@' + letter, from);
+    var toName = '@temp@for-to@' + letter;
+    var stepName = '@temp@for-step@' + letter;
     core.setFlag(toName, data.to);
     core.setFlag(stepName, data.step);
     var condition = "(function () {"+
-        "var clearAndReturn = function (v) { if (!v) { core.removeFlag('"+toName+"'); core.removeFlag('"+stepName+"'); } return v; };"+
         "var to = core.calValue(core.getFlag('" + toName + "'));"+
         "var step = core.calValue(core.getFlag('" + stepName + "'));"+
-        "if (typeof step != 'number' || typeof to != 'number') return clearAndReturn(false);"+
-        "if (step == 0) return clearAndReturn(true);"+
-        "var currentValue = core.calValue('switch:'+'" + data.name.substring(7) + "', '"+prefix+"');"+
+        "if (typeof step != 'number' || typeof to != 'number') return false;"+
+        "if (step == 0) return true;"+
+        "var currentValue = core.getFlag('@temp@" + letter + "');"+
         "currentValue += step;"+
-        "core.events._setValue_setSwitch('switch:'+'" + data.name.substring(7) + "', currentValue, '"+prefix+"');"+
-        "if (step > 0) { return clearAndReturn(currentValue <= to); }"+
-        "else { return clearAndReturn(currentValue >= to); }"+
+        "core.setFlag('@temp@" + letter + "', currentValue);"+
+        "if (step > 0) { return currentValue <= to; }"+
+        "else { return currentValue >= to; }"+
         "})()";
     return this._action_dowhile({"condition": condition, "data": data.data}, x, y, prefix);
 }
@@ -1859,17 +1844,17 @@ events.prototype._precompile_for = function (data) {
 }
 
 events.prototype._action_forEach = function (data, x, y, prefix) {
-    // Only support switch:A
-    if (!/^switch:[A-Z]$/.test(data.name)) {
-        core.insertAction(['循环遍历事件只支持独立开关！']);
+    // Only support temp:A
+    if (!/^temp:[A-Z]$/.test(data.name)) {
+        core.insertAction(['循环遍历事件只支持临时变量！']);
         return core.doAction();
     }
-    var listName = '__forEach@' + prefix + '@' + data.name.substring(7) + '__';
+    var listName = '@temp@forEach@' + data.name.substring(5);
     core.setFlag(listName, core.clone(data.list));
     var condition = "(function () {" +
         "var list = core.getFlag('"+listName+"', []);"+
-        "if (list.length == 0) { core.removeFlag('" + listName + "'); return false; }"+
-        "core.events._setValue_setSwitch('switch:'+'" + data.name.substring(7) + "', list.shift(), '"+prefix+"');"+
+        "if (list.length == 0) return false;"+
+        "core.setFlag('@temp@'+'" + data.name.substring(5) + "', list.shift());"+
         "return true;"+
         "})()";
     return this._action_while({"condition": condition, "data": data.data}, x, y, prefix);
@@ -1949,7 +1934,7 @@ events.prototype._action_function = function (data, x, y, prefix) {
 }
 
 events.prototype._action_update = function (data, x, y, prefix) {
-    core.updateStatusBar();
+    core.updateStatusBar(data.doNotCheckAutoEvents);
     core.doAction();
 }
 
@@ -2084,13 +2069,6 @@ events.prototype._action_waitAsync = function (data, x, y, prefix) {
             core.doAction();
         }
     }, 50);
-}
-
-events.prototype._action_revisit = function (data, x, y, prefix) {
-    var block = core.getBlock(x, y);
-    if (block != null && block.block.event.trigger == 'action')
-        this.setEvents(block.block.event.data);
-    core.doAction();
 }
 
 events.prototype._action_callBook = function (data, x, y, prefix) {
@@ -2296,14 +2274,14 @@ events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
-        core.drawTip("只有在楼梯边才能使用传送器");
+        core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name);
         core.unLockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
     if (!core.canUseItem('fly')) {
-        core.drawTip("楼层传送器好像失效了");
+        core.drawTip(core.material.items['fly'].name + "好像失效了");
         core.unLockControl();
         core.status.event.data = null;
         core.status.event.id = null;
@@ -2343,8 +2321,17 @@ events.prototype.openQuickShop = function (fromUserAction) {
     // --- 如果只有一个商店，则直接打开之
     if (Object.keys(core.status.shops).length == 1) {
         var shopId = Object.keys(core.status.shops)[0];
-        if (core.status.event.id != null || !this._checkStatus('shop', false)) return;
-        core.events.openShop(shopId, true);
+        if (core.status.event.id != null) return;
+        if (!core.canOpenShop(shopId)) {
+            core.drawTip("当前无法打开快捷商店！");
+            return;
+        }
+        var message = core.canUseQuickShop(shopId);
+        if (message != null) {
+            core.drawTip(message);
+            return;
+        }
+        core.openShop(shopId, false);
         return;
     }
 
@@ -2452,6 +2439,7 @@ events.prototype.setValue = function (name, operator, value, prefix) {
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
+    this._setValue_setTemp(name, value, prefix);
     this._setValue_setGlobal(name, value);
 }
 
@@ -2477,6 +2465,11 @@ events.prototype._setValue_setSwitch = function (name, value, prefix) {
     core.setFlag((prefix || ":f@x@y") + "@" + name.substring(7), value);
 }
 
+events.prototype._setValue_setTemp = function (name, value) {
+    if (name.indexOf("temp:") !== 0) return;
+    core.setFlag("@temp@" + name.substring(5), value);
+}
+
 events.prototype._setValue_setGlobal = function (name, value) {
     if (name.indexOf("global:") !== 0) return;
     core.setGlobal(name.substring(7), value);
@@ -2485,16 +2478,6 @@ events.prototype._setValue_setGlobal = function (name, value) {
 ////// 数值增减 //////
 events.prototype.addValue = function (name, value, prefix) {
     this.setValue(name, '+=', value, prefix);
-}
-
-////// 执行一个表达式的effect操作 //////
-events.prototype.doEffect = function (effect, need, times) {
-    effect.split(";").forEach(function (expression) {
-        var arr = expression.split("+=");
-        if (arr.length != 2) return;
-        var name=arr[0], value=core.calValue(arr[1], null, need, times);
-        core.addValue(name, value);
-    });
 }
 
 ////// 设置一个怪物属性 //////
@@ -2862,87 +2845,6 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
     core.setHeroLoc('y', ey);
     core.drawHero();
     if (callback) callback();
-}
-
-////// 打开一个全局商店 //////
-events.prototype.openShop = function (shopId, needVisited) {
-    var shop = core.status.shops[shopId];
-    shop.times = shop.times || 0;
-    if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
-    var reason = core.events.canUseQuickShop(shop.id);
-    if (reason != null) return core.drawTip(reason);
-
-    if (needVisited && !shop.visited) {
-        if (!core.flags.enableDisabledShop || shop.commonEvent || shop.item) {
-            if (shop.times == 0) core.drawTip("该项尚未开启");
-            else core.drawTip("该项已失效");
-            core.ui.closePanel();
-            return;
-        }
-        else {
-            core.drawTip("该商店尚未开启，只能浏览不可使用");
-        }
-    }
-    else shop.visited = true;
-
-    if (shop.item) {
-        core.status.route.push("shop:" + shopId + ":0");
-        if (core.openItemShop) {
-            core.openItemShop(shopId);
-        } else {
-            core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
-        }
-        return;
-    } else if (shop.commonEvent) {
-        core.status.route.push("shop:"+shopId+":0");
-        core.insertAction({"type": "insert", "name": shop.commonEvent, "args": shop.args});
-        return;
-    }
-    core.ui.drawShop(shopId);
-}
-
-events.prototype._useShop = function (shop, index) {
-    if (!shop.visited) {
-        core.drawTip(shop.times ? "该商店已失效" : "该商店尚未开启");
-        return false;
-    }
-    var use = shop.use, choice = shop.choices[index];
-    var times = shop.times, need = core.calValue(choice.need || shop.need, null, null, times);
-    if (need > core.getStatus(use)) {
-        core.drawTip("你的" + (use == 'money' ? "金币" : "经验") + "不足");
-        return false;
-    }
-    core.status.event.selection = index;
-    core.status.event.data.actions.push(index);
-    core.setStatus(use, core.getStatus(use) - need);
-    core.doEffect(choice.effect, need, times);
-    core.updateStatusBar();
-    shop.times++;
-    if (shop.commonTimes) core.setFlag('commonTimes', shop.times);
-    this.openShop(shop.id);
-    return true;
-}
-
-events.prototype._exitShop = function () {
-    if (core.status.event.data.actions.length > 0) {
-        core.status.route.push("shop:" + core.status.event.data.id + ":" + core.status.event.data.actions.join(""));
-    }
-    core.status.event.data.actions = [];
-    core.status.boxAnimateObjs = [];
-    if (core.status.event.data.fromList)
-        core.ui.drawQuickShop();
-    else
-        core.ui.closePanel();
-}
-
-////// 禁用一个全局商店 //////
-events.prototype.disableQuickShop = function (shopId) {
-    core.status.shops[shopId].visited = false;
-}
-
-////// 能否使用快捷商店 //////
-events.prototype.canUseQuickShop = function (shopId) {
-    return this.eventdata.canUseQuickShop(shopId);
 }
 
 ////// 设置角色行走图 //////

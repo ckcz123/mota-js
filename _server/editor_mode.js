@@ -18,7 +18,7 @@ editor_mode = function (editor) {
         this._ids = {}
         this.dom = {}
         this.actionList = [];
-        this.mode = '';
+        this.mode = 'tower'; // 初始默认显示全塔属性
         this.info = {};
         this.appendPic = {};
         this.doubleClickMode = 'change';
@@ -176,6 +176,7 @@ editor_mode = function (editor) {
                 printe(err);
                 throw Error(err);
             }
+            var notExist = null;
             thiseval.map(function (v) {
                 var name = v.indexOf('.') < 0 ? (v+'.png') : v;
                 if (data.indexOf(name) < 0) notExist = name;

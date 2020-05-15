@@ -86,7 +86,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         var hints = [];
         for (var i = 0; i < specials.length; i++) {
             if (this.hasSpecial(enemy, specials[i][0]))
-                hints.push(this._calSpecialContent(enemy, specials[i][1]) + "：" + this._calSpecialContent(enemy, specials[i][2]));
+                hints.push("\r[#FF6A6A]\\d"+this._calSpecialContent(enemy, specials[i][1]) + "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]));
         }
         return hints;
     }
@@ -94,7 +94,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
     if (specials == null) return "";
     for (var i = 0; i < specials.length; i++) {
         if (special == specials[i][0])
-            return this._calSpecialContent(enemy, specials[i][1]) + "：" + this._calSpecialContent(enemy, specials[i][2]);
+            return "\r[#FF6A6A]\\d"+this._calSpecialContent(enemy, specials[i][1]) + "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]);
     }
     return "";
 }

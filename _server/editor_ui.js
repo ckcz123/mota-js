@@ -220,7 +220,7 @@ editor_ui_wrapper = function (editor) {
         var clickpath = editor.uifunctions.getClickpath(e);
 
         var unselect = true;
-        for (var ii = 0, thisId; thisId = ['edit', 'tip', 'brushMod', 'brushMod2', 'brushMod3', 'layerMod', 'layerMod2', 'layerMod3', 'viewportButtons'][ii]; ii++) {
+        for (var ii = 0, thisId; thisId = ['edit', 'tip', 'brushMod', 'brushMod2', 'brushMod3', 'brushMode4', 'layerMod', 'layerMod2', 'layerMod3', 'viewportButtons'][ii]; ii++) {
             if (clickpath.indexOf(thisId) !== -1) {
                 unselect = false;
                 break;
@@ -468,16 +468,7 @@ editor_ui_wrapper = function (editor) {
     uievent.elements.canvas = document.getElementById('uievent');
     uievent.elements.usedFlags = document.getElementById('uieventUsedFlags');
     uievent.elements.usedFlagList = document.getElementById('uieventUsedFlagList');
-
-    uievent.confirm = function () {
-        var callback = uievent.values.callback, floorId = uievent.values.floorId,
-            x = uievent.values.x, y = uievent.values.y;
-        uievent.close();
-        if (callback) {
-            callback(floorId, x, y);
-        }
-    }
-    uievent.elements.yes.onclick = uievent.confirm;
+    uievent.elements.materialList = document.getElementById('uieventMaterialList');
 
     uievent.close = function () {
         uievent.isOpen = false;
@@ -534,7 +525,6 @@ editor_ui_wrapper = function (editor) {
 
     uievent.selectPoint = function (floorId, x, y, hideFloor, callback) {
         uievent.values.hideFloor = hideFloor;
-        uievent.values.callback = callback;
         uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32;
         uievent.elements.selectPointBox.style.width = (uievent.values.size - 6) + "px";
         uievent.elements.selectPointBox.style.height = (uievent.values.size - 6) + "px";
@@ -552,6 +542,13 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.usedFlags.style.display = 'none';
         uievent.elements.usedFlagList.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
+        uievent.elements.yes.onclick = function () {
+            var floorId = uievent.values.floorId, x = uievent.values.x, y = uievent.values.y;
+            uievent.close();
+            if (callback) {
+                callback(floorId, x, y);
+            }
+        }
 
         // Append children
         var floors = "";
@@ -743,6 +740,101 @@ editor_ui_wrapper = function (editor) {
             }
         }
         return list;
+    }
+
+    // ------ 素材选择框 ------ //
+    uievent.selectMaterial = function (value, title, directory, transform, callback) {
+        fs.readdir(directory, function (err, data) {
+            if (err) {
+                printe(directory + '不存在！');
+                throw (directory + '不存在！');
+            }
+            if (!(data instanceof Array)) {
+                printe('没有可显示的内容')
+                return;
+            }
+            value = value || [];
+            data = (transform ? data.map(transform) : data).filter(function (one) {return one;}).sort();
+
+            uievent.isOpen = true;
+            uievent.elements.div.style.display = 'block';
+            uievent.mode = 'selectMaterial';
+            uievent.elements.selectPoint.style.display = 'none';
+            uievent.elements.yes.style.display = 'block';
+            uievent.elements.title.innerText = title;
+            uievent.elements.selectBackground.style.display = 'none';
+            uievent.elements.selectFloor.style.display = 'none';
+            uievent.elements.selectPointBox.style.display = 'none';
+            uievent.elements.canvas.style.display = 'none';
+            uievent.elements.usedFlags.style.display = 'none';
+            uievent.elements.usedFlagList.style.display = 'none';
+            uievent.elements.materialList.style.display = 'block';
+            uievent.elements.body.style.overflow = "auto";
+
+            uievent.elements.yes.onclick = function () {
+                var list = Array.from(document.getElementsByClassName('materialCheckbox')).filter(function (one) {
+                    return one.checked;
+                }).map(function (one) {return one.getAttribute('key'); });
+                uievent.close();
+                if (callback) callback(list);
+            }
+
+            // 显示每一项内容
+            var html = "<p style='margin-left: 10px; line-height: 25px'>";
+            html += "<button onclick='editor.uievent._selectAllMaterial(true)'>全选</button>"+
+                    "<button style='margin-left: 10px' onclick='editor.uievent._selectAllMaterial(false)'>全不选</button><br/>";
+            data.forEach(function (one) {
+                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${value.indexOf(one) >= 0? 'checked' : ''} /> ${one}`;
+                // 预览图片
+                if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
+                    html += "<button onclick='editor.uievent._previewMaterialImage(this)' style='margin-left: 10px'>预览</button>";
+                    html += '<br style="display:none"/><img key="'+directory+one+'" style="display:none; max-width: 100%"/>';
+                }
+                // 试听音频
+                if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || one.endsWith('.wav')) {
+                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>试听</button>";
+                    html += '<br style="display:none"/><audio controls preload="none" src="'+directory+one+'" style="display:none; max-width: 100%"></audio>';
+                }
+                html += '<br/>';
+            });
+            html += "</p>";
+            uievent.elements.materialList.innerHTML = html;
+        });
+    }
+
+    uievent._selectAllMaterial = function (checked) {
+        Array.from(document.getElementsByClassName('materialCheckbox')).forEach(function (one) {
+            one.checked = checked;
+        })
+    }
+
+    uievent._previewMaterialImage = function (button) {
+        var br = button.nextElementSibling;
+        var img = br.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '折叠';
+            br.style.display = 'block';
+            img.style.display = 'block';
+            img.src = img.getAttribute('key');
+        } else {
+            button.innerText = '预览';
+            br.style.display = 'none';
+            img.style.display = 'none';
+        }
+    }
+
+    uievent._previewMaterialAudio = function (button) {
+        var br = button.nextElementSibling;
+        var audio = br.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '折叠';
+            br.style.display = 'block';
+            audio.style.display = 'block';
+        } else {
+            button.innerText = '试听';
+            br.style.display = 'none';
+            audio.style.display = 'none';
+        }
     }
 
     editor.constructor.prototype.uievent=uievent;

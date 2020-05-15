@@ -16,7 +16,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
 	window.flags = core.status.hero.flags;
-	core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
+	core.events.setHeroIcon(core.status.hero.image, true);
 	core.control._initStatistics(core.animateFrame.totalTime);
 	core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
 		Math.max(core.status.hero.statistics.totalTime, core.animateFrame.totalTime);
@@ -111,6 +111,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置画布尺寸
 	core.maps.resizeMap(floorId);
 	// 设置勇士的位置
+	heroLoc.direction = core.turnDirection(heroLoc.direction);
 	core.status.hero.loc = heroLoc;
 	// 检查重生怪并重置
 	if (!fromLoad) {
@@ -233,7 +234,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	return true;
 },
-        "afterBattle": function (enemyId, x, y, callback) {
+        "afterBattle": function (enemyId, x, y) {
 	// 战斗结束后触发的事件
 
 	var enemy = core.material.enemys[enemyId];
@@ -272,7 +273,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 删除该块
 	var guards = []; // 支援
 	if (x != null && y != null) {
-		core.removeBlock(x, y);
+		// 检查是否是重生怪物；如果是则仅隐藏不删除
+		if (core.hasSpecial(enemy.special, 23)) {
+			core.hideBlock(x, y);
+		} else {
+			core.removeBlock(x, y);
+		}
 		guards = core.getFlag("__guards__" + x + "_" + y, []);
 		core.removeFlag("__guards__" + x + "_" + y);
 	}
@@ -373,10 +379,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	else
 		core.clearContinueAutomaticRoute();
 
-	if (callback) callback();
-
 },
-        "afterOpenDoor": function (doorId, x, y, callback) {
+        "afterOpenDoor": function (doorId, x, y) {
 	// 开一个门后触发的事件
 
 	var todo = [];
@@ -390,10 +394,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.continueAutomaticRoute();
 	else
 		core.clearContinueAutomaticRoute();
-
-	if (callback) callback();
 },
-        "afterGetItem": function (itemId, x, y, isGentleClick, callback) {
+        "afterGetItem": function (itemId, x, y, isGentleClick) {
 	// 获得一个道具后触发的事件
 	// itemId：获得的道具ID；x和y是该道具所在的坐标
 	// isGentleClick：是否是轻按触发的
@@ -407,8 +409,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	if (todo.length > 0) core.insertAction(todo, x, y);
-
-	if (callback) callback();
 },
         "afterPushBox": function () {
 	// 推箱子后的事件
@@ -939,7 +939,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置音量
 	core.events.setVolume(core.getFlag("__volume__", 1), 0);
 	// 加载勇士图标
-	var icon = core.getFlag("heroIcon", "hero.png");
+	var icon = core.status.hero.image;
 	icon = core.getMappedName(icon);
 	if (core.material.images.images[icon]) {
 		core.material.images.hero = core.material.images.images[icon];
@@ -1107,7 +1107,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				type[currloc] = type[currloc] || {};
 				type[currloc]["阻击伤害"] = true;
 
-				var rdir = core.reverseDirection(dir);
+				var rdir = core.turnDirection(":back", dir);
 				// 检查下一个点是否存在事件（从而判定是否移动）
 				var rnx = x + core.utils.scan[rdir].x,
 					rny = y + core.utils.scan[rdir].y;
@@ -1212,17 +1212,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		cache: {} // clear cache
 	};
 },
-        "moveOneStep": function (x, y) {
-	// 勇士每走一步后执行的操作，x,y为要移动到的坐标。
+        "moveOneStep": function (callback) {
+	// 勇士每走一步后执行的操作。callback为行走完毕后的回调
 	// 这个函数执行在“刚走完”的时候，即还没有检查该点的事件和领域伤害等。
 	// 请注意：瞬间移动不会执行该函数。如果要控制能否瞬间移动有三种方法：
 	// 1. 将全塔属性中的cannotMoveDirectly这个开关勾上，即可在全塔中全程禁止使用瞬移。
 	// 2, 将楼层属性中的cannotMoveDirectly这个开关勾上，即禁止在该层楼使用瞬移。
 	// 3. 将flag:cannotMoveDirectly置为true，即可使用flag控制在某段剧情范围内禁止瞬移。
 
-	// 设置当前坐标，增加步数
-	core.setHeroLoc('x', x, true);
-	core.setHeroLoc('y', y, true);
+	// 增加步数
 	core.status.hero.steps++;
 	// 更新跟随者状态，并绘制
 	core.updateFollowers();
@@ -1235,6 +1233,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.status.hero.hp = 0;
 			core.updateStatusBar();
 			core.events.lose();
+			return;
 		} else {
 			core.updateStatusBar();
 		}
@@ -1246,6 +1245,31 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	
 	// 检查自动事件
 	core.checkAutoEvents();
+
+	// ------ 检查目标点事件 ------ //
+	// 无事件的道具（如血瓶）需要优先于阻激夹域判定
+    var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
+    var block = core.getBlock(nowx, nowy);
+    var hasTrigger = false;
+    if (block!=null && block.block.event.trigger=='getItem' &&
+        !core.floors[core.status.floorId].afterGetItem[nowx+","+nowy]) {
+        hasTrigger = true;
+        core.trigger(nowx, nowy, callback);
+    }
+    // 执行目标点的阻激夹域事件
+    core.checkBlock();
+
+    // 执行目标点的script和事件
+    if (!hasTrigger)
+        core.trigger(nowx, nowy, callback);
+
+    // 检查该点是否是滑冰
+    if (core.onSki()) {
+		// 延迟到事件最后执行，因为这之前可能有阻激夹域动画
+		core.insertAction({"type": "moveAction"}, null, null, null, true);
+    }
+
+	// ------ 检查目标点事件 END ------ //
 
 	// 如需强行终止行走可以在这里条件判定：
 	// core.stopAutomaticRoute();

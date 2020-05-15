@@ -198,7 +198,7 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    background: url(project/images/ground.png) repeat;
+    background: url(project/materials/ground.png) repeat;
     z-index: 185;
     display: none;
     top: 0;
@@ -232,7 +232,7 @@
 }
 #toolBar {
     position: absolute;
-    background: url(project/images/ground.png) repeat;
+    background: url(project/materials/ground.png) repeat;
     z-index: 210;
     box-sizing: border-box;
     -moz-box-sizing: border-box;

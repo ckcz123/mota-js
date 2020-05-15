@@ -190,9 +190,9 @@ function core() {
         },
         "globalAttribute": {
             'equipName': main.equipName || [],
-            "statusLeftBackground": main.statusLeftBackground || "url(project/images/ground.png) repeat",
-            "statusTopBackground": main.statusTopBackground || "url(project/images/ground.png) repeat",
-            "toolsBackground": main.toolsBackground || "url(project/images/ground.png) repeat",
+            "statusLeftBackground": main.statusLeftBackground || "url(project/materials/ground.png) repeat",
+            "statusTopBackground": main.statusTopBackground || "url(project/materials/ground.png) repeat",
+            "toolsBackground": main.toolsBackground || "url(project/images/materials.png) repeat",
             "borderColor": main.borderColor || "white",
             "statusBarColor": main.statusBarColor || "white",
             "hardLabelColor": main.hardLabelColor || "red",
@@ -239,6 +239,10 @@ core.prototype._init_flags = function () {
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
+    
+    // 让你总是拼错！
+    window.on = true;
+    window.off = false;
 
     core.dom.versionLabel.innerText = core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;
@@ -370,8 +374,8 @@ core.prototype._init_others = function () {
     core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
-    core.loadImage('fog', function (name, img) { core.animateFrame.weather.fog = img; });
-    core.loadImage('keyboard', function (name, img) {core.material.images.keyboard = img; });
+    core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
+    core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
     core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });

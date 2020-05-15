@@ -107,6 +107,7 @@ editor_blockly = function () {
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
+      MotaActionBlocks['moveAction_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['jumpHero_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),
@@ -128,6 +129,7 @@ editor_blockly = function () {
       MotaActionBlocks['show_s'].xmlText(),
       MotaActionBlocks['hide_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
+      MotaActionBlocks['turnBlock_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
       MotaActionBlocks['showBgFgMap_s'].xmlText(),
@@ -826,7 +828,7 @@ function omitedcheckUpdateFunction(event) {
     var selectPointBlocks = {
         "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
         "jumpHero_s": ["PosString_0", "PosString_1"],
-        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
+        "changeFloor_s": ["Number_0", "Number_1", "IdString_0", true],
         "changePos_s": ["PosString_0", "PosString_1"],
         "battle_1_s": ["PosString_0", "PosString_1"],
         "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
@@ -834,6 +836,7 @@ function omitedcheckUpdateFunction(event) {
         "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
         "setBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
+        "turnBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
         "move_s": ["PosString_0", "PosString_1"],
         "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
         "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
@@ -874,7 +877,7 @@ function omitedcheckUpdateFunction(event) {
                 block.setFieldValue(xv+"", arr[0]);
                 block.setFieldValue(yv+"", arr[1]);
             }
-            if (block.type == 'changeFloor_m') {
+            if (block.type == 'changeFloor_m' || block.type == 'changeFloor_s') {
                 block.setFieldValue("floorId", "Floor_List_0");
                 block.setFieldValue("loc", "Stair_List_0");
             }
@@ -988,6 +991,7 @@ function omitedcheckUpdateFunction(event) {
         var allBgms = Object.keys(core.material.bgms);
         var allSounds = Object.keys(core.material.sounds);
         var allShops = Object.keys(core.status.shops);
+        var allFloorIds = core.floorIds;
         var allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
                          "maroon（深红色）", "navy（深蓝色）", "gold（金色）",  "olive（黄褐色）", "orange（橙色）", "purple（品红色）", 
                          "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
@@ -1040,6 +1044,14 @@ function omitedcheckUpdateFunction(event) {
         // 对全局商店进行补全
         if ((type == 'openShop_s' || type == 'disableShop_s') && name == 'IdString_0') {
           return filter(allShops, content);
+        }
+
+        // 对楼层名进行补全
+        if ((type == 'setFloor_s' || type == 'show_s' || type == 'hide_s' || type == 'insert_2_s'
+          || type == 'setBlock_s' || type == 'turnBlock_s' || type == 'showFloorImg_s' || type == 'hideFloorImg_s'
+          || type == 'showBgFgMap_s' || type == 'hideBgFgMap_s' || type == 'setBgFgBlock_s'
+          || type == 'openDoor_s' || type == 'changeFloor_m') && name == "IdString_0") {
+          return filter(allFloorIds, content);
         }
 
         // 对\f进行自动补全

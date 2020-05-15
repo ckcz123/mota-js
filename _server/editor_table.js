@@ -57,11 +57,21 @@ editor_table_wrapper = function (editor) {
     }
 
     editor_table.prototype.gap = function (field) {
-        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
+        var tokenlist = field.slice(2, -2).split("']['");
+        var rule = tokenlist.join("-");
+        tokenlist.pop();
+        var self = tokenlist.join("-");
+        var status = !!tokenPool[rule];
+        return /* html */`<tr data-gap="${rule}" data-field="${self}">
+            <td>----</td>
+            <td>----</td>
+            <td>${field}</td>
+            <td><button style="background: #FFCCAA" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
+        </tr>\n`
     }
 
     editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortComment, tdstr, type) {
-        return /* html */`<tr id="${guid}">
+        return /* html */`<tr id="${guid}" data-field="${field.slice(2, -2).split("']['").join("-")}">
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
         <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
@@ -348,6 +358,36 @@ editor_table_wrapper = function (editor) {
         }
     }
 
+    var tokenPool = {};
+    var tokenstyle = document.createElement("style");
+    document.body.appendChild(tokenstyle);
+
+    tokenPoolRender = function() {
+        var content = "";
+        Object.keys(tokenPool).forEach(function(k) {
+            content += /* CSS */`[data-field|=${k}]{ display: none }`;
+        })
+        tokenstyle.innerHTML = content;
+    }
+
+    /**
+     * 当"折叠"被按下时
+     */
+    editor_table.prototype.onFoldBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        if (button.dataset.fold == "true") {
+            delete tokenPool[tr.dataset.gap];
+            tokenPoolRender();
+            button.dataset.fold = "false";
+            button.innerText = "折叠";
+        } else {
+            tokenPool[tr.dataset.gap] = true;
+            tokenPoolRender();
+            button.dataset.fold = "true";
+            button.innerText = "展开";
+        }
+    }
+
     /**
      * 当"显示完整注释"被按下时
      */
@@ -363,8 +403,10 @@ editor_table_wrapper = function (editor) {
         var tr = button.parentNode.parentNode;
         var guid = tr.getAttribute('id');
         var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
+        var input = tr.children[2].children[0].children[0];
         if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
         if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+        if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
     }
 
     /**
@@ -378,6 +420,7 @@ editor_table_wrapper = function (editor) {
         if (editor_mode.doubleClickMode === 'change') {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
             if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+            if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -385,6 +428,17 @@ editor_table_wrapper = function (editor) {
             editor_mode.doubleClickMode = 'change';
             editor.table.deletefunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
+    }
+
+    editor_table.prototype.selectMaterial = function (input, cobj) {
+        editor.uievent.selectMaterial(input.value, cobj._docs || cobj._data || '请选择素材', cobj._directory, function (one) {
+            if (!/^[-A-Za-z0-9_.]+$/.test(one)) return null;
+            if (cobj._transform) return eval("("+cobj._transform+")(one)");
+            return one;
+        }, function (data) {
+            input.value = JSON.stringify(cobj._onconfirm ? eval("("+cobj._onconfirm+")(JSON.parse(input.value), data)") : data);
+            input.onchange();
+        })
     }
 
     /**

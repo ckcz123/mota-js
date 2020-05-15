@@ -26,6 +26,7 @@ function editor() {
         brushMod:document.getElementById('brushMod'),
         brushMod2:document.getElementById('brushMod2'),
         brushMod3:document.getElementById('brushMod3'),
+        brushMod4:document.getElementById('brushMod4'),
         bgc : document.getElementById('bg'),
         bgCtx : document.getElementById('bg').getContext('2d'),
         fgc : document.getElementById('fg'),
@@ -49,6 +50,7 @@ function editor() {
         selectAppend : document.getElementById('selectAppend'),
         selectFileBtn :document.getElementById('selectFileBtn'),
         changeFloorId :document.getElementById('changeFloorId'),
+        changeFloorSize: document.getElementById('changeFloorSize'),
         left1 : document.getElementById('left1'),
         editModeSelect :document.getElementById('editModeSelect'),
         mid2 : document.getElementById('mid2'),
@@ -149,7 +151,7 @@ editor.prototype.init = function (callback) {
     var useCompress = main.useCompress;
     main.useCompress = false;
     editor.airwallImg = new Image();
-    editor.airwallImg.src = './project/images/airwall.png';
+    editor.airwallImg.src = './project/materials/airwall.png';
 
     main.init('editor', function () {
         editor.config = new editor_config();

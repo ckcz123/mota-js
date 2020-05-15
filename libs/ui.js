@@ -1875,8 +1875,8 @@ ui.prototype.drawBookDetail = function (index) {
 
     var left = 10, width = this.PIXEL - 2 * left, right = left + width;
     var content_left = left + 25, validWidth = right - content_left - 13;
-    var contents = core.splitLines("data", content, validWidth, this._buildFont(16, false));
-    var height = Math.max(24 * contents.length + 55, 80), top = (this.PIXEL - height) / 2, bottom = top + height;
+    var height = Math.max(this.getTextContentHeight(content, {fontSize: 16, lineHeight: 24, maxWidth: validWidth}) + 58, 80), 
+        top = (this.PIXEL - height) / 2, bottom = top + height;
 
     core.setAlpha('data', 0.9);
     core.fillRect('data', left, top, width, height, '#000000');
@@ -1884,7 +1884,7 @@ ui.prototype.drawBookDetail = function (index) {
     core.strokeRect('data', left - 1, top - 1, width + 1, height + 1,
         core.status.globalAttribute.borderColor, 2);
 
-    this._drawBookDetail_drawContent(enemy, contents, {top: top, content_left: content_left, bottom: bottom});
+    this._drawBookDetail_drawContent(enemy, content, {top: top, content_left: content_left, bottom: bottom, validWidth: validWidth});
 }
 
 ui.prototype._drawBookDetail_getInfo = function (index) {
@@ -1917,7 +1917,7 @@ ui.prototype._drawBookDetail_mofang = function (enemy, texts) {
         var hp = enemy.hp;
         var delta = core.status.hero.atk - core.status.hero.def;
         if (delta<hp && hp<=10000 && hp>0) {
-            texts.push("模仿临界计算器：（当前攻防差"+core.formatBigNumber(delta)+"）");
+            texts.push("\r[#FF6A6A]\\d模仿临界计算器：\\d\r[]（当前攻防差"+core.formatBigNumber(delta)+"）");
             var u = [];
             this._drawBookDetail_mofang_getArray(hp).forEach(function (t) {
                 if (u.length < 20) u.push(t);
@@ -1968,7 +1968,7 @@ ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
             }
             core.status.hero.hp = start;
             if (core.canBattle(enemy.id)) {
-                texts.push("打死该怪物最低需要生命值："+core.formatBigNumber(start));
+                texts.push("\r[#FF6A6A]\\d打死该怪物最低需要生命值：\\d\r[]"+core.formatBigNumber(start));
             }
             core.status.hero.hp = nowHp;
         }
@@ -1977,19 +1977,19 @@ ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
 
 ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
     if (core.enemys.hasSpecial(enemy.special, 17)) {
-        texts.push("当前仇恨伤害值："+core.getFlag('hatred', 0));
+        texts.push("\r[#FF6A6A]\\d当前仇恨伤害值：\\d\r[]"+core.getFlag('hatred', 0));
     }
 }
 
 ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
     var damageInfo = core.getDamageInfo(enemy, null, null, null, floorId);
-    texts.push("战斗回合数："+((damageInfo||{}).turn||0));
+    texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]"+((damageInfo||{}).turn||0));
     // 临界表
     var criticals = core.enemys.nextCriticals(enemy, 8, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
-    texts.push("临界表："+JSON.stringify(criticals));
+    texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]"+JSON.stringify(criticals));
     var prevInfo = core.getDamageInfo(enemy, {atk: core.status.hero.atk-1}, null, null, floorId);
     if (prevInfo != null && damageInfo != null) {
         if (damageInfo.damage != null) damageInfo = damageInfo.damage;
@@ -2000,26 +2000,14 @@ ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts)
     }
 }
 
-ui.prototype._drawBookDetail_drawContent = function (enemy, contents, pos) {
+ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
     // 名称
     core.setTextAlign('data', 'left');
     core.fillText('data', enemy.name, pos.content_left, pos.top + 30, '#FFD700', this._buildFont(22, true));
-    var content_top = pos.top + 57;
+    var content_top = pos.top + 44;
 
-    for (var i=0;i<contents.length;i++) {
-        var text=contents[i];
-        var index=text.indexOf("：");
-        if (index>=0) {
-            var x1 = text.substring(0, index+1);
-            core.fillText('data', x1, pos.content_left, content_top, '#FF6A6A', this._buildFont(16, true));
-            var len=core.calWidth('data', x1);
-            core.fillText('data', text.substring(index+1), pos.content_left+len, content_top, '#FFFFFF', this._buildFont(16, false));
-        }
-        else {
-            core.fillText('data', contents[i], pos.content_left, content_top, '#FFFFFF', this._buildFont(16, false));
-        }
-        content_top+=24;
-    }
+    this.drawTextContent('data', content, {left: pos.content_left, top: content_top, maxWidth: pos.validWidth,
+        fontSize: 16, lineHeight: 24});
 }
 
 ////// 绘制楼层传送器 //////
@@ -2069,7 +2057,7 @@ ui.prototype.drawCenterFly = function () {
     var fillstyle = 'rgba(255,0,0,0.5)';
     if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
-    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.getFlag('heroIcon', "hero.png")},
+    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image},
         {ctx: 'ui', centerX: toX, centerY: toY});
     var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
@@ -2554,7 +2542,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
         core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
-            heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
+            heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags
         }, {
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });

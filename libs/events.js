@@ -300,16 +300,22 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 }
 
 ////// 触发(x,y)点的事件 //////
-events.prototype._trigger = function (x, y) {
-    if (core.status.gameOver) return;
-    if (core.status.event.id == 'action') {
-        core.insertAction({"type": "trigger", "loc": [x, y]}, x, y, null, true);
+events.prototype.trigger = function (x, y, callback) {
+    var _executeCallback = function () {
+        // 因为trigger之后还有可能触发其他同步脚本（比如阻激夹域检测）
+        // 所以这里强制callback被异步触发
+        if (callback) {
+            setTimeout(callback, 1); // +1是为了录像检测系统 
+        }
         return;
     }
-    if (core.status.event.id) return;
+    if (core.status.gameOver) return _executeCallback();
+    if (core.status.event.id && core.status.event.id != 'action') return _executeCallback();
+
+    var inAction = core.status.event.id == 'action';
 
     var block = core.getBlock(x, y);
-    if (block == null) return;
+    if (block == null) return _executeCallback();
     block = block.block;
 
     // 执行该点的脚本
@@ -322,11 +328,24 @@ events.prototype._trigger = function (x, y) {
         if (noPass) core.clearAutomaticRouteNode(x, y);
 
         // 转换楼层能否穿透
-        if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
+        if (!inAction && trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
             return;
         core.status.automaticRoute.moveDirectly = false;
-        this.doSystemEvent(trigger, block);
+        if (inAction) {
+            // 切换事件点的坐标
+            this.setEvents(null, block.x, block.y);
+            if (block.event.trigger == 'action') {
+                this.insertAction(block.event.data);
+            }
+            else {
+                this.doSystemEvent(block.event.trigger, block, _executeCallback);
+                return;
+            }
+        } else {
+            this.doSystemEvent(trigger, block);
+        }
     }
+    return _executeCallback();
 }
 
 events.prototype._trigger_ignoreChangeFloor = function (block) {
@@ -370,7 +389,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!this.beforeBattle(id, x, y))
         return core.clearContinueAutomaticRoute(callback);
     // 战后事件
-    this.afterBattle(id, x, y, callback);
+    this.afterBattle(id, x, y);
+    if (callback) callback();
 }
 
 ////// 战斗前触发的事件 //////
@@ -379,8 +399,8 @@ events.prototype.beforeBattle = function (enemyId, x, y) {
 }
 
 ////// 战斗结束后触发的事件 //////
-events.prototype.afterBattle = function (enemyId, x, y, callback) {
-    return this.eventdata.afterBattle(enemyId, x, y, callback);
+events.prototype.afterBattle = function (enemyId, x, y) {
+    return this.eventdata.afterBattle(enemyId, x, y);
 }
 
 events.prototype._sys_openDoor = function (data, callback) {
@@ -408,7 +428,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         setTimeout(function () {
             core.status.replay.animate = false;
             core.events.afterOpenDoor(id, x, y, callback);
-        });
+        }, 1); // +1是为了录像检测系统
     } else {
         this._openDoor_animate(id, x, y, callback);
     }
@@ -472,7 +492,8 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
             delete core.animateFrame.asyncId[animate];
             if (!locked) core.unLockControl();
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(id, x, y, callback);
+            core.events.afterOpenDoor(id, x, y);
+            if (callback) callback();
             return;
         }
         core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
@@ -481,8 +502,8 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
 }
 
 ////// 开一个门后触发的事件 //////
-events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
-    return this.eventdata.afterOpenDoor(doorId, x, y, callback);
+events.prototype.afterOpenDoor = function (doorId, x, y) {
+    return this.eventdata.afterOpenDoor(doorId, x, y);
 }
 
 events.prototype._sys_getItem = function (data, callback) {
@@ -519,11 +540,12 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
         itemHint.push(id);
     }
 
-    this.afterGetItem(id, x, y, isGentleClick, callback);
+    this.afterGetItem(id, x, y, isGentleClick);
+    if (callback) callback();
 }
 
-events.prototype.afterGetItem = function (id, x, y, isGentleClick, callback) {
-    this.eventdata.afterGetItem(id, x, y, isGentleClick, callback);
+events.prototype.afterGetItem = function (id, x, y, isGentleClick) {
+    this.eventdata.afterGetItem(id, x, y, isGentleClick);
 }
 
 ////// 获得面前的物品（轻按） //////
@@ -599,6 +621,8 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
         var index = core.floorIds.indexOf(core.status.floorId);
         if (index < core.floorIds.length - 1) floorId = core.floorIds[index + 1];
         else floorId = core.status.floorId;
+    } else if (floorId == ':now') {
+        floorId = core.status.floorId;
     }
     if (!core.status.maps[floorId]) {
         main.log("不存在的楼层：" + floorId);
@@ -734,30 +758,17 @@ events.prototype.pushBox = function (data) {
     var nextId = core.getBlockId(nx, ny);
     if (nextId != null && nextId != 'flower') return;
 
-    core.setBlock(nextId == null ? 169 : 170, nx, ny);
+    core.setBlock(nextId == null ? 'box' : 'boxed', nx, ny);
 
     if (data.event.id == 'box')
         core.removeBlock(data.x, data.y);
     else
-        core.setBlock(168, data.x, data.y);
-    this._pushBox_moveHero(direction);
-}
-
-events.prototype._pushBox_moveHero = function (direction) {
-    core.status.replay.animate = true;
-    core.lockControl();
-    setTimeout(function () {
-        core.moveHero(direction, function () {
-            core.status.replay.animate = false;
-            core.status.route.pop();
-            core.events.afterPushBox();
-            // 可能有阻击...
-            if (core.status.event.id == null) {
-                core.unLockControl();
-                core.replay();
-            }
-        });
-    });
+        core.setBlock('flower', data.x, data.y);
+    // 勇士前进一格，然后触发推箱子后事件
+    core.insertAction([
+        {"type": "moveAction"},
+        {"type": "function", "function": "function() { core.afterPushBox(); }"}
+    ]);
 }
 
 ////// 推箱子后的事件 //////
@@ -766,7 +777,8 @@ events.prototype.afterPushBox = function () {
 }
 
 events.prototype._sys_ski = function (data, callback) {
-    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
+    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y);
+    if (callback) callback();
 }
 
 /// 当前是否在冰上
@@ -780,7 +792,7 @@ events.prototype._sys_action = function (data, callback) {
     var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
     // 检查是否需要改变朝向
     if (ex == core.nextX() && ey == core.nextY()) {
-        var dir = core.reverseDirection();
+        var dir = core.turnDirection(":back");
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
             var number = core.getNumberById(toId);
@@ -793,7 +805,8 @@ events.prototype._sys_action = function (data, callback) {
 
 events.prototype._sys_custom = function (data, callback) {
     core.insertAction(["请使用\r[yellow]core.registerSystemEvent('custom', func)\r来处理自己添加的系统触发器！"],
-        data.x, data.y, callback);
+        data.x, data.y);
+    if (callback) callback();
 }
 
 // ------ 自定义事件的处理 ------ //
@@ -1249,14 +1262,12 @@ events.prototype._action_show = function (data, x, y, prefix) {
 events.prototype._action_hide = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     if (data.time > 0 && data.floorId == core.status.floorId) {
-        data.loc.forEach(function (t) {
-            core.hideBlock(t[0], t[1], data.floorId);
-        });
-        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'hide', data.time);
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, data.remove ? 'remove' : 'hide', data.time);
     }
     else {
         data.loc.forEach(function (t) {
-            core.removeBlock(t[0], t[1], data.floorId)
+            if (data.remove) core.removeBlock(t[0], t[1], data.floorId);
+            else core.hideBlock(t[0], t[1], data.floorId);
         });
         core.doAction();
     }
@@ -1266,6 +1277,14 @@ events.prototype._action_setBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
         core.setBlock(data.number, t[0], t[1], data.floorId);
+    });
+    core.doAction();
+}
+
+events.prototype._action_turnBlock = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.turnBlock(data.number, t[0], t[1], data.floorId);
     });
     core.doAction();
 }
@@ -1333,6 +1352,26 @@ events.prototype._action_move = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.moveBlock, loc[0], loc[1], data.steps, data.time, data.keep);
 }
 
+events.prototype._action_moveAction = function (data, x, y, prefix) {
+    // 检查下一个点是否可通行
+    if (core.canMoveHero()) {
+        var nx = core.nextX(), ny = core.nextY();
+        // 检查noPass决定是撞击还是移动
+        if (core.noPass(nx, ny)) {
+            core.insertAction([
+                {"type": "trigger", "loc": [nx, ny]}
+            ]);
+        } else {
+            // 先移动一格，然后尝试触发事件
+            core.insertAction([
+                {"type": "moveHero", "steps": ["forward"]},
+                {"type": "function", "function": "function() { core.moveOneStep(core.doAction); }", "async": true},
+            ]);
+        }
+    }
+    core.doAction();
+}
+
 events.prototype._action_moveHero = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.eventMoveHero, data.steps, data.time);
 }
@@ -1363,7 +1402,7 @@ events.prototype._action_changeFloor = function (data, x, y, prefix) {
 events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
     if (data.x == null && data.y == null && data.direction) {
-        core.setHeroLoc('direction', data.direction, true);
+        core.setHeroLoc('direction', core.turnDirection(data.direction), true);
         core.drawHero();
         return core.doAction();
     }
@@ -1371,7 +1410,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     core.setHeroLoc('x', loc[0]);
     core.setHeroLoc('y', loc[1]);
-    if (data.direction) core.setHeroLoc('direction', data.direction);
+    if (data.direction) core.setHeroLoc('direction', core.turnDirection(data.direction));
     core.drawHero();
     core.doAction();
 }
@@ -1508,18 +1547,7 @@ events.prototype._action_battle = function (data, x, y, prefix) {
 
 events.prototype._action_trigger = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    var block = core.getBlock(loc[0], loc[1]);
-    if (block != null && block.block.event.trigger) {
-        block = block.block;
-        this.setEvents(data.keep ? null : [], block.x, block.y);
-        if (block.event.trigger == 'action')
-            this.insertAction(block.event.data);
-        else {
-            core.doSystemEvent(block.event.trigger, block, core.doAction);
-            return;
-        }
-    }
-    core.doAction();
+    core.trigger(loc[0], loc[1], core.doAction);
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
@@ -2843,8 +2871,11 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
 events.prototype.setHeroIcon = function (name, noDraw) {
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
-    if (!img) return;
-    core.setFlag("heroIcon", name);
+    if (!img) {
+        console.error("找不到图片: "+img);
+        return;
+    }
+    core.status.hero.image = name;
     core.material.images.hero = img;
     core.material.icons.hero.width = img.width / 4;
     core.material.icons.hero.height = img.height / 4;

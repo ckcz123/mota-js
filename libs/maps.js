@@ -1238,7 +1238,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
     this.drawEvents(floorId, blocks, tempCanvas);
     // 缩略图：勇士
     if (options.heroLoc) {
-        options.heroIcon = options.heroIcon || core.getFlag("heroIcon", "hero.png");
+        options.heroIcon = options.heroIcon || core.status.hero.image;
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;

@@ -244,6 +244,14 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"hero": {
 					"_type": "object",
 					"_data": {
+						"image": {
+							"_leaf": true,
+							"_type": "select",
+							"_select": {
+								"values": [null].concat(Object.keys(editor.core.material.images))
+							},
+							"_data": "勇士行走图"
+						},
 						"name": {
 							"_leaf": true,
 							"_type": "textarea",

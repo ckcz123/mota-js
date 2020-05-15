@@ -16,7 +16,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
 	window.flags = core.status.hero.flags;
-	core.events.setHeroIcon(core.getFlag('heroIcon', 'hero.png'), true);
+	core.events.setHeroIcon(core.status.hero.image, true);
 	core.control._initStatistics(core.animateFrame.totalTime);
 	core.status.hero.statistics.totalTime = core.animateFrame.totalTime =
 		Math.max(core.status.hero.statistics.totalTime, core.animateFrame.totalTime);
@@ -939,7 +939,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置音量
 	core.events.setVolume(core.getFlag("__volume__", 1), 0);
 	// 加载勇士图标
-	var icon = core.getFlag("heroIcon", "hero.png");
+	var icon = core.status.hero.image;
 	icon = core.getMappedName(icon);
 	if (core.material.images.images[icon]) {
 		core.material.images.hero = core.material.images.images[icon];

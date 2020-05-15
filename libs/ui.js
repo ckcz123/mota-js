@@ -2057,7 +2057,7 @@ ui.prototype.drawCenterFly = function () {
     var fillstyle = 'rgba(255,0,0,0.5)';
     if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
-    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.getFlag('heroIcon', "hero.png")},
+    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image},
         {ctx: 'ui', centerX: toX, centerY: toY});
     var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
@@ -2542,7 +2542,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
         core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
-            heroLoc: data.hero.loc, heroIcon: data.hero.flags.heroIcon, flags: data.hero.flags
+            heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags
         }, {
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });

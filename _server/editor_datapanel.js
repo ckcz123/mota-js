@@ -544,7 +544,7 @@ editor_datapanel_wrapper = function (editor) {
             });
 
             // Step 3:更新所有坐标
-            ["afterBattle", "afterGetItem", "afterOpenDoor", "changeFloor", "autoEvent", "cannotMove"].forEach(function (name) {
+            ["events", "afterBattle", "afterGetItem", "afterOpenDoor", "changeFloor", "autoEvent", "cannotMove"].forEach(function (name) {
                 newFloorData[name] = {};
                 if (!currentFloorData[name]) return;
                 for (var loc in currentFloorData[name]) {
@@ -564,8 +564,14 @@ editor_datapanel_wrapper = function (editor) {
                 }
             });
 
-            console.log(currentFloorData);
-            console.log(newFloorData);
+            editor.file.saveFloor(newFloorData, function (err) {
+                if (err) {
+                    printe(err);
+                    throw(err)
+                }
+                ;alert('地图更改大小成功，即将刷新地图...\n请检查所有点的事件是否存在问题。');
+                window.location.reload();
+            });
         }
     }
 

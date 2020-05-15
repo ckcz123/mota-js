@@ -41,6 +41,7 @@ editor_listen_wrapper = function (editor) {
         editor.dom.brushMod.onchange = editor.uifunctions.brushMod_onchange
         if (editor.dom.brushMod2) editor.dom.brushMod2.onchange = editor.uifunctions.brushMod2_onchange;
         if (editor.dom.brushMod3) editor.dom.brushMod3.onchange = editor.uifunctions.brushMod3_onchange;
+        if (editor.dom.brushMod4) editor.dom.brushMod4.onchange = editor.uifunctions.brushMod4_onchange;
 
         editor.dom.layerMod.onchange = editor.uifunctions.layerMod_onchange
         if (editor.dom.layerMod2) editor.dom.layerMod2.onchange = editor.uifunctions.layerMod2_onchange;

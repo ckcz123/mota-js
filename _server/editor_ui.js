@@ -220,7 +220,7 @@ editor_ui_wrapper = function (editor) {
         var clickpath = editor.uifunctions.getClickpath(e);
 
         var unselect = true;
-        for (var ii = 0, thisId; thisId = ['edit', 'tip', 'brushMod', 'brushMod2', 'brushMod3', 'layerMod', 'layerMod2', 'layerMod3', 'viewportButtons'][ii]; ii++) {
+        for (var ii = 0, thisId; thisId = ['edit', 'tip', 'brushMod', 'brushMod2', 'brushMod3', 'brushMode4', 'layerMod', 'layerMod2', 'layerMod3', 'viewportButtons'][ii]; ii++) {
             if (clickpath.indexOf(thisId) !== -1) {
                 unselect = false;
                 break;

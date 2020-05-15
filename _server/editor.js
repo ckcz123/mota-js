@@ -26,6 +26,7 @@ function editor() {
         brushMod:document.getElementById('brushMod'),
         brushMod2:document.getElementById('brushMod2'),
         brushMod3:document.getElementById('brushMod3'),
+        brushMod4:document.getElementById('brushMod4'),
         bgc : document.getElementById('bg'),
         bgCtx : document.getElementById('bg').getContext('2d'),
         fgc : document.getElementById('fg'),

@@ -247,6 +247,11 @@ editor_mappanel_wrapper = function (editor) {
                     editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.ids[editor.indexs[idnum + editor.uivalues.stepPostfix[ii].x - x0]];
                 }
             } else {
+                // 检测是否是填充模式
+                if (editor.uivalues.stepPostfix.length == 1 && editor.brushMod == 'fill') {
+                    editor.uivalues.stepPostfix = editor.uifunctions._fillMode_bfs(editor[editor.layerMod], editor.uivalues.stepPostfix[0].x, editor.uivalues.stepPostfix[0].y,
+                        editor[editor.layerMod][0].length, editor[editor.layerMod].length);
+                } 
                 for (var ii = 0; ii < editor.uivalues.stepPostfix.length; ii++)
                     editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.info;
             }
@@ -261,6 +266,32 @@ editor_mappanel_wrapper = function (editor) {
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
         }
         return false;
+    }
+
+    /**
+     * bfs找寻和某点相连的全部相同图块坐标
+     */
+    editor.uifunctions._fillMode_bfs = function (array, x, y, maxWidth, maxHeight) {
+        var _getNumber = function (x, y) {
+            if (x<0 || y<0 || x>=maxWidth || y>=maxHeight) return null;
+            return array[y][x].idnum || array[y][x] || 0;
+        }
+        var number = _getNumber(x, y) || 0;
+        var visited = {}, result = [];
+        var list = [{x:x, y:y}];
+        while (list.length != 0) {
+            var next = list.shift(), key = next.x+","+next.y;
+            if (visited[key]) continue;
+            visited[key] = true;
+            result.push(next);
+            [[-1,0],[1,0],[0,-1],[0,1]].forEach(function (dir) {
+                var nx = next.x + dir[0], ny = next.y + dir[1];
+                if (_getNumber(nx, ny) == number) {
+                    list.push({x: nx, y: ny});
+                }
+            });
+        }
+        return result;
     }
 
     /**
@@ -586,6 +617,11 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.brushMod_onchange = function () {
         editor.brushMod = editor.dom.brushMod.value;
+        if (editor.brushMod == 'fill') {
+            tip.isSelectedBlock(false);
+            tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
+            tip.whichShow(12);
+        }
     }
 
     /**
@@ -610,6 +646,13 @@ editor_mappanel_wrapper = function (editor) {
         tip.msgs[11] = String('tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
         tip.whichShow(12);
         editor.brushMod = editor.dom.brushMod3.value;
+    }
+
+    editor.uifunctions.brushMod4_onchange = function () {
+        tip.isSelectedBlock(false);
+        tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
+        tip.whichShow(12);
+        editor.brushMod = editor.dom.brushMod4.value;
     }
 
     /**

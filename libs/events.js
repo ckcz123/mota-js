@@ -937,13 +937,6 @@ events.prototype._popEvents = function (current, prefix) {
 events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
-
-    // ------ 判定commonEvent
-    var commonEvent = this.getCommonEvent(action);
-    if (commonEvent instanceof Array) {
-        // 将公共事件视为一个do-while事件插入执行，可被break跳出
-        action = [{"type": "dowhile", "condition": "false", "data": commonEvent}];
-    }
     if (!action) return;
 
     action = this.precompile(action);
@@ -958,6 +951,16 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
             core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
+}
+
+////// 往当前事件列表之前或之后添加一个公共事件 //////
+events.prototype.insertCommonEvent = function (name, x, y, callback, addToLast) {
+    var commonEvent = this.getCommonEvent(name);
+    if (!commonEvent) {
+        if (callback) callback();
+        return;
+    }
+    this.insertAction(commonEvent, x, y, callback, addToLast);
 }
 
 ////// 获得一个公共事件 //////
@@ -1562,7 +1565,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     }
     if (data.name) { // 公共事件
         core.setFlag('arg0', data.name);
-        core.insertAction(data.name);
+        core.insertCommonEvent(data.name);
     }
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
@@ -1630,6 +1633,11 @@ events.prototype._action_setValue = function (data, x, y, prefix) {
         }
     }
     core.doAction();
+}
+
+events.prototype._action_addValue = function (data, x, y, prefix) {
+    data.operator = '+=';
+    this._action_setValue(data, x, y, prefix);
 }
 
 events.prototype._action_setEnemy = function (data, x, y, prefix) {

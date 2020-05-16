@@ -27,7 +27,8 @@ editor_table_wrapper = function (editor) {
         return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
     editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
-        if (!(value instanceof Array)) value = [];
+        if (value == null) value = [];
+        if (!(value instanceof Array)) value = [value];
         keys=Array.from(keys)
         prefixStrings=Array.from(prefixStrings)
         for (var index = 0; index < value.length; index++) {

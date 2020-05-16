@@ -85,7 +85,7 @@ function main() {
         'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins'
     ];
     this.materials = [
-        'animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'
+        'animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'icons'
     ];
 
     this.statusBar = {

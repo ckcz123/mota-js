@@ -3812,31 +3812,48 @@ ActionParser.prototype.Colour = function(color) {
   return color?JSON.stringify(color).slice(1,-1):null;
 }
 
-ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
-  var match=/^switch:([A-Z])$/.exec(args[0])
+ActionParser.prototype.matchId = function(args, isShadow, comment) {
+  var rt=function(xml){
+    return {xml:xml,ret:true}
+  }
+  var match = /nothing/.exec('nothing')
+  // 固定列表
+  var FixedId_List=MotaActionBlocks.idFixedList_e.json.args0[0].options; // [["生命", "status:hp"], ...]
+  match=new RegExp('^('+FixedId_List.map(function(v){return v[1]}).join('|')+')$').exec(args[0])
+  if(match){
+    return rt(MotaActionBlocks['idFixedList_e'].xmlText(args, isShadow, comment));
+  }
+  // 独立开关
+  match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment);
+    return rt(MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment));
   }
+  // 临时变量
   match=/^temp:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment);
+    return rt(MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment));
   }
+  // id列表
+  var Id_List = MotaActionBlocks.idIdList_e.json.args0[0].options; // [["变量", "flag"], ...]
+  match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
+  if(match){
+    args=[match[1],match[2]].concat(args.slice(1))
+    return rt(MotaActionBlocks['idIdList_e'].xmlText(args, isShadow, comment));
+  }
+  return {xml:'',ret:false}
+}
+
+ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
+  var ret=this.matchId(args, isShadow, comment)
+  if (ret.ret) return ret.xml;
   return MotaActionBlocks['idString_e'].xmlText(args, isShadow, comment);
 }
 
 ActionParser.prototype.expandEvalBlock = function(args, isShadow, comment) {
-  var match=/^switch:([A-Z])$/.exec(args[0])
-  if(match){
-    args[0]=match[1]
-    return MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment);
-  }
-  match=/^temp:([A-Z])$/.exec(args[0])
-  if(match){
-    args[0]=match[1]
-    return MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment);
-  }
+  var ret=this.matchId(args, isShadow, comment)
+  if (ret.ret) return ret.xml;
   // todo 
   // 1. 将「数值设置」的名称尽可能替换掉；如果是 FixedId_List 那就用它；否则如果是 独立开关/临时变量 那就用对应的；否则用 A:B 的那个框
   // 2. 将「值块」尽可能替换掉，主要是「独立开关」，「临时变量」，「非 - 独立开关」，「非-临时变量」；以及true/false替换成勾选框；对于其他变量/属性等之类也尽可能进行替换

@@ -2507,9 +2507,15 @@ expression
     :   expression Arithmetic_List expression
     |   negate_e
     |   bool_e
+    |   idFixedList_e
+    |   idFlag_e
+    |   idTemp_e
+    |   idIdList_e
     |   idString_e
-    |   evFlag_e
-    |   evTemp_e
+    |   enemyattr_e
+    |   blockId_e
+    |   blockCls_e
+    |   equip_e
     |   evalString_e
     
 
@@ -2571,90 +2577,77 @@ var code = IdString_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_1_e
+idIdList_e
     :   Id_List ':' IdText
     
 
-/* idString_1_e
+/* idIdList_e
 colour : this.idstring_eColor
 default : [null,"自定义flag"]
-//todo 将其output改成'idString_e'
 var code = MotaActionFunctions.replaceFromName(MotaActionFunctions.replaceToName(Id_List_0+':'+IdText_0));
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_2_e
+idFixedList_e
     :   FixedId_List
     
 
-/* idString_2_e
+/* idFixedList_e
 colour : this.idstring_eColor
-//todo 将其output改成'idString_e'
 var code = FixedId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_3_e
+enemyattr_e
     :   '怪物' IdString '的' EnemyId_List
 
 
-/* idString_3_e
-colour : this.idstring_eColor
+/* enemyattr_e
 default : ['greenSlime',"攻击"]
-//todo 将其output改成'idString_e'
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_4_e
+blockId_e
     :   '图块ID:' Int ',' Int
 
 
-/* idString_4_e
-colour : this.idstring_eColor
+/* blockId_e
 default : [0,0]
 var code = 'blockId:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_5_e
+blockCls_e
     :   '图块类别:' Int ',' Int
 
 
-/* idString_5_e
-colour : this.idstring_eColor
+/* blockCls_e
 default : [0,0]
 var code = 'blockCls:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_6_e
+equip_e
     :   '装备孔:' Int
 
 
-/* idString_6_e
-colour : this.idstring_eColor
+/* equip_e
 default : [0]
 var code = 'equip:'+Int_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evFlag_e
+idFlag_e
     :   '独立开关' Letter_List
 
 
-/* evFlag_e
+/* idFlag_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "switch:"+Letter_List_0;
@@ -2662,11 +2655,11 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evTemp_e
+idTemp_e
     :   '临时变量' Letter_List
 
 
-/* evTemp_e
+/* idTemp_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "temp:"+Letter_List_0;
@@ -2899,14 +2892,10 @@ this.evisitor.mapColor=175;
 
 /* Function_1
 delete(this.block('negate_e').inputsInline);
-this.block('idString_1_e').output='idString_e';
-this.block('idString_2_e').output='idString_e';
-this.block('idString_3_e').output='idString_e';
-this.block('idString_4_e').output='idString_e';
-this.block('idString_5_e').output='idString_e';
-this.block('idString_6_e').output='idString_e';
-this.block('evFlag_e').output='idString_e';
-this.block('evTemp_e').output='idString_e';
+this.block('idIdList_e').output='idString_e';
+this.block('idFixedList_e').output='idString_e';
+this.block('idFlag_e').output='idString_e';
+this.block('idTemp_e').output='idString_e';
 */
 
 /* Functions
@@ -2957,7 +2946,7 @@ ActionParser.prototype.parse = function (obj,type) {
       var text_choices = null;
       for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
         text_choices=MotaActionBlocks['levelCase'].xmlText([
-          MotaActionBlocks['evalString_e'].xmlText([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
+          this.expandEvalBlock([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
       }
       return MotaActionBlocks['level_m'].xmlText([text_choices]);
 
@@ -3414,14 +3403,14 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        this.tryToUseEvFlag_e('idString_e', [data.name]), data["operator"]||'=',
-        MotaActionBlocks['evalString_e'].xmlText([data.value]),
+        this.expandIdBlock([data.name]), data["operator"]||'=',
+        this.expandEvalBlock([data.value]),
         data.norefresh || false,
         this.next]);
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        data.id, data.name, MotaActionBlocks['evalString_e'].xmlText([data.value]), this.next]);
+        data.id, data.name, this.expandEvalBlock([data.value]), this.next]);
       break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
@@ -3450,14 +3439,14 @@ ActionParser.prototype.parseAction = function() {
     case "if": // 条件判断
       if (data["false"]) {
         this.next = MotaActionBlocks['if_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.insertActionList(data["false"]),
           this.next]);
       }
       else {
         this.next = MotaActionBlocks['if_1_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.next]);
       }
@@ -3473,11 +3462,10 @@ ActionParser.prototype.parseAction = function() {
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionBlocks['switchCase'].xmlText([
-          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
+          this.isset(caseNow.case)?this.expandEvalBlock([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         case_caseList,this.next]);
       break;
     case "choices": // 提供选项
@@ -3494,30 +3482,28 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "for": // 循环遍历
       this.next = MotaActionBlocks['for_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        this.expandEvalBlock([data.name]),
         data.from || 0, data.to || 0, data.step || 0,
         this.insertActionList(data.data),
         this.next]);
       break;
     case "forEach": // 循环遍历列表
       this.next = MotaActionBlocks['forEach_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        this.expandEvalBlock([data.name]),
         JSON.stringify(data.list),
         this.insertActionList(data.data),
         this.next]);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         this.insertActionList(data.data),
         this.next]);
       break;
     case "dowhile": // 后置条件循环处理
       this.next = MotaActionBlocks['dowhile_s'].xmlText([
         this.insertActionList(data.data),
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         this.next]);
       break;
     case "break": // 跳出循环
@@ -3826,18 +3812,53 @@ ActionParser.prototype.Colour = function(color) {
   return color?JSON.stringify(color).slice(1,-1):null;
 }
 
-ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
-  var match=/^switch:([A-Z])$/.exec(args[0])
+ActionParser.prototype.matchId = function(args, isShadow, comment) {
+  var rt=function(xml){
+    return {xml:xml,ret:true}
+  }
+  var match = /nothing/.exec('nothing')
+  // 固定列表
+  var FixedId_List=MotaActionBlocks.idFixedList_e.json.args0[0].options; // [["生命", "status:hp"], ...]
+  match=new RegExp('^('+FixedId_List.map(function(v){return v[1]}).join('|')+')$').exec(args[0])
+  if(match){
+    return rt(MotaActionBlocks['idFixedList_e'].xmlText(args, isShadow, comment));
+  }
+  // 独立开关
+  match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
+    return rt(MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment));
   }
+  // 临时变量
   match=/^temp:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['evTemp_e'].xmlText(args, isShadow, comment);
+    return rt(MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment));
   }
-  return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
+  // id列表
+  var Id_List = MotaActionBlocks.idIdList_e.json.args0[0].options; // [["变量", "flag"], ...]
+  match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
+  if(match){
+    args=[match[1],match[2]].concat(args.slice(1))
+    return rt(MotaActionBlocks['idIdList_e'].xmlText(args, isShadow, comment));
+  }
+  return {xml:'',ret:false}
+}
+
+ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
+  var ret=this.matchId(args, isShadow, comment)
+  if (ret.ret) return ret.xml;
+  return MotaActionBlocks['idString_e'].xmlText(args, isShadow, comment);
+}
+
+ActionParser.prototype.expandEvalBlock = function(args, isShadow, comment) {
+  var ret=this.matchId(args, isShadow, comment)
+  if (ret.ret) return ret.xml;
+  // todo 
+  // 1. 将「数值设置」的名称尽可能替换掉；如果是 FixedId_List 那就用它；否则如果是 独立开关/临时变量 那就用对应的；否则用 A:B 的那个框
+  // 2. 将「值块」尽可能替换掉，主要是「独立开关」，「临时变量」，「非 - 独立开关」，「非-临时变量」；以及true/false替换成勾选框；对于其他变量/属性等之类也尽可能进行替换
+
+  return MotaActionBlocks['evalString_e'].xmlText(args, isShadow, comment);
 }
 
 MotaActionFunctions.actionParser = new ActionParser();

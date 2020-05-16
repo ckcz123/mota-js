@@ -97,7 +97,7 @@ editor_blockly = function () {
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
+        MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
@@ -217,20 +217,20 @@ editor_blockly = function () {
     ],
     '值块':[
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
+        MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
-      MotaActionBlocks['evFlag_e'].xmlText(),
-      MotaActionBlocks['evTemp_e'].xmlText(),
+      MotaActionBlocks['idFlag_e'].xmlText(),
+      MotaActionBlocks['idTemp_e'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
       MotaActionBlocks['bool_e'].xmlText(),
       MotaActionBlocks['idString_e'].xmlText(),
-      MotaActionBlocks['idString_1_e'].xmlText(),
-      MotaActionBlocks['idString_2_e'].xmlText(),
-      MotaActionBlocks['idString_3_e'].xmlText(),
-      MotaActionBlocks['idString_4_e'].xmlText(),
-      MotaActionBlocks['idString_5_e'].xmlText(),
-      MotaActionBlocks['idString_6_e'].xmlText(),
+      MotaActionBlocks['idIdList_e'].xmlText(),
+      MotaActionBlocks['idFixedList_e'].xmlText(),
+      MotaActionBlocks['enemyattr_e'].xmlText(),
+      MotaActionBlocks['blockId_e'].xmlText(),
+      MotaActionBlocks['blockCls_e'].xmlText(),
+      MotaActionBlocks['equip_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
@@ -1011,7 +1011,7 @@ function omitedcheckUpdateFunction(event) {
         }
 
         // 对怪物ID提供补全
-        if ((type == 'idString_3_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
+        if ((type == 'enemyattr_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
           return filter(allEnemys, content);
         }
 

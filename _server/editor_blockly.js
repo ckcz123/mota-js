@@ -227,10 +227,10 @@ editor_blockly = function () {
       MotaActionBlocks['idString_e'].xmlText(),
       MotaActionBlocks['idString_1_e'].xmlText(),
       MotaActionBlocks['idString_2_e'].xmlText(),
-      MotaActionBlocks['idString_3_e'].xmlText(),
-      MotaActionBlocks['idString_4_e'].xmlText(),
-      MotaActionBlocks['idString_5_e'].xmlText(),
-      MotaActionBlocks['idString_6_e'].xmlText(),
+      MotaActionBlocks['enemyattr_e'].xmlText(),
+      MotaActionBlocks['blockId_e'].xmlText(),
+      MotaActionBlocks['blockCls_e'].xmlText(),
+      MotaActionBlocks['equip_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
@@ -1011,7 +1011,7 @@ function omitedcheckUpdateFunction(event) {
         }
 
         // 对怪物ID提供补全
-        if ((type == 'idString_3_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
+        if ((type == 'enemyattr_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
           return filter(allEnemys, content);
         }
 

@@ -2510,6 +2510,10 @@ expression
     |   idString_e
     |   evFlag_e
     |   evTemp_e
+    |   enemyattr_e
+    |   blockId_e
+    |   blockCls_e
+    |   equip_e
     |   evalString_e
     
 
@@ -2597,13 +2601,11 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_3_e
+enemyattr_e
     :   '怪物' IdString '的' EnemyId_List
 
 
-/* idString_3_e
-colour : this.idstring_eColor
+/* enemyattr_e
 default : ['greenSlime',"攻击"]
 //todo 将其output改成'idString_e'
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
@@ -2611,39 +2613,33 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_4_e
+blockId_e
     :   '图块ID:' Int ',' Int
 
 
-/* idString_4_e
-colour : this.idstring_eColor
+/* blockId_e
 default : [0,0]
 var code = 'blockId:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_5_e
+blockCls_e
     :   '图块类别:' Int ',' Int
 
 
-/* idString_5_e
-colour : this.idstring_eColor
+/* blockCls_e
 default : [0,0]
 var code = 'blockCls:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_6_e
+equip_e
     :   '装备孔:' Int
 
 
-/* idString_6_e
-colour : this.idstring_eColor
+/* equip_e
 default : [0]
 var code = 'equip:'+Int_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
@@ -2901,10 +2897,6 @@ this.evisitor.mapColor=175;
 delete(this.block('negate_e').inputsInline);
 this.block('idString_1_e').output='idString_e';
 this.block('idString_2_e').output='idString_e';
-this.block('idString_3_e').output='idString_e';
-this.block('idString_4_e').output='idString_e';
-this.block('idString_5_e').output='idString_e';
-this.block('idString_6_e').output='idString_e';
 this.block('evFlag_e').output='idString_e';
 this.block('evTemp_e').output='idString_e';
 */

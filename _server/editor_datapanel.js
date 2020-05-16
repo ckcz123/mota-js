@@ -503,8 +503,77 @@ editor_datapanel_wrapper = function (editor) {
         }
     }
 
+    editor.uifunctions.changeFloorSize_func = function () {
+        var children = editor.dom.changeFloorSize.children;
+        children[4].onclick = function () {
+            var width = parseInt(children[0].value);
+            var height = parseInt(children[1].value);
+            var x = parseInt(children[2].value);
+            var y = parseInt(children[3].value);
+            if (!(width >= core.__SIZE__ && height >= core.__SIZE__ && x >=0 && y >=0)) {
+                printe("参数错误！宽高不得小于"+core.__SIZE__+"，偏移量不得小于0");
+                return;
+            }
+            var currentFloorData = editor.currentFloorData;
+            var currWidth = currentFloorData.width;
+            var currHeight = currentFloorData.height;
+            if (width < currWidth) x = -x;
+            if (height < currHeight) y = -y;
+            // Step 1:创建一个新的地图
+            var newFloorData = core.clone(currentFloorData);
+            newFloorData.width = width;
+            newFloorData.height = height;
 
+            // Step 2:更新map, bgmap和fgmap
+            ["bgmap", "fgmap", "map"].forEach(function (name) {
+                newFloorData[name] = [];
+                if (currentFloorData[name] && currentFloorData[name].length > 0) {
+                    for (var j = 0; j < height; ++j) {
+                        newFloorData[name][j] = [];
+                        for (var i = 0; i < width; ++i) {
+                            var oi = i - x;
+                            var oj = j - y;
+                            if (oi >= 0 && oi < currWidth && oj >= 0 && oj < currHeight) {
+                                newFloorData[name][j].push(currentFloorData[name][oj][oi]);
+                            } else {
+                                newFloorData[name][j].push(0);
+                            }
+                        }
+                    }
+                }
+            });
 
+            // Step 3:更新所有坐标
+            ["events", "afterBattle", "afterGetItem", "afterOpenDoor", "changeFloor", "autoEvent", "cannotMove"].forEach(function (name) {
+                newFloorData[name] = {};
+                if (!currentFloorData[name]) return;
+                for (var loc in currentFloorData[name]) {
+                    var oxy = loc.split(','), ox = parseInt(oxy[0]), oy = parseInt(oxy[1]);
+                    var nx = ox + x, ny = oy + y;
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                        newFloorData[name][nx+","+ny] = core.clone(currentFloorData[name][loc]);
+                    }
+                }
+            });
+
+            // Step 4:上楼点&下楼点
+            ["upFloor", "downFloor"].forEach(function (name) {
+                if (newFloorData[name] && newFloorData[name].length == 2) {
+                    newFloorData[name][0]+=x;
+                    newFloorData[name][1]+=y;
+                }
+            });
+
+            editor.file.saveFloor(newFloorData, function (err) {
+                if (err) {
+                    printe(err);
+                    throw(err)
+                }
+                ;alert('地图更改大小成功，即将刷新地图...\n请检查所有点的事件是否存在问题。');
+                window.location.reload();
+            });
+        }
+    }
 
 
 
@@ -552,7 +621,7 @@ editor_datapanel_wrapper = function (editor) {
 
 
     editor.uifunctions.fixCtx_func = function () {
-        [editor.dom.sourceCtx, editor.dom.spriteCtx].forEach(function (ctx) {
+        [editor.dom.appendSourceCtx, editor.dom.appendSpriteCtx].forEach(function (ctx) {
             ctx.mozImageSmoothingEnabled = false;
             ctx.webkitImageSmoothingEnabled = false;
             ctx.msImageSmoothingEnabled = false;
@@ -575,10 +644,10 @@ editor_datapanel_wrapper = function (editor) {
                 editor_mode.appendPic.imageName = 'autotile';
                 for (var jj = 0; jj < 4; jj++) editor.dom.appendPicSelection.children[jj].style = 'display:none';
                 if (editor_mode.appendPic.img) {
-                    editor.dom.sprite.style.width = (editor.dom.sprite.width = editor_mode.appendPic.img.width) / editor.uivalues.ratio + 'px';
-                    editor.dom.sprite.style.height = (editor.dom.sprite.height = editor_mode.appendPic.img.height) / editor.uivalues.ratio + 'px';
-                    editor.dom.spriteCtx.clearRect(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-                    editor.dom.spriteCtx.drawImage(editor_mode.appendPic.img, 0, 0);
+                    editor.dom.appendSprite.style.width = (editor.dom.appendSprite.width = editor_mode.appendPic.img.width) / editor.uivalues.ratio + 'px';
+                    editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = editor_mode.appendPic.img.height) / editor.uivalues.ratio + 'px';
+                    editor.dom.appendSpriteCtx.clearRect(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
+                    editor.dom.appendSpriteCtx.drawImage(editor_mode.appendPic.img, 0, 0);
                 }
                 return;
             }
@@ -599,9 +668,9 @@ editor_datapanel_wrapper = function (editor) {
             for (var jj = num; jj < 4; jj++) {
                 editor.dom.appendPicSelection.children[jj].style = 'display:none';
             }
-            editor.dom.sprite.style.width = (editor.dom.sprite.width = img.width) / editor.uivalues.ratio + 'px';
-            editor.dom.sprite.style.height = (editor.dom.sprite.height = img.height + ysize) / editor.uivalues.ratio + 'px';
-            editor.dom.spriteCtx.drawImage(img, 0, 0);
+            editor.dom.appendSprite.style.width = (editor.dom.appendSprite.width = img.width) / editor.uivalues.ratio + 'px';
+            editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = img.height + ysize) / editor.uivalues.ratio + 'px';
+            editor.dom.appendSpriteCtx.drawImage(img, 0, 0);
         }
         editor.dom.selectAppend.onchange();
     }
@@ -718,8 +787,8 @@ editor_datapanel_wrapper = function (editor) {
                                 newsprite.style.width = (newsprite.width = image.width) / editor.uivalues.ratio + 'px';
                                 newsprite.style.height = (newsprite.height = image.height) / editor.uivalues.ratio + 'px';
                             }
-                            editor.dom.spriteCtx.clearRect(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-                            editor.dom.spriteCtx.drawImage(image, 0, 0);
+                            editor.dom.appendSpriteCtx.clearRect(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
+                            editor.dom.appendSpriteCtx.drawImage(image, 0, 0);
                         }
                         else {
                             var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
@@ -731,7 +800,7 @@ editor_datapanel_wrapper = function (editor) {
                         }
 
                         //画灰白相间的格子
-                        var bgc = editor.dom.bgCtx;
+                        var bgc = editor.dom.appendBgCtx;
                         var colorA = ["#f8f8f8", "#cccccc"];
                         var colorIndex;
                         var sratio = 4;
@@ -745,8 +814,8 @@ editor_datapanel_wrapper = function (editor) {
                         }
 
                         //把导入的图片画出
-                        editor.dom.sourceCtx.drawImage(image, 0, 0);
-                        editor_mode.appendPic.sourceImageData = editor.dom.sourceCtx.getImageData(0, 0, image.width, image.height);
+                        editor.dom.appendSourceCtx.drawImage(image, 0, 0);
+                        editor_mode.appendPic.sourceImageData = editor.dom.appendSourceCtx.getImageData(0, 0, image.width, image.height);
 
                         //重置临时变量
                         editor.dom.selectAppend.onchange();
@@ -782,8 +851,8 @@ editor_datapanel_wrapper = function (editor) {
                     editor.util.setPixel(nimgData, x, y, convert(editor.util.getPixel(imgData, x, y), delta))
                 }
             }
-            editor.dom.sourceCtx.clearRect(0, 0, imgData.width, imgData.height);
-            editor.dom.sourceCtx.putImageData(nimgData, 0, 0);
+            editor.dom.appendSourceCtx.clearRect(0, 0, imgData.width, imgData.height);
+            editor.dom.appendSourceCtx.putImageData(nimgData, 0, 0);
         }
     }
 
@@ -808,7 +877,7 @@ editor_datapanel_wrapper = function (editor) {
             return pos;
         }
 
-        editor.dom.picClick.onclick = function (e) {
+        editor.dom.appendPicClick.onclick = function (e) {
             var loc = eToLoc(e);
             var pos = locToPos(loc);
             //console.log(e,loc,pos);
@@ -838,12 +907,12 @@ editor_datapanel_wrapper = function (editor) {
                     printe("不合法的Autotile图片！");
                     return;
                 }
-                var imgData = editor.dom.sourceCtx.getImageData(0, 0, image.width, image.height);
-                editor.dom.spriteCtx.putImageData(imgData, 0, 0);
-                var imgbase64 = editor.dom.sprite.toDataURL().split(',')[1];
+                var imgData = editor.dom.appendSourceCtx.getImageData(0, 0, image.width, image.height);
+                editor.dom.appendSpriteCtx.putImageData(imgData, 0, 0);
+                var imgbase64 = editor.dom.appendSprite.toDataURL().split(',')[1];
 
                 // Step 1: List文件名
-                fs.readdir('./project/images', function (err, data) {
+                fs.readdir('./project/autotiles', function (err, data) {
                     if (err) {
                         printe(err);
                         throw (err);
@@ -857,7 +926,7 @@ editor_datapanel_wrapper = function (editor) {
                     }
 
                     // Step 3: 写入文件
-                    fs.writeFile('./project/images/' + filename + ".png", imgbase64, 'base64', function (err, data) {
+                    fs.writeFile('./project/autotiles/' + filename + ".png", imgbase64, 'base64', function (err, data) {
                         if (err) {
                             printe(err);
                             throw (err);
@@ -884,23 +953,23 @@ editor_datapanel_wrapper = function (editor) {
 
             var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
             for (var ii = 0, v; v = editor_mode.appendPic.selectPos[ii]; ii++) {
-                // var imgData = editor.dom.sourceCtx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
-                // editor.dom.spriteCtx.putImageData(imgData, ii * 32, editor.dom.sprite.height - ysize);
-                // editor.dom.spriteCtx.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
+                // var imgData = editor.dom.appendSourceCtx.getImageData(v.x * 32, v.y * ysize, 32, ysize);
+                // editor.dom.appendSpriteCtx.putImageData(imgData, ii * 32, editor.dom.appendSprite.height - ysize);
+                // editor.dom.appendSpriteCtx.drawImage(editor_mode.appendPic.img, v.x * 32, v.y * ysize, 32, ysize,  ii * 32, height,  32, ysize)
 
-                editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, v.x * 32, v.y * ysize, 32, ysize, 32 * ii, editor.dom.sprite.height - ysize, 32, ysize);
+                editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, v.x * 32, v.y * ysize, 32, ysize, 32 * ii, editor.dom.appendSprite.height - ysize, 32, ysize);
             }
-            var dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-            var imgbase64 = editor.dom.sprite.toDataURL('image/png');
+            var dt = editor.dom.appendSpriteCtx.getImageData(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
+            var imgbase64 = editor.dom.appendSprite.toDataURL('image/png');
             var imgName = editor_mode.appendPic.imageName;
-            fs.writeFile('./project/images/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
+            fs.writeFile('./project/materials/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
                 }
-                var currHeight = editor.dom.sprite.height;
-                editor.dom.sprite.style.height = (editor.dom.sprite.height = (currHeight + ysize)) + "px";
-                editor.dom.spriteCtx.putImageData(dt, 0, 0);
+                var currHeight = editor.dom.appendSprite.height;
+                editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = (currHeight + ysize)) + "px";
+                editor.dom.appendSpriteCtx.putImageData(dt, 0, 0);
                 core.material.images[imgName].src = imgbase64;
                 editor.widthsX[imgName][3] = currHeight;
                 if (appendRegister && appendRegister.checked) {
@@ -923,29 +992,29 @@ editor_datapanel_wrapper = function (editor) {
             if (value != 'enemys' && value != 'enemy48' && value != 'npcs' && value != 'npc48')
                 return printe("只有怪物或NPC才能快速导入！");
             var ysize = value.endsWith('48') ? 48 : 32;
-            if (editor.dom.sourceCtx.canvas.width != 128 || editor.dom.sourceCtx.canvas.height != 4 * ysize)
+            if (editor.dom.appendSourceCtx.canvas.width != 128 || editor.dom.appendSourceCtx.canvas.height != 4 * ysize)
                 return printe("只有 4*4 的素材图片才可以快速导入！");
 
-            var dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-            editor.dom.sprite.style.height = (editor.dom.sprite.height = (editor.dom.sprite.height + 3 * ysize)) + "px";
-            editor.dom.spriteCtx.putImageData(dt, 0, 0);
-            if (editor.dom.sprite.width == 64) { // 两帧
-                editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, 32, 0, 64, 4 * ysize, 0, editor.dom.sprite.height - 4 * ysize, 64, 4 * ysize);
+            var dt = editor.dom.appendSpriteCtx.getImageData(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
+            editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = (editor.dom.appendSprite.height + 3 * ysize)) + "px";
+            editor.dom.appendSpriteCtx.putImageData(dt, 0, 0);
+            if (editor.dom.appendSprite.width == 64) { // 两帧
+                editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32, 0, 64, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 64, 4 * ysize);
             } else { // 四帧
-                editor.dom.spriteCtx.drawImage(editor.dom.sourceCtx.canvas, 0, 0, 128, 4 * ysize, 0, editor.dom.sprite.height - 4 * ysize, 128, 4 * ysize);
+                editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 0, 0, 128, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 128, 4 * ysize);
             }
 
-            dt = editor.dom.spriteCtx.getImageData(0, 0, editor.dom.sprite.width, editor.dom.sprite.height);
-            var imgbase64 = editor.dom.sprite.toDataURL('image/png');
+            dt = editor.dom.appendSpriteCtx.getImageData(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
+            var imgbase64 = editor.dom.appendSprite.toDataURL('image/png');
             var imgName = editor_mode.appendPic.imageName;
-            fs.writeFile('./project/images/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
+            fs.writeFile('./project/materials/' + imgName + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
                 if (err) {
                     printe(err);
                     throw (err)
                 }
-                var currHeight = editor.dom.sprite.height;
-                editor.dom.sprite.style.height = (editor.dom.sprite.height = (currHeight + ysize)) + "px";
-                editor.dom.spriteCtx.putImageData(dt, 0, 0);
+                var currHeight = editor.dom.appendSprite.height;
+                editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = (currHeight + ysize)) + "px";
+                editor.dom.appendSpriteCtx.putImageData(dt, 0, 0);
                 core.material.images[imgName].src = imgbase64;
                 editor.widthsX[imgName][3] = currHeight;
                 if (appendRegister && appendRegister.checked) {

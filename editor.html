@@ -169,6 +169,11 @@
                 <input placeholder="修改floorId为"/>
                 <button>save</button>
             </div>
+            <div id='changeFloorSize' style="font-size: 13px;">
+                修改地图大小：宽<input style="width: 25px;" value="13" />，高<input style="width: 25px;" value="13" />，
+                偏移x<input style="width: 25px;" value="0" /> y<input style="width: 25px;" value="0" /> 
+                <button>save</button>
+            </div>
         </div>
     </div>
     <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><!-- tower -->
@@ -336,9 +341,11 @@
             <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定模式</span>
             <br/>
             <span style="font-size: 12px;">
-            <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />画线
-            <input type="radio" id="brushMod2" name="brushMod" value="rectangle" />画矩形
+            <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />线
+            <input type="radio" id="brushMod2" name="brushMod" value="rectangle" />矩形
             <input type="radio" id="brushMod3" name="brushMod" value="tileset" />tileset贴图
+            <input type="radio" id="brushMod4" name="brushMod" value="fill" />填充
+
             </span>
             <br/>
             <span style="font-size: 12px">

@@ -202,7 +202,6 @@ editor_table_wrapper = function (editor) {
                 // 当cobj的参数为函数时,代入args算出值
                 for (var key in cobj) {
                     if (key === '_data') continue;
-                    if (key === '_transform' || key == '_onconfirm') cobj[key] = cobj[key].toString();
                     if (cobj[key] instanceof Function) cobj[key] = cobj[key](args);
                 }
                 pvobj[ii] = vobj = args.vobj;
@@ -363,7 +362,7 @@ editor_table_wrapper = function (editor) {
     var tokenstyle = document.createElement("style");
     document.body.appendChild(tokenstyle);
 
-    tokenPoolRender = function() {
+    var tokenPoolRender = function() {
         var content = "";
         Object.keys(tokenPool).forEach(function(k) {
             content += /* CSS */`[data-field|=${k}]{ display: none }`;

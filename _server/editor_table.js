@@ -362,7 +362,7 @@ editor_table_wrapper = function (editor) {
     var tokenstyle = document.createElement("style");
     document.body.appendChild(tokenstyle);
 
-    tokenPoolRender = function() {
+    var tokenPoolRender = function() {
         var content = "";
         Object.keys(tokenPool).forEach(function(k) {
             content += /* CSS */`[data-field|=${k}]{ display: none }`;

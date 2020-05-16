@@ -169,9 +169,10 @@ editor_mode = function (editor) {
         return true
     }
 
-    editor_mode.prototype.checkImages = function (thiseval) {
+    editor_mode.prototype.checkImages = function (thiseval, directory) {
+        if (!directory) return true;
         if (!editor_mode.checkUnique(thiseval)) return false;
-        fs.readdir('project/images', function (err, data) {
+        fs.readdir(directory, function (err, data) {
             if (err) {
                 printe(err);
                 throw Error(err);

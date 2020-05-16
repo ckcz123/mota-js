@@ -20,7 +20,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"images": {
 					"_leaf": true,
 					"_type": "material",
-					"_range": "editor.mode.checkImages(thiseval)",
+					"_range": "editor.mode.checkImages(thiseval, './project/images/')",
 					"_directory": "./project/images/",
 					"_transform": (function (one) {
 						if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || end.endsWith('.gif'))
@@ -33,8 +33,8 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"tilesets": {
 					"_leaf": true,
 					"_type": "material",
-					"_range": "editor.mode.checkImages(thiseval)",
-					"_directory": "./project/images/",
+					"_range": "editor.mode.checkImages(thiseval, './project/tilesets/')",
+					"_directory": "./project/tilesets/",
 					"_transform": (function (one) {
 						if (one.endsWith('.png'))
 							return one;
@@ -248,7 +248,9 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_leaf": true,
 							"_type": "select",
 							"_select": {
-								"values": [null].concat(Object.keys(editor.core.material.images))
+								"values": [null].concat(Object.keys(editor.core.material.images.images).filter(function (name) {
+									return name.endsWith('.png');
+								}))
 							},
 							"_data": "勇士行走图"
 						},

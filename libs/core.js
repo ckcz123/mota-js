@@ -192,7 +192,7 @@ function core() {
             'equipName': main.equipName || [],
             "statusLeftBackground": main.statusLeftBackground || "url(project/materials/ground.png) repeat",
             "statusTopBackground": main.statusTopBackground || "url(project/materials/ground.png) repeat",
-            "toolsBackground": main.toolsBackground || "url(project/images/materials.png) repeat",
+            "toolsBackground": main.toolsBackground || "url(project/materials/ground.png) repeat",
             "borderColor": main.borderColor || "white",
             "statusBarColor": main.statusBarColor || "white",
             "hardLabelColor": main.hardLabelColor || "red",

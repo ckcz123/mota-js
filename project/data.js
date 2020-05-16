@@ -40,7 +40,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"背景图.jpg": "bg.jpg",
 			"背景音乐.mp3": "bgm.mp3"
 		},
-		"startBackground": "bg.jpg",
+		"startBackground": "project/images/bg.jpg",
 		"startLogoStyle": "color: black",
 		"levelChoose": [
 			[
@@ -65,7 +65,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"盾牌"
 		],
 		"startBgm": null,
-		"statusLeftBackground": null,
+		"statusLeftBackground": "url(project/materials/ground.png) repeat",
 		"statusTopBackground": "url(project/materials/ground.png) repeat",
 		"toolsBackground": "url(project/materials/ground.png) repeat",
 		"borderColor": "#CCCCCC",

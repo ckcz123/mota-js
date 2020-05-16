@@ -2946,7 +2946,7 @@ ActionParser.prototype.parse = function (obj,type) {
       var text_choices = null;
       for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
         text_choices=MotaActionBlocks['levelCase'].xmlText([
-          MotaActionBlocks['evalString_e'].xmlText([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
+          this.expandEvalBlock([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
       }
       return MotaActionBlocks['level_m'].xmlText([text_choices]);
 
@@ -3403,14 +3403,14 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        this.tryToUseEvFlag_e('idString_e', [data.name]), data["operator"]||'=',
-        MotaActionBlocks['evalString_e'].xmlText([data.value]),
+        this.expandIdBlock([data.name]), data["operator"]||'=',
+        this.expandEvalBlock([data.value]),
         data.norefresh || false,
         this.next]);
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        data.id, data.name, MotaActionBlocks['evalString_e'].xmlText([data.value]), this.next]);
+        data.id, data.name, this.expandEvalBlock([data.value]), this.next]);
       break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
@@ -3439,14 +3439,14 @@ ActionParser.prototype.parseAction = function() {
     case "if": // 条件判断
       if (data["false"]) {
         this.next = MotaActionBlocks['if_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.insertActionList(data["false"]),
           this.next]);
       }
       else {
         this.next = MotaActionBlocks['if_1_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.next]);
       }
@@ -3462,11 +3462,10 @@ ActionParser.prototype.parseAction = function() {
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionBlocks['switchCase'].xmlText([
-          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
+          this.isset(caseNow.case)?this.expandEvalBlock([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         case_caseList,this.next]);
       break;
     case "choices": // 提供选项
@@ -3483,30 +3482,28 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "for": // 循环遍历
       this.next = MotaActionBlocks['for_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        this.expandEvalBlock([data.name]),
         data.from || 0, data.to || 0, data.step || 0,
         this.insertActionList(data.data),
         this.next]);
       break;
     case "forEach": // 循环遍历列表
       this.next = MotaActionBlocks['forEach_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        this.expandEvalBlock([data.name]),
         JSON.stringify(data.list),
         this.insertActionList(data.data),
         this.next]);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         this.insertActionList(data.data),
         this.next]);
       break;
     case "dowhile": // 后置条件循环处理
       this.next = MotaActionBlocks['dowhile_s'].xmlText([
         this.insertActionList(data.data),
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         this.next]);
       break;
     case "break": // 跳出循环
@@ -3815,7 +3812,7 @@ ActionParser.prototype.Colour = function(color) {
   return color?JSON.stringify(color).slice(1,-1):null;
 }
 
-ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
+ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
   var match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
@@ -3826,7 +3823,25 @@ ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, 
     args[0]=match[1]
     return MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment);
   }
-  return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
+  return MotaActionBlocks['idString_e'].xmlText(args, isShadow, comment);
+}
+
+ActionParser.prototype.expandEvalBlock = function(args, isShadow, comment) {
+  var match=/^switch:([A-Z])$/.exec(args[0])
+  if(match){
+    args[0]=match[1]
+    return MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment);
+  }
+  match=/^temp:([A-Z])$/.exec(args[0])
+  if(match){
+    args[0]=match[1]
+    return MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment);
+  }
+  // todo 
+  // 1. 将「数值设置」的名称尽可能替换掉；如果是 FixedId_List 那就用它；否则如果是 独立开关/临时变量 那就用对应的；否则用 A:B 的那个框
+  // 2. 将「值块」尽可能替换掉，主要是「独立开关」，「临时变量」，「非 - 独立开关」，「非-临时变量」；以及true/false替换成勾选框；对于其他变量/属性等之类也尽可能进行替换
+
+  return MotaActionBlocks['evalString_e'].xmlText(args, isShadow, comment);
 }
 
 MotaActionFunctions.actionParser = new ActionParser();

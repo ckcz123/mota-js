@@ -2507,9 +2507,11 @@ expression
     :   expression Arithmetic_List expression
     |   negate_e
     |   bool_e
+    |   idFixedList_e
+    |   idFlag_e
+    |   idTemp_e
+    |   idIdList_e
     |   idString_e
-    |   evFlag_e
-    |   evTemp_e
     |   enemyattr_e
     |   blockId_e
     |   blockCls_e
@@ -2575,27 +2577,23 @@ var code = IdString_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_1_e
+idIdList_e
     :   Id_List ':' IdText
     
 
-/* idString_1_e
+/* idIdList_e
 colour : this.idstring_eColor
 default : [null,"自定义flag"]
-//todo 将其output改成'idString_e'
 var code = MotaActionFunctions.replaceFromName(MotaActionFunctions.replaceToName(Id_List_0+':'+IdText_0));
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_2_e
+idFixedList_e
     :   FixedId_List
     
 
-/* idString_2_e
+/* idFixedList_e
 colour : this.idstring_eColor
-//todo 将其output改成'idString_e'
 var code = FixedId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
@@ -2607,7 +2605,6 @@ enemyattr_e
 
 /* enemyattr_e
 default : ['greenSlime',"攻击"]
-//todo 将其output改成'idString_e'
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
@@ -2646,11 +2643,11 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evFlag_e
+idFlag_e
     :   '独立开关' Letter_List
 
 
-/* evFlag_e
+/* idFlag_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "switch:"+Letter_List_0;
@@ -2658,11 +2655,11 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evTemp_e
+idTemp_e
     :   '临时变量' Letter_List
 
 
-/* evTemp_e
+/* idTemp_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "temp:"+Letter_List_0;
@@ -2895,10 +2892,10 @@ this.evisitor.mapColor=175;
 
 /* Function_1
 delete(this.block('negate_e').inputsInline);
-this.block('idString_1_e').output='idString_e';
-this.block('idString_2_e').output='idString_e';
-this.block('evFlag_e').output='idString_e';
-this.block('evTemp_e').output='idString_e';
+this.block('idIdList_e').output='idString_e';
+this.block('idFixedList_e').output='idString_e';
+this.block('idFlag_e').output='idString_e';
+this.block('idTemp_e').output='idString_e';
 */
 
 /* Functions
@@ -3822,12 +3819,12 @@ ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, 
   var match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
+    return MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment);
   }
   match=/^temp:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['evTemp_e'].xmlText(args, isShadow, comment);
+    return MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment);
   }
   return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
 }

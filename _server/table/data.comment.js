@@ -69,7 +69,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "material",
 					"_range": "editor.mode.checkUnique(thiseval)",
-					"_directory": "./project/sounds/",
+					"_directory": "./project/bgms/",
 					"_transform": (function (one) {
 						if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || end.endsWith('.wav'))
 							return one;

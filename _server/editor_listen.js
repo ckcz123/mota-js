@@ -35,6 +35,7 @@ editor_listen_wrapper = function (editor) {
         editor.dom.clearLoc.onmousedown = editor.uifunctions.clearLoc_click
 
         editor.dom.lastUsed.onmousedown = editor.uifunctions.lastUsed_click;
+        editor.dom.lastUsed.oncontextmenu = function (e) { e.preventDefault(); }
         editor.dom.clearLastUsedBtn.onclick = editor.uifunctions.clearLastUsedBtn_click;
         editor.dom.lockMode.onchange = editor.uifunctions.lockMode_onchange;
 

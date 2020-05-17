@@ -204,6 +204,8 @@ editor_blockly = function () {
       MotaActionBlocks['strokePolygon_s'].xmlText(),
       MotaActionBlocks['fillEllipse_s'].xmlText(),
       MotaActionBlocks['strokeEllipse_s'].xmlText(),
+      MotaActionBlocks['fillArc_s'].xmlText(),
+      MotaActionBlocks['strokeArc_s'].xmlText(),
       MotaActionBlocks['drawImage_s'].xmlText(),
       MotaActionBlocks['drawImage_1_s'].xmlText(),
       MotaActionBlocks['drawIcon_s'].xmlText(),
@@ -706,7 +708,7 @@ function omitedcheckUpdateFunction(event) {
         var types = [
             "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
             "fillBoldText_s", "fillRect_s", "strokeRect_s", "drawLine_s",
-            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillEllipse_s", "strokeEllipse_s",
+            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillEllipse_s", "strokeEllipse_s", "fillArc_s", "strokeArc_s",
             "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s",
             "waitContext_2"
         ];

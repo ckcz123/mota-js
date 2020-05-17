@@ -279,6 +279,39 @@ ui.prototype._uievent_strokeEllipse = function (data) {
         core.calValue(data.b), (core.calValue(data.angle) || 0) * Math.PI / 180, data.style, data.lineWidth);
 }
 
+ui.prototype.fillArc = function (name, x, y, r, start, end, style) {
+    if (style) core.setFillStyle(name, style);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.arc(x, y, r, start, end);
+    ctx.closePath();
+    ctx.fill();
+}
+
+ui.prototype._uievent_fillArc = function (data) {
+    this._createUIEvent();
+    this.fillArc('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r),
+        (core.calValue(data.start) || 0) * Math.PI / 180, (core.calValue(data.end) || 0) * Math.PI / 180, data.style);
+}
+
+ui.prototype.strokeArc = function (name, x, y, r, start, end, style, lineWidth) {
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth) core.setLineWidth(name, lineWidth);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(x, y, r, start, end);
+    ctx.stroke();
+}
+
+ui.prototype._uievent_strokeArc = function (data) {
+    this._createUIEvent();
+    this.strokeArc('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r),
+        (core.calValue(data.start) || 0) * Math.PI / 180, (core.calValue(data.end) || 0) * Math.PI / 180, data.style, data.lineWidth);
+}
+
 ////// 在某个canvas上绘制一条线 //////
 ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);

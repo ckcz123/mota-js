@@ -432,6 +432,8 @@ action
     |   strokePolygon_s
     |   fillEllipse_s
     |   strokeEllipse_s
+    |   fillArc_s
+    |   strokeArc_s
     |   drawImage_s
     |   drawImage_1_s
     |   drawIcon_s
@@ -2368,6 +2370,35 @@ var code = '{"type": "strokeEllipse", "x": '+PosString_0+', "y": '+PosString_1+'
 return code;
 */;
 
+fillArc_s
+    :   '绘制扇形' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour Newline
+
+/* fillArc_s
+tooltip : fillArc：绘制扇形
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+colour : this.subColor
+default : ["0","0","100","0","90","",null,""]
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+var code = '{"type": "fillArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+'},\n';
+return code;
+*/;
+
+
+strokeArc_s
+    :   '绘制弧' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+
+/* strokeArc_s
+tooltip : strokeArc：绘制弧
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+colour : this.subColor
+default : ["0","0","100","0","90","",null,""]
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "strokeArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+IntString_0+'},\n';
+return code;
+*/;
+
+
 
 drawImage_s
     :   '绘制图片' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
@@ -3700,6 +3731,18 @@ ActionParser.prototype.parseAction = function() {
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['strokeEllipse_s'].xmlText([
         data.x, data.y, data.a, data.b, data.angle, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      ]);
+      break;
+    case "fillArc": // 绘制弧
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['fillArc_s'].xmlText([
+        data.x, data.y, data.r, data.start, data.end, data.style, 'rgba('+data.style+')', this.next
+      ]);
+      break;
+    case "strokeArc": // 绘制弧
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['strokeArc_s'].xmlText([
+        data.x, data.y, data.r, data.start, data.end, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawImage": // 绘制图片

@@ -257,7 +257,17 @@ editor_mappanel_wrapper = function (editor) {
             }
             // console.log(editor.map);
             if (editor.info.y != null) {
-                editor.uivalues.lastUsed = [editor.info].concat(editor.uivalues.lastUsed.filter(function (e) { return e.id != editor.info.id}));
+                var found = false;
+                editor.uivalues.lastUsed.forEach(function (one) {
+                    if (one.id == editor.info.id) {
+                        found = true;
+                        one.recent = new Date().getTime();
+                        one.frequent = (one.frequent || 0) + 1;
+                    }
+                })
+                if (!found) {
+                    editor.uivalues.lastUsed.push(Object.assign({}, editor.info, {recent: new Date().getTime(), frequent: 1}));
+                }
                 editor.config.set("lastUsed", editor.uivalues.lastUsed);
             }
             editor.updateMap();
@@ -781,7 +791,13 @@ editor_mappanel_wrapper = function (editor) {
         var x = parseInt(px / 32), y = parseInt(py / 32);
         var index = x + core.__SIZE__ * y;
         if (index >= editor.uivalues.lastUsed.length) return;
-        editor.setSelectBoxFromInfo(editor.uivalues.lastUsed[index]);
+        var lastUsed = editor.uivalues.lastUsed.sort(function (a, b) {
+            return (b[editor.uivalues.lastUsedType] || 0) - (a[editor.uivalues.lastUsedType] || 0);
+        });
+        var one = Object.assign({}, lastUsed[index]);
+        delete one['recent'];
+        delete one['frequent'];
+        editor.setSelectBoxFromInfo(one);
         return;
     }
 

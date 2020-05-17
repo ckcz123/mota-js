@@ -91,6 +91,18 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "本塔使用音效",
 					"_data": "在此存放所有的SE，和文件名一致 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
 				},
+				"fonts": {
+					"_leaf": true,
+					"_type": "material",
+					"_range": "editor.mode.checkUnique(thiseval)",
+					"_directory": "./project/fonts/",
+					"_transform": (function (one) {
+						if (one.endsWith(".ttf")) return one.substring(0, one.lastIndexOf('.'));
+						return null;
+					}).toString(),
+					"_docs": "本塔使用字体",
+					"_data": "在此存放所有可能使用的字体 \n 字体名不能使用中文，不能带空格或特殊字符"
+				},
 				"nameMap": {
 					"_leaf": true,
 					"_type": "textarea",

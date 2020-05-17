@@ -215,6 +215,7 @@ main.prototype.init = function (mode, callback) {
             main.dom.levelChooseButtons.appendChild(span);
         });
         main.createOnChoiceAnimation();
+        main.importFonts(main.fonts);
         
         main.loadJs('libs', main.loadList, function () {
             main.core = core;
@@ -369,6 +370,19 @@ main.prototype.selectButton = function (index) {
     else if (main.dom.levelChooseButtons.style.display == 'block') {
         select(main.dom.levelChooseButtons.children);
     }
+}
+
+////// 创建字体 //////
+main.prototype.importFonts = function (fonts) {
+    if (!(fonts instanceof Array) || fonts.length == 0) return;
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    var html = '';
+    fonts.forEach(function (font) {
+        html += '@font-face { font-family: "'+font+'"; src: url("project/fonts/'+font+'.ttf") format("truetype")';
+    });
+    style.innerHTML = html;
+    document.body.appendChild(style);
 }
 
 main.prototype.listen = function () {

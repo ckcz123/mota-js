@@ -430,8 +430,8 @@ action
     |   drawArrow_s
     |   fillPolygon_s
     |   strokePolygon_s
-    |   fillCircle_s
-    |   strokeCircle_s
+    |   fillEllipse_s
+    |   strokeEllipse_s
     |   drawImage_s
     |   drawImage_1_s
     |   drawIcon_s
@@ -2339,30 +2339,32 @@ var code = '{"type": "strokePolygon", "nodes": ['+EvalString_0+']'+ColorString_0
 return code;
 */;
 
-fillCircle_s
-    :   '绘制圆' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour Newline
+fillEllipse_s
+    :   '绘制椭圆' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '顺时针旋转度数' PosString? '颜色' ColorString? Colour Newline
 
-/* fillCircle_s
-tooltip : fillCircle：绘制圆
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+/* fillEllipse_s
+tooltip : fillEllipse：绘制椭圆
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
 colour : this.subColor
-default : ["0","0","100","",null]
+default : ["0","0","100","100","0","",null]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
-var code = '{"type": "fillCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+'},\n';
+PosString_4 = PosString_4 ? (', "angle": ' + PosString_4) : '';
+var code = '{"type": "fillEllipse", "x": '+PosString_0+', "y": '+PosString_1+', "a": '+PosString_2+', "b": '+PosString_3+PosString_4+ColorString_0+'},\n';
 return code;
 */;
 
-strokeCircle_s
-    :   '绘制圆边框' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+strokeEllipse_s
+    :   '绘制椭圆边框' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '顺时针旋转度数' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
-/* strokeCircle_s
-tooltip : strokeCircle：绘制圆边框
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
+/* strokeEllipse_s
+tooltip : strokeEllipse：绘制椭圆边框
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
 colour : this.subColor
-default : ["0","0","100","",null,""]
+default : ["0","0","100","100","0","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
-var code = '{"type": "strokeCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+IntString_0+'},\n';
+PosString_4 = PosString_4 ? (', "angle": ' + PosString_4) : '';
+var code = '{"type": "strokeEllipse", "x": '+PosString_0+', "y": '+PosString_1+', "a": '+PosString_2+', "b": '+PosString_3+PosString_4+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
@@ -3688,16 +3690,16 @@ ActionParser.prototype.parseAction = function() {
         x_str.join(','), y_str.join(','), data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
-    case "fillCircle": // 绘制圆
+    case "fillEllipse": // 绘制椭圆
       data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['fillCircle_s'].xmlText([
-        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', this.next
+      this.next = MotaActionBlocks['fillEllipse_s'].xmlText([
+        data.x, data.y, data.a, data.b, data.angle, data.style, 'rgba('+data.style+')', this.next
       ]);
       break;
-    case "strokeCircle": // 绘制圆边框
+    case "strokeEllipse": // 绘制椭圆边框
       data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['strokeCircle_s'].xmlText([
-        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      this.next = MotaActionBlocks['strokeEllipse_s'].xmlText([
+        data.x, data.y, data.a, data.b, data.angle, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawImage": // 绘制图片

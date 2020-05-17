@@ -238,35 +238,45 @@ ui.prototype._uievent_strokePolygon = function (data) {
     this.strokePolygon('uievent', data.nodes, data.style, data.lineWidth);
 }
 
-////// 在某个canvas上绘制一个圆 //////
-ui.prototype.fillCircle = function (name, x, y, r, style) {
+////// 在某个canvas上绘制一个椭圆 //////
+ui.prototype.fillEllipse = function (name, x, y, a, b, angle, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.ellipse(x, y, a, b, angle, 0, 2*Math.PI);
     ctx.fill();
 }
 
-ui.prototype._uievent_fillCircle = function (data) {
+ui.prototype.fillCircle = function (name, x, y, r, style) {
+    return this.fillEllipse(name, x, y, r, r, 0, style);
+}
+
+ui.prototype._uievent_fillEllipse = function (data) {
     this._createUIEvent();
-    this.fillCircle('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r), data.style);
+    this.fillEllipse('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.a),
+        core.calValue(data.b), (core.calValue(data.angle) || 0) * Math.PI / 180, data.style);
 }
 
 ////// 在某个canvas上绘制一个圆的边框 //////
-ui.prototype.strokeCircle = function (name, x, y, r, style, lineWidth) {
+ui.prototype.strokeEllipse = function (name, x, y, a, b, angle, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.ellipse(x, y, a, b, angle, 0, 2*Math.PI);
     ctx.stroke();
 }
 
-ui.prototype._uievent_strokeCircle = function (data) {
+ui.prototype.strokeCircle = function (name, x, y, r, style, lineWidth) {
+    return this.strokeEllipse(name, x, y, r, r, 0, style, lineWidth);
+}
+
+ui.prototype._uievent_strokeEllipse = function (data) {
     this._createUIEvent();
-    this.strokeCircle('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r), data.style, data.lineWidth);
+    this.strokeEllipse('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.a),
+        core.calValue(data.b), (core.calValue(data.angle) || 0) * Math.PI / 180, data.style, data.lineWidth);
 }
 
 ////// 在某个canvas上绘制一条线 //////

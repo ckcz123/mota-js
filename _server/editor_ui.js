@@ -792,8 +792,10 @@ editor_ui_wrapper = function (editor) {
                 }
                 // 试听音频
                 if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || one.endsWith('.wav')) {
-                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>试听</button>";
-                    html += '<br style="display:none"/><audio controls preload="none" src="'+directory+one+'" style="display:none; max-width: 100%"></audio>';
+                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>";
+                    html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>
+                        <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
+                        <progress value="0" max="1" style="display:none; width:100%" onclick="editor.uievent._previewMaterialAudio_seek(this, event)"></progress>`;
                 }
                 html += '<br/>';
             });
@@ -824,17 +826,39 @@ editor_ui_wrapper = function (editor) {
     }
 
     uievent._previewMaterialAudio = function (button) {
-        var br = button.nextElementSibling;
+        var span = button.nextElementSibling;
+        var br = span.nextElementSibling;
         var audio = br.nextElementSibling;
+        var progress = audio.nextElementSibling;
         if (br.style.display == 'none') {
-            button.innerText = '折叠';
+            button.innerText = '暂停';
             br.style.display = 'block';
-            audio.style.display = 'block';
+            progress.style.display = 'block';
+            span.style.display = 'inline';
+            audio.play();
         } else {
-            button.innerText = '试听';
+            button.innerText = '播放';
             br.style.display = 'none';
-            audio.style.display = 'none';
+            progress.style.display='none';
+            span.style.display = 'none';
+            audio.pause();
         }
+    }
+
+    uievent._previewMaterialAudio_onTimeUpdate = function (audio) {
+        var _format = function (time) { return parseInt(time/60) + ":" + core.setTwoDigits(parseInt(time) % 60); }
+        if (audio.duration > 0) {
+            audio.previousElementSibling.previousElementSibling.innerText = _format(audio.currentTime) + " / " + _format(audio.duration);
+            audio.nextElementSibling.setAttribute('value', audio.currentTime / audio.duration);
+        }
+    }
+
+    uievent._previewMaterialAudio_seek = function (element, event) {
+        var audio = element.previousElementSibling;
+        var value = event.offsetX * element.max / element.offsetWidth;
+        element.setAttribute("value", value);
+        audio.currentTime = audio.duration * value;
+        if (audio.paused) audio.play();
     }
 
     editor.constructor.prototype.uievent=uievent;

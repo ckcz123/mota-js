@@ -67,7 +67,10 @@ def static_file(path):
 	if not os.path.isfile(path):
 		abort(404)
 		return None
-	return Response(get_file(path), mimetype = get_mimetype(path))
+	mimetype = get_mimetype(path)
+	response = Response(get_file(path), mimetype = mimetype)
+	if mimetype.startswith('audio/'): response.headers["Accept-Ranges"] = "bytes"
+	return response
 
 def process_request():
 	data = request.get_data() # str in py2 and bytes in py3

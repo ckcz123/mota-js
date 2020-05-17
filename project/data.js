@@ -36,9 +36,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bomb.mp3",
 			"centerFly.mp3"
 		],
-		"fonts": [
-			"number"
-		],
+		"fonts": [],
 		"nameMap": {
 			"背景图.jpg": "bg.jpg",
 			"背景音乐.mp3": "bgm.mp3"

@@ -398,22 +398,22 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   if(editor_blockly.workspace.topBlocks_.length>=2){
-    codeAreaHL.setValue('入口方块只能有一个');
+    editor_blockly.setValue('入口方块只能有一个');
     return;
   }
   var eventType = document.getElementById('entryType').value;
   if(editor_blockly.workspace.topBlocks_.length==1){
     var blockType = editor_blockly.workspace.topBlocks_[0].type;
     if(blockType!==eventType+'_m'){
-      codeAreaHL.setValue('入口方块类型错误');
+      editor_blockly.setValue('入口方块类型错误');
       return;
     }
   }
   try {
     var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\(i|c|d|e|z)/g, '\\\\\\\\$1');
-    codeAreaHL.setValue(code);
+    editor_blockly.setValue(code);
   } catch (error) {
-    codeAreaHL.setValue(String(error));
+    editor_blockly.setValue(String(error));
     if (error instanceof OmitedError){
     var blockName = error.blockName;
     var varName = error.varName;
@@ -529,13 +529,19 @@ function omitedcheckUpdateFunction(event) {
     xhr.open('GET', '_server/MotaAction.g4', true);
     xhr.send(null);
 
-    codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
+    var codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
         lineNumbers: true,
         matchBrackets: true,
         lineWrapping: true,
         continueComments: "Enter",
-        extraKeys: {"Ctrl-Q": "toggleComment"}
+        extraKeys: {"Ctrl-Q": "toggleComment"},
     });
+    codeAreaHL.on('changes', function () {
+        editor_blockly.highlightParse(!changeFromBlockly);
+        changeFromBlockly = false;
+    });
+    var changeFromBlockly = false;
+    var shouldNotifyParse = false;
 
     editor_blockly.showXML = function () {
         var xml = Blockly.Xml.workspaceToDom(editor_blockly.workspace);
@@ -561,6 +567,11 @@ function omitedcheckUpdateFunction(event) {
         }
     }
 
+    editor_blockly.setValue = function (value) {
+      changeFromBlockly = true;
+      codeAreaHL.setValue(value);
+    }
+
     editor_blockly.parse = function () {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
@@ -580,7 +591,7 @@ function omitedcheckUpdateFunction(event) {
         var type = args.type;
         if (!type) return false;
         editor_blockly.id = id_;
-        codeAreaHL.setValue(input.value);
+        editor_blockly.setValue(input.value);
         document.getElementById('entryType').value = type;
         editor_blockly.parse();
         editor_blockly.show();
@@ -604,6 +615,13 @@ function omitedcheckUpdateFunction(event) {
         }
     }
 
+    var blocklyParseBtn = document.getElementById('blocklyParse');
+    editor_blockly.highlightParse = function (shouldHighLight) {
+      if (shouldNotifyParse == shouldHighLight) return;
+      shouldNotifyParse = shouldHighLight;
+      blocklyParseBtn.style.background = shouldNotifyParse ? '#FFCCAA' : 'unset';
+    }
+
     editor_blockly.cancel = function () {
         editor_blockly.id = '';
         editor_blockly.hide();
@@ -614,15 +632,19 @@ function omitedcheckUpdateFunction(event) {
             editor_blockly.id = '';
             return;
         }
+        if (shouldNotifyParse) {
+          alert('你尚未解析修改后的内容，请进行解析或放弃操作');
+          return;
+        }
         if(editor_blockly.workspace.topBlocks_.length>=2){
-          codeAreaHL.setValue('入口方块只能有一个');
+          editor_blockly.setValue('入口方块只能有一个');
           return;
         }
         var eventType = document.getElementById('entryType').value;
         if(editor_blockly.workspace.topBlocks_.length==1){
           var blockType = editor_blockly.workspace.topBlocks_[0].type;
           if(blockType!==eventType+'_m'){
-            codeAreaHL.setValue('入口方块类型错误');
+            editor_blockly.setValue('入口方块类型错误');
             return;
           }
         }

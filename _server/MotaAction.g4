@@ -2242,29 +2242,31 @@ return code;
 */;
 
 fillRect_s
-    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour Newline
+    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '颜色' ColorString? Colour Newline
 
 /* fillRect_s
 tooltip : fillRect：绘制矩形
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2
 colour : this.subColor
-default : ["0","0","flag:x","300","",null]
+default : ["0","0","flag:x","300","","",null]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
-var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+'},\n';
+PosString_4 = PosString_4 ? (', "radius": '+PosString_4) : '';
+var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+PosString_4+ColorString_0+'},\n';
 return code;
 */;
 
 strokeRect_s
-    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2%e8%be%b9%e6%a1%86
 colour : this.subColor
-default : ["0","0","flag:x","300","",null,""]
+default : ["0","0","flag:x","300","","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
-var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+IntString_0+'},\n';
+PosString_4 = PosString_4 ? (', "radius": '+PosString_4) : '';
+var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+PosString_4+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
@@ -3643,13 +3645,13 @@ ActionParser.prototype.parseAction = function() {
     case "fillRect": // 绘制矩形
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['fillRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', this.next
+        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', this.next
       ]);
       break;
     case "strokeRect": // 绘制矩形边框
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['strokeRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawLine": // 绘制线段

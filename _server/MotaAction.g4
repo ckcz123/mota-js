@@ -271,16 +271,19 @@ return code;
 
 //changeFloor 事件编辑器入口之一
 changeFloor_m
-    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' IntString? '穿透性' IgnoreChangeFloor_List BEND
+    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? '穿透性' IgnoreChangeFloor_List BEND
     
 
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://h5mota.com/games/template/_docs/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : [null,"MTx",null,0,0,null,"",null]
+default : [null,"MTx",null,"","",null,"",null]
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
-var loc = ', "loc": ['+Number_0+', '+Number_1+']';
+var loc = '';
+if (PosString_0 && PosString_1) {
+  loc = ', "loc": ['+PosString_0+', '+PosString_1+']';
+}
 if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
@@ -1189,7 +1192,7 @@ return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' IntString? Newline
+    :   '楼层切换' Floor_List IdString? Stair_List 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? Newline
     
 
 /* changeFloor_s
@@ -1199,8 +1202,11 @@ default : [null,"",null,"","",null,"",null]
 colour : this.dataColor
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
-toFloorId = toFloorId ? (', "floorId": ' + toFloorId) : '';
-var loc = ', "loc": ['+Number_0+', '+Number_1+']';
+toFloorId = toFloorId ? (', "floorId": "' + toFloorId +'"') : '';
+var loc = '';
+if (PosString_0 && PosString_1) {
+  loc = ', "loc": ['+PosString_0+', '+PosString_1+']';
+}
 if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
@@ -2956,9 +2962,9 @@ ActionParser.prototype.parse = function (obj,type) {
     
     case 'changeFloor':
       if(!obj)obj={};
-      if(!this.isset(obj.loc)) {
-        obj.loc=[0,0];
-        if (!this.isset(obj.stair)) obj.stair=':now';
+      if (!obj.loc) {
+        obj.loc = obj.loc || ['',''];
+        obj.stair = obj.stair || ':now';
       }
       if (obj.floorId==':before'||obj.floorId==':next'||obj.floorId==':now') {
         obj.floorType=obj.floorId;
@@ -3259,8 +3265,8 @@ ActionParser.prototype.parseAction = function() {
         data.floorType=data.floorId;
         delete data.floorId;
       }
-      return MotaActionBlocks['changeFloor_s'].xmlText([
-        data.floorType||'floorId',data.floorId,data.stair||'loc',data.loc[0],data.loc[1],obj.direction,
+      this.next = MotaActionBlocks['changeFloor_s'].xmlText([
+        data.floorType||'floorId',data.floorId,data.stair||'loc',data.loc[0],data.loc[1],data.direction,
         data.time, this.next]);
       break;
     case "changePos": // 直接更换勇士位置, 不切换楼层

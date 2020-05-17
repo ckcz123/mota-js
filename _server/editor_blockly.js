@@ -850,9 +850,9 @@ function omitedcheckUpdateFunction(event) {
 
     // id: [x, y, floorId, forceFloor]
     var selectPointBlocks = {
-        "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
+        "changeFloor_m": ["PosString_0", "PosString_1", "IdString_0", true],
         "jumpHero_s": ["PosString_0", "PosString_1"],
-        "changeFloor_s": ["Number_0", "Number_1", "IdString_0", true],
+        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
         "changePos_s": ["PosString_0", "PosString_1"],
         "battle_1_s": ["PosString_0", "PosString_1"],
         "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],

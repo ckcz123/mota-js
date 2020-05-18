@@ -143,10 +143,12 @@
         return;
     }
 
+    /**
+     * @param {string} path 支持"/"做分隔符
+     * @param {() => {err: string, data}} callback
+     */
     fs.mkdir = function (path, callback) {
         //callback:function(err, data)
-        //path:支持"/"做分隔符,不以"/"结尾
-        //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
         if (typeof(path) != typeof(''))
             throw 'Type Error in fs.readdir';
         var data = '';
@@ -155,7 +157,7 @@
             try {
                 data = JSON.parse(data);
             } catch (e) {
-                err = "Invalid /mkdir";
+                err = "Invalid /makeDir";
                 data = null;
             }
             callback(err, data);
@@ -163,10 +165,11 @@
         return;
     }
 
+    /**
+     * @param {string} path 支持"/"做分隔符, 不以"/"结尾
+     * @param {() => {err: string, data}} callback
+     */
     fs.moveFile = function (src, dest, callback) {
-        //callback:function(err, data)
-        //path:支持"/"做分隔符,不以"/"结尾
-        //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
         if (typeof(src) != typeof('') || typeof(dest) != typeof(''))
             throw 'Type Error in fs.readdir';
         var data = '';
@@ -183,10 +186,11 @@
         return;
     }
 
+    /**
+     * @param {string} path 支持"/"做分隔符, 不以"/"结尾
+     * @param {() => {err: string, data}} callback
+     */
     fs.deleteFile = function (path, callback) {
-        //callback:function(err, data)
-        //path:支持"/"做分隔符,不以"/"结尾
-        //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
         if (typeof(path) != typeof(''))
             throw 'Type Error in fs.readdir';
         var data = '';

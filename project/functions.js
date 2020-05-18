@@ -1051,7 +1051,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var damage = {}, // 每个点的伤害值
 		type = {}, // 每个点的伤害类型
-		repluse = {}, // 每个点的阻击怪信息
+		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
 
 	// 计算血网和领域、阻击、激光的伤害，计算捕捉信息
@@ -1096,8 +1096,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 
 		// 阻击
-		// 如果要防止阻击伤害，可以直接简单的将 flag:no_repluse 设为true
-		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_repluse')) {
+		// 如果要防止阻击伤害，可以直接简单的将 flag:no_repulse 设为true
+		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_repulse')) {
 			for (var dir in core.utils.scan) {
 				var nx = x + core.utils.scan[dir].x,
 					ny = y + core.utils.scan[dir].y,
@@ -1112,7 +1112,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var rnx = x + core.utils.scan[rdir].x,
 					rny = y + core.utils.scan[rdir].y;
 				if (rnx >= 0 && rnx < width && rny >= 0 && rny < height && core.getBlock(rnx, rny, floorId) == null) {
-					repluse[currloc] = (repluse[currloc] || []).concat([
+					repulse[currloc] = (repulse[currloc] || []).concat([
 						[x, y, id, rdir]
 					]);
 				}
@@ -1207,7 +1207,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.checkBlock = {
 		damage: damage,
 		type: type,
-		repluse: repluse,
+		repulse: repulse,
 		ambush: ambush,
 		cache: {} // clear cache
 	};

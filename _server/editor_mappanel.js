@@ -257,7 +257,17 @@ editor_mappanel_wrapper = function (editor) {
             }
             // console.log(editor.map);
             if (editor.info.y != null) {
-                editor.uivalues.lastUsed = [editor.info].concat(editor.uivalues.lastUsed.filter(function (e) { return e.id != editor.info.id}));
+                var found = false;
+                editor.uivalues.lastUsed.forEach(function (one) {
+                    if (one.id == editor.info.id) {
+                        found = true;
+                        one.recent = new Date().getTime();
+                        one.frequent = (one.frequent || 0) + 1;
+                    }
+                })
+                if (!found) {
+                    editor.uivalues.lastUsed.push(Object.assign({}, editor.info, {recent: new Date().getTime(), frequent: 1}));
+                }
                 editor.config.set("lastUsed", editor.uivalues.lastUsed);
             }
             editor.updateMap();
@@ -781,16 +791,34 @@ editor_mappanel_wrapper = function (editor) {
         var x = parseInt(px / 32), y = parseInt(py / 32);
         var index = x + core.__SIZE__ * y;
         if (index >= editor.uivalues.lastUsed.length) return;
-        editor.setSelectBoxFromInfo(editor.uivalues.lastUsed[index]);
-        return;
+        var lastUsed = editor.uivalues.lastUsed.sort(function (a, b) {
+            if ((a.istop || 0) != (b.istop || 0)) return (b.istop || 0) - (a.istop || 0);
+            return (b[editor.uivalues.lastUsedType] || 0) - (a[editor.uivalues.lastUsedType] || 0);
+        });
+
+        if (e.button == 2) {
+            lastUsed[index].istop = lastUsed[index].istop ? 0 : 1;
+            printf("已"+(lastUsed[index].istop ? '置顶' : '取消置顶')+"该图块");
+            editor.config.set('lastUsed', editor.uivalues.lastUsed);
+            editor.updateLastUsedMap();
+            return false;
+        }
+        var one = Object.assign({}, lastUsed[index]);
+        delete one['recent'];
+        delete one['frequent'];
+        delete one['istop'];
+        editor.setSelectBoxFromInfo(one);
+        return false;
     }
 
     editor.uifunctions.clearLastUsedBtn_click = function () {
         if (editor.isMobile) return;
-
-        editor.uivalues.lastUsed = [];
-        editor.config.set('lastUsed', []);
-        editor.updateLastUsedMap();
+ 
+        if (confirm("你确定要清理全部最近使用图块么？\n所有最近使用和最常使用图块（含置顶图块）都将被清除；此过程不可逆！")) {
+            editor.uivalues.lastUsed = [];
+            editor.config.set('lastUsed', []);
+            editor.updateLastUsedMap();
+        }
     }
 
     /////////////////////////////////////////////////////////////////////////////

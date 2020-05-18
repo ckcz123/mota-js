@@ -27,7 +27,8 @@ editor_table_wrapper = function (editor) {
         return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
     editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
-        if (!(value instanceof Array)) value = [];
+        if (value == null) value = [];
+        if (!(value instanceof Array)) value = [value];
         keys=Array.from(keys)
         prefixStrings=Array.from(prefixStrings)
         for (var index = 0; index < value.length; index++) {
@@ -224,8 +225,10 @@ editor_table_wrapper = function (editor) {
 
         var listen = function (guids) {
             // 每个叶节点的事件绑定
+            var tableid = editor.util.guid();
+            editor.mode.currentTable=tableid;
             guids.forEach(function (guid) {
-                editor.table.guidListen(guid, obj, commentObj)
+                editor.table.guidListen(guid, tableid, obj, commentObj)
             });
         }
         return { "HTML": outstr.join(''), "guids": guids, "listen": listen };
@@ -309,7 +312,7 @@ editor_table_wrapper = function (editor) {
      * 监听一个guid对应的表格项
      * @param {String} guid 
      */
-    editor_table.prototype.guidListen = function (guid, obj, commentObj) {
+    editor_table.prototype.guidListen = function (guid, tableid, obj, commentObj) {
         // tr>td[title=field]
         //   >td[title=comment,cobj=cobj:json]
         //   >td>div>input[value=thiseval]
@@ -318,6 +321,7 @@ editor_table_wrapper = function (editor) {
         var field = thisTr.children[0].getAttribute('title');
         var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
         var modeNode = thisTr.parentNode;
+        thisTr.setAttribute('tableid',tableid)
         while (!editor_mode._ids.hasOwnProperty(modeNode.getAttribute('id'))) {
             modeNode = modeNode.parentNode;
         }
@@ -341,6 +345,7 @@ editor_table_wrapper = function (editor) {
      */
     editor_table.prototype.onchange = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+        if (editor.mode.currentTable!=thisTr.getAttribute('tableid')) return;
         var thiseval = null;
         if (input.checked != null) input.value = input.checked;
         try {

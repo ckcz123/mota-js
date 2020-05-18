@@ -1,0 +1,91 @@
+V2.6.6 -> V2.7 接档说明：
+
+此版本仅可接档【地图】，【事件】和【怪物数据】。脚本编辑等不可进行接档。
+
+请严格按照此说明进行每一步操作以避免可能的bug。接档前请做好备份。
+
+接档准备：
+ - Visual Studio Code
+ - 需要进行接档的V266的样板
+ - 两个全新的V2.7的样板（一个用于接档结果，一个用于抄部分修改后的内容）
+
+接档步骤：
+1. 将V266的样板中，【project】目录下的如下文件和文件夹，直接复制并覆盖到V2.7的样板中的project目录下：
+ - animates/
+ - floors/
+ - enemys.js
+ - events.js
+ - icons.js
+ - items.js
+ - maps.js
+
+2. 将V266样板中，【project/images】目录下的图片，拆分后放入V2.7的对应图片目录下：
+ - 系统默认图片放入materials中
+ - 自动元件放入autotiles中
+ - 额外素材放入tilesets中
+ - 使用到的其他图片放入images中
+【请注意】hero.png在V2.7请放入images目录（而不是materials目录）
+
+3. 将V266样板中，【project/sounds】目录下的音乐和音效，分别放入V2.7的bgms和sounds目录。
+
+4. 使用VSCode直接分别打开V266和V2.7的【project/data.js】，并执行以下操作：
+ - 将【main】一项的全部内容从V2.6.6直接复制到V2.7
+ - 将【firstData】一项中的，【title】，【name】，【floorId】，【hero】直接复制到
+ - 在注册的图片中，请手动补上【hero.png】项
+ - 在【hero】中【name】上方增加 "image": "hero.png"
+ - 在【hero】中【steps】上方新增一项 "followers": []
+ - 将【hero】中的【experience】改成【exp】
+ - 删除【hero】中【items】中的【keys】项
+请勿覆盖或复制其他内容（例如全塔数值或全局开关），否则可能导致编辑器无法打开。
+
+5. 使用VSCode分别打开接档后的V2.7和纯净的V2.7的【project/items.js】，并执行以下操作：
+ - 将三色钥匙的cls从"keys"改成"tools"，并新增 "hideInToolbox": true
+ - 如下道具的【useItemEffect】和【canUseItemEffect】有所改变，请直接从纯净的V2.7覆盖到你要接档的V2.7：
+   - earthquake, pickaxe, icePickaxe, snow, bigKey, bomb, upFly, downFly
+   - 如果确认你的塔不会使用该道具，可忽略
+ - 黄宝石和生命魔杖增加了【useItemEvent】；如需使用请进行复制
+
+6. 使用VSCode打开接档后的V2.7的【project/icons.js】，并执行如下操作：
+ - 找到【terrains】中的三色墙和六色门，删除对应的这几行
+   - yellowWall, blueWall, whiteWall, yellowDoor, blueDoor, redDoor, greenDoor, specialDoor, steelDoor
+   - （在V2.7中，terrains不再保留门的引用，门效果仅由animates决定）
+ - 将【terrains】中的 blueShop-left, blueShop-right, pinkShop-left, pinkShop-right 分别重命名为
+   blueShopLeft, blueShopRight, pinkShopLeft, pinkShopRight
+
+7. 使用VSCode分别打开接档后的V2.7和纯净的V2.7的【project/maps.js】，并执行以下操作：
+ - 将纯净的V2.7中如下ID的行，直接替换掉要接档的V2.7：
+   - yellowWall, whiteWall, blueWall, blueShopLeft, blueShopRight, pinkShopLeft, pinkShopRight, 
+     lavaNet, poisonNet, weakNet, curseNet, yellowDoor, blueDoor, redDoor, greenDoor, specialDoor, steelDoor,
+     arrowUp, arrowDown, arrowLeft, arrowRight, light
+ - 将所有的 "noPass":false 改成 "canPass":true  原来是 "noPass":true 的请直接删除
+   - V2.7中，不再在图块属性使用noPass，而是全部改成了canPass；请检查此文件的全部noPass是否被替换或删除
+
+8. 到这一步后已经可以打开编辑器了。
+ - 如果打开编辑器白屏或报错，请检查一下上面是否每个步骤都完成了
+ - 如果还有问题请联系小艾
+
+9. 在编辑器中，切换到「全塔属性」标签，并进行修改：
+ - V2.7中，全局商店的结构完全重写了，请重新实现一遍
+ - 全塔开关中，是否在状态栏显示XXX改成在同一个方框中
+ - 删除了部分全局数值和全塔开关
+
+10. 在编辑器中，切换到「脚本编辑」标签，并进行修改：
+ - setInitData已经被删除；移动到了开场剧情的startText中
+ - 删除了afterChangeLight和afterPassNet脚本
+ - 很多函数的实现有所改变，改变较为严重的有：
+   - resetGame, changingFloor, afterBattle, getDamageInfo, saveData, loadData, 
+     updateStatusBar, updateCheckBlock, moveOneStep
+ - 修改脚本编辑（例如getDamageInfo）时，请勿直接拿原来的脚本进行覆盖，而是重新对函数进行修改！
+
+11. 在编辑器中，切换到「插件编写」标签，并重新增加新增的插件插件
+ - 请勿随意修改已有的默认插件
+
+12. 逐楼层检查firstArrive以及每个点的事件列表；主要事件API变化如下：
+ - 所有的「数值增减」事件已被删除，被数值设置+运算符替代
+   - 编辑器将无法再解析「数值增减」事件（会被解析成自定义事件），但是游戏中仍然可以正确执行
+ - 「隐藏事件」将不再默认删除该点（而只是纯粹的隐藏）；请给有需要的「隐藏事件」勾选「同时删除」选项
+ - 「重启当前事件」已经被删除并且无法在游戏中使用。请替换成等价的循环处理或者插入事件
+ - 在V2.7中，所有的experience全部改名exp；请检查所有对经验值进行操作的地方
+
+
+

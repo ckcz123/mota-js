@@ -392,6 +392,12 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x) < 10 ? "0" + x : x;
 }
 
+utils.prototype.formatSize = function (size) {
+    if (size < 1024) return size + 'B';
+    else if (size < 1024 * 1024) return (size/1024).toFixed(2) + "KB";
+    else return (size/1024/1024).toFixed(2) + "MB";
+}
+
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
@@ -1227,7 +1233,7 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     };
     xhr.onprogress = function (e) {
         if (e.lengthComputable) {
-            if (onprogress) onprogress(e.loaded / e.total);
+            if (onprogress) onprogress(e.loaded, e.total);
         }
     }
     xhr.onabort = function () {

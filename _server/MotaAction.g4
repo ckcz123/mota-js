@@ -271,16 +271,19 @@ return code;
 
 //changeFloor 事件编辑器入口之一
 changeFloor_m
-    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' IntString? '穿透性' IgnoreChangeFloor_List BEND
+    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? '穿透性' IgnoreChangeFloor_List BEND
     
 
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://h5mota.com/games/template/_docs/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : [null,"MTx",null,0,0,null,"",null]
+default : [null,"MTx",null,"","",null,"",null]
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
-var loc = ', "loc": ['+Number_0+', '+Number_1+']';
+var loc = '';
+if (PosString_0 && PosString_1) {
+  loc = ', "loc": ['+PosString_0+', '+PosString_1+']';
+}
 if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
@@ -430,8 +433,10 @@ action
     |   drawArrow_s
     |   fillPolygon_s
     |   strokePolygon_s
-    |   fillCircle_s
-    |   strokeCircle_s
+    |   fillEllipse_s
+    |   strokeEllipse_s
+    |   fillArc_s
+    |   strokeArc_s
     |   drawImage_s
     |   drawImage_1_s
     |   drawIcon_s
@@ -1187,7 +1192,7 @@ return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' IntString? Newline
+    :   '楼层切换' Floor_List IdString? Stair_List 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? Newline
     
 
 /* changeFloor_s
@@ -1197,8 +1202,11 @@ default : [null,"",null,"","",null,"",null]
 colour : this.dataColor
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
-toFloorId = toFloorId ? (', "floorId": ' + toFloorId) : '';
-var loc = ', "loc": ['+Number_0+', '+Number_1+']';
+toFloorId = toFloorId ? (', "floorId": "' + toFloorId +'"') : '';
+var loc = '';
+if (PosString_0 && PosString_1) {
+  loc = ', "loc": ['+PosString_0+', '+PosString_1+']';
+}
 if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
@@ -2242,29 +2250,31 @@ return code;
 */;
 
 fillRect_s
-    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour Newline
+    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '颜色' ColorString? Colour Newline
 
 /* fillRect_s
 tooltip : fillRect：绘制矩形
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2
 colour : this.subColor
-default : ["0","0","flag:x","300","",null]
+default : ["0","0","flag:x","300","","",null]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
-var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+'},\n';
+PosString_4 = PosString_4 ? (', "radius": '+PosString_4) : '';
+var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+PosString_4+ColorString_0+'},\n';
 return code;
 */;
 
 strokeRect_s
-    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2%e8%be%b9%e6%a1%86
 colour : this.subColor
-default : ["0","0","flag:x","300","",null,""]
+default : ["0","0","flag:x","300","","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
-var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+IntString_0+'},\n';
+PosString_4 = PosString_4 ? (', "radius": '+PosString_4) : '';
+var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+PosString_4+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
@@ -2337,32 +2347,63 @@ var code = '{"type": "strokePolygon", "nodes": ['+EvalString_0+']'+ColorString_0
 return code;
 */;
 
-fillCircle_s
-    :   '绘制圆' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour Newline
+fillEllipse_s
+    :   '绘制椭圆' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '顺时针旋转度数' PosString? '颜色' ColorString? Colour Newline
 
-/* fillCircle_s
-tooltip : fillCircle：绘制圆
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+/* fillEllipse_s
+tooltip : fillEllipse：绘制椭圆
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
 colour : this.subColor
-default : ["0","0","100","",null]
+default : ["0","0","100","100","0","",null]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
-var code = '{"type": "fillCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+'},\n';
+PosString_4 = PosString_4 ? (', "angle": ' + PosString_4) : '';
+var code = '{"type": "fillEllipse", "x": '+PosString_0+', "y": '+PosString_1+', "a": '+PosString_2+', "b": '+PosString_3+PosString_4+ColorString_0+'},\n';
 return code;
 */;
 
-strokeCircle_s
-    :   '绘制圆边框' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+strokeEllipse_s
+    :   '绘制椭圆边框' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '顺时针旋转度数' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
-/* strokeCircle_s
-tooltip : strokeCircle：绘制圆边框
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
+/* strokeEllipse_s
+tooltip : strokeEllipse：绘制椭圆边框
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
 colour : this.subColor
-default : ["0","0","100","",null,""]
+default : ["0","0","100","100","0","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
-var code = '{"type": "strokeCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+IntString_0+'},\n';
+PosString_4 = PosString_4 ? (', "angle": ' + PosString_4) : '';
+var code = '{"type": "strokeEllipse", "x": '+PosString_0+', "y": '+PosString_1+', "a": '+PosString_2+', "b": '+PosString_3+PosString_4+ColorString_0+IntString_0+'},\n';
 return code;
 */;
+
+fillArc_s
+    :   '绘制扇形' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour Newline
+
+/* fillArc_s
+tooltip : fillArc：绘制扇形
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+colour : this.subColor
+default : ["0","0","100","0","90","",null,""]
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+var code = '{"type": "fillArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+'},\n';
+return code;
+*/;
+
+
+strokeArc_s
+    :   '绘制弧' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+
+/* strokeArc_s
+tooltip : strokeArc：绘制弧
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+colour : this.subColor
+default : ["0","0","100","0","90","",null,""]
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "strokeArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+IntString_0+'},\n';
+return code;
+*/;
+
 
 
 drawImage_s
@@ -2507,9 +2548,15 @@ expression
     :   expression Arithmetic_List expression
     |   negate_e
     |   bool_e
+    |   idFixedList_e
+    |   idFlag_e
+    |   idTemp_e
+    |   idIdList_e
     |   idString_e
-    |   evFlag_e
-    |   evTemp_e
+    |   enemyattr_e
+    |   blockId_e
+    |   blockCls_e
+    |   equip_e
     |   evalString_e
     
 
@@ -2571,90 +2618,77 @@ var code = IdString_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_1_e
+idIdList_e
     :   Id_List ':' IdText
     
 
-/* idString_1_e
+/* idIdList_e
 colour : this.idstring_eColor
 default : [null,"自定义flag"]
-//todo 将其output改成'idString_e'
 var code = MotaActionFunctions.replaceFromName(MotaActionFunctions.replaceToName(Id_List_0+':'+IdText_0));
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_2_e
+idFixedList_e
     :   FixedId_List
     
 
-/* idString_2_e
+/* idFixedList_e
 colour : this.idstring_eColor
-//todo 将其output改成'idString_e'
 var code = FixedId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_3_e
+enemyattr_e
     :   '怪物' IdString '的' EnemyId_List
 
 
-/* idString_3_e
-colour : this.idstring_eColor
+/* enemyattr_e
 default : ['greenSlime',"攻击"]
-//todo 将其output改成'idString_e'
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_4_e
+blockId_e
     :   '图块ID:' Int ',' Int
 
 
-/* idString_4_e
-colour : this.idstring_eColor
+/* blockId_e
 default : [0,0]
 var code = 'blockId:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_5_e
+blockCls_e
     :   '图块类别:' Int ',' Int
 
 
-/* idString_5_e
-colour : this.idstring_eColor
+/* blockCls_e
 default : [0,0]
 var code = 'blockCls:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_6_e
+equip_e
     :   '装备孔:' Int
 
 
-/* idString_6_e
-colour : this.idstring_eColor
+/* equip_e
 default : [0]
 var code = 'equip:'+Int_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evFlag_e
+idFlag_e
     :   '独立开关' Letter_List
 
 
-/* evFlag_e
+/* idFlag_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "switch:"+Letter_List_0;
@@ -2662,11 +2696,11 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evTemp_e
+idTemp_e
     :   '临时变量' Letter_List
 
 
-/* evTemp_e
+/* idTemp_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "temp:"+Letter_List_0;
@@ -2899,14 +2933,10 @@ this.evisitor.mapColor=175;
 
 /* Function_1
 delete(this.block('negate_e').inputsInline);
-this.block('idString_1_e').output='idString_e';
-this.block('idString_2_e').output='idString_e';
-this.block('idString_3_e').output='idString_e';
-this.block('idString_4_e').output='idString_e';
-this.block('idString_5_e').output='idString_e';
-this.block('idString_6_e').output='idString_e';
-this.block('evFlag_e').output='idString_e';
-this.block('evTemp_e').output='idString_e';
+this.block('idIdList_e').output='idString_e';
+this.block('idFixedList_e').output='idString_e';
+this.block('idFlag_e').output='idString_e';
+this.block('idTemp_e').output='idString_e';
 */
 
 /* Functions
@@ -2932,9 +2962,9 @@ ActionParser.prototype.parse = function (obj,type) {
     
     case 'changeFloor':
       if(!obj)obj={};
-      if(!this.isset(obj.loc)) {
-        obj.loc=[0,0];
-        if (!this.isset(obj.stair)) obj.stair=':now';
+      if (!obj.loc) {
+        obj.loc = obj.loc || ['',''];
+        obj.stair = obj.stair || ':now';
       }
       if (obj.floorId==':before'||obj.floorId==':next'||obj.floorId==':now') {
         obj.floorType=obj.floorId;
@@ -2957,7 +2987,7 @@ ActionParser.prototype.parse = function (obj,type) {
       var text_choices = null;
       for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
         text_choices=MotaActionBlocks['levelCase'].xmlText([
-          MotaActionBlocks['evalString_e'].xmlText([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
+          this.expandEvalBlock([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
       }
       return MotaActionBlocks['level_m'].xmlText([text_choices]);
 
@@ -3235,8 +3265,8 @@ ActionParser.prototype.parseAction = function() {
         data.floorType=data.floorId;
         delete data.floorId;
       }
-      return MotaActionBlocks['changeFloor_s'].xmlText([
-        data.floorType||'floorId',data.floorId,data.stair||'loc',data.loc[0],data.loc[1],obj.direction,
+      this.next = MotaActionBlocks['changeFloor_s'].xmlText([
+        data.floorType||'floorId',data.floorId,data.stair||'loc',data.loc[0],data.loc[1],data.direction,
         data.time, this.next]);
       break;
     case "changePos": // 直接更换勇士位置, 不切换楼层
@@ -3414,14 +3444,14 @@ ActionParser.prototype.parseAction = function() {
       break
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
-        this.tryToUseEvFlag_e('idString_e', [data.name]), data["operator"]||'=',
-        MotaActionBlocks['evalString_e'].xmlText([data.value]),
+        this.expandIdBlock([data.name]), data["operator"]||'=',
+        this.expandEvalBlock([data.value]),
         data.norefresh || false,
         this.next]);
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        data.id, data.name, MotaActionBlocks['evalString_e'].xmlText([data.value]), this.next]);
+        data.id, data.name, this.expandEvalBlock([data.value]), this.next]);
       break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
@@ -3450,14 +3480,14 @@ ActionParser.prototype.parseAction = function() {
     case "if": // 条件判断
       if (data["false"]) {
         this.next = MotaActionBlocks['if_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.insertActionList(data["false"]),
           this.next]);
       }
       else {
         this.next = MotaActionBlocks['if_1_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+          this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.next]);
       }
@@ -3473,11 +3503,10 @@ ActionParser.prototype.parseAction = function() {
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionBlocks['switchCase'].xmlText([
-          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
+          this.isset(caseNow.case)?this.expandEvalBlock([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
       }
       this.next = MotaActionBlocks['switch_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         case_caseList,this.next]);
       break;
     case "choices": // 提供选项
@@ -3494,30 +3523,28 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "for": // 循环遍历
       this.next = MotaActionBlocks['for_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        this.expandEvalBlock([data.name]),
         data.from || 0, data.to || 0, data.step || 0,
         this.insertActionList(data.data),
         this.next]);
       break;
     case "forEach": // 循环遍历列表
       this.next = MotaActionBlocks['forEach_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
+        this.expandEvalBlock([data.name]),
         JSON.stringify(data.list),
         this.insertActionList(data.data),
         this.next]);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionBlocks['while_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         this.insertActionList(data.data),
         this.next]);
       break;
     case "dowhile": // 后置条件循环处理
       this.next = MotaActionBlocks['dowhile_s'].xmlText([
         this.insertActionList(data.data),
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
+        this.expandEvalBlock([data.condition]),
         this.next]);
       break;
     case "break": // 跳出循环
@@ -3657,13 +3684,13 @@ ActionParser.prototype.parseAction = function() {
     case "fillRect": // 绘制矩形
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['fillRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', this.next
+        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', this.next
       ]);
       break;
     case "strokeRect": // 绘制矩形边框
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['strokeRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawLine": // 绘制线段
@@ -3700,16 +3727,28 @@ ActionParser.prototype.parseAction = function() {
         x_str.join(','), y_str.join(','), data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
-    case "fillCircle": // 绘制圆
+    case "fillEllipse": // 绘制椭圆
       data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['fillCircle_s'].xmlText([
-        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', this.next
+      this.next = MotaActionBlocks['fillEllipse_s'].xmlText([
+        data.x, data.y, data.a, data.b, data.angle, data.style, 'rgba('+data.style+')', this.next
       ]);
       break;
-    case "strokeCircle": // 绘制圆边框
+    case "strokeEllipse": // 绘制椭圆边框
       data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['strokeCircle_s'].xmlText([
-        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      this.next = MotaActionBlocks['strokeEllipse_s'].xmlText([
+        data.x, data.y, data.a, data.b, data.angle, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+      ]);
+      break;
+    case "fillArc": // 绘制弧
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['fillArc_s'].xmlText([
+        data.x, data.y, data.r, data.start, data.end, data.style, 'rgba('+data.style+')', this.next
+      ]);
+      break;
+    case "strokeArc": // 绘制弧
+      data.style = this.Colour(data.style);
+      this.next = MotaActionBlocks['strokeArc_s'].xmlText([
+        data.x, data.y, data.r, data.start, data.end, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawImage": // 绘制图片
@@ -3826,18 +3865,53 @@ ActionParser.prototype.Colour = function(color) {
   return color?JSON.stringify(color).slice(1,-1):null;
 }
 
-ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
-  var match=/^switch:([A-Z])$/.exec(args[0])
+ActionParser.prototype.matchId = function(args, isShadow, comment) {
+  var rt=function(xml){
+    return {xml:xml,ret:true}
+  }
+  var match = /nothing/.exec('nothing')
+  // 固定列表
+  var FixedId_List=MotaActionBlocks.idFixedList_e.json.args0[0].options; // [["生命", "status:hp"], ...]
+  match=new RegExp('^('+FixedId_List.map(function(v){return v[1]}).join('|')+')$').exec(args[0])
+  if(match){
+    return rt(MotaActionBlocks['idFixedList_e'].xmlText(args, isShadow, comment));
+  }
+  // 独立开关
+  match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
+    return rt(MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment));
   }
+  // 临时变量
   match=/^temp:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return MotaActionBlocks['evTemp_e'].xmlText(args, isShadow, comment);
+    return rt(MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment));
   }
-  return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
+  // id列表
+  var Id_List = MotaActionBlocks.idIdList_e.json.args0[0].options; // [["变量", "flag"], ...]
+  match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
+  if(match){
+    args=[match[1],match[2]].concat(args.slice(1))
+    return rt(MotaActionBlocks['idIdList_e'].xmlText(args, isShadow, comment));
+  }
+  return {xml:'',ret:false}
+}
+
+ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
+  var ret=this.matchId(args, isShadow, comment)
+  if (ret.ret) return ret.xml;
+  return MotaActionBlocks['idString_e'].xmlText(args, isShadow, comment);
+}
+
+ActionParser.prototype.expandEvalBlock = function(args, isShadow, comment) {
+  var ret=this.matchId(args, isShadow, comment)
+  if (ret.ret) return ret.xml;
+  // todo 
+  // 1. 将「数值设置」的名称尽可能替换掉；如果是 FixedId_List 那就用它；否则如果是 独立开关/临时变量 那就用对应的；否则用 A:B 的那个框
+  // 2. 将「值块」尽可能替换掉，主要是「独立开关」，「临时变量」，「非 - 独立开关」，「非-临时变量」；以及true/false替换成勾选框；对于其他变量/属性等之类也尽可能进行替换
+
+  return MotaActionBlocks['evalString_e'].xmlText(args, isShadow, comment);
 }
 
 MotaActionFunctions.actionParser = new ActionParser();

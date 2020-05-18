@@ -134,7 +134,65 @@ ui.prototype.fillRect = function (name, x, y, width, height, style) {
 
 ui.prototype._uievent_fillRect = function (data) {
     this._createUIEvent();
-    this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style);
+    if (data.radius) {
+        this.fillRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), core.calValue(data.radius), data.style);
+    } else {
+        this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style);
+    }
+}
+
+////// 在某个canvas上绘制一个矩形的边框 //////
+ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth) core.setLineWidth(name, lineWidth);
+    var ctx = this.getContextByName(name);
+    if (ctx) ctx.strokeRect(x, y, width, height);
+}
+
+ui.prototype._uievent_strokeRect = function (data) {
+    this._createUIEvent();
+    if (data.radius) {
+        this.strokeRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+            core.calValue(data.radius), data.style, data.lineWidth);
+    } else {
+        this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style, data.lineWidth);
+    }
+}
+
+////// 在某个canvas上绘制一个圆角矩形 //////
+ui.prototype.fillRoundRect = function (name, x, y, width, height, radius, style) {
+    if (style) core.setFillStyle(name, style);
+    var ctx = this.getContextByName(name);
+    if (ctx) {
+        this._roundRect_buildPath(ctx, x, y, width, height, radius);
+        ctx.fill();
+    }
+}
+
+////// 在某个canvas上绘制一个圆角矩形的边框 //////
+ui.prototype.strokeRoundRect = function (name, x, y, width, height, radius, style, lineWidth) {
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth) core.setLineWidth(name, lineWidth);
+    var ctx = this.getContextByName(name);
+    if (ctx) {
+        this._roundRect_buildPath(ctx, x, y, width, height, radius);
+        ctx.stroke();
+    }
+}
+
+
+ui.prototype._roundRect_buildPath = function (ctx, x, y, width, height, radius) {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
 }
 
 ////// 在某个canvas上绘制一个多边形 //////
@@ -156,19 +214,6 @@ ui.prototype.fillPolygon = function (name, nodes, style) {
 ui.prototype._uievent_fillPolygon = function (data) {
     this._createUIEvent();
     this.fillPolygon('uievent', data.nodes, data.style);
-}
-
-////// 在某个canvas上绘制一个矩形的边框 //////
-ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
-    if (style) core.setStrokeStyle(name, style);
-    if (lineWidth) core.setLineWidth(name, lineWidth);
-    var ctx = this.getContextByName(name);
-    if (ctx) ctx.strokeRect(x, y, width, height);
-}
-
-ui.prototype._uievent_strokeRect = function (data) {
-    this._createUIEvent();
-    this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style, data.lineWidth);
 }
 
 ////// 在某个canvas上绘制一个多边形的边框 //////
@@ -193,35 +238,78 @@ ui.prototype._uievent_strokePolygon = function (data) {
     this.strokePolygon('uievent', data.nodes, data.style, data.lineWidth);
 }
 
-////// 在某个canvas上绘制一个圆 //////
-ui.prototype.fillCircle = function (name, x, y, r, style) {
+////// 在某个canvas上绘制一个椭圆 //////
+ui.prototype.fillEllipse = function (name, x, y, a, b, angle, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.ellipse(x, y, a, b, angle, 0, 2*Math.PI);
     ctx.fill();
 }
 
-ui.prototype._uievent_fillCircle = function (data) {
+ui.prototype.fillCircle = function (name, x, y, r, style) {
+    return this.fillEllipse(name, x, y, r, r, 0, style);
+}
+
+ui.prototype._uievent_fillEllipse = function (data) {
     this._createUIEvent();
-    this.fillCircle('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r), data.style);
+    this.fillEllipse('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.a),
+        core.calValue(data.b), (core.calValue(data.angle) || 0) * Math.PI / 180, data.style);
 }
 
 ////// 在某个canvas上绘制一个圆的边框 //////
-ui.prototype.strokeCircle = function (name, x, y, r, style, lineWidth) {
+ui.prototype.strokeEllipse = function (name, x, y, a, b, angle, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     ctx.beginPath();
-    ctx.arc(x, y, r, 0, 2*Math.PI);
+    ctx.ellipse(x, y, a, b, angle, 0, 2*Math.PI);
     ctx.stroke();
 }
 
-ui.prototype._uievent_strokeCircle = function (data) {
+ui.prototype.strokeCircle = function (name, x, y, r, style, lineWidth) {
+    return this.strokeEllipse(name, x, y, r, r, 0, style, lineWidth);
+}
+
+ui.prototype._uievent_strokeEllipse = function (data) {
     this._createUIEvent();
-    this.strokeCircle('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r), data.style, data.lineWidth);
+    this.strokeEllipse('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.a),
+        core.calValue(data.b), (core.calValue(data.angle) || 0) * Math.PI / 180, data.style, data.lineWidth);
+}
+
+ui.prototype.fillArc = function (name, x, y, r, start, end, style) {
+    if (style) core.setFillStyle(name, style);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.arc(x, y, r, start, end);
+    ctx.closePath();
+    ctx.fill();
+}
+
+ui.prototype._uievent_fillArc = function (data) {
+    this._createUIEvent();
+    this.fillArc('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r),
+        (core.calValue(data.start) || 0) * Math.PI / 180, (core.calValue(data.end) || 0) * Math.PI / 180, data.style);
+}
+
+ui.prototype.strokeArc = function (name, x, y, r, start, end, style, lineWidth) {
+    if (style) core.setStrokeStyle(name, style);
+    if (lineWidth) core.setLineWidth(name, lineWidth);
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(x, y, r, start, end);
+    ctx.stroke();
+}
+
+ui.prototype._uievent_strokeArc = function (data) {
+    this._createUIEvent();
+    this.strokeArc('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.r),
+        (core.calValue(data.start) || 0) * Math.PI / 180, (core.calValue(data.end) || 0) * Math.PI / 180, data.style, data.lineWidth);
 }
 
 ////// 在某个canvas上绘制一条线 //////
@@ -1496,8 +1584,8 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
             this.drawWindowSelector(core.status.textAttribute.background,
                 this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
         else
-            core.strokeRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
-                len+10, 28, "#FFD700", 2);
+            core.strokeRoundRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
+                len+10, 28, 6, "#FFD700", 2);
     }
 }
 
@@ -1536,7 +1624,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         if (isWindowSkin)
             this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
         else
-            core.strokeRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, "#FFD700", 2);
+            core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, "#FFD700", 2);
     }
 }
 
@@ -1750,7 +1838,7 @@ ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, sele
     this._drawBook_drawName(index, enemy, top, left, name_width);
     this._drawBook_drawContent(index, enemy, top, left + name_width);
     if (selected)
-        core.strokeRect('ui', 10, top + 1, this.PIXEL - 10 * 2, pageinfo.per_height, '#FFD700');
+        core.strokeRoundRect('ui', 10, top + 1, this.PIXEL - 10 * 2, pageinfo.per_height, 10, '#FFD700');
 }
 
 ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
@@ -2273,7 +2361,7 @@ ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawC
         if (drawCount)
             core.fillText('ui', core.itemCount(item), 64 * (i % this.HSIZE) + 56, yoffset + 33, '#FFFFFF', this._buildFont(14, true));
         if (info.selectId == item)
-            core.strokeRect('ui', 64 * (i % this.HSIZE) + 17, yoffset - 4, 40, 40, '#FFD700');
+            core.strokeRoundRect('ui', 64 * (i % this.HSIZE) + 17, yoffset - 4, 40, 40, 6, '#FFD700');
     }
 }
 
@@ -2448,7 +2536,7 @@ ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
             core.drawImage('ui', core.material.images.items, 0, 32 * icon, 32, 32, offset_image, y, 32, 32);
         }
         core.fillText('ui', info.allEquips[i] || "未知", offset_text, y + 27, '#FFFFFF', this._buildFont(16, true))
-        core.strokeRect('ui', offset_image - 4, y - 4, 40, 40, info.index==i?'#FFD700':"#FFFFFF");
+        core.strokeRoundRect('ui', offset_image - 4, y - 4, 40, 40, 6, info.index==i?'#FFD700':"#FFFFFF");
     }
 }
 
@@ -2631,7 +2719,7 @@ ui.prototype.drawKeyBoard = function () {
     if (isWindowSkin)
         this.drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
     else
-        core.strokeRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, "#FFD700", 2);
+        core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, "#FFD700", 2);
 }
 
 ////// 绘制状态栏 /////

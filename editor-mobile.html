@@ -219,7 +219,7 @@
                     <option value="item">item</option>
                 </select>
                 <button onclick="editor_blockly.confirm()">确认</button>
-                <button onclick="editor_blockly.parse()">解析</button>
+                <button id='blocklyParse' onclick="editor_blockly.parse()">解析</button>
                 <button onclick="editor_blockly.cancel()">取消</button>
                 <!-- 手机端放不下，因此不显示搜索框 -->
                 <div style="display: none">
@@ -320,7 +320,7 @@
         
     </div>
     <div id="mid2" style="display: none">
-        <p style="margin: 10px">最近使用的图块列表： <button id='clearLastUsedBtn'>清除</button></p>
+        <p style="margin: 10px"><span id='lastUsedTitle'></span> <button id='clearLastUsedBtn'>清除</button></p>
         <div class="map" style="height: 160px; margin-top: 25px" id="lastUsedDiv">
             <canvas class='gameCanvas' id='lastUsed' width='416' height='160'></canvas>
         </div>

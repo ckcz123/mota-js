@@ -55,6 +55,7 @@ function editor() {
         editModeSelect :document.getElementById('editModeSelect'),
         mid2 : document.getElementById('mid2'),
         clearLastUsedBtn: document.getElementById('clearLastUsedBtn'),
+        lastUsedTitle: document.getElementById('lastUsedTitle'),
         lastUsedDiv: document.getElementById('lastUsedDiv'),
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
@@ -105,6 +106,7 @@ function editor() {
         lockMode: false,
 
         // 最近使用的图块
+        lastUsedType: null,
         lastUsed: [],
     };
 
@@ -406,16 +408,35 @@ editor.prototype.updateMap = function () {
     this.updateLastUsedMap();
 }
 
+editor.prototype.setLastUsedType = function (type) {
+    if (type == editor.uivalues.lastUsedType) return;
+    editor.uivalues.lastUsedType = type;
+    var _buildHtml = function (type, text) {
+        if (type == null) return "<b>" + text + "</b>";
+        else return `<a href="javascript:editor.setLastUsedType('${type}')">${text}</a>`;
+    }
+    editor.dom.lastUsedTitle.innerHTML
+        = type == 'frequent' ? (_buildHtml('recent', '最近使用') + " | " + _buildHtml(null, '最常使用'))
+        : (_buildHtml(null, '最近使用') + " | " + _buildHtml('frequent', '最常使用'));
+    this.updateLastUsedMap();
+}
+
 editor.prototype.updateLastUsedMap = function () {
+    var lastUsed = editor.uivalues.lastUsed.sort(function (a, b) {
+        if ((a.istop || 0) != (b.istop || 0)) return (b.istop || 0) - (a.istop || 0);
+        return (b[editor.uivalues.lastUsedType] || 0) - (a[editor.uivalues.lastUsedType] || 0);
+    });
+
     // 绘制最近使用事件
     var ctx = editor.dom.lastUsedCtx;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.strokeStyle = 'rgba(255,128,0,0.85)';
+    ctx.fillStyle = 'rgba(255,0,0,0.85)';
     ctx.lineWidth = 4;
-    for (var i = 0; i < editor.uivalues.lastUsed.length; ++i) {
+    for (var i = 0; i < lastUsed.length; ++i) {
         try {
             var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
-            var info = editor.uivalues.lastUsed[i];
+            var info = lastUsed[i];
             if (!info || !info.images) continue;
             if (info.isTile && core.material.images.tilesets[info.images]) {
                 ctx.drawImage(core.material.images.tilesets[info.images], 32 * info.x, 32 * info.y, 32, 32, x*32, y*32, 32, 32);
@@ -424,6 +445,9 @@ editor.prototype.updateLastUsedMap = function () {
             } else {
                 var per_height = info.images.endsWith('48') ? 48 : 32;
                 ctx.drawImage(core.material.images[info.images], 0, info.y * per_height, 32, per_height, x * 32, y * 32, 32, 32);
+            }
+            if (info.istop) {
+                ctx.fillRect(32 * x, 32 * y + 24, 8, 8);
             }
             if (selectBox.isSelected() && editor.info.id == info.id) {
                 ctx.strokeRect(32 * x + 2, 32 * y + 2, 28, 28);
@@ -458,6 +482,7 @@ editor.prototype.drawInitData = function (icons) {
     // editor.uivalues.folded = true;
     editor.uivalues.foldPerCol = editor.config.get('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
+    editor.setLastUsedType(editor.config.get('lastUsedType', 'recent'));
     editor.uivalues.lastUsed = editor.config.get("lastUsed", []);
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 

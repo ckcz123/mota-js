@@ -97,7 +97,7 @@ editor_blockly = function () {
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
+        MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
@@ -202,8 +202,10 @@ editor_blockly = function () {
       MotaActionBlocks['drawArrow_s'].xmlText(),
       MotaActionBlocks['fillPolygon_s'].xmlText(),
       MotaActionBlocks['strokePolygon_s'].xmlText(),
-      MotaActionBlocks['fillCircle_s'].xmlText(),
-      MotaActionBlocks['strokeCircle_s'].xmlText(),
+      MotaActionBlocks['fillEllipse_s'].xmlText(),
+      MotaActionBlocks['strokeEllipse_s'].xmlText(),
+      MotaActionBlocks['fillArc_s'].xmlText(),
+      MotaActionBlocks['strokeArc_s'].xmlText(),
       MotaActionBlocks['drawImage_s'].xmlText(),
       MotaActionBlocks['drawImage_1_s'].xmlText(),
       MotaActionBlocks['drawIcon_s'].xmlText(),
@@ -217,20 +219,20 @@ editor_blockly = function () {
     ],
     '值块':[
       MotaActionBlocks['setValue_s'].xmlText([
-        MotaActionBlocks['idString_1_e'].xmlText(['status','生命']), '=', '', false
+        MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['expression_arithmetic_0'].xmlText(),
-      MotaActionBlocks['evFlag_e'].xmlText(),
-      MotaActionBlocks['evTemp_e'].xmlText(),
+      MotaActionBlocks['idFlag_e'].xmlText(),
+      MotaActionBlocks['idTemp_e'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
       MotaActionBlocks['bool_e'].xmlText(),
       MotaActionBlocks['idString_e'].xmlText(),
-      MotaActionBlocks['idString_1_e'].xmlText(),
-      MotaActionBlocks['idString_2_e'].xmlText(),
-      MotaActionBlocks['idString_3_e'].xmlText(),
-      MotaActionBlocks['idString_4_e'].xmlText(),
-      MotaActionBlocks['idString_5_e'].xmlText(),
-      MotaActionBlocks['idString_6_e'].xmlText(),
+      MotaActionBlocks['idIdList_e'].xmlText(),
+      MotaActionBlocks['idFixedList_e'].xmlText(),
+      MotaActionBlocks['enemyattr_e'].xmlText(),
+      MotaActionBlocks['blockId_e'].xmlText(),
+      MotaActionBlocks['blockCls_e'].xmlText(),
+      MotaActionBlocks['equip_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
@@ -398,22 +400,22 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   if(editor_blockly.workspace.topBlocks_.length>=2){
-    codeAreaHL.setValue('入口方块只能有一个');
+    editor_blockly.setValue('入口方块只能有一个');
     return;
   }
   var eventType = document.getElementById('entryType').value;
   if(editor_blockly.workspace.topBlocks_.length==1){
     var blockType = editor_blockly.workspace.topBlocks_[0].type;
     if(blockType!==eventType+'_m'){
-      codeAreaHL.setValue('入口方块类型错误');
+      editor_blockly.setValue('入口方块类型错误');
       return;
     }
   }
   try {
     var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\\\(i|c|d|e|z)/g, '\\\\\\\\$1');
-    codeAreaHL.setValue(code);
+    editor_blockly.setValue(code);
   } catch (error) {
-    codeAreaHL.setValue(String(error));
+    editor_blockly.setValue(String(error));
     if (error instanceof OmitedError){
     var blockName = error.blockName;
     var varName = error.varName;
@@ -529,13 +531,19 @@ function omitedcheckUpdateFunction(event) {
     xhr.open('GET', '_server/MotaAction.g4', true);
     xhr.send(null);
 
-    codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
+    var codeAreaHL = CodeMirror.fromTextArea(document.getElementById("codeArea"), {
         lineNumbers: true,
         matchBrackets: true,
         lineWrapping: true,
         continueComments: "Enter",
-        extraKeys: {"Ctrl-Q": "toggleComment"}
+        extraKeys: {"Ctrl-Q": "toggleComment"},
     });
+    codeAreaHL.on('changes', function () {
+        editor_blockly.highlightParse(!changeFromBlockly);
+        changeFromBlockly = false;
+    });
+    var changeFromBlockly = false;
+    var shouldNotifyParse = false;
 
     editor_blockly.showXML = function () {
         var xml = Blockly.Xml.workspaceToDom(editor_blockly.workspace);
@@ -561,6 +569,11 @@ function omitedcheckUpdateFunction(event) {
         }
     }
 
+    editor_blockly.setValue = function (value) {
+      changeFromBlockly = true;
+      codeAreaHL.setValue(value);
+    }
+
     editor_blockly.parse = function () {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
@@ -580,7 +593,7 @@ function omitedcheckUpdateFunction(event) {
         var type = args.type;
         if (!type) return false;
         editor_blockly.id = id_;
-        codeAreaHL.setValue(input.value);
+        editor_blockly.setValue(input.value);
         document.getElementById('entryType').value = type;
         editor_blockly.parse();
         editor_blockly.show();
@@ -604,6 +617,13 @@ function omitedcheckUpdateFunction(event) {
         }
     }
 
+    var blocklyParseBtn = document.getElementById('blocklyParse');
+    editor_blockly.highlightParse = function (shouldHighLight) {
+      if (shouldNotifyParse == shouldHighLight) return;
+      shouldNotifyParse = shouldHighLight;
+      blocklyParseBtn.style.background = shouldNotifyParse ? '#FFCCAA' : 'unset';
+    }
+
     editor_blockly.cancel = function () {
         editor_blockly.id = '';
         editor_blockly.hide();
@@ -614,15 +634,19 @@ function omitedcheckUpdateFunction(event) {
             editor_blockly.id = '';
             return;
         }
+        if (shouldNotifyParse) {
+          alert('你尚未解析修改后的内容，请进行解析或放弃操作');
+          return;
+        }
         if(editor_blockly.workspace.topBlocks_.length>=2){
-          codeAreaHL.setValue('入口方块只能有一个');
+          editor_blockly.setValue('入口方块只能有一个');
           return;
         }
         var eventType = document.getElementById('entryType').value;
         if(editor_blockly.workspace.topBlocks_.length==1){
           var blockType = editor_blockly.workspace.topBlocks_[0].type;
           if(blockType!==eventType+'_m'){
-            codeAreaHL.setValue('入口方块类型错误');
+            editor_blockly.setValue('入口方块类型错误');
             return;
           }
         }
@@ -684,7 +708,7 @@ function omitedcheckUpdateFunction(event) {
         var types = [
             "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
             "fillBoldText_s", "fillRect_s", "strokeRect_s", "drawLine_s",
-            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillCircle_s", "strokeCircle_s",
+            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillEllipse_s", "strokeEllipse_s", "fillArc_s", "strokeArc_s",
             "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s",
             "waitContext_2"
         ];
@@ -826,9 +850,9 @@ function omitedcheckUpdateFunction(event) {
 
     // id: [x, y, floorId, forceFloor]
     var selectPointBlocks = {
-        "changeFloor_m": ["Number_0", "Number_1", "IdString_0", true],
+        "changeFloor_m": ["PosString_0", "PosString_1", "IdString_0", true],
         "jumpHero_s": ["PosString_0", "PosString_1"],
-        "changeFloor_s": ["Number_0", "Number_1", "IdString_0", true],
+        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
         "changePos_s": ["PosString_0", "PosString_1"],
         "battle_1_s": ["PosString_0", "PosString_1"],
         "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
@@ -1011,7 +1035,7 @@ function omitedcheckUpdateFunction(event) {
         }
 
         // 对怪物ID提供补全
-        if ((type == 'idString_3_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
+        if ((type == 'enemyattr_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
           return filter(allEnemys, content);
         }
 

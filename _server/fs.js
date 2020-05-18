@@ -142,4 +142,68 @@
         });
         return;
     }
+
+    /**
+     * @param {string} path 支持"/"做分隔符
+     * @param {() => {err: string, data}} callback
+     */
+    fs.mkdir = function (path, callback) {
+        //callback:function(err, data)
+        if (typeof(path) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'name=' + path;
+        postsomething(data, '/makeDir', function (err, data) {
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                err = "Invalid /makeDir";
+                data = null;
+            }
+            callback(err, data);
+        });
+        return;
+    }
+
+    /**
+     * @param {string} path 支持"/"做分隔符, 不以"/"结尾
+     * @param {() => {err: string, data}} callback
+     */
+    fs.moveFile = function (src, dest, callback) {
+        if (typeof(src) != typeof('') || typeof(dest) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'src=' + src + "&dest=" + dest;
+        postsomething(data, '/moveFile', function (err, data) {
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                err = "Invalid /moveFile";
+                data = null;
+            }
+            callback(err, data);
+        });
+        return;
+    }
+
+    /**
+     * @param {string} path 支持"/"做分隔符, 不以"/"结尾
+     * @param {() => {err: string, data}} callback
+     */
+    fs.deleteFile = function (path, callback) {
+        if (typeof(path) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'name=' + path;
+        postsomething(data, '/deleteFile', function (err, data) {
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                err = "Invalid /deleteFile";
+                data = null;
+            }
+            callback(err, data);
+        });
+        return;
+    }
 })();

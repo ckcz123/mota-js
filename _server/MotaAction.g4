@@ -2564,9 +2564,7 @@ expression
 //todo 修改recieveOrder,根据Arithmetic_List_0不同的值设定不同的recieveOrder
 var code = expression_0 + Arithmetic_List_0 + expression_1;
 var ops = {
-    '^': 'Math.pow('+expression_0+','+expression_1+')',
-    '和': expression_0+' && '+expression_1,
-    '或': expression_0+' || '+expression_1,
+    '^': 'Math.pow('+expression_0+','+expression_1+')'
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -2581,8 +2579,8 @@ var orders = {
     '<': Blockly.JavaScript.ORDER_RELATIONAL,
     '>=': Blockly.JavaScript.ORDER_RELATIONAL,
     '<=': Blockly.JavaScript.ORDER_RELATIONAL,
-    '和': Blockly.JavaScript.ORDER_LOGICAL_AND,
-    '或': Blockly.JavaScript.ORDER_LOGICAL_OR
+    '&&': Blockly.JavaScript.ORDER_LOGICAL_AND,
+    '||': Blockly.JavaScript.ORDER_LOGICAL_OR
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -2774,8 +2772,8 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'>'|'<'|'>='|'<='|'和'|'或'
-    ;
+    :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'>'|'<'|'>='|'<='|'且'|'或'
+    /*Arithmetic_List ['+','-','*','/','^','==','!=','>','<','>=','<=','&&','||']*/;
 
 AssignOperator_List
     :   '='|'+='|'-='|'*='|'/='|'**='|'//='|'%='

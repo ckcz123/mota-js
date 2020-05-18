@@ -497,6 +497,16 @@ function omitedcheckUpdateFunction(event) {
         alert("已" + (replaceCheckbox.checked ? "开启" : "关闭") + "中文变量名替换！\n关闭并重开事件编辑器以生效。");
     }
 
+    editor.uivalues.disableBlocklyExpandCompare = editor.config.get("disableBlocklyExpandCompare", false);
+    var expandCompareCheckbox = document.getElementById('blocklyExpandCompare');
+    expandCompareCheckbox.checked = !editor.uivalues.disableBlocklyExpandCompare;
+
+    editor_blockly.triggerExpandCompare = function () {
+        editor.uivalues.disableBlocklyExpandCompare = !expandCompareCheckbox.checked;
+        editor.config.set("disableBlocklyExpandCompare", !expandCompareCheckbox.checked);
+        if (MotaActionFunctions) MotaActionFunctions.disableExpandCompare = !expandCompareCheckbox.checked;
+    }
+
     var input_ = '';
     editor_blockly.runOne = function () {
         //var printf = console.log;
@@ -527,6 +537,7 @@ function omitedcheckUpdateFunction(event) {
         input_ = xhr.responseText;
         editor_blockly.runOne();
         MotaActionFunctions.disableReplace = editor.uivalues.disableBlocklyReplace;
+        MotaActionFunctions.disableExpandCompare = editor.uivalues.disableBlocklyExpandCompare;
     }
     xhr.open('GET', '_server/MotaAction.g4', true);
     xhr.send(null);

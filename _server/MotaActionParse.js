@@ -997,12 +997,13 @@ ActionParser.prototype.matchEvalAtom = function(args) {
 }
 
 ActionParser.prototype.matchEvalCompare=function(args, isShadow){
-  var raw=args[0].replace(/&gt;/g,'>').replace(/&lt;/g,'<')
+  if (MotaActionFunctions.disableExpandCompare) return {ret:false};
+  var raw=args[0].replace(/&gt;/g,'>').replace(/&lt;/g,'<').replace(/&quot;/g,'"').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&')
   if (raw[0]+raw.slice(-1)=='()') raw=raw.slice(1,-1);
   var str=raw
   var xml=MotaActionBlocks['expression_arithmetic_0'].xmlText
-  if (!/<=|<|>=|>|==|!=/.exec(str)) return {ret:false};
-  str=str.replace(/[^<>=!()]/g,' ')
+  if (!/<=|<|>=|>|==|!=|&&|\|\|/.exec(str)) return {ret:false};
+  str=str.replace(/[^<>=!()&|]/g,' ')
   // 处理括号匹配
   var old;
   do {
@@ -1010,11 +1011,11 @@ ActionParser.prototype.matchEvalCompare=function(args, isShadow){
     str=str.replace(/\([^()]*\)/g,function(v){return Array.from({length:v.length+1}).join(' ')})
   } while (old!=str);
   // 按优先级依次寻找以下符号
-  var oplist=['<','<=','>','>=','==','!=']
+  var oplist=['<','<=','>','>=','==','!=','&&','||'].reverse()
   for (var index = 0,op; op=oplist[index]; index++) {
-    var match=new RegExp('(?<= )'+op+'(?= )').exec(str)
+    var match=new RegExp('(?<= )'+(op=='||'?'\\|\\|':op)+'(?= )').exec(str)
     if (!match) continue;
-    args=[this.expandEvalBlock([raw.slice(0,match.index)],isShadow),op,this.expandEvalBlock([raw.slice(match.index+op.length)],isShadow)]
+    args=[this.expandEvalBlock([raw.slice(0,match.index)],isShadow),(op=='&&'?'&amp;&amp;':op),this.expandEvalBlock([raw.slice(match.index+op.length)],isShadow)]
     return {ret:true,xml:xml,args:args}
   }
   return {ret:false}
@@ -1248,6 +1249,7 @@ MotaActionFunctions.pattern.replaceEnemyList = [
 ];
 
 MotaActionFunctions.disableReplace = false;
+MotaActionFunctions.disableExpandCompare = false;
 
 MotaActionFunctions.replaceToName_token = function (str) {
   if (!str || MotaActionFunctions.disableReplace) return str;

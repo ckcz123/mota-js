@@ -1015,7 +1015,7 @@ ActionParser.prototype.matchEvalCompare=function(args, isShadow){
   for (var index = 0,op; op=oplist[index]; index++) {
     var match=new RegExp('(?<= )'+(op=='||'?'\\|\\|':op)+'(?= )').exec(str)
     if (!match) continue;
-    args=[this.expandEvalBlock([raw.slice(0,match.index)],isShadow),(op=='&&'?'&amp;&amp;':op),this.expandEvalBlock([raw.slice(match.index+op.length)],isShadow)]
+    args=[this.expandEvalBlock([raw.slice(0,match.index)],isShadow),op.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),this.expandEvalBlock([raw.slice(match.index+op.length)],isShadow)]
     return {ret:true,xml:xml,args:args}
   }
   return {ret:false}

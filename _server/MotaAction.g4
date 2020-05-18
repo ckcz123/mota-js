@@ -2598,10 +2598,11 @@ return [code, Blockly.JavaScript.ORDER_LOGICAL_NOT];
 */;
 
 bool_e
-    :   Bool
+    :   ':' Bool
     
 
 /* bool_e
+tooltip : 逻辑是否
 var code = Bool_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
@@ -3865,53 +3866,143 @@ ActionParser.prototype.Colour = function(color) {
   return color?JSON.stringify(color).slice(1,-1):null;
 }
 
-ActionParser.prototype.matchId = function(args, isShadow, comment) {
-  var rt=function(xml){
-    return {xml:xml,ret:true}
+ActionParser.prototype.matchId = function(args) {
+  var rt=function(xml,args){
+    // 此处刻意不写成 xml:MotaActionBlocks[str].xmlText 来方便搜索
+    return {ret:true,xml:xml,args:args}
   }
   var match = /nothing/.exec('nothing')
   // 固定列表
   var FixedId_List=MotaActionBlocks.idFixedList_e.json.args0[0].options; // [["生命", "status:hp"], ...]
   match=new RegExp('^('+FixedId_List.map(function(v){return v[1]}).join('|')+')$').exec(args[0])
   if(match){
-    return rt(MotaActionBlocks['idFixedList_e'].xmlText(args, isShadow, comment));
+    return rt(MotaActionBlocks['idFixedList_e'].xmlText, args);
   }
   // 独立开关
   match=/^switch:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return rt(MotaActionBlocks['idFlag_e'].xmlText(args, isShadow, comment));
+    return rt(MotaActionBlocks['idFlag_e'].xmlText, args);
   }
   // 临时变量
   match=/^temp:([A-Z])$/.exec(args[0])
   if(match){
     args[0]=match[1]
-    return rt(MotaActionBlocks['idTemp_e'].xmlText(args, isShadow, comment));
+    return rt(MotaActionBlocks['idTemp_e'].xmlText, args);
   }
   // id列表
   var Id_List = MotaActionBlocks.idIdList_e.json.args0[0].options; // [["变量", "flag"], ...]
   match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
   if(match){
-    args=[match[1],match[2]].concat(args.slice(1))
-    return rt(MotaActionBlocks['idIdList_e'].xmlText(args, isShadow, comment));
+    args=[match[1],MotaActionFunctions.replaceToName_token(match[2])]
+    return rt(MotaActionBlocks['idIdList_e'].xmlText, args);
   }
-  return {xml:'',ret:false}
+  return {ret:false}
+}
+
+ActionParser.prototype.matchEvalAtom = function(args) {
+  var rt=function(xml,args){
+    // 此处刻意不写成 xml:MotaActionBlocks[str].xmlText 来方便搜索
+    return {ret:true,xml:xml,args:args}
+  }
+  var match = /nothing/.exec('nothing')
+  // 勾选框
+  match = /^(true|false)$/.exec(args[0])
+  if(match){
+    return rt(MotaActionBlocks['bool_e'].xmlText, args);
+  }
+  // 怪物属性
+  var EnemyId_List=MotaActionBlocks.enemyattr_e.json.args0[1].options; // [["生命", "hp"], ...]
+  match=new RegExp("^enemy:([a-zA-Z0-9_]+):(" + EnemyId_List.map(function(v){return v[1]}).join('|') + ")$").exec(args[0])
+  if(match){
+    args=[MotaActionFunctions.replaceToName_token(match[1]),MotaActionFunctions.replaceToName_token(match[2])]
+    return rt(MotaActionBlocks['enemyattr_e'].xmlText, args);
+  }
+  // 图块ID
+  match=/^blockId:(-?\d+),(-?\d+)$/.exec(args[0])
+  if(match){
+    args=[match[1],match[2]]
+    return rt(MotaActionBlocks['blockId_e'].xmlText, args);
+  }
+  // 图块类别
+  match=/^blockCls:(-?\d+),(-?\d+)$/.exec(args[0])
+  if(match){
+    args=[match[1],match[2]]
+    return rt(MotaActionBlocks['blockCls_e'].xmlText, args);
+  }
+  // 装备孔
+  match=/^equip:(-?\d+)$/.exec(args[0])
+  if(match){
+    args[0]=match[1]
+    return rt(MotaActionBlocks['equip_e'].xmlText, args);
+  }
+  return {ret:false}
+}
+
+ActionParser.prototype.matchEvalCompare=function(args, isShadow){
+  var raw=args[0].replace(/&gt;/g,'>').replace(/&lt;/g,'<')
+  if (raw[0]+raw.slice(-1)=='()') raw=raw.slice(1,-1);
+  var str=raw
+  var xml=MotaActionBlocks['expression_arithmetic_0'].xmlText
+  if (!/<=|<|>=|>|==|!=/.exec(str)) return {ret:false};
+  str=str.replace(/[^<>=!()]/g,' ')
+  // 处理括号匹配
+  var old;
+  do {
+    old=str;
+    str=str.replace(/\([^()]*\)/g,function(v){return Array.from({length:v.length+1}).join(' ')})
+  } while (old!=str);
+  // 按优先级依次寻找以下符号
+  var oplist=['<','<=','>','>=','==','!=']
+  for (var index = 0,op; op=oplist[index]; index++) {
+    var match=new RegExp('(?<= )'+op+'(?= )').exec(str)
+    if (!match) continue;
+    args=[this.expandEvalBlock([raw.slice(0,match.index)],isShadow),op,this.expandEvalBlock([raw.slice(match.index+op.length)],isShadow)]
+    return {ret:true,xml:xml,args:args}
+  }
+  return {ret:false}
 }
 
 ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
-  var ret=this.matchId(args, isShadow, comment)
-  if (ret.ret) return ret.xml;
-  return MotaActionBlocks['idString_e'].xmlText(args, isShadow, comment);
+  args[0]=MotaActionFunctions.replaceFromName(args[0])
+  var xml=MotaActionBlocks['idString_e'].xmlText
+  var ret=this.matchId(args)
+  if (ret.ret){
+    xml=ret.xml;
+    args=ret.args;
+  } else {
+    for (var index = 0; index < args.length; index++) {
+      args[index]=MotaActionFunctions.replaceToName(args[index])
+    }
+  }
+  return xml(args, isShadow, comment);
 }
 
 ActionParser.prototype.expandEvalBlock = function(args, isShadow, comment) {
-  var ret=this.matchId(args, isShadow, comment)
-  if (ret.ret) return ret.xml;
-  // todo 
-  // 1. 将「数值设置」的名称尽可能替换掉；如果是 FixedId_List 那就用它；否则如果是 独立开关/临时变量 那就用对应的；否则用 A:B 的那个框
-  // 2. 将「值块」尽可能替换掉，主要是「独立开关」，「临时变量」，「非 - 独立开关」，「非-临时变量」；以及true/false替换成勾选框；对于其他变量/属性等之类也尽可能进行替换
-
-  return MotaActionBlocks['evalString_e'].xmlText(args, isShadow, comment);
+  args[0]=MotaActionFunctions.replaceFromName(args[0])
+  var xml=MotaActionBlocks['evalString_e'].xmlText
+  var ret=this.matchId(args)
+  if (ret.ret){
+    xml=ret.xml;
+    args=ret.args;
+  } else if( (ret=this.matchEvalAtom(args)).ret ){
+    xml=ret.xml;
+    args=ret.args;
+  } else if(/^(!.*|\(!.*\))$/.exec(args[0])){
+    // 非
+    xml=MotaActionBlocks['negate_e'].xmlText
+    var content=args[0][0]=='!'?args[0].slice(1):args[0].slice(2,-1)
+    args[0]=this.expandEvalBlock([content],isShadow)
+  } else if( (ret=this.matchEvalCompare(args, isShadow)).ret ){
+    // 大小比较
+    xml=ret.xml;
+    args=ret.args;
+  } else {
+    for (var index = 0; index < args.length; index++) {
+      args[index]=MotaActionFunctions.replaceToName(args[index])
+    }
+  }
+  return xml(args, isShadow, comment);
 }
 
 MotaActionFunctions.actionParser = new ActionParser();
@@ -4100,6 +4191,20 @@ MotaActionFunctions.pattern.replaceEnemyList = [
 ];
 
 MotaActionFunctions.disableReplace = false;
+
+MotaActionFunctions.replaceToName_token = function (str) {
+  if (!str || MotaActionFunctions.disableReplace) return str;
+  var list = [];
+  list=list.concat(MotaActionFunctions.pattern.replaceStatusList)
+  list=list.concat(MotaActionFunctions.pattern.replaceItemList)
+  list=list.concat(MotaActionFunctions.pattern.replaceEnemyList)
+  for(var index=0,pair;pair=list[index];index++){
+    if (pair[0]==str) {
+      return pair[1]
+    }
+  }
+  return str;
+}
 
 MotaActionFunctions.replaceToName = function (str) {
   if (!str || MotaActionFunctions.disableReplace) return str;

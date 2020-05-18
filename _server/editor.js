@@ -87,6 +87,8 @@ function editor() {
         ratio : 1,
         // blockly转义
         disableBlocklyReplace: false,
+        // blockly展开比较
+        disableBlocklyExpandCompare: false,
 
         // 绑定机关门事件相关
         bindSpecialDoor: {

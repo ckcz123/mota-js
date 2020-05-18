@@ -2174,7 +2174,7 @@ if (core.flags.enableAddPoint && point > 0) {
 ``` json
 "shops": [{
     "id": "shop1",
-    "text": "\t[贪婪之神,blueShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
+    "text": "\t[贪婪之神,moneyShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
     "textInList": "1F金币商店",
     "mustEnable": false,
     "disablePreview": false,

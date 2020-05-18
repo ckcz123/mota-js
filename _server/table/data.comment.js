@@ -456,19 +456,19 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "衰弱效果",
 					"_data": "衰弱状态下攻防减少的数值\n如果此项不小于1，则作为实际下降的数值（比如10就是攻防各下降10）\n如果在0到1之间则为下降的比例（比如0.3就是下降30%的攻防）"
 				},
-				"redJewel": {
+				"redGem": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "红宝石效果",
 					"_data": "红宝石加攻击的数值"
 				},
-				"blueJewel": {
+				"blueGem": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "蓝宝石效果",
 					"_data": "蓝宝石加防御的数值"
 				},
-				"greenJewel": {
+				"greenGem": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "绿宝石效果",

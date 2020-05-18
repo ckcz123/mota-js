@@ -499,7 +499,7 @@ editor_file = function (editor, callback) {
         /*actionList:[
           ["change","['items']['name']","红宝石的新名字"],
           ["add","['items']['新的和name同级的属性']",123],
-          ["change","['itemEffectTip']","'，攻击力+'+editor.core.values.redJewel"],
+          ["change","['itemEffectTip']","'，攻击力+'+editor.core.values.redGem"],
         ]
         为[]时只查询不修改
         */
@@ -574,7 +574,7 @@ editor_file = function (editor, callback) {
 
     editor.file.editMapBlocksInfo = function (idnum, actionList, callback) {
         /*actionList:[
-          ["change","['events']",["\t[老人,magician]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
+          ["change","['events']",["\t[老人,wizard]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
           ["change","['afterBattle']",null],
         ]
         为[]时只查询不修改
@@ -618,7 +618,7 @@ editor_file = function (editor, callback) {
 
     editor.file.editLoc = function (x, y, actionList, callback) {
         /*actionList:[
-          ["change","['events']",["\t[老人,magician]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
+          ["change","['events']",["\t[老人,wizard]领域、夹击。\n请注意领域怪需要设置value为伤害数值，可参见样板中初级巫师的写法。"]],
           ["change","['afterBattle']",null],
         ]
         为[]时只查询不修改

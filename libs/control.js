@@ -984,7 +984,7 @@ control.prototype.checkBlock = function () {
             core.updateStatusBar();
         }
     }
-    this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
+    this._checkBlock_repluse(core.status.checkBlock.repluse[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
 }
 
@@ -998,10 +998,10 @@ control.prototype._checkBlock_disableQuickShop = function () {
 }
 
 ////// 阻击 //////
-control.prototype._checkBlock_snipe = function (snipe) {
-    if (!snipe || snipe.length == 0) return;
+control.prototype._checkBlock_repluse = function (repluse) {
+    if (!repluse || repluse.length == 0) return;
     var actions = [];
-    snipe.forEach(function (t) {
+    repluse.forEach(function (t) {
         actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": true, "async": true});
     });
     actions.push({"type": "waitAsync"});

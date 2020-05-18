@@ -871,7 +871,7 @@ main.floors.sample3=
                 "\t[hero]好温暖……",
                 {
                     "type": "setValue",
-                    "name": "item:yellowJewel",
+                    "name": "item:yellowGem",
                     "value": "1"
                 },
                 {

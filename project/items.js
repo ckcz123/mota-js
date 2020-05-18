@@ -19,22 +19,22 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "可以打开一扇红门",
 			"hideInToolbox": true
 		},
-		"redJewel": {
+		"redGem": {
 			"cls": "items",
 			"name": "红宝石",
-			"text": "'，攻击+${core.values.redJewel}'"
+			"text": "'，攻击+${core.values.redGem}'"
 		},
-		"blueJewel": {
+		"blueGem": {
 			"cls": "items",
 			"name": "蓝宝石",
-			"text": "'，防御+${core.values.blueJewel}'"
+			"text": "'，防御+${core.values.blueGem}'"
 		},
-		"greenJewel": {
+		"greenGem": {
 			"cls": "items",
 			"name": "绿宝石",
-			"text": "'，护盾+${core.values.greenJewel}'"
+			"text": "'，护盾+${core.values.greenGem}'"
 		},
-		"yellowJewel": {
+		"yellowGem": {
 			"cls": "items",
 			"name": "黄宝石",
 			"text": "可以进行加点"
@@ -178,9 +178,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"cls": "items",
 			"name": "圣水"
 		},
-		"moneyPocket": {
+		"silverCoin": {
 			"cls": "items",
-			"name": "金钱袋"
+			"name": "银币"
 		},
 		"book": {
 			"cls": "constants",
@@ -200,7 +200,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"name": "幸运金币",
 			"text": "持有时打败怪物可得双倍金币"
 		},
-		"snow": {
+		"freezeBadge": {
 			"cls": "constants",
 			"name": "冰冻徽章",
 			"text": "可以将面前的熔岩变成平地"
@@ -210,14 +210,14 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"name": "十字架",
 			"text": "持有后无视怪物的无敌属性"
 		},
-		"knife": {
+		"dagger": {
 			"cls": "constants",
 			"name": "屠龙匕首",
 			"text": "该道具尚未被定义"
 		},
-		"shoes": {
+		"amulet": {
 			"cls": "constants",
-			"name": "绿鞋",
+			"name": "护符",
 			"text": "持有时无视负面地形"
 		},
 		"bigKey": {
@@ -317,10 +317,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		}
 	},
 	"itemEffect": {
-		"redJewel": "core.status.hero.atk += core.values.redJewel * ratio",
-		"blueJewel": "core.status.hero.def += core.values.blueJewel * ratio",
-		"greenJewel": "core.status.hero.mdef += core.values.greenJewel * ratio",
-		"yellowJewel": "core.status.hero.hp+=1000;core.status.hero.atk+=6;core.status.hero.def+=6;core.status.hero.mdef+=10;",
+		"redGem": "core.status.hero.atk += core.values.redGem * ratio",
+		"blueGem": "core.status.hero.def += core.values.blueGem * ratio",
+		"greenGem": "core.status.hero.mdef += core.values.greenGem * ratio",
+		"yellowGem": "core.status.hero.hp+=1000;core.status.hero.atk+=6;core.status.hero.def+=6;core.status.hero.mdef+=10;",
 		"redPotion": "core.status.hero.hp += core.values.redPotion * ratio",
 		"bluePotion": "core.status.hero.hp += core.values.bluePotion * ratio",
 		"yellowPotion": "core.status.hero.hp += core.values.yellowPotion * ratio",
@@ -339,13 +339,13 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield5": "core.status.hero.def += 100;core.status.hero.mdef += 100",
 		"bigKey": "core.status.hero.items.keys.yellowKey++;core.status.hero.items.keys.blueKey++;core.status.hero.items.keys.redKey++;",
 		"superPotion": "core.status.hero.hp *= 2",
-		"moneyPocket": "core.status.hero.money += 500"
+		"silverCoin": "core.status.hero.money += 500"
 	},
 	"itemEffectTip": {
-		"redJewel": "'，攻击+'+core.values.redJewel * ratio",
-		"blueJewel": "'，防御+'+core.values.blueJewel * ratio",
-		"greenJewel": "'，护盾+'+core.values.greenJewel * ratio",
-		"yellowJewel": "'，全属性提升'",
+		"redGem": "'，攻击+'+core.values.redGem * ratio",
+		"blueGem": "'，防御+'+core.values.blueGem * ratio",
+		"greenGem": "'，护盾+'+core.values.greenGem * ratio",
+		"yellowGem": "'，全属性提升'",
 		"redPotion": "'，生命+'+core.values.redPotion * ratio",
 		"bluePotion": "'，生命+'+core.values.bluePotion * ratio",
 		"yellowPotion": "'，生命+'+core.values.yellowPotion * ratio",
@@ -364,7 +364,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"shield5": "'，防御+100，护盾+100'",
 		"bigKey": "'，全钥匙+1'",
 		"superPotion": "'，生命值翻倍'",
-		"moneyPocket": "'，金币+500'"
+		"silverCoin": "'，金币+500'"
 	},
 	"useItemEffect": {
 		"book": "core.ui.drawBook(0);",
@@ -372,7 +372,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"earthquake": "(function () {\n\tvar indexes = [];\n\tfor (var index in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[index];\n\t\tif (!block.disable && block.event.canBreak) {\n\t\t\tindexes.push(index);\n\t\t}\n\t}\n\tcore.removeBlockByIndexes(indexes);\n\tcore.drawMap(core.status.floorId, function () {\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t});\n})();",
 		"pickaxe": "(function () {\n\tvar canBreak = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable) return false;\n\t\treturn block.block.event.canBreak;\n\t};\n\n\tvar success = false;\n\tvar pickaxeFourDirections = false; // 是否四方向破；如果是将其改成true\n\tif (pickaxeFourDirections) {\n\t\t// 四方向破\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (canBreak(nx, ny)) {\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t\tsuccess = true;\n\t\t\t}\n\t\t}\n\t} else {\n\t\t// 仅破当前\n\t\tif (canBreak(core.nextX(), core.nextY())) {\n\t\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\t\tsuccess = true;\n\t\t}\n\t}\n\n\tif (success) {\n\t\tcore.playSound('pickaxe.mp3');\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t} else {\n\t\t// 无法使用\n\t\tcore.drawTip(\"当前无法使用\" + core.material.items[itemId].name);\n\t\tcore.addItem(itemId, 1);\n\t\treturn;\n\t}\n})();",
 		"icePickaxe": "(function () {\n\tcore.removeBlock(core.nextX(), core.nextY());\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
-		"snow": "(function () {\n\tvar success = false;\n\n\tvar snowFourDirections = false; // 是否四方向雪花；如果是将其改成true\n\tif (snowFourDirections) {\n\t\t// 四方向雪花\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (core.getBlockId(nx, ny) == 'lava') {\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t\tsuccess = true;\n\t\t\t}\n\t\t}\n\t} else {\n\t\tif (core.getBlockId(core.nextX(), core.nextY()) == 'lava') {\n\t\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\t\tsuccess = true;\n\t\t}\n\t}\n\n\tif (success) {\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t} else {\n\t\tcore.drawTip(\"当前无法使用\" + core.material.items[itemId].name);\n\t\tcore.addItem(itemId, 1);\n\t\treturn;\n\t}\n})();",
+		"freezeBadge": "(function () {\n\tvar success = false;\n\n\tvar snowFourDirections = false; // 是否四方向雪花；如果是将其改成true\n\tif (snowFourDirections) {\n\t\t// 四方向雪花\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (core.getBlockId(nx, ny) == 'lava') {\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t\tsuccess = true;\n\t\t\t}\n\t\t}\n\t} else {\n\t\tif (core.getBlockId(core.nextX(), core.nextY()) == 'lava') {\n\t\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\t\tsuccess = true;\n\t\t}\n\t}\n\n\tif (success) {\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t} else {\n\t\tcore.drawTip(\"当前无法使用\" + core.material.items[itemId].name);\n\t\tcore.addItem(itemId, 1);\n\t\treturn;\n\t}\n})();",
 		"bigKey": "(function () {\n\tvar actions = core.searchBlock(\"yellowDoor\").map(function (block) {\n\t\treturn { \"type\": \"openDoor\", \"loc\": [block.x, block.y], \"async\": true };\n\t});\n\tactions.push({ \"type\": \"waitAsync\" });\n\tactions.push({ \"type\": \"tip\", \"text\": core.material.items[itemId].name + \"使用成功\" });\n\tcore.insertAction(actions);\n})();",
 		"bomb": "(function () {\n\tvar canBomb = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable || block.block.event.cls.indexOf('enemy') != 0) return false;\n\t\tvar enemy = core.material.enemys[block.block.event.id];\n\t\treturn enemy && !enemy.notBomb;\n\t};\n\n\tvar bombList = []; // 炸掉的怪物坐标列表\n\tvar bombFourDirections = false; // 是否四方向可炸；如果是将其改成true。\n\tif (bombFourDirections) {\n\t\t// 四方向炸\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (canBomb(nx, ny)) {\n\t\t\t\tbombList.push([nx, ny]);\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t}\n\t\t}\n\t} else {\n\t\t// 仅炸当前\n\t\tif (canBomb(core.nextX(), core.nextY())) {\n\t\t\tbombList.push([core.nextX(), core.nextY()]);\n\t\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\t}\n\t}\n\n\tif (bombList.length > 0) {\n\t\tcore.playSound('bomb.mp3');\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t} else {\n\t\tcore.drawTip('当前无法使用' + core.material.items[itemId].name);\n\t\tcore.addItem(itemId, 1);\n\t\treturn;\n\t}\n\n\t// 炸弹后事件\n\t// 这是一个使用炸弹也能开门的例子\n\t/*\n\tif (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在\n\t\t&& !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在\n\t{\n\t\tcore.insertAction([ // 插入事件\n\t\t\t{\"type\": \"openDoor\", \"loc\": [x0,y0]} // 开门\n\t\t])\n\t}\n\t*/\n})();",
 		"centerFly": "core.playSound('centerFly.mp3');\ncore.clearMap('hero');\ncore.setHeroLoc('x', core.bigmap.width - 1 - core.getHeroLoc('x'));\ncore.setHeroLoc('y', core.bigmap.height - 1 - core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
@@ -388,10 +388,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"bluePotion": "core.status.hero.hp += core.values.bluePotion",
 		"greenPotion": "core.status.hero.hp += core.values.greenPotion",
 		"yellowPotion": "core.status.hero.hp += core.values.yellowPotion",
-		"redJewel": "core.status.hero.atk += core.values.redJewel",
-		"blueJewel": "core.status.hero.def += core.values.blueJewel",
-		"greenJewel": "core.status.hero.mdef += core.values.greenJewel",
-		"yellowJewel": null,
+		"redGem": "core.status.hero.atk += core.values.redGem",
+		"blueGem": "core.status.hero.def += core.values.blueGem",
+		"greenGem": "core.status.hero.mdef += core.values.greenGem",
+		"yellowGem": null,
 		"skill1": "// 二倍斩的flag:skill为1\nif (core.getFlag('skill', 0)==0) { // 判断当前是否已经开了技能\n\tif (core.getStatus('mana')>=5) { // 这里要写当前能否开技能的条件判断，比如魔力值至少要多少\n\t\tcore.setFlag('skill', 1); // 开技能1\n\t\tcore.setFlag('skillName', '二倍斩'); // 设置技能名\n\t}\n\telse {\n\t\tcore.drawTip(\"魔力不足，无法开启技能\");\n\t}\n}\nelse { // 关闭技能\n\tcore.setFlag('skill', 0); // 关闭技能状态\n\tcore.setFlag('skillName', '无');\n}"
 	},
 	"canUseItemEffect": {
@@ -404,7 +404,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"centerFly": "(function () {\n\tvar toX = core.bigmap.width - 1 - core.getHeroLoc('x'),\n\t\ttoY = core.bigmap.height - 1 - core.getHeroLoc('y');\n\tvar id = core.getBlockId(toX, toY);\n\treturn id == null;\n})();",
 		"upFly": "(function () {\n\tvar floorId = core.status.floorId,\n\t\tindex = core.floorIds.indexOf(floorId);\n\tif (index < core.floorIds.length - 1) {\n\t\tvar toId = core.floorIds[index + 1],\n\t\t\ttoX = core.getHeroLoc('x'),\n\t\t\ttoY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width,\n\t\t\tmh = core.floors[toId].height;\n\t\tif (toX >= 0 && toX < mw && toY >= 0 && toY < mh && core.getBlock(toX, toY, toId) == null) {\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
 		"downFly": "(function () {\n\tvar floorId = core.status.floorId,\n\t\tindex = core.floorIds.indexOf(floorId);\n\tif (index > 0) {\n\t\tvar toId = core.floorIds[index - 1],\n\t\t\ttoX = core.getHeroLoc('x'),\n\t\t\ttoY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width,\n\t\t\tmh = core.floors[toId].height;\n\t\tif (toX >= 0 && toX < mw && toY >= 0 && toY < mh && core.getBlock(toX, toY, toId) == null) {\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();",
-		"snow": "true",
+		"freezeBadge": "true",
 		"bigKey": "(function () {\n\treturn core.searchBlock('yellowDoor').length > 0;\n})();",
 		"poisonWine": "core.hasFlag('poison');",
 		"weakWine": "core.hasFlag('weak');",
@@ -416,15 +416,15 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"bluePotion": "true",
 		"greenPotion": "true",
 		"yellowPotion": "true",
-		"redJewel": "true",
-		"blueJewel": "true",
-		"greenJewel": "true",
-		"yellowJewel": "true",
+		"redGem": "true",
+		"blueGem": "true",
+		"greenGem": "true",
+		"yellowGem": "true",
 		"skill1": "true"
 	},
 	"equipCondition": {},
 	"useItemEvent": {
-		"yellowJewel": [
+		"yellowGem": [
 			{
 				"type": "choices",
 				"choices": [

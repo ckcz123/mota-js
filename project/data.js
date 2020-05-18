@@ -303,7 +303,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"shops": [
 			{
 				"id": "shop1",
-				"text": "\t[贪婪之神,blueShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
+				"text": "\t[贪婪之神,moneyShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
 				"textInList": "1F金币商店",
 				"mustEnable": false,
 				"disablePreview": false,
@@ -368,7 +368,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"id": "shop2",
-				"text": "\t[贪婪之神,pinkShop]勇敢的武士啊, 给我一定经验就可以：",
+				"text": "\t[贪婪之神,expShop]勇敢的武士啊, 给我一定经验就可以：",
 				"textInList": "1F经验商店",
 				"mustEnable": false,
 				"disablePreview": true,
@@ -465,9 +465,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"lavaDamage": 100,
 		"poisonDamage": 10,
 		"weakValue": 20,
-		"redJewel": 3,
-		"blueJewel": 3,
-		"greenJewel": 5,
+		"redGem": 3,
+		"blueGem": 3,
+		"greenGem": 5,
 		"redPotion": 100,
 		"bluePotion": 250,
 		"yellowPotion": 500,

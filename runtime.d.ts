@@ -1542,7 +1542,7 @@ declare class utils {
 
     /**
      * 读取一个全局存储，适用于global:xxx，支持录像。
-     * @example if (core.getGlobal('一周目已通关', false) === true) core.getItem('knife'); // 二周目游戏进行到此处时会获得一把屠龙匕首
+     * @example if (core.getGlobal('一周目已通关', false) === true) core.getItem('dagger'); // 二周目游戏进行到此处时会获得一把屠龙匕首
      * @param key 全局变量名称，支持中文
      * @param defaultValue 可选，当此全局变量不存在或值为null、undefined时，用此值代替
      * @returns 全局变量的值

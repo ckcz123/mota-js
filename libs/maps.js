@@ -688,7 +688,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y) {
         // 绕过路障
         if (id.endsWith("Net")) deepAdd += 100;
         // 绕过血瓶和绿宝石
-        if (core.hasFlag('__potionNoRouting__') && (id.endsWith("Potion") || id == 'greenJewel')) deepAdd += 100;
+        if (core.hasFlag('__potionNoRouting__') && (id.endsWith("Potion") || id == 'greenGem')) deepAdd += 100;
         // 绕过传送点
         // if (block.block.event.trigger == 'changeFloor') deepAdd+=10;
     }

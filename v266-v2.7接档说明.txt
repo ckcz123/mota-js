@@ -41,7 +41,7 @@ V2.6.6 -> V2.7 接档说明：
 5. 使用VSCode分别打开接档后的V2.7和纯净的V2.7的【project/items.js】，并执行以下操作：
  - 将三色钥匙的cls从"keys"改成"tools"，并新增 "hideInToolbox": true
  - 如下道具的【useItemEffect】和【canUseItemEffect】有所改变，请直接从纯净的V2.7覆盖到你要接档的V2.7：
-   - earthquake, pickaxe, icePickaxe, snow, bigKey, bomb, upFly, downFly
+   - earthquake, pickaxe, icePickaxe, freezeBadge, bigKey, bomb, upFly, downFly
    - 如果确认你的塔不会使用该道具，可忽略
  - 黄宝石和生命魔杖增加了【useItemEvent】；如需使用请进行复制
 
@@ -49,7 +49,7 @@ V2.6.6 -> V2.7 接档说明：
  - 找到【terrains】中的三色墙和六色门，删除对应的这几行
    - yellowWall, blueWall, whiteWall, yellowDoor, blueDoor, redDoor, greenDoor, specialDoor, steelDoor
    - （在V2.7中，terrains不再保留门的引用，门效果仅由animates决定）
- - 将【terrains】中的 blueShop-left, blueShop-right, pinkShop-left, pinkShop-right 分别重命名为
+ - 将【terrains】中的 moneyShop-left, moneyShop-right, expShop-left, expShop-right 分别重命名为
    blueShopLeft, blueShopRight, pinkShopLeft, pinkShopRight
 
 7. 使用VSCode分别打开接档后的V2.7和纯净的V2.7的【project/maps.js】，并执行以下操作：
@@ -87,5 +87,6 @@ V2.6.6 -> V2.7 接档说明：
  - 「重启当前事件」已经被删除并且无法在游戏中使用。请替换成等价的循环处理或者插入事件
  - 在V2.7中，所有的experience全部改名exp；请检查所有对经验值进行操作的地方
 
-
+其他：
+Jewel改名Gem
 

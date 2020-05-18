@@ -254,7 +254,7 @@ ID必须由数字字母下划线组成，数字在1000以内，且均不能和�
 
 ``` js
 // ratio为楼层的item_ratio值，可以进行翻倍宝石属性
-core.status.hero.atk += core.values.redJewel * ratio
+core.status.hero.atk += core.values.redGem * ratio
 ```
 
 这里我们可以直接写ratio来取用该楼层中定义的`item_ratio`的值。
@@ -263,7 +263,7 @@ core.status.hero.atk += core.values.redJewel * ratio
 
 ``` js
 // 一个二倍线性增加的例子
-core.status.hero.atk += core.values.redJewel + 2*ratio
+core.status.hero.atk += core.values.redGem + 2*ratio
 ```
 
 ### 消耗类道具（cls: tools）；永久类道具（cls: constants）
@@ -308,11 +308,11 @@ function (enemy, hero_hp, hero_atk, hero_def, hero_mdef, x, y, floorId) {
 [ // 写在获得道具后事件
     // 设置不同的flag可以分别无视对应的阻激夹域效果
     {"type": "setValue", "name": "flag:no_zone", "value": "true"}, // 免疫领域
-    {"type": "setValue", "name": "flag:no_snipe", "value": "true"}, // 免疫阻击
+    {"type": "setValue", "name": "flag:no_repluse", "value": "true"}, // 免疫阻击
     {"type": "setValue", "name": "flag:no_laser", "value": "true"}, // 免疫激光
     {"type": "setValue", "name": "flag:no_betweenAttack", "value": "true"}, // 免疫夹击
     {"type": "setValue", "name": "flag:no_ambush", "value": "true"}, // 免疫捕捉
-    {"type": "setValue", "name": "item:shoes", "value": "1"} // 免疫路障
+    {"type": "setValue", "name": "item:amulet", "value": "1"} // 免疫路障
 ]
 ```
 4. 如果有更高的需求，例如想让吸血效果变成一半，则还是在上面这些地方进行对应的修改即可。
@@ -666,7 +666,7 @@ if (core.flags.statusBarItems.indexOf('enableSkill')>=0) {
 
 - **`flag:hard`**: 当前的难度标志；此flag变量在setInitData中被定义，可以直接取用来判定当前难度分歧。上传成绩时将根据此flag来对不同难度进行排序。
 - **`flag:posion`**, **`flag:weak`**, **`flag:curse`**: 中毒、衰弱、诅咒状态。
-- **`flag:no_zone`**, **`flag:no_snipe`**, **`flag:no_laser`**, **`flag:no_betweenAttack`**: 是否分别免疫领域、阻击、激光、夹击效果。
+- **`flag:no_zone`**, **`flag:no_repluse`**, **`flag:no_laser`**, **`flag:no_betweenAttack`**: 是否分别免疫领域、阻击、激光、夹击效果。
 - **`flag:hatred`**: 当前的仇恨数值。
 - **`flag:commonTimes`**: 全局商店共用次数时的访问次数。
 - **`flag:input`**: 接受用户输入的事件后，存放用户输入的结果。

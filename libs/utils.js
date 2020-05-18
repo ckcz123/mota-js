@@ -1149,7 +1149,7 @@ utils.prototype._export = function (floorIds) {
     })
 
     // values
-    content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
+    content += ["redGem", "blueGem", "greenGem", "redPotion", "bluePotion",
         "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
         return core.values[x] || 0;
     }).join(" ") + "\n\n";

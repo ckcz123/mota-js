@@ -432,7 +432,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	return [
 		[1, "先攻", "怪物首先攻击"],
 		[2, "魔攻", "怪物无视勇士的防御"],
-		[3, "坚固", "勇士每回合最多只能对怪物造成1点伤害"],
+		[3, "坚固", "怪物防御不小于勇士攻击-1"],
 		[4, "2连击", "怪物每回合攻击2次"],
 		[5, "3连击", "怪物每回合攻击3次"],
 		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
@@ -833,7 +833,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		break;
 	case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断
 		{
-			var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
+			var list = ["icePickaxe", "freezeBadge", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
 			for (var i = 0; i < list.length; i++) {
 				var itemId = list[i];
 				if (core.canUseItem(itemId)) {
@@ -1051,7 +1051,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var damage = {}, // 每个点的伤害值
 		type = {}, // 每个点的伤害类型
-		snipe = {}, // 每个点的阻击怪信息
+		repluse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
 
 	// 计算血网和领域、阻击、激光的伤害，计算捕捉信息
@@ -1065,7 +1065,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type[loc] = type[loc] || {};
 
 		// 血网
-		if (id == 'lavaNet' && !core.hasItem('shoes')) {
+		if (id == 'lavaNet' && !core.hasItem('amulet')) {
 			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
 			type[loc]["血网伤害"] = true;
 		}
@@ -1096,8 +1096,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 
 		// 阻击
-		// 如果要防止阻击伤害，可以直接简单的将 flag:no_snipe 设为true
-		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_snipe')) {
+		// 如果要防止阻击伤害，可以直接简单的将 flag:no_repluse 设为true
+		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_repluse')) {
 			for (var dir in core.utils.scan) {
 				var nx = x + core.utils.scan[dir].x,
 					ny = y + core.utils.scan[dir].y,
@@ -1112,7 +1112,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var rnx = x + core.utils.scan[rdir].x,
 					rny = y + core.utils.scan[rdir].y;
 				if (rnx >= 0 && rnx < width && rny >= 0 && rny < height && core.getBlock(rnx, rny, floorId) == null) {
-					snipe[currloc] = (snipe[currloc] || []).concat([
+					repluse[currloc] = (repluse[currloc] || []).concat([
 						[x, y, id, rdir]
 					]);
 				}
@@ -1207,7 +1207,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.checkBlock = {
 		damage: damage,
 		type: type,
-		snipe: snipe,
+		repluse: repluse,
 		ambush: ambush,
 		cache: {} // clear cache
 	};
@@ -1391,9 +1391,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	return [
 		'yellowDoor', 'blueDoor', 'redDoor', 'greenDoor', 'steelDoor',
 		'yellowKey', 'blueKey', 'redKey', 'greenKey', 'steelKey',
-		'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+		'redGem', 'blueGem', 'greenGem', 'yellowGem',
 		'redPotion', 'bluePotion', 'greenPotion', 'yellowPotion', 'superPotion',
-		'pickaxe', 'bomb', 'centerFly', 'icePickaxe', 'snow',
+		'pickaxe', 'bomb', 'centerFly', 'icePickaxe', 'freezeBadge',
 		'earthquake', 'upFly', 'downFly', 'jumpShoes', 'lifeWand',
 		'poisonWine', 'weakWine', 'curseWine', 'superWine',
 		'sword1', 'sword2', 'sword3', 'sword4', 'sword5',

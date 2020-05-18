@@ -36,7 +36,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"redSwordsman": {"name":"剑王","hp":100,"atk":120,"def":0,"money":7,"experience":0,"point":0,"special":6,"n":8},
 	"poisonZombie": {"name":"绿兽人","hp":100,"atk":120,"def":0,"money":13,"experience":0,"point":0,"special":12},
 	"octopus": {"name":"血影","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
-	"greenKnight": {"name":"强盾骑士","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
+	"princessEnemy": {"name":"假公主","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"angel": {"name":"天使","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"elemental": {"name":"元素生物","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"steelGuard": {"name":"铁守卫","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":18,"value":20},
@@ -70,7 +70,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"evilFairy": {"name":"黑暗仙子","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"blueRock": {"name":"鬼邪石","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"skeletonLite": {"name":"骷髅精英","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
-	"blueSkeleton": {"name":"蓝骷髅","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
+	"greenKnight": {"name":"强盾骑士","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"bowman": {"name":"弓兵","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"liteBowman": {"name":"精锐弓兵","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"crismonZombie": {"name":"红兽人","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
@@ -80,9 +80,5 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"grayPriest": {"name":"混沌法师","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"greenGT": {"name":"卫兵队长","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
 	"ghostSoldier": {"name":"冥队长","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
-	"goldBat": {"name":"金蝙蝠","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
-	"pinkSoldier": {"name":"红战士","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
-	"pinkGhostSoldier": {"name":"红队长","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
-	"greenSoldier": {"name":"青战士","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0},
-	"greenGhostSoldier": {"name":"青队长","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0}
+	"frostBat": {"name":"寒蝙蝠","hp":0,"atk":0,"def":0,"money":0,"experience":0,"point":0,"special":0}
 }

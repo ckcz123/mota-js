@@ -142,4 +142,64 @@
         });
         return;
     }
+
+    fs.mkdir = function (path, callback) {
+        //callback:function(err, data)
+        //path:支持"/"做分隔符,不以"/"结尾
+        //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
+        if (typeof(path) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'name=' + path;
+        postsomething(data, '/makeDir', function (err, data) {
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                err = "Invalid /mkdir";
+                data = null;
+            }
+            callback(err, data);
+        });
+        return;
+    }
+
+    fs.moveFile = function (src, dest, callback) {
+        //callback:function(err, data)
+        //path:支持"/"做分隔符,不以"/"结尾
+        //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
+        if (typeof(src) != typeof('') || typeof(dest) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'src=' + src + "&dest=" + dest;
+        postsomething(data, '/moveFile', function (err, data) {
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                err = "Invalid /moveFile";
+                data = null;
+            }
+            callback(err, data);
+        });
+        return;
+    }
+
+    fs.deleteFile = function (path, callback) {
+        //callback:function(err, data)
+        //path:支持"/"做分隔符,不以"/"结尾
+        //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
+        if (typeof(path) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'name=' + path;
+        postsomething(data, '/deleteFile', function (err, data) {
+            try {
+                data = JSON.parse(data);
+            } catch (e) {
+                err = "Invalid /deleteFile";
+                data = null;
+            }
+            callback(err, data);
+        });
+        return;
+    }
 })();

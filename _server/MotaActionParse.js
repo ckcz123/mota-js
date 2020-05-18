@@ -972,7 +972,7 @@ ActionParser.prototype.matchEvalAtom = function(args) {
   var EnemyId_List=MotaActionBlocks.enemyattr_e.json.args0[1].options; // [["生命", "hp"], ...]
   match=new RegExp("^enemy:([a-zA-Z0-9_]+):(" + EnemyId_List.map(function(v){return v[1]}).join('|') + ")$").exec(args[0])
   if(match){
-    args=[MotaActionFunctions.replaceToName_token(match[1]),MotaActionFunctions.replaceToName_token(match[2])]
+    args=[match[1],match[2]]
     return rt(MotaActionBlocks['enemyattr_e'].xmlText, args);
   }
   // 图块ID

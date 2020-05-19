@@ -236,6 +236,7 @@ editor_ui_wrapper = function (editor) {
                             throw (err)
                         }
                         ; printf('地图保存成功');
+                        editor.uifunctions.unhighlightSaveFloorButton();
                     });
                 }
                 selectBox.isSelected(false);

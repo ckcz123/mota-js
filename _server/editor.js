@@ -105,6 +105,7 @@ function editor() {
 
         // tile
         tileSize: [1,1],
+        startLoc: {"x":0,"y":0},
         lockMode: false,
 
         // 最近使用的图块
@@ -683,6 +684,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
     editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
     editor.dom.dataSelection.style.top = pos.y * ysize + 'px';
     editor.dom.dataSelection.style.height = ysize - 6 + 'px';
+    editor.dom.dataSelection.style.width = 32 - 6 + 'px';
     setTimeout(function(){
         selectBox.isSelected(true);
         editor.updateLastUsedMap();

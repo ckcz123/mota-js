@@ -24,6 +24,8 @@ editor_listen_wrapper = function (editor) {
         editor.dom.iconExpandBtn.onclick = editor.uifunctions.fold_material_click
 
         editor.dom.iconLib.onmousedown = editor.uifunctions.material_ondown
+        editor.dom.iconLib.onmousemove = editor.uifunctions.material_onmove
+        editor.dom.iconLib.onmouseup = editor.uifunctions.material_onup
         editor.dom.iconLib.oncontextmenu = function (e) { e.preventDefault() }
 
         editor.dom.extraEvent.onmousedown = editor.uifunctions.extraEvent_click

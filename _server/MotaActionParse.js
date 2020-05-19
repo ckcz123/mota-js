@@ -1022,9 +1022,9 @@ ActionParser.prototype.matchEvalCompare=function(args, isShadow){
   // 按优先级依次寻找以下符号
   var oplist=['<','<=','>','>=','==','!=','&&','||'].reverse()
   for (var index = 0,op; op=oplist[index]; index++) {
-    var match=new RegExp('(?<= )'+(op=='||'?'\\|\\|':op)+'(?= )').exec(str)
+    var match=new RegExp(' '+(op=='||'?'\\|\\|':op)+' ').exec(str)
     if (!match) continue;
-    args=[this.expandEvalBlock([raw.slice(0,match.index)],isShadow),op.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),this.expandEvalBlock([raw.slice(match.index+op.length)],isShadow)]
+    args=[this.expandEvalBlock([raw.slice(0,match.index+1)],isShadow),op.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),this.expandEvalBlock([raw.slice(match.index+1+op.length)],isShadow)]
     return {ret:true,xml:xml,args:args}
   }
   return {ret:false}

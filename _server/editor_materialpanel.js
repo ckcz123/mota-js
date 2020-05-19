@@ -62,13 +62,41 @@ editor_materialpanel_wrapper = function (editor) {
         }
     }
 
+    var lastmoveE=null;
     /**
      * editor.dom.iconLib.onmousedown
-     * 素材区的单击事件
+     * 素材区的单击/拖拽事件
      */
     editor.uifunctions.material_ondown = function (e) {
         e.stopPropagation();
         e.preventDefault();
+        lastmoveE=e;
+        if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
+        var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
+        var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+        editor.uivalues.startLoc={
+            'x': scrollLeft + e.clientX + editor.dom.iconLib.scrollLeft - right.offsetLeft - editor.dom.iconLib.offsetLeft,
+            'y': scrollTop + e.clientY + editor.dom.iconLib.scrollTop - right.offsetTop - editor.dom.iconLib.offsetTop,
+            'size': 32
+        };
+    }
+    
+    /**
+     * editor.dom.iconLib.onmousemove
+     * 素材区的单击/拖拽事件
+     */
+    editor.uifunctions.material_onmove = function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        lastmoveE=e;
+    }
+
+    /**
+     * editor.dom.iconLib.onmouseup
+     * 素材区的单击/拖拽事件
+     */
+    editor.uifunctions.material_onup = function (ee) {
+        var e=lastmoveE;
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -79,6 +107,7 @@ editor_materialpanel_wrapper = function (editor) {
         };
         editor.loc = loc;
         editor.uivalues.tileSize = [1,1];
+        var pos0 = editor.uifunctions.locToPos(editor.uivalues.startLoc);
         var pos = editor.uifunctions.locToPos(loc);
         for (var spriter in editor.widthsX) {
             if (pos.x >= editor.widthsX[spriter][1] && pos.x < editor.widthsX[spriter][2]) {
@@ -115,6 +144,7 @@ editor_materialpanel_wrapper = function (editor) {
                 editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
                 editor.dom.dataSelection.style.top = pos.y * ysize + 'px';
                 editor.dom.dataSelection.style.height = ysize - 6 + 'px';
+                editor.dom.dataSelection.style.width = 32 - 6 + 'px';
 
                 if (pos.x == 0 && pos.y == 0) {
                     // editor.info={idnum:0, id:'empty','images':'清除块', 'y':0};
@@ -133,21 +163,21 @@ editor_materialpanel_wrapper = function (editor) {
                         editor.info = { 'images': pos.images, 'y': y }
                     }
 
-                    for (var ii = 0; ii < editor.ids.length; ii++) {
-                        if ((core.tilesets.indexOf(pos.images) != -1 && editor.info.images == editor.ids[ii].images
-                            && editor.info.y == editor.ids[ii].y && editor.info.x == editor.ids[ii].x)
-                            || (Object.prototype.hasOwnProperty.call(autotiles, pos.images) && editor.info.images == editor.ids[ii].id
-                                && editor.info.y == editor.ids[ii].y)
-                            || (core.tilesets.indexOf(pos.images) == -1 && editor.info.images == editor.ids[ii].images
-                                && editor.info.y == editor.ids[ii].y)
+                    for (var idindex = 0; idindex < editor.ids.length; idindex++) {
+                        if ((core.tilesets.indexOf(pos.images) != -1 && editor.info.images == editor.ids[idindex].images
+                            && editor.info.y == editor.ids[idindex].y && editor.info.x == editor.ids[idindex].x)
+                            || (Object.prototype.hasOwnProperty.call(autotiles, pos.images) && editor.info.images == editor.ids[idindex].id
+                                && editor.info.y == editor.ids[idindex].y)
+                            || (core.tilesets.indexOf(pos.images) == -1 && editor.info.images == editor.ids[idindex].images
+                                && editor.info.y == editor.ids[idindex].y)
                         ) {
 
-                            editor.info = editor.ids[ii];
+                            editor.info = editor.ids[idindex];
                             break;
                         }
                     }
 
-                    if (editor.info.isTile && e.button == 2) {
+                    if (editor.info.isTile && e.button == 2) { //这段改一改之类的应该能给手机用,就不删了
                         var v = prompt("请输入该额外素材区域绑定宽高，以逗号分隔", "1,1");
                         if (v != null && /^\d+,\d+$/.test(v)) {
                             v = v.split(",");
@@ -157,8 +187,30 @@ editor_materialpanel_wrapper = function (editor) {
                                 alert("不合法的输入范围，已经越界");
                             } else {
                                 editor.uivalues.tileSize = [x, y];
+                                editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
+                                editor.dom.dataSelection.style.top = pos.y * ysize + 'px';
+                                editor.dom.dataSelection.style.height = ysize*y - 6 + 'px';
+                                editor.dom.dataSelection.style.width = 32*x - 6 + 'px';
                             }
                         }
+                    }
+                    if (editor.info.isTile && e.button != 2) { //左键拖拽框选
+
+                        var x = pos.x-pos0.x+1, y = pos.y-pos0.y+1;
+                        var widthX = editor.widthsX[editor.info.images];
+                        // 懒得仔细处理了, 只允许左上往右下拉
+                        if (x <= 0 || y <= 0 || pos0.x < widthX[1]){
+                            
+                        } else {
+                            editor.info = editor.ids[idindex-(x-1)-(y-1)*(widthX[2]-widthX[1])];
+                            editor.uifunctions.locToPos(editor.uivalues.startLoc); //重置editor.pos
+                            editor.uivalues.tileSize = [x, y];
+                            editor.dom.dataSelection.style.left = pos0.x * 32 + 'px';
+                            editor.dom.dataSelection.style.top = pos0.y * ysize + 'px';
+                            editor.dom.dataSelection.style.height = ysize*y - 6 + 'px';
+                            editor.dom.dataSelection.style.width = 32*x - 6 + 'px';
+                        }
+
                     }
 
                 }

@@ -240,12 +240,11 @@ editor_mappanel_wrapper = function (editor) {
                 var x0 = editor.uivalues.stepPostfix[0].x;
                 var y0 = editor.uivalues.stepPostfix[0].y;
                 var idnum = editor.info.idnum;
+                var pmod=function(a,b){return (a%b+b)%b;}
                 for (var ii = 0; ii < editor.uivalues.stepPostfix.length; ii++) {
-                    if (editor.uivalues.stepPostfix[ii].y != y0) {
-                        y0++;
-                        idnum += imgWidth;
-                    }
-                    editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.ids[editor.indexs[idnum + editor.uivalues.stepPostfix[ii].x - x0]];
+                    var dx=pmod(editor.uivalues.stepPostfix[ii].x-x0,editor.uivalues.tileSize[0]);
+                    var dy=pmod(editor.uivalues.stepPostfix[ii].y-y0,editor.uivalues.tileSize[1]);
+                    editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.ids[editor.indexs[idnum + dx+dy*imgWidth]];
                 }
             } else {
                 // 检测是否是填充模式
@@ -661,7 +660,7 @@ editor_mappanel_wrapper = function (editor) {
         }
         // tip.showHelp(5)
         tip.isSelectedBlock(false)
-        tip.msgs[11] = String('tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
+        tip.msgs[11] = String('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
         tip.whichShow(12);
         editor.brushMod = editor.dom.brushMod3.value;
     }

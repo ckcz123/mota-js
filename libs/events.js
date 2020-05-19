@@ -441,7 +441,7 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
     }
 
     // 是否存在门或暗墙
-    if (core.material.icons.animates[id] == null) {
+    if (core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null) {
         return clearAndReturn();
     }
 
@@ -475,17 +475,23 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
 }
 
 events.prototype._openDoor_animate = function (id, x, y, callback) {
-    var door = core.material.icons.animates[id];
+    var blockInfo = core.getBlockInfo(id);
+    var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
+
     var speed = 40;
 
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
     core.removeBlock(x, y);
-    core.drawImage('event', core.material.images.animates, 0, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+    core.drawImage('event', image, 0, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+    if (height > 32)
+        core.drawImage('event2', image, 0, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     var state = 0;
     var animate = window.setInterval(function () {
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        if (height > 32) 
+            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32)
         state++;
         if (state == 4) {
             clearInterval(animate);
@@ -496,7 +502,9 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
             if (callback) callback();
             return;
         }
-        core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', image, 32 * state, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        if (height > 32)
+            core.drawImage('event2', image, 32 * state, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }

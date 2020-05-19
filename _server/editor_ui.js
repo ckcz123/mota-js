@@ -318,6 +318,7 @@ editor_ui_wrapper = function (editor) {
                     editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
                     editor.updateMap();
                     editor.uivalues.postMapData.push(data);
+                    editor.uifunctions.highlightSaveFloorButton();
                     printf("已撤销此操作，你可能需要重新保存地图。");
                 }
                 return;
@@ -332,6 +333,7 @@ editor_ui_wrapper = function (editor) {
                     editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
                     editor.updateMap();
                     editor.uivalues.preMapData.push(data);
+                    editor.uifunctions.highlightSaveFloorButton();
                     printf("已重做此操作，你可能需要重新保存地图。");
                 }
                 return;
@@ -349,6 +351,7 @@ editor_ui_wrapper = function (editor) {
                 editor.uivalues.copyedInfo = editor.copyFromPos();
                 editor.clearPos(true, null, function () {
                     printf('该点事件已剪切');
+                    editor.uifunctions.unhighlightSaveFloorButton();
                 })
                 return;
             }
@@ -366,6 +369,7 @@ editor_ui_wrapper = function (editor) {
                         throw (err)
                     }
                     ; printf('粘贴事件成功');
+                    editor.uifunctions.unhighlightSaveFloorButton();
                     editor.drawPosSelection();
                 });
                 return;
@@ -373,6 +377,7 @@ editor_ui_wrapper = function (editor) {
             // DELETE
             if (e.keyCode == 46 && !selectBox.isSelected()) {
                 editor.clearPos(true);
+                editor.uifunctions.unhighlightSaveFloorButton();
                 return;
             }
             // ESC

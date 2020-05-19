@@ -274,6 +274,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.holdingPath = 0;
             editor.uivalues.stepPostfix = [];
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+            editor.uifunctions.highlightSaveFloorButton();
         }
         return false;
     }
@@ -465,6 +466,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.drawEventBlock();
             editor_mode.showMode('loc');
             printf('添加楼梯事件成功');
+            editor.uifunctions.unhighlightSaveFloorButton();
         });
         return true;
     }
@@ -525,6 +527,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.drawPosSelection();
             editor_mode.showMode('loc');
             printf('绑定机关门事件成功');
+            editor.uifunctions.unhighlightSaveFloorButton();
         });
         bindSpecialDoor.loc = null;
         bindSpecialDoor.enemys = [];
@@ -577,6 +580,7 @@ editor_mappanel_wrapper = function (editor) {
                 throw (err)
             }
             ; printf('复制事件成功');
+            editor.uifunctions.unhighlightSaveFloorButton();
             editor.drawPosSelection();
         });
     }
@@ -591,6 +595,7 @@ editor_mappanel_wrapper = function (editor) {
         editor.savePreMap();
         editor_mode.onmode('');
         editor.exchangePos(editor.pos, editor.uivalues.lastRightButtonPos[1]);
+        editor.uifunctions.unhighlightSaveFloorButton();
     }
 
     /**
@@ -600,6 +605,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.clearEvent_click = function (e) {
         e.stopPropagation();
         editor.clearPos(false);
+        editor.uifunctions.unhighlightSaveFloorButton();
     }
 
     /**
@@ -609,6 +615,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.clearLoc_click = function (e) {
         e.stopPropagation();
         editor.clearPos(true);
+        editor.uifunctions.unhighlightSaveFloorButton();
     }
 
     /**
@@ -765,6 +772,15 @@ editor_mappanel_wrapper = function (editor) {
         });
     }
 
+    editor.uifunctions.highlightSaveFloorButton=function(){
+        var saveFloor = document.getElementById('saveFloor');
+        saveFloor.style.background='#FFCCAA';
+    }
+
+    editor.uifunctions.unhighlightSaveFloorButton=function(){
+        var saveFloor = document.getElementById('saveFloor');
+        saveFloor.style.background='';
+    }
 
     editor.uifunctions.saveFloor_func = function () {
         var saveFloor = document.getElementById('saveFloor');
@@ -776,6 +792,7 @@ editor_mappanel_wrapper = function (editor) {
                     throw (err)
                 }
                 ; printf('保存成功');
+                editor.uifunctions.unhighlightSaveFloorButton()
             });
         }
         saveFloor.onclick = editor_mode.saveFloor;

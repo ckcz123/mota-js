@@ -282,6 +282,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         editor.viewportLoc = editor.viewportLoc || {};
         var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
         editor.setViewport(x, y);
+        editor.uifunctions.unhighlightSaveFloorButton();
 
         editor.config.set('editorLastFloorId', floorId, function() {
             if (callback) callback();

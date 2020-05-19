@@ -493,7 +493,7 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
 
 events.prototype._openDoor_animate = function (id, x, y, callback) {
     var blockInfo = core.getBlockInfo(id);
-    var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
+    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 
     var speed = 40;
 
@@ -2599,7 +2599,8 @@ events.prototype.setGlobalFlag = function (name, value) {
 
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
-    if (core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
+    if ((core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null)
+         || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }
@@ -2611,19 +2612,23 @@ events.prototype.closeDoor = function (x, y, id, callback) {
 
     // 关门动画
     core.playSound(doorInfo[2] || 'door.mp3');
-    var door = core.material.icons.animates[id];
+    var blockInfo = core.getBlockInfo(id);
+    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
+
     var speed = 40, state = 0;
     var animate = window.setInterval(function () {
         state++;
         if (state == 4) {
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
-            core.setBlock(core.getNumberById(id), x, y);
+            core.setBlock(id, x, y);
             if (callback) callback();
             return;
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
-        core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', image, 32 * (4-state), posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        if (height > 32)
+        core.drawImage('event2', image, 32 * (4-state), posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }

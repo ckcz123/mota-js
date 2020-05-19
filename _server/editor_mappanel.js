@@ -202,6 +202,7 @@ editor_mappanel_wrapper = function (editor) {
                 editor.exchangeBgFg(editor.uivalues.startPos, editor.uivalues.endPos, editor.layerMod);
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+            editor.uifunctions.unhighlightSaveFloorButton();
             return false;
         }
         editor.uivalues.holdingPath = 0;

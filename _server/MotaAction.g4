@@ -848,14 +848,14 @@ return code;
 */;
 
 setBlock_s
-    :   '转变图块为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    :   '转变图块为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool Newline
     
 
 /* setBlock_s
 tooltip : setBlock：设置某个图块,忽略坐标楼层则为当前事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
 colour : this.mapColor
-default : ["yellowDoor","","",""]
+default : ["yellowDoor","","","","",false]
 var floorstr = '';
 if (EvalString_1 && EvalString_2) {
   var pattern1 = MotaActionFunctions.pattern.id;
@@ -874,7 +874,9 @@ if (EvalString_1 && EvalString_2) {
   floorstr = ', "loc": ['+EvalString_1.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
+IntString_0 = IntString_0 && (', "time": ' + IntString_0);
+Bool_0 = Bool_0 ? (', "async": true') : '';
+var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+IntString_0+Bool_0+'},\n';
 return code;
 */;
 

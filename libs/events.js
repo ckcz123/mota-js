@@ -1306,10 +1306,16 @@ events.prototype._action_hide = function (data, x, y, prefix) {
 
 events.prototype._action_setBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    data.loc.forEach(function (t) {
-        core.setBlock(data.number, t[0], t[1], data.floorId);
-    });
-    core.doAction();
+    data.time = data.time || 0;
+    data.floorId = data.floorId || core.status.floorId;
+    if (data.time > 0 && data.floorId == core.status.floorId) {
+        this.__action_doAsyncFunc(data.async, core.animateSetBlocks, data.number, data.loc, data.floorId, data.time);
+    } else {
+        data.loc.forEach(function (loc) {
+            core.setBlock(data.number, loc[0], loc[1], data.floorId);
+        });
+        core.doAction();
+    }
 }
 
 events.prototype._action_turnBlock = function (data, x, y, prefix) {

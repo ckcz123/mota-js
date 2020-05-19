@@ -222,7 +222,7 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['setBlock_s'].xmlText([
-        data.number||0,x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
+        data.number||0,x_str.join(','),y_str.join(','),data.floorId||'',data.time,data.async||false,this.next]);
       break;
     case "turnBlock": // 事件转向
       data.loc=data.loc||[];

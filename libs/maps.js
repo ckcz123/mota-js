@@ -1638,6 +1638,103 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     }
 }
 
+maps.prototype.animateSetBlock = function (number, x, y, floorId, time, callback) {
+    floorId = floorId || core.status.floorId;
+    time = time || 0;
+    if (floorId != core.status.floorId || time == 0) {
+        // 不在当前楼层，直接忽略
+        this.setBlock(number, x, y, floorId);
+        if (callback) callback();
+        return;
+    }
+    if (typeof number == 'string') {
+        if (/^\d+$/.test(number)) number = parseInt(number);
+        else number = core.getNumberById(number);
+    }
+    var originBlock = core.getBlock(x, y, floorId, true);
+    var block = this.initBlock(x, y, number, true, core.floors[floorId]);
+
+    // 如果原本是启用的
+    if (originBlock != null && !originBlock.block.disable) {
+        return this._animateSetBlock_originEnabled(block, number, x, y, floorId, time, callback);
+    }
+
+    // 如果原本不存在
+    if (originBlock == null) {
+        return this._animateSetBlock_originNotExists(block, number, x, y, floorId, time, callback);
+    }
+
+    // 如果原本存在且禁用；应当直接设置，没有动画
+    if (originBlock != null && originBlock.block.disable) {
+        return this._animateSetBlock_originDisabled(number, x, y, floorId, callback);
+    }
+    if (callback) callback();
+}
+
+maps.prototype._animateSetBlock_originEnabled = function (block, number, x, y, floorId, time, callback) {
+    // 情况1：设置到0
+    if (block.id == 0) {
+        // 如果该点红点没有事件 - 直接删除
+        if (!block.event.trigger) {
+            return this.animateBlock([x, y], 'remove', time, callback);
+        } else {
+            // 如果该点红点有事件；则设置到0，但是需启用
+            return this.animateBlock([x, y], 'hide', time, function () {
+                core.setBlock(0, x, y, floorId);
+                core.showBlock(x, y, floorId);
+                if (callback) callback();
+            });
+        }
+    }
+    // 情况2：设置到非0
+    else {
+        return this.animateBlock([x, y], 'hide', time / 2, function () {
+            core.setBlock(number, x, y, floorId);
+            core.animateBlock([x, y], 'show', time / 2, callback);
+        })
+    }
+}
+
+maps.prototype._animateSetBlock_originNotExists = function (block, number, x, y, floorId, time, callback) {
+    // 情况1：设置到0；没有动画效果
+    if (block.id == 0) {
+        core.setBlock(number, x, y, floorId);
+        if (callback) callback();
+    }
+    else {
+        // 情况2：设置到非0，有淡入动画
+        core.setBlock(number, x, y, floorId);
+        core.hideBlock(x, y, floorId);
+        core.animateBlock([x, y], 'show', time, callback);
+        return;
+    }
+}
+
+maps.prototype._animateSetBlock_originDisabled = function (number, x, y, floorId, callback) {
+    core.setBlock(number, x, y, floorId);
+    if (callback) callback();
+}
+
+maps.prototype.animateSetBlocks = function (number, locs, floorId, time, callback) {
+    if (!(locs instanceof Array)) {
+        if (callback) callback();
+        return;
+    }
+    if (typeof locs[0] == 'number' && typeof locs[1] == 'number')
+    locs = [locs];
+
+    var count = locs.length;
+    var _afterSet = function () {
+        count--;
+        if (count == 0) {
+            if (callback) callback();
+        }
+    }
+    locs.forEach(function (loc) {
+        core.animateSetBlock(number, loc[0], loc[1], floorId, time, _afterSet);
+    });
+}
+
 ////// 事件转向 //////
 maps.prototype.turnBlock = function (direction, x, y, floorId) {
     var id = core.getBlockId(x, y, floorId, true);

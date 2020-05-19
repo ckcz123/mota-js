@@ -783,15 +783,59 @@ control.prototype.drawHero = function (status, offset) {
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
     if (!core.hasFlag('hideHero')) {
-        this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-            core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
-                block.heroIcon.loc * block.height, block.width, block.height,
-                block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
-        });
+        this._drawHero_draw(direction, x, y, status, offset);
     }
 
     core.control.updateViewport();
     core.setGameCanvasTranslate('hero', 0, 0);
+}
+
+control.prototype._drawHero_draw = function (direction, x, y, status, offset) {
+    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+        core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+            block.heroIcon.loc * block.height, block.width, block.height,
+            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+    });
+}
+
+control.prototype.triggerHero = function (type, time, callback) {
+    if (type == null) {
+        type = core.hasFlag('hideHero') ? 'show' : 'hide';
+    }
+    if ((core.hasFlag('hideHero') && type != 'show') || (!core.hasFlag('hideHero') && type != 'hide')) {
+        if (callback) callback();
+        return;
+    }
+    if (type == 'show') core.removeFlag('hideHero');
+    else core.setFlag('hideHero', true);
+
+    time = time || 0;
+    if (time == 0) {
+        core.drawHero();
+        if (callback) callback();
+        return;
+    }
+    time /= Math.max(core.status.replay.speed, 1)    
+    this._triggerHero_animate(type, 10 / time, callback);
+}
+
+control.prototype._triggerHero_animate = function (type, delta, callback) {
+    var opacity = type != 'show' ? 1 : 0;
+    var animate = setInterval(function () {
+        opacity += type != 'show' ? -delta : delta;
+        core.clearMap('hero');
+        core.setAlpha('hero', opacity);
+        core.control._drawHero_draw(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop', 0);
+        core.setAlpha('hero', 1);
+        if (opacity >= 1 || opacity <= 0) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            core.drawHero();
+            if (callback) callback();
+        }
+    }, 10);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {

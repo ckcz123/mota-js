@@ -2011,15 +2011,25 @@ events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
 }
 
 events.prototype._action_showHero = function (data, x, y, prefix) {
-    core.removeFlag('hideHero');
-    core.drawHero();
-    core.doAction();
+    data.time = data.time || 0;
+    if (data.time > 0) {
+        this.__action_doAsyncFunc(data.async, core.triggerHero, 'show', data.time);
+    } else {
+        core.removeFlag('hideHero');
+        core.drawHero();
+        core.doAction();
+    }
 }
 
 events.prototype._action_hideHero = function (data, x, y, prefix) {
-    core.setFlag('hideHero', true);
-    core.drawHero();
-    core.doAction();
+    data.time = data.time || 0;
+    if (data.time > 0) {
+        this.__action_doAsyncFunc(data.async, core.triggerHero, 'hide', data.time);
+    } else {
+        core.setFlag('hideHero', true);
+        core.drawHero();
+        core.doAction();
+    }
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {

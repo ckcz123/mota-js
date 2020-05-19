@@ -1123,26 +1123,32 @@ return code;
 */;
 
 showHero_s
-    :   '显示勇士' Newline
+    :   '显示勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
 
 
 /* showHero_s
 tooltip : showHero: 显示勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showHero%3a+%e6%98%be%e7%a4%ba%e5%8b%87%e5%a3%ab
+default : ['',false]
 colour : this.soundColor
-var code = '{"type": "showHero"},\n';
+IntString_0 = IntString_0 && (', "time": ' + IntString_0);
+Bool_0 = Bool_0 ? (', "async": true') : '';
+var code = '{"type": "showHero"'+IntString_0+Bool_0+'},\n';
 return code;
 */;
 
 hideHero_s
-    :   '隐藏勇士' Newline
+    :   '隐藏勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
 
 
 /* hideHero_s
 tooltip : hideHero: 隐藏勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideHero%ef%bc%9a%e9%9a%90%e8%97%8f%e5%8b%87%e5%a3%ab
+default : ['',false]
 colour : this.soundColor
-var code = '{"type": "hideHero"},\n';
+IntString_0 = IntString_0 && (', "time": ' + IntString_0);
+Bool_0 = Bool_0 ? (', "async": true') : '';
+var code = '{"type": "hideHero"'+IntString_0+Bool_0+'},\n';
 return code;
 */;
 

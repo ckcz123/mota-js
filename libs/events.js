@@ -487,7 +487,7 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
             core.removeItem(keyName, keyInfo[keyName]);
         }
     }
-    core.playSound(doorInfo[1] || 'door.mp3');
+    core.playSound(doorInfo[2] || 'door.mp3');
     return true;
 }
 
@@ -495,7 +495,7 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
     var blockInfo = core.getBlockInfo(id);
     var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 
-    var speed = 40;
+    var speed = (core.getBlockById(id).event.doorInfo[1] || 160) / 4;
 
     var locked = core.status.lockControl;
     core.lockControl();
@@ -2611,11 +2611,11 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     }
 
     // 关门动画
-    core.playSound(doorInfo[2] || 'door.mp3');
+    core.playSound(doorInfo[3] || 'door.mp3');
     var blockInfo = core.getBlockInfo(id);
     var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 
-    var speed = 40, state = 0;
+    var speed = (doorInfo[1] || 160) / 4, state = 0;
     var animate = window.setInterval(function () {
         state++;
         if (state == 4) {

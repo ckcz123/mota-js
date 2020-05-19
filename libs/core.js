@@ -195,7 +195,6 @@ function core() {
             "toolsBackground": main.toolsBackground || "url(project/materials/ground.png) repeat",
             "borderColor": main.borderColor || "white",
             "statusBarColor": main.statusBarColor || "white",
-            "hardLabelColor": main.hardLabelColor || "red",
             "floorChangingBackground": main.floorChangingBackground || "black",
             "floorChangingTextColor": main.floorChangingTextColor || "white",
             "font": main.font || "Verdana"

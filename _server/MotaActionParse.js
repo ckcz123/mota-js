@@ -49,6 +49,15 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       return MotaActionBlocks['level_m'].xmlText([text_choices]);
 
+    case 'levelChoose':
+      if(!obj) obj=[];
+      var text_choices = null;
+      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+        text_choices=MotaActionBlocks['levelChooseChoice'].xmlText([
+          choice.title, choice.name, choice.hard||0, choice.color, 'rgba('+choice.color+')', this.parseList(choice.action), text_choices]);
+      }
+      return MotaActionBlocks['levelChoose_m'].xmlText([text_choices]);
+
     case 'shop':
       var buildsub = function(obj,parser,next){
         var text_choices = null;

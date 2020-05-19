@@ -221,7 +221,6 @@ type gameStatus = {
         toolsBackground: string
         borderColor: string
         statusBarColor: string
-        hardLabelColor: string
         floorChangingBackground: string
         floorChangingTextColor: string
         font: string

@@ -44,22 +44,29 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startBackground": "project/images/bg.jpg",
 		"startLogoStyle": "color: black",
 		"levelChoose": [
-			[
-				"简单",
-				"Easy"
-			],
-			[
-				"普通",
-				"Normal"
-			],
-			[
-				"困难",
-				"Hard"
-			],
-			[
-				"噩梦",
-				"Hell"
-			]
+			{
+				"title": "简单",
+				"name": "Easy",
+				"hard": 1,
+				"action": [
+					{
+						"type": "comment",
+						"text": "在这里写该难度需执行的事件"
+					}
+				]
+			},
+			{
+				"title": "普通",
+				"name": "Normal",
+				"hard": 2,
+				"color": [
+					0,
+					255,
+					0,
+					1
+				],
+				"action": []
+			}
 		],
 		"equipName": [
 			"武器",
@@ -71,7 +78,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"toolsBackground": "url(project/materials/ground.png) repeat",
 		"borderColor": "#CCCCCC",
 		"statusBarColor": "white",
-		"hardLabelColor": "red",
 		"floorChangingBackground": "black",
 		"floorChangingTextColor": "white",
 		"font": "Verdana",
@@ -158,7 +164,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 									},
 									{
 										"type": "if",
-										"condition": "core.flags.startDirectly",
+										"condition": "main.levelChoose.length == 0",
 										"true": [
 											{
 												"type": "comment",
@@ -172,7 +178,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 											},
 											{
 												"type": "function",
-												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one[0],\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + one[1] + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
+												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one.title || '',\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + (one.name || '') + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
 											}
 										]
 									},
@@ -219,7 +225,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 									},
 									{
 										"type": "if",
-										"condition": "!core.isReplaying()",
+										"condition": "(!core.isReplaying())",
 										"true": [
 											{
 												"type": "function",
@@ -239,60 +245,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			}
 		],
 		"startText": [
-			{
-				"type": "comment",
-				"text": "根据难度分歧设置<flag:hard>并给其他初始值"
-			},
-			{
-				"type": "switch",
-				"condition": "core.status.hard",
-				"caseList": [
-					{
-						"case": "'Easy'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "1"
-							},
-							{
-								"type": "comment",
-								"text": "可以在这里修改初始道具或属性，比如赠送黄钥匙等"
-							}
-						]
-					},
-					{
-						"case": "'Normal'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "2"
-							}
-						]
-					},
-					{
-						"case": "'Hard'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "3"
-							}
-						]
-					},
-					{
-						"case": "'Hell'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "4"
-							}
-						]
-					}
-				]
-			},
 			{
 				"type": "comment",
 				"text": "初始剧情"
@@ -499,7 +451,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"betweenAttackMax": false,
 		"useLoop": false,
 		"startUsingCanvas": false,
-		"startDirectly": false,
 		"statusCanvas": false,
 		"displayEnemyDamage": true,
 		"displayCritical": true,

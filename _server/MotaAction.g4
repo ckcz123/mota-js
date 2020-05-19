@@ -322,6 +322,43 @@ var code = '[\n'+action_0+']\n';
 return code;
 */;
 
+// levelChoose 事件编辑器入口之一
+levelChoose_m
+    :   '难度分歧' BGNL? levelChooseList+ BEND
+
+
+/* levelChoose_m
+tooltip : 难度分歧
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+var code = '[\n'+levelChooseList_0+']\n';
+return code;
+*/;
+
+levelChooseList
+    : levelChooseChoice
+    | levelChooseEmpty;
+
+levelChooseEmpty
+    :   Newline
+    
+/* levelChooseEmpty
+var code = ' \n';
+return code;
+*/;
+
+levelChooseChoice
+   :    '难度分歧项' '名称' EvalString '简写' EvalString '变量:hard值' Int '颜色' ColorString? Colour BGNL Newline action+ BEND
+
+/* levelChooseChoice
+tooltip : 难度分歧项
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+default : ['简单','Easy',1,'']
+ColorString_0 = ColorString_0 ? (', "color": [' + ColorString_0 + ']') : '';
+var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+Int_0+ColorString_0+', "action": [\n'+action_0+']},\n';
+return code;
+*/;
+
+
 //为了避免关键字冲突,全部加了_s
 //动作
 action
@@ -2808,8 +2845,8 @@ Floor_Meta_List
     /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'item_ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
-    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'难度显示文字色'|'楼层转换背景'|'楼层转换文字色'|'装备列表'
-    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor', 'equipName']*/;
+    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'楼层转换背景'|'楼层转换文字色'|'装备列表'
+    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'floorChangingBackground', 'floorChangingTextColor', 'equipName']*/;
 
 Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'动画时间'

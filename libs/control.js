@@ -2521,9 +2521,6 @@ control.prototype.updateGlobalAttribute = function (name) {
                     texts[i].style.color = attribute[name];
                 break;
             }
-        case 'hardLabelColor':
-            core.dom.hard.style.color = attribute[name];
-            break;
         case 'floorChangingBackground':
             core.dom.floorMsgGroup.style.background = attribute[name];
             break;
@@ -2844,7 +2841,6 @@ control.prototype._resize_tools = function (obj) {
         style.marginTop = 6 * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
-    core.dom.hard.style.color = obj.globalAttribute.hardLabelColor;
     if (core.domStyle.isVertical) {
         core.dom.hard.style.width = obj.outerSize - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + "px";
     }

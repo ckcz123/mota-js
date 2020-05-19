@@ -2636,7 +2636,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         });
         if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {
             core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4], 2);
-            core.fillText('ui', data.hard, x, parseInt(y+22+size/2), core.dom.hard.style.color, this._buildFont(30,true));
+            core.fillText('ui', data.hard, x, parseInt(y+22+size/2), data.hero.flags.__hardColor__ || 'red', this._buildFont(30,true));
         }
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);

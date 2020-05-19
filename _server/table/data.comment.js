@@ -132,10 +132,10 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"levelChoose": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval instanceof Array && thiseval.length>=1 && thiseval[0] instanceof Array && thiseval[0].length==2",
+					"_type": "event",
+					"_event": "levelChoose",
 					"_docs": "难度分歧",
-					"_data": "难度选择：每个数组的第一个是其在标题界面显示的难度，第二个是在游戏内部传输的字符串，会显示在状态栏，修改此处后需要在project/functions中作相应更改。\n如果需直接开始游戏将下面的startDirectly开关打开即可。"
+					"_data": "难度分歧定义和对应的事件；此处留空数组表示将直接开始游戏"
 				},
 				"equipName": {
 					"_leaf": true,
@@ -187,13 +187,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_string": true,
 					"_docs": "状态栏文字色",
 					"_data": "状态栏的文字颜色，默认是白色"
-				},
-				"hardLabelColor": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "难度标签色",
-					"_data": "难度显示的颜色，默认是红色"
 				},
 				"floorChangingBackground": {
 					"_leaf": true,
@@ -646,12 +639,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_docs": "标题事件化",
 					"_data": "是否开始菜单canvas化；如果此项为true，则将使用canvas来绘制开始菜单"
-				},
-				"startDirectly": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "不选择难度",
-					"_data": "点击“开始游戏”后是否立刻开始游戏而不显示难度选择界面"
 				},
 				"statusCanvas": {
 					"_leaf": true,

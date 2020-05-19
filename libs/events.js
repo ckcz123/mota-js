@@ -61,12 +61,29 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.dom.musicBtn.style.display = 'block';
         core.push(todo, core.firstData.startCanvas);
     }
+    core.push(todo, {"type": "function", "function": "function() { core.events._startGame_setHard(); }"})
     core.push(todo, core.firstData.startText);
     this.insertAction(todo, null, null, function () {
         core.events._startGame_afterStart(nowLoc, callback);
     });
 
     if (route != null) core.startReplay(route);
+}
+
+events.prototype._startGame_setHard = function () {
+    // 根据难度设置flag:hard
+    // 这一段应当在startCanvas之后，startText之前做
+    var hardValue = 0;
+    var hardColor = 'red';
+    main.levelChoose.forEach(function (one) {
+        if (one.name == core.status.hard) {
+            hardValue = one.hard;
+            hardColor = core.arrayToRGBA(one.color || [255,0,0,1]);
+            core.insertAction(one.action);
+        }
+    });
+    core.setFlag('hard', 0);
+    core.setFlag('__hardColor__', hardColor);
 }
 
 events.prototype._startGame_afterStart = function (nowLoc, callback) {

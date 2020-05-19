@@ -70,6 +70,11 @@ editor_blockly = function () {
       MotaActionBlocks['level_m'].xmlText(),
       MotaActionBlocks['commonEvent_m'].xmlText(),
       MotaActionBlocks['item_m'].xmlText(),
+      MotaActionFunctions.actionParser.parse([
+        {"title":"简单", "name": "Easy", "hard": 1, "action": [
+          {"type": "comment", "text": "在这里写该难度需执行的事件"}
+        ]}
+      ], 'levelChoose'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),

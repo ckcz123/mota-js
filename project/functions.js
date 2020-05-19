@@ -1032,6 +1032,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 难度
 	core.statusBar.hard.innerText = core.status.hard;
+	core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
 	// 自定义状态栏绘制
 	core.drawStatusBar();
 

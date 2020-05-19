@@ -105,7 +105,7 @@ function editor() {
 
         // tile
         tileSize: [1,1],
-        startLoc: {"x":0,"y":0},
+        startLoc: null,
         lockMode: false,
 
         // 最近使用的图块

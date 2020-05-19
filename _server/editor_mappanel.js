@@ -655,9 +655,9 @@ editor_mappanel_wrapper = function (editor) {
      * 切换画笔模式
      */
     editor.uifunctions.brushMod3_onchange = function () {
-        if (!editor.config.get('alertTileMode') &&
-            !confirm("从V2.6.6开始，tileset贴图模式已被废弃。\n请右键额外素材，并输入所需要绘制的宽高，然后单击地图以绘制一个区域。\n\n点取消将不再显示此提示。")) {
-            editor.config.set('alertTileMode', true);
+        if (!editor.config.get('alertTileModeV2.7') &&
+            !confirm("从V2.7开始，请直接素材区拖框进行绘制区域。\n\n点取消将不再显示此提示。")) {
+            editor.config.set('alertTileModeV2.7', true);
         }
         // tip.showHelp(5)
         tip.isSelectedBlock(false)

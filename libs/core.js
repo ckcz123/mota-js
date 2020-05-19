@@ -292,9 +292,11 @@ core.prototype._init_sys_flags = function () {
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', 500);
-    core.domStyle.scale = core.getLocalStorage('scale', 1);
-    if (core.domStyle.scale != 1) {
-        core.resize();
+    if (main.mode != 'editor') {
+        core.domStyle.scale = core.getLocalStorage('scale', 1);
+        if (core.domStyle.scale != 1) {
+            core.resize();
+        }
     }
 }
 

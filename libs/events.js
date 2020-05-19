@@ -2067,7 +2067,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
     } else if (data.timeout) {
         core.status.event.interval = setTimeout(function() {
             core.status.route.push("input:none");
-            core.removeFlag("type");
+            core.setFlag("type", -1);
             core.doAction();
         }, data.timeout);
     }

@@ -42,6 +42,10 @@ maps.prototype.loadFloor = function (floorId, map) {
         if (notCopy.indexOf(name) == -1 && map[name] != null)
             content[name] = core.clone(map[name]);
     }
+    if (map.deleted) {
+        content['blocks'] = [];
+        return content;
+    }
     map = this.decompressMap(map.map, floorId);
     // 事件处理
     content['blocks'] = this._mapIntoBlocks(map, floor, floorId);
@@ -267,7 +271,7 @@ maps.prototype.saveMap = function (floorId) {
     }
     // 砍层状态：直接返回
     if (main.mode == 'play' && (flags.__removed__ || []).indexOf(floorId) >= 0) {
-        return { canFlyTo: false, cannotViewMap: true };
+        return { deleted: true, canFlyTo: false, cannotViewMap: true };
     }
 
     var map = maps[floorId], floor = core.floors[floorId];
@@ -303,23 +307,6 @@ maps.prototype.loadMap = function (data, floorId) {
         return map;
     }
     return this.loadFloor(floorId, data[floorId]);
-}
-
-////// 删除地图，不计入存档 //////
-maps.prototype.removeMaps = function (fromId, toId) {
-    if (!core.isPlaying()) return;
-    toId = toId || fromId;
-    var fromIndex = core.floorIds.indexOf(fromId),
-        toIndex = core.floorIds.indexOf(toId);
-    if (toIndex < 0) toIndex = core.floorIds.length - 1;
-    flags.__removed__ = flags.__removed__ || [];
-    for (var i = fromIndex; i <= toIndex; ++i) {
-        var floorId = core.floorIds[i];
-        delete flags.__visited__[floorId];
-        flags.__removed__.push(floorId);
-        core.status.maps[floorId].canFlyTo = false;
-        core.status.maps[floorId].cannotViewMap = true;
-    }
 }
 
 ////// 更改地图画布的尺寸

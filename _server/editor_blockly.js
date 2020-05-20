@@ -1169,9 +1169,8 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
 
     setTimeout(function () {
         document.getElementById("colorPicker").value = getValue();
-        window.jsColorPicker.confirm = setValue;
         // 设置位置
-        triggerColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top);
+        openColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top, setValue);
     });
 
     return document.createElement('table');

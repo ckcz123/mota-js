@@ -228,10 +228,6 @@
                     <div class="searchLogo"></div>
                     <input type="text" id="searchBlock" placeholder="搜索图块"/>
                 </div>
-                <div id="colorPanel" class="cpPanel" style="display: none">
-                    <input class="color" id="colorPicker" value="255,215,0,1"/>
-                    <button onclick="confirmColor()">确定</button>
-                </div>
                 <button class="cpPanel" onclick="editor_blockly.selectPoint()">地图选点</button>
                 <button class="cpPanel" onclick="editor.uievent.searchUsedFlags()" style="margin-left:5px">变量出现位置搜索</button>
                 <input type="checkbox" class="cpPanel" id="blocklyReplace" onchange="editor_blockly.triggerReplace()" style="margin-left: 10px" />
@@ -248,6 +244,10 @@
                 <textarea id="codeArea" spellcheck="false"></textarea>
             </div>
         </div>
+    </div>
+    <div id="colorPanel" class="cpPanel" style="display: none">
+        <input class="color" id="colorPicker" value="255,215,0,1"/>
+        <button onclick="confirmColor()">确定</button>
     </div>
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
         <button onclick="editor_multi.confirm()">确认</button>

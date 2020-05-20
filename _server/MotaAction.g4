@@ -1498,23 +1498,26 @@ return code;
 */;
 
 showImage_s
-    :   '显示图片' '图片编号' Int '图片' EvalString BGNL?
+    :   '显示图片' '图片编号' Int '图片' EvalString '翻转' Reverse_List BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showImage_s
 tooltip : showImage：显示图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
-default : [1,"bg.jpg","0","0",1,0,false]
+default : [1,"bg.jpg","null","0","0",1,0,false]
 colour : this.printColor
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
 showImage_1_s
-    :   '显示图片' '图片编号' Int '图片' EvalString BGNL?
+    :   '显示图片' '图片编号' Int '图片' EvalString '翻转' Reverse_List BGNL?
         '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '不透明度' Number BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '时间' Int '不等待执行完毕' Bool Newline
 
@@ -1522,11 +1525,14 @@ showImage_1_s
 /* showImage_1_s
 tooltip : showImage_1：显示图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
-default : [1,"bg.jpg","0","0","","",1,"0","0","","",0,false]
+default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 colour : this.printColor
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", '+
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', '+
            '"sloc": ['+PosString_0+','+PosString_1+','+PosString_2+','+PosString_3+'], '+
            '"loc": ['+PosString_4+','+PosString_5+','+PosString_6+','+PosString_7+'], '+
            '"opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
@@ -2506,22 +2512,25 @@ return code;
 
 
 drawImage_s
-    :   '绘制图片' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
+    :   '绘制图片' EvalString '翻转' Reverse_List '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
 
 
 /* drawImage_s
 tooltip : drawImage：绘制图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
-default : ["bg.jpg","0","0","",""]
+default : ["bg.jpg","null","0","0","",""]
 colour : this.subColor
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
 PosString_2 = PosString_2 ? (', "w": '+PosString_2) : '';
 PosString_3 = PosString_3 ? (', "h": '+PosString_3) : '';
-var code = '{"type": "drawImage", "image": "'+EvalString_0+'", "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
+var code = '{"type": "drawImage", "image": "'+EvalString_0+'"'+Reverse_List_0+', "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
 return code;
 */;
 
 drawImage_1_s
-    :   '绘制图片' EvalString '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
+    :   '绘制图片' EvalString '翻转' Reverse_List '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 
@@ -2530,7 +2539,10 @@ tooltip : drawImage：绘制图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
 default : ["bg.jpg","0","0","32","32","0","0","32","32"]
 colour : this.subColor
-var code = '{"type": "drawImage", "image": "'+EvalString_0+'"'+
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
+var code = '{"type": "drawImage", "image": "'+EvalString_0+'"'+Reverse_List_0+
            ', "x": '+PosString_0+', "y": '+PosString_1+', "w": '+PosString_2+', "h": '+PosString_3+
            ', "x1": '+PosString_4+', "y1": '+PosString_5+', "w1": '+PosString_6+', "h1": '+PosString_7+'},\n';
 return code;
@@ -2865,6 +2877,10 @@ TextAlign_List
 TextBaseline_List
     :   '不改变'|'顶部'|'悬挂'|'居中'|'标准值'|'ideographic'|'底部'
     /*TextBaseline_List ['null','top','hanging','middle','alphabetic','ideographic','bottom']*/;
+
+Reverse_List
+    :   '不改变'|'左右翻转'|'上下翻转'|'中心翻转'
+    /*Reverse_List ['null',':x',':y',':o']*/;
 
 ShopUse_List
     :   '金币' | '经验'

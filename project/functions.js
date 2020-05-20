@@ -1360,7 +1360,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 绘制下一个数据
 		var name = toDraw[index];
 		// 图片大小25x25
-		ctx.drawImage(core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
+		core.drawImage(ctx, core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
 		// 文字内容
 		var text = (core.statusBar[name] || {}).innerText || " ";
 		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消

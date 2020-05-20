@@ -1455,7 +1455,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
 events.prototype._action_showImage = function (data, x, y, prefix) {
     if (core.isReplaying()) data.time = 0;
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, data.image, data.sloc, data.loc, data.opacity, data.time);
+        data.code, data.image + (data.reverse || ''), data.sloc, data.loc, data.opacity, data.time);
 }
 
 events.prototype._precompile_showImage = function (data) {
@@ -2651,7 +2651,12 @@ events.prototype.closeDoor = function (x, y, id, callback) {
 
 ////// 显示图片 //////
 events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time, callback) {
+    var imageName = null;
     if (typeof image == 'string') {
+        imageName = image;
+        if (image.endsWith(':x') || image.endsWith(':y') || image.endsWith(':o')) {
+            image = image.substring(0, image.length - 2);
+        }
         image = core.getMappedName(image);
         image = core.material.images.images[image];
     }
@@ -2673,7 +2678,7 @@ events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time,
     time = time || 0;
     var name = "image" + zIndex;
     var ctx = core.createCanvas(name, x, y, w, h, zIndex);
-    ctx.drawImage(image, sx, sy, sw, sh, 0, 0, w, h);
+    core.drawImage(ctx, imageName == null ? image : imageName, sx, sy, sw, sh, 0, 0, w, h);
     if (time == 0) {
         core.setOpacity(name, opacityVal);
         if (callback) callback();

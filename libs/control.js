@@ -260,7 +260,7 @@ control.prototype._animationFrame_weather_fog = function () {
         var w = core.__PIXELS__, h = core.__PIXELS__;
         core.setAlpha('weather', 0.5);
         core.animateFrame.weather.nodes.forEach(function (p) {
-            ctx.drawImage(core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
+            core.drawImage(ctx, core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
             p.x += p.xs;
             p.y += p.ys;
             if (p.x > core.bigmap.width*32 - w/2) {
@@ -2515,10 +2515,10 @@ control.prototype.updateHeroIcon = function (name) {
     var ratio = Math.min(w / h, 1), width = 32 * ratio, left = 16 - width/2;
 
     var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
     canvas.width = 32;
     canvas.height = 32;
-    context.drawImage(image, 0, 0, w, h, left, 0, width, 32);
+    core.drawImage(ctx, image, 0, 0, w, h, left, 0, width, 32);
 
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
 }

@@ -815,7 +815,7 @@ maps.prototype._drawBg_drawBackground = function (floorId, ctx) {
     if (groundInfo != null) {
         for (var i = 0; i < width; i++) {
             for (var j = 0; j < height; j++) {
-                ctx.drawImage(groundInfo.image, 32 * groundInfo.posX, groundInfo.height * groundInfo.posY, 32, 32, i * 32, j * 32, 32, 32);
+                core.drawImage(ctx, groundInfo.image, 32 * groundInfo.posX, groundInfo.height * groundInfo.posY, 32, 32, i * 32, j * 32, 32, 32);
             }
         }
     }
@@ -899,6 +899,9 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
     images.forEach(function (t) {
         if (typeof t == 'string') t = [0, 0, t];
         var dx = parseInt(t[0]), dy = parseInt(t[1]), imageName = t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
+        if (imageName.endsWith(':x') || imageName.endsWith(':y') || imageName.endsWith(':o')) {
+            imageName = imageName.substring(0, imageName.length - 2);
+        }
         imageName = core.getMappedName(imageName);
         var image = core.material.images.images[imageName];
         if (redraw && frame == 1) return; // 不重绘
@@ -911,7 +914,7 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
                 this._drawFloorImages_gif(image, dx, dy);
                 return;
             }
-            core.maps._drawFloorImage(ctx, name, t[3], image, offsetX, width, dx, dy, redraw);
+            core.maps._drawFloorImage(ctx, name, t[3], t[2], image, offsetX, width, dx, dy, redraw);
         }
     });
 }
@@ -941,11 +944,11 @@ maps.prototype._drawFloorImages_gif = function (image, dx, dy) {
     return;
 }
 
-maps.prototype._drawFloorImage = function (ctx, name, type, image, offsetX, width, dx, dy, redraw) {
+maps.prototype._drawFloorImage = function (ctx, name, type, imageName, image, offsetX, width, dx, dy, redraw) {
     var height = image.height;
     var _draw = function () {
         if (redraw) core.clearMap(ctx, dx, dy, width, height);
-        core.drawImage(ctx, image, offsetX, 0, width, height, dx, dy, width, height);
+        core.drawImage(ctx, imageName, offsetX, 0, width, height, dx, dy, width, height);
     }
     if (!type) {
         if (name != 'bg') return;
@@ -958,11 +961,11 @@ maps.prototype._drawFloorImage = function (ctx, name, type, image, offsetX, widt
     if (type == 2) {
         if (name == 'bg') {
             if (redraw) core.clearMap(ctx, dx, dy + height - 32, width, 32);
-            core.drawImage('bg', image, offsetX, height - 32, width, 32, dx, dy + height - 32, width, 32);
+            core.drawImage('bg', imageName, offsetX, height - 32, width, 32, dx, dy + height - 32, width, 32);
         }
         else if (name == 'fg') {
             if (redraw) core.clearMap(ctx, dx, dy, width, height - 32);
-            core.drawImage('fg', image, offsetX, 0, width, height - 32, dx, dy, width, height - 32);
+            core.drawImage('fg', imageName, offsetX, 0, width, height - 32, dx, dy, width, height - 32);
         }
         return;
     }
@@ -1035,7 +1038,7 @@ maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, sta
     ];
     var data = indexData[index];
     if(index>=16){ // 拐角直接绘制
-        canvas.drawImage(autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
+        core.drawImage(canvas, autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
     }else{ // 非拐角要根据是否已经绘制进行切分后绘制
         this._drawAutotile_renderCut(canvas, autotile, x, y, size, data, done);
     }
@@ -1076,7 +1079,7 @@ maps.prototype._drawAutotile_renderCut = function(canvas, autotile, x, y, size, 
     }
     for(var i = 0; i<4; i++){
         var dt = drawData[i];if(!dt)continue;
-        canvas.drawImage(autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2);
+        core.drawImage(canvas, autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2);
     };
 }
 
@@ -1086,7 +1089,7 @@ maps.prototype._drawAutotile_drawBlockByIndex = function (ctx, dx, dy, autotileI
     var sx = 16 * ((index - 1) % 6), sy = 16 * (~~((index - 1) / 6));
     status = status || 0;
     status %= parseInt(autotileImg.width / 96);
-    ctx.drawImage(autotileImg, sx + 96 * status, sy, 16, 16, dx, dy, size / 2, size / 2);
+    core.drawImage(ctx, autotileImg, sx + 96 * status, sy, 16, 16, dx, dy, size / 2, size / 2);
 }
 
 maps.prototype._drawAutotile_getAutotileAroundId = function (currId, x, y, mapArr) {
@@ -1157,16 +1160,16 @@ maps.prototype._makeAutotileEdges = function () {
         var n = core.maps.getNumberById(t);
         core.material.autotileEdges[n] = [n];
 
-        ctx.clearRect(0, 0, 32, 32);
-        ctx.drawImage(core.material.images.autotile[t], 0, 0, 32, 32, 0, 0, 32, 32);
+        core.clearMap(ctx, 0, 0, 32, 32);
+        core.drawImage(ctx, core.material.images.autotile[t], 0, 0, 32, 32, 0, 0, 32, 32);
         var data = canvas.toDataURL("image/png");
 
         autotileIds.forEach(function (t2) {
             if (t == t2) return;
             var n2 = core.maps.getNumberById(t2);
 
-            ctx.clearRect(0, 0, 32, 32);
-            ctx.drawImage(core.material.images.autotile[t2], 32, 0, 32, 32, 0, 0, 32, 32);
+            core.clearMap(ctx, 0, 0, 32, 32);
+            core.drawImage(ctx, core.material.images.autotile[t2], 32, 0, 32, 32, 0, 0, 32, 32);
             if (data == canvas.toDataURL("image/png")) {
                 core.material.autotileEdges[n].push(n2);
             }
@@ -1229,7 +1232,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
-        tempCanvas.drawImage(core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
+        core.drawImage(tempCanvas, core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
             32 * options.heroLoc.x, 32 * options.heroLoc.y + 32 - height, 32, height);
     }
     // 缩略图：前景
@@ -1259,21 +1262,21 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
             var side = (size - realWidth) / 2;
             core.fillRect(ctx, x, y, side, realHeight, '#000000');
             core.fillRect(ctx, x + size - side, y, side, realHeight);
-            ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x + side, y, realWidth, realHeight);
+            core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x + side, y, realWidth, realHeight);
         }
         else {
             var realWidth = size, realHeight = realWidth * tempHeight / tempWidth;
             var side = (size - realHeight) / 2;
             core.fillRect(ctx, x, y, realWidth, side, '#000000');
             core.fillRect(ctx, x, y + size - side, realWidth, side);
-            ctx.drawImage(tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x, y + side, realWidth, realHeight);
+            core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x, y + side, realWidth, realHeight);
         }
     }
     else {
         // 只绘制可见窗口
         var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
             offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-        ctx.drawImage(tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+        core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
     }
 }
 

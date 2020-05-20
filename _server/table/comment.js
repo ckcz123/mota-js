@@ -393,7 +393,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"canFlyTo": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_docs": "可飞",
+							"_docs": "可楼传",
 							"_data": "该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）"
 						},
 						"canUseQuickShop": {

@@ -63,9 +63,9 @@ ActionParser.prototype.parse = function (obj,type) {
       var buildEquip = function (obj) {
         obj = obj || {};
         var text_choices = null;
-        var knownKeys = MotaActionBlocks.equipKnown.json.args0[0].options.map(function (one) {return one[1];})
+        var knownEquipListKeys = MotaActionBlocks.equipKnown.json.args0[0].options.map(function (one) {return one[1];})
         Object.keys(obj).sort().forEach(function (key) {
-          var one = knownKeys.indexOf(key) >= 0 ? 'equipKnown' : 'equipUnknown';
+          var one = knownEquipListKeys.indexOf(key) >= 0 ? 'equipKnown' : 'equipUnknown';
           text_choices = MotaActionBlocks[one].xmlText([
             key, obj.key, text_choices
           ]);
@@ -385,13 +385,13 @@ ActionParser.prototype.parseAction = function() {
       data.loc=data.loc||['','']
       if (data.sloc) {
         this.next = MotaActionBlocks['showImage_1_s'].xmlText([
-            data.code,data.image||data.name,data.sloc[0],data.sloc[1],data.sloc[2],data.sloc[3],data.opacity,
+            data.code,data.image||data.name,data.reverse,data.sloc[0],data.sloc[1],data.sloc[2],data.sloc[3],data.opacity,
             data.loc[0],data.loc[1],data.loc[2],data.loc[3],data.time||0,data.async||false,this.next
         ]);
       }
       else {
         this.next = MotaActionBlocks['showImage_s'].xmlText([
-              data.code,data.image||data.name,data.loc[0],data.loc[1],data.opacity,data.time||0,data.async||false,this.next]);
+              data.code,data.image||data.name,data.reverse,data.loc[0],data.loc[1],data.opacity,data.time||0,data.async||false,this.next]);
       }
       break;
     case "hideImage": // 清除图片
@@ -837,12 +837,12 @@ ActionParser.prototype.parseAction = function() {
     case "drawImage": // 绘制图片
       if (data.x1 != null && data.y1 != null && data.w1 != null && data.h1 != null) {
         this.next = MotaActionBlocks['drawImage_1_s'].xmlText([
-          data.image, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, this.next
+          data.image, data.reverse, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, this.next
         ]);
       }
       else {
         this.next = MotaActionBlocks['drawImage_s'].xmlText([
-          data.image, data.x, data.y, data.w, data.h, this.next
+          data.image, data.reverse, data.x, data.y, data.w, data.h, this.next
         ]);
       }
       break;

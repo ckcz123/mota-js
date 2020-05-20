@@ -2459,23 +2459,17 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
 }
 
 ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType, y) {
-    var compare, differentMode = null;
-    if (info.index < this.LAST) compare = core.compareEquipment(null, info.selectId);
-    else {
-        if (equipType<0) differentMode = '<当前没有该装备的空位，请先卸下装备>';
-        else {
-            var last = core.material.items[info.equipEquipment[equipType]]||{};
-            if (last.equip && (last.equip.percentage || false) != (equip.equip.percentage || false))
-                differentMode = '<数值和比例模式之间的切换不显示属性变化>';
-            else
-                compare = core.compareEquipment(info.selectId, info.equipEquipment[equipType]);
-        }
+    if (info.index < this.LAST) {
+        // 光标在装备栏上：查询卸下装备属性
+        return core.compareEquipment(null, info.selectId);
     }
-    if (differentMode != null) {
-        core.fillText('ui', differentMode, 10, y, '#CCCCCC', this._buildFont(14, false));
-        return;
+    if (equipType < 0) {
+        // 没有空位
+        core.fillText('ui', '<当前没有该装备的空位，请先卸下装备>', 10, y, '#CCCCCC', this._buildFont(14, false));
+        return null;
     }
-    return compare;
+    // 光标在装备上：查询装上后的属性变化
+    return core.compareEquipment(info.selectId, info.equipEquipment[equipType]);
 }
 
 ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipType) {
@@ -2485,19 +2479,19 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
 
     // --- 变化值...
     core.setFont('ui', this._buildFont(14, true));
-    for (var name in compare) {
+    for (var name in core.status.hero) {
+        if (typeof core.status.hero[name] != 'number') continue;
+        var nowValue = core.getRealStatus(name);
+        // 查询新值
+        var newValue = (core.getStatus(name) + (compare.value[name] || 0))
+            * (core.getBuff(name) + (compare.percentage[name] || 0) / 100);
+        if (nowValue == newValue) continue;
         var text = this._drawEquipbox_getStatusName(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
-        var nowValue = core.getStatus(name) * core.getBuff(name), newValue = (core.getStatus(name) + compare[name]) * core.getBuff(name);
-        if (equip.equip.percentage) {
-            var nowBuff = core.getBuff(name), newBuff = nowBuff + compare[name] / 100;
-            nowValue = Math.floor(nowBuff * core.getStatus(name));
-            newValue = Math.floor(newBuff * core.getStatus(name));
-        }
         nowValue = core.formatBigNumber(nowValue);
         newValue = core.formatBigNumber(newValue);
         this._drawEquipbox_drawStatusChanged_draw(nowValue+"->", '#CCCCCC', obj);
-        this._drawEquipbox_drawStatusChanged_draw(newValue, compare[name]>0?'#00FF00':'#FF0000', obj);
+        this._drawEquipbox_drawStatusChanged_draw(newValue, newValue>nowValue?'#00FF00':'#FF0000', obj);
         obj.drawOffset += 8;
     }
 }

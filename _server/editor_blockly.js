@@ -75,6 +75,9 @@ editor_blockly = function () {
           {"type": "comment", "text": "在这里写该难度需执行的事件"}
         ]}
       ], 'levelChoose'),
+      MotaActionFunctions.actionParser.parse({
+        "type": 0, "value": {"atk": 10}, "percentage": {"speed": 10},
+      }, 'equip'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -1067,7 +1070,7 @@ function omitedcheckUpdateFunction(event) {
         }
 
         // 对动画进行补全
-        if (type == 'animate_s' && name == 'IdString_0') {
+        if ((type == 'animate_s' && name == 'IdString_0') || (type == 'equip_m' && name == 'IdString_0')) {
           return filter(allAnimates, content);
         }
 

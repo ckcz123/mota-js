@@ -358,6 +358,60 @@ var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+
 return code;
 */;
 
+// equip 事件编辑器入口之一
+equip_m 
+    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ BEND
+
+
+/* equip_m
+tooltip : 装备
+default : ['0', '']
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+if (!/^\d+$/.test(EvalString_0)) {
+    EvalString_0 = '"' + EvalString_0 + '"';
+}
+IdString_0 = IdString_0 && (', "animate": "'+IdString_0+'"');
+var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}}';
+return code;
+*/;
+
+equipList
+    : equipKnown
+    | equipUnknown
+    | equipEmpty;
+
+
+equipKnown
+    : Equip_List ':' Number BEND
+
+
+/* equipKnown
+tooltip : 装备项
+default : ['atk', 10]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '"'+Equip_List_0+'": '+Number_0+', ';
+*/;
+
+equipUnknown
+    : EvalString ':' Number BEND
+
+
+/* equipUnknown
+tooltip : 装备项
+default : ['speed', 10]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '"'+EvalString_0+'": '+Number_0+', ';
+*/;
+
+
+equipEmpty
+    :   Newline
+    
+/* equipEmpty
+var code = ' \n';
+return code;
+*/;
+
 
 //为了避免关键字冲突,全部加了_s
 //动作
@@ -2908,8 +2962,8 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'
-    /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp']*/;
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'
+    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax']*/;
 
 Id_List
     :   '变量' | '状态' | '物品' | '独立开关' | '临时变量' |'全局存储'
@@ -2918,6 +2972,10 @@ Id_List
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
     /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
+
+Equip_List
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'魔力'|'魔力上限'
+    /*Equip_List ['hp','hpmax','atk','def','mdef','mana','manamax']*/;
 
 //转blockly后不保留需要加"
 EvalString

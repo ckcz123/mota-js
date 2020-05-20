@@ -65,8 +65,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一把已经生锈的剑",
 			"equip": {
 				"type": 0,
-				"atk": 0,
-				"animate": "sword"
+				"animate": "sword",
+				"value": {
+					"atk": 0
+				}
 			}
 		},
 		"sword1": {
@@ -75,8 +77,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一把很普通的铁剑",
 			"equip": {
 				"type": 0,
-				"atk": 10,
-				"animate": "sword"
+				"animate": "sword",
+				"value": {
+					"atk": 10
+				}
 			}
 		},
 		"sword2": {
@@ -85,8 +89,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一把很普通的银剑",
 			"equip": {
 				"type": 0,
-				"atk": 20,
-				"animate": "sword"
+				"animate": "sword",
+				"value": {
+					"atk": 20
+				}
 			}
 		},
 		"sword3": {
@@ -95,8 +101,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一把很普通的骑士剑",
 			"equip": {
 				"type": 0,
-				"atk": 40,
-				"animate": "sword"
+				"animate": "sword",
+				"value": {
+					"atk": 40
+				}
 			}
 		},
 		"sword4": {
@@ -105,8 +113,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一把很普通的圣剑",
 			"equip": {
 				"type": 0,
-				"atk": 80,
-				"animate": "sword"
+				"animate": "sword",
+				"value": {
+					"atk": 80
+				}
 			}
 		},
 		"sword5": {
@@ -115,8 +125,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一把很普通的神圣剑",
 			"equip": {
 				"type": 0,
-				"atk": 100,
-				"animate": "sword"
+				"animate": "sword",
+				"value": {
+					"atk": 160
+				}
 			}
 		},
 		"shield0": {
@@ -125,7 +137,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一个很破旧的铁盾",
 			"equip": {
 				"type": 1,
-				"def": 0
+				"value": {
+					"def": 0
+				}
 			}
 		},
 		"shield1": {
@@ -134,7 +148,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一个很普通的铁盾",
 			"equip": {
 				"type": 1,
-				"def": 10
+				"value": {
+					"def": 10
+				}
 			}
 		},
 		"shield2": {
@@ -143,7 +159,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一个很普通的银盾",
 			"equip": {
 				"type": 1,
-				"def": 20
+				"value": {
+					"def": 20
+				}
 			}
 		},
 		"shield3": {
@@ -152,7 +170,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一个很普通的骑士盾",
 			"equip": {
 				"type": 1,
-				"def": 40
+				"value": {
+					"def": 40
+				}
 			}
 		},
 		"shield4": {
@@ -161,7 +181,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一个很普通的圣盾",
 			"equip": {
 				"type": 1,
-				"def": 80
+				"value": {
+					"def": 80
+				}
 			}
 		},
 		"shield5": {
@@ -170,8 +192,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			"text": "一个很普通的神圣盾",
 			"equip": {
 				"type": 1,
-				"def": 100,
-				"mdef": 100
+				"value": {
+					"def": 100,
+					"mdef": 100
+				}
 			}
 		},
 		"superPotion": {

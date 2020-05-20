@@ -292,53 +292,41 @@ items.prototype.unloadEquip = function (equipType, callback) {
 }
 
 items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
-    var result = {};
+    var result = {"value": {}, "percentage": {}};
     var first = core.material.items[compareEquipId], second = core.material.items[beComparedEquipId];
-    for (var name in core.status.hero) {
-        if (typeof core.status.hero[name] == 'number') {
-            var ans = 0;
-            if (first) ans += (first.equip || {})[name] || 0;
-            if (second) ans -= (second.equip || {})[name] || 0;
-            if (ans != 0) result[name] = ans;
+    for (var one in result) {
+        for (var name in core.status.hero) {
+            if (typeof core.status.hero[name] == 'number') {
+                var ans = 0;
+                if (first) ans += ((first.equip || {})[one] || {})[name] || 0;
+                if (second) ans -= ((second.equip || {})[one] || {})[name] || 0;
+                if (ans != 0) result[one][name] = ans;
+            }
         }
     }
     return result;
 }
 
 ////// 实际换装的效果 //////
-items.prototype._loadEquipEffect = function (equipId, unloadEquipId, isPercentage) {
+items.prototype._loadEquipEffect = function (equipId, unloadEquipId) {
     // 比较能力值
     var result = core.compareEquipment(equipId, unloadEquipId);
 
-    if (isPercentage) {
-        for (var name in result)
-            core.addBuff(name, result[name] / 100);
-    }
-    else {
-        for (var name in result)
-            core.status.hero[name] += result[name];
-    }
+    for (var name in result.percentage)
+        core.addBuff(name, result.percentage[name] / 100);
+
+    for (var name in result.value)
+        core.status.hero[name] += result.value[name];
 }
 
 items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
     var loadEquip = core.material.items[loadId] || {}, unloadEquip = core.material.items[unloadId] || {};
-    loadEquip.equip = loadEquip.equip || {};
-    unloadEquip.equip = unloadEquip.equip || {}
-
-    var loadPercentage = loadEquip.equip.percentage, unloadPercentage = unloadEquip.equip.percentage;
-
-    if (loadId && unloadId && (loadPercentage || false) != (unloadPercentage || false)) {
-        this.unloadEquip(type);
-        this.loadEquip(loadId);
-        if (callback) callback();
-        return;
-    }
 
     // --- 音效
     this._realLoadEquip_playSound();
 
     // --- 实际换装
-    this._loadEquipEffect(loadId, unloadId, loadPercentage == null ? unloadPercentage : loadPercentage);
+    this._loadEquipEffect(loadId, unloadId);
 
     // --- 加减
     if (loadId) core.removeItem(loadId);

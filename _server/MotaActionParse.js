@@ -58,6 +58,22 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       return MotaActionBlocks['levelChoose_m'].xmlText([text_choices]);
 
+    case 'equip':
+      if(!obj) obj={};
+      var buildEquip = function (obj) {
+        obj = obj || {};
+        var text_choices = null;
+        var knownKeys = MotaActionBlocks.equipKnown.json.args0[0].options.map(function (one) {return one[1];})
+        Object.keys(obj).sort().forEach(function (key) {
+          var one = knownKeys.indexOf(key) >= 0 ? 'equipKnown' : 'equipUnknown';
+          text_choices = MotaActionBlocks[one].xmlText([
+            key, obj.key, text_choices
+          ]);
+        })
+        return text_choices;
+      }
+      return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage)]);
+
     case 'shop':
       var buildsub = function(obj,parser,next){
         var text_choices = null;

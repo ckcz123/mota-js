@@ -358,7 +358,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果该点存在事件 -- V2.5.4 以后阻击怪也可以有战后事件了
-	core.push(todo, core.floors[core.status.floorId].afterBattle[x + "," + y]);
+	if (core.status.floorId != null) {
+		core.push(todo, core.floors[core.status.floorId].afterBattle[x + "," + y]);
+	}
 
 	// 在这里增加其他的自定义事件需求
 	/*
@@ -385,6 +387,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var todo = [];
 	// 检查该点的获得开门后事件。
+	if (core.status.floorId == null) return;
 	var event = core.floors[core.status.floorId].afterOpenDoor[x + "," + y];
 	if (event) core.unshift(todo, event);
 
@@ -403,6 +406,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var todo = [];
 	// 检查该点的获得道具后事件。
+	if (core.status.floorId == null) return;
 	var event = core.floors[core.status.floorId].afterGetItem[x + "," + y];
 	if (event && (event instanceof Array || !isGentleClick || !event.disableOnGentleClick)) {
 		core.unshift(todo, event);

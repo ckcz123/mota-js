@@ -618,41 +618,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		};
 	};
 
-	// 其实只注释了最后一行，只能这样了
-	control.drawHero = function (status, offset) {
-		if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
-		var x = core.getHeroLoc('x'),
-			y = core.getHeroLoc('y'),
-			direction = core.getHeroLoc('direction');
-		status = status || 'stop';
-		offset = offset || 0;
-		var way = core.utils.scan[direction];
-		var dx = way.x,
-			dy = way.y,
-			offsetX = dx * offset,
-			offsetY = dy * offset;
-		core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32 * core.bigmap.width - core.__PIXELS__);
-		core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32 * core.bigmap.height - core.__PIXELS__);
-		core.clearAutomaticRouteNode(x + dx, y + dy);
-		core.clearMap('hero');
-
-		if (!core.hasFlag('hideHero')) {
-			this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-				core.drawImage('hero', block.img, block.heroIcon[block.status] * block.width,
-					block.heroIcon.loc * block.height, block.width, block.height,
-					block.posx + (32 - block.width) / 2, block.posy + 32 - block.height, block.width, block.height);
-			});
-		}
-
-		core.control.updateViewport();
-		//core.setGameCanvasTranslate('hero', 0, 0);
-	};
-
-	// 复写转发
-	core.drawHero = function (status, offset) {
-		return core.control.drawHero(status, offset);
-	};
-
 	// 创建摄像机对象
 	this.camera = new this.Camera();
 
@@ -661,13 +626,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		this.camera.update();
 	};
 
+	core.control._drawHero_updateViewport = function () {
+		core.control.updateViewport();
+	}
+
 	// 代理原本的镜头事件
-	control.updateViewport = function () {
+	core.control.updateViewport = function () {
 		core.plugin.camera.requestCameraUpdate();
 	};
 
 	// 更变楼层的行为追加，重置镜头
-	events.prototype.changingFloor = function (floorId, heroLoc) {
+	core.events.changingFloor = function (floorId, heroLoc) {
 		this.eventdata.changingFloor(floorId, heroLoc);
 		core.plugin.camera.resetCamera();
 	};

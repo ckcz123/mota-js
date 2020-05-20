@@ -786,6 +786,10 @@ control.prototype.drawHero = function (status, offset) {
         this._drawHero_draw(direction, x, y, status, offset);
     }
 
+    this._drawHero_updateViewport();
+}
+
+control.prototype._drawHero_updateViewport = function () {
     core.control.updateViewport();
     core.setGameCanvasTranslate('hero', 0, 0);
 }

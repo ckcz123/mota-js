@@ -30,7 +30,7 @@ editor_ui_wrapper = function (editor) {
             '双击事件编辑器的图块可以进行长文本编辑/脚本编辑/地图选点/UI绘制预览等操作',
             'ESC或点击空白处可以自动保存当前修改',
             'H键可以打开操作帮助哦',
-            'tileset贴图模式可以在地图上拖动来一次绘制一个区域；右键额外素材也可以绑定宽高',
+            'tileset平铺模式可以在地图上拖动来平铺框选的图形',
             '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴，Delete删除',
             'Alt+数字键保存图块，数字键读取保存的图块',
         ];
@@ -236,6 +236,7 @@ editor_ui_wrapper = function (editor) {
                             throw (err)
                         }
                         ; printf('地图保存成功');
+                        editor.uifunctions.unhighlightSaveFloorButton();
                     });
                 }
                 selectBox.isSelected(false);
@@ -318,6 +319,7 @@ editor_ui_wrapper = function (editor) {
                     editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
                     editor.updateMap();
                     editor.uivalues.postMapData.push(data);
+                    editor.uifunctions.highlightSaveFloorButton();
                     printf("已撤销此操作，你可能需要重新保存地图。");
                 }
                 return;
@@ -332,6 +334,7 @@ editor_ui_wrapper = function (editor) {
                     editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
                     editor.updateMap();
                     editor.uivalues.preMapData.push(data);
+                    editor.uifunctions.highlightSaveFloorButton();
                     printf("已重做此操作，你可能需要重新保存地图。");
                 }
                 return;
@@ -349,6 +352,7 @@ editor_ui_wrapper = function (editor) {
                 editor.uivalues.copyedInfo = editor.copyFromPos();
                 editor.clearPos(true, null, function () {
                     printf('该点事件已剪切');
+                    editor.uifunctions.unhighlightSaveFloorButton();
                 })
                 return;
             }
@@ -366,6 +370,7 @@ editor_ui_wrapper = function (editor) {
                         throw (err)
                     }
                     ; printf('粘贴事件成功');
+                    editor.uifunctions.unhighlightSaveFloorButton();
                     editor.drawPosSelection();
                 });
                 return;
@@ -373,6 +378,7 @@ editor_ui_wrapper = function (editor) {
             // DELETE
             if (e.keyCode == 46 && !selectBox.isSelected()) {
                 editor.clearPos(true);
+                editor.uifunctions.unhighlightSaveFloorButton();
                 return;
             }
             // ESC

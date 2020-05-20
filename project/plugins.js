@@ -221,6 +221,49 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 },
+    "removeMap": function () {
+	// 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。
+	// 推荐用法：
+	// 对于超高层或分区域塔，当在1区时将2区以后的地图删除；1区结束时恢复2区，进二区时删除1区地图，以此类推
+	// 这样可以大幅减少存档空间，以及加快存读档速度
+
+	// 删除楼层
+	// core.removeMaps("MT1", "MT300") 删除MT1~MT300之间的全部层
+	// core.removeMaps("MT10") 只删除MT10层
+	this.removeMaps = function (fromId, toId) {
+		toId = toId || fromId;
+		var fromIndex = core.floorIds.indexOf(fromId),
+			toIndex = core.floorIds.indexOf(toId);
+		if (toIndex < 0) toIndex = core.floorIds.length - 1;
+		flags.__removed__ = flags.__removed__ || [];
+		for (var i = fromIndex; i <= toIndex; ++i) {
+			var floorId = core.floorIds[i];
+			delete flags.__visited__[floorId];
+			flags.__removed__.push(floorId);
+			core.status.maps[floorId].deleted = true;
+			core.status.maps[floorId].canFlyTo = false;
+			core.status.maps[floorId].cannotViewMap = true;
+		}
+	}
+
+	// 恢复楼层
+	// core.resumeMaps("MT1", "MT300") 恢复MT1~MT300之间的全部层
+	// core.resumeMaps("MT10") 只恢复MT10层
+	this.resumeMaps = function (fromId, toId) {
+		toId = toId || fromId;
+		var fromIndex = core.floorIds.indexOf(fromId),
+			toIndex = core.floorIds.indexOf(toId);
+		if (toIndex < 0) toIndex = core.floorIds.length - 1;
+		flags.__removed__ = flags.__removed__ || [];
+		for (var i = fromIndex; i <= toIndex; ++i) {
+			var floorId = core.floorIds[i];
+			flags.__removed__ = flags.__removed__.filter(function (f) { return f != floorId; });
+			if (core.status.maps[floorId].deleted) {
+				core.status.maps[floorId] = core.loadFloor(floorId);
+			}
+		}
+	}
+},
     "itemShop": function () {
 	// 道具商店相关的插件
 	// 可在全塔属性-全局商店中使用「道具商店」事件块进行编辑（如果找不到可以在入口方块中找）

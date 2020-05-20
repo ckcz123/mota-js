@@ -1655,16 +1655,15 @@ ui.prototype.drawWaiting = function(text) {
 ui.prototype.drawSwitchs = function() {
     core.status.event.id = 'switchs';
     var choices = [
-        "背景音乐： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
-        "背景音效： "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        "音乐/音效： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]") + " "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
         //显示为 0~10 十挡
         " <     音量：" + Math.round(Math.sqrt(100 * core.musicStatus.userVolume)) + "     > ",
         //数值越大耗时越长
         " <   步时：" + core.values.moveSpeed + "   > ",
         " <   转场：" + core.values.floorChangeTime + "   > ",
+        " <   放缩：" + Math.max(core.domStyle.scale, 1) + "x   > ",
         "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
-        "临界显伤： "+(core.flags.displayCritical ? "[ON]" : "[OFF]"),
-        "领域显伤： "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "临界/领域： "+(core.flags.displayCritical ? "[ON]" : "[OFF]")+" "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "血瓶绕路： "+(core.hasFlag('__potionNoRouting__') ? "[ON]":"[OFF]"),
         "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
         "返回主菜单"

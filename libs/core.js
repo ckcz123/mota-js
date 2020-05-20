@@ -84,6 +84,7 @@ function core() {
     // 样式
     this.domStyle = {
         scale: 1.0,
+        availableScale: [],
         isVertical: false,
         showStatusBar: true,
         toolbarBtn: false,
@@ -291,6 +292,12 @@ core.prototype._init_sys_flags = function () {
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', 500);
+    if (main.mode != 'editor') {
+        core.domStyle.scale = core.getLocalStorage('scale', 1);
+        if (core.domStyle.scale != 1) {
+            core.resize();
+        }
+    }
 }
 
 core.prototype._init_platform = function () {

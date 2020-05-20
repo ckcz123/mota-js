@@ -202,6 +202,7 @@ editor_mappanel_wrapper = function (editor) {
                 editor.exchangeBgFg(editor.uivalues.startPos, editor.uivalues.endPos, editor.layerMod);
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+            editor.uifunctions.unhighlightSaveFloorButton();
             return false;
         }
         editor.uivalues.holdingPath = 0;
@@ -239,12 +240,11 @@ editor_mappanel_wrapper = function (editor) {
                 var x0 = editor.uivalues.stepPostfix[0].x;
                 var y0 = editor.uivalues.stepPostfix[0].y;
                 var idnum = editor.info.idnum;
+                var pmod=function(a,b){return (a%b+b)%b;}
                 for (var ii = 0; ii < editor.uivalues.stepPostfix.length; ii++) {
-                    if (editor.uivalues.stepPostfix[ii].y != y0) {
-                        y0++;
-                        idnum += imgWidth;
-                    }
-                    editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.ids[editor.indexs[idnum + editor.uivalues.stepPostfix[ii].x - x0]];
+                    var dx=pmod(editor.uivalues.stepPostfix[ii].x-x0,editor.uivalues.tileSize[0]);
+                    var dy=pmod(editor.uivalues.stepPostfix[ii].y-y0,editor.uivalues.tileSize[1]);
+                    editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.ids[editor.indexs[idnum + dx+dy*imgWidth]];
                 }
             } else {
                 // 检测是否是填充模式
@@ -274,6 +274,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.holdingPath = 0;
             editor.uivalues.stepPostfix = [];
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+            editor.uifunctions.highlightSaveFloorButton();
         }
         return false;
     }
@@ -465,6 +466,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.drawEventBlock();
             editor_mode.showMode('loc');
             printf('添加楼梯事件成功');
+            editor.uifunctions.unhighlightSaveFloorButton();
         });
         return true;
     }
@@ -525,6 +527,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.drawPosSelection();
             editor_mode.showMode('loc');
             printf('绑定机关门事件成功');
+            editor.uifunctions.unhighlightSaveFloorButton();
         });
         bindSpecialDoor.loc = null;
         bindSpecialDoor.enemys = [];
@@ -577,6 +580,7 @@ editor_mappanel_wrapper = function (editor) {
                 throw (err)
             }
             ; printf('复制事件成功');
+            editor.uifunctions.unhighlightSaveFloorButton();
             editor.drawPosSelection();
         });
     }
@@ -591,6 +595,7 @@ editor_mappanel_wrapper = function (editor) {
         editor.savePreMap();
         editor_mode.onmode('');
         editor.exchangePos(editor.pos, editor.uivalues.lastRightButtonPos[1]);
+        editor.uifunctions.unhighlightSaveFloorButton();
     }
 
     /**
@@ -600,6 +605,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.clearEvent_click = function (e) {
         e.stopPropagation();
         editor.clearPos(false);
+        editor.uifunctions.unhighlightSaveFloorButton();
     }
 
     /**
@@ -609,6 +615,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.clearLoc_click = function (e) {
         e.stopPropagation();
         editor.clearPos(true);
+        editor.uifunctions.unhighlightSaveFloorButton();
     }
 
     /**
@@ -647,13 +654,13 @@ editor_mappanel_wrapper = function (editor) {
      * 切换画笔模式
      */
     editor.uifunctions.brushMod3_onchange = function () {
-        if (!editor.config.get('alertTileMode') &&
-            !confirm("从V2.6.6开始，tileset贴图模式已被废弃。\n请右键额外素材，并输入所需要绘制的宽高，然后单击地图以绘制一个区域。\n\n点取消将不再显示此提示。")) {
-            editor.config.set('alertTileMode', true);
+        if (!editor.config.get('alertTileModeV2.7') &&
+            !confirm("从V2.7开始，请直接素材区拖框进行绘制区域。\n\n点取消将不再显示此提示。")) {
+            editor.config.set('alertTileModeV2.7', true);
         }
         // tip.showHelp(5)
         tip.isSelectedBlock(false)
-        tip.msgs[11] = String('tileset贴图模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
+        tip.msgs[11] = String('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
         tip.whichShow(12);
         editor.brushMod = editor.dom.brushMod3.value;
     }
@@ -765,6 +772,15 @@ editor_mappanel_wrapper = function (editor) {
         });
     }
 
+    editor.uifunctions.highlightSaveFloorButton=function(){
+        var saveFloor = document.getElementById('saveFloor');
+        saveFloor.style.background='#FFCCAA';
+    }
+
+    editor.uifunctions.unhighlightSaveFloorButton=function(){
+        var saveFloor = document.getElementById('saveFloor');
+        saveFloor.style.background='';
+    }
 
     editor.uifunctions.saveFloor_func = function () {
         var saveFloor = document.getElementById('saveFloor');
@@ -776,6 +792,7 @@ editor_mappanel_wrapper = function (editor) {
                     throw (err)
                 }
                 ; printf('保存成功');
+                editor.uifunctions.unhighlightSaveFloorButton()
             });
         }
         saveFloor.onclick = editor_mode.saveFloor;

@@ -75,6 +75,7 @@ editor_mappanel_wrapper = function (editor) {
      * + 绘图时画个矩形在那个位置
      */
     editor.uifunctions.map_ondown = function (e) {
+        editor.uivalues.lastMoveE=e;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
         if (editor.uivalues.bindSpecialDoor.loc != null) {
@@ -89,10 +90,10 @@ editor_mappanel_wrapper = function (editor) {
             }
             return false;
         }
-        if (e.button == 2) {
-            editor.uifunctions.showMidMenu(e.clientX, e.clientY);
-            return false;
-        }
+        // if (e.buttons == 2) { // 挪到onup
+        //     editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+        //     return false;
+        // }
         if (!selectBox.isSelected()) {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
@@ -122,6 +123,7 @@ editor_mappanel_wrapper = function (editor) {
      * + 绘图模式时找到与队列尾相邻的鼠标方向的点画个矩形
      */
     editor.uifunctions.map_onmove = function (e) {
+        editor.uivalues.lastMoveE=e;
         if (!selectBox.isSelected()) {
             if (editor.uivalues.startPos == null) return;
             //tip.whichShow(1);
@@ -136,9 +138,25 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.endPos = pos;
             if (editor.uivalues.startPos != null) {
                 if (editor.uivalues.startPos.x != editor.uivalues.endPos.x || editor.uivalues.startPos.y != editor.uivalues.endPos.y) {
-                    core.drawArrow('eui',
-                        32 * editor.uivalues.startPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.startPos.y + 16 - core.bigmap.offsetY,
-                        32 * editor.uivalues.endPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.endPos.y + 16 - core.bigmap.offsetY);
+                    if (e.buttons == 2) {
+                        // 右键拖拽: 画选的区域
+                        var x0 = editor.uivalues.startPos.x;
+                        var y0 = editor.uivalues.startPos.y;
+                        var x1 = editor.uivalues.endPos.x;
+                        var y1 = editor.uivalues.endPos.y;
+                        if (x0 > x1) { x0 ^= x1; x1 ^= x0; x0 ^= x1; }//swap
+                        if (y0 > y1) { y0 ^= y1; y1 ^= y0; y0 ^= y1; }//swap
+                        // draw rect
+                        editor.dom.euiCtx.clearRect(0, 0, editor.dom.euiCtx.canvas.width, editor.dom.euiCtx.canvas.height);
+                        editor.dom.euiCtx.fillStyle = 'rgba(0, 127, 255, 0.4)';
+                        editor.dom.euiCtx.fillRect(32 * x0 - core.bigmap.offsetX, 32 * y0 - core.bigmap.offsetY,
+                            32 * (x1 - x0) + 32, 32 * (y1 - y0) + 32);
+                    }else{
+                        // 左键拖拽: 画箭头
+                        core.drawArrow('eui',
+                            32 * editor.uivalues.startPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.startPos.y + 16 - core.bigmap.offsetY,
+                            32 * editor.uivalues.endPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.endPos.y + 16 - core.bigmap.offsetY);
+                    }
                 }
             }
             // editor_mode.onmode('nextChange');
@@ -192,17 +210,31 @@ editor_mappanel_wrapper = function (editor) {
      * + 非绘图模式时, 交换首末点的内容
      * + 绘图模式时, 根据画线/画矩形/画tileset 做对应的绘制
      */
-    editor.uifunctions.map_onup = function (e) {
+    editor.uifunctions.map_onup = function (ee) {
+        console.log(1)
+        var e=editor.uivalues.lastMoveE;
         if (!selectBox.isSelected()) {
-            //tip.whichShow(1);
-            // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
-            if (editor.layerMod == 'map')
-                editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
-            else
-                editor.exchangeBgFg(editor.uivalues.startPos, editor.uivalues.endPos, editor.layerMod);
-            editor.uivalues.startPos = editor.uivalues.endPos = null;
+            if (e.buttons == 2) {
+                if (editor.uivalues.endPos==null || editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y){
+                    // 右键点击: 弹菜单
+                    editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+                } else {
+                    // 右键拖拽: 选中区域
+                    printf('已经选中该区域')
+                    // 后续的处理
+                }
+            } else {
+                // 左键拖拽: 交换
+                //tip.whichShow(1);
+                // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
+                if (editor.layerMod == 'map')
+                    editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
+                else
+                    editor.exchangeBgFg(editor.uivalues.startPos, editor.uivalues.endPos, editor.layerMod);
+                editor.uifunctions.unhighlightSaveFloorButton();
+            }
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
-            editor.uifunctions.unhighlightSaveFloorButton();
+            editor.uivalues.startPos = editor.uivalues.endPos = null;
             return false;
         }
         editor.uivalues.holdingPath = 0;

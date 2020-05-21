@@ -336,13 +336,15 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"doorInfo": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "event",
+					"_event": "doorInfo", 
 					"_docs": "门信息",
 					"_data": "该图块的门信息，是一个四元数组。\n第一项为所需要的钥匙信息，第二项为开关门的毫秒数，第三项为开此门时的音效，第四项为关此门时的音效。仅对animates生效。"
 				},
 				"faceIds": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "event",
+					"_event": "faceIds",
 					"_docs": "行走图朝向",
 					"_data": "行走图朝向，仅对NPC有效。可以在这里定义同一个NPC的多个朝向行走图。\n比如 {\"up\":\"N333\",\"down\":\"N334\",\"left\":\"N335\",\"right\":\"N336\"} 就将该素材的上下左右朝向分别绑定到N333,N334,N335和N336四个图块。\n在勇士撞上NPC时，或NPC在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
 				}

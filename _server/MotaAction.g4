@@ -457,6 +457,75 @@ return code;
 */;
 
 
+// doorInfo 事件编辑器入口之一
+doorInfo_m 
+    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ BEND
+
+
+/* doorInfo_m
+tooltip : 开门信息
+default : [160, 'door.mp3', 'door.mp3']
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+EvalString_0 = EvalString_0 && (', "openSound": "' + EvalString_0 + '"');
+EvalString_1 = EvalString_1 && (', "closeSound": "' + EvalString_1 + '"');
+var code = '{"time": '+Int_0+EvalString_0+EvalString_1+', "keys": {\n'+doorKeyList_0+'\n}}';
+return code;
+*/;
+
+doorKeyList
+    : doorKeyKnown
+    | doorKeyUnknown
+    | doorKeyEmpty;
+
+
+doorKeyKnown
+    : Key_List ':' Int BEND
+
+
+/* doorKeyKnown
+tooltip : 需要钥匙
+default : ['yellowKey', 1]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '"'+Key_List_0+'": '+Int_0+', ';
+*/;
+
+doorKeyUnknown
+    : IdString ':' Int BEND
+
+
+/* doorKeyUnknown
+tooltip : 需要钥匙
+default : ['orangeKey', 1]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '"'+IdString_0+'": '+Int_0+', ';
+*/;
+
+
+doorKeyEmpty
+    :   Newline
+    
+/* doorKeyEmpty
+var code = ' \n';
+return code;
+*/;
+
+
+faceIds_m
+    : '行走图朝向:' BGNL? Newline '向上ID' IdString? '向下ID' IdString? '向左ID' IdString? '向右ID' IdString? BEND
+
+
+/* faceIds_m
+tooltip : 行走图朝向
+default : ["","","",""]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '{' + [
+    IdString_0 && ('"up": "' + IdString_0 +'"'),
+    IdString_1 && ('"down": "' + IdString_1 +'"'),
+    IdString_2 && ('"left": "' + IdString_2 +'"'),
+    IdString_3 && ('"right": "' + IdString_3 +'"'),
+].join(', ') + '}\n';
+*/;
+
 
 //为了避免关键字冲突,全部加了_s
 //动作
@@ -3041,6 +3110,10 @@ EnemyId_List
 Equip_List
     :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'魔力'|'魔力上限'
     /*Equip_List ['hp','hpmax','atk','def','mdef','mana','manamax']*/;
+
+Key_List
+    :   '黄钥匙'|'蓝钥匙'|'红钥匙'|'绿钥匙'|'铁门钥匙'
+    /*Key_List ['yellowKey','blueKey','redKey','greenKey','steelKey']*/;
 
 //转blockly后不保留需要加"
 EvalString

@@ -74,6 +74,22 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage)]);
 
+      case 'doorInfo':
+        if(!obj) obj={};
+        var buildKeys = function (obj) {
+          obj = obj || {};
+          var text_choices = null;
+          var knownListKeys = MotaActionBlocks.doorKeyKnown.json.args0[0].options.map(function (one) {return one[1];})
+          Object.keys(obj).sort().forEach(function (key) {
+            var one = knownListKeys.indexOf(key) >= 0 ? 'doorKeyKnown' : 'doorKeyUnknown';
+            text_choices = MotaActionBlocks[one].xmlText([
+              key, obj.key, text_choices
+            ]);
+          })
+          return text_choices;
+        }
+        return MotaActionBlocks['doorInfo_m'].xmlText([obj.time || 160, obj.openSound, obj.closeSound, buildKeys(obj.keys)]);
+
     case 'floorImage':
       if(!obj) obj=[];
       var text_choices = null;
@@ -84,6 +100,9 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       return MotaActionBlocks['floorImage_m'].xmlText([text_choices]);
 
+    case 'faceIds':
+      if(!obj) obj={};
+      return MotaActionBlocks['faceIds_m'].xmlText([obj.up||"", obj.down||"", obj.left||"", obj.right||""]);
 
     case 'shop':
       var buildsub = function(obj,parser,next){

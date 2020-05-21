@@ -81,6 +81,10 @@ editor_blockly = function () {
       MotaActionFunctions.actionParser.parse([{
         "name": "bg.jpg", "x": 0, "y": 0, "canvas": "bg"
       }], 'floorImage'),
+      MotaActionFunctions.actionParser.parse({
+        "time": 160, "openSound": "door.mp3", "closeSound": "door.mp3", "keys": {"yellowKey": 1, "orangeKey": 1}
+      }, 'doorInfo'),
+      MotaActionBlocks['faceIds_m'].xmlText(),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -1052,7 +1056,8 @@ function omitedcheckUpdateFunction(event) {
           || (type == 'choices_s' && name == 'IdString_0') || (type == 'choicesContext' && name == 'IdString_0')
           || (type == 'closeDoor_s' && name == 'IdString_0') || (type == 'setBlock_s' && name == 'EvalString_0')
           || (type == 'setBgFgBlock_s' && name == 'EvalString_0') || (type == 'drawIcon_s' && name == 'IdString_0')
-          || (type == 'shopsub' && name == 'IdString_1') || (type == 'shopChoices' && name == 'IdString_0')) {
+          || (type == 'shopsub' && name == 'IdString_1') || (type == 'shopChoices' && name == 'IdString_0')
+          || type == 'faceIds_m') {
           return filter(allIds, content);
         }
 
@@ -1062,13 +1067,14 @@ function omitedcheckUpdateFunction(event) {
         }
 
         // 对道具ID进行补全
-        if ((type == 'useItem_s' || type == 'loadEquip_s') && name == 'IdString_0') {
+        if ((type == 'useItem_s' || type == 'loadEquip_s' || type == 'doorKeyUnknown') && name == 'IdString_0') {
           return filter(allItems, content);
         }
 
         // 对图片名进行补全
         if ((type == 'showImage_s' || type == 'showImage_1_s' || type == 'showGif_s' || type == 'setHeroIcon_s'
-          || type == 'follow_s' || type == 'unfollow_s' || type == 'drawImage_s' || type == 'drawImage_1_s') && name == 'EvalString_0') {
+          || type == 'follow_s' || type == 'unfollow_s' || type == 'drawImage_s' || type == 'drawImage_1_s'
+          || type == 'floorOneImage') && name == 'EvalString_0') {
           return filter(allImages, content);
         }
 

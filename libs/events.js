@@ -469,13 +469,14 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         return clearAndReturn();
     doorInfo = doorInfo.doorInfo;
     // Check all keys
-    var keyInfo = doorInfo[0];
+    var keyInfo = doorInfo.keys || {};
     if (needKey) {
-        if (keyInfo == null) {
-            core.drawTip("无法开启此门");
-            return clearAndReturn();
-        }
         for (var keyName in keyInfo) {
+            // --- 如果是一个不存在的道具，则直接认为无法开启
+            if (!core.material.items[keyName]) {
+                core.drawTip("无法开启此门");
+                return clearAndReturn();
+            }
             var keyValue = keyInfo[keyName];
             if (core.itemCount(keyName) < keyValue) {
                 core.drawTip("你没有" + ((core.material.items[keyName] || {}).name || "钥匙"), null, true);
@@ -487,7 +488,7 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
             core.removeItem(keyName, keyInfo[keyName]);
         }
     }
-    core.playSound(doorInfo[2] || 'door.mp3');
+    core.playSound(doorInfo.openSound);
     return true;
 }
 
@@ -495,7 +496,7 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
     var blockInfo = core.getBlockInfo(id);
     var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 
-    var speed = (core.getBlockById(id).event.doorInfo[1] || 160) / 4;
+    var speed = (core.getBlockById(id).event.doorInfo.time || 160) / 4;
 
     var locked = core.status.lockControl;
     core.lockControl();
@@ -2629,11 +2630,11 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     }
 
     // 关门动画
-    core.playSound(doorInfo[3] || 'door.mp3');
+    core.playSound(doorInfo.closeDoor);
     var blockInfo = core.getBlockInfo(id);
     var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 
-    var speed = (doorInfo[1] || 160) / 4, state = 0;
+    var speed = (doorInfo.time || 160) / 4, state = 0;
     var animate = window.setInterval(function () {
         state++;
         if (state == 4) {

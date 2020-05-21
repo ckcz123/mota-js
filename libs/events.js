@@ -928,6 +928,8 @@ events.prototype.doAction = function (keepUI) {
 }
 
 events.prototype._doAction_finishEvents = function () {
+    if (core.status.gameOver) return true;
+
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
         // 检测并执行延迟自动事件

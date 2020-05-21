@@ -7,12 +7,14 @@ main.floors.sample1=
     "canUseQuickShop": true,
     "defaultGround": "grass",
     "images": [
-        [
-            0,
-            0,
-            "bg.jpg",
-            0
-        ]
+        {
+            "name": "bg.jpg",
+            "canvas": "bg",
+            "x": 0,
+            "y": 0,
+            "w": 416,
+            "h": 416
+        }
     ],
     "weather": [
         "snow",
@@ -263,13 +265,13 @@ main.floors.sample1=
             }
         ],
         "10,4": [
-            "\t[blackKing]你终于还是来了。",
+            "\t[blackMS]你终于还是来了。",
             "\t[hero]放开我们的公主！",
-            "\t[blackKing]如果我不愿意呢？",
+            "\t[blackMS]如果我不愿意呢？",
             "\t[hero]无需多说，拔剑吧！",
             {
                 "type": "battle",
-                "id": "blackKing"
+                "id": "blackMS"
             },
             {
                 "type": "hide",
@@ -285,7 +287,7 @@ main.floors.sample1=
                     7
                 ]
             },
-            "\t[blackKing]没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。",
+            "\t[blackMS]没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。",
             {
                 "type": "hide"
             }

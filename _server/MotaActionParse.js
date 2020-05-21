@@ -74,6 +74,17 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage)]);
 
+    case 'floorImage':
+      if(!obj) obj=[];
+      var text_choices = null;
+      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+        text_choices=MotaActionBlocks['floorOneImage'].xmlText([
+          choice.name, choice.reverse, choice.canvas||'bg', choice.x||0, choice.y||0, choice.disable||false, 
+          choice.sx, choice.sy, choice.w, choice.h, choice.frame, text_choices]);
+      }
+      return MotaActionBlocks['floorImage_m'].xmlText([text_choices]);
+
+
     case 'shop':
       var buildsub = function(obj,parser,next){
         var text_choices = null;

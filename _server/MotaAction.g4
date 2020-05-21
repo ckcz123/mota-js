@@ -412,6 +412,51 @@ var code = ' \n';
 return code;
 */;
 
+floorImage_m
+    : '楼层贴图' BGNL? Newline floorImageList+ BEND
+
+
+/* floorImage_m
+tooltip : 楼层贴图
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+var code = '[\n'+floorImageList_0+']\n';
+return code;
+*/;
+
+floorImageList
+    :   floorOneImage
+    |   floorEmptyImage;
+
+floorOneImage
+    :   '图片名' EvalString '翻转' Reverse_List '图层' Bg_Fg2_List '绘制坐标' 'x' Int 'y' Int '初始禁用' Bool BGNL? Newline 
+        '裁剪起点坐标' 'x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '帧数' IntString? BEND
+
+
+/* floorOneImage
+tooltip : 楼层贴图
+default : ["bg.jpg","null","bg",0,0,false,"","","","",""]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
+Bool_0 = Bool_0 ? (', "disable": true') : '';
+IntString_0 = IntString_0 && (', "sx": '+IntString_0);
+IntString_1 = IntString_1 && (', "sy": '+IntString_1);
+IntString_2 = IntString_2 && (', "w": '+IntString_2);
+IntString_3 = IntString_3 && (', "h": '+IntString_3);
+IntString_4 = IntString_4 && (', "frame": '+IntString_4);
+return '{"name": "'+EvalString_0+'"'+Reverse_List_0+', "canvas": "'+Bg_Fg2_List_0+'", "x": '+Int_0+', "y": '+Int_1+Bool_0+IntString_0+IntString_1+IntString_2+IntString_3+IntString_4+'},\n';
+*/;
+
+floorEmptyImage
+    :   Newline
+    
+/* floorEmptyImage
+var code = ' \n';
+return code;
+*/;
+
+
 
 //为了避免关键字冲突,全部加了_s
 //动作
@@ -2909,6 +2954,10 @@ B_1_List
 Bg_Fg_List
     :   '背景层'|'前景层'
     /*Bg_Fg_List ['bg','fg']*/;
+
+Bg_Fg2_List
+    :   '背景层'|'前景层'|'自适配'
+    /*Bg_Fg2_List ['bg','fg','auto']*/;
 
 IgnoreChangeFloor_List
     :   '全局默认值' | '可穿透' | '不可穿透'

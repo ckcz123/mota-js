@@ -22,6 +22,17 @@ maps.prototype._setFloorSize = function (floorId) {
     core.floors[floorId].height = core.floors[floorId].height || core.__SIZE__;
 }
 
+maps.prototype._resetFloorImages = function () {
+    for (var floorId in core.status.maps) {
+        (core.status.maps[floorId].images || []).forEach(function (one) {
+            var flag = "__floorImg__" + floorId + "_" + one.x + "_" + one.y;
+            if (core.getFlag(flag) == null) {
+                if (one.disabled) core.setFlag(flag, true);
+            }
+        })
+    }
+}
+
 // ------ 加载地图与地图的存档读档（压缩与解压缩） ------ //
 
 ////// 加载某个楼层（从剧本或存档中） //////
@@ -896,39 +907,25 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
     floorId = floorId || core.status.floorId;
     if (!images) images = this._getFloorImages(floorId);
     var redraw = currStatus != null;
-    images.forEach(function (t) {
-        if (typeof t == 'string') t = [0, 0, t];
-        var dx = parseInt(t[0]), dy = parseInt(t[1]), imageName = t[2], frame = core.clamp(parseInt(t[4]), 1, 8);
-        if (imageName.endsWith(':x') || imageName.endsWith(':y') || imageName.endsWith(':o')) {
-            imageName = imageName.substring(0, imageName.length - 2);
-        }
-        imageName = core.getMappedName(imageName);
-        var image = core.material.images.images[imageName];
+    images.forEach(function (one) {
+        var image = core.material.images.images[core.getMappedName(one.name)];
+        var frame = one.frame || 1;
+        if (!image) return;
+        var flag = "__floorImg__" + floorId + "_" + one.x + "_" + one.y;
+        if (core.hasFlag(flag)) return;
         if (redraw && frame == 1) return; // 不重绘
 
-        if (core.isset(dx) && core.isset(dy) && image &&
-            !core.hasFlag("__floorImg__" + floorId + "_" + dx + "_" + dy)) {
-            var width = parseInt(image.width / frame), offsetX = (currStatus || 0) % frame * width;
-            if (/.*\.gif/i.test(imageName) && main.mode == 'play') {
-                if (redraw) return; // 忽略gif
-                this._drawFloorImages_gif(image, dx, dy);
-                return;
-            }
-            core.maps._drawFloorImage(ctx, name, t[3], t[2], image, offsetX, width, dx, dy, redraw);
+        if (/.*\.gif/i.test(one.name)) {
+            if (redraw) return;
+            this._drawFloorImages_gif(image, one.x, one.y);
+            return;
         }
-    });
+        this._drawFloorImage(ctx, name, one, image, currStatus);
+    }, this);
 }
 
 maps.prototype._getFloorImages = function (floorId) {
-    floorId = floorId || core.status.floorId;
-    var images = [];
-    if ((core.status.maps || core.floors)[floorId].images) {
-        images = (core.status.maps || core.floors)[floorId].images;
-        if (typeof images == 'string') {
-            images = [[0, 0, images]];
-        }
-    }
-    return images;
+    return ((core.status.maps || core.floors)[floorId || core.status.floorId] || {}).images || [];
 }
 
 maps.prototype._drawFloorImages_gif = function (image, dx, dy) {
@@ -944,30 +941,26 @@ maps.prototype._drawFloorImages_gif = function (image, dx, dy) {
     return;
 }
 
-maps.prototype._drawFloorImage = function (ctx, name, type, imageName, image, offsetX, width, dx, dy, redraw) {
+maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus) {
     var height = image.height;
-    var _draw = function () {
-        if (redraw) core.clearMap(ctx, dx, dy, width, height);
-        core.drawImage(ctx, imageName, offsetX, 0, width, height, dx, dy, width, height);
-    }
-    if (!type) {
-        if (name != 'bg') return;
-        return _draw();
-    }
-    if (type == 1) {
-        if (name != 'fg') return;
-        return _draw();
-    }
-    if (type == 2) {
+    var imageName = one.name + (one.reverse||'');
+    var width = parseInt((one.w == null ? image.width : one.w) / (one.frame || 1));
+    var height = one.h == null ? image.height : one.h;
+    var sx = (one.sx || 0) + (currStatus || 0) % (one.frame || 1) * width;
+    var sy = one.sy || 0;
+
+    if (one.canvas != 'auto' && one.canvas != name) return;
+    if (one.canvas != 'auto') {
+        if (currStatus != null) core.clearMap(ctx, one.x, one.y, width, height);
+        core.drawImage(ctx, imageName, sx, sy, width, height, one.x, one.y, width, height);
+    } else {
         if (name == 'bg') {
-            if (redraw) core.clearMap(ctx, dx, dy + height - 32, width, 32);
-            core.drawImage('bg', imageName, offsetX, height - 32, width, 32, dx, dy + height - 32, width, 32);
+            if (currStatus != null) core.clearMap(ctx, one.x, one.y + height - 32, width, 32);
+            core.drawImage(ctx, imageName, sx, sy + height - 32, width, 32, one.x, one.y+height - 32, width, 32);
+        } else if (name == 'fg') {
+            if (currStatus != null) core.clearMap(ctx, one.x, one.y, width, height - 32);
+            core.drawImage(ctx, imageName, sx, sy, width, height - 32, one.x, one.y, width, height - 32);
         }
-        else if (name == 'fg') {
-            if (redraw) core.clearMap(ctx, dx, dy, width, height - 32);
-            core.drawImage('fg', imageName, offsetX, 0, width, height - 32, dx, dy, width, height - 32);
-        }
-        return;
     }
 }
 

@@ -458,7 +458,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"images": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "event",
+							"_event": "floorImage",
 							"_docs": "楼层贴图",
 							"_data": "背景/前景图；你可以选择若干张图片来作为背景/前景素材。详细用法请参见文档“自定义素材”中的说明。"
 						},

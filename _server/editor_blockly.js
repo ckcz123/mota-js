@@ -78,6 +78,9 @@ editor_blockly = function () {
       MotaActionFunctions.actionParser.parse({
         "type": 0, "value": {"atk": 10}, "percentage": {"speed": 10},
       }, 'equip'),
+      MotaActionFunctions.actionParser.parse([{
+        "name": "bg.jpg", "x": 0, "y": 0, "canvas": "bg"
+      }], 'floorImage'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),

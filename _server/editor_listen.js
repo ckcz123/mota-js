@@ -32,7 +32,7 @@ editor_listen_wrapper = function (editor) {
         editor.dom.chooseThis.onmousedown = editor.uifunctions.chooseThis_click
         editor.dom.chooseInRight.onmousedown = editor.uifunctions.chooseInRight_click
         editor.dom.copyLoc.onmousedown = editor.uifunctions.copyLoc_click
-        editor.dom.moveLoc.onmousedown = editor.uifunctions.moveLoc_click
+        editor.dom.pasteLoc.onmousedown = editor.uifunctions.pasteLoc_click
         editor.dom.clearEvent.onmousedown = editor.uifunctions.clearEvent_click
         editor.dom.clearLoc.onmousedown = editor.uifunctions.clearLoc_click
 
@@ -130,8 +130,8 @@ editor_listen_wrapper = function (editor) {
         editor.dom.chooseInRight.onmousedown = null
         editor.dom.copyLoc.ontouchstart = editor.dom.copyLoc.onmousedown
         editor.dom.copyLoc.onmousedown = null
-        editor.dom.moveLoc.ontouchstart = editor.dom.moveLoc.onmousedown
-        editor.dom.moveLoc.onmousedown = null
+        editor.dom.pasteLoc.ontouchstart = editor.dom.pasteLoc.onmousedown
+        editor.dom.pasteLoc.onmousedown = null
         editor.dom.clearLoc.ontouchstart = editor.dom.clearLoc.onmousedown
         editor.dom.clearLoc.onmousedown = null
         

@@ -342,12 +342,7 @@ editor_mappanel_wrapper = function (editor) {
      * 显示右键菜单
      */
     editor.uifunctions.showMidMenu = function (x, y) {
-        editor.uivalues.lastRightButtonPos = JSON.parse(JSON.stringify(
-            [editor.pos, editor.uivalues.lastRightButtonPos[0]]
-        ));
         // --- copy
-        editor.uivalues.lastCopyedInfo = [editor.copyFromPos(), editor.uivalues.lastCopyedInfo[0]];
-        var locStr = '(' + editor.uivalues.lastRightButtonPos[1].x + ',' + editor.uivalues.lastRightButtonPos[1].y + ')';
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 
@@ -386,8 +381,8 @@ editor_mappanel_wrapper = function (editor) {
         else editor.dom.extraEvent.style.display = 'none';
 
         editor.dom.chooseThis.children[0].innerHTML = '选中此点' + '(' + editor.pos.x + ',' + editor.pos.y + ')'
-        editor.dom.copyLoc.children[0].innerHTML = '复制事件' + locStr + '到此处';
-        editor.dom.moveLoc.children[0].innerHTML = '交换事件' + locStr + '与此事件的位置';
+        editor.dom.copyLoc.children[0].innerHTML = '复制此事件';
+        editor.dom.pasteLoc.children[0].innerHTML = '粘贴到此事件';
         editor.dom.midMenu.style = 'top:' + (y + scrollTop) + 'px;left:' + (x + scrollLeft) + 'px;';
     }
 
@@ -568,34 +563,39 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.copyLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.preventDefault();
+        editor_mode.onmode('');
+        editor.uivalues.copyedInfo = editor.copyFromPos();
+        printf('该点事件已复制');
+        return;
+    }
+
+    /**
+     * editor.dom.pasteLoc.onmousedown
+     * 菜单 移动此事件
+     */
+    editor.uifunctions.pasteLoc_click = function (e) {
+        editor.uifunctions.hideMidMenu();
+        e.stopPropagation();
+        e.preventDefault();
+        if (!editor.uivalues.copyedInfo) {
+            printe("没有复制的事件");
+            return;
+        }
         editor.savePreMap();
         editor_mode.onmode('');
-        var now = editor.pos, last = editor.uivalues.lastRightButtonPos[1];
-        if (now.x == last.x && now.y == last.y) return;
-        editor.pasteToPos(editor.uivalues.lastCopyedInfo[1]);
+        editor.pasteToPos(editor.uivalues.copyedInfo);
         editor.updateMap();
         editor.file.saveFloorFile(function (err) {
             if (err) {
                 printe(err);
                 throw (err)
             }
-            ; printf('复制事件成功');
+            ; printf('粘贴到事件成功');
             editor.uifunctions.unhighlightSaveFloorButton();
             editor.drawPosSelection();
         });
-    }
-
-    /**
-     * editor.dom.moveLoc.onmousedown
-     * 菜单 移动此事件
-     */
-    editor.uifunctions.moveLoc_click = function (e) {
-        editor.uifunctions.hideMidMenu();
-        e.stopPropagation();
-        editor.savePreMap();
-        editor_mode.onmode('');
-        editor.exchangePos(editor.pos, editor.uivalues.lastRightButtonPos[1]);
-        editor.uifunctions.unhighlightSaveFloorButton();
+        return;
     }
 
     /**

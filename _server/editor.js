@@ -20,7 +20,7 @@ function editor() {
         chooseThis : document.getElementById('chooseThis'),
         chooseInRight : document.getElementById('chooseInRight'),
         copyLoc : document.getElementById('copyLoc'),
-        moveLoc : document.getElementById('moveLoc'),
+        pasteLoc : document.getElementById('pasteLoc'),
         clearEvent : document.getElementById('clearEvent'),
         clearLoc : document.getElementById('clearLoc'),
         brushMod:document.getElementById('brushMod'),
@@ -80,9 +80,6 @@ function editor() {
         scrollBarHeight :0,
         folded:false,
         foldPerCol: 50,
-        // 画图区菜单
-        lastRightButtonPos:[{x:0,y:0},{x:0,y:0}],
-        lastCopyedInfo : [null, null],
         //
         ratio : 1,
         // blockly转义

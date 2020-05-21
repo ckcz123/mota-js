@@ -465,7 +465,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"color": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "color",
 							"_docs": "色调",
 							"_data": "该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组如[255,0,0,0.3]"
 						},

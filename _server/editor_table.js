@@ -412,6 +412,7 @@ editor_table_wrapper = function (editor) {
         if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
         if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
         if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
+        if (cobj._type === 'color') editor.table.selectColor(input);
     }
 
     /**
@@ -426,6 +427,7 @@ editor_table_wrapper = function (editor) {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
             if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
             if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
+            if (cobj._type === 'color') editor.table.selectColor(input);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -442,6 +444,21 @@ editor_table_wrapper = function (editor) {
             return one;
         }, function (data) {
             input.value = JSON.stringify(cobj._onconfirm ? eval("("+cobj._onconfirm+")(JSON.parse(input.value), data)") : data);
+            input.onchange();
+        })
+    }
+
+    editor_table.prototype.selectColor = function (input) {
+        if (input.value != null) {
+            var str = input.value.toString().replace(/[^\d.,]/g, '');
+            if (/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/.test(str)) {            
+                document.getElementById('colorPicker').value = str;
+            }
+        }
+        var boundingBox = input.getBoundingClientRect();
+        openColorPicker(boundingBox.x, boundingBox.y + boundingBox.height, function (value) {
+            value = value.replace(/[^\d.,]/g, '');
+            input.value = '[' + value +']';
             input.onchange();
         })
     }

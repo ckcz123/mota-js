@@ -121,7 +121,7 @@
                             colorPickers.current = colorPickers[index];
                         }
                     },
-                    createListener = function(e) {
+                    createListener = function() {
                         elm = document.getElementById("colorPicker");
                         var input = elm,
                             position = window.ColorPicker.getOrigin(input),
@@ -268,9 +268,19 @@ jsColorPicker('input.color', {
     size: 1,
 });
 
-function openColorFromButton() {
-    delete window.jsColorPicker.confirm;
-    triggerColorPicker('414px', '53px');
+function openColorPicker(px, py, callback) {
+    window.jsColorPicker.confirm = callback;
+    var colorPanel = document.getElementById('colorPanel');
+    if (colorPanel.style.display=='none' && px != null && py != null) {
+        colorPanel.style.display = "inline-block";
+        colorPanel.style.left = px + 'px';
+        colorPanel.style.top = py + 'px';
+        window.jsColorPicker.create();
+    }
+    else {
+        colorPanel.style.display = 'none';
+        delete window.jsColorPicker.confirm;
+    }
 }
 
 function confirmColor() {
@@ -287,22 +297,8 @@ function confirmColor() {
         colorPicker.select();
         document.execCommand("Copy");
     }
-
-    triggerColorPicker();
-}
-
-function triggerColorPicker(left, top) {
-    var colorPanel = document.getElementById('colorPanel');
-    if (colorPanel.style.display=='none' && left && top) {
-        colorPanel.style.display = "inline-block";
-        colorPanel.style.left = left;
-        colorPanel.style.top = top;
-        window.jsColorPicker.create();
-    }
-    else {
-        colorPanel.style.display = 'none';
-        delete window.jsColorPicker.confirm;
-    }
+    colorPanel.style.display = 'none';
+    delete window.jsColorPicker.confirm;
 }
 
 // ------ AutoCompletion ------

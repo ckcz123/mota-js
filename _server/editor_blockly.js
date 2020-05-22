@@ -491,29 +491,31 @@ editor_blockly = function () {
             }).sort();
         }
 
-        var allIds = core.getAllIconIds();
-        var allIconIds = allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
+        var namesObj={};
+
+        namesObj.allIds = core.getAllIconIds();
+        namesObj.allIconIds = namesObj.allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
           return core.statusBar.icons[x] instanceof Image;
         }));
-        var allImages = Object.keys(core.material.images.images);
-        var allEnemys = Object.keys(core.material.enemys);
+        namesObj.allImages = Object.keys(core.material.images.images);
+        namesObj.allEnemys = Object.keys(core.material.enemys);
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
-          allEnemys = allEnemys.concat(MotaActionFunctions.pattern.replaceEnemyList.map(function (x) {
+            namesObj.allEnemys = namesObj.allEnemys.concat(MotaActionFunctions.pattern.replaceEnemyList.map(function (x) {
             return x[1];
           }))
         }
-        var allItems = Object.keys(core.material.items);
+        namesObj.allItems = Object.keys(core.material.items);
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
-          allItems = allItems.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
+            namesObj.allItems = namesObj.allItems.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
             return x[1];
           }))
         }
-        var allAnimates = Object.keys(core.material.animates);
-        var allBgms = Object.keys(core.material.bgms);
-        var allSounds = Object.keys(core.material.sounds);
-        var allShops = Object.keys(core.status.shops);
-        var allFloorIds = core.floorIds;
-        var allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
+        namesObj.allAnimates = Object.keys(core.material.animates);
+        namesObj.allBgms = Object.keys(core.material.bgms);
+        namesObj.allSounds = Object.keys(core.material.sounds);
+        namesObj.allShops = Object.keys(core.status.shops);
+        namesObj.allFloorIds = core.floorIds;
+        namesObj.allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
                          "maroon（深红色）", "navy（深蓝色）", "gold（金色）",  "olive（黄褐色）", "orange（橙色）", "purple（品红色）", 
                          "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
         var filter = function (list, content) {
@@ -523,48 +525,18 @@ editor_blockly = function () {
         }
 
         // 对任意图块提供补全
-        if (MotaActionBlocks[type].allIds && eval(MotaActionBlocks[type].allIds).indexOf(name)!==-1) {
-          return filter(allIds, content);
-        }
-
         // 对怪物ID提供补全
-        if (MotaActionBlocks[type].allEnemys && eval(MotaActionBlocks[type].allEnemys).indexOf(name)!==-1) {
-          return filter(allEnemys, content);
-        }
-
         // 对道具ID进行补全
-        if (MotaActionBlocks[type].allItems && eval(MotaActionBlocks[type].allItems).indexOf(name)!==-1) {
-          return filter(allItems, content);
-        }
-
         // 对图片名进行补全
-        if (MotaActionBlocks[type].allImages && eval(MotaActionBlocks[type].allImages).indexOf(name)!==-1) {
-          return filter(allImages, content);
-        }
-
         // 对动画进行补全
-        if (MotaActionBlocks[type].allAnimates && eval(MotaActionBlocks[type].allAnimates).indexOf(name)!==-1) {
-          return filter(allAnimates, content);
-        }
-
         // 对音乐进行补全
-        if (MotaActionBlocks[type].allBgms && eval(MotaActionBlocks[type].allBgms).indexOf(name)!==-1) {
-          return filter(allBgms, content);
-        }
-
         // 对音效进行补全
-        if (MotaActionBlocks[type].allSounds && eval(MotaActionBlocks[type].allSounds).indexOf(name)!==-1) {
-          return filter(allSounds, content);
-        }
-
         // 对全局商店进行补全
-        if (MotaActionBlocks[type].allShops && eval(MotaActionBlocks[type].allShops).indexOf(name)!==-1) {
-          return filter(allShops, content);
-        }
-
         // 对楼层名进行补全
-        if (MotaActionBlocks[type].allFloorIds && eval(MotaActionBlocks[type].allFloorIds).indexOf(name)!==-1) {
-          return filter(allFloorIds, content);
+        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds'][ii];ii++){
+            if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
+                return filter(namesObj[names], content);
+            }
         }
 
         // 对\f进行自动补全
@@ -573,7 +545,7 @@ editor_blockly = function () {
           if (content.charAt(index) == '\\') index++;
           var after = content.substring(index + 2);
           if (after.indexOf(",") < 0 && after.indexOf("]") < 0) {
-            return filter(allImages, after);
+            return filter(namesObj.allImages, after);
           }
         }
 
@@ -582,7 +554,7 @@ editor_blockly = function () {
         if (index >= 0) {
           var after = content.substring(index + 3);
           if (after.indexOf("]") < 0) {
-            return filter(allIconIds, after);
+            return filter(namesObj.allIconIds, after);
           }
         }
 
@@ -592,7 +564,7 @@ editor_blockly = function () {
           if (content.charAt(index) == '\\') index++;
           var after = content.substring(index + 2);
           if (after.indexOf("]") < 0) {
-            return filter(allColors, after);
+            return filter(namesObj.allColors, after);
           }
         }
 

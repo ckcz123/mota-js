@@ -23,8 +23,8 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.checkbox = function (value) {
         return /* html */`<input type='checkbox' class='checkbox' ${(value ? 'checked ' : '')}/>\n`
     }
-    editor_table.prototype.textarea = function (value, indent) {
-        return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
+    editor_table.prototype.textarea = function (value, indent, disable) {
+        return /* html */`<textarea spellcheck='false' ${disable ? 'disabled readonly' : ''}>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
     editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
         if (value == null) value = [];
@@ -76,7 +76,7 @@ editor_table_wrapper = function (editor) {
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
         <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
-        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet')}</td>
+        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'disable')}</td>
         </tr>\n`
     }
 
@@ -283,7 +283,7 @@ editor_table_wrapper = function (editor) {
             case 'checkboxSet':
                 return editor.table.checkboxSet(thiseval, cobj._checkboxSet.key, cobj._checkboxSet.prefix);
             default: 
-                return editor.table.textarea(thiseval, cobj.indent || 0);
+                return editor.table.textarea(thiseval, cobj.indent || 0, cobj._type == 'disable');
         }
     }
 

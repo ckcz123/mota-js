@@ -69,6 +69,12 @@ function editor() {
         mouseOutCheck : 2,
         startPos:null,
         endPos:null,
+        lastMoveE:{buttons:0,clientX:0,clientY:0},
+        selectedArea: null,
+        // 材料区拖动有关
+        lastMoveMaterE:null,
+        tileSize: [1,1],
+        startLoc: null,
         // 撤销/恢复
         preMapData : [],
         preMapMax: 10,
@@ -101,8 +107,6 @@ function editor() {
         },
 
         // tile
-        tileSize: [1,1],
-        startLoc: null,
         lockMode: false,
 
         // 最近使用的图块

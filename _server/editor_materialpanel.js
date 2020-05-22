@@ -62,7 +62,6 @@ editor_materialpanel_wrapper = function (editor) {
         }
     }
 
-    var lastmoveE=null;
     /**
      * editor.dom.iconLib.onmousedown
      * 素材区的单击/拖拽事件
@@ -70,7 +69,7 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_ondown = function (e) {
         e.stopPropagation();
         e.preventDefault();
-        lastmoveE=e;
+        editor.uivalues.lastMoveMaterE=e;
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -90,7 +89,7 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_onmove = function (e) {
         e.stopPropagation();
         e.preventDefault();
-        lastmoveE=e;
+        editor.uivalues.lastMoveMaterE=e;
         if (!editor.uivalues.startLoc) return;
         var pos0 = editor.uifunctions.locToPos(editor.uivalues.startLoc);
 
@@ -109,7 +108,7 @@ editor_materialpanel_wrapper = function (editor) {
         var startLoc = editor.uivalues.startLoc;
         editor.uivalues.startLoc = null;
 
-        var e=lastmoveE;
+        var e=editor.uivalues.lastMoveMaterE;
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop;

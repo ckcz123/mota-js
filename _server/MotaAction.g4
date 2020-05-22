@@ -536,7 +536,7 @@ return '{' + [
     IdString_1 && ('"down": "' + IdString_1 +'"'),
     IdString_2 && ('"left": "' + IdString_2 +'"'),
     IdString_3 && ('"right": "' + IdString_3 +'"'),
-].join(', ') + '}\n';
+].filter(function (x) { return x; }).join(', ') + '}\n';
 */;
 
 
@@ -3106,7 +3106,7 @@ Event_List
 
 Floor_Meta_List
     :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'楼层贴图'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
-    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'item_ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
+    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
     :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'楼层转换背景'|'楼层转换文字色'|'装备列表'
@@ -3173,7 +3173,7 @@ Id_List
 
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
-    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
+    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','属性值','退化扣攻','退化扣防','不可炸','九宫格领域','领域范围','连击数','吸血到自身','固伤值']*/;
 
 Equip_List
     :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'魔力'|'魔力上限'
@@ -3249,6 +3249,6 @@ this.block('idTemp_e').output='idString_e';
 
 /* Functions
 
-MotaActionParse()
+MotaActionParser()
 
 */

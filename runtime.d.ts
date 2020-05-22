@@ -42,7 +42,7 @@ type Animate = {
 
 type Floor = {
     title: string,
-    item_ratio: number
+    ratio: number
 }
 
 type ResolvedMap = {
@@ -651,9 +651,9 @@ declare class events {
     
     /**
      * 设置一项楼层属性并刷新状态栏
-     * @example core.setFloorInfo('item_ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
-     * @param name 'title','name','canFlyTo','canUseQuickShop','cannotViewMap','cannotMoveDirectly','upFloor','downFloor','defaultGround','images','color','weather','bgm','item_ratio','underGround'之一
-     * @param values 属性的新值，可选。对'title'、'name'、'defaultGround'和'bgm'需要是字符串，对'underGround'和四个'canXxx'需要是布尔值，对两个'xxxFloor'需要是一行两列的自然数数组，对'item_ratio'需要是数字
+     * @example core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
+     * @param name 'title','name','canFlyTo','canUseQuickShop','cannotViewMap','cannotMoveDirectly','upFloor','downFloor','defaultGround','images','color','weather','bgm','ratio','underGround'之一
+     * @param values 属性的新值，可选。对'title'、'name'、'defaultGround'和'bgm'需要是字符串，对'underGround'和四个'canXxx'需要是布尔值，对两个'xxxFloor'需要是一行两列的自然数数组，对'ratio'需要是数字
      * @param floorId 楼层id，不填视为当前层
      * @param prefix 独立开关前缀，一般不需要，下同
      */

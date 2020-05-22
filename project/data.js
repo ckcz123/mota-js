@@ -90,6 +90,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",
+			"animate": false,
 			"name": "阳光",
 			"lv": 1,
 			"hpmax": 9999,

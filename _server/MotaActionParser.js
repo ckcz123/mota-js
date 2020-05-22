@@ -1,4 +1,4 @@
-MotaActionParse=function(){
+MotaActionParser=function(){
 function ActionParser(){
 }
 
@@ -67,7 +67,7 @@ ActionParser.prototype.parse = function (obj,type) {
         Object.keys(obj).sort().forEach(function (key) {
           var one = knownEquipListKeys.indexOf(key) >= 0 ? 'equipKnown' : 'equipUnknown';
           text_choices = MotaActionBlocks[one].xmlText([
-            key, obj.key, text_choices
+            key, obj[key], text_choices
           ]);
         })
         return text_choices;
@@ -83,7 +83,7 @@ ActionParser.prototype.parse = function (obj,type) {
           Object.keys(obj).sort().forEach(function (key) {
             var one = knownListKeys.indexOf(key) >= 0 ? 'doorKeyKnown' : 'doorKeyUnknown';
             text_choices = MotaActionBlocks[one].xmlText([
-              key, obj.key, text_choices
+              one == 'doorKeyUnknown' ? MotaActionFunctions.replaceToName_token(key) : key, obj[key], text_choices
             ]);
           })
           return text_choices;
@@ -474,11 +474,11 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "useItem": // 使用道具
       this.next = MotaActionBlocks['useItem_s'].xmlText([
-        data.id,this.next]);
+        MotaActionFunctions.replaceToName_token(data.id),this.next]);
       break;
     case "loadEquip": // 装上装备
       this.next = MotaActionBlocks['loadEquip_s'].xmlText([
-        data.id,this.next]);
+        MotaActionFunctions.replaceToName_token(data.id),this.next]);
       break;
     case "unloadEquip": // 卸下装备
       this.next = MotaActionBlocks['unloadEquip_s'].xmlText([
@@ -495,7 +495,7 @@ ActionParser.prototype.parseAction = function() {
     case "battle": // 强制战斗
       if (data.id) {
         this.next = MotaActionBlocks['battle_s'].xmlText([
-          data.id,this.next]);
+          MotaActionFunctions.replaceToName_token(data.id),this.next]);
       }
       else {
         data.loc = data.loc || [];
@@ -564,7 +564,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        data.id, data.name, this.expandEvalBlock([data.value]), this.next]);
+        MotaActionFunctions.replaceToName_token(data.id), data.name, this.expandEvalBlock([data.value]), this.next]);
       break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
@@ -1027,7 +1027,7 @@ ActionParser.prototype.matchEvalAtom = function(args) {
   var EnemyId_List=MotaActionBlocks['EnemyId_List'].options; // [["生命", "hp"], ...]
   match=new RegExp("^enemy:([a-zA-Z0-9_]+):(" + EnemyId_List.map(function(v){return v[1]}).join('|') + ")$").exec(args[0])
   if(match){
-    args=[match[1],match[2]]
+    args=[MotaActionFunctions.replaceToName_token(match[1]),match[2]]
     return rt(MotaActionBlocks['enemyattr_e'].xmlText, args);
   }
   // 图块ID
@@ -1156,6 +1156,7 @@ MotaActionFunctions.IntString_pre = function (IntString) {
 MotaActionFunctions.IdString_pre = function(IdString){
   if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   IdString = MotaActionFunctions.replaceFromName(IdString);
+  IdString = MotaActionFunctions.replaceFromName_token(IdString);
   if (IdString && !(MotaActionFunctions.pattern.id.test(IdString)) && !(MotaActionFunctions.pattern.idWithoutFlag.test(IdString)))
       throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
   return IdString;
@@ -1241,59 +1242,46 @@ MotaActionFunctions.pattern.replaceStatusList = [
   ["steps", "步数"],
 ];
 
-MotaActionFunctions.pattern.replaceItemList = [
-  // 保证顺序！
-  ["yellowKey", "黄钥匙"],
-  ["blueKey", "蓝钥匙"],
-  ["redKey", "红钥匙"],
-  ["redGem", "红宝石"],
-  ["blueGem", "蓝宝石"],
-  ["greenGem", "绿宝石"],
-  ["yellowGem", "黄宝石"],
-  ["redPotion", "红血瓶"],
-  ["bluePotion", "蓝血瓶"],
-  ["yellowPotion", "黄血瓶"],
-  ["greenPotion", "绿血瓶"],
-  ["sword1", "铁剑"],
-  ["sword2", "银剑"],
-  ["sword3", "骑士剑"],
-  ["sword4", "圣剑"],
-  ["sword5", "神圣剑"],
-  ["shield1", "铁盾"],
-  ["shield2", "银盾"],
-  ["shield3", "骑士盾"],
-  ["shield4", "圣盾"],
-  ["shield5", "神圣盾"],
-  ["superPotion", "圣水"],
-  ["silverCoin", "银币"],
-  ["book", "怪物手册"],
-  ["fly", "楼层传送器"],
-  ["coin", "幸运金币"],
-  ["freezeBadge", "冰冻徽章"],
-  ["cross", "十字架"],
-  ["dagger", "屠龙匕首"],
-  ["amulet", "护符"],
-  ["bigKey", "大黄门钥匙"],
-  ["greenKey", "绿钥匙"],
-  ["steelKey", "铁门钥匙"],
-  ["pickaxe", "破墙镐"],
-  ["icePickaxe", "破冰镐"],
-  ["bomb", "炸弹"],
-  ["centerFly", "中心对称飞行器"],
-  ["upFly", "上楼器"],
-  ["downFly", "下楼器"],
-  ["earthquake", "地震卷轴"],
-  ["poisonWine", "解毒药水"],
-  ["weakWine", "解衰药水"],
-  ["curseWine", "解咒药水"],
-  ["superWine", "万能药水"],
-  ["hammer", "圣锤"],
-  ["lifeWand", "生命魔杖"],
-  ["jumpShoes", "跳跃靴"],
-];
 
-MotaActionFunctions.pattern.replaceEnemyList = [
+(function() {
+  // 读道具列表
+  MotaActionFunctions.pattern.replaceItemList = [];
+  for (var id in core.material.items) {
+    var name = core.material.items[id].name;
+    if (id && name && name != '新物品') {
+      var hasPrefix = false;
+      MotaActionFunctions.pattern.replaceItemList.forEach(function (one) {
+        if (one[0].startsWith(id) || id.startsWith(one[0]) || one[1].startsWith(name) || name.startsWith(one[1])) {
+          hasPrefix = true;
+        }
+      });
+      if (!hasPrefix) {
+        MotaActionFunctions.pattern.replaceItemList.push([id, name]);
+      }
+    }
+  }
+
+  MotaActionFunctions.pattern.replaceEnemyList = [];
+  for (var id in core.material.enemys) {
+    var name = core.material.enemys[id].name;
+    if (id && name && name != '新敌人') {
+      var hasPrefix = false;
+      MotaActionFunctions.pattern.replaceEnemyList.forEach(function (one) {
+        if (one[0].startsWith(id) || id.startsWith(one[0]) || one[1].startsWith(name) || name.startsWith(one[1])) {
+          hasPrefix = true;
+        }
+      });
+      if (!hasPrefix) {
+        MotaActionFunctions.pattern.replaceEnemyList.push([id, name]);
+      }
+    }
+  }
+
+})();
+
+MotaActionFunctions.pattern.replaceEnemyValueList = [
   // 保证顺序！
+  ["hp", "生命"],
   ["name", "名称"],
   ["atk", "攻击"],
   ["def", "防御"],
@@ -1312,9 +1300,25 @@ MotaActionFunctions.replaceToName_token = function (str) {
   list=list.concat(MotaActionFunctions.pattern.replaceStatusList)
   list=list.concat(MotaActionFunctions.pattern.replaceItemList)
   list=list.concat(MotaActionFunctions.pattern.replaceEnemyList)
+  list=list.concat(MotaActionFunctions.pattern.replaceEnemyValueList)
   for(var index=0,pair;pair=list[index];index++){
     if (pair[0]==str) {
       return pair[1]
+    }
+  }
+  return str;
+}
+
+MotaActionFunctions.replaceFromName_token = function (str) {
+  if (!str || MotaActionFunctions.disableReplace) return str;
+  var list = [];
+  list=list.concat(MotaActionFunctions.pattern.replaceStatusList)
+  list=list.concat(MotaActionFunctions.pattern.replaceItemList)
+  list=list.concat(MotaActionFunctions.pattern.replaceEnemyList)
+  list=list.concat(MotaActionFunctions.pattern.replaceEnemyValueList)
+  for(var index=0,pair;pair=list[index];index++){
+    if (pair[1]==str) {
+      return pair[0]
     }
   }
   return str;
@@ -1338,12 +1342,20 @@ MotaActionFunctions.replaceToName = function (str) {
   }).replace(/item:/g, "物品：");
   str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：").replace(/temp:/g, "临时变量：");
 
+
+  MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
+    map[v[0]] = v[1]; list.push(v[0]);
+  });
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[.:](" + list.join("|") + ")", "g"), function (a, b, c) {
+    return map[c] ? ("enemy:" + b + "：" + map[c]) : c;
+  }).replace(/(enemy:[a-zA-Z0-9_]+)[.:：]/g, '$1：');
+
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
   });
-  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+).(" + list.join("|") + ")", "g"), function (a, b, c) {
-    return map[c] ? ("怪物：" + b + "：" + map[c]) : c;
+  str = str.replace(new RegExp("enemy:(" + list.join("|") + ")", "g"), function (a, b) {
+    return map[b] ? ("怪物：" + map[b]) : b;
   }).replace(/enemy:/g, "怪物：");
 
   str = str.replace(/blockId:/g, "图块ID：").replace(/blockCls:/g, "图块类别：").replace(/equip:/g, "装备孔：");
@@ -1366,15 +1378,23 @@ MotaActionFunctions.replaceFromName = function (str) {
   str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
-  str = str.replace(/临时变量[:：]/g, "temp:").replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
+  str = str.replace(/临时变量[:：]/g, "temp d:").replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
 
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("(enemy:|怪物[:：])([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")", "g"), function (a, b, c, d) {
-    return map[d] ? ("enemy:" + c + ":" + map[d]) : d;
+  str = str.replace(new RegExp("(enemy:|怪物[:：])(" + list.join("|") + ")", "g"), function (a, b, c, d) {
+    return map[c] ? ("enemy:" + map[c]) : c;
   }).replace(/怪物[:：]/g, "enemy:");
+
+  map = {}; list = [];
+  MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
+    map[v[1]] = v[0]; list.push(v[1]);
+  });
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")", "g"), function (a, b, c, d) {
+    return map[c] ? ("enemy:" + b + ":" + map[c]) : c;
+  }).replace(/(enemy:[a-zA-Z0-9_]+)[:：]/g, '$1:');
 
   str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块类别[:：]/g, "blockCls:").replace(/装备孔[:：]/g, "equip:");
 

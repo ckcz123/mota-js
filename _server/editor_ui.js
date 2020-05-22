@@ -343,15 +343,15 @@ editor_ui_wrapper = function (editor) {
             // Ctrl+C, Ctrl+X, Ctrl+V
             if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
                 e.preventDefault();
-                editor.uivalues.copyedInfo = editor.copyFromPos();
-                printf('该点事件已复制');
+                editor.uivalues.copyedInfo = editor.copyFromPos(editor.uivalues.selectedArea);
+                printf('该点事件已复制；请注意右键地图拉框可以复制一个区域；若有时复制失灵请多点几下空白处');
                 return;
             }
             if (e.ctrlKey && e.keyCode == 88 && !selectBox.isSelected()) {
                 e.preventDefault();
-                editor.uivalues.copyedInfo = editor.copyFromPos();
-                editor.clearPos(true, null, function () {
-                    printf('该点事件已剪切');
+                editor.uivalues.copyedInfo = editor.copyFromPos(editor.uivalues.selectedArea);
+                editor.clearPos(true, editor.uivalues.selectedArea, function () {
+                    printf('该点事件已剪切；请注意右键地图拉框可以剪切一个区域；若有时剪切失灵请多点几下空白处');
                     editor.uifunctions.unhighlightSaveFloorButton();
                 })
                 return;
@@ -369,7 +369,7 @@ editor_ui_wrapper = function (editor) {
                         printe(err);
                         throw (err)
                     }
-                    ; printf('粘贴事件成功');
+                    ; printf('粘贴事件成功；若有时粘贴失灵请多点几下空白处');
                     editor.uifunctions.unhighlightSaveFloorButton();
                     editor.drawPosSelection();
                 });
@@ -377,8 +377,10 @@ editor_ui_wrapper = function (editor) {
             }
             // DELETE
             if (e.keyCode == 46 && !selectBox.isSelected()) {
-                editor.clearPos(true);
-                editor.uifunctions.unhighlightSaveFloorButton();
+                editor.clearPos(true, editor.uivalues.selectedArea, function () {
+                    printf('该点事件已删除；请注意右键地图拉框可以删除一个区域；；若有时删除失灵请多点几下空白处');
+                    editor.uifunctions.unhighlightSaveFloorButton();
+                })
                 return;
             }
             // ESC

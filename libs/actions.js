@@ -2068,15 +2068,17 @@ actions.prototype._keyUpSwitchs = function (keycode) {
     }
     if (keycode == 37) {
         switch (core.status.event.selection) {
-            case 2: return this._clickSwitchs_userVolume(-1);
-            case 3: return this._clickSwitchs_moveSpeed(-10);
-            case 4: this._clickSwitchs_floorChangeTime(-100);
+            case 1: return this._clickSwitchs_userVolume(-1);
+            case 2: return this._clickSwitchs_moveSpeed(-10);
+            case 3: return this._clickSwitchs_floorChangeTime(-100);
+            case 4: return this._clickSwitchs_setSize(-1);
         }
     } else if (keycode == 39) {
         switch (core.status.event.selection) {
-            case 2: return this._clickSwitchs_userVolume(1);
-            case 3: return this._clickSwitchs_moveSpeed(10);
-            case 4: this._clickSwitchs_floorChangeTime(100);
+            case 1: return this._clickSwitchs_userVolume(1);
+            case 2: return this._clickSwitchs_moveSpeed(10);
+            case 3: return this._clickSwitchs_floorChangeTime(100);
+            case 4: return this._clickSwitchs_setSize(1);
         }
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs);

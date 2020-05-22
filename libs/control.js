@@ -146,6 +146,11 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         core.status.autotileAnimateObjs.blocks.forEach(function (block) {
             core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
         });
+
+        // Global hero animate
+        if ((core.status.hero || {}).animate && core.status.heroMoving == 0) {
+            core.drawHero('stop', null, core.status.globalAnimateStatus);
+        }
     }
     // Box animate
     core.drawBoxAnimate();
@@ -768,7 +773,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 }
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (status, offset) {
+control.prototype.drawHero = function (status, offset, frame) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
@@ -783,7 +788,7 @@ control.prototype.drawHero = function (status, offset) {
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
     if (!core.hasFlag('hideHero')) {
-        this._drawHero_draw(direction, x, y, status, offset);
+        this._drawHero_draw(direction, x, y, status, offset, frame);
     }
 
     this._drawHero_updateViewport();
@@ -794,9 +799,9 @@ control.prototype._drawHero_updateViewport = function () {
     core.setGameCanvasTranslate('hero', 0, 0);
 }
 
-control.prototype._drawHero_draw = function (direction, x, y, status, offset) {
+control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-        core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
+        core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
@@ -2691,7 +2696,7 @@ control.prototype.resize = function() {
         core.domStyle.isVertical = false;
 
         core.domStyle.availableScale = [];
-        [1, 1.25, 1.5, 2].forEach(function (v) {
+        [1, 1.25, 1.5, 1.75, 2].forEach(function (v) {
             if (clientWidth - 3 * BORDER >= v*(CANVAS_WIDTH + BAR_WIDTH) && clientHeight - 2 * BORDER >= v * CANVAS_WIDTH) {
                 core.domStyle.availableScale.push(v); // 64x64
             }

@@ -427,7 +427,13 @@ editor_blockly = function () {
                         return one != token && one.startsWith(token);
                     }).sort();
                 } else if (before.endsWith("怪物") || (ch == ':' && before.endsWith("enemy"))) {
-                    return Object.keys(core.material.enemys).filter(function (one) {
+                    var list = Object.keys(core.material.enemys);
+                    if (before.endsWith("怪物") && MotaActionFunctions) {
+                      list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
+                          return v[1];
+                      }).concat(list);
+                    }
+                    return list.filter(function (one) {
                         return one != token && one.startsWith(token);
                     })
                 } else {
@@ -438,7 +444,7 @@ editor_blockly = function () {
                         if (before.endsWith("怪物") || (ch == ':' && ch2 == ':' && before.endsWith("enemy"))) {
                             var list = ["name", "hp", "atk", "def", "money", "exp", "point", "special"];
                             if (before.endsWith("怪物") && MotaActionFunctions) {
-                                list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
+                                list = MotaActionFunctions.pattern.replaceEnemyValueList.map(function (v) {
                                     return v[1];
                                 }).concat(list);
                             }
@@ -491,7 +497,17 @@ editor_blockly = function () {
         }));
         var allImages = Object.keys(core.material.images.images);
         var allEnemys = Object.keys(core.material.enemys);
+        if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
+          allEnemys = allEnemys.concat(MotaActionFunctions.pattern.replaceEnemyList.map(function (x) {
+            return x[1];
+          }))
+        }
         var allItems = Object.keys(core.material.items);
+        if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
+          allItems = allItems.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
+            return x[1];
+          }))
+        }
         var allAnimates = Object.keys(core.material.animates);
         var allBgms = Object.keys(core.material.bgms);
         var allSounds = Object.keys(core.material.sounds);

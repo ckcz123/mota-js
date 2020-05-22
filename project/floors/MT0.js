@@ -8,7 +8,7 @@ main.floors.MT0=
     "cannotViewMap": false,
     "defaultGround": "ground",
     "images": [],
-    "item_ratio": 1,
+    "ratio": 1,
     "map": [
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],
     [  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0],

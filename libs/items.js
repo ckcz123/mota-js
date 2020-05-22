@@ -31,7 +31,6 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
     if (itemCls === 'items') {
-        var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
         var curr_hp = core.status.hero.hp;
         if (itemId in this.itemEffect) {
             try {
@@ -64,10 +63,9 @@ items.prototype.getItemEffectTip = function (itemId) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
     if (itemCls === 'items') {
-        var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
         if (itemId in this.itemEffectTip) {
             try {
-                return eval(this.itemEffectTip[itemId]) || "";
+                return core.replaceText(this.itemEffectTip[itemId]) || "";
             } catch (e) {
                 main.log(e);
                 return "";
@@ -95,7 +93,6 @@ items.prototype.useItem = function (itemId, noRoute, callback) {
 items.prototype._useItemEffect = function (itemId) {
     if (itemId in this.useItemEffect) {
         try {
-            var ratio = parseInt(core.status.thisMap.item_ratio) || 1;
             eval(this.useItemEffect[itemId]);
         }
         catch (e) {

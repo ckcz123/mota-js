@@ -1400,10 +1400,18 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
         core.status.boxAnimateObjs = [];
         // --- 勇士
         if (titleInfo.image == core.material.images.hero) {
-            core.clearMap('ui', hPos.left + 15, image_top, 32, titleInfo.height);
-            core.fillRect('ui', hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
-            core.drawImage('ui', titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
-                hPos.left + 15, image_top, 32, titleInfo.height);
+            if (core.status.hero.animate) {
+                core.status.boxAnimateObjs.push({
+                    'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
+                    'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': 4,
+                    'image': titleInfo.image, 'pos': core.material.icons.hero[core.getHeroLoc('direction')].loc * titleInfo.height
+                })
+            } else {
+                core.clearMap('ui', hPos.left + 15, image_top, 32, titleInfo.height);
+                core.fillRect('ui', hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
+                core.drawImage('ui', titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
+                    hPos.left + 15, image_top, 32, titleInfo.height);
+            }            
         }
         else {
             core.status.boxAnimateObjs.push({
@@ -2836,7 +2844,6 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
     if (obj.cls[id]=='items' && id!='superPotion') {
         var temp = core.clone(core.status.hero);
         core.setFlag("__statistics__", true);
-        var ratio = floor.item_ratio||1;
         try { eval(core.items.itemEffect[id]); }
         catch (e) {}
         hp = core.status.hero.hp - temp.hp;

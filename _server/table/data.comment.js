@@ -27,7 +27,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							return one;
 						return null;
 					}).toString(),
-					"_docs": "本塔使用图片",
+					"_docs": "使用图片",
 					"_data": "在此存放所有可能使用的图片（tilesets除外） \n图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加",
 				},
 				"tilesets": {
@@ -50,7 +50,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							return j >= 0 ? 1 : -1;
 						});
 					}).toString(),
-					"_docs": "本塔额外素材",
+					"_docs": "额外素材",
 					"_data": "在此存放额外素材的图片名, \n可以自定导入任意张素材图片，无需PS，无需注册，即可直接在游戏中使用 \n 形式如[\"1.png\", \"2.png\"] ,将需要的素材图片放在images目录下 \n 素材的宽高必须都是32的倍数，且图片上的总图块数不超过1000（即最多有1000个32*32的图块在该图片上）"
 				},
 				"animates": {
@@ -62,7 +62,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						if (one.endsWith(".animate")) return one.substring(0, one.lastIndexOf('.'));
 						return null;
 					}).toString(),
-					"_docs": "本塔使用动画",
+					"_docs": "使用动画",
 					"_data": "在此存放所有可能使用的动画，必须是animate格式，在这里不写后缀名 \n动画必须放在animates目录下；文件名不能使用中文，不能带空格或特殊字符 \n \"jianji\", \"thunder\" 根据需求自行添加"
 				},
 				"bgms": {
@@ -75,7 +75,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							return one;
 						return null;
 					}).toString(),
-					"_docs": "本塔使用音乐",
+					"_docs": "使用音乐",
 					"_data": "在此存放所有的bgm，和文件名一致。 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
 				},
 				"sounds": {
@@ -88,7 +88,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							return one;
 						return null;
 					}).toString(),
-					"_docs": "本塔使用音效",
+					"_docs": "使用音效",
 					"_data": "在此存放所有的SE，和文件名一致 \n音频名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好"
 				},
 				"fonts": {
@@ -100,13 +100,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						if (one.endsWith(".ttf")) return one.substring(0, one.lastIndexOf('.'));
 						return null;
 					}).toString(),
-					"_docs": "本塔使用字体",
+					"_docs": "使用字体",
 					"_data": "在此存放所有可能使用的字体 \n 字体名不能使用中文，不能带空格或特殊字符"
 				},
 				"nameMap": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "文件名映射",
+					"_docs": "文件映射",
 					"_data": "文件名映射，目前仅对images, animates, bgms, sounds有效。\n例如定义 {\"精灵石.mp3\":\"jinglingshi.mp3\"} 就可以使用\ncore.playBgm(\"精灵石.mp3\") 或对应的事件来播放该bgm。"
 				},
 				"startBackground": {
@@ -157,21 +157,21 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
-					"_docs": "横屏状态栏",
+					"_docs": "横状态栏",
 					"_data": "横屏时左侧状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
 				},
 				"statusTopBackground": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
-					"_docs": "竖屏状态栏",
+					"_docs": "竖状态栏",
 					"_data": "竖屏时上方状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
 				},
 				"toolsBackground": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
-					"_docs": "竖屏工具栏",
+					"_docs": "竖工具栏",
 					"_data": "竖屏时下方工具栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
 				},
 				"borderColor": {
@@ -192,14 +192,14 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
-					"_docs": "转场背景色",
+					"_docs": "转场背景",
 					"_data": "楼层转换界面的背景样式；可以使用纯色（默认值black），也可以使用图片（参见状态栏的图片写法）"
 				},
 				"floorChangingTextColor": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
-					"_docs": "转场文字色",
+					"_docs": "转场文字",
 					"_data": "楼层转换界面的文字颜色，默认是白色"
 				},
 				"font": {
@@ -257,7 +257,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 									return name.endsWith('.png');
 								}))
 							},
-							"_data": "勇士行走图"
+							"_data": "行走图"
+						},
+						"animate": {
+							"_leaf": true,
+							"_type": "checkbox",
+							"_docs": "帧动画",
+							"_data": "是否开启停止状态和对话框的帧动画"
 						},
 						"name": {
 							"_leaf": true,
@@ -344,7 +350,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 									"_leaf": true,
 									"_type": "textarea",
 									"_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
-									"_docs": "初始装备个数",
+									"_docs": "初始拥有装备个数",
 									"_data": "初始装备个数，例如初始送铁剑可以写 {\"sword1\": 1}"
 								}
 							}
@@ -385,13 +391,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"followers": {
 							"_leaf": true,
-							"_type": "textarea",
-							"_range": "thiseval instanceof Array",
-							"_data": "跟随者列表"
+							"_type": "disable",
+							"_data": "跟随者"
 						},
 						"steps": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "disable",
 							"_data": "行走步数"
 						}
 					}
@@ -401,7 +406,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "event",
 					"_event": "firstArrive",
 					"_range": "thiseval==null || thiseval instanceof Array",
-					"_docs": "标题事件化",
+					"_docs": "标题事件",
 					"_data": "标题界面事件化，可以使用事件流的形式来绘制开始界面等。\n需要开启startUsingCanvas这个开关。\n详见文档-个性化-标题界面事件化。"
 				},
 				"startText": {
@@ -452,43 +457,43 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"redGem": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "红宝石效果",
+					"_docs": "红宝石值",
 					"_data": "红宝石加攻击的数值"
 				},
 				"blueGem": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "蓝宝石效果",
+					"_docs": "蓝宝石值",
 					"_data": "蓝宝石加防御的数值"
 				},
 				"greenGem": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "绿宝石效果",
+					"_docs": "绿宝石值",
 					"_data": "绿宝石加护盾的数值"
 				},
 				"redPotion": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "红血瓶效果",
+					"_docs": "红血瓶值",
 					"_data": "红血瓶加血数值"
 				},
 				"bluePotion": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "蓝血瓶效果",
+					"_docs": "蓝血瓶值",
 					"_data": "蓝血瓶加血数值"
 				},
 				"yellowPotion": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "黄血瓶效果",
+					"_docs": "黄血瓶值",
 					"_data": "黄血瓶加血数值"
 				},
 				"greenPotion": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "绿血瓶效果",
+					"_docs": "绿血瓶值",
 					"_data": "绿血瓶加血数值"
 				},
 				"breakArmor": {
@@ -518,14 +523,16 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"animateSpeed": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "全局动画时间",
-					"_data": "全局动画时间，即怪物振动频率，一般300比较合适"
+					"_docs": "全局帧动画时间",
+					"_data": "全局帧动画时间，即怪物振动频率，一般300比较合适"
 				},
 				"statusCanvasRowsOnMobile": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==null || (thiseval>0 && thiseval<=4)",
-					"_docs": "竖屏自绘行数",
+					"_type": "select",
+					"_select": {
+						"values": [1,2,3,4]
+					},
+					"_docs": "竖状态栏自绘行数",
 					"_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于4。\n仅在statusCanvas开启时才有效"
 				},
 			}
@@ -578,36 +585,36 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"enableSkill"
 						]
 					},
-					"_data": "状态栏显示"
+					"_data": "状态栏显示项"
 				},
 				"flyNearStair": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "楼传楼梯边",
+					"_docs": "楼传需在楼梯边",
 					"_data": "传送器是否需要在楼梯边使用；如果flyRecordPosition开启，则此项对箭头也有效。"
 				},
 				"flyRecordPosition": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "楼传平面模式",
+					"_docs": "楼传开平面模式",
 					"_data": "传送器平面塔模式；此模式下楼层传送器将飞到上次离开该楼层的位置。"
 				},
 				"steelDoorWithoutKey": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "铁门不消耗",
+					"_docs": "铁门不消耗钥匙",
 					"_data": "铁门是否不需要钥匙开启。如果此项为true，则无需钥匙也可以开铁门。"
 				},
 				"itemFirstText": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "首次道具提示",
+					"_docs": "首次道具进行提示",
 					"_data": "首次获得道具是否提示"
 				},
 				"equipboxButton": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "状态栏装备",
+					"_docs": "状态栏装备按钮",
 					"_data": "状态栏的装备按钮。若此项为true则将状态栏中的楼层转换器按钮换为装备栏按钮"
 				},
 				"enableAddPoint": {
@@ -625,7 +632,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"betweenAttackMax": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "夹击不超伤害",
+					"_docs": "夹击不超伤害值",
 					"_data": "夹击伤害是否不超过怪物伤害值。"
 				},
 				"useLoop": {
@@ -637,13 +644,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"startUsingCanvas": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "标题事件化",
+					"_docs": "标题开启事件化",
 					"_data": "是否开始菜单canvas化；如果此项为true，则将使用canvas来绘制开始菜单"
 				},
 				"statusCanvas": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "自绘状态栏",
+					"_docs": "开启自绘状态栏",
 					"_data": "是否状态栏canvas化，即手动自定义绘制状态栏。\n如果此项开启，则可在脚本编辑的drawStatusBar中自定义绘制菜单栏。"
 				},
 				"displayEnemyDamage": {

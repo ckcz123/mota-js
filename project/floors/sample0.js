@@ -8,7 +8,7 @@ main.floors.sample0=
     "defaultGround": "ground",
     "images": [],
     "bgm": "bgm.mp3",
-    "item_ratio": 1,
+    "ratio": 1,
     "map": [
     [  0,  0,220,  0,  0, 20, 87,  3, 65, 64, 44, 43, 42],
     [  0,246,  0,246,  0, 20,  0,  3, 58, 59, 60, 61, 41],

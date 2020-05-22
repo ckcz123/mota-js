@@ -89,4 +89,6 @@ V2.6.6 -> V2.7 接档说明：
 
 其他：
 Jewel改名Gem
+道具效果提示文字replaceText
+
 

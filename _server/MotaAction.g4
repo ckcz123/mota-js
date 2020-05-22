@@ -1,4 +1,5 @@
 // 编辑此文件用的vscode插件: https://marketplace.visualstudio.com/items?itemName=zhaouv.vscode-mota-js-extension
+// 此文件通过antlr-blockly生成编辑器中的图块, 相关帮助说明: https://zhaouv.github.io/antlr-blockly/docs/#/README
 
 grammar MotaAction;
 
@@ -2800,6 +2801,8 @@ var orders = {
     '^': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     '==': Blockly.JavaScript.ORDER_EQUALITY,
     '!=': Blockly.JavaScript.ORDER_EQUALITY,
+    '===': Blockly.JavaScript.ORDER_EQUALITY,
+    '!==': Blockly.JavaScript.ORDER_EQUALITY,
     '>': Blockly.JavaScript.ORDER_RELATIONAL,
     '<': Blockly.JavaScript.ORDER_RELATIONAL,
     '>=': Blockly.JavaScript.ORDER_RELATIONAL,
@@ -3001,8 +3004,8 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'>'|'<'|'>='|'<='|'且'|'或'
-    /*Arithmetic_List ['+','-','*','/','^','==','!=','>','<','>=','<=','&&','||']*/;
+    :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'==='|'!=='|'>'|'<'|'>='|'<='|'且'|'或'
+    /*Arithmetic_List ['+','-','*','/','^','==','!=','===','!==','>','<','>=','<=','&&','||']*/;
 
 AssignOperator_List
     :   '='|'+='|'-='|'*='|'/='|'**='|'//='|'%='

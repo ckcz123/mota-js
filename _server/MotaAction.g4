@@ -2994,7 +2994,7 @@ enemyattr_e
 
 /* enemyattr_e
 default : ['greenSlime',"攻击"]
-allItems : ['IdString_0']
+allEnemys : ['IdString_0']
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;

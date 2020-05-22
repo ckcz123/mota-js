@@ -988,7 +988,7 @@ events.prototype.insertCommonEvent = function (name, x, y, callback, addToLast) 
         if (callback) callback();
         return;
     }
-    this.insertAction(commonEvent, x, y, callback, addToLast);
+    this.insertAction({"type": "dowhile", "condition": "false", "data": commonEvent}, x, y, callback, addToLast);
 }
 
 ////// 获得一个公共事件 //////

@@ -536,7 +536,7 @@ editor_blockly = function () {
             }).sort();
         }
 
-        var allIds = core.getAllIconIds();
+        var allIds = ["this"].concat(core.getAllIconIds());
         var allIconIds = allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
           return core.statusBar.icons[x] instanceof Image;
         }));

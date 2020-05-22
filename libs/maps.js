@@ -79,6 +79,7 @@ maps.prototype._mapIntoBlocks = function (map, floor, floorId) {
 
 ////// 从ID获得数字 //////
 maps.prototype.getNumberById = function (id) {
+    id = this.getIdOfThis(id);
     core.status.id2number = core.status.id2number || {};
     if (core.status.id2number[id] != null) return core.status.id2number[id];
     return core.status.id2number[id] = this._getNumberById(id);
@@ -107,6 +108,13 @@ maps.prototype.getBlockByNumber = function (number) {
 
 maps.prototype.getBlockById = function (id) {
     return this.getBlockByNumber(this.getNumberById(id));
+}
+
+maps.prototype.getIdOfThis = function (id) {
+    if (id != 'this') return id;
+    if (core.status.event.id != 'action') return id;
+    if (!core.status.event.data || core.status.event.data.x == null || core.status.event.data.y == null) return id;
+    return core.getBlockId(core.status.event.data.x, core.status.event.data.y) || id;
 }
 
 ////// 数字和ID的对应关系 //////
@@ -562,8 +570,6 @@ maps.prototype._canMoveDirectly_checkGlobal = function () {
     if (core.status.thisMap.cannotMoveDirectly) return false;
     // flag:cannotMoveDirectly为true：不能
     if (core.hasFlag('cannotMoveDirectly')) return false;
-    // 中毒状态：不能
-    if (core.hasFlag('poison')) return false;
 
     return true;
 }

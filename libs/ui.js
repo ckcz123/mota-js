@@ -596,7 +596,7 @@ ui.prototype.closePanel = function () {
     if (core.status.hero && core.status.hero.flags) {
         // 清除全部临时变量
         Object.keys(core.status.hero.flags).forEach(function (name) {
-            if (name.startsWith("@temp@")) {
+            if (name.startsWith("@temp@") || /^arg\d+$/.test(name)) {
                 delete core.status.hero.flags[name];
             }
         });
@@ -752,7 +752,7 @@ ui.prototype._getPosition = function (content) {
         py = core.status.event.data.y;
     }
     content = content.replace("\b", "\\b")
-        .replace(/\\b\[(up|center|down|hero|null)(,(hero|null|\d+,\d+|\d+))?]/g, function (s0, s1, s2, s3) {
+        .replace(/\\b\[(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?]/g, function (s0, s1, s2, s3) {
             pos = s1;
             if (s3 == 'hero' || s1=='hero' && !s3) {
                 px = core.status.hero.loc.x;
@@ -776,7 +776,7 @@ ui.prototype._getPosition = function (content) {
                     noPeak = core.getBlockId(px, py) == null;
                 }
             }
-            if(pos=='hero' || pos=='null'){
+            if(pos=='hero' || pos=='this'){
                 pos = py==null?'center':(py>=core.__HALF_SIZE__? 'up':'down'); 
             }
             return "";
@@ -974,6 +974,7 @@ ui.prototype._getDrawableIconInfo = function (id) {
     if (id && id.indexOf('flag:') === 0) {
         id = core.getFlag(id.substring(5), id);
     }
+    id = core.getIdOfThis(id);
     var image = null, icon = null;
     ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
         if (core.material.icons[v][id] != null) {
@@ -1401,10 +1402,12 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
         // --- 勇士
         if (titleInfo.image == core.material.images.hero) {
             if (core.status.hero.animate) {
+                var direction = core.getHeroLoc('direction');
+                if (direction == 'up') direction = 'down';
                 core.status.boxAnimateObjs.push({
                     'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
                     'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': 4,
-                    'image': titleInfo.image, 'pos': core.material.icons.hero[core.getHeroLoc('direction')].loc * titleInfo.height
+                    'image': titleInfo.image, 'pos': core.material.icons.hero[direction].loc * titleInfo.height
                 })
             } else {
                 core.clearMap('ui', hPos.left + 15, image_top, 32, titleInfo.height);

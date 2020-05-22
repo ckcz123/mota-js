@@ -70,6 +70,7 @@ function editor() {
         startPos:null,
         endPos:null,
         lastMoveE:{buttons:0,clientX:0,clientY:0},
+        selectedArea: null,
         // 材料区拖动有关
         lastMoveMaterE:null,
         tileSize: [1,1],

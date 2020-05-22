@@ -523,7 +523,7 @@ return '{' + [
     IdString_1 && ('"down": "' + IdString_1 +'"'),
     IdString_2 && ('"left": "' + IdString_2 +'"'),
     IdString_3 && ('"right": "' + IdString_3 +'"'),
-].join(', ') + '}\n';
+].filter(function (x) { return x; }).join(', ') + '}\n';
 */;
 
 

@@ -75,6 +75,7 @@ editor_mappanel_wrapper = function (editor) {
      * + 绘图时画个矩形在那个位置
      */
     editor.uifunctions.map_ondown = function (e) {
+        editor.uivalues.selectedArea = null;
         editor.uivalues.lastMoveE=e;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
@@ -211,16 +212,20 @@ editor_mappanel_wrapper = function (editor) {
      * + 绘图模式时, 根据画线/画矩形/画tileset 做对应的绘制
      */
     editor.uifunctions.map_onup = function (ee) {
-        console.log(1)
+        editor.uivalues.selectedArea = null;
+        ee.preventDefault();
+        ee.stopPropagation();
         var e=editor.uivalues.lastMoveE;
         if (!selectBox.isSelected()) {
             if (e.buttons == 2) {
-                if (editor.uivalues.endPos==null || editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y){
+                if (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y)) {
                     // 右键点击: 弹菜单
                     editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+                    editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
                 } else {
                     // 右键拖拽: 选中区域
                     printf('已经选中该区域')
+                    editor.uivalues.selectedArea = Object.assign({}, editor.uivalues.startPos, {x1: editor.uivalues.endPos.x, y1: editor.uivalues.endPos.y});
                     // 后续的处理
                 }
             } else {
@@ -232,8 +237,8 @@ editor_mappanel_wrapper = function (editor) {
                 else
                     editor.exchangeBgFg(editor.uivalues.startPos, editor.uivalues.endPos, editor.layerMod);
                 editor.uifunctions.unhighlightSaveFloorButton();
+                editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             }
-            editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             return false;
         }
@@ -876,30 +881,51 @@ editor_mappanel_wrapper = function (editor) {
     editor.constructor.prototype.copyFromPos = function (pos) {
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
-        var map = core.clone(editor.map[pos.y][pos.x]);
-        var events = {};
-        fields.forEach(function(v){
-            events[v] = core.clone(editor.currentFloorData[v][pos.x+','+pos.y]);
-        })
-        return {map: map, events: events};
+        var x0 = pos.x, y0 = pos.y, x1 = pos.x1, y1 = pos.y1;
+        if (x1 == null) x1 = x0;
+        if (y1 == null) y1 = y0;
+        if (x0 > x1) { x0 ^= x1; x1 ^= x0; x0 ^= x1; }//swap
+        if (y0 > y1) { y0 ^= y1; y1 ^= y0; y0 ^= y1; }//swap
+        var result = {w: x1 - x0 + 1, h: y1 - y0 + 1, layer: editor.layerMod, data: []};
+        for (var i = x0; i <= x1; ++i) {
+            for (var j = y0; j<= y1; ++j) {
+                var map = core.clone(editor[editor.layerMod][j][i]);
+                var events = {};
+                fields.forEach(function(v){
+                    events[v] = core.clone(editor.currentFloorData[v][i+','+j]);
+                })
+                result.data.push({map: map, events: events});
+            }
+        }
+        return result;
     }
     
     editor.constructor.prototype.pasteToPos = function (info, pos) {
         if (info == null) return;
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
-        editor.map[pos.y][pos.x] = core.clone(info.map);
-        fields.forEach(function(v){
-            if (info.events[v] == null) delete editor.currentFloorData[v][pos.x+","+pos.y];
-            else editor.currentFloorData[v][pos.x+","+pos.y] = core.clone(info.events[v]);
-        });
+        var w = info.w || 1, h = info.h || 1, layer = info.layer || 'map';
+        var data = core.clone(info.data || []);
+        for (var i = pos.x; i < pos.x+w; ++i) {
+            for (var j = pos.y; j < pos.y+h; ++j) {
+                var one = data.shift();
+                if (j >= editor[editor.layerMod].length || i >= editor[editor.layerMod][0].length) continue;
+                editor[editor.layerMod][j][i] = core.clone(one.map);
+                if (layer == 'map' && editor.layerMod == 'map') {
+                    fields.forEach(function(v){
+                        if (one.events[v] == null) delete editor.currentFloorData[v][i+","+j];
+                        else editor.currentFloorData[v][i+","+j] = core.clone(one.events[v]);
+                    });
+                }
+            }
+        }
     }
     
     editor.constructor.prototype.movePos = function (startPos, endPos, callback) {
         if (!startPos || !endPos) return;
         if (startPos.x == endPos.x && startPos.y == endPos.y) return;
         var copyed = editor.copyFromPos(startPos);
-        editor.pasteToPos({map:0, events: {}}, startPos);
+        editor.pasteToPos({w: 1, h: 1, layer: 'map', data: [{map:0, events: {}}]}, startPos);
         editor.pasteToPos(copyed, endPos);
         editor.updateMap();
         editor.file.saveFloorFile(function (err) {
@@ -986,16 +1012,28 @@ editor_mappanel_wrapper = function (editor) {
     editor.constructor.prototype.clearPos = function (clearPos, pos, callback) {
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
+        var x0 = pos.x, y0 = pos.y, x1 = pos.x1, y1 = pos.y1;
+        if (x1 == null) x1 = x0;
+        if (y1 == null) y1 = y0;
+        if (x0 > x1) { x0 ^= x1; x1 ^= x0; x0 ^= x1; }//swap
+        if (y0 > y1) { y0 ^= y1; y1 ^= y0; y0 ^= y1; }//swap
         editor.uifunctions.hideMidMenu();
         editor.savePreMap();
         editor.info = 0;
         editor_mode.onmode('');
-        if (clearPos)
-            editor.map[pos.y][pos.x]=editor.info;
+        for (var i = x0; i <= x1; ++i) {
+            for (var j = y0; j <= y1; ++j) {
+                if (j >= editor[editor.layerMod].length || i >= editor[editor.layerMod][0].length) continue;
+                if (clearPos)
+                    editor[editor.layerMod][j][i] = 0;
+                if (editor.layerMod == 'map') {
+                    fields.forEach(function(v){
+                        delete editor.currentFloorData[v][i+","+j];
+                    });
+                }
+            }
+        }
         editor.updateMap();
-        fields.forEach(function(v){
-            delete editor.currentFloorData[v][pos.x+','+pos.y];
-        })
         editor.file.saveFloorFile(function (err) {
             if (err) {
                 printe(err);

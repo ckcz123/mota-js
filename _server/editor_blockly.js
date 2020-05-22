@@ -523,57 +523,47 @@ editor_blockly = function () {
         }
 
         // 对任意图块提供补全
-        if ((type == 'text_1_s' && name == 'EvalString_1') || (type == 'autoText_s' && name == 'EvalString_1')
-          || (type == 'choices_s' && name == 'IdString_0') || (type == 'choicesContext' && name == 'IdString_0')
-          || (type == 'closeDoor_s' && name == 'IdString_0') || (type == 'setBlock_s' && name == 'EvalString_0')
-          || (type == 'setBgFgBlock_s' && name == 'EvalString_0') || (type == 'drawIcon_s' && name == 'IdString_0')
-          || (type == 'shopsub' && name == 'IdString_1') || (type == 'shopChoices' && name == 'IdString_0')
-          || type == 'faceIds_m') {
+        if (MotaActionBlocks[type].allIds && eval(MotaActionBlocks[type].allIds).indexOf(name)!==-1) {
           return filter(allIds, content);
         }
 
         // 对怪物ID提供补全
-        if ((type == 'enemyattr_e' || type == 'battle_s' || type == 'setEnemy_s') && name == 'IdString_0') {
+        if (MotaActionBlocks[type].allEnemys && eval(MotaActionBlocks[type].allEnemys).indexOf(name)!==-1) {
           return filter(allEnemys, content);
         }
 
         // 对道具ID进行补全
-        if ((type == 'useItem_s' || type == 'loadEquip_s' || type == 'doorKeyUnknown') && name == 'IdString_0') {
+        if (MotaActionBlocks[type].allItems && eval(MotaActionBlocks[type].allItems).indexOf(name)!==-1) {
           return filter(allItems, content);
         }
 
         // 对图片名进行补全
-        if ((type == 'showImage_s' || type == 'showImage_1_s' || type == 'showGif_s' || type == 'setHeroIcon_s'
-          || type == 'follow_s' || type == 'unfollow_s' || type == 'drawImage_s' || type == 'drawImage_1_s'
-          || type == 'floorOneImage') && name == 'EvalString_0') {
+        if (MotaActionBlocks[type].allImages && eval(MotaActionBlocks[type].allImages).indexOf(name)!==-1) {
           return filter(allImages, content);
         }
 
         // 对动画进行补全
-        if ((type == 'animate_s' && name == 'IdString_0') || (type == 'equip_m' && name == 'IdString_0')) {
+        if (MotaActionBlocks[type].allAnimates && eval(MotaActionBlocks[type].allAnimates).indexOf(name)!==-1) {
           return filter(allAnimates, content);
         }
 
         // 对音乐进行补全
-        if ((type == 'playBgm_s' || type == 'loadBgm_s' || type == 'freeBgm_s') && name == 'EvalString_0') {
+        if (MotaActionBlocks[type].allBgms && eval(MotaActionBlocks[type].allBgms).indexOf(name)!==-1) {
           return filter(allBgms, content);
         }
 
         // 对音效进行补全
-        if (type == 'playSound_s' && name == 'EvalString_0') {
+        if (MotaActionBlocks[type].allSounds && eval(MotaActionBlocks[type].allSounds).indexOf(name)!==-1) {
           return filter(allSounds, content);
         }
 
         // 对全局商店进行补全
-        if ((type == 'openShop_s' || type == 'disableShop_s') && name == 'IdString_0') {
+        if (MotaActionBlocks[type].allShops && eval(MotaActionBlocks[type].allShops).indexOf(name)!==-1) {
           return filter(allShops, content);
         }
 
         // 对楼层名进行补全
-        if ((type == 'setFloor_s' || type == 'show_s' || type == 'hide_s' || type == 'insert_2_s'
-          || type == 'setBlock_s' || type == 'turnBlock_s' || type == 'showFloorImg_s' || type == 'hideFloorImg_s'
-          || type == 'showBgFgMap_s' || type == 'hideBgFgMap_s' || type == 'setBgFgBlock_s'
-          || type == 'openDoor_s' || type == 'changeFloor_m') && name == "IdString_0") {
+        if (MotaActionBlocks[type].allFloorIds && eval(MotaActionBlocks[type].allFloorIds).indexOf(name)!==-1) {
           return filter(allFloorIds, content);
         }
 

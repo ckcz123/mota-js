@@ -3108,7 +3108,7 @@ Id_List
 
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
-    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
+    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','属性值','退化扣攻','退化扣防','不可炸','九宫格领域','领域范围','连击数','吸血到自身','固伤值']*/;
 
 Equip_List
     :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'魔力'|'魔力上限'

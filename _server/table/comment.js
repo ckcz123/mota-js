@@ -108,7 +108,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				}
 			}
 		},
-		"items_template": { 'cls': 'items', 'name': '新物品', 'canPass': true },
+		"items_template": { 'cls': 'items', 'name': '新物品' },
 
 
 		// --------------------------- 【怪物】相关的表格配置 --------------------------- //

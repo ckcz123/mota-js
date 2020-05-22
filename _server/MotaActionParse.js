@@ -1057,7 +1057,7 @@ ActionParser.prototype.matchEvalCompare=function(args, isShadow){
   if (raw[0]+raw.slice(-1)=='()') raw=raw.slice(1,-1);
   var str=raw
   var xml=MotaActionBlocks['expression_arithmetic_0'].xmlText
-  if (!/<=|<|>=|>|==|!=|&&|\|\|/.exec(str)) return {ret:false};
+  if (!/<=|<|>=|>|==|!=|===|!==|&&|\|\|/.exec(str)) return {ret:false};
   str=str.replace(/[^<>=!()&|]/g,' ')
   // 处理括号匹配
   var old;
@@ -1066,7 +1066,7 @@ ActionParser.prototype.matchEvalCompare=function(args, isShadow){
     str=str.replace(/\([^()]*\)/g,function(v){return Array.from({length:v.length+1}).join(' ')})
   } while (old!=str);
   // 按优先级依次寻找以下符号
-  var oplist=['<','<=','>','>=','==','!=','&&','||'].reverse()
+  var oplist=['<','<=','>','>=','==','!=','===','!==','&&','||'].reverse()
   for (var index = 0,op; op=oplist[index]; index++) {
     var match=new RegExp(' '+(op=='||'?'\\|\\|':op)+' ').exec(str)
     if (!match) continue;

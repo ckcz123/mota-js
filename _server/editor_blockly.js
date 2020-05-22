@@ -465,8 +465,7 @@ function omitedcheckUpdateFunction(event) {
       if(noinput) input = '';
       if(inputType!=='field') {
         var subList = false;
-        var subrulename = rule.args[ii];
-        subrulename=subrulename.split('_').slice(0,-1).join('_');
+        var subrulename = rule.argsGrammarName[ii];
         var subrule = MotaActionBlocks[subrulename];
         if (subrule instanceof Array) {
           subrulename=subrule[subrule.length-1];

@@ -63,7 +63,7 @@ ActionParser.prototype.parse = function (obj,type) {
       var buildEquip = function (obj) {
         obj = obj || {};
         var text_choices = null;
-        var knownEquipListKeys = MotaActionBlocks.equipKnown.json.args0[0].options.map(function (one) {return one[1];})
+        var knownEquipListKeys = MotaActionBlocks['Equip_List'].options.map(function (one) {return one[1];})
         Object.keys(obj).sort().forEach(function (key) {
           var one = knownEquipListKeys.indexOf(key) >= 0 ? 'equipKnown' : 'equipUnknown';
           text_choices = MotaActionBlocks[one].xmlText([
@@ -79,7 +79,7 @@ ActionParser.prototype.parse = function (obj,type) {
         var buildKeys = function (obj) {
           obj = obj || {};
           var text_choices = null;
-          var knownListKeys = MotaActionBlocks.doorKeyKnown.json.args0[0].options.map(function (one) {return one[1];})
+          var knownListKeys = MotaActionBlocks['Key_List'].options.map(function (one) {return one[1];})
           Object.keys(obj).sort().forEach(function (key) {
             var one = knownListKeys.indexOf(key) >= 0 ? 'doorKeyKnown' : 'doorKeyUnknown';
             text_choices = MotaActionBlocks[one].xmlText([
@@ -985,7 +985,7 @@ ActionParser.prototype.matchId = function(args) {
   }
   var match = /nothing/.exec('nothing')
   // 固定列表
-  var FixedId_List=MotaActionBlocks.idFixedList_e.json.args0[0].options; // [["生命", "status:hp"], ...]
+  var FixedId_List=MotaActionBlocks['FixedId_List'].options; // [["生命", "status:hp"], ...]
   match=new RegExp('^('+FixedId_List.map(function(v){return v[1]}).join('|')+')$').exec(args[0])
   if(match){
     return rt(MotaActionBlocks['idFixedList_e'].xmlText, args);
@@ -1003,7 +1003,7 @@ ActionParser.prototype.matchId = function(args) {
     return rt(MotaActionBlocks['idTemp_e'].xmlText, args);
   }
   // id列表
-  var Id_List = MotaActionBlocks.idIdList_e.json.args0[0].options; // [["变量", "flag"], ...]
+  var Id_List = MotaActionBlocks['Id_List'].options; // [["变量", "flag"], ...]
   match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
   if(match){
     args=[match[1],MotaActionFunctions.replaceToName_token(match[2])]
@@ -1024,7 +1024,7 @@ ActionParser.prototype.matchEvalAtom = function(args) {
     return rt(MotaActionBlocks['bool_e'].xmlText, args);
   }
   // 怪物属性
-  var EnemyId_List=MotaActionBlocks.enemyattr_e.json.args0[1].options; // [["生命", "hp"], ...]
+  var EnemyId_List=MotaActionBlocks['EnemyId_List'].options; // [["生命", "hp"], ...]
   match=new RegExp("^enemy:([a-zA-Z0-9_]+):(" + EnemyId_List.map(function(v){return v[1]}).join('|') + ")$").exec(args[0])
   if(match){
     args=[match[1],match[2]]

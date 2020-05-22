@@ -231,14 +231,8 @@ editor_blockly = function () {
     }
 
     var previewBlock = function (b) {
-        var types = [
-            "previewUI_s", "clearMap_s", "clearMap_1_s", "setAttribute_s", "fillText_s",
-            "fillBoldText_s", "fillRect_s", "strokeRect_s", "drawLine_s",
-            "drawArrow_s", "fillPolygon_s", "strokePolygon_s", "fillEllipse_s", "strokeEllipse_s", "fillArc_s", "strokeArc_s",
-            "drawImage_s", "drawImage_1_s", "drawIcon_s", "drawBackground_s", "drawSelector_s", "drawSelector_1_s",
-            "waitContext_2"
-        ];
-        if (b && types.indexOf(b.type)>=0) {
+
+        if (b && MotaActionBlocks[b.type].previewBlock) {
             try {
                 var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|z)/g, '\\\\$1') + "]";
                 eval("var obj="+code);
@@ -264,30 +258,17 @@ editor_blockly = function () {
 
         if (previewBlock(b)) return;
 
-        if (b && b.type in selectPointBlocks) { // selectPoint
+        if (b && MotaActionBlocks[b.type].selectPoint) { // selectPoint
             this.selectPoint();
             return;
         }
 
-        var textStringDict = {
-            'text_0_s': 'EvalString_0',
-            'text_1_s': 'EvalString_2',
-            'autoText_s': 'EvalString_2',
-            'scrollText_s': 'EvalString_0',
-            'comment_s': 'EvalString_0',
-            'choices_s': 'EvalString_0',
-            'showTextImage_s': 'EvalString_0',
-            'function_s': 'RawEvalString_0',
-            'shopsub': 'EvalString_1',
-            'confirm_s': 'EvalString_0',
-            'drawTextContent_s': 'EvalString_0',
-        }
-        var f = b ? textStringDict[b.type] : null;
+        var f = b ? MotaActionBlocks[b.type].doubleclicktext : null;
         if (f) {
             var value = b.getFieldValue(f);
             //多行编辑
             editor_multi.multiLineEdit(value, b, f, {'lint': f === 'RawEvalString_0'}, function (newvalue, b, f) {
-                if (textStringDict[b.type] !== 'RawEvalString_0') {
+                if (MotaActionBlocks[b.type].doubleclicktext !== 'RawEvalString_0') {
                 }
                 b.setFieldValue(newvalue.split('\n').join('\\n'), f);
             });
@@ -374,37 +355,11 @@ editor_blockly = function () {
 
     // ------ select point ------
 
-    // id: [x, y, floorId, forceFloor]
-    var selectPointBlocks = {
-        "changeFloor_m": ["PosString_0", "PosString_1", "IdString_0", true],
-        "jumpHero_s": ["PosString_0", "PosString_1"],
-        "changeFloor_s": ["PosString_0", "PosString_1", "IdString_0", true],
-        "changePos_s": ["PosString_0", "PosString_1"],
-        "battle_1_s": ["PosString_0", "PosString_1"],
-        "openDoor_s": ["PosString_0", "PosString_1", "IdString_0"],
-        "closeDoor_s": ["PosString_0", "PosString_1"],
-        "show_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "hide_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "setBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
-        "turnBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
-        "move_s": ["PosString_0", "PosString_1"],
-        "jump_s": ["PosString_2", "PosString_3"], // 跳跃暂时只考虑终点
-        "showBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "hideBgFgMap_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "setBgFgBlock_s": ["EvalString_1", "EvalString_2", "IdString_0"],
-        "showFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "hideFloorImg_s": ["EvalString_0", "EvalString_1", "IdString_0"],
-        "trigger_s": ["PosString_0", "PosString_1"],
-        "insert_2_s": ["PosString_0", "PosString_1", "IdString_0"],
-        "animate_s": ["EvalString_0", "EvalString_0"],
-        "setViewport_s": ["PosString_0", "PosString_1"]
-    }
-
     editor_blockly.selectPoint = function () {
         var block = Blockly.selected, arr = null;
         var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
-        if (block != null && block.type in selectPointBlocks) {
-            arr = selectPointBlocks[block.type];
+        if (block != null && MotaActionBlocks[block.type].selectPoint) {
+            arr = eval(MotaActionBlocks[block.type].selectPoint);
             var xv = parseInt(block.getFieldValue(arr[0])), yv = parseInt(block.getFieldValue(arr[1]));
             if (block.type == 'animate_s') {
                 var v = block.getFieldValue(arr[0]).split(",");

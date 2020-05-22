@@ -3184,6 +3184,6 @@ this.block('idTemp_e').output='idString_e';
 
 /* Functions
 
-MotaActionParse()
+MotaActionParser()
 
 */

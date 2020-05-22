@@ -1,4 +1,4 @@
-MotaActionParse=function(){
+MotaActionParser=function(){
 function ActionParser(){
 }
 

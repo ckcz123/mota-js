@@ -1249,15 +1249,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   for (var id in core.material.items) {
     var name = core.material.items[id].name;
     if (id && name && name != '新物品') {
-      var hasPrefix = false;
-      MotaActionFunctions.pattern.replaceItemList.forEach(function (one) {
-        if (one[0].startsWith(id) || id.startsWith(one[0]) || one[1].startsWith(name) || name.startsWith(one[1])) {
-          hasPrefix = true;
-        }
-      });
-      if (!hasPrefix) {
-        MotaActionFunctions.pattern.replaceItemList.push([id, name]);
-      }
+      MotaActionFunctions.pattern.replaceItemList.push([id, name]);
     }
   }
 
@@ -1265,15 +1257,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   for (var id in core.material.enemys) {
     var name = core.material.enemys[id].name;
     if (id && name && name != '新敌人') {
-      var hasPrefix = false;
-      MotaActionFunctions.pattern.replaceEnemyList.forEach(function (one) {
-        if (one[0].startsWith(id) || id.startsWith(one[0]) || one[1].startsWith(name) || name.startsWith(one[1])) {
-          hasPrefix = true;
-        }
-      });
-      if (!hasPrefix) {
-        MotaActionFunctions.pattern.replaceEnemyList.push([id, name]);
-      }
+      MotaActionFunctions.pattern.replaceEnemyList.push([id, name]);
     }
   }
 
@@ -1330,14 +1314,14 @@ MotaActionFunctions.replaceToName = function (str) {
   MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
   });
-  str = str.replace(new RegExp("status:(" + list.join("|") + ")", "g"), function (a, b) {
+  str = str.replace(new RegExp("status:(" + list.join("|") + ")\\b", "g"), function (a, b) {
     return map[b] ? ("状态：" + map[b]) : b;
   }).replace(/status:/g, "状态：");
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
   });
-  str = str.replace(new RegExp("item:(" + list.join("|") + ")", "g"), function (a, b) {
+  str = str.replace(new RegExp("item:(" + list.join("|") + ")\\b", "g"), function (a, b) {
     return map[b] ? ("物品：" + map[b]) : b;
   }).replace(/item:/g, "物品：");
   str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：").replace(/temp:/g, "临时变量：");
@@ -1346,7 +1330,7 @@ MotaActionFunctions.replaceToName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
   });
-  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[.:](" + list.join("|") + ")", "g"), function (a, b, c) {
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[.:](" + list.join("|") + ")\\b", "g"), function (a, b, c) {
     return map[c] ? ("enemy:" + b + "：" + map[c]) : c;
   }).replace(/(enemy:[a-zA-Z0-9_]+)[.:：]/g, '$1：');
 
@@ -1354,7 +1338,7 @@ MotaActionFunctions.replaceToName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
   });
-  str = str.replace(new RegExp("enemy:(" + list.join("|") + ")", "g"), function (a, b) {
+  str = str.replace(new RegExp("enemy:(" + list.join("|") + ")\\b", "g"), function (a, b) {
     return map[b] ? ("怪物：" + map[b]) : b;
   }).replace(/enemy:/g, "怪物：");
 
@@ -1368,14 +1352,14 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")", "g"), function (a, b) {
+  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
     return map[b] ? ("status:" + map[b]) : b;
   }).replace(/状态[:：]/g, "status:");
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")", "g"), function (a, b) {
+  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
   str = str.replace(/临时变量[:：]/g, "temp d:").replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
@@ -1384,7 +1368,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("(enemy:|怪物[:：])(" + list.join("|") + ")", "g"), function (a, b, c, d) {
+  str = str.replace(new RegExp("(enemy:|怪物[:：])(" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b, c, d) {
     return map[c] ? ("enemy:" + map[c]) : c;
   }).replace(/怪物[:：]/g, "enemy:");
 
@@ -1392,7 +1376,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")", "g"), function (a, b, c, d) {
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b, c, d) {
     return map[c] ? ("enemy:" + b + ":" + map[c]) : c;
   }).replace(/(enemy:[a-zA-Z0-9_]+)[:：]/g, '$1:');
 

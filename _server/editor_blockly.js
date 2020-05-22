@@ -1,6 +1,6 @@
 editor_blockly = function () {
 
-    var editor_blockly = {};
+    var editor_blockly = {entryType:'event'};
 
 /////////////////initscript start/////////////////////////////
 // do not use String.raw because of highlighting
@@ -21,6 +21,7 @@ editor_blockly = function () {
 
   var toolboxObj = {
     '入口方块':[
+      '<label text="入口方块会根据当前类型在此数组中筛选,具体控制在editor_blockly.entranceCategoryCallback中"></label>',
       MotaActionFunctions.actionParser.parse([
         "欢迎使用事件编辑器",
         "本事件触发一次后会消失",
@@ -343,6 +344,7 @@ editor_blockly = function () {
   for (var name in toolboxObj){
     var custom = null;
     if(name=='最近使用事件')custom='searchBlockCategory';
+    if(name=='入口方块')custom='entranceCategory';
     getCategory(name,custom).innerHTML = toolboxObj[name].join(toolboxgap);
   }
 
@@ -361,6 +363,23 @@ var workspace = Blockly.inject(blocklyDiv,{
   },
   trashcan: false,
 });
+
+editor_blockly.entranceCategoryCallback = function(workspace) {
+  var list=toolboxObj['入口方块']
+  var xmlList = [];
+  var eventType = editor_blockly.entryType+'_m';
+  for(var ii=0,blockText;blockText=list[ii];ii++){
+    if(new RegExp('<block type="'+eventType+'">').exec(blockText)){
+      var block = Blockly.Xml.textToDom('<xml>'+blockText+'</xml>').firstChild;
+      block.setAttribute("gap", 5);
+      xmlList.push(block);
+    }
+  }
+  return xmlList;
+}
+
+workspace.registerToolboxCategoryCallback(
+  'entranceCategory', editor_blockly.entranceCategoryCallback);
 
 editor_blockly.searchBlockCategoryCallback = function(workspace) {
   var xmlList = [];
@@ -418,7 +437,7 @@ function omitedcheckUpdateFunction(event) {
     editor_blockly.setValue('入口方块只能有一个');
     return;
   }
-  var eventType = document.getElementById('entryType').value;
+  var eventType = editor_blockly.entryType;
   if(editor_blockly.workspace.topBlocks_.length==1){
     var blockType = editor_blockly.workspace.topBlocks_[0].type;
     if(blockType!==eventType+'_m'){
@@ -465,8 +484,7 @@ function omitedcheckUpdateFunction(event) {
       if(noinput) input = '';
       if(inputType!=='field') {
         var subList = false;
-        var subrulename = rule.args[ii];
-        subrulename=subrulename.split('_').slice(0,-1).join('_');
+        var subrulename = rule.argsGrammarName[ii];
         var subrule = MotaActionBlocks[subrulename];
         if (subrule instanceof Array) {
           subrulename=subrule[subrule.length-1];
@@ -605,7 +623,7 @@ function omitedcheckUpdateFunction(event) {
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
             }).replace(/\\(r|f|i|c|d|e|z)/g,'\\\\$1')),
-            document.getElementById('entryType').value
+            editor_blockly.entryType
         );
     }
 
@@ -620,7 +638,7 @@ function omitedcheckUpdateFunction(event) {
         if (!type) return false;
         editor_blockly.id = id_;
         editor_blockly.setValue(input.value);
-        document.getElementById('entryType').value = type;
+        editor_blockly.entryType = type;
         editor_blockly.parse();
         editor_blockly.show();
         return true;
@@ -668,7 +686,7 @@ function omitedcheckUpdateFunction(event) {
           editor_blockly.setValue('入口方块只能有一个');
           return;
         }
-        var eventType = document.getElementById('entryType').value;
+        var eventType = editor_blockly.entryType;
         if(editor_blockly.workspace.topBlocks_.length==1){
           var blockType = editor_blockly.workspace.topBlocks_[0].type;
           if(blockType!==eventType+'_m'){

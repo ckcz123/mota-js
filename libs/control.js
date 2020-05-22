@@ -1579,10 +1579,12 @@ control.prototype._replayAction_getNext = function (action) {
 control.prototype._replayAction_moveDirectly = function (action) {
     if (action.indexOf("move:")!=0) return false;
     // 忽略连续的瞬移事件
-    while (core.status.replay.toReplay.length>0 &&
-        core.status.replay.toReplay[0].indexOf('move:')==0) {
-            core.status.route.push(action);
-            action = core.status.replay.toReplay.shift();
+    if (!core.hasFlag('poison')) {
+        while (core.status.replay.toReplay.length>0 &&
+            core.status.replay.toReplay[0].indexOf('move:')==0) {
+                core.status.route.push(action);
+                action = core.status.replay.toReplay.shift();
+        }
     }
 
     var pos=action.substring(5).split(":");

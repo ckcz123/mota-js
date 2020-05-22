@@ -714,7 +714,7 @@ if (EvalString_0==''){
     if (EvalString_1=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
-if(EvalString_2 && !(/^(up|center|down|hero|null)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
+if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
@@ -754,7 +754,7 @@ if (EvalString_0==''){
     if (EvalString_1=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
-if(EvalString_2 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_2))) {
+if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');

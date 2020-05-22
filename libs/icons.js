@@ -53,6 +53,7 @@ icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
 icons.prototype.getTilesetOffset = function (id) {
 
     if (typeof id == 'string') {
+        id = core.getIdOfThis(id);
         // Tileset的ID必须是 X+数字 的形式
         if (!/^X\d+$/.test(id)) return null;
         id = parseInt(id.substring(1));

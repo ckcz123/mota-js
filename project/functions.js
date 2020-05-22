@@ -1287,6 +1287,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 判定能否瞬移到该点
 	if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
 	if (ignoreSteps >= 0) {
+		// 中毒也允许瞬移
+		if (core.hasFlag('poison')) {
+			var damage = ignoreSteps * core.values.poisonDamage;
+			if (damage >= core.status.hero.hp) return false;
+			core.status.hero.statistics.poisonDamage += damage;
+			core.status.hero.hp -= damage;
+		}
+
 		core.clearMap('hero');
 		// 获得勇士最后的朝向
 		var lastDirection = core.status.route[core.status.route.length - 1];
@@ -1301,6 +1309,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 统计信息
 		core.status.hero.statistics.moveDirectly++;
 		core.status.hero.statistics.ignoreSteps += ignoreSteps;
+		if (core.hasFlag('poison')) {
+			core.updateStatusBar();
+		}
 		return true;
 	}
 	return false;

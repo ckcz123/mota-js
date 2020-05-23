@@ -11,54 +11,55 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 		"items": {
 			"_type": "object",
 			"_data": {
-				"items": {
-					"_type": "object",
-					"_data": {
-						"cls": {
-							"_leaf": true,
-							"_type": "select",
-							"_select": {
-								"values": [
-									"items",
-									"constants",
-									"tools",
-									"equips"
-								]
-							},
-							"_docs": "道具类别",
-							"_data": "items(宝石、血瓶) constants(永久物品) tools(消耗道具) equips(装备)"
-						},
-						"name": {
-							"_leaf": true,
-							"_type": "textarea",
-							"_string": true,
-							"_data": "道具名称"
-						},
-						"text": {
-							"_leaf": true,
-							"_type": "textarea",
-							"_string": true,
-							"_docs": "道具描述",
-							"_data": "道具在道具栏中显示的描述"
-						},
-						"hideInToolbox": {
-							"_leaf": true,
-							"_type": "checkbox",
-							"_docs": "不显示在道具栏",
-						},
-						"equip": {
-							"_leaf": true,
-							"_type": "event",
-							"_event": "equip",
-							"_docs": "道具的装备属性"
-						},
-						"hideInReplay": {
-							"_leaf": true,
-							"_type": "checkbox",
-							"_docs": "回放不绘制道具栏",
-							"_data": "此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
-						}
-					}
+				"id": {
+					"_leaf": true,
+					"_type": "disable",
+					"_docs": "道具ID",
+					"_data": "道具ID，可于页面底部修改"
+				},
+				"cls": {
+					"_leaf": true,
+					"_type": "select",
+					"_select": {
+						"values": [
+							"items",
+							"constants",
+							"tools",
+							"equips"
+						]
+					},
+					"_docs": "道具类别",
+					"_data": "items(宝石、血瓶) constants(永久物品) tools(消耗道具) equips(装备)"
+				},
+				"name": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_data": "道具名称"
+				},
+				"text": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_docs": "道具描述",
+					"_data": "道具在道具栏中显示的描述"
+				},
+				"hideInToolbox": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "不显示在道具栏",
+				},
+				"equip": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "equip",
+					"_docs": "道具的装备属性"
+				},
+				"hideInReplay": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "回放不绘制道具栏",
+					"_data": "此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
 				},
 				"itemEffect": {
 					"_leaf": true,
@@ -115,6 +116,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 		"enemys": {
 			"_type": "object",
 			"_data": {
+				"id": {
+					"_leaf": true,
+					"_type": "disable",
+					"_docs": "怪物ID",
+					"_data": "怪物ID，可于页面底部修改"
+				},
 				"name": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -328,7 +335,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "select",
 					"_select": {
-						"values": [1,2,3,4],
+						"values": [null,1,2,3,4],
 					},
 					"_docs": "动画帧数",
 					"_data": "null代表素材默认帧数"

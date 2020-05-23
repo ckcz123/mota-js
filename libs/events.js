@@ -444,7 +444,8 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         core.removeBlock(x, y);
         setTimeout(function () {
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(id, x, y, callback);
+            core.events.afterOpenDoor(id, x, y);
+            if (callback) callback();
         }, 1); // +1是为了录像检测系统
     } else {
         this._openDoor_animate(id, x, y, callback);

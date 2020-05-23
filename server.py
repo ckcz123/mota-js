@@ -7,6 +7,7 @@
 import sys
 import json
 import os
+import shutil
 import base64
 
 isPy3 = sys.version_info > (3, 0)
@@ -140,6 +141,46 @@ def listFile():
 		for f in os.listdir(filename)
 		if os.path.isfile(os.path.join(filename, f))]
 	return "[" + ", ".join(['"'+f+'"' for f in files]) + "]"
+
+@app.route('/makeDir', methods=['POST'])
+def makeDir():
+	data = process_request()
+	filename = data.get('name', None)
+	if filename is None or not is_sub(filename):
+		abort(403)
+		return
+	if not os.path.exists(filename):
+		os.makedirs(filename)
+	return 'Success'
+
+@app.route('/moveFile', methods=['POST'])
+def moveFile():
+	data = process_request()
+	src = data.get('src', None)
+	dest = data.get('dest', None)
+	if src is None or dest is None or not is_sub(src) or not is_sub(dest):
+		abort(403)
+		return
+	if not os.path.exists(src):
+		abort(404)
+		return
+	if os.path.exists(dest):
+		os.remove(dest)
+	os.rename(src, dest)
+	return 'Success'
+
+@app.route('/deleteFile', methods=['POST'])
+def deleteFile():
+	data = process_request()
+	name = data.get('name', None)
+	if name is None or not is_sub(name):
+		abort(403)
+		return
+	if os.path.isfile(name):
+		os.remove(name)
+	elif os.path.isdir(name):
+		shutil.rmtree(name)
+	return 'Success'
 
 def port_used(port):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

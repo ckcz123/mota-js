@@ -730,7 +730,7 @@ control.prototype.waitHeroToStop = function(callback) {
                 core.setHeroLoc('direction', lastDirection);
             core.drawHero();
             callback();
-        }, core.status.replay.speed == 24 ? 0 : 30);
+        }, core.status.replay.speed == 24 ? 1 : 30);
     }
 }
 

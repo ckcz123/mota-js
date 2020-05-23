@@ -8,17 +8,10 @@ function items() {
 
 ////// 初始化 //////
 items.prototype._init = function () {
-    this.items = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.items;
-    this.itemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffect;
-    this.itemEffectTip = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip;
-    this.useItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEffect;
-    this.canUseItemEffect = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.canUseItemEffect;
-    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition)
-        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition = {};
-    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent)
-        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent = {};
-    this.equipCondition = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.equipCondition;
-    this.useItemEvent = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.useItemEvent;
+    this.items = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a;
+    for (var itemId in this.items) {
+        this.items[itemId].id = itemId;
+    }
 }
 
 ////// 获得所有道具 //////
@@ -32,10 +25,11 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
     // 消耗品
     if (itemCls === 'items') {
         var curr_hp = core.status.hero.hp;
-        if (itemId in this.itemEffect) {
+        var itemEffect = core.material.items[itemId].itemEffect;
+        if (itemEffect) {
             try {
                 for (var i = 0; i < itemNum; ++i)
-                    eval(this.itemEffect[itemId]);
+                    eval(itemEffect);
             }
             catch (e) {
                 main.log(e);
@@ -43,9 +37,10 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
         }
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
 
-        if (this.useItemEvent[itemId]) {
+        var useItemEvent = core.material.items[itemId].useItemEvent;
+        if (useItemEvent) {
             try {
-                core.insertAction(this.useItemEvent[itemId]);
+                core.insertAction(useItemEvent);
             }
             catch (e) {
                 main.log(e);
@@ -63,9 +58,10 @@ items.prototype.getItemEffectTip = function (itemId) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
     if (itemCls === 'items') {
-        if (itemId in this.itemEffectTip) {
+        var itemEffectTip = core.material.items[itemId].itemEffectTip;
+        if (itemEffectTip) {
             try {
-                return core.replaceText(this.itemEffectTip[itemId]) || "";
+                return core.replaceText(itemEffectTip) || "";
             } catch (e) {
                 main.log(e);
                 return "";
@@ -91,17 +87,19 @@ items.prototype.useItem = function (itemId, noRoute, callback) {
 }
 
 items.prototype._useItemEffect = function (itemId) {
-    if (itemId in this.useItemEffect) {
+    var useItemEffect = core.material.items[itemId].useItemEffect;
+    if (useItemEffect) {
         try {
-            eval(this.useItemEffect[itemId]);
+            eval(useItemEffect);
         }
         catch (e) {
             main.log(e);
         }
     }
-    if (this.useItemEvent[itemId]) {
+    var useItemEvent = core.material.items[itemId].useItemEvent;
+    if (useItemEvent) {
         try {
-            core.insertAction(this.useItemEvent[itemId]);
+            core.insertAction(useItemEvent);
         }
         catch (e) {
             main.log(e);
@@ -123,10 +121,11 @@ items.prototype._afterUseItem = function (itemId) {
 items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
-
-    if (itemId in this.canUseItemEffect) {
+    
+    var canUseItemEffect = core.material.items[itemId].canUseItemEffect;
+    if (canUseItemEffect) {
         try {
-            return eval(this.canUseItemEffect[itemId]);
+            return eval(canUseItemEffect);
         }
         catch (e) {
             main.log(e);
@@ -243,10 +242,10 @@ items.prototype.canEquip = function (equipId, hint) {
     }
 
     // 可装备条件
-    var condition = this.equipCondition[equipId];
-    if (condition) {
+    var equipCondition = core.material.items[equipId].equipCondition;
+    if (equipCondition) {
         try {
-            if (!eval(condition)) {
+            if (!eval(equipCondition)) {
                 if (hint) core.drawTip("当前不可换上" + equip.name);
                 return false;
             }

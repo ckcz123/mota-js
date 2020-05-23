@@ -307,7 +307,7 @@ maps.prototype.saveMap = function (floorId) {
     var map = maps[floorId];
     var thisFloor = this._compressFloorData(map, core.floors[floorId]);
     if (map.blocks) {
-        var mapArr = this.compressMap(map.blocks, map.width, map.height, floorId);
+        var mapArr = this.compressMap(this._getMapArrayFromBlocks(map.blocks, map.width, map.height, true), floorId);
         if (mapArr != null) thisFloor.map = mapArr;
     }
     return thisFloor;

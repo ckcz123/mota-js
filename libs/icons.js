@@ -36,15 +36,12 @@ icons.prototype.getAllIconIds = function () {
     return this.allIconIds;
 }
 
-icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
+icons.prototype._getAnimateFrames = function (cls) {
     if (cls == 'enemys' || cls == 'npcs') {
         return 2;
     }
-    if (cls == 'animates' || cls == 'enemy48') {
+    if (cls == 'animates' || cls == 'enemy48' || cls == 'npc48') {
         return 4;
-    }
-    if (cls == 'npc48') {
-        return useOriginValue ? 4 : 1;
     }
     return 1;
 }

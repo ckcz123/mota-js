@@ -2643,7 +2643,9 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17, true));
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
-        core.drawThumbnail(data.floorId, core.maps.loadMap(data.maps, data.floorId).blocks, {
+        var map = core.maps.loadMap(data.maps, data.floorId);
+        core.extractBlocks(map);
+        core.drawThumbnail(data.floorId, map.blocks, {
             heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags
         }, {
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
@@ -2813,6 +2815,7 @@ ui.prototype._drawStatistics_add = function (floorId, obj, x1, x2, value) {
 }
 
 ui.prototype._drawStatistics_floorId = function (floorId, obj) {
+    core.extractBlocks(floorId);
     var floor = core.status.maps[floorId], blocks = floor.blocks;
     // 隐藏层不给看
     if (floor.cannotViewMap && floorId!=core.status.floorId) return;

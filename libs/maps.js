@@ -53,14 +53,25 @@ maps.prototype.loadFloor = function (floorId, map) {
         if (notCopy.indexOf(name) == -1 && map[name] != null)
             content[name] = core.clone(map[name]);
     }
-    if (map.deleted) {
-        content['blocks'] = [];
-        return content;
+    content.map = map.map;
+    if (main.mode == 'editor') {
+        this.extractBlocks(content);
     }
-    map = this.decompressMap(map.map, floorId);
-    // 事件处理
-    content['blocks'] = this._mapIntoBlocks(map, floor, floorId);
     return content;
+}
+
+/// 根据需求解析出blocks
+maps.prototype.extractBlocks = function (map) {
+    map = map || core.status.floorId;
+    if (typeof map == 'string') map = (core.status.maps||{})[map];
+    if (!map) return;
+    if (map.blocks) return;
+    if (map.deleted) {
+        map.blocks = [];
+        return;
+    }
+    var floorId = map.floorId;
+    map.blocks = this._mapIntoBlocks(this.decompressMap(map.map, floorId), core.floors[floorId], floorId);
 }
 
 maps.prototype._mapIntoBlocks = function (map, floor, floorId) {
@@ -160,7 +171,7 @@ maps.prototype._addInfo = function (block) {
         block.event.trigger = 'getItem';
     }
     if (block.event.animate == null) {
-        block.event.animate = core.icons._getAnimateFrames(block.event.cls, false);
+        block.event.animate = core.icons._getAnimateFrames(block.event.cls);
     }
     block.event.height = 32;
     if (block.event.cls == 'enemy48' || block.event.cls == 'npc48')
@@ -289,17 +300,16 @@ maps.prototype.saveMap = function (floorId) {
         return map;
     }
     // 砍层状态：直接返回
-    if (main.mode == 'play' && (flags.__removed__ || []).indexOf(floorId) >= 0) {
+    if ((flags.__removed__ || []).indexOf(floorId) >= 0) {
         return { deleted: true, canFlyTo: false, cannotViewMap: true };
     }
 
-    var map = maps[floorId], floor = core.floors[floorId];
-    var blocks = this._getMapArrayFromBlocks(map.blocks, floor.width, floor.height, true);
-    if (main.mode == 'editor') return blocks;
-
-    var thisFloor = this._compressFloorData(map, floor);
-    var mapArr = this.compressMap(blocks, floorId);
-    if (mapArr != null) thisFloor.map = mapArr;
+    var map = maps[floorId];
+    var thisFloor = this._compressFloorData(map, core.floors[floorId]);
+    if (map.blocks) {
+        var mapArr = this.compressMap(map.blocks, map.width, map.height, floorId);
+        if (mapArr != null) thisFloor.map = mapArr;
+    }
     return thisFloor;
 }
 
@@ -351,18 +361,12 @@ maps.prototype.resizeMap = function (floorId) {
 ////// 将当前地图重新变成二维数组形式 //////
 maps.prototype.getMapArray = function (floorId, showDisable) {
     floorId = floorId || core.status.floorId;
-    return this._getMapArrayFromBlocks(core.status.maps[floorId].blocks,
-        core.floors[floorId].width, core.floors[floorId].height, showDisable);
+    var map = core.status.maps[floorId];
+    if (!map.blocks) return map.map;
+    return this._getMapArrayFromBlocks(map.blocks, map.width, map.height, showDisable);
 }
 
 maps.prototype._getMapArrayFromBlocks = function (blockArray, width, height, showDisable) {
-    if (typeof blockArray == 'string') {
-        var floorId = blockArray;
-        blockArray = core.status.maps[floorId].blocks;
-        width = core.floors[floorId].width;
-        height = core.floors[floorId].height;
-    }
-
     var blocks = [];
     var allzero = [];
     for (var y = 0; y < width; y++) allzero.push(0);
@@ -386,6 +390,7 @@ maps.prototype._getMapArrayFromBlocks = function (blockArray, width, height, sho
 maps.prototype.getMapBlocksObj = function (floorId, showDisable) {
     floorId = floorId || core.status.floorId;
     var obj = {};
+    core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         if (!block.disable || showDisable)
             obj[block.x + "," + block.y] = block;
@@ -775,6 +780,7 @@ maps.prototype.drawMap = function (floorId, callback) {
     core.clearMap('all');
     this.generateGroundPattern(floorId);
     core.status.floorId = floorId;
+    core.extractBlocks(floorId);
     core.status.thisMap = core.status.maps[floorId];
 
     this._drawMap_drawAll();
@@ -841,6 +847,7 @@ maps.prototype._drawBg_drawBackground = function (floorId, ctx) {
 ////// 绘制事件层 //////
 maps.prototype.drawEvents = function (floorId, blocks, ctx) {
     floorId = floorId || core.status.floorId;
+    core.extractBlocks(floorId);
     if (!blocks) blocks = core.status.maps[floorId].blocks;
     var arr = this._getMapArrayFromBlocks(blocks, core.floors[floorId].width, core.floors[floorId].height);
     var onMap = ctx == null;
@@ -1193,6 +1200,7 @@ maps.prototype.drawThumbnail = function (floorId, blocks, options, toDraw) {
 }
 
 maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, options) {
+    core.extractBlocks(floorId);
     blocks = blocks || core.status.maps[floorId].blocks;
     options = options || {}
 
@@ -1329,6 +1337,7 @@ maps.prototype.enemyExists = function (x, y, id, floorId) {
 maps.prototype.getBlock = function (x, y, floorId, showDisable) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return null;
+    core.extractBlocks(floorId);
     var blocks = core.status.maps[floorId].blocks;
     for (var n = 0; n < blocks.length; n++) {
         if (blocks[n].x == x && blocks[n].y == y) {
@@ -1406,6 +1415,7 @@ maps.prototype.searchBlock = function (id, floorId, showDisable) {
         });
         return result;
     }
+    core.extractBlocks(floorId);
     for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
         var block = core.status.maps[floorId].blocks[i];
         if ((showDisable || !block.disable) && (core.matchWildcard(id, block.event.id) || core.matchRegex(id, block.event.id))) {
@@ -1461,7 +1471,7 @@ maps.prototype.hideBlock = function (x, y, floorId) {
 maps.prototype.hideBlockByIndex = function (index, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
-
+    core.extractBlocks(floorId);
     var blocks = core.status.maps[floorId].blocks, block = blocks[index];
     block.disable = true;
 }
@@ -1501,7 +1511,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
 maps.prototype.removeBlockByIndex = function (index, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
-
+    core.extractBlocks(floorId);
     var blocks = core.status.maps[floorId].blocks, block = blocks[index];
     blocks.splice(index, 1);
 }
@@ -1754,6 +1764,7 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
         return;
     }
     var toBlock = this.getBlockByNumber(toNumber, true);
+    core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         if (block.id == fromNumber) {
             block.id = toNumber;
@@ -1903,7 +1914,7 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 }
 
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
-    var animateTotal = core.icons._getAnimateFrames(blockInfo.cls, true), animateTime = 0;
+    var animateTotal = core.icons._getAnimateFrames(blockInfo.cls), animateTime = 0;
     var animate = window.setInterval(function () {
         if (blockInfo.cls != 'tileset') {
             animateTime += moveInfo.per_time;

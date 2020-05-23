@@ -1128,51 +1128,6 @@ utils.prototype.same = function (a, b) {
     return false;
 }
 
-utils.prototype._export = function (floorIds) {
-    if (!floorIds) floorIds = [core.status.floorId];
-    else if (floorIds == 'all') floorIds = core.clone(core.floorIds);
-    else if (typeof floorIds == 'string') floorIds = [floorIds];
-
-    var monsterMap = {};
-
-    // map
-    var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
-    floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
-        content += arr.map(function (x) {
-            // check monster
-            x.forEach(function (t) {
-                var block = core.maps.getBlockByNumber(t);
-                if (block.event.cls.indexOf("enemy") == 0) {
-                    monsterMap[t] = block.event.id;
-                }
-            })
-            return x.join("\t");
-        }).join("\n") + "\n\n";
-    })
-
-    // values
-    content += ["redGem", "blueGem", "greenGem", "redPotion", "bluePotion",
-        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x] || 0;
-    }).join(" ") + "\n\n";
-
-    // monster
-    content += Object.keys(monsterMap).length + "\n";
-    for (var t in monsterMap) {
-        var id = monsterMap[t], monster = core.material.enemys[id];
-        content += t + " " + monster.hp + " " + monster.atk + " " +
-            monster.def + " " + monster.money + " " + monster.special + "\n";
-    }
-    content += "\n0 0 0 0 0 0\n\n";
-    content += core.status.hero.hp + " " + core.status.hero.atk + " "
-        + core.status.hero.def + " " + core.status.hero.mdef + " " + core.status.hero.money + " "
-        + core.itemCount('yellowKey') + " " + core.itemCount("blueKey") + " " + core.itemCount("redKey") + " 0 "
-        + core.status.hero.loc.x + " " + core.status.hero.loc.y + "\n";
-
-    console.log(content);
-}
-
 utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
     var _error = function (msg) {
         main.log(msg);

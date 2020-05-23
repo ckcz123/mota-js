@@ -1100,6 +1100,7 @@ control.prototype.updateDamage = function (floorId, ctx) {
 
 control.prototype._updateDamage_damage = function (floorId, ctx) {
     core.setTextAlign(ctx, 'left');
+    core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         var x = block.x, y = block.y;
         if (!block.disable && block.event.cls.indexOf('enemy') == 0 && block.event.displayDamage !== false) {

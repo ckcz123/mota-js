@@ -115,6 +115,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hero.loc = heroLoc;
 	// 检查重生怪并重置
 	if (!fromLoad) {
+        core.extractBlocks(floorId);
 		core.status.maps[floorId].blocks.forEach(function (block) {
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
@@ -520,6 +521,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var cache = core.status.checkBlock.cache[index];
 		if (!cache) {
 			// 没有该点的缓存，则遍历每个图块
+			core.extractBlocks(floorId);
 			core.status.maps[floorId].blocks.forEach(function (block) {
 				if (!block.disable) {
 					// 获得该图块的ID

@@ -687,6 +687,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
             heroLoc.y = core.status.maps[floorId][stair][1];
         }
         else {
+            core.extractBlocks(floorId);
             var blocks = core.status.maps[floorId].blocks;
             for (var i in blocks) {
                 if (!blocks[i].disable && blocks[i].event.id === stair) {

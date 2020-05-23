@@ -8,14 +8,14 @@ editor_table_wrapper = function (editor) {
     // HTML模板
 
     editor_table.prototype.select = function (value, values) {
-        var content = editor.table.option(value) +
-            values.map(function (v) {
-                return editor.table.option(v)
+        if (values.indexOf(value) < 0) values = [value].concat(values);
+        var content = values.map(function (v) {
+                return editor.table.option(v, v == value)
             }).join('')
         return /* html */`<select>\n${content}</select>\n`
     }
-    editor_table.prototype.option = function (value) {
-        return /* html */`<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
+    editor_table.prototype.option = function (value, selected) {
+        return /* html */`<option value='${JSON.stringify(value)}' ${selected ? 'selected' : ''}>${JSON.stringify(value)}</option>\n`
     }
     editor_table.prototype.text = function (value) {
         return /* html */`<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`

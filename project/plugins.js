@@ -124,38 +124,42 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	////// 将一个全局商店转变成可预览的公共事件 //////
 	this._convertShop = function (shop) {
-		return [{
-			"type": "while",
-			"condition": "true",
-			"data": [
-				// 检测能否访问该商店
-				{
-					"type": "if",
-					"condition": "core.isShopVisited('" + shop.id + "')",
-					"true": [
-						// 可以访问，直接插入执行效果
-						{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', false) }" },
-					],
-					"false": [
-						// 不能访问的情况下：检测能否预览
-						{
-							"type": "if",
-							"condition": shop.disablePreview,
-							"true": [
-								// 不可预览，提示并退出
-								"当前无法访问该商店！",
-								{ "type": "break" },
-							],
-							"false": [
-								// 可以预览：将商店全部内容进行替换
-								{ "type": "tip", "text": "当前处于预览模式，不可购买" },
-								{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', true) }" },
-							]
-						}
-					]
-				}
-			]
-		}];
+		return [
+			{ "type": "function", "function": "function() {core.setFlag('@temp@shop', true);}" },
+			{
+				"type": "while",
+				"condition": "true",
+				"data": [
+					// 检测能否访问该商店
+					{
+						"type": "if",
+						"condition": "core.isShopVisited('" + shop.id + "')",
+						"true": [
+							// 可以访问，直接插入执行效果
+							{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', false) }" },
+						],
+						"false": [
+							// 不能访问的情况下：检测能否预览
+							{
+								"type": "if",
+								"condition": shop.disablePreview,
+								"true": [
+									// 不可预览，提示并退出
+									"当前无法访问该商店！",
+									{ "type": "break" },
+								],
+								"false": [
+									// 可以预览：将商店全部内容进行替换
+									{ "type": "tip", "text": "当前处于预览模式，不可购买" },
+									{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', true) }" },
+								]
+							}
+						]
+					}
+				]
+			},
+			{ "type": "function", "function": "function() {core.removeFlag('@temp@shop');}" }
+		];
 	}
 
 	this._convertShop_replaceChoices = function (shopId, previewMode) {
@@ -219,6 +223,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			return '当前楼层不能使用快捷商店。';
 		return null;
 	}
+
+	/// 允许商店X键退出
+	core.registerAction('keyUp', 'shops', function (keycode) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		if (keycode == 88) { // X
+			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
+			return true;
+		}
+	}, 60);
 
 },
     "removeMap": function () {

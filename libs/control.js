@@ -2807,7 +2807,7 @@ control.prototype._resize_status = function (obj) {
         core.dom.statusLabels[i].style.marginLeft = 6 * core.domStyle.scale + "px";
     }
     for (var i = 0; i < core.dom.statusTexts.length; ++i) {
-        core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
+        core.dom.statusTexts[i].style.color = core.arrayToRGBA(obj.globalAttribute.statusBarColor);
     }
     // keys
     if (core.flags.statusBarItems.indexOf('enableGreenKey')>=0) {

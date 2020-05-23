@@ -613,7 +613,7 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
     setTimeout(function () {
         document.getElementById("colorPicker").value = getValue();
         // 设置位置
-        openColorPicker(Blockly.WidgetDiv.DIV.style.left, Blockly.WidgetDiv.DIV.style.top, setValue);
+        openColorPicker(Blockly.WidgetDiv.DIV.style.left.replace(/[^\d.]/g, ''), Blockly.WidgetDiv.DIV.style.top.replace(/[^\d.]/g, ''), setValue);
     });
 
     return document.createElement('table');

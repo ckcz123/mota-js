@@ -56,7 +56,8 @@
                 callback(null, data);
             }
         }, function (e) {
-            main.log(e);
+            if (window.main != null && main.log) main.log(e);
+            else console.log(e);
             callback(e+"：请检查启动服务是否处于正常运行状态。");
         }, "text/plain; charset=x-user-defined");
     }
@@ -153,15 +154,7 @@
             throw 'Type Error in fs.readdir';
         var data = '';
         data += 'name=' + path;
-        postsomething(data, '/makeDir', function (err, data) {
-            try {
-                data = JSON.parse(data);
-            } catch (e) {
-                err = "Invalid /makeDir";
-                data = null;
-            }
-            callback(err, data);
-        });
+        postsomething(data, '/makeDir', callback);
         return;
     }
 
@@ -174,15 +167,7 @@
             throw 'Type Error in fs.readdir';
         var data = '';
         data += 'src=' + src + "&dest=" + dest;
-        postsomething(data, '/moveFile', function (err, data) {
-            try {
-                data = JSON.parse(data);
-            } catch (e) {
-                err = "Invalid /moveFile";
-                data = null;
-            }
-            callback(err, data);
-        });
+        postsomething(data, '/moveFile', callback);
         return;
     }
 
@@ -195,15 +180,7 @@
             throw 'Type Error in fs.readdir';
         var data = '';
         data += 'name=' + path;
-        postsomething(data, '/deleteFile', function (err, data) {
-            try {
-                data = JSON.parse(data);
-            } catch (e) {
-                err = "Invalid /deleteFile";
-                data = null;
-            }
-            callback(err, data);
-        });
+        postsomething(data, '/deleteFile', callback);
         return;
     }
 })();

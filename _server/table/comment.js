@@ -335,7 +335,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "select",
 					"_select": {
-						"values": [1,2,3,4],
+						"values": [null,1,2,3,4],
 					},
 					"_docs": "动画帧数",
 					"_data": "null代表素材默认帧数"

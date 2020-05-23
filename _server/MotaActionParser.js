@@ -1256,7 +1256,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   MotaActionFunctions.pattern.replaceItemList = [];
   for (var id in core.material.items) {
     var name = core.material.items[id].name;
-    if (id && name && name != '新物品') {
+    if (id && name && name != '新物品' && /^[a-zA-Z0-9_\u4E00-\u9FCC]+$/.test(name)) {
       MotaActionFunctions.pattern.replaceItemList.push([id, name]);
     }
   }
@@ -1264,7 +1264,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   MotaActionFunctions.pattern.replaceEnemyList = [];
   for (var id in core.material.enemys) {
     var name = core.material.enemys[id].name;
-    if (id && name && name != '新敌人') {
+    if (id && name && name != '新敌人' && /^[a-zA-Z0-9_\u4E00-\u9FCC]+$/.test(name)) {
       MotaActionFunctions.pattern.replaceEnemyList.push([id, name]);
     }
   }

@@ -20,7 +20,7 @@ function editor() {
         chooseThis : document.getElementById('chooseThis'),
         chooseInRight : document.getElementById('chooseInRight'),
         copyLoc : document.getElementById('copyLoc'),
-        moveLoc : document.getElementById('moveLoc'),
+        pasteLoc : document.getElementById('pasteLoc'),
         clearEvent : document.getElementById('clearEvent'),
         clearLoc : document.getElementById('clearLoc'),
         brushMod:document.getElementById('brushMod'),
@@ -69,6 +69,12 @@ function editor() {
         mouseOutCheck : 2,
         startPos:null,
         endPos:null,
+        lastMoveE:{buttons:0,clientX:0,clientY:0},
+        selectedArea: null,
+        // 材料区拖动有关
+        lastMoveMaterE:null,
+        tileSize: [1,1],
+        startLoc: null,
         // 撤销/恢复
         preMapData : [],
         preMapMax: 10,
@@ -80,13 +86,12 @@ function editor() {
         scrollBarHeight :0,
         folded:false,
         foldPerCol: 50,
-        // 画图区菜单
-        lastRightButtonPos:[{x:0,y:0},{x:0,y:0}],
-        lastCopyedInfo : [null, null],
         //
         ratio : 1,
         // blockly转义
         disableBlocklyReplace: false,
+        // blockly展开比较
+        disableBlocklyExpandCompare: false,
 
         // 绑定机关门事件相关
         bindSpecialDoor: {
@@ -102,7 +107,6 @@ function editor() {
         },
 
         // tile
-        tileSize: [1,1],
         lockMode: false,
 
         // 最近使用的图块
@@ -280,6 +284,7 @@ editor.prototype.changeFloor = function (floorId, callback) {
         editor.viewportLoc = editor.viewportLoc || {};
         var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
         editor.setViewport(x, y);
+        editor.uifunctions.unhighlightSaveFloorButton();
 
         editor.config.set('editorLastFloorId', floorId, function() {
             if (callback) callback();
@@ -680,6 +685,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
     editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
     editor.dom.dataSelection.style.top = pos.y * ysize + 'px';
     editor.dom.dataSelection.style.height = ysize - 6 + 'px';
+    editor.dom.dataSelection.style.width = 32 - 6 + 'px';
     setTimeout(function(){
         selectBox.isSelected(true);
         editor.updateLastUsedMap();

@@ -41,41 +41,48 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"背景图.jpg": "bg.jpg",
 			"背景音乐.mp3": "bgm.mp3"
 		},
-		"startBackground": "project/images/bg.jpg",
-		"startLogoStyle": "color: black",
 		"levelChoose": [
-			[
-				"简单",
-				"Easy"
-			],
-			[
-				"普通",
-				"Normal"
-			],
-			[
-				"困难",
-				"Hard"
-			],
-			[
-				"噩梦",
-				"Hell"
-			]
+			{
+				"title": "简单",
+				"name": "Easy",
+				"hard": 1,
+				"action": [
+					{
+						"type": "comment",
+						"text": "在这里写该难度需执行的事件"
+					}
+				]
+			},
+			{
+				"title": "普通",
+				"name": "Normal",
+				"hard": 2,
+				"color": [
+					0,
+					255,
+					0,
+					1
+				],
+				"action": []
+			}
 		],
 		"equipName": [
 			"武器",
 			"盾牌"
 		],
 		"startBgm": null,
-		"statusLeftBackground": "url(project/materials/ground.png) repeat",
-		"statusTopBackground": "url(project/materials/ground.png) repeat",
-		"toolsBackground": "url(project/materials/ground.png) repeat",
-		"borderColor": "#CCCCCC",
-		"statusBarColor": "white",
-		"hardLabelColor": "red",
-		"floorChangingBackground": "black",
-		"floorChangingTextColor": "white",
-		"font": "Verdana",
-		"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;"
+		"styles": {
+			"startBackground": "project/images/bg.jpg",
+			"startLogoStyle": "color: black",
+			"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;",
+			"statusLeftBackground": "url(project/materials/ground.png) repeat",
+			"statusTopBackground": "url(project/materials/ground.png) repeat",
+			"toolsBackground": "url(project/materials/ground.png) repeat",
+			"borderColor": [204,204,204,1],
+			"statusBarColor": [255,255,255,1],
+			"floorChangingStyle": "background-color: black; color: white",
+			"font": "Verdana"
+		}
 	},
 	"firstData": {
 		"title": "魔塔样板",
@@ -84,6 +91,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",
+			"animate": false,
 			"name": "阳光",
 			"lv": 1,
 			"hpmax": 9999,
@@ -158,7 +166,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 									},
 									{
 										"type": "if",
-										"condition": "core.flags.startDirectly",
+										"condition": "main.levelChoose.length == 0",
 										"true": [
 											{
 												"type": "comment",
@@ -172,7 +180,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 											},
 											{
 												"type": "function",
-												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one[0],\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + one[1] + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
+												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one.title || '',\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + (one.name || '') + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
 											}
 										]
 									},
@@ -219,7 +227,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 									},
 									{
 										"type": "if",
-										"condition": "!core.isReplaying()",
+										"condition": "(!core.isReplaying())",
 										"true": [
 											{
 												"type": "function",
@@ -241,60 +249,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startText": [
 			{
 				"type": "comment",
-				"text": "根据难度分歧设置<flag:hard>并给其他初始值"
-			},
-			{
-				"type": "switch",
-				"condition": "core.status.hard",
-				"caseList": [
-					{
-						"case": "'Easy'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "1"
-							},
-							{
-								"type": "comment",
-								"text": "可以在这里修改初始道具或属性，比如赠送黄钥匙等"
-							}
-						]
-					},
-					{
-						"case": "'Normal'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "2"
-							}
-						]
-					},
-					{
-						"case": "'Hard'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "3"
-							}
-						]
-					},
-					{
-						"case": "'Hell'",
-						"action": [
-							{
-								"type": "setValue",
-								"name": "flag:hard",
-								"value": "4"
-							}
-						]
-					}
-				]
-			},
-			{
-				"type": "comment",
 				"text": "初始剧情"
 			},
 			"Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
@@ -303,7 +257,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"shops": [
 			{
 				"id": "shop1",
-				"text": "\t[贪婪之神,blueShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
+				"text": "\t[贪婪之神,moneyShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
 				"textInList": "1F金币商店",
 				"mustEnable": false,
 				"disablePreview": false,
@@ -368,7 +322,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"id": "shop2",
-				"text": "\t[贪婪之神,pinkShop]勇敢的武士啊, 给我一定经验就可以：",
+				"text": "\t[贪婪之神,expShop]勇敢的武士啊, 给我一定经验就可以：",
 				"textInList": "1F经验商店",
 				"mustEnable": false,
 				"disablePreview": true,
@@ -465,9 +419,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"lavaDamage": 100,
 		"poisonDamage": 10,
 		"weakValue": 20,
-		"redJewel": 3,
-		"blueJewel": 3,
-		"greenJewel": 5,
+		"redGem": 3,
+		"blueGem": 3,
+		"greenGem": 5,
 		"redPotion": 100,
 		"bluePotion": 250,
 		"yellowPotion": 500,
@@ -499,7 +453,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"betweenAttackMax": false,
 		"useLoop": false,
 		"startUsingCanvas": false,
-		"startDirectly": false,
 		"statusCanvas": false,
 		"displayEnemyDamage": true,
 		"displayCritical": true,

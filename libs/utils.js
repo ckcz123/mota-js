@@ -352,13 +352,13 @@ utils.prototype.splitImage = function (image, width, height) {
     width = width || 32;
     height = height || width;
     var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
     var ans = [];
     for (var j = 0; j < image.height; j += height) {
         for (var i = 0; i < image.width; i += width) {
             var w = Math.min(width, image.width - i), h = Math.min(height, image.height - j);
             canvas.width = w; canvas.height = h;
-            context.drawImage(image, i, j, w, h, 0, 0, w, h);
+            core.drawImage(ctx, image, i, j, w, h, 0, 0, w, h);
             var img = new Image();
             img.src = canvas.toDataURL("image/png");
             ans.push(img);
@@ -401,6 +401,7 @@ utils.prototype.formatSize = function (size) {
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
+    if (x > 1e24 || x < -1e24) return x;
 
     var c = x < 0 ? "-" : "";
     x = Math.abs(x);
@@ -436,12 +437,14 @@ utils.prototype.formatBigNumber = function (x, onMap) {
 
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
+    if (!(color instanceof Array)) return color;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255);
     return "#" + ((1 << 24) + (nowR << 16) + (nowG << 8) + nowB).toString(16).slice(1);
 }
 
 utils.prototype.arrayToRGBA = function (color) {
+    if (!(color instanceof Array)) return color;
     if (color[3] == null) color[3] = 1;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255), nowA = this.clamp(parseFloat(color[3]), 0, 1);
@@ -1123,51 +1126,6 @@ utils.prototype.same = function (a, b) {
         return true;
     }
     return false;
-}
-
-utils.prototype._export = function (floorIds) {
-    if (!floorIds) floorIds = [core.status.floorId];
-    else if (floorIds == 'all') floorIds = core.clone(core.floorIds);
-    else if (typeof floorIds == 'string') floorIds = [floorIds];
-
-    var monsterMap = {};
-
-    // map
-    var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
-    floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
-        content += arr.map(function (x) {
-            // check monster
-            x.forEach(function (t) {
-                var block = core.maps.getBlockByNumber(t);
-                if (block.event.cls.indexOf("enemy") == 0) {
-                    monsterMap[t] = block.event.id;
-                }
-            })
-            return x.join("\t");
-        }).join("\n") + "\n\n";
-    })
-
-    // values
-    content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
-        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x] || 0;
-    }).join(" ") + "\n\n";
-
-    // monster
-    content += Object.keys(monsterMap).length + "\n";
-    for (var t in monsterMap) {
-        var id = monsterMap[t], monster = core.material.enemys[id];
-        content += t + " " + monster.hp + " " + monster.atk + " " +
-            monster.def + " " + monster.money + " " + monster.special + "\n";
-    }
-    content += "\n0 0 0 0 0 0\n\n";
-    content += core.status.hero.hp + " " + core.status.hero.atk + " "
-        + core.status.hero.def + " " + core.status.hero.mdef + " " + core.status.hero.money + " "
-        + core.itemCount('yellowKey') + " " + core.itemCount("blueKey") + " " + core.itemCount("redKey") + " 0 "
-        + core.status.hero.loc.x + " " + core.status.hero.loc.y + "\n";
-
-    console.log(content);
 }
 
 utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {

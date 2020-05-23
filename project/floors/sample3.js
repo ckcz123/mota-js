@@ -18,7 +18,7 @@ main.floors.sample3=
         10
     ],
     "bgm": "bgm.mp3",
-    "item_ratio": 1,
+    "ratio": 1,
     "map": [
     [  5,  5,  5,  5,  5,  5, 87,  5,  5,  5,  5,  5,  5],
     [  5,  4,  4,  4,  4,  1,  0,  1,  4,  4,  4,  4,  5],
@@ -871,7 +871,7 @@ main.floors.sample3=
                 "\t[hero]好温暖……",
                 {
                     "type": "setValue",
-                    "name": "item:yellowJewel",
+                    "name": "item:yellowGem",
                     "value": "1"
                 },
                 {

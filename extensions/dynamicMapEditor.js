@@ -8,7 +8,7 @@ function dynamicMapEditor() {
 	// 所有显示的ID
 	this.displayIds = [
 		'none', 'yellowWall', 'blueWall', 'whiteWall', 'yellowDoor', 'blueDoor', 'redDoor', 'star', 'lava', 'lavaNet',
-		'yellowKey', 'blueKey', 'redKey', 'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+		'yellowKey', 'blueKey', 'redKey', 'redGem', 'blueGem', 'greenGem', 'yellowGem',
 		'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'pickaxe', 'bomb', 'centerFly',
 		'cls:autotile', 'cls:enemys', 'cls:enemy48'
 	];

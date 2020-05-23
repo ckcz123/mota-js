@@ -74,7 +74,7 @@
     color: #fff;
     font-size: 0.6rem;
     position: absolute;
-    top: 8%;
+    top: 10%;
     left: 5%;
     z-index: 15;
 }
@@ -295,27 +295,22 @@ p#name {
 
 #bg {
     z-index: 10;
-    image-rendering: pixelated;
 }
 
 #event {
     z-index: 30;
-    image-rendering: pixelated;
 }
 
 #hero {
     z-index: 40;
-    image-rendering: pixelated;
 }
 
 #event2 {
     z-index: 50;
-    image-rendering: pixelated;
 }
 
 #fg {
     z-index: 60;
-    image-rendering: pixelated;
 }
 
 #damage {

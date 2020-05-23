@@ -175,7 +175,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 				"data": [
 					{
 						"type": "choices",
-						"text": "\t[商人,woman]你有多余的钥匙想要出售吗？",
+						"text": "\t[商人,trader]你有多余的钥匙想要出售吗？",
 						"choices": [
 							{
 								"text": "黄钥匙（10金币）",
@@ -204,7 +204,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 											}
 										],
 										"false": [
-											"\t[商人,woman]你没有黄钥匙！"
+											"\t[商人,trader]你没有黄钥匙！"
 										]
 									}
 								]
@@ -236,7 +236,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 											}
 										],
 										"false": [
-											"\t[商人,woman]你没有蓝钥匙！"
+											"\t[商人,trader]你没有蓝钥匙！"
 										]
 									}
 								]

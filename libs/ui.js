@@ -2846,7 +2846,7 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
     if (obj.cls[id]=='items' && id!='superPotion') {
         var temp = core.clone(core.status.hero);
         core.setFlag("__statistics__", true);
-        try { eval(core.items.itemEffect[id]); }
+        try { eval(core.material.items[id].itemEffect); }
         catch (e) {}
         hp = core.status.hero.hp - temp.hp;
         atk = core.status.hero.atk - temp.atk;

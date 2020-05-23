@@ -347,7 +347,7 @@ editor_file = function (editor, callback) {
             mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}]);
             faceIds.push({idnum: idnum, id: id});
             if (image=='items')
-                templateActions.push(["add", "['items']['" + id + "']", editor.file.comment._data.items_template]);
+                templateActions.push(["add", "['" + id + "']", editor.file.comment._data.items_template]);
             else if (image.indexOf('enemy')==0)
                 templateActions.push(["add", "['" + id + "']", editor.file.comment._data.enemys_template]);
             idnum++;
@@ -449,7 +449,7 @@ editor_file = function (editor, callback) {
             saveSetting('maps', [["add", "['" + idnum + "']", {'cls': info.images, 'id': id}]], tempcallback);
             saveSetting('icons', [["add", "['" + info.images + "']['" + id + "']", info.y]], tempcallback);
             if (info.images === 'items') {
-                saveSetting('items', [["add", "['items']['" + id + "']", editor.file.comment._data.items_template]], function (err) {
+                saveSetting('items', [["add", "['" + id + "']", editor.file.comment._data.items_template]], function (err) {
                     if (err) {
                         printe(err);
                         throw(err)
@@ -479,7 +479,7 @@ editor_file = function (editor, callback) {
 
             maps_90f36752_8815_4be8_b32b_d7fad1d0542e[idnum].id = id;
 
-            var arr=[icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a,{enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80:enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80}]
+            var arr=[icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1,{items: items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a},{enemys: enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80}]
             arr.forEach(function (obj) {
                 for(var jj in obj){
                     var ii=obj[jj]
@@ -497,8 +497,8 @@ editor_file = function (editor, callback) {
     //callback(err:String)
     editor.file.editItem = function (id, actionList, callback) {
         /*actionList:[
-          ["change","['items']['name']","红宝石的新名字"],
-          ["add","['items']['新的和name同级的属性']",123],
+          ["change","['name']","红宝石的新名字"],
+          ["add","['新的和name同级的属性']",123],
           ["change","['itemEffectTip']","'，攻击力+'+editor.core.values.redGem"],
         ]
         为[]时只查询不修改
@@ -506,8 +506,7 @@ editor_file = function (editor, callback) {
         checkCallback(callback);
         if (isset(actionList) && actionList.length > 0) {
             actionList.forEach(function (value) {
-                var tempindex = value[1].indexOf(']') + 1;
-                value[1] = [value[1].slice(0, tempindex), "['" + id + "']", value[1].slice(tempindex)].join('');
+                value[1] = "['" + id + "']" + value[1];
             });
             saveSetting('items', actionList, function (err) {
                 callback([err]);
@@ -515,22 +514,12 @@ editor_file = function (editor, callback) {
         } else {
             callback([
                 (function () {
-                    var locObj_ = {};
+                    var locObj = Object.assign({}, editor.core.items.items[id]);
                     Object.keys(editor.file.comment._data.items._data).forEach(function (v) {
-                        if (isset(editor.core.items[v][id]) && v !== 'items')
-                            locObj_[v] = editor.core.items[v][id];
-                        else
-                            locObj_[v] = null;
+                        if (!isset(editor.core.items.items[id][v]))
+                            locObj[v] = null;
                     });
-                    locObj_['items'] = (function () {
-                        var locObj = Object.assign({}, editor.core.items.items[id]);
-                        Object.keys(editor.file.comment._data.items._data.items._data).forEach(function (v) {
-                            if (!isset(editor.core.items.items[id][v]))
-                                locObj[v] = null;
-                        });
-                        return locObj;
-                    })();
-                    return locObj_;
+                    return locObj;
                 })(),
                 editor.file.comment._data.items,
                 null]);
@@ -930,7 +919,10 @@ editor_file = function (editor, callback) {
                 eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a" + value[1] + '=' + JSON.stringify(value[2]));
             });
             var datastr = 'var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
-            datastr += JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a, null, '\t');
+            datastr += JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a, function (k, v) {
+                if (v.id != null) delete v.id;
+                return v;
+            }, '\t');
             fs.writeFile('project/items.js', encode(datastr), 'base64', function (err, data) {
                 callback(err);
             });
@@ -944,6 +936,7 @@ editor_file = function (editor, callback) {
             var emap = {};
             var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80, function (k, v) {
                 if (v.hp != null) {
+                    delete v.id;
                     var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;

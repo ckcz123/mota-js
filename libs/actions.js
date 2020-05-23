@@ -1919,7 +1919,7 @@ actions.prototype._clickSwitchs = function (x, y) {
     var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
-        if (selection != 2 && selection != 3 && selection != 4) return;
+        if (selection != 1 && selection != 2 && selection != 3 && selection != 4) return;
     }
     var width = choices[selection].width;
     var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
@@ -1928,32 +1928,32 @@ actions.prototype._clickSwitchs = function (x, y) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                return this._clickSwitchs_bgm();
+                return this._clickSwitchs_bgmSound();
             case 1:
-                return this._clickSwitchs_sound();
-            case 2:
                 if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_userVolume(-1);
                 if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_userVolume(1);
                 return;
-            case 3:
+            case 2:
                 if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_moveSpeed(-10);
                 if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_moveSpeed(10);
                 return;
-            case 4:
+            case 3:
                 if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_floorChangeTime(-100);
                 if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_floorChangeTime(100);
+                return;
+            case 4:
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_setSize(-1);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_setSize(1);
                 return;
             case 5:
                 return this._clickSwitchs_displayEnemyDamage();
             case 6:
-                return this._clickSwitchs_displayCritical();
+                return this._clickSwitchs_displayCriticalExtra();
             case 7:
-                return this._clickSwitchs_displayExtraDamage();
-            case 8:
                 return this._clickSwitchs_potionNoRouting();
-            case 9:
+            case 8:
                 return this._clickSwitchs_clickMove();
-            case 10:
+            case 9:
                 core.status.event.selection = 0;
                 core.ui.drawSettings();
                 break;
@@ -1961,13 +1961,23 @@ actions.prototype._clickSwitchs = function (x, y) {
     }
 }
 
-actions.prototype._clickSwitchs_bgm = function () {
-    core.triggerBgm();
-    core.ui.drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_sound = function () {
-    core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
+actions.prototype._clickSwitchs_bgmSound = function () {
+    var bgm = core.musicStatus.bgmStatus;
+    var sound = core.musicStatus.soundStatus;
+    if (bgm && sound) {
+        sound = false;
+    } else if (bgm && !sound) {
+        bgm = false;
+        sound = true;
+    } else if (!bgm && sound) {
+        sound = false;
+    } else {
+        bgm = true;
+        sound = true;
+    }
+    if (bgm != core.musicStatus.bgmStatus)
+        core.triggerBgm();
+    core.musicStatus.soundStatus = sound;
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
     core.ui.drawSwitchs();
 }
@@ -1995,6 +2005,17 @@ actions.prototype._clickSwitchs_floorChangeTime = function (delta) {
     core.ui.drawSwitchs();
 }
 
+actions.prototype._clickSwitchs_setSize = function (delta) {
+    var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
+    if (index < 0) return;
+    index += delta;
+    if (index < 0 || index >= core.domStyle.availableScale.length);
+    core.domStyle.scale = core.domStyle.availableScale[index];
+    core.setLocalStorage('scale', core.domStyle.scale);
+    core.resize();
+    core.ui.drawSwitchs();
+}
+
 actions.prototype._clickSwitchs_displayEnemyDamage = function () {
     core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
     core.updateDamage();
@@ -2002,16 +2023,26 @@ actions.prototype._clickSwitchs_displayEnemyDamage = function () {
     core.ui.drawSwitchs();
 }
 
-actions.prototype._clickSwitchs_displayCritical = function () {
-    core.flags.displayCritical = !core.flags.displayCritical;
+actions.prototype._clickSwitchs_displayCriticalExtra = function () {
+    var critical = core.flags.displayCritical;
+    var extra = core.flags.displayExtraDamage;
+    if (critical && extra) {
+        extra = false;
+    } else if (critical && !extra) {
+        critical = false;
+        extra = true;
+    } else if (!critical && extra) {
+        critical = false;
+        extra = false;
+    } else {
+        critical = true;
+        extra = true;
+    }
+
+    core.flags.displayCritical = critical;
+    core.flags.displayExtraDamage = extra;
     core.updateDamage();
     core.setLocalStorage('critical', core.flags.displayCritical);
-    core.ui.drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_displayExtraDamage = function () {
-    core.flags.displayExtraDamage = !core.flags.displayExtraDamage;
-    core.updateDamage();
     core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
     core.ui.drawSwitchs();
 }
@@ -2037,15 +2068,17 @@ actions.prototype._keyUpSwitchs = function (keycode) {
     }
     if (keycode == 37) {
         switch (core.status.event.selection) {
-            case 2: return this._clickSwitchs_userVolume(-1);
-            case 3: return this._clickSwitchs_moveSpeed(-10);
-            case 4: this._clickSwitchs_floorChangeTime(-100);
+            case 1: return this._clickSwitchs_userVolume(-1);
+            case 2: return this._clickSwitchs_moveSpeed(-10);
+            case 3: return this._clickSwitchs_floorChangeTime(-100);
+            case 4: return this._clickSwitchs_setSize(-1);
         }
     } else if (keycode == 39) {
         switch (core.status.event.selection) {
-            case 2: return this._clickSwitchs_userVolume(1);
-            case 3: return this._clickSwitchs_moveSpeed(10);
-            case 4: this._clickSwitchs_floorChangeTime(100);
+            case 1: return this._clickSwitchs_userVolume(1);
+            case 2: return this._clickSwitchs_moveSpeed(10);
+            case 3: return this._clickSwitchs_floorChangeTime(100);
+            case 4: return this._clickSwitchs_setSize(1);
         }
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs);

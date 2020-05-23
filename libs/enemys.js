@@ -10,13 +10,13 @@ function enemys() {
 enemys.prototype._init = function () {
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
     this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys;
+    for (var enemyId in this.enemys) {
+        this.enemys[enemyId].id = enemyId;
+    }
     if (main.mode == 'play') {
         this.enemydata.hasSpecial = function (a, b) {
             return core.enemys.hasSpecial(a, b)
         };
-        for (var enemyId in this.enemys) {
-            this.enemys[enemyId].id = enemyId;
-        }
     }
 }
 
@@ -299,6 +299,7 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
 enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId = floorId || core.status.floorId;
     var enemys = [], used = {};
+    core.extractBlocks(floorId);
     var mapBlocks = core.status.maps[floorId].blocks;
     for (var b = 0; b < mapBlocks.length; b++) {
         if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
@@ -364,6 +365,7 @@ enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
     else if (enemyId) enemyMap[enemyId] = true;
     else enemyMap = null;
     for (var i = 0; i < floorId.length; i++) {
+        core.extractBlocks(floorId[i]);
         var mapBlocks = core.status.maps[floorId[i]].blocks;
         for (var b = 0; b < mapBlocks.length; b++) {
             if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') === 0) {

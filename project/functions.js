@@ -26,6 +26,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 初始化地图
 	core.status.floorId = floorId;
 	core.status.maps = maps;
+	core.maps._resetFloorImages();
 	// 初始化怪物和道具
 	core.material.enemys = core.enemys.getEnemys();
 	core.material.items = core.items.getItems();
@@ -40,7 +41,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core._init_sys_flags();
 	// 初始化界面，状态栏等
 	core.resize();
-	core.updateGlobalAttribute();
 	// 状态栏是否显示
 	if (core.hasFlag('hideStatusBar'))
 		core.hideStatusBar(core.hasFlag('showToolbox'));
@@ -115,6 +115,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hero.loc = heroLoc;
 	// 检查重生怪并重置
 	if (!fromLoad) {
+        core.extractBlocks(floorId);
 		core.status.maps[floorId].blocks.forEach(function (block) {
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
@@ -358,7 +359,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果该点存在事件 -- V2.5.4 以后阻击怪也可以有战后事件了
-	core.push(todo, core.floors[core.status.floorId].afterBattle[x + "," + y]);
+	if (core.status.floorId != null) {
+		core.push(todo, core.floors[core.status.floorId].afterBattle[x + "," + y]);
+	}
 
 	// 在这里增加其他的自定义事件需求
 	/*
@@ -385,6 +388,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var todo = [];
 	// 检查该点的获得开门后事件。
+	if (core.status.floorId == null) return;
 	var event = core.floors[core.status.floorId].afterOpenDoor[x + "," + y];
 	if (event) core.unshift(todo, event);
 
@@ -403,6 +407,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var todo = [];
 	// 检查该点的获得道具后事件。
+	if (core.status.floorId == null) return;
 	var event = core.floors[core.status.floorId].afterGetItem[x + "," + y];
 	if (event && (event instanceof Array || !isGentleClick || !event.disableOnGentleClick)) {
 		core.unshift(todo, event);
@@ -432,7 +437,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	return [
 		[1, "先攻", "怪物首先攻击"],
 		[2, "魔攻", "怪物无视勇士的防御"],
-		[3, "坚固", "勇士每回合最多只能对怪物造成1点伤害"],
+		[3, "坚固", "怪物防御不小于勇士攻击-1"],
 		[4, "2连击", "怪物每回合攻击2次"],
 		[5, "3连击", "怪物每回合攻击3次"],
 		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
@@ -516,6 +521,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var cache = core.status.checkBlock.cache[index];
 		if (!cache) {
 			// 没有该点的缓存，则遍历每个图块
+			core.extractBlocks(floorId);
 			core.status.maps[floorId].blocks.forEach(function (block) {
 				if (!block.disable) {
 					// 获得该图块的ID
@@ -833,7 +839,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		break;
 	case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断
 		{
-			var list = ["icePickaxe", "snow", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
+			var list = ["icePickaxe", "freezeBadge", "earthquake", "upFly", "downFly", "jumpShoes", "lifeWand", "poisonWine", "weakWine", "curseWine", "superWine"];
 			for (var i = 0; i < list.length; i++) {
 				var itemId = list[i];
 				if (core.canUseItem(itemId)) {
@@ -934,7 +940,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
 	if (!core.same(toAttribute, core.status.globalAttribute)) {
 		core.status.globalAttribute = toAttribute;
-		core.updateGlobalAttribute();
+		core.resize();
 	}
 	// 重置音量
 	core.events.setVolume(core.getFlag("__volume__", 1), 0);
@@ -1032,6 +1038,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 难度
 	core.statusBar.hard.innerText = core.status.hard;
+	core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
 	// 自定义状态栏绘制
 	core.drawStatusBar();
 
@@ -1051,7 +1058,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var damage = {}, // 每个点的伤害值
 		type = {}, // 每个点的伤害类型
-		snipe = {}, // 每个点的阻击怪信息
+		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
 
 	// 计算血网和领域、阻击、激光的伤害，计算捕捉信息
@@ -1065,7 +1072,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type[loc] = type[loc] || {};
 
 		// 血网
-		if (id == 'lavaNet' && !core.hasItem('shoes')) {
+		if (id == 'lavaNet' && !core.hasItem('amulet')) {
 			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
 			type[loc]["血网伤害"] = true;
 		}
@@ -1096,8 +1103,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 
 		// 阻击
-		// 如果要防止阻击伤害，可以直接简单的将 flag:no_snipe 设为true
-		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_snipe')) {
+		// 如果要防止阻击伤害，可以直接简单的将 flag:no_repulse 设为true
+		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_repulse')) {
 			for (var dir in core.utils.scan) {
 				var nx = x + core.utils.scan[dir].x,
 					ny = y + core.utils.scan[dir].y,
@@ -1112,7 +1119,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var rnx = x + core.utils.scan[rdir].x,
 					rny = y + core.utils.scan[rdir].y;
 				if (rnx >= 0 && rnx < width && rny >= 0 && rny < height && core.getBlock(rnx, rny, floorId) == null) {
-					snipe[currloc] = (snipe[currloc] || []).concat([
+					repulse[currloc] = (repulse[currloc] || []).concat([
 						[x, y, id, rdir]
 					]);
 				}
@@ -1207,7 +1214,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.checkBlock = {
 		damage: damage,
 		type: type,
-		snipe: snipe,
+		repulse: repulse,
 		ambush: ambush,
 		cache: {} // clear cache
 	};
@@ -1281,6 +1288,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 判定能否瞬移到该点
 	if (ignoreSteps == null) ignoreSteps = core.canMoveDirectly(x, y);
 	if (ignoreSteps >= 0) {
+		// 中毒也允许瞬移
+		if (core.hasFlag('poison')) {
+			var damage = ignoreSteps * core.values.poisonDamage;
+			if (damage >= core.status.hero.hp) return false;
+			core.status.hero.statistics.poisonDamage += damage;
+			core.status.hero.hp -= damage;
+		}
+
 		core.clearMap('hero');
 		// 获得勇士最后的朝向
 		var lastDirection = core.status.route[core.status.route.length - 1];
@@ -1295,6 +1310,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 统计信息
 		core.status.hero.statistics.moveDirectly++;
 		core.status.hero.statistics.ignoreSteps += ignoreSteps;
+		if (core.hasFlag('poison')) {
+			core.updateStatusBar();
+		}
 		return true;
 	}
 	return false;
@@ -1355,7 +1373,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 绘制下一个数据
 		var name = toDraw[index];
 		// 图片大小25x25
-		ctx.drawImage(core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
+		core.drawImage(ctx, core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
 		// 文字内容
 		var text = (core.statusBar[name] || {}).innerText || " ";
 		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
@@ -1391,9 +1409,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	return [
 		'yellowDoor', 'blueDoor', 'redDoor', 'greenDoor', 'steelDoor',
 		'yellowKey', 'blueKey', 'redKey', 'greenKey', 'steelKey',
-		'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+		'redGem', 'blueGem', 'greenGem', 'yellowGem',
 		'redPotion', 'bluePotion', 'greenPotion', 'yellowPotion', 'superPotion',
-		'pickaxe', 'bomb', 'centerFly', 'icePickaxe', 'snow',
+		'pickaxe', 'bomb', 'centerFly', 'icePickaxe', 'freezeBadge',
 		'earthquake', 'upFly', 'downFly', 'jumpShoes', 'lifeWand',
 		'poisonWine', 'weakWine', 'curseWine', 'superWine',
 		'sword1', 'sword2', 'sword3', 'sword4', 'sword5',

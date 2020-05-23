@@ -684,10 +684,6 @@ core.updateHeroIcon()
 更新状态栏上的勇士图标。
 
 
-core.updateGlobalAttribute()
-更新全局属性，例如状态栏的背景图等。
-
-
 core.setToolbarButton(useButtom)
 设置工具栏是否是拓展键盘。
 
@@ -2144,10 +2140,6 @@ callback为用户点击确认或取消后的回调。
 
 core.showWithAnimate(obj, speed, callback) / core.hideWithAnimate(obj, speed, callback)
 动画淡入或淡出一个对象。
-
-
-core.hashCode(obj)
-计算一个对象的哈希值。
 
 
 core.same(a, b)

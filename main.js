@@ -85,7 +85,7 @@ function main() {
         'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins'
     ];
     this.materials = [
-        'animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48'
+        'animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'icons'
     ];
 
     this.statusBar = {
@@ -186,8 +186,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.6.6";
-    this.__VERSION_CODE__ = 99;
+    this.__VERSION__ = "2.7";
+    this.__VERSION_CODE__ = 127;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -197,24 +197,33 @@ main.prototype.init = function (mode, callback) {
     main.mode = mode;
 
     main.loadJs('project', main.pureData, function(){
+        if (items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffect
+            && items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip) {
+            alert('即将跳转到接档工具...');
+            window.location = 'migration.html';
+            return;
+        }
+
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
         
-        main.dom.startBackground.src="project/images/"+main.startBackground;
-        main.dom.startLogo.style=main.startLogoStyle;
-        main.dom.startButtonGroup.style = main.startButtonsStyle;
-        main.levelChoose.forEach(function(value){
+        main.dom.startBackground.src = main.styles.startBackground;
+        main.dom.startLogo.style=main.styles.startLogoStyle;
+        main.dom.startButtonGroup.style = main.styles.startButtonsStyle;
+        main.levelChoose = main.levelChoose || [];
+        main.levelChoose.forEach(function (value) {
             var span = document.createElement('span');
             span.setAttribute('class','startButton');
-            span.innerText=value[0];
+            span.innerText=value.title || '';
             (function(span,str_){
                 span.onclick = function () {
                     core.events.startGame(str_);
                 }
-            })(span,value[1]);
+            })(span,value.name||'');
             main.dom.levelChooseButtons.appendChild(span);
         });
         main.createOnChoiceAnimation();
+        main.importFonts(main.fonts);
         
         main.loadJs('libs', main.loadList, function () {
             main.core = core;
@@ -369,6 +378,19 @@ main.prototype.selectButton = function (index) {
     else if (main.dom.levelChooseButtons.style.display == 'block') {
         select(main.dom.levelChooseButtons.children);
     }
+}
+
+////// 创建字体 //////
+main.prototype.importFonts = function (fonts) {
+    if (!(fonts instanceof Array) || fonts.length == 0) return;
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    var html = '';
+    fonts.forEach(function (font) {
+        html += '@font-face { font-family: "'+font+'"; src: url("project/fonts/'+font+'.ttf") format("truetype")';
+    });
+    style.innerHTML = html;
+    document.body.appendChild(style);
 }
 
 main.prototype.listen = function () {
@@ -710,10 +732,9 @@ main.dom.playGame.onclick = function () {
     main.dom.startButtons.style.display='none';
     main.core.control.checkBgm();
 
-    if (main.core.isset(main.core.flags.startDirectly) && main.core.flags.startDirectly) {
+    if (main.levelChoose.length == 0) {
         core.events.startGame("");
-    }
-    else {
+    } else {
         main.dom.levelChooseButtons.style.display='block';
         main.selectedButton = null;
         main.selectButton(0);

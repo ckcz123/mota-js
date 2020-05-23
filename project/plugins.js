@@ -124,38 +124,42 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	////// 将一个全局商店转变成可预览的公共事件 //////
 	this._convertShop = function (shop) {
-		return [{
-			"type": "while",
-			"condition": "true",
-			"data": [
-				// 检测能否访问该商店
-				{
-					"type": "if",
-					"condition": "core.isShopVisited('" + shop.id + "')",
-					"true": [
-						// 可以访问，直接插入执行效果
-						{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', false) }" },
-					],
-					"false": [
-						// 不能访问的情况下：检测能否预览
-						{
-							"type": "if",
-							"condition": shop.disablePreview,
-							"true": [
-								// 不可预览，提示并退出
-								"当前无法访问该商店！",
-								{ "type": "break" },
-							],
-							"false": [
-								// 可以预览：将商店全部内容进行替换
-								{ "type": "tip", "text": "当前处于预览模式，不可购买" },
-								{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', true) }" },
-							]
-						}
-					]
-				}
-			]
-		}];
+		return [
+			{ "type": "function", "function": "function() {core.setFlag('@temp@shop', true);}" },
+			{
+				"type": "while",
+				"condition": "true",
+				"data": [
+					// 检测能否访问该商店
+					{
+						"type": "if",
+						"condition": "core.isShopVisited('" + shop.id + "')",
+						"true": [
+							// 可以访问，直接插入执行效果
+							{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', false) }" },
+						],
+						"false": [
+							// 不能访问的情况下：检测能否预览
+							{
+								"type": "if",
+								"condition": shop.disablePreview,
+								"true": [
+									// 不可预览，提示并退出
+									"当前无法访问该商店！",
+									{ "type": "break" },
+								],
+								"false": [
+									// 可以预览：将商店全部内容进行替换
+									{ "type": "tip", "text": "当前处于预览模式，不可购买" },
+									{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', true) }" },
+								]
+							}
+						]
+					}
+				]
+			},
+			{ "type": "function", "function": "function() {core.removeFlag('@temp@shop');}" }
+		];
 	}
 
 	this._convertShop_replaceChoices = function (shopId, previewMode) {
@@ -220,6 +224,62 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return null;
 	}
 
+	/// 允许商店X键退出
+	core.registerAction('keyUp', 'shops', function (keycode) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		if (keycode == 88) { // X
+			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
+			return true;
+		}
+	}, 60);
+
+},
+    "removeMap": function () {
+	// 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。
+	// 推荐用法：
+	// 对于超高层或分区域塔，当在1区时将2区以后的地图删除；1区结束时恢复2区，进二区时删除1区地图，以此类推
+	// 这样可以大幅减少存档空间，以及加快存读档速度
+
+	// 删除楼层
+	// core.removeMaps("MT1", "MT300") 删除MT1~MT300之间的全部层
+	// core.removeMaps("MT10") 只删除MT10层
+	this.removeMaps = function (fromId, toId) {
+		toId = toId || fromId;
+		var fromIndex = core.floorIds.indexOf(fromId),
+			toIndex = core.floorIds.indexOf(toId);
+		if (toIndex < 0) toIndex = core.floorIds.length - 1;
+		flags.__removed__ = flags.__removed__ || [];
+		for (var i = fromIndex; i <= toIndex; ++i) {
+			var floorId = core.floorIds[i];
+			delete flags.__visited__[floorId];
+			flags.__removed__.push(floorId);
+			core.status.maps[floorId].deleted = true;
+			core.status.maps[floorId].canFlyTo = false;
+			core.status.maps[floorId].cannotViewMap = true;
+		}
+	}
+
+	// 恢复楼层
+	// core.resumeMaps("MT1", "MT300") 恢复MT1~MT300之间的全部层
+	// core.resumeMaps("MT10") 只恢复MT10层
+	this.resumeMaps = function (fromId, toId) {
+		toId = toId || fromId;
+		var fromIndex = core.floorIds.indexOf(fromId),
+			toIndex = core.floorIds.indexOf(toId);
+		if (toIndex < 0) toIndex = core.floorIds.length - 1;
+		flags.__removed__ = flags.__removed__ || [];
+		for (var i = fromIndex; i <= toIndex; ++i) {
+			var floorId = core.floorIds[i];
+			flags.__removed__ = flags.__removed__.filter(function (f) { return f != floorId; });
+			if (core.status.maps[floorId].deleted) {
+				core.status.maps[floorId] = core.loadFloor(floorId);
+			}
+		}
+	}
 },
     "itemShop": function () {
 	// 道具商店相关的插件
@@ -618,41 +678,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		};
 	};
 
-	// 其实只注释了最后一行，只能这样了
-	control.drawHero = function (status, offset) {
-		if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
-		var x = core.getHeroLoc('x'),
-			y = core.getHeroLoc('y'),
-			direction = core.getHeroLoc('direction');
-		status = status || 'stop';
-		offset = offset || 0;
-		var way = core.utils.scan[direction];
-		var dx = way.x,
-			dy = way.y,
-			offsetX = dx * offset,
-			offsetY = dy * offset;
-		core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32 * core.bigmap.width - core.__PIXELS__);
-		core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32 * core.bigmap.height - core.__PIXELS__);
-		core.clearAutomaticRouteNode(x + dx, y + dy);
-		core.clearMap('hero');
-
-		if (!core.hasFlag('hideHero')) {
-			this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-				core.drawImage('hero', block.img, block.heroIcon[block.status] * block.width,
-					block.heroIcon.loc * block.height, block.width, block.height,
-					block.posx + (32 - block.width) / 2, block.posy + 32 - block.height, block.width, block.height);
-			});
-		}
-
-		core.control.updateViewport();
-		//core.setGameCanvasTranslate('hero', 0, 0);
-	};
-
-	// 复写转发
-	core.drawHero = function (status, offset) {
-		return core.control.drawHero(status, offset);
-	};
-
 	// 创建摄像机对象
 	this.camera = new this.Camera();
 
@@ -661,13 +686,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		this.camera.update();
 	};
 
+	core.control._drawHero_updateViewport = function () {
+		core.control.updateViewport();
+	}
+
 	// 代理原本的镜头事件
-	control.updateViewport = function () {
+	core.control.updateViewport = function () {
 		core.plugin.camera.requestCameraUpdate();
 	};
 
 	// 更变楼层的行为追加，重置镜头
-	events.prototype.changingFloor = function (floorId, heroLoc) {
+	core.events.changingFloor = function (floorId, heroLoc) {
 		this.eventdata.changingFloor(floorId, heroLoc);
 		core.plugin.camera.resetCamera();
 	};

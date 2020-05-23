@@ -81,8 +81,8 @@
     "一段普通文字",
     "\t[勇士,hero]这是一段勇士说的话",
     "\t[hero]如果使用勇士默认名称也可以直接简写hero",
-    "\t[黑暗大法师,blackMagician]我是黑暗大法师",
-    "\t[blackMagician]如果使用怪物的默认名称也可以简写怪物id",
+    "\t[黑暗大法师,magicMaster]我是黑暗大法师",
+    "\t[magicMaster]如果使用怪物的默认名称也可以简写怪物id",
     "\t[小妖精,fairy]这是一段小妖精说的话，使用仙子(fairy)的图标",
     "\t[你赢了]直接显示标题为【你赢了】",
     "\t[1.png]绘制1.png这个头像图",
@@ -383,7 +383,7 @@ value为必填项，代表要修改到的内容。对于修改名称的，必须
     {"type": "setFloor", "name": "title", "value": "'主塔 0 层'" } // 设置当前楼层的中文名为主塔0层
     {"type": "setFloor", "name": "canFlyTo", "floorId": "MT2", "value": "false" } // 设置MT2层不可飞行
     {"type": "setFloor", "name": "cannotViewMap", "floorId": "MT0", "value": "true" } // 设置MT0层不可被浏览地图
-    {"type": "setFloor", "name": "item_ratio", "value": "5" } // 设置当前楼层的宝石血瓶属性加成为5
+    {"type": "setFloor", "name": "ratio", "value": "5" } // 设置当前楼层的宝石血瓶属性加成为5
     {"type": "setFloor", "name": "images", "value": "[[0,0,'tree.png',2]]" } // 设置当前楼层的楼层贴图
     {"type": "setFloor", "name": "upFloor", "value": "[2,3]" } // 设置当前楼层的上楼梯
     {"type": "setFloor", "name": "bgm", "floorId": "MT10", "value": "'233.mp3'" } // 设置当前楼层的背景音乐
@@ -2174,7 +2174,7 @@ if (core.flags.enableAddPoint && point > 0) {
 ``` json
 "shops": [{
     "id": "shop1",
-    "text": "\t[贪婪之神,blueShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
+    "text": "\t[贪婪之神,moneyShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
     "textInList": "1F金币商店",
     "mustEnable": false,
     "disablePreview": false,

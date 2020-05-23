@@ -61,12 +61,29 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.dom.musicBtn.style.display = 'block';
         core.push(todo, core.firstData.startCanvas);
     }
+    core.push(todo, {"type": "function", "function": "function() { core.events._startGame_setHard(); }"})
     core.push(todo, core.firstData.startText);
     this.insertAction(todo, null, null, function () {
         core.events._startGame_afterStart(nowLoc, callback);
     });
 
     if (route != null) core.startReplay(route);
+}
+
+events.prototype._startGame_setHard = function () {
+    // 根据难度设置flag:hard
+    // 这一段应当在startCanvas之后，startText之前做
+    var hardValue = 0;
+    var hardColor = 'red';
+    main.levelChoose.forEach(function (one) {
+        if (one.name == core.status.hard) {
+            hardValue = one.hard;
+            hardColor = core.arrayToRGBA(one.color || [255,0,0,1]);
+            core.insertAction(one.action);
+        }
+    });
+    core.setFlag('hard', 0);
+    core.setFlag('__hardColor__', hardColor);
 }
 
 events.prototype._startGame_afterStart = function (nowLoc, callback) {
@@ -427,7 +444,8 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         core.removeBlock(x, y);
         setTimeout(function () {
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(id, x, y, callback);
+            core.events.afterOpenDoor(id, x, y);
+            if (callback) callback();
         }, 1); // +1是为了录像检测系统
     } else {
         this._openDoor_animate(id, x, y, callback);
@@ -441,7 +459,7 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
     }
 
     // 是否存在门或暗墙
-    if (core.material.icons.animates[id] == null) {
+    if (core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null) {
         return clearAndReturn();
     }
 
@@ -452,13 +470,14 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         return clearAndReturn();
     doorInfo = doorInfo.doorInfo;
     // Check all keys
-    var keyInfo = doorInfo[0];
+    var keyInfo = doorInfo.keys || {};
     if (needKey) {
-        if (keyInfo == null) {
-            core.drawTip("无法开启此门");
-            return clearAndReturn();
-        }
         for (var keyName in keyInfo) {
+            // --- 如果是一个不存在的道具，则直接认为无法开启
+            if (!core.material.items[keyName]) {
+                core.drawTip("无法开启此门");
+                return clearAndReturn();
+            }
             var keyValue = keyInfo[keyName];
             if (core.itemCount(keyName) < keyValue) {
                 core.drawTip("你没有" + ((core.material.items[keyName] || {}).name || "钥匙"), null, true);
@@ -470,22 +489,28 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
             core.removeItem(keyName, keyInfo[keyName]);
         }
     }
-    core.playSound(doorInfo[1] || 'door.mp3');
+    core.playSound(doorInfo.openSound);
     return true;
 }
 
 events.prototype._openDoor_animate = function (id, x, y, callback) {
-    var door = core.material.icons.animates[id];
-    var speed = 40;
+    var blockInfo = core.getBlockInfo(id);
+    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
+
+    var speed = (core.getBlockById(id).event.doorInfo.time || 160) / 4;
 
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
     core.removeBlock(x, y);
-    core.drawImage('event', core.material.images.animates, 0, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+    core.drawImage('event', image, 0, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+    if (height > 32)
+        core.drawImage('event2', image, 0, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     var state = 0;
     var animate = window.setInterval(function () {
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        if (height > 32) 
+            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32)
         state++;
         if (state == 4) {
             clearInterval(animate);
@@ -496,7 +521,9 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
             if (callback) callback();
             return;
         }
-        core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', image, 32 * state, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        if (height > 32)
+            core.drawImage('event2', image, 32 * state, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
@@ -661,6 +688,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
             heroLoc.y = core.status.maps[floorId][stair][1];
         }
         else {
+            core.extractBlocks(floorId);
             var blocks = core.status.maps[floorId].blocks;
             for (var i in blocks) {
                 if (!blocks[i].disable && blocks[i].event.id === stair) {
@@ -903,6 +931,8 @@ events.prototype.doAction = function (keepUI) {
 }
 
 events.prototype._doAction_finishEvents = function () {
+    if (core.status.gameOver) return true;
+
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
         // 检测并执行延迟自动事件
@@ -937,13 +967,6 @@ events.prototype._popEvents = function (current, prefix) {
 events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
-
-    // ------ 判定commonEvent
-    var commonEvent = this.getCommonEvent(action);
-    if (commonEvent instanceof Array) {
-        // 将公共事件视为一个do-while事件插入执行，可被break跳出
-        action = [{"type": "dowhile", "condition": "false", "data": commonEvent}];
-    }
     if (!action) return;
 
     action = this.precompile(action);
@@ -958,6 +981,16 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
             core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
+}
+
+////// 往当前事件列表之前或之后添加一个公共事件 //////
+events.prototype.insertCommonEvent = function (name, x, y, callback, addToLast) {
+    var commonEvent = this.getCommonEvent(name);
+    if (!commonEvent) {
+        if (callback) callback();
+        return;
+    }
+    this.insertAction({"type": "dowhile", "condition": "false", "data": commonEvent}, x, y, callback, addToLast);
 }
 
 ////// 获得一个公共事件 //////
@@ -1119,11 +1152,14 @@ events.prototype.__precompile_getArray = function () {
         "setValue", "setEnemy", "setFloor", "setGlobalValue",
     ];
     var uievents = [
-        "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "strokeCircle",
-        "drawIcon", "drawSelector", "drawBackground",
+        "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "fillEllipse", "strokeEllipse",
+        "fillArc", "strokeArc", "drawIcon", "drawSelector", "drawBackground",
     ];
     var others = {
-        "strokeCircle": ["r"],
+        "fillEllipse": ["a", "b"],
+        "strokeEllipse": ["a", "b"],
+        "fillArc": ["r", "start", "end"],
+        "strokeArc": ["r", "start", "end"],
         "drawLine": ["x1", "y1", "x2", "y2"],
         "drawArrow": ["x1", "y1", "x2", "y2"],
         "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1"],
@@ -1275,10 +1311,16 @@ events.prototype._action_hide = function (data, x, y, prefix) {
 
 events.prototype._action_setBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    data.loc.forEach(function (t) {
-        core.setBlock(data.number, t[0], t[1], data.floorId);
-    });
-    core.doAction();
+    data.time = data.time || 0;
+    data.floorId = data.floorId || core.status.floorId;
+    if (data.time > 0 && data.floorId == core.status.floorId) {
+        this.__action_doAsyncFunc(data.async, core.animateSetBlocks, data.number, data.loc, data.floorId, data.time);
+    } else {
+        data.loc.forEach(function (loc) {
+            core.setBlock(data.number, loc[0], loc[1], data.floorId);
+        });
+        core.doAction();
+    }
 }
 
 events.prototype._action_turnBlock = function (data, x, y, prefix) {
@@ -1418,7 +1460,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
 events.prototype._action_showImage = function (data, x, y, prefix) {
     if (core.isReplaying()) data.time = 0;
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, data.image, data.sloc, data.loc, data.opacity, data.time);
+        data.code, data.image + (data.reverse || ''), data.sloc, data.loc, data.opacity, data.time);
 }
 
 events.prototype._precompile_showImage = function (data) {
@@ -1562,7 +1604,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     }
     if (data.name) { // 公共事件
         core.setFlag('arg0', data.name);
-        core.insertAction(data.name);
+        core.insertCommonEvent(data.name);
     }
     else {
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
@@ -1630,6 +1672,11 @@ events.prototype._action_setValue = function (data, x, y, prefix) {
         }
     }
     core.doAction();
+}
+
+events.prototype._action_addValue = function (data, x, y, prefix) {
+    data.operator = '+=';
+    this._action_setValue(data, x, y, prefix);
 }
 
 events.prototype._action_setEnemy = function (data, x, y, prefix) {
@@ -1969,15 +2016,25 @@ events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
 }
 
 events.prototype._action_showHero = function (data, x, y, prefix) {
-    core.removeFlag('hideHero');
-    core.drawHero();
-    core.doAction();
+    data.time = data.time || 0;
+    if (data.time > 0) {
+        this.__action_doAsyncFunc(data.async, core.triggerHero, 'show', data.time);
+    } else {
+        core.removeFlag('hideHero');
+        core.drawHero();
+        core.doAction();
+    }
 }
 
 events.prototype._action_hideHero = function (data, x, y, prefix) {
-    core.setFlag('hideHero', true);
-    core.drawHero();
-    core.doAction();
+    data.time = data.time || 0;
+    if (data.time > 0) {
+        this.__action_doAsyncFunc(data.async, core.triggerHero, 'hide', data.time);
+    } else {
+        core.setFlag('hideHero', true);
+        core.drawHero();
+        core.doAction();
+    }
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {
@@ -2015,7 +2072,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
     } else if (data.timeout) {
         core.status.event.interval = setTimeout(function() {
             core.status.route.push("input:none");
-            core.removeFlag("type");
+            core.setFlag("type", -1);
             core.doAction();
         }, data.timeout);
     }
@@ -2205,11 +2262,19 @@ events.prototype._precompile_strokePolygon = function (data) {
     return data;
 }
 
-events.prototype._action_fillCircle = function (data, x, y, prefix) {
+events.prototype._action_fillEllipse = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
-events.prototype._action_strokeCircle = function (data, x, y, prefix) {
+events.prototype._action_strokeEllipse = function (data, x, y, prefix) {
+    this.__action_doUIEvent(data);
+}
+
+events.prototype._action_fillArc = function (data, x, y, prefix) {
+    this.__action_doUIEvent(data);
+}
+
+events.prototype._action_strokeArc = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
@@ -2516,7 +2581,7 @@ events.prototype.setEnemy = function (id, name, value, prefix) {
 ////// 设置楼层属性 //////
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
     floorId = floorId || core.status.floorId;
-    core.status.maps[floorId][name] = core.calValue(value, prefix);
+    core.status.maps[floorId][name] = value;
     core.updateStatusBar();
 }
 
@@ -2529,10 +2594,14 @@ events.prototype.setGlobalAttribute = function (name, value) {
         // --- 检查 []
         if (value.charAt(0) == '[' && value.charAt(value.length - 1) == ']')
             value = eval(value);
+        // --- 检查颜色
+        if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)) {
+            value = 'rgba(' + value + ')';
+        }
     }
     core.status.globalAttribute[name] = value;
-    core.updateGlobalAttribute(name);
     core.setFlag('globalAttribute', core.status.globalAttribute);
+    core.resize();
 }
 
 ////// 设置全局开关 //////
@@ -2555,7 +2624,8 @@ events.prototype.setGlobalFlag = function (name, value) {
 
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
-    if (core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
+    if ((core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null)
+         || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }
@@ -2566,27 +2636,36 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     }
 
     // 关门动画
-    core.playSound(doorInfo[2] || 'door.mp3');
-    var door = core.material.icons.animates[id];
-    var speed = 40, state = 0;
+    core.playSound(doorInfo.closeDoor);
+    var blockInfo = core.getBlockInfo(id);
+    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
+
+    var speed = (doorInfo.time || 160) / 4, state = 0;
     var animate = window.setInterval(function () {
         state++;
         if (state == 4) {
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
-            core.setBlock(core.getNumberById(id), x, y);
+            core.setBlock(id, x, y);
             if (callback) callback();
             return;
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
-        core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', image, 32 * (4-state), posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        if (height > 32)
+        core.drawImage('event2', image, 32 * (4-state), posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 显示图片 //////
 events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time, callback) {
+    var imageName = null;
     if (typeof image == 'string') {
+        imageName = image;
+        if (image.endsWith(':x') || image.endsWith(':y') || image.endsWith(':o')) {
+            image = image.substring(0, image.length - 2);
+        }
         image = core.getMappedName(image);
         image = core.material.images.images[image];
     }
@@ -2608,7 +2687,7 @@ events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time,
     time = time || 0;
     var name = "image" + zIndex;
     var ctx = core.createCanvas(name, x, y, w, h, zIndex);
-    ctx.drawImage(image, sx, sy, sw, sh, 0, 0, w, h);
+    core.drawImage(ctx, imageName == null ? image : imageName, sx, sy, sw, sh, 0, 0, w, h);
     if (time == 0) {
         core.setOpacity(name, opacityVal);
         if (callback) callback();

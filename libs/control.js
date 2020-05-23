@@ -146,6 +146,11 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         core.status.autotileAnimateObjs.blocks.forEach(function (block) {
             core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
         });
+
+        // Global hero animate
+        if ((core.status.hero || {}).animate && core.status.heroMoving == 0) {
+            core.drawHero('stop', null, core.status.globalAnimateStatus);
+        }
     }
     // Box animate
     core.drawBoxAnimate();
@@ -260,7 +265,7 @@ control.prototype._animationFrame_weather_fog = function () {
         var w = core.__PIXELS__, h = core.__PIXELS__;
         core.setAlpha('weather', 0.5);
         core.animateFrame.weather.nodes.forEach(function (p) {
-            ctx.drawImage(core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
+            core.drawImage(ctx, core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
             p.x += p.xs;
             p.y += p.ys;
             if (p.x > core.bigmap.width*32 - w/2) {
@@ -725,7 +730,7 @@ control.prototype.waitHeroToStop = function(callback) {
                 core.setHeroLoc('direction', lastDirection);
             core.drawHero();
             callback();
-        }, core.status.replay.speed == 24 ? 0 : 30);
+        }, core.status.replay.speed == 24 ? 1 : 30);
     }
 }
 
@@ -768,7 +773,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 }
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (status, offset) {
+control.prototype.drawHero = function (status, offset, frame) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
@@ -783,15 +788,63 @@ control.prototype.drawHero = function (status, offset) {
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
     if (!core.hasFlag('hideHero')) {
-        this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
-            core.drawImage('hero', block.img, block.heroIcon[block.status]*block.width,
-                block.heroIcon.loc * block.height, block.width, block.height,
-                block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
-        });
+        this._drawHero_draw(direction, x, y, status, offset, frame);
     }
 
+    this._drawHero_updateViewport();
+}
+
+control.prototype._drawHero_updateViewport = function () {
     core.control.updateViewport();
     core.setGameCanvasTranslate('hero', 0, 0);
+}
+
+control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
+    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+        core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
+            block.heroIcon.loc * block.height, block.width, block.height,
+            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+    });
+}
+
+control.prototype.triggerHero = function (type, time, callback) {
+    if (type == null) {
+        type = core.hasFlag('hideHero') ? 'show' : 'hide';
+    }
+    if ((core.hasFlag('hideHero') && type != 'show') || (!core.hasFlag('hideHero') && type != 'hide')) {
+        if (callback) callback();
+        return;
+    }
+    if (type == 'show') core.removeFlag('hideHero');
+    else core.setFlag('hideHero', true);
+
+    time = time || 0;
+    if (time == 0) {
+        core.drawHero();
+        if (callback) callback();
+        return;
+    }
+    time /= Math.max(core.status.replay.speed, 1)    
+    this._triggerHero_animate(type, 10 / time, callback);
+}
+
+control.prototype._triggerHero_animate = function (type, delta, callback) {
+    var opacity = type != 'show' ? 1 : 0;
+    var animate = setInterval(function () {
+        opacity += type != 'show' ? -delta : delta;
+        core.clearMap('hero');
+        core.setAlpha('hero', opacity);
+        core.control._drawHero_draw(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop', 0);
+        core.setAlpha('hero', 1);
+        if (opacity >= 1 || opacity <= 0) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            core.drawHero();
+            if (callback) callback();
+        }
+    }, 10);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -984,7 +1037,7 @@ control.prototype.checkBlock = function () {
             core.updateStatusBar();
         }
     }
-    this._checkBlock_snipe(core.status.checkBlock.snipe[loc]);
+    this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
 }
 
@@ -998,10 +1051,10 @@ control.prototype._checkBlock_disableQuickShop = function () {
 }
 
 ////// 阻击 //////
-control.prototype._checkBlock_snipe = function (snipe) {
-    if (!snipe || snipe.length == 0) return;
+control.prototype._checkBlock_repulse = function (repulse) {
+    if (!repulse || repulse.length == 0) return;
     var actions = [];
-    snipe.forEach(function (t) {
+    repulse.forEach(function (t) {
         actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": true, "async": true});
     });
     actions.push({"type": "waitAsync"});
@@ -1047,6 +1100,7 @@ control.prototype.updateDamage = function (floorId, ctx) {
 
 control.prototype._updateDamage_damage = function (floorId, ctx) {
     core.setTextAlign(ctx, 'left');
+    core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         var x = block.x, y = block.y;
         if (!block.disable && block.event.cls.indexOf('enemy') == 0 && block.event.displayDamage !== false) {
@@ -1526,10 +1580,12 @@ control.prototype._replayAction_getNext = function (action) {
 control.prototype._replayAction_moveDirectly = function (action) {
     if (action.indexOf("move:")!=0) return false;
     // 忽略连续的瞬移事件
-    while (core.status.replay.toReplay.length>0 &&
-        core.status.replay.toReplay[0].indexOf('move:')==0) {
-            core.status.route.push(action);
-            action = core.status.replay.toReplay.shift();
+    if (!core.hasFlag('poison')) {
+        while (core.status.replay.toReplay.length>0 &&
+            core.status.replay.toReplay[0].indexOf('move:')==0) {
+                core.status.route.push(action);
+                action = core.status.replay.toReplay.shift();
+        }
     }
 
     var pos=action.substring(5).split(":");
@@ -1704,8 +1760,6 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (!data) return core.drawTip("无效的存档");
     if (data.version != core.firstData.version) return core.drawTip("存档版本不匹配");
     if (data.hard != core.status.hard) core.drawTip("游戏难度不匹配！");
-    if (data.hashCode != null && data.hashCode != core.utils.hashCode(data.hero))
-        return alert("存档校验失败，请勿修改存档文件！");
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
     if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
         return core.drawTip("无法从此存档回放录像");
@@ -2008,12 +2062,17 @@ control.prototype.getRealStatusOrDefault = function (status, name) {
 
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
+    // 仅保留三位有效buff值
+    value = parseFloat(value.toFixed(3));
     this.setFlag('__'+name+'_buff__', value);
 }
 
 ////// 加减某个属性的增幅值 //////
 control.prototype.addBuff = function (name, value) {
-    this.setFlag('__'+name+'_buff__', this.getBuff(name) + value);
+    var buff = this.getBuff(name) + value;
+    // 仅保留三位有效buff值
+    buff = parseFloat(buff.toFixed(3));
+    this.setFlag('__'+name+'_buff__', buff);
 }
 
 ////// 获得某个属性的增幅值 //////
@@ -2467,70 +2526,12 @@ control.prototype.updateHeroIcon = function (name) {
     var ratio = Math.min(w / h, 1), width = 32 * ratio, left = 16 - width/2;
 
     var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
     canvas.width = 32;
     canvas.height = 32;
-    context.drawImage(image, 0, 0, w, h, left, 0, width, 32);
+    core.drawImage(ctx, image, 0, 0, w, h, left, 0, width, 32);
 
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
-}
-
-control.prototype.updateGlobalAttribute = function (name) {
-    if (name == null) name = Object.keys(core.status.globalAttribute);
-    if (name instanceof Array) {
-        name.forEach(function (t) {
-            core.control.updateGlobalAttribute(t);
-        });
-        return;
-    }
-    var attribute = core.status.globalAttribute || core.initStatus.globalAttribute;
-    if (attribute == null) return;
-    switch (name) {
-        case 'statusLeftBackground':
-            if (!core.domStyle.isVertical) {
-                core.dom.statusBar.style.background = attribute[name];
-            }
-            break;
-        case 'statusTopBackground':
-            if (core.domStyle.isVertical) {
-                core.dom.statusBar.style.background = attribute[name];
-            }
-            break;
-        case 'toolsBackground':
-            if (core.domStyle.isVertical) {
-                core.dom.toolBar.style.background = attribute[name];
-            }
-            break;
-        case 'borderColor':
-            {
-                var border = '3px ' + attribute[name] + ' solid';
-                core.dom.statusBar.style.borderTop = border;
-                core.dom.statusBar.style.borderLeft = border;
-                core.dom.statusBar.style.borderRight = core.domStyle.isVertical?border:'';
-                core.dom.statusBar.style.borderBottom = core.domStyle.isVertical?'':border;
-                core.dom.gameDraw.style.border = border;
-                core.dom.toolBar.style.borderLeft = border;
-                core.dom.toolBar.style.borderRight = core.domStyle.isVertical?border:'';
-                core.dom.toolBar.style.borderBottom = core.domStyle.isVertical?border:'';
-                break;
-            }
-        case 'statusBarColor':
-            {
-                var texts = core.dom.statusTexts;
-                for (var i=0;i<texts.length;i++)
-                    texts[i].style.color = attribute[name];
-                break;
-            }
-        case 'hardLabelColor':
-            core.dom.hard.style.color = attribute[name];
-            break;
-        case 'floorChangingBackground':
-            core.dom.floorMsgGroup.style.background = attribute[name];
-            break;
-        case 'floorChangingTextColor':
-            core.dom.floorMsgGroup.style.color = attribute[name];
-            break;
-    }
 }
 
 ////// 改变工具栏为按钮1-8 //////
@@ -2638,17 +2639,28 @@ control.prototype._doResize = function (obj) {
 control.prototype.resize = function() {
     if (main.mode=='editor')return;
     var clientWidth = main.dom.body.clientWidth, clientHeight = main.dom.body.clientHeight;
-    var CANVAS_WIDTH = core.__PIXELS__ + 6, BAR_WIDTH = Math.round(core.__PIXELS__ * 0.31) + 3;
+    var CANVAS_WIDTH = core.__PIXELS__, BAR_WIDTH = Math.round(core.__PIXELS__ * 0.31);
+    var BORDER = 3;
 
-    if (clientWidth >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && clientHeight < CANVAS_WIDTH)) {
+    if (clientWidth - 3 * BORDER >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && clientHeight - 2 * BORDER < CANVAS_WIDTH)) {
         // 横屏
         core.domStyle.isVertical = false;
-        core.domStyle.scale = Math.min(1, clientHeight / CANVAS_WIDTH);
+
+        core.domStyle.availableScale = [];
+        [1, 1.25, 1.5, 1.75, 2].forEach(function (v) {
+            if (clientWidth - 3 * BORDER >= v*(CANVAS_WIDTH + BAR_WIDTH) && clientHeight - 2 * BORDER >= v * CANVAS_WIDTH) {
+                core.domStyle.availableScale.push(v); // 64x64
+            }
+        });
+        if (core.domStyle.availableScale.indexOf(core.domStyle.scale) < 0) {
+            core.domStyle.scale = Math.min(1, (clientHeight - 2 * BORDER) / CANVAS_WIDTH);
+        }
     }
     else {
         // 竖屏
         core.domStyle.isVertical = true;
-        core.domStyle.scale = Math.min(1, clientWidth / CANVAS_WIDTH);
+        core.domStyle.scale = Math.min(1, (clientWidth - 2 * BORDER) / CANVAS_WIDTH);
+        core.domStyle.availableScale = [];
     }
 
     var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
@@ -2664,15 +2676,16 @@ control.prototype.resize = function() {
         clientWidth: clientWidth,
         clientHeight: clientHeight,
         CANVAS_WIDTH: CANVAS_WIDTH,
+        BORDER: BORDER,
         BAR_WIDTH: BAR_WIDTH,
-        outerSize: CANVAS_WIDTH * core.domStyle.scale,
+        outerSize: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
         globalAttribute: globalAttribute,
-        border: '3px ' + globalAttribute.borderColor + ' solid',
+        border: '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
         statusDisplayArr: statusDisplayArr,
         count: count,
         col: col,
-        statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 6 : 0,
-        toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 6 : 0,
+        statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER : 0,
+        toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 2 * BORDER : 0,
         is15x15: core.__SIZE__ == 15
     };
 
@@ -2689,7 +2702,7 @@ control.prototype._resize_gameGroup = function (obj) {
         totalHeight = obj.outerSize + obj.statusBarHeightInVertical + obj.toolbarHeightInVertical
     }
     else {
-        totalWidth = (obj.CANVAS_WIDTH + obj.BAR_WIDTH) * core.domStyle.scale;
+        totalWidth = obj.outerSize + obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER;
         totalHeight = obj.outerSize;
     }
     gameGroup.style.width = totalWidth + "px";
@@ -2698,10 +2711,9 @@ control.prototype._resize_gameGroup = function (obj) {
     gameGroup.style.top = (obj.clientHeight - totalHeight) / 2 + "px";
     // floorMsgGroup
     var floorMsgGroup = core.dom.floorMsgGroup;
-    floorMsgGroup.style.width = obj.outerSize - 6 + "px";
-    floorMsgGroup.style.height = totalHeight - 6 + "px";
-    floorMsgGroup.style.background = obj.globalAttribute.floorChangingBackground;
-    floorMsgGroup.style.color = obj.globalAttribute.floorChangingTextColor;
+    floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
+    floorMsgGroup.style.width = obj.outerSize - 2 * obj.BORDER + "px";
+    floorMsgGroup.style.height = totalHeight - 2 * obj.BORDER + "px";
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
         core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";
@@ -2713,7 +2725,7 @@ control.prototype._resize_gameGroup = function (obj) {
 }
 
 control.prototype._resize_canvas = function (obj) {
-    var innerSize = (obj.outerSize - 6) + "px";
+    var innerSize = (obj.CANVAS_WIDTH * core.domStyle.scale) + "px";
     for (var i = 0; i < core.dom.gameCanvas.length; ++i)
         core.dom.gameCanvas[i].style.width = core.dom.gameCanvas[i].style.height = innerSize;
     core.dom.gif.style.width = core.dom.gif.style.height = innerSize;
@@ -2738,8 +2750,6 @@ control.prototype._resize_canvas = function (obj) {
     // resize next
     main.dom.next.style.width = main.dom.next.style.height = 5 * core.domStyle.scale + "px";
     main.dom.next.style.borderBottomWidth = main.dom.next.style.borderRightWidth = 4 * core.domStyle.scale + "px";
-
-
 }
 
 control.prototype._resize_statusBar = function (obj) {
@@ -2752,7 +2762,7 @@ control.prototype._resize_statusBar = function (obj) {
         statusBar.style.fontSize = 16 * core.domStyle.scale + "px";
     }
     else {
-        statusBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
+        statusBar.style.width = (obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER) + "px";
         statusBar.style.height = obj.outerSize + "px";
         statusBar.style.background = obj.globalAttribute.statusLeftBackground;
         // --- 计算文字大小
@@ -2764,22 +2774,22 @@ control.prototype._resize_statusBar = function (obj) {
     statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
     // 自绘状态栏
     if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.style.width = obj.outerSize - 6 + "px";
-        core.dom.statusCanvas.width = core.__PIXELS__;
+        core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH + "px";
+        core.dom.statusCanvas.width = obj.CANVAS_WIDTH;
         core.dom.statusCanvas.style.height = obj.statusBarHeightInVertical - 3 + "px";
         core.dom.statusCanvas.height = obj.col * 32 + 9;
     }
     else {
-        core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale - 3 + "px";
-        core.dom.statusCanvas.width = obj.BAR_WIDTH - 3;
-        core.dom.statusCanvas.style.height = obj.outerSize - 6 + "px";
-        core.dom.statusCanvas.height = core.__PIXELS__;
+        core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
+        core.dom.statusCanvas.width = obj.BAR_WIDTH;
+        core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER + "px";
+        core.dom.statusCanvas.height = obj.CANVAS_WIDTH;
     }
     core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
 }
 
 control.prototype._resize_status = function (obj) {
-    var statusHeight = (core.domStyle.isVertical ? 1 : (core.__HALF_SIZE__ + 3) / obj.count) *  32 * core.domStyle.scale * 0.8;
+    var statusHeight = (core.domStyle.isVertical ? 1 : (core.__HALF_SIZE__ + obj.BORDER) / obj.count) *  32 * core.domStyle.scale * 0.8;
     // status
     for (var i = 0; i < core.dom.status.length; ++i) {
         var id = core.dom.status[i].id, style = core.dom.status[i].style;
@@ -2787,7 +2797,7 @@ control.prototype._resize_status = function (obj) {
         style.display = core.flags.statusCanvas || obj.statusDisplayArr.indexOf(id) < 0 ? 'none': 'block';
         style.margin = 3 * core.domStyle.scale + "px";
         style.height = statusHeight + "px";
-        style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1) + "px";
+        style.maxWidth = obj.BAR_WIDTH * core.domStyle.scale * (core.domStyle.isVertical ? 0.95 : 1) + obj.BORDER + "px";
         if (obj.is15x15 && !core.domStyle.isVertical)
             style.marginLeft = 11 * core.domStyle.scale + "px";
     }
@@ -2797,7 +2807,7 @@ control.prototype._resize_status = function (obj) {
         core.dom.statusLabels[i].style.marginLeft = 6 * core.domStyle.scale + "px";
     }
     for (var i = 0; i < core.dom.statusTexts.length; ++i) {
-        core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
+        core.dom.statusTexts[i].style.color = core.arrayToRGBA(obj.globalAttribute.statusBarColor);
     }
     // keys
     if (core.flags.statusBarItems.indexOf('enableGreenKey')>=0) {
@@ -2819,7 +2829,7 @@ control.prototype._resize_toolBar = function (obj) {
         toolBar.style.background = obj.globalAttribute.toolsBackground;
     }
     else {
-        toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
+        toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + "px";
         toolBar.style.top = 0.718 * obj.outerSize + "px";
         toolBar.style.height = 0.281 * obj.outerSize + "px";
         toolBar.style.background = 'transparent';
@@ -2844,7 +2854,6 @@ control.prototype._resize_tools = function (obj) {
         style.marginTop = 6 * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
-    core.dom.hard.style.color = obj.globalAttribute.hardLabelColor;
     if (core.domStyle.isVertical) {
         core.dom.hard.style.width = obj.outerSize - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + "px";
     }

@@ -31,7 +31,7 @@ editor_ui_wrapper = function (editor) {
             'ESC或点击空白处可以自动保存当前修改',
             'H键可以打开操作帮助哦',
             'tileset平铺模式可以在地图上拖动来平铺框选的图形',
-            '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴，Delete删除',
+            '可以拖动地图上的图块和事件；或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴，Delete删除；右键也可以拉框选择区域',
             'Alt+数字键保存图块，数字键读取保存的图块',
         ];
         if (value == null) value = Math.floor(Math.random() * tips.length);

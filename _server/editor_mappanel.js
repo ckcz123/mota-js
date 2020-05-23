@@ -232,10 +232,7 @@ editor_mappanel_wrapper = function (editor) {
                 // 左键拖拽: 交换
                 //tip.whichShow(1);
                 // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
-                if (editor.layerMod == 'map')
-                    editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
-                else
-                    editor.exchangeBgFg(editor.uivalues.startPos, editor.uivalues.endPos, editor.layerMod);
+                editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.uifunctions.unhighlightSaveFloorButton();
                 editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             }
@@ -971,42 +968,6 @@ editor_mappanel_wrapper = function (editor) {
                 editor.uivalues.preMapData.shift();
             }
         }
-    }
-    
-    editor.constructor.prototype.moveBgFg = function (startPos, endPos, name, callback) {
-        if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
-        if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-        editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
-        editor[name][startPos.y][startPos.x] = 0;
-        editor.updateMap();
-        editor.file.saveFloorFile(function (err) {
-            if (err) {
-                printe(err);
-                throw(err)
-            }
-            ;printf('移动图块成功');
-            editor.drawPosSelection();
-            if (callback) callback();
-        });
-    }
-    
-    editor.constructor.prototype.exchangeBgFg = function (startPos, endPos, name, callback) {
-        if (!startPos || !endPos || ["bgmap","fgmap"].indexOf(name)<0) return;
-        if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-        var value = editor[name][endPos.y][endPos.x];
-        editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
-        editor[name][startPos.y][startPos.x] = value;
-        editor.updateMap();
-        editor.file.saveFloorFile(function (err) {
-            if (err) {
-                printe(err);
-                throw(err)
-            }
-            ;printf('交换图块成功');
-            editor.drawPosSelection();
-            if (callback) callback();
-        });
-    
     }
     
     editor.constructor.prototype.clearPos = function (clearPos, pos, callback) {

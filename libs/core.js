@@ -191,14 +191,13 @@ function core() {
         },
         "globalAttribute": {
             'equipName': main.equipName || [],
-            "statusLeftBackground": main.statusLeftBackground || "url(project/materials/ground.png) repeat",
-            "statusTopBackground": main.statusTopBackground || "url(project/materials/ground.png) repeat",
-            "toolsBackground": main.toolsBackground || "url(project/materials/ground.png) repeat",
-            "borderColor": main.borderColor || "white",
-            "statusBarColor": main.statusBarColor || "white",
-            "floorChangingBackground": main.floorChangingBackground || "black",
-            "floorChangingTextColor": main.floorChangingTextColor || "white",
-            "font": main.font || "Verdana"
+            "statusLeftBackground": main.styles.statusLeftBackground || "url(project/materials/ground.png) repeat",
+            "statusTopBackground": main.styles.statusTopBackground || "url(project/materials/ground.png) repeat",
+            "toolsBackground": main.styles.toolsBackground || "url(project/materials/ground.png) repeat",
+            "borderColor": main.styles.borderColor || [204,204,204,1],
+            "statusBarColor": main.styles.statusBarColor || [255,255,255,1],
+            "floorChangingStyle": main.styles.floorChangingStyle || "background-color: black; color: white",
+            "font": main.styles.font || "Verdana"
         },
         'curtainColor': null,
         'openingDoor': null,

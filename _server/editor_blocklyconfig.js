@@ -82,6 +82,7 @@ editor_blocklyconfig=(function(){
         "time": 160, "openSound": "door.mp3", "closeSound": "door.mp3", "keys": {"yellowKey": 1, "orangeKey": 1}
       }, 'doorInfo'),
       MotaActionBlocks['faceIds_m'].xmlText(),
+      MotaActionBlocks['mainStyle_m'].xmlText(),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),

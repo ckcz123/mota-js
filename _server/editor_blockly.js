@@ -595,7 +595,7 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
     var getValue=function(){
         // return self.getValue() // css颜色
         var f = pb.getFieldValue(targetf);
-        if (/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/.test(f)) {
+        if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(f)) {
             return f;
         }
         return "";
@@ -656,7 +656,7 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
         // 给inputDom绑事件
         inputDom.oninput=function(){
             var value=inputDom.value
-            if(/[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?/.test(value)){
+            if(/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)){
                 setValue('rgba('+value+')')
             }
         }

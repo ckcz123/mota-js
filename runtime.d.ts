@@ -221,8 +221,7 @@ type gameStatus = {
         toolsBackground: string
         borderColor: string
         statusBarColor: string
-        floorChangingBackground: string
-        floorChangingTextColor: string
+        floorChangingStyle: string
         font: string
     }
     curtainColor: null

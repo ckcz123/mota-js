@@ -557,6 +557,35 @@ return '{' + [
 */;
 
 
+mainStyle_m
+    : '主要样式设置：' '标题界面背景图（全路径）：'  EvalString BGNL? Newline 
+      '标题样式；可写 display: none 隐藏标题' EvalString BGNL? Newline 
+      '标题按钮样式：' EvalString BGNL? Newline 
+      '横屏状态栏背景；url(...) 0 0/100% 100% no-repeat 可将图片拉伸自适配' BGNL? Newline EvalString BGNL? Newline  
+      '竖屏状态栏背景：' EvalString BGNL? Newline 
+      '竖屏工具栏背景：' EvalString BGNL? Newline 
+      '楼层切换样式：' EvalString BGNL? Newline
+      '状态栏颜色' ColorString Colour '边框颜色' ColorString Colour '全局字体' EvalString BEND
+
+/* mainStyle_m
+tooltip : 主要样式设置
+default : ["project/images/bg.jpg", "color: black", "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "background-color: black; color: white", "255,255,255,1", "rgba(255,255,255,1)", "204,204,204,1", "rgba(204,204,204,1)", "Verdana"]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+var code = {
+    startBackground: EvalString_0,
+    startLogoStyle: EvalString_1,
+    startButtonsStyle: EvalString_2,
+    statusLeftBackground: EvalString_3,
+    statusTopBackground: EvalString_4,
+    toolsBackground: EvalString_5,
+    floorChangingStyle: EvalString_6,
+    statusBarColor: JSON.parse('['+ColorString_0+']'),
+    borderColor: JSON.parse('['+ColorString_1+']'),
+    font: EvalString_7
+};
+return JSON.stringify(code);
+*/;
+
 //为了避免关键字冲突,全部加了_s
 //动作
 action
@@ -818,6 +847,7 @@ tip_s
 /* tip_s
 tooltip : tip：显示一段提示文字
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=tip%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97
+allIds : ['IdString_0']
 default : ["这段话将在左上角以气泡形式显示",""]
 IdString_0 = IdString_0 && (', "icon": "' + IdString_0 + '"');
 var code = '{"type": "tip", "text": "'+EvalString_0+'"'+IdString_0+'},\n';
@@ -857,17 +887,17 @@ return code;
 
 
 setFloor_s
-    :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' EvalString Newline
+    :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' JsonEvalString Newline
 
 
 /* setFloor_s
 tooltip : setFloor：设置楼层属性；该楼层属性和编辑器中的楼层属性一一对应
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setFloor%ef%bc%9a%e8%ae%be%e7%bd%ae%e6%a5%bc%e5%b1%82%e5%b1%9e%e6%80%a7
-default : ["title","","'字符串类型的值要加引号，其他类型则不用'"]
+default : ["title","","\"新楼层名\""]
 allFloorIds : ['IdString_0']
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setFloor", "name": "'+Floor_Meta_List_0+'"'+IdString_0+', "value": "'+EvalString_0+'"},\n';
+var code = '{"type": "setFloor", "name": "'+Floor_Meta_List_0+'"'+IdString_0+', "value": '+JsonEvalString_0+'},\n';
 return code;
 */;
 
@@ -1481,6 +1511,7 @@ tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changefloor%EF%BC%9A%E6%A5%BC%E5%B1%82%E5%88%87%E6%8D%A2
 default : [null,"",null,"","",null,"",null]
 selectPoint : ["PosString_0", "PosString_1", "IdString_0", true]
+allFloorIds : ['IdString_0']
 colour : this.dataColor
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
@@ -3166,8 +3197,8 @@ Floor_Meta_List
     /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
-    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'楼层转换背景'|'楼层转换文字色'|'装备列表'
-    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'floorChangingBackground', 'floorChangingTextColor', 'equipName']*/;
+    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'楼层转换样式'|'装备列表'
+    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'floorChangingStyle', 'equipName']*/;
 
 Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'动画时间'

@@ -2063,12 +2063,17 @@ control.prototype.getRealStatusOrDefault = function (status, name) {
 
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
+    // 仅保留三位有效buff值
+    value = parseFloat(value.toFixed(3));
     this.setFlag('__'+name+'_buff__', value);
 }
 
 ////// 加减某个属性的增幅值 //////
 control.prototype.addBuff = function (name, value) {
-    this.setFlag('__'+name+'_buff__', this.getBuff(name) + value);
+    var buff = this.getBuff(name) + value;
+    // 仅保留三位有效buff值
+    buff = parseFloat(buff.toFixed(3));
+    this.setFlag('__'+name+'_buff__', buff);
 }
 
 ////// 获得某个属性的增幅值 //////
@@ -2530,61 +2535,6 @@ control.prototype.updateHeroIcon = function (name) {
     core.statusBar.image.name.src = canvas.toDataURL("image/png");
 }
 
-control.prototype.updateGlobalAttribute = function (name) {
-    if (name == null) name = Object.keys(core.status.globalAttribute);
-    if (name instanceof Array) {
-        name.forEach(function (t) {
-            core.control.updateGlobalAttribute(t);
-        });
-        return;
-    }
-    var attribute = core.status.globalAttribute || core.initStatus.globalAttribute;
-    if (attribute == null) return;
-    switch (name) {
-        case 'statusLeftBackground':
-            if (!core.domStyle.isVertical) {
-                core.dom.statusBar.style.background = attribute[name];
-            }
-            break;
-        case 'statusTopBackground':
-            if (core.domStyle.isVertical) {
-                core.dom.statusBar.style.background = attribute[name];
-            }
-            break;
-        case 'toolsBackground':
-            if (core.domStyle.isVertical) {
-                core.dom.toolBar.style.background = attribute[name];
-            }
-            break;
-        case 'borderColor':
-            {
-                var border = '3px ' + attribute[name] + ' solid';
-                core.dom.statusBar.style.borderTop = border;
-                core.dom.statusBar.style.borderLeft = border;
-                core.dom.statusBar.style.borderRight = core.domStyle.isVertical?border:'';
-                core.dom.statusBar.style.borderBottom = core.domStyle.isVertical?'':border;
-                core.dom.gameDraw.style.border = border;
-                core.dom.toolBar.style.borderLeft = border;
-                core.dom.toolBar.style.borderRight = core.domStyle.isVertical?border:'';
-                core.dom.toolBar.style.borderBottom = core.domStyle.isVertical?border:'';
-                break;
-            }
-        case 'statusBarColor':
-            {
-                var texts = core.dom.statusTexts;
-                for (var i=0;i<texts.length;i++)
-                    texts[i].style.color = attribute[name];
-                break;
-            }
-        case 'floorChangingBackground':
-            core.dom.floorMsgGroup.style.background = attribute[name];
-            break;
-        case 'floorChangingTextColor':
-            core.dom.floorMsgGroup.style.color = attribute[name];
-            break;
-    }
-}
-
 ////// 改变工具栏为按钮1-8 //////
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {
@@ -2731,7 +2681,7 @@ control.prototype.resize = function() {
         BAR_WIDTH: BAR_WIDTH,
         outerSize: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
         globalAttribute: globalAttribute,
-        border: '3px ' + globalAttribute.borderColor + ' solid',
+        border: '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
         statusDisplayArr: statusDisplayArr,
         count: count,
         col: col,
@@ -2762,10 +2712,9 @@ control.prototype._resize_gameGroup = function (obj) {
     gameGroup.style.top = (obj.clientHeight - totalHeight) / 2 + "px";
     // floorMsgGroup
     var floorMsgGroup = core.dom.floorMsgGroup;
+    floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
     floorMsgGroup.style.width = obj.outerSize - 2 * obj.BORDER + "px";
     floorMsgGroup.style.height = totalHeight - 2 * obj.BORDER + "px";
-    floorMsgGroup.style.background = obj.globalAttribute.floorChangingBackground;
-    floorMsgGroup.style.color = obj.globalAttribute.floorChangingTextColor;
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
         core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";

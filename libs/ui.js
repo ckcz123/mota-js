@@ -108,9 +108,9 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font
     if (!ctx) return;
     if (font) ctx.font = font;
     if (!style) style = ctx.fillStyle;
-    if (style instanceof Array) style = core.arrayToRGBA(style);
+    style = core.arrayToRGBA(style);
     if (!strokeStyle) strokeStyle = '#000000';
-    if (strokeStyle instanceof Array) strokeStyle = core.arrayToRGBA(strokeStyle);
+    strokeStyle = core.arrayToRGBA(strokeStyle);
     ctx.fillStyle = strokeStyle;
     ctx.fillText(text, x-1, y-1);
     ctx.fillText(text, x-1, y+1);
@@ -392,15 +392,13 @@ ui.prototype.setOpacity = function (name, opacity) {
 ////// 设置某个canvas的绘制属性（如颜色等） //////
 ui.prototype.setFillStyle = function (name, style) {
     var ctx = this.getContextByName(name);
-    if (style instanceof Array) style = core.arrayToRGBA(style);
-    if (ctx) ctx.fillStyle = style;
+    if (ctx) ctx.fillStyle = core.arrayToRGBA(style);
 }
 
 ////// 设置某个canvas边框属性 //////
 ui.prototype.setStrokeStyle = function (name, style) {
     var ctx = this.getContextByName(name);
-    if (style instanceof Array) style = core.arrayToRGBA(style);
-    if (ctx) ctx.strokeStyle = style;
+    if (ctx) ctx.strokeStyle = core.arrayToRGBA(style);
 }
 
 ////// 设置某个canvas的对齐 //////
@@ -921,7 +919,7 @@ ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, r
 ui.prototype._drawBackground_drawColor = function (background, left, top, right, bottom, position, px, py, xoffset, yoffset) {
     var alpha = background[3];
     core.setAlpha('ui', alpha);
-    core.setStrokeStyle('ui', core.status.globalAttribute.borderColor);
+    core.setStrokeStyle('ui', core.arrayToRGBA(core.status.globalAttribute.borderColor));
     core.setFillStyle('ui', core.arrayToRGB(background));
     core.setLineWidth('ui', 2);
     // 绘制
@@ -1010,8 +1008,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.left = config.left || 0;
     config.right = config.left + (config.maxWidth == null ? (ctx != null ? ctx.canvas.width : core.__PIXELS__) : config.maxWidth)
     config.top = config.top || 0;
-    config.color = config.color || textAttribute.text;
-    if (config.color instanceof Array) config.color = core.arrayToRGBA(config.color);
+    config.color = core.arrayToRGBA(config.color || textAttribute.text);
     if (config.bold == null) config.bold = textAttribute.bold;
     config.italic = false;
     config.align = config.align || textAttribute.align || "left";
@@ -1585,8 +1582,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
     core.setTextAlign('ui', 'center');
     core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
-        var color = choices[i].color || core.status.textAttribute.text;
-        if (color instanceof Array) color = core.arrayToRGBA(color);
+        var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
         core.setFillStyle('ui', color);
         var offset = this.HPIXEL;
         if (choices[i].icon) {
@@ -1994,7 +1990,7 @@ ui.prototype.drawBookDetail = function (index) {
     core.fillRect('data', left, top, width, height, '#000000');
     core.setAlpha('data', 1);
     core.strokeRect('data', left - 1, top - 1, width + 1, height + 1,
-        core.status.globalAttribute.borderColor, 2);
+        core.arrayToRGBA(core.status.globalAttribute.borderColor), 2);
 
     this._drawBookDetail_drawContent(enemy, content, {top: top, content_left: content_left, bottom: bottom, validWidth: validWidth});
 }

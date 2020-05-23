@@ -451,7 +451,7 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.selectColor = function (input) {
         if (input.value != null) {
             var str = input.value.toString().replace(/[^\d.,]/g, '');
-            if (/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/.test(str)) {            
+            if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(str)) {            
                 document.getElementById('colorPicker').value = str;
             }
         }

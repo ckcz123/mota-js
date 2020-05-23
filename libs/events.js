@@ -2579,7 +2579,7 @@ events.prototype.setEnemy = function (id, name, value, prefix) {
 ////// 设置楼层属性 //////
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
     floorId = floorId || core.status.floorId;
-    core.status.maps[floorId][name] = core.calValue(value, prefix);
+    core.status.maps[floorId][name] = value;
     core.updateStatusBar();
 }
 
@@ -2592,10 +2592,14 @@ events.prototype.setGlobalAttribute = function (name, value) {
         // --- 检查 []
         if (value.charAt(0) == '[' && value.charAt(value.length - 1) == ']')
             value = eval(value);
+        // --- 检查颜色
+        if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)) {
+            value = 'rgba(' + value + ')';
+        }
     }
     core.status.globalAttribute[name] = value;
-    core.updateGlobalAttribute(name);
     core.setFlag('globalAttribute', core.status.globalAttribute);
+    core.resize();
 }
 
 ////// 设置全局开关 //////

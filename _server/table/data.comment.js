@@ -109,27 +109,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "文件映射",
 					"_data": "文件名映射，目前仅对images, animates, bgms, sounds有效。\n例如定义 {\"精灵石.mp3\":\"jinglingshi.mp3\"} 就可以使用\ncore.playBgm(\"精灵石.mp3\") 或对应的事件来播放该bgm。"
 				},
-				"startBackground": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "标题背景",
-					"_data": "标题界面的背景，建议使用jpg格式以压缩背景图空间"
-				},
-				"startLogoStyle": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "标题样式",
-					"_data": "标题样式：可以改变颜色，也可以写\"display: none\"来隐藏标题"
-				},
-				"startButtonsStyle": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "标题按钮样式",
-					"_data": "标题界面按钮的样式；caret-color指的是当前选中项的边框颜色"
-				},
 				"levelChoose": {
 					"_leaf": true,
 					"_type": "event",
@@ -153,61 +132,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "标题音乐",
 					"_data": "在标题界面应该播放的bgm内容"
 				},
-				"statusLeftBackground": {
+				"styles": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "横状态栏",
-					"_data": "横屏时左侧状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
-				},
-				"statusTopBackground": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "竖状态栏",
-					"_data": "竖屏时上方状态栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
-				},
-				"toolsBackground": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "竖工具栏",
-					"_data": "竖屏时下方工具栏的背景样式，可以定义背景图、平铺方式等。\n具体请网上搜索\"css background\"了解写法。\n如果弄一张图片作为背景图，推荐写法：\n\"url(project/images/XXX.png) 0 0/100% 100% no-repeat\"\n图片最好进行一些压缩等操作节省流量。"
-				},
-				"borderColor": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "边框色",
-					"_data": "边框颜色，包括游戏边界的边框和对话框边框等。"
-				},
-				"statusBarColor": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "状态栏文字色",
-					"_data": "状态栏的文字颜色，默认是白色"
-				},
-				"floorChangingBackground": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "转场背景",
-					"_data": "楼层转换界面的背景样式；可以使用纯色（默认值black），也可以使用图片（参见状态栏的图片写法）"
-				},
-				"floorChangingTextColor": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "转场文字",
-					"_data": "楼层转换界面的文字颜色，默认是白色"
-				},
-				"font": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "全局字体",
-					"_data": "游戏中使用的字体，默认是Verdana"
+					"_type": "event",
+					"_event": "mainStyle",
+					"_docs": "主样式",
+					"_data": "主要样式设置，包括标题、按钮、状态栏等的背景色等"
 				}
 			}
 		},

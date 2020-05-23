@@ -41,7 +41,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core._init_sys_flags();
 	// 初始化界面，状态栏等
 	core.resize();
-	core.updateGlobalAttribute();
 	// 状态栏是否显示
 	if (core.hasFlag('hideStatusBar'))
 		core.hideStatusBar(core.hasFlag('showToolbox'));
@@ -939,7 +938,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
 	if (!core.same(toAttribute, core.status.globalAttribute)) {
 		core.status.globalAttribute = toAttribute;
-		core.updateGlobalAttribute();
+		core.resize();
 	}
 	// 重置音量
 	core.events.setVolume(core.getFlag("__volume__", 1), 0);

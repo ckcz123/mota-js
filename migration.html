@@ -118,7 +118,7 @@ function action_data(callback) {
 
     // Step 0: 移动目录
     // materials
-    ['animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'icons'].forEach(function (one) {
+    ['animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'icons', 'airwall', 'fog', 'keyboard'].forEach(function (one) {
         fs.moveFile('project/images/'+one+".png", 'project/materials/'+one+'.png', function (e, d) {});
     });
     main.tilesets.forEach(function (one) {
@@ -127,7 +127,7 @@ function action_data(callback) {
     });
     // bgms
     main.bgms.forEach(function (one) {
-        fs.moveFile('project/bgms/'+one, 'project/bgms/'+one, function (e,d) {});
+        fs.moveFile('project/sounds/'+one, 'project/bgms/'+one, function (e,d) {});
     })
 
     // Step 1: 重置levelChoose和shop
@@ -308,7 +308,7 @@ function action_items(callback) {
         var data = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[one];
         if (!data) return;
         for (var id in data) {
-            if (data[id] != null)
+            if (data[id] != null && items[id])
                 items[id][one] = data[id];
         }
     });

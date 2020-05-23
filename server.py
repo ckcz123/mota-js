@@ -164,6 +164,8 @@ def moveFile():
 	if not os.path.exists(src):
 		abort(404)
 		return
+	if src == dest:
+		return 'Success'
 	if os.path.exists(dest):
 		os.remove(dest)
 	os.rename(src, dest)

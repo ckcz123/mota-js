@@ -1760,8 +1760,6 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (!data) return core.drawTip("无效的存档");
     if (data.version != core.firstData.version) return core.drawTip("存档版本不匹配");
     if (data.hard != core.status.hard) core.drawTip("游戏难度不匹配！");
-    if (data.hashCode != null && data.hashCode != core.utils.hashCode(data.hero))
-        return alert("存档校验失败，请勿修改存档文件！");
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
     if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
         return core.drawTip("无法从此存档回放录像");

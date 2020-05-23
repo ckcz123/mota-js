@@ -186,8 +186,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.6.6";
-    this.__VERSION_CODE__ = 99;
+    this.__VERSION__ = "2.7";
+    this.__VERSION_CODE__ = 127;
 }
 
 main.prototype.init = function (mode, callback) {

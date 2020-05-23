@@ -2142,10 +2142,6 @@ core.showWithAnimate(obj, speed, callback) / core.hideWithAnimate(obj, speed, ca
 动画淡入或淡出一个对象。
 
 
-core.hashCode(obj)
-计算一个对象的哈希值。
-
-
 core.same(a, b)
 判定a和b是否相同，包括类型相同和值相同。
 如果a和b都是数组，则会递归依次比较数组中的值；如果都是对象亦然。

@@ -685,10 +685,6 @@ core.updateHeroIcon()
 更新状态栏上的勇士图标。
 
 
-core.updateGlobalAttribute()
-更新全局属性，例如状态栏的背景图等。
-
-
 core.setToolbarButton(useButtom)
 设置工具栏是否是拓展键盘。
 

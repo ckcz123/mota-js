@@ -42,7 +42,7 @@ type Animate = {
 
 type Floor = {
     title: string,
-    item_ratio: number
+    ratio: number
 }
 
 type ResolvedMap = {
@@ -221,9 +221,7 @@ type gameStatus = {
         toolsBackground: string
         borderColor: string
         statusBarColor: string
-        hardLabelColor: string
-        floorChangingBackground: string
-        floorChangingTextColor: string
+        floorChangingStyle: string
         font: string
     }
     curtainColor: null
@@ -652,9 +650,9 @@ declare class events {
     
     /**
      * 设置一项楼层属性并刷新状态栏
-     * @example core.setFloorInfo('item_ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
-     * @param name 'title','name','canFlyTo','canUseQuickShop','cannotViewMap','cannotMoveDirectly','upFloor','downFloor','defaultGround','images','color','weather','bgm','item_ratio','underGround'之一
-     * @param values 属性的新值，可选。对'title'、'name'、'defaultGround'和'bgm'需要是字符串，对'underGround'和四个'canXxx'需要是布尔值，对两个'xxxFloor'需要是一行两列的自然数数组，对'item_ratio'需要是数字
+     * @example core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
+     * @param name 'title','name','canFlyTo','canUseQuickShop','cannotViewMap','cannotMoveDirectly','upFloor','downFloor','defaultGround','images','color','weather','bgm','ratio','underGround'之一
+     * @param values 属性的新值，可选。对'title'、'name'、'defaultGround'和'bgm'需要是字符串，对'underGround'和四个'canXxx'需要是布尔值，对两个'xxxFloor'需要是一行两列的自然数数组，对'ratio'需要是数字
      * @param floorId 楼层id，不填视为当前层
      * @param prefix 独立开关前缀，一般不需要，下同
      */
@@ -1542,7 +1540,7 @@ declare class utils {
 
     /**
      * 读取一个全局存储，适用于global:xxx，支持录像。
-     * @example if (core.getGlobal('一周目已通关', false) === true) core.getItem('knife'); // 二周目游戏进行到此处时会获得一把屠龙匕首
+     * @example if (core.getGlobal('一周目已通关', false) === true) core.getItem('dagger'); // 二周目游戏进行到此处时会获得一把屠龙匕首
      * @param key 全局变量名称，支持中文
      * @param defaultValue 可选，当此全局变量不存在或值为null、undefined时，用此值代替
      * @returns 全局变量的值

@@ -299,6 +299,7 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
 enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId = floorId || core.status.floorId;
     var enemys = [], used = {};
+    core.extractBlocks(floorId);
     var mapBlocks = core.status.maps[floorId].blocks;
     for (var b = 0; b < mapBlocks.length; b++) {
         if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
@@ -364,6 +365,7 @@ enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
     else if (enemyId) enemyMap[enemyId] = true;
     else enemyMap = null;
     for (var i = 0; i < floorId.length; i++) {
+        core.extractBlocks(floorId[i]);
         var mapBlocks = core.status.maps[floorId[i]].blocks;
         for (var b = 0; b < mapBlocks.length; b++) {
             if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') === 0) {

@@ -388,6 +388,10 @@ editor_datapanel_wrapper = function (editor) {
                     printe('不合法的id，请使用字母、数字或下划线，且不能以数字开头')
                     return;
                 }
+                if (id == 'hero' || id == 'this' || id == 'none' || id == 'airwall') {
+                    printe('不得使用保留关键字作为id！');
+                    return;
+                }
                 editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {
                     if (err) {
                         printe(err);

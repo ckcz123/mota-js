@@ -36,15 +36,12 @@ icons.prototype.getAllIconIds = function () {
     return this.allIconIds;
 }
 
-icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
+icons.prototype._getAnimateFrames = function (cls) {
     if (cls == 'enemys' || cls == 'npcs') {
         return 2;
     }
-    if (cls == 'animates' || cls == 'enemy48') {
+    if (cls == 'animates' || cls == 'enemy48' || cls == 'npc48') {
         return 4;
-    }
-    if (cls == 'npc48') {
-        return useOriginValue ? 4 : 1;
     }
     return 1;
 }
@@ -53,6 +50,7 @@ icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
 icons.prototype.getTilesetOffset = function (id) {
 
     if (typeof id == 'string') {
+        id = core.getIdOfThis(id);
         // Tileset的ID必须是 X+数字 的形式
         if (!/^X\d+$/.test(id)) return null;
         id = parseInt(id.substring(1));

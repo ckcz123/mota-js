@@ -200,18 +200,19 @@ main.prototype.init = function (mode, callback) {
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
         
-        main.dom.startBackground.src = main.startBackground;
-        main.dom.startLogo.style=main.startLogoStyle;
-        main.dom.startButtonGroup.style = main.startButtonsStyle;
-        main.levelChoose.forEach(function(value){
+        main.dom.startBackground.src = main.styles.startBackground;
+        main.dom.startLogo.style=main.styles.startLogoStyle;
+        main.dom.startButtonGroup.style = main.styles.startButtonsStyle;
+        main.levelChoose = main.levelChoose || [];
+        main.levelChoose.forEach(function (value) {
             var span = document.createElement('span');
             span.setAttribute('class','startButton');
-            span.innerText=value[0];
+            span.innerText=value.title || '';
             (function(span,str_){
                 span.onclick = function () {
                     core.events.startGame(str_);
                 }
-            })(span,value[1]);
+            })(span,value.name||'');
             main.dom.levelChooseButtons.appendChild(span);
         });
         main.createOnChoiceAnimation();
@@ -724,10 +725,9 @@ main.dom.playGame.onclick = function () {
     main.dom.startButtons.style.display='none';
     main.core.control.checkBgm();
 
-    if (main.core.isset(main.core.flags.startDirectly) && main.core.flags.startDirectly) {
+    if (main.levelChoose.length == 0) {
         core.events.startGame("");
-    }
-    else {
+    } else {
         main.dom.levelChooseButtons.style.display='block';
         main.selectedButton = null;
         main.selectButton(0);

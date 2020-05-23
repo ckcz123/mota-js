@@ -7,18 +7,20 @@ main.floors.sample1=
     "canUseQuickShop": true,
     "defaultGround": "grass",
     "images": [
-        [
-            0,
-            0,
-            "bg.jpg",
-            0
-        ]
+        {
+            "name": "bg.jpg",
+            "canvas": "bg",
+            "x": 0,
+            "y": 0,
+            "w": 416,
+            "h": 416
+        }
     ],
     "weather": [
         "snow",
         6
     ],
-    "item_ratio": 1,
+    "ratio": 1,
     "map": [
     [  7,131,  8,152,  9,130, 10,152,166,165,132,165,166],
     [  0,  0,  0,  0,  0,  0,  0,152,165,164,  0,162,165],
@@ -263,13 +265,13 @@ main.floors.sample1=
             }
         ],
         "10,4": [
-            "\t[blackKing]你终于还是来了。",
+            "\t[blackMS]你终于还是来了。",
             "\t[hero]放开我们的公主！",
-            "\t[blackKing]如果我不愿意呢？",
+            "\t[blackMS]如果我不愿意呢？",
             "\t[hero]无需多说，拔剑吧！",
             {
                 "type": "battle",
-                "id": "blackKing"
+                "id": "blackMS"
             },
             {
                 "type": "hide",
@@ -285,7 +287,7 @@ main.floors.sample1=
                     7
                 ]
             },
-            "\t[blackKing]没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。",
+            "\t[blackMS]没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。",
             {
                 "type": "hide"
             }
@@ -419,23 +421,23 @@ main.floors.sample1=
                             {
                                 "case": "0",
                                 "action": [
-                                    "\t[老人,woman]这是个很复杂的例子，它将教会你如何使用if 语句进行条件判断，以及 choices 提供选项来供用户进行选择。",
-                                    "\t[老人,woman]第一次访问我将显示这段文字；从第二次开始将会向你出售钥匙。\n钥匙价格将随着访问次数递增。\n当合计出售了七把钥匙后，将送你一把大黄门钥匙，并消失不再出现。",
-                                    "\t[老人,woman]这部分的逻辑比较长，请细心看样板的写法，是很容易看懂并理解的。"
+                                    "\t[老人,trader]这是个很复杂的例子，它将教会你如何使用if 语句进行条件判断，以及 choices 提供选项来供用户进行选择。",
+                                    "\t[老人,trader]第一次访问我将显示这段文字；从第二次开始将会向你出售钥匙。\n钥匙价格将随着访问次数递增。\n当合计出售了七把钥匙后，将送你一把大黄门钥匙，并消失不再出现。",
+                                    "\t[老人,trader]这部分的逻辑比较长，请细心看样板的写法，是很容易看懂并理解的。"
                                 ]
                             },
                             {
                                 "case": "8",
                                 "action": [
-                                    "\t[老人,woman]你购买的钥匙已经够多了，再继续卖给你的话我会有危险的。",
-                                    "\t[老人,woman]看在你贡献给我这么多钱的份上，送你一把大黄门钥匙吧，希望你能好好用它。",
+                                    "\t[老人,trader]你购买的钥匙已经够多了，再继续卖给你的话我会有危险的。",
+                                    "\t[老人,trader]看在你贡献给我这么多钱的份上，送你一把大黄门钥匙吧，希望你能好好用它。",
                                     {
                                         "type": "setValue",
                                         "name": "item:bigKey",
                                         "operator": "+=",
                                         "value": "1"
                                     },
-                                    "\t[老人,woman]我先走了，拜拜~",
+                                    "\t[老人,trader]我先走了，拜拜~",
                                     {
                                         "type": "hide",
                                         "time": 500
@@ -450,7 +452,7 @@ main.floors.sample1=
                                 "action": [
                                     {
                                         "type": "choices",
-                                        "text": "\t[老人,woman]少年，你需要钥匙吗？\n我这里有大把的！",
+                                        "text": "\t[老人,trader]少年，你需要钥匙吗？\n我这里有大把的！",
                                         "choices": [
                                             {
                                                 "text": "黄钥匙（${9+flag:woman_times}金币）",
@@ -473,7 +475,7 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,woman]你的金钱不足！"
+                                                            "\t[老人,trader]你的金钱不足！"
                                                         ]
                                                     }
                                                 ]
@@ -502,7 +504,7 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,woman]你的金钱不足！"
+                                                            "\t[老人,trader]你的金钱不足！"
                                                         ]
                                                     }
                                                 ]
@@ -528,7 +530,7 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,woman]你的金钱不足！",
+                                                            "\t[老人,trader]你的金钱不足！",
                                                             {
                                                                 "type": "continue"
                                                             }
@@ -560,8 +562,8 @@ main.floors.sample1=
             }
         ],
         "12,11": [
-            "\t[老人,womanMagician]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
-            "\t[老人,womanMagician]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
+            "\t[老人,recluse]使用 {\"type\":\"function\"} 可以写自定义的JS脚本。\n本塔支持的所有主要API会在doc文档内给出。",
+            "\t[老人,recluse]例如这个例子：即将弹出一个输入窗口，然后会将你的输入结果直接加到你的攻击力上。",
             {
                 "type": "input",
                 "text": "请输入你要加攻击力的数值："
@@ -584,7 +586,7 @@ main.floors.sample1=
                 ],
                 "false": []
             },
-            "\t[老人,womanMagician]具体可参见样板中本事件的写法。"
+            "\t[老人,recluse]具体可参见样板中本事件的写法。"
         ]
     },
     "changeFloor": {

@@ -57,7 +57,7 @@
 					"_data": "速度"
 				},
 ```
-刷新之后, 怪物的表格在hp下面就多出了speed一项, 剪辑后出现在了怪物属性中
+刷新之后, 怪物的表格在hp下面就多出了speed一项, 编辑后出现在了怪物属性中
 ```js
 "greenSlime": {"name":"绿头怪","hp":100,"atk":120,"def":0,"money":1,"exp":1,"point":0,"special":[1,5,7,8],"speed":123123},
 ```
@@ -252,14 +252,14 @@ json类型的文本使用JsonEvalString
 
 每次要使用插入公共事件并要填`陨石坠落`和形如`[[231,231,41],[5,7],1]`的长而且带有格式的内容, 并且无法使用取色器和地图选点功能. 此时就可以借助'注册一个自定义事件'并填加新语句图块来解决这个问题.
 
-首先注册成名为'meteorite'的事件, 再插件编写的init中添加以下内容
+首先注册成名为'meteorite'的事件, 在插件编写的init中添加以下内容
 ```js
 core.registerEvent('meteorite', function(data){
     core.insertAction({"type": "insert", "name": "陨石坠落", "args": [data.color,data.loc,data.range]})
 })
 ```
 
-然后再g4中修改以下位置(请善用搜索来定位)
+然后在g4中修改以下位置(请善用搜索来定位)
 
 <pre><code>    |   drawSelector_1_s
     |   unknown_s

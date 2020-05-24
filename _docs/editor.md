@@ -10,38 +10,38 @@
 拉到`【怪物】相关的表格配置`的部分  
 ``` js
 // --------------------------- 【怪物】相关的表格配置 --------------------------- //
-		"enemys": {
-			"_type": "object",
-			"_data": {
-				"id": {
-					"_leaf": true,
-					"_type": "disable",
-					"_docs": "怪物ID",
-					"_data": "怪物ID，可于页面底部修改"
-				},
-				"name": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_data": "名称"
-				},
-				"displayIdInBook": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "手册映射ID",
-					"_data": "在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。常被运用在同一个怪物的多朝向上。"
-				},
-				"hp": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_data": "生命值"
-				},
-				"atk": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_data": "攻击力"
-				},
+"enemys": {
+	"_type": "object",
+	"_data": {
+		"id": {
+			"_leaf": true,
+			"_type": "disable",
+			"_docs": "怪物ID",
+			"_data": "怪物ID，可于页面底部修改"
+		},
+		"name": {
+			"_leaf": true,
+			"_type": "textarea",
+			"_string": true,
+			"_data": "名称"
+		},
+		"displayIdInBook": {
+			"_leaf": true,
+			"_type": "textarea",
+			"_string": true,
+			"_docs": "手册映射ID",
+			"_data": "在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。常被运用在同一个怪物的多朝向上。"
+		},
+		"hp": {
+			"_leaf": true,
+			"_type": "textarea",
+			"_data": "生命值"
+		},
+		"atk": {
+			"_leaf": true,
+			"_type": "textarea",
+			"_data": "攻击力"
+		},
 ```
 可以看到, project/enemys.js 中怪物的属性
 ```js
@@ -51,11 +51,11 @@
 
 把hp的部分复制一份并修改
 ```js
-				"speed": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_data": "速度"
-				},
+"speed": {
+	"_leaf": true,
+	"_type": "textarea",
+	"_data": "速度"
+},
 ```
 刷新之后, 怪物的表格在hp下面就多出了speed一项, 编辑后出现在了怪物属性中
 ```js
@@ -88,39 +88,39 @@
 
 注意这是js文件, 可以使用表达式, 如下例子引用了别处的数据作为下拉菜单
 ```js
-						"bgm": {
-							"_leaf": true,
-							"_type": "select",
-							"_select": {
-								"values": [null].concat(Object.keys(editor.core.material.bgms))
-							},
-							"_docs": "背景音乐",
-							"_data": "到达该层后默认播放的BGM"
-						},
+"bgm": {
+	"_leaf": true,
+	"_type": "select",
+	"_select": {
+		"values": [null].concat(Object.keys(editor.core.material.bgms))
+	},
+	"_docs": "背景音乐",
+	"_data": "到达该层后默认播放的BGM"
+},
 ```
 
 同时`_`开头的项可以使用函数. 同一级中`_data`最先被计算. 复杂的结构的注释可以利用函数动态生成  
 `_data`的参数`key`是各子项的名字, 其他`_`开头的参数是`args`详见editor_table.prototype.objToTable的注释  
 例如: 自动事件数组, `"_leaf": false`强制展开, 通过`_action`函数即使为空也显示两个空白的项, 同时`_data`函数给自动事件的每一项标记为event  
 ```js
-						"autoEvent": {
-							"_type": "object",
-							"_leaf": false,
-							"_action": function (args) {
-								args.vobj = args.vobj || {};
-								for (var ii = 0; ii < 2; ii++) {
-									args.vobj[ii] = args.vobj[ii] || null;
-								}
-							},
-							"_data": function (key) {
-								return {
-									"_leaf": true,
-									"_type": "event",
-									"_event": "autoEvent",
-									"_data": "自动事件"
-								}
-							}
-						},
+"autoEvent": {
+	"_type": "object",
+	"_leaf": false,
+	"_action": function (args) {
+		args.vobj = args.vobj || {};
+		for (var ii = 0; ii < 2; ii++) {
+			args.vobj[ii] = args.vobj[ii] || null;
+		}
+	},
+	"_data": function (key) {
+		return {
+			"_leaf": true,
+			"_type": "event",
+			"_event": "autoEvent",
+			"_data": "自动事件"
+		}
+	}
+},
 ```
 
 ## 修改事件编辑器

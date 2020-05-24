@@ -76,6 +76,7 @@
   - event 事件编辑器
   - material 素材选取
   - color 取色器
+  - point 地图选点
   - disable 不允许编辑
 
 当某个event例如 门信息编辑 无法适应修改后的数据结构, 可以修改事件编辑器, 也可以把_type改成textarea  

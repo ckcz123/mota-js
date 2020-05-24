@@ -286,8 +286,20 @@ editor_mappanel_wrapper = function (editor) {
                     editor.uivalues.stepPostfix = editor.uifunctions._fillMode_bfs(editor[editor.layerMod], editor.uivalues.stepPostfix[0].x, editor.uivalues.stepPostfix[0].y,
                         editor[editor.layerMod][0].length, editor[editor.layerMod].length);
                 } 
-                for (var ii = 0; ii < editor.uivalues.stepPostfix.length; ii++)
-                    editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.info;
+                for (var ii = 0; ii < editor.uivalues.stepPostfix.length; ii++) {
+                    var currx = editor.uivalues.stepPostfix[ii].x, curry = editor.uivalues.stepPostfix[ii].y;
+                    editor[editor.layerMod][curry][currx] = editor.info;
+                    // 检查上下楼梯绑定
+                    if (editor.layerMod == 'map' && editor.info && editor.info.id == 'upFloor') {
+                        editor.currentFloorData.changeFloor[currx+","+curry] = { "floorId": ":next", "stair": "downFloor" };
+                        editor.drawEventBlock();
+                    }
+                    if (editor.layerMod == 'map' && editor.info && editor.info.id == 'downFloor') {
+                        editor.currentFloorData.changeFloor[currx+","+curry] = { "floorId": ":before", "stair": "upFloor" };
+                        editor.drawEventBlock();
+                    }
+                }
+                    
             }
             // console.log(editor.map);
             if (editor.info.y != null) {

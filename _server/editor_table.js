@@ -28,7 +28,10 @@ editor_table_wrapper = function (editor) {
     }
     editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
         if (value == null) value = [];
-        if (!(value instanceof Array)) value = [value];
+        if (!(value instanceof Array)) {
+            if (value == 0) value = [];
+            else value = [value];
+        }
         keys=Array.from(keys)
         prefixStrings=Array.from(prefixStrings)
         for (var index = 0; index < value.length; index++) {

@@ -83,6 +83,8 @@ editor_table_wrapper = function (editor) {
 
     /**
      * checkboxset中checkbox的onchange
+     * 这个函数本质是模板editor_table.prototype.checkboxSetMember的一部分
+     * 故放在HTML模板分类下
      */
     editor_table.prototype.checkboxSetMemberOnchange = function (onemember) {
         var thisset=onemember.parentNode

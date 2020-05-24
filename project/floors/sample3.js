@@ -18,7 +18,7 @@ main.floors.sample3=
         10
     ],
     "bgm": "bgm.mp3",
-    "item_ratio": 1,
+    "ratio": 1,
     "map": [
     [  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5,  5],
     [  5,  4,  4,  4,  4,  4,  1, 87,  1,  4,  4,  4,  4,  4,  5],
@@ -119,7 +119,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]我的真名为——黑暗大法师，第四区域的头目。",
+            "\t[magicMaster]我的真名为——黑暗大法师，第四区域的头目。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -129,7 +129,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]以杰克的名义利用了你这么久，真是抱歉啊。",
+            "\t[magicMaster]以杰克的名义利用了你这么久，真是抱歉啊。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -139,7 +139,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]盗贼杰克这个人类从未存在过，他只是我用来接近你的一副皮囊而已。",
+            "\t[magicMaster]盗贼杰克这个人类从未存在过，他只是我用来接近你的一副皮囊而已。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -149,7 +149,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]为什么你看上去丝毫不生气？",
+            "\t[magicMaster]为什么你看上去丝毫不生气？",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -169,7 +169,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]能够如此淡定的面对背叛，看来跟五年前相比，你确实成长了很多啊。",
+            "\t[magicMaster]能够如此淡定的面对背叛，看来跟五年前相比，你确实成长了很多啊。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -179,12 +179,12 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]五年前那场屠城你应该这一生都不会忘记吧。",
+            "\t[magicMaster]五年前那场屠城你应该这一生都不会忘记吧。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]很不巧，那场屠城的主谋，也是我。",
+            "\t[magicMaster]很不巧，那场屠城的主谋，也是我。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -199,7 +199,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]你的双亲？这种事情我怎么可能会记得？\n你难道在踩死蚂蚁的时候还会一只只记下他们的样子吗？",
+            "\t[magicMaster]你的双亲？这种事情我怎么可能会记得？\n你难道在踩死蚂蚁的时候还会一只只记下他们的样子吗？",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -209,17 +209,17 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]你应该对我心怀感激才对，如果不是那时的我看出了你隐藏的稀有勇者体质，你绝对不可能活到今天。",
+            "\t[magicMaster]你应该对我心怀感激才对，如果不是那时的我看出了你隐藏的稀有勇者体质，你绝对不可能活到今天。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]在暗中动手脚让你通过勇者选拔的人也是我，我一直一直在暗中引导你走到今天这一步。",
+            "\t[magicMaster]在暗中动手脚让你通过勇者选拔的人也是我，我一直一直在暗中引导你走到今天这一步。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]是我救赎了一无是处的你。",
+            "\t[magicMaster]是我救赎了一无是处的你。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -234,12 +234,12 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]我刚才不是说过了吗？因为我看出了你有稀有勇者体质啊。",
+            "\t[magicMaster]我刚才不是说过了吗？因为我看出了你有稀有勇者体质啊。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]你刚刚跟鬼帝交过手，应该已经很清楚这稀有勇者体质意味着什么了吧？",
+            "\t[magicMaster]你刚刚跟鬼帝交过手，应该已经很清楚这稀有勇者体质意味着什么了吧？",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -249,7 +249,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]愚蠢！这意味着只要我对你加以引导跟培养，你就能成为这世间实力最强的存在！",
+            "\t[magicMaster]愚蠢！这意味着只要我对你加以引导跟培养，你就能成为这世间实力最强的存在！",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -259,7 +259,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]我利用你干的事情，你不是已经完成了吗？",
+            "\t[magicMaster]我利用你干的事情，你不是已经完成了吗？",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -269,7 +269,7 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]不知不觉间，你已经在我的指引下跟鬼帝正面交手并且杀掉了他啊。",
+            "\t[magicMaster]不知不觉间，你已经在我的指引下跟鬼帝正面交手并且杀掉了他啊。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -279,12 +279,12 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]你们两个一个是人类勇者，一个是魔物勇者，迟早会有交手的一天。",
+            "\t[magicMaster]你们两个一个是人类勇者，一个是魔物勇者，迟早会有交手的一天。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]我只不过是操纵了一系列的连锁事件让这一天提早了数十年到来而已。",
+            "\t[magicMaster]我只不过是操纵了一系列的连锁事件让这一天提早了数十年到来而已。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -294,22 +294,22 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]一个惧怕征战，爱好和平的懦夫，也配叫救世主？",
+            "\t[magicMaster]一个惧怕征战，爱好和平的懦夫，也配叫救世主？",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]获得了力量，却只会被动挨打而不主动向人类世界出击，龟缩在第二区域惶惶度日，他根本就不配拥有稀有勇者体质。",
+            "\t[magicMaster]获得了力量，却只会被动挨打而不主动向人类世界出击，龟缩在第二区域惶惶度日，他根本就不配拥有稀有勇者体质。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]为了不让这种人霸占着积累多年的庞大灵魂能量无作为，我设计让你杀掉了他。",
+            "\t[magicMaster]为了不让这种人霸占着积累多年的庞大灵魂能量无作为，我设计让你杀掉了他。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]你没有辜负我的期待，成功战胜了那个废物，现在你体内累积的灵魂能量……也就是魔力，已经达到了能跟魔王匹敌的地步。",
+            "\t[magicMaster]你没有辜负我的期待，成功战胜了那个废物，现在你体内累积的灵魂能量……也就是魔力，已经达到了能跟魔王匹敌的地步。",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -319,12 +319,12 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]不止如此，你现在的力量之强就算是统治世界也是绰绰有余！",
+            "\t[magicMaster]不止如此，你现在的力量之强就算是统治世界也是绰绰有余！",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]怎么样？要不要加入我的麾下，跟随我去征战人类世界？",
+            "\t[magicMaster]怎么样？要不要加入我的麾下，跟随我去征战人类世界？",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -339,12 +339,12 @@ main.floors.sample3=
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]……什么？！",
+            "\t[magicMaster]……什么？！",
             {
                 "type": "playSound",
                 "name": "item.mp3"
             },
-            "\t[blackMagician]等一下！别冲动！你先等我把这利害关系理一理——",
+            "\t[magicMaster]等一下！别冲动！你先等我把这利害关系理一理——",
             {
                 "type": "playSound",
                 "name": "item.mp3"
@@ -393,7 +393,7 @@ main.floors.sample3=
             "trigger": "action",
             "enable": false,
             "data": [
-                "\t[blackMagician]听不进去人话的蠢货，就要用疼痛来管教！",
+                "\t[magicMaster]听不进去人话的蠢货，就要用疼痛来管教！",
                 {
                     "type": "changePos",
                     "direction": "up"
@@ -402,7 +402,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]出来吧！禁忌——紫电凶杀阵！",
+                "\t[magicMaster]出来吧！禁忌——紫电凶杀阵！",
                 {
                     "type": "show",
                     "loc": [
@@ -429,7 +429,7 @@ main.floors.sample3=
                     "type": "sleep",
                     "time": 500
                 },
-                "\t[blackMagician]感受绝望吧！冥顽不化的蠢货！",
+                "\t[magicMaster]感受绝望吧！冥顽不化的蠢货！",
                 {
                     "type": "animate",
                     "name": "yongchang",
@@ -484,12 +484,12 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]我的魔力可是充足的很啊！我会一直折磨到你屈服于我为止！",
+                "\t[magicMaster]我的魔力可是充足的很啊！我会一直折磨到你屈服于我为止！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]人类！好好感受吧！当初你们施加于我的痛苦！如今我要百倍奉还！",
+                "\t[magicMaster]人类！好好感受吧！当初你们施加于我的痛苦！如今我要百倍奉还！",
                 {
                     "type": "show",
                     "loc": [
@@ -592,7 +592,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]可恶…多管闲事的妖精族…明明只要再让他承受一点疼痛来瓦解他的意志力，我的计划就成功了！",
+                "\t[magicMaster]可恶…多管闲事的妖精族…明明只要再让他承受一点疼痛来瓦解他的意志力，我的计划就成功了！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
@@ -602,7 +602,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]不甘心！我不甘心！妖精公主又如何！\n只要是阻挡我的，不管是谁我都要铲除！",
+                "\t[magicMaster]不甘心！我不甘心！妖精公主又如何！\n只要是阻挡我的，不管是谁我都要铲除！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
@@ -612,12 +612,12 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]呵呵呵……那个昏庸的魔王，掌握着那么庞大的魔物军队却只知道固守魔塔，而不主动侵略人类世界扩张领土！",
+                "\t[magicMaster]呵呵呵……那个昏庸的魔王，掌握着那么庞大的魔物军队却只知道固守魔塔，而不主动侵略人类世界扩张领土！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]我实在是看不过眼，所以我才决定把这个具备稀有勇者体质的家伙培养成新一任魔王！\n来让这个世界的势力重新洗牌！",
+                "\t[magicMaster]我实在是看不过眼，所以我才决定把这个具备稀有勇者体质的家伙培养成新一任魔王！\n来让这个世界的势力重新洗牌！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
@@ -627,7 +627,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]恼人至极的妖精族！呵呵呵……我干脆一不做二不休，连你也一块收拾了吧！",
+                "\t[magicMaster]恼人至极的妖精族！呵呵呵……我干脆一不做二不休，连你也一块收拾了吧！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
@@ -637,7 +637,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]只会耍嘴皮子的恼人苍蝇！我倒要看看一块焦炭会不会说话！\n——招雷弹！！",
+                "\t[magicMaster]只会耍嘴皮子的恼人苍蝇！我倒要看看一块焦炭会不会说话！\n——招雷弹！！",
                 {
                     "type": "animate",
                     "name": "yongchang",
@@ -691,7 +691,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]哼！翅膀都被烧焦了还要嘴硬？你难不成真以为我不会对你动真格？",
+                "\t[magicMaster]哼！翅膀都被烧焦了还要嘴硬？你难不成真以为我不会对你动真格？",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
@@ -721,7 +721,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]什么？！难不成你是想！！不可能……\n就为了一个渺小的人类，不可理喻！！",
+                "\t[magicMaster]什么？！难不成你是想！！不可能……\n就为了一个渺小的人类，不可理喻！！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
@@ -736,7 +736,7 @@ main.floors.sample3=
                     "type": "playSound",
                     "name": "item.mp3"
                 },
-                "\t[blackMagician]不！！不应该是这样的！我完美的计划竟然会被一只小小的妖精破坏！",
+                "\t[magicMaster]不！！不应该是这样的！我完美的计划竟然会被一只小小的妖精破坏！",
                 {
                     "type": "playSound",
                     "name": "item.mp3"
@@ -775,7 +775,7 @@ main.floors.sample3=
                     "type": "sleep",
                     "time": 200
                 },
-                "\t[blackMagician]不可能！！！！！",
+                "\t[magicMaster]不可能！！！！！",
                 {
                     "type": "hide",
                     "loc": [
@@ -873,7 +873,7 @@ main.floors.sample3=
                 "\t[hero]好温暖……",
                 {
                     "type": "setValue",
-                    "name": "item:yellowJewel",
+                    "name": "item:yellowGem",
                     "value": "1"
                 },
                 {
@@ -921,7 +921,7 @@ main.floors.sample3=
     },
     "afterBattle": {
         "7,5": [
-            "\t[blackMagician]天真！你以为这样就能战胜我吗？",
+            "\t[magicMaster]天真！你以为这样就能战胜我吗？",
             {
                 "type": "show",
                 "loc": [
@@ -935,7 +935,7 @@ main.floors.sample3=
             }
         ],
         "8,6": [
-            "\t[blackMagician]你打败的不过是我众多分身中的其中一个而已。",
+            "\t[magicMaster]你打败的不过是我众多分身中的其中一个而已。",
             {
                 "type": "show",
                 "loc": [
@@ -949,7 +949,7 @@ main.floors.sample3=
             }
         ],
         "6,5": [
-            "\t[blackMagician]你的身体已经伤痕累累了，可我还留有着九成多的魔力。",
+            "\t[magicMaster]你的身体已经伤痕累累了，可我还留有着九成多的魔力。",
             {
                 "type": "show",
                 "loc": [
@@ -963,7 +963,7 @@ main.floors.sample3=
             }
         ],
         "6,6": [
-            "\t[blackMagician]顽固的家伙！放弃抵抗吧！",
+            "\t[magicMaster]顽固的家伙！放弃抵抗吧！",
             {
                 "type": "show",
                 "loc": [
@@ -977,7 +977,7 @@ main.floors.sample3=
             }
         ],
         "8,5": [
-            "\t[blackMagician]哈哈哈哈！我的灵魂远比你想象的强大！\n我即是永恒！",
+            "\t[magicMaster]哈哈哈哈！我的灵魂远比你想象的强大！\n我即是永恒！",
             {
                 "type": "show",
                 "loc": [

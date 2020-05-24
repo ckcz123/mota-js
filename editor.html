@@ -169,6 +169,11 @@
                 <input placeholder="修改floorId为"/>
                 <button>save</button>
             </div>
+            <div id='changeFloorSize' style="font-size: 13px;">
+                修改地图大小：宽<input style="width: 25px;" value="13" />，高<input style="width: 25px;" value="13" />，
+                偏移x<input style="width: 25px;" value="0" /> y<input style="width: 25px;" value="0" /> 
+                <button>save</button>
+            </div>
         </div>
     </div>
     <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><!-- tower -->
@@ -195,35 +200,19 @@
                 <button onclick="editor_blockly.showXML()">Show XML</button>
                 <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
                 -->
-                <select id="entryType" disabled="disabled" style="display: none">
-                    <option value="event">event</option>
-                    <option value="autoEvent">autoEvent</option>
-                    <option value="changeFloor">changeFloor</option>
-                    <option value="level">level</option>
-                    <option value="shop">shop</option>
-                    <option value="afterBattle">afterBattle</option>
-                    <option value="afterGetItem">afterGetItem</option>
-                    <option value="afterOpenDoor">afterOpenDoor</option>
-                    <option value="firstArrive">firstArrive</option>
-                    <option value="eachArrive">eachArrive</option>
-                    <option value="commonEvent">commonEvent</option>
-                    <option value="item">item</option>
-                </select>
                 <button onclick="editor_blockly.confirm()">确认</button>
-                <button onclick="editor_blockly.parse()">解析</button>
+                <button id='blocklyParse' onclick="editor_blockly.parse()">解析</button>
                 <button onclick="editor_blockly.cancel()">取消</button>
                 <div style="position: relative; display: inline-block; margin-left: 10px">
                     <div class="searchLogo"></div>
                     <input type="text" id="searchBlock" placeholder="搜索图块"/>
                 </div>
-                <div id="colorPanel" class="cpPanel" style="display: none">
-                    <input class="color" id="colorPicker" value="255,215,0,1"/>
-                    <button onclick="confirmColor()">确定</button>
-                </div>
                 <button class="cpPanel" onclick="editor_blockly.selectPoint()" style="margin-left:5px">地图选点</button>
                 <button class="cpPanel" onclick="editor.uievent.searchUsedFlags()" style="margin-left:5px">变量出现位置搜索</button>
                 <input type="checkbox" class="cpPanel" id="blocklyReplace" onchange="editor_blockly.triggerReplace()" style="margin-left: 10px" />
                 <span class="cpPanel" style="margin-left: -4px; font-size: 13px">开启中文名替换</span>
+                <input type="checkbox" class="cpPanel" id="blocklyExpandCompare" onchange="editor_blockly.triggerExpandCompare()" style="margin-left: 10px" />
+                <span class="cpPanel" style="margin-left: -4px; font-size: 13px">展开值块逻辑运算</span>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -234,6 +223,10 @@
                 <textarea id="codeArea" spellcheck="false"></textarea>
             </div>
         </div>
+    </div>
+    <div id="colorPanel" class="cpPanel" style="display: none">
+        <input class="color" id="colorPicker" value="255,215,0,1"/>
+        <button onclick="confirmColor()">确定</button>
     </div>
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
         <button onclick="editor_multi.confirm()">确认</button>
@@ -336,9 +329,11 @@
             <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定模式</span>
             <br/>
             <span style="font-size: 12px;">
-            <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />画线
-            <input type="radio" id="brushMod2" name="brushMod" value="rectangle" />画矩形
-            <input type="radio" id="brushMod3" name="brushMod" value="tileset" />tileset贴图
+            <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />线
+            <input type="radio" id="brushMod2" name="brushMod" value="rectangle" />矩形
+            <input type="radio" id="brushMod3" name="brushMod" value="tileset" />tileset平铺
+            <input type="radio" id="brushMod4" name="brushMod" value="fill" />填充
+
             </span>
             <br/>
             <span style="font-size: 12px">
@@ -359,7 +354,7 @@
         </div>
     </div>
     <div id="mid2">
-        <p style="margin: 10px">最近使用的图块列表（Ctrl+滚轮放缩） <button id='clearLastUsedBtn'>清除</button></p>
+        <p style="margin: 10px"><span id='lastUsedTitle'></span><small>（Ctrl+滚轮放缩，右键置顶）</small> <button id='clearLastUsedBtn'>清除</button></p>
         <div class="map" id="lastUsedDiv">
             <canvas id='lastUsed' width='480' height='480' style="overflow: hidden"></canvas>
         </div>
@@ -379,7 +374,7 @@
             <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
             <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
             <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
-            <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
+            <div id='pasteLoc' class="menuitem"><div class="menuitem-content">粘贴到此事件</div></div>
             <div id='clearEvent' class="menuitem"><div class="menuitem-content">仅清空此点事件</div></div>
             <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
         </div>
@@ -546,7 +541,8 @@
         <div id='uieventBody'>
             <canvas class='gameCanvas' id='uievent' width='480' height='480'></canvas>
             <div id="selectPointBox"></div>
-            <div id="uieventUsedFlagList" style="display: none"></div>
+            <div id="uieventUsedFlagList" style="display: none; margin-top: -10px"></div>
+            <div id="uieventMaterialList" style="display: none; margin-top: -10px"></div>
         </div>
         <div id="selectPoint">
             <select id="selectPointFloor"></select>
@@ -602,6 +598,8 @@
 <script src="_server/blockly/blocks_compressed.js"></script>
 <script src="_server/blockly/javascript_compressed.js"></script>
 <script src="_server/blockly/zh-hans.js"></script>
+<script src='_server/MotaActionParser.js'></script>
+<script src='_server/editor_blocklyconfig.js'></script>
 <script src='_server/editor_blockly.js'></script>
 <!-- codemirror -->
 <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>

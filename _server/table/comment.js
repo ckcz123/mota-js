@@ -11,55 +11,55 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 		"items": {
 			"_type": "object",
 			"_data": {
-				"items": {
-					"_type": "object",
-					"_data": {
-						"cls": {
-							"_leaf": true,
-							"_type": "select",
-							"_select": {
-								"values": [
-									"items",
-									"constants",
-									"tools",
-									"equips"
-								]
-							},
-							"_docs": "道具类别",
-							"_data": "只能取items(宝石、血瓶) constants(永久物品) tools(消耗道具) equips(装备)"
-						},
-						"name": {
-							"_leaf": true,
-							"_type": "textarea",
-							"_string": true,
-							"_data": "道具名称"
-						},
-						"text": {
-							"_leaf": true,
-							"_type": "textarea",
-							"_string": true,
-							"_docs": "道具描述",
-							"_data": "道具在道具栏中显示的描述"
-						},
-						"hideInToolbox": {
-							"_leaf": true,
-							"_type": "checkbox",
-							"_docs": "道具栏中隐藏",
-							"_data": "是否不显示在道具栏中"
-						},
-						"equip": {
-							"_leaf": true,
-							"_type": "textarea",
-							"_docs": "道具的装备属性",
-							"_data": "装备属性设置，仅对cls为equips有效。\n如果此项不为null，需要是一个对象，里面可含\"type\"，\"atk\"，\"def\"，\"mdef\"，\"animate\"五项，分别对应装备部位、攻防护盾和动画。\n具体详见文档（元件说明-装备）和已有的几个装备的写法。"
-						},
-						"hideInReplay": {
-							"_leaf": true,
-							"_type": "checkbox",
-							"_docs": "回放不绘制道具栏",
-							"_data": "是否回放时不绘制道具栏。\n如果此项为true，则在回放录像时使用本道具将不会绘制道具栏页面，而是直接使用。\n此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
-						}
-					}
+				"id": {
+					"_leaf": true,
+					"_type": "disable",
+					"_docs": "道具ID",
+					"_data": "道具ID，可于页面底部修改"
+				},
+				"cls": {
+					"_leaf": true,
+					"_type": "select",
+					"_select": {
+						"values": [
+							"items",
+							"constants",
+							"tools",
+							"equips"
+						]
+					},
+					"_docs": "道具类别",
+					"_data": "items(宝石、血瓶) constants(永久物品) tools(消耗道具) equips(装备)"
+				},
+				"name": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_data": "道具名称"
+				},
+				"text": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_docs": "道具描述",
+					"_data": "道具在道具栏中显示的描述"
+				},
+				"hideInToolbox": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "不显示在道具栏",
+				},
+				"equip": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "equip",
+					"_docs": "道具的装备属性"
+				},
+				"hideInReplay": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "回放不绘制道具栏",
+					"_data": "此项建议在会频繁连续多次使用的道具开启（如开启技能，或者《镜子》那样的镜像切换等等）"
 				},
 				"itemEffect": {
 					"_leaf": true,
@@ -73,7 +73,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_string": true,
-					"_lint": true,
 					"_docs": "即捡即用提示",
 					"_data": "即捡即用类物品在获得时提示的文字，仅对cls为items有效。"
 				},
@@ -82,7 +81,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "event",
 					"_event": "item",
 					"_docs": "碰触或使用事件",
-					"_data": "碰触或使用本道具所执行的事件"
+					"_data": "碰触或使用本道具所执行的事件，对所有cls有效"
 				},
 				"useItemEffect": {
 					"_leaf": true,
@@ -97,7 +96,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_string": true,
 					"_lint": true,
-					"_docs": "能否使用条件",
+					"_docs": "能否使用",
 					"_data": "当前能否使用该道具，仅对cls为tools或constants有效。"
 				},
 				"equipCondition": {
@@ -105,18 +104,24 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_string": true,
 					"_lint": true,
-					"_docs": "能否装备条件",
+					"_docs": "能否装备",
 					"_data": "能装备某个装备的条件，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
 				}
 			}
 		},
-		"items_template": { 'cls': 'items', 'name': '新物品', 'canPass': true },
+		"items_template": { 'cls': 'items', 'name': '新物品' },
 
 
 		// --------------------------- 【怪物】相关的表格配置 --------------------------- //
 		"enemys": {
 			"_type": "object",
 			"_data": {
+				"id": {
+					"_leaf": true,
+					"_type": "disable",
+					"_docs": "怪物ID",
+					"_data": "怪物ID，可于页面底部修改"
+				},
 				"name": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -128,7 +133,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_string": true,
 					"_docs": "手册映射ID",
-					"_data": "在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。\n此项应被运用在同一个怪物的多朝向上。\n例如，如果想定义同一个怪物的向下和向左的行走图，则需要建立两个属性完全相同的怪物。\n但是这样会导致在怪物手册中同时存在向下和向左的两种怪物的显示。\n可以将朝向左的怪物的displayIdInBook项指定为朝向下的怪物ID，这样在怪物手册中则会归一化，只显示一个。"
+					"_data": "在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。常被运用在同一个怪物的多朝向上。"
 				},
 				"hp": {
 					"_leaf": true,
@@ -182,7 +187,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"value": {
 					"_leaf": true,
 					"_type": "textarea",
-					"_docs": "特殊属性值",
+					"_docs": "特殊属性数值",
 					"_data": "特殊属性的数值\n如：领域/阻激/激光怪的伤害值；吸血怪的吸血比例；光环怪增加生命的比例"
 				},
 				"zoneSquare": {
@@ -201,7 +206,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"notBomb": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "是否不可炸",
+					"_docs": "不可炸",
 					"_data": "该怪物不可被炸"
 				},
 				"n": {
@@ -214,21 +219,21 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"add": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "吸血加自身",
+					"_docs": "吸血加到自身",
 					"_data": "吸血后是否加到自身；光环是否叠加"
 				},
 				"atkValue": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣攻击",
+					"_docs": "退化扣除攻击",
 					"_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例"
 				},
 				"defValue": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣防御",
+					"_docs": "退化扣除防御",
 					"_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例"
 				},
 				"damage": {
@@ -249,19 +254,20 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"_data": {
 				"id": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "disable",
 					"_range": "false",
-					"_data": "图块ID"
+					"_docs": "图块ID",
+					"_data": "图块唯一ID，可在页面底部修改"
 				},
 				"idnum": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "disable",
 					"_range": "false",
 					"_data": "图块数字"
 				},
 				"cls": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "disable",
 					"_range": "false",
 					"_data": "图块类别"
 				},
@@ -290,7 +296,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_docs": "可通行性",
-					"_data": "该图块是否可以通行；true代表可以通行，false代表不可通行"
 				},
 				"script": {
 					"_leaf": true,
@@ -308,7 +313,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"key":["up","down","left","right"]
 					},
 					"_docs": "不可出方向",
-					"_data": "该图块的不可出方向\n可以在这里定义在该图块时不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表在该图块时不能往上和左走\n此值对背景层、事件层、前景层上的图块均有效"
+					"_data": "该图块的不可出方向\n对背景层、事件层、前景层上的图块均有效"
 				},
 				"cannotIn": {
 					"_leaf": true,
@@ -318,7 +323,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"key":["up","down","left","right"]
 					},
 					"_docs": "不可入方向",
-					"_data": "该图块的不可入方向\n可以在这里定义不能朝哪个方向进入该图块，可以达到悬崖之类的效果\n例如 [\"down\"] 代表不能从该图块的上方点朝向下进入此图块\n此值对背景层、事件层、前景层上的图块均有效"
+					"_data": "该图块的不可入方向\n对背景层、事件层、前景层上的图块均有效"
 				},
 				"canBreak": {
 					"_leaf": true,
@@ -328,22 +333,26 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"animate": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_range": "thiseval==~~thiseval||thiseval==null",
+					"_type": "select",
+					"_select": {
+						"values": [null,1,2,3,4],
+					},
 					"_docs": "动画帧数",
-					"_data": "该图块的全局动画帧数。\n如果此项为null，则对于除了npc48外，使用素材默认帧数；npc48默认是1帧（即静止）。"
+					"_data": "null代表素材默认帧数"
 				},
 				"doorInfo": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "event",
+					"_event": "doorInfo", 
 					"_docs": "门信息",
-					"_data": "该图块的门信息，是一个三元数组。\n第一项为所需要的钥匙信息，第二项为开此门时的音效，第三项为关此门时的音效。仅对animates生效。"
+					"_data": "该图块的门信息，仅对animates和npc48生效。"
 				},
 				"faceIds": {
 					"_leaf": true,
-					"_type": "textarea",
+					"_type": "event",
+					"_event": "faceIds",
 					"_docs": "行走图朝向",
-					"_data": "行走图朝向，仅对NPC有效。可以在这里定义同一个NPC的多个朝向行走图。\n比如 {\"up\":\"N333\",\"down\":\"N334\",\"left\":\"N335\",\"right\":\"N336\"} 就将该素材的上下左右朝向分别绑定到N333,N334,N335和N336四个图块。\n在勇士撞上NPC时，或NPC在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
+					"_data": "行走图朝向，仅对npc48有效。在勇士撞上NPC时，或NPC在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
 				}
 			}
 		},
@@ -358,15 +367,15 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_data": {
 						"floorId": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "disable",
 							"_range": "false",
 							"_docs": "楼层ID",
-							"_data": "文件名和floorId需要保持完全一致 \n楼层唯一标识符仅能由字母、数字、下划线组成，且不能由数字开头 \n推荐用法：第20层就用MT20，第38层就用MT38，地下6层就用MT_6（用下划线代替负号），隐藏3层用MT3h（h表示隐藏），等等 \n楼层唯一标识符，需要和名字完全一致 \n这里不能更改floorId,请通过另存为来实现"
+							"_data": "文件名和floorId需要保持完全一致，可在页面底部修改"
 						},
 						"title": {
 							"_leaf": true,
 							"_type": "textarea",
-							"_docs": "楼层中文名",
+							"_docs": "楼层名",
 							"_data": "楼层中文名，将在切换楼层和浏览地图时显示"
 						},
 						"name": {
@@ -377,22 +386,22 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"width": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "disable",
 							"_range": "false",
 							"_docs": "宽度",
-							"_data": "地图x方向大小,这里不能更改,仅能在新建地图时设置,null视为13"
+							"_data": "地图x方向大小,请在表格最下方修改"
 						},
 						"height": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "disable",
 							"_range": "false",
 							"_docs": "高度",
-							"_data": "地图y方向大小,这里不能更改,仅能在新建地图时设置,null视为13"
+							"_data": "地图y方向大小,请在表格最下方修改"
 						},
 						"canFlyTo": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_docs": "可飞",
+							"_docs": "可楼传",
 							"_data": "该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）"
 						},
 						"canUseQuickShop": {
@@ -457,13 +466,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"images": {
 							"_leaf": true,
-							"_type": "textarea",
-							"_docs": "楼层贴图",
-							"_data": "背景/前景图；你可以选择若干张图片来作为背景/前景素材。详细用法请参见文档“自定义素材”中的说明。"
+							"_type": "event",
+							"_event": "floorImage",
+							"_docs": "楼层贴图"
 						},
 						"color": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "color",
 							"_docs": "色调",
 							"_data": "该层的默认画面色调。本项可不写（代表无色调），如果写需要是一个RGBA数组如[255,0,0,0.3]"
 						},
@@ -480,9 +489,9 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 								"values": [null].concat(Object.keys(editor.core.material.bgms))
 							},
 							"_docs": "背景音乐",
-							"_data": "到达该层后默认播放的BGM。本项可忽略，或者为一个定义过的背景音乐如\"bgm.mp3\"。"
+							"_data": "到达该层后默认播放的BGM"
 						},
-						"item_ratio": {
+						"ratio": {
 							"_leaf": true,
 							"_type": "textarea",
 							"_range": "(thiseval==~~thiseval && thiseval>=0)||thiseval==null",
@@ -579,7 +588,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"cannotViewMap": false,
 			"cannotMoveDirectly": false,
 			"images": [],
-			"item_ratio": 1,
+			"ratio": 1,
 			"defaultGround": "ground",
 			"bgm": null,
 			"upFloor": null,

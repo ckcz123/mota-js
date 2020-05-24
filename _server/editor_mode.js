@@ -18,7 +18,7 @@ editor_mode = function (editor) {
         this._ids = {}
         this.dom = {}
         this.actionList = [];
-        this.mode = '';
+        this.mode = 'tower'; // 初始默认显示全塔属性
         this.info = {};
         this.appendPic = {};
         this.doubleClickMode = 'change';
@@ -97,14 +97,12 @@ editor_mode = function (editor) {
     }
 
     editor_mode.prototype.onmode = function (mode, callback) {
-        setTimeout(function(){
-            if (editor_mode.mode != mode) {
-                if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
-                if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
-                if (mode !== 'save') editor_mode.mode = mode;
-                editor_mode.actionList = [];
-            }
-        })
+        if (editor_mode.mode != mode) {
+            if (mode === 'save') editor_mode.doActionList(editor_mode.mode, editor_mode.actionList, callback);
+            if (editor_mode.mode === 'nextChange' && mode) editor_mode.showMode(mode);
+            if (mode !== 'save') editor_mode.mode = mode;
+            editor_mode.actionList = [];
+        }
     }
 
     editor_mode.prototype.showMode = function (mode) {
@@ -169,13 +167,15 @@ editor_mode = function (editor) {
         return true
     }
 
-    editor_mode.prototype.checkImages = function (thiseval) {
+    editor_mode.prototype.checkImages = function (thiseval, directory) {
+        if (!directory) return true;
         if (!editor_mode.checkUnique(thiseval)) return false;
-        fs.readdir('project/images', function (err, data) {
+        fs.readdir(directory, function (err, data) {
             if (err) {
                 printe(err);
                 throw Error(err);
             }
+            var notExist = null;
             thiseval.map(function (v) {
                 var name = v.indexOf('.') < 0 ? (v+'.png') : v;
                 if (data.indexOf(name) < 0) notExist = name;

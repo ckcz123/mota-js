@@ -56,7 +56,8 @@
                 callback(null, data);
             }
         }, function (e) {
-            main.log(e);
+            if (window.main != null && main.log) main.log(e);
+            else console.log(e);
             callback(e+"：请检查启动服务是否处于正常运行状态。");
         }, "text/plain; charset=x-user-defined");
     }
@@ -140,6 +141,46 @@
             }
             callback(err, data);
         });
+        return;
+    }
+
+    /**
+     * @param {string} path 支持"/"做分隔符
+     * @param {() => {err: string, data}} callback
+     */
+    fs.mkdir = function (path, callback) {
+        //callback:function(err, data)
+        if (typeof(path) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'name=' + path;
+        postsomething(data, '/makeDir', callback);
+        return;
+    }
+
+    /**
+     * @param {string} path 支持"/"做分隔符, 不以"/"结尾
+     * @param {() => {err: string, data}} callback
+     */
+    fs.moveFile = function (src, dest, callback) {
+        if (typeof(src) != typeof('') || typeof(dest) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'src=' + src + "&dest=" + dest;
+        postsomething(data, '/moveFile', callback);
+        return;
+    }
+
+    /**
+     * @param {string} path 支持"/"做分隔符, 不以"/"结尾
+     * @param {() => {err: string, data}} callback
+     */
+    fs.deleteFile = function (path, callback) {
+        if (typeof(path) != typeof(''))
+            throw 'Type Error in fs.readdir';
+        var data = '';
+        data += 'name=' + path;
+        postsomething(data, '/deleteFile', callback);
         return;
     }
 })();

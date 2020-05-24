@@ -8,14 +8,14 @@ editor_table_wrapper = function (editor) {
     // HTML模板
 
     editor_table.prototype.select = function (value, values) {
-        var content = editor.table.option(value) +
-            values.map(function (v) {
-                return editor.table.option(v)
+        if (values.indexOf(value) < 0) values = [value].concat(values);
+        var content = values.map(function (v) {
+                return editor.table.option(v, v == value)
             }).join('')
         return /* html */`<select>\n${content}</select>\n`
     }
-    editor_table.prototype.option = function (value) {
-        return /* html */`<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
+    editor_table.prototype.option = function (value, selected) {
+        return /* html */`<option value='${JSON.stringify(value)}' ${selected ? 'selected' : ''}>${JSON.stringify(value)}</option>\n`
     }
     editor_table.prototype.text = function (value) {
         return /* html */`<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
@@ -23,11 +23,15 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.checkbox = function (value) {
         return /* html */`<input type='checkbox' class='checkbox' ${(value ? 'checked ' : '')}/>\n`
     }
-    editor_table.prototype.textarea = function (value, indent) {
-        return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
+    editor_table.prototype.textarea = function (value, indent, disable) {
+        return /* html */`<textarea spellcheck='false' ${disable ? 'disabled readonly' : ''}>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
     editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
-        if (!(value instanceof Array)) value = [];
+        if (value == null) value = [];
+        if (!(value instanceof Array)) {
+            if (value == 0) value = [];
+            else value = [value];
+        }
         keys=Array.from(keys)
         prefixStrings=Array.from(prefixStrings)
         for (var index = 0; index < value.length; index++) {
@@ -57,15 +61,25 @@ editor_table_wrapper = function (editor) {
     }
 
     editor_table.prototype.gap = function (field) {
-        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
+        var tokenlist = field.slice(2, -2).split("']['");
+        var rule = tokenlist.join("-");
+        tokenlist.pop();
+        var self = tokenlist.join("-");
+        var status = !!tokenPool[rule];
+        return /* html */`<tr data-gap="${rule}" data-field="${self}">
+            <td>----</td>
+            <td>----</td>
+            <td>${field}</td>
+            <td><button style="background: #FFCCAA" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
+        </tr>\n`
     }
 
     editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortComment, tdstr, type) {
-        return /* html */`<tr id="${guid}">
+        return /* html */`<tr id="${guid}" data-field="${field.slice(2, -2).split("']['").join("-")}">
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
         <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
-        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet')}</td>
+        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'disable')}</td>
         </tr>\n`
     }
 
@@ -214,8 +228,10 @@ editor_table_wrapper = function (editor) {
 
         var listen = function (guids) {
             // 每个叶节点的事件绑定
+            var tableid = editor.util.guid();
+            editor.mode.currentTable=tableid;
             guids.forEach(function (guid) {
-                editor.table.guidListen(guid, obj, commentObj)
+                editor.table.guidListen(guid, tableid, obj, commentObj)
             });
         }
         return { "HTML": outstr.join(''), "guids": guids, "listen": listen };
@@ -270,7 +286,7 @@ editor_table_wrapper = function (editor) {
             case 'checkboxSet':
                 return editor.table.checkboxSet(thiseval, cobj._checkboxSet.key, cobj._checkboxSet.prefix);
             default: 
-                return editor.table.textarea(thiseval, cobj.indent || 0);
+                return editor.table.textarea(thiseval, cobj.indent || 0, cobj._type == 'disable');
         }
     }
 
@@ -299,7 +315,7 @@ editor_table_wrapper = function (editor) {
      * 监听一个guid对应的表格项
      * @param {String} guid 
      */
-    editor_table.prototype.guidListen = function (guid, obj, commentObj) {
+    editor_table.prototype.guidListen = function (guid, tableid, obj, commentObj) {
         // tr>td[title=field]
         //   >td[title=comment,cobj=cobj:json]
         //   >td>div>input[value=thiseval]
@@ -308,6 +324,7 @@ editor_table_wrapper = function (editor) {
         var field = thisTr.children[0].getAttribute('title');
         var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
         var modeNode = thisTr.parentNode;
+        thisTr.setAttribute('tableid',tableid)
         while (!editor_mode._ids.hasOwnProperty(modeNode.getAttribute('id'))) {
             modeNode = modeNode.parentNode;
         }
@@ -331,6 +348,7 @@ editor_table_wrapper = function (editor) {
      */
     editor_table.prototype.onchange = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+        if (editor.mode.currentTable!=thisTr.getAttribute('tableid')) return;
         var thiseval = null;
         if (input.checked != null) input.value = input.checked;
         try {
@@ -345,6 +363,36 @@ editor_table_wrapper = function (editor) {
             editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
+        }
+    }
+
+    var tokenPool = {};
+    var tokenstyle = document.createElement("style");
+    document.body.appendChild(tokenstyle);
+
+    var tokenPoolRender = function() {
+        var content = "";
+        Object.keys(tokenPool).forEach(function(k) {
+            content += /* CSS */`[data-field|=${k}]{ display: none }`;
+        })
+        tokenstyle.innerHTML = content;
+    }
+
+    /**
+     * 当"折叠"被按下时
+     */
+    editor_table.prototype.onFoldBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        if (button.dataset.fold == "true") {
+            delete tokenPool[tr.dataset.gap];
+            tokenPoolRender();
+            button.dataset.fold = "false";
+            button.innerText = "折叠";
+        } else {
+            tokenPool[tr.dataset.gap] = true;
+            tokenPoolRender();
+            button.dataset.fold = "true";
+            button.innerText = "展开";
         }
     }
 
@@ -363,8 +411,11 @@ editor_table_wrapper = function (editor) {
         var tr = button.parentNode.parentNode;
         var guid = tr.getAttribute('id');
         var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
+        var input = tr.children[2].children[0].children[0];
         if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
         if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+        if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
+        if (cobj._type === 'color') editor.table.selectColor(input);
     }
 
     /**
@@ -378,6 +429,8 @@ editor_table_wrapper = function (editor) {
         if (editor_mode.doubleClickMode === 'change') {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
             if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+            if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
+            if (cobj._type === 'color') editor.table.selectColor(input);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -385,6 +438,32 @@ editor_table_wrapper = function (editor) {
             editor_mode.doubleClickMode = 'change';
             editor.table.deletefunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
+    }
+
+    editor_table.prototype.selectMaterial = function (input, cobj) {
+        editor.uievent.selectMaterial(input.value, cobj._docs || cobj._data || '请选择素材', cobj._directory, function (one) {
+            if (!/^[-A-Za-z0-9_.]+$/.test(one)) return null;
+            if (cobj._transform) return eval("("+cobj._transform+")(one)");
+            return one;
+        }, function (data) {
+            input.value = JSON.stringify(cobj._onconfirm ? eval("("+cobj._onconfirm+")(JSON.parse(input.value), data)") : data);
+            input.onchange();
+        })
+    }
+
+    editor_table.prototype.selectColor = function (input) {
+        if (input.value != null) {
+            var str = input.value.toString().replace(/[^\d.,]/g, '');
+            if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(str)) {            
+                document.getElementById('colorPicker').value = str;
+            }
+        }
+        var boundingBox = input.getBoundingClientRect();
+        openColorPicker(boundingBox.x, boundingBox.y + boundingBox.height, function (value) {
+            value = value.replace(/[^\d.,]/g, '');
+            input.value = '[' + value +']';
+            input.onchange();
+        })
     }
 
     /**

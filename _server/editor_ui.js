@@ -30,8 +30,8 @@ editor_ui_wrapper = function (editor) {
             '双击事件编辑器的图块可以进行长文本编辑/脚本编辑/地图选点/UI绘制预览等操作',
             'ESC或点击空白处可以自动保存当前修改',
             'H键可以打开操作帮助哦',
-            'tileset贴图模式可以在地图上拖动来一次绘制一个区域；右键额外素材也可以绑定宽高',
-            '可以拖动地图上的图块和事件，或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴，Delete删除',
+            'tileset平铺模式可以在地图上拖动来平铺框选的图形',
+            '可以拖动地图上的图块和事件；或按Ctrl+C, Ctrl+X和Ctrl+V进行复制，剪切和粘贴，Delete删除；右键也可以拉框选择区域',
             'Alt+数字键保存图块，数字键读取保存的图块',
         ];
         if (value == null) value = Math.floor(Math.random() * tips.length);
@@ -220,7 +220,7 @@ editor_ui_wrapper = function (editor) {
         var clickpath = editor.uifunctions.getClickpath(e);
 
         var unselect = true;
-        for (var ii = 0, thisId; thisId = ['edit', 'tip', 'brushMod', 'brushMod2', 'brushMod3', 'layerMod', 'layerMod2', 'layerMod3', 'viewportButtons'][ii]; ii++) {
+        for (var ii = 0, thisId; thisId = ['edit', 'tip', 'brushMod', 'brushMod2', 'brushMod3', 'brushMode4', 'layerMod', 'layerMod2', 'layerMod3', 'viewportButtons'][ii]; ii++) {
             if (clickpath.indexOf(thisId) !== -1) {
                 unselect = false;
                 break;
@@ -236,6 +236,7 @@ editor_ui_wrapper = function (editor) {
                             throw (err)
                         }
                         ; printf('地图保存成功');
+                        editor.uifunctions.unhighlightSaveFloorButton();
                     });
                 }
                 selectBox.isSelected(false);
@@ -318,6 +319,7 @@ editor_ui_wrapper = function (editor) {
                     editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
                     editor.updateMap();
                     editor.uivalues.postMapData.push(data);
+                    editor.uifunctions.highlightSaveFloorButton();
                     printf("已撤销此操作，你可能需要重新保存地图。");
                 }
                 return;
@@ -332,6 +334,7 @@ editor_ui_wrapper = function (editor) {
                     editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
                     editor.updateMap();
                     editor.uivalues.preMapData.push(data);
+                    editor.uifunctions.highlightSaveFloorButton();
                     printf("已重做此操作，你可能需要重新保存地图。");
                 }
                 return;
@@ -340,15 +343,16 @@ editor_ui_wrapper = function (editor) {
             // Ctrl+C, Ctrl+X, Ctrl+V
             if (e.ctrlKey && e.keyCode == 67 && !selectBox.isSelected()) {
                 e.preventDefault();
-                editor.uivalues.copyedInfo = editor.copyFromPos();
-                printf('该点事件已复制');
+                editor.uivalues.copyedInfo = editor.copyFromPos(editor.uivalues.selectedArea);
+                printf('该点事件已复制；请注意右键地图拉框可以复制一个区域；若有时复制失灵请多点几下空白处');
                 return;
             }
             if (e.ctrlKey && e.keyCode == 88 && !selectBox.isSelected()) {
                 e.preventDefault();
-                editor.uivalues.copyedInfo = editor.copyFromPos();
-                editor.clearPos(true, null, function () {
-                    printf('该点事件已剪切');
+                editor.uivalues.copyedInfo = editor.copyFromPos(editor.uivalues.selectedArea);
+                editor.clearPos(true, editor.uivalues.selectedArea, function () {
+                    printf('该点事件已剪切；请注意右键地图拉框可以剪切一个区域；若有时剪切失灵请多点几下空白处');
+                    editor.uifunctions.unhighlightSaveFloorButton();
                 })
                 return;
             }
@@ -365,14 +369,18 @@ editor_ui_wrapper = function (editor) {
                         printe(err);
                         throw (err)
                     }
-                    ; printf('粘贴事件成功');
+                    ; printf('粘贴事件成功；若有时粘贴失灵请多点几下空白处');
+                    editor.uifunctions.unhighlightSaveFloorButton();
                     editor.drawPosSelection();
                 });
                 return;
             }
             // DELETE
             if (e.keyCode == 46 && !selectBox.isSelected()) {
-                editor.clearPos(true);
+                editor.clearPos(true, editor.uivalues.selectedArea, function () {
+                    printf('该点事件已删除；请注意右键地图拉框可以删除一个区域；；若有时删除失灵请多点几下空白处');
+                    editor.uifunctions.unhighlightSaveFloorButton();
+                })
                 return;
             }
             // ESC
@@ -468,16 +476,7 @@ editor_ui_wrapper = function (editor) {
     uievent.elements.canvas = document.getElementById('uievent');
     uievent.elements.usedFlags = document.getElementById('uieventUsedFlags');
     uievent.elements.usedFlagList = document.getElementById('uieventUsedFlagList');
-
-    uievent.confirm = function () {
-        var callback = uievent.values.callback, floorId = uievent.values.floorId,
-            x = uievent.values.x, y = uievent.values.y;
-        uievent.close();
-        if (callback) {
-            callback(floorId, x, y);
-        }
-    }
-    uievent.elements.yes.onclick = uievent.confirm;
+    uievent.elements.materialList = document.getElementById('uieventMaterialList');
 
     uievent.close = function () {
         uievent.isOpen = false;
@@ -534,7 +533,6 @@ editor_ui_wrapper = function (editor) {
 
     uievent.selectPoint = function (floorId, x, y, hideFloor, callback) {
         uievent.values.hideFloor = hideFloor;
-        uievent.values.callback = callback;
         uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32;
         uievent.elements.selectPointBox.style.width = (uievent.values.size - 6) + "px";
         uievent.elements.selectPointBox.style.height = (uievent.values.size - 6) + "px";
@@ -552,6 +550,13 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.usedFlags.style.display = 'none';
         uievent.elements.usedFlagList.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
+        uievent.elements.yes.onclick = function () {
+            var floorId = uievent.values.floorId, x = uievent.values.x, y = uievent.values.y;
+            uievent.close();
+            if (callback) {
+                callback(floorId, x, y);
+            }
+        }
 
         // Append children
         var floors = "";
@@ -743,6 +748,125 @@ editor_ui_wrapper = function (editor) {
             }
         }
         return list;
+    }
+
+    // ------ 素材选择框 ------ //
+    uievent.selectMaterial = function (value, title, directory, transform, callback) {
+        fs.readdir(directory, function (err, data) {
+            if (err) {
+                printe(directory + '不存在！');
+                throw (directory + '不存在！');
+            }
+            if (!(data instanceof Array)) {
+                printe('没有可显示的内容')
+                return;
+            }
+            value = value || [];
+            data = (transform ? data.map(transform) : data).filter(function (one) {return one;}).sort();
+
+            uievent.isOpen = true;
+            uievent.elements.div.style.display = 'block';
+            uievent.mode = 'selectMaterial';
+            uievent.elements.selectPoint.style.display = 'none';
+            uievent.elements.yes.style.display = 'block';
+            uievent.elements.title.innerText = title;
+            uievent.elements.selectBackground.style.display = 'none';
+            uievent.elements.selectFloor.style.display = 'none';
+            uievent.elements.selectPointBox.style.display = 'none';
+            uievent.elements.canvas.style.display = 'none';
+            uievent.elements.usedFlags.style.display = 'none';
+            uievent.elements.usedFlagList.style.display = 'none';
+            uievent.elements.materialList.style.display = 'block';
+            uievent.elements.body.style.overflow = "auto";
+
+            uievent.elements.yes.onclick = function () {
+                var list = Array.from(document.getElementsByClassName('materialCheckbox')).filter(function (one) {
+                    return one.checked;
+                }).map(function (one) {return one.getAttribute('key'); });
+                uievent.close();
+                if (callback) callback(list);
+            }
+
+            // 显示每一项内容
+            var html = "<p style='margin-left: 10px; line-height: 25px'>";
+            html += "<button onclick='editor.uievent._selectAllMaterial(true)'>全选</button>"+
+                    "<button style='margin-left: 10px' onclick='editor.uievent._selectAllMaterial(false)'>全不选</button><br/>";
+            data.forEach(function (one) {
+                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${value.indexOf(one) >= 0? 'checked' : ''} /> ${one}`;
+                // 预览图片
+                if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
+                    html += "<button onclick='editor.uievent._previewMaterialImage(this)' style='margin-left: 10px'>预览</button>";
+                    html += '<br style="display:none"/><img key="'+directory+one+'" style="display:none; max-width: 100%"/>';
+                }
+                // 试听音频
+                if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || one.endsWith('.wav')) {
+                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>";
+                    html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>
+                        <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
+                        <progress value="0" max="1" style="display:none; width:100%" onclick="editor.uievent._previewMaterialAudio_seek(this, event)"></progress>`;
+                }
+                html += '<br/>';
+            });
+            html += "</p>";
+            uievent.elements.materialList.innerHTML = html;
+        });
+    }
+
+    uievent._selectAllMaterial = function (checked) {
+        Array.from(document.getElementsByClassName('materialCheckbox')).forEach(function (one) {
+            one.checked = checked;
+        })
+    }
+
+    uievent._previewMaterialImage = function (button) {
+        var br = button.nextElementSibling;
+        var img = br.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '折叠';
+            br.style.display = 'block';
+            img.style.display = 'block';
+            img.src = img.getAttribute('key');
+        } else {
+            button.innerText = '预览';
+            br.style.display = 'none';
+            img.style.display = 'none';
+        }
+    }
+
+    uievent._previewMaterialAudio = function (button) {
+        var span = button.nextElementSibling;
+        var br = span.nextElementSibling;
+        var audio = br.nextElementSibling;
+        var progress = audio.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '暂停';
+            br.style.display = 'block';
+            progress.style.display = 'block';
+            span.style.display = 'inline';
+            audio.play();
+        } else {
+            button.innerText = '播放';
+            br.style.display = 'none';
+            progress.style.display='none';
+            span.style.display = 'none';
+            audio.pause();
+        }
+    }
+
+    uievent._previewMaterialAudio_onTimeUpdate = function (audio) {
+        var _format = function (time) { return parseInt(time/60) + ":" + core.setTwoDigits(parseInt(time) % 60); }
+        if (audio.duration > 0) {
+            audio.previousElementSibling.previousElementSibling.innerText = _format(audio.currentTime) + " / " + _format(audio.duration);
+            audio.nextElementSibling.setAttribute('value', audio.currentTime / audio.duration);
+        }
+    }
+
+    uievent._previewMaterialAudio_seek = function (element, event) {
+        var audio = element.previousElementSibling;
+        var value = event.offsetX * element.max / element.offsetWidth;
+        element.setAttribute("value", value);
+        audio.currentTime = audio.duration * value;
+        if (audio.paused) audio.play();
     }
 
     editor.constructor.prototype.uievent=uievent;

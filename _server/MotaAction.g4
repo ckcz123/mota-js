@@ -1,4 +1,25 @@
 // 编辑此文件用的vscode插件: https://marketplace.visualstudio.com/items?itemName=zhaouv.vscode-mota-js-extension
+// 此文件通过antlr-blockly生成编辑器中的图块, 相关帮助说明: https://zhaouv.github.io/antlr-blockly/docs/#/README
+
+
+/*
+特殊注入demo
+doubleclicktext : EvalString_1
+previewBlock : true
+// [x, y, floorId, forceFloor]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0", true]
+// 自动补全
+allIds : ['EvalString_1']
+allEnemys : ['EvalString_1']
+allItems : ['EvalString_1']
+allImages : ['EvalString_1']
+allAnimates : ['EvalString_1']
+allBgms : ['EvalString_1']
+allSounds : ['EvalString_1']
+allShops : ['EvalString_1']
+allFloorIds : ['EvalString_1']
+*/
+
 
 grammar MotaAction;
 
@@ -34,7 +55,7 @@ autoEvent_m
     
 
 /* autoEvent_m
-tooltip : ?????
+tooltip : 自动事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event
 default : ["flag:__door__==2",0,true,false,false,null]
 var code = {
@@ -109,7 +130,9 @@ shopsub
 /* shopsub
 tooltip : 全局商店
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
-default : ["shop1","贪婪之神","blueShop","勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：","金币商店",false,false]
+doubleclicktext : EvalString_1
+allIds : ['IdString_1']
+default : ["shop1","贪婪之神","moneyShop","勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：","金币商店",false,false]
 var title='';
 if (EvalString_0==''){
     if (IdString_1=='') title='';
@@ -138,9 +161,10 @@ shopChoices
 tooltip : 商店选项,商店消耗是-1时,这里的消耗对应各自选项的消耗,商店消耗不是-1时这里的消耗不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e5%85%a8%e5%b1%80%e5%95%86%e5%ba%97
 default : ["攻击+1","status:money>=20+2*flag:shop1","","","rgba(255,255,255,1)",""]
+allIds : ['IdString_0']
 colour : this.subColor
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
-EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_1+'"')
+EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"')
 IdString_0 = IdString_0? (', "icon": "'+IdString_0+'"'):'';
 var code = '{"text": "'+EvalString_0+'", "need": "'+EvalString_1+'"'+IdString_0+ColorString_0+EvalString_2+', "action": [\n'+action_0+']},\n';
 return code;
@@ -220,14 +244,17 @@ return code;
 
 //afterGetItem 事件编辑器入口之一
 afterGetItem_m
-    :   '获取道具后' BGNL? Newline action+ BEND
+    :   '获取道具后' '轻按时不触发' Bool BGNL? Newline action+ BEND
     
 
 /* afterGetItem_m
 tooltip : 系统引发的自定义事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=%e7%b3%bb%e7%bb%9f%e5%bc%95%e5%8f%91%e7%9a%84%e8%87%aa%e5%ae%9a%e4%b9%89%e4%ba%8b%e4%bb%b6
-var code = '[\n'+action_0+']\n';
-return code;
+if (Bool_0) {
+  return '{"disableOnGentleClick": true, "data": [\n'+action_0+']\n}';
+} else {
+  return '[\n'+action_0+']\n';
+}
 */;
 
 //afterOpenDoor 事件编辑器入口之一
@@ -268,18 +295,24 @@ return code;
 
 //changeFloor 事件编辑器入口之一
 changeFloor_m
-    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' Number ',' 'y' Number '朝向' DirectionEx_List '动画时间' IntString? '穿透性' IgnoreChangeFloor_List BEND
+    :   '楼梯, 传送门' BGNL? Newline Floor_List IdString? Stair_List 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? '穿透性' IgnoreChangeFloor_List BEND
     
 
 /* changeFloor_m
 tooltip : 楼梯, 传送门, 如果目标楼层有多个楼梯, 写upFloor或downFloor可能会导致到达的楼梯不确定, 这时候请使用loc方式来指定具体的点位置
 helpUrl : https://h5mota.com/games/template/_docs/#/element?id=%e8%b7%af%e9%9a%9c%ef%bc%8c%e6%a5%bc%e6%a2%af%ef%bc%8c%e4%bc%a0%e9%80%81%e9%97%a8
-default : [null,"MTx",null,0,0,null,"",null]
+default : [null,"MTx",null,"","",null,"",null]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0", true]
+allFloorIds : ['IdString_0']
 var toFloorId = IdString_0;
 if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
-var loc = ', "loc": ['+Number_0+', '+Number_1+']';
+var loc = '';
+if (PosString_0 && PosString_1) {
+  loc = ', "loc": ['+PosString_0+', '+PosString_1+']';
+}
 if (Stair_List_0===':now') loc = '';
 else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 if (IgnoreChangeFloor_List_0!='null') {
@@ -315,6 +348,246 @@ var code = '[\n'+action_0+']\n';
 return code;
 */;
 
+// levelChoose 事件编辑器入口之一
+levelChoose_m
+    :   '难度分歧' BGNL? levelChooseList+ BEND
+
+
+/* levelChoose_m
+tooltip : 难度分歧
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+var code = '[\n'+levelChooseList_0+']\n';
+return code;
+*/;
+
+levelChooseList
+    : levelChooseChoice
+    | levelChooseEmpty;
+
+levelChooseEmpty
+    :   Newline
+    
+/* levelChooseEmpty
+var code = ' \n';
+return code;
+*/;
+
+levelChooseChoice
+   :    '难度分歧项' '名称' EvalString '简写' EvalString '变量:hard值' Int '颜色' ColorString? Colour BGNL Newline action+ BEND
+
+/* levelChooseChoice
+tooltip : 难度分歧项
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+default : ['简单','Easy',1,'']
+ColorString_0 = ColorString_0 ? (', "color": [' + ColorString_0 + ']') : '';
+var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+Int_0+ColorString_0+', "action": [\n'+action_0+']},\n';
+return code;
+*/;
+
+// equip 事件编辑器入口之一
+equip_m 
+    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ BEND
+
+
+/* equip_m
+tooltip : 装备
+default : ['0', '']
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+allAnimates : ['IdString_0']
+if (!/^\d+$/.test(EvalString_0)) {
+    EvalString_0 = '"' + EvalString_0 + '"';
+}
+IdString_0 = IdString_0 && (', "animate": "'+IdString_0+'"');
+var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}}';
+return code;
+*/;
+
+equipList
+    : equipKnown
+    | equipUnknown
+    | equipEmpty;
+
+
+equipKnown
+    : Equip_List ':' Number BEND
+
+
+/* equipKnown
+tooltip : 装备项
+default : ['atk', 10]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '"'+Equip_List_0+'": '+Number_0+', ';
+*/;
+
+equipUnknown
+    : EvalString ':' Number BEND
+
+
+/* equipUnknown
+tooltip : 装备项
+default : ['speed', 10]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '"'+EvalString_0+'": '+Number_0+', ';
+*/;
+
+
+equipEmpty
+    :   Newline
+    
+/* equipEmpty
+var code = ' \n';
+return code;
+*/;
+
+floorImage_m
+    : '楼层贴图' BGNL? Newline floorImageList+ BEND
+
+
+/* floorImage_m
+tooltip : 楼层贴图
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+var code = '[\n'+floorImageList_0+']\n';
+return code;
+*/;
+
+floorImageList
+    :   floorOneImage
+    |   floorEmptyImage;
+
+floorOneImage
+    :   '图片名' EvalString '翻转' Reverse_List '图层' Bg_Fg2_List '绘制坐标' 'x' Int 'y' Int '初始禁用' Bool BGNL? Newline 
+        '裁剪起点坐标' 'x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '帧数' IntString? BEND
+
+
+/* floorOneImage
+tooltip : 楼层贴图
+default : ["bg.jpg","null","bg",0,0,false,"","","","",""]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+allImages : ['EvalString_0']
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
+Bool_0 = Bool_0 ? (', "disable": true') : '';
+IntString_0 = IntString_0 && (', "sx": '+IntString_0);
+IntString_1 = IntString_1 && (', "sy": '+IntString_1);
+IntString_2 = IntString_2 && (', "w": '+IntString_2);
+IntString_3 = IntString_3 && (', "h": '+IntString_3);
+IntString_4 = IntString_4 && (', "frame": '+IntString_4);
+return '{"name": "'+EvalString_0+'"'+Reverse_List_0+', "canvas": "'+Bg_Fg2_List_0+'", "x": '+Int_0+', "y": '+Int_1+Bool_0+IntString_0+IntString_1+IntString_2+IntString_3+IntString_4+'},\n';
+*/;
+
+floorEmptyImage
+    :   Newline
+    
+/* floorEmptyImage
+var code = ' \n';
+return code;
+*/;
+
+
+// doorInfo 事件编辑器入口之一
+doorInfo_m 
+    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ BEND
+
+
+/* doorInfo_m
+tooltip : 开门信息
+default : [160, 'door.mp3', 'door.mp3']
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+EvalString_0 = EvalString_0 && (', "openSound": "' + EvalString_0 + '"');
+EvalString_1 = EvalString_1 && (', "closeSound": "' + EvalString_1 + '"');
+var code = '{"time": '+Int_0+EvalString_0+EvalString_1+', "keys": {\n'+doorKeyList_0+'\n}}';
+return code;
+*/;
+
+doorKeyList
+    : doorKeyKnown
+    | doorKeyUnknown
+    | doorKeyEmpty;
+
+
+doorKeyKnown
+    : Key_List ':' Int BEND
+
+
+/* doorKeyKnown
+tooltip : 需要钥匙
+default : ['yellowKey', 1]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '"'+Key_List_0+'": '+Int_0+', ';
+*/;
+
+doorKeyUnknown
+    : IdString ':' Int BEND
+
+
+/* doorKeyUnknown
+tooltip : 需要钥匙
+default : ['orangeKey', 1]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+allItems : ['IdString_0']
+return '"'+IdString_0+'": '+Int_0+', ';
+*/;
+
+
+doorKeyEmpty
+    :   Newline
+    
+/* doorKeyEmpty
+var code = ' \n';
+return code;
+*/;
+
+
+faceIds_m
+    : '行走图朝向:' BGNL? Newline '向上ID' IdString? '向下ID' IdString? '向左ID' IdString? '向右ID' IdString? BEND
+
+
+/* faceIds_m
+tooltip : 行走图朝向
+default : ["","","",""]
+allIds : ['IdString_0','IdString_1','IdString_2','IdString_3']
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+return '{' + [
+    IdString_0 && ('"up": "' + IdString_0 +'"'),
+    IdString_1 && ('"down": "' + IdString_1 +'"'),
+    IdString_2 && ('"left": "' + IdString_2 +'"'),
+    IdString_3 && ('"right": "' + IdString_3 +'"'),
+].filter(function (x) { return x; }).join(', ') + '}\n';
+*/;
+
+
+mainStyle_m
+    : '主要样式设置：' '标题界面背景图（544x422）：' EvalString BGNL? Newline 
+      '竖屏标题界面背景图（422x580）' EvalString BGNL? Newline 
+      '标题样式；可写 display: none 隐藏标题' EvalString BGNL? Newline 
+      '标题按钮样式：' EvalString BGNL? Newline 
+      '横屏状态栏背景；url(...) 0 0/100% 100% no-repeat 可将图片拉伸自适配' BGNL? Newline EvalString BGNL? Newline  
+      '竖屏状态栏背景：' EvalString BGNL? Newline 
+      '竖屏工具栏背景：' EvalString BGNL? Newline 
+      '楼层切换样式：' EvalString BGNL? Newline
+      '状态栏颜色' ColorString Colour '边框颜色' ColorString Colour '全局字体' EvalString BEND
+
+/* mainStyle_m
+tooltip : 主要样式设置
+default : ["project/images/bg.jpg", "project/images/bg.jpg", "color: black", "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "background-color: black; color: white", "255,255,255,1", "rgba(255,255,255,1)", "204,204,204,1", "rgba(204,204,204,1)", "Verdana"]
+helpUrl : https://h5mota.com/games/template/_docs/#/event
+var code = {
+    startBackground: EvalString_0,
+    startVerticalBackground: EvalString_1,
+    startLogoStyle: EvalString_2,
+    startButtonsStyle: EvalString_3,
+    statusLeftBackground: EvalString_4,
+    statusTopBackground: EvalString_5,
+    toolsBackground: EvalString_6,
+    floorChangingStyle: EvalString_7,
+    statusBarColor: JSON.parse('['+ColorString_0+']'),
+    borderColor: JSON.parse('['+ColorString_1+']'),
+    font: EvalString_8
+};
+return JSON.stringify(code);
+*/;
+
 //为了避免关键字冲突,全部加了_s
 //动作
 action
@@ -338,6 +611,7 @@ action
     |   insert_2_s
     |   exit_s
     |   setBlock_s
+    |   turnBlock_s
     |   showFloorImg_s
     |   hideFloorImg_s
     |   showBgFgMap_s
@@ -380,6 +654,7 @@ action
     |   screenFlash_s
     |   setWeather_s
     |   move_s
+    |   moveAction_s
     |   moveHero_s
     |   jump_s
     |   jumpHero_s
@@ -424,8 +699,10 @@ action
     |   drawArrow_s
     |   fillPolygon_s
     |   strokePolygon_s
-    |   fillCircle_s
-    |   strokeCircle_s
+    |   fillEllipse_s
+    |   strokeEllipse_s
+    |   fillArc_s
+    |   strokeArc_s
     |   drawImage_s
     |   drawImage_1_s
     |   drawIcon_s
@@ -444,6 +721,7 @@ text_0_s
 /* text_0_s
 tooltip : text：显示一段文字（剧情）
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=text%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%96%87%E5%AD%97%EF%BC%88%E5%89%A7%E6%83%85%EF%BC%89
+doubleclicktext : EvalString_0
 default : ["欢迎使用事件编辑器(双击方块进入多行编辑)"]
 var code = '"'+EvalString_0+'",\n';
 return code;
@@ -456,6 +734,8 @@ text_1_s
 /* text_1_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=text%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%96%87%E5%AD%97%EF%BC%88%E5%89%A7%E6%83%85%EF%BC%89
+doubleclicktext : EvalString_3
+allIds : ['EvalString_1']
 default : ["小妖精","fairy","","欢迎使用事件编辑器(双击方块进入多行编辑)"]
 var title='';
 if (EvalString_0==''){
@@ -465,7 +745,7 @@ if (EvalString_0==''){
     if (EvalString_1=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
-if(EvalString_2 && !(/^(up|center|down|hero|null)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
+if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
@@ -480,6 +760,7 @@ comment_s
 /* comment_s
 tooltip : comment：添加一段会被游戏跳过的注释内容
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=comment%ef%bc%9a%e6%b7%bb%e5%8a%a0%e6%b3%a8%e9%87%8a
+doubleclicktext : EvalString_0
 default : ["可以在这里写添加任何注释内容"]
 colour : this.commentColor
 var code = '{"type": "comment", "text": "'+EvalString_0+'"},\n';
@@ -493,6 +774,8 @@ autoText_s
 /* autoText_s
 tooltip : autoText：自动剧情文本,用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=autotext%EF%BC%9A%E8%87%AA%E5%8A%A8%E5%89%A7%E6%83%85%E6%96%87%E6%9C%AC
+doubleclicktext : EvalString_2
+allIds : ['EvalString_1']
 default : ["小妖精","fairy","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
 var title='';
 if (EvalString_0==''){
@@ -502,7 +785,7 @@ if (EvalString_0==''){
     if (EvalString_1=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
-if(EvalString_2 && !(/^(up|down)(,hero)?(,([+-]?\d+),([+-]?\d+))?$/.test(EvalString_2))) {
+if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
@@ -517,6 +800,7 @@ scrollText_s
 /* scrollText_s
 tooltip : scrollText：滚动剧情文本，将从下到上进行滚动显示。
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=scrollText%ef%bc%9a%e6%bb%9a%e5%8a%a8%e5%89%a7%e6%83%85%e6%96%87%e6%9c%ac
+doubleclicktext : EvalString_0
 default : [5000,1.4,false,"时间是总时间，可以使用setText事件来控制字体、颜色、大小、偏移量等"]
 Bool_0 = Bool_0?', "async": true':'';
 var code =  '{"type": "scrollText", "text": "'+EvalString_0+'"'+Bool_0+', "time" :'+Int_0+', "lineHeight": '+Number_0+'},\n';
@@ -565,6 +849,7 @@ tip_s
 /* tip_s
 tooltip : tip：显示一段提示文字
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=tip%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%8F%90%E7%A4%BA%E6%96%87%E5%AD%97
+allIds : ['IdString_0']
 default : ["这段话将在左上角以气泡形式显示",""]
 IdString_0 = IdString_0 && (', "icon": "' + IdString_0 + '"');
 var code = '{"type": "tip", "text": "'+EvalString_0+'"'+IdString_0+'},\n';
@@ -594,8 +879,9 @@ setEnemy_s
 
 /* setEnemy_s
 tooltip : setEnemy：设置某个怪物的属性
-default : ["greenSlime", "atk", "0"]
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setEnemy%ef%bc%9a%e5%a2%9e%e5%87%8f%e5%8b%87%e5%a3%ab%e7%9a%84%e6%9f%90%e4%b8%aa%e5%b1%9e%e6%80%a7%e3%80%81%e9%81%93%e5%85%b7%e4%b8%aa%e6%95%b0%ef%bc%8c%e6%88%96%e6%9f%90%e4%b8%aa%e5%8f%98%e9%87%8f%2fFlag%e7%9a%84%e5%80%bc
+default : ["greenSlime", "atk", "0"]
+allEnemys : ['IdString_0']
 colour : this.dataColor
 var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'", "value": "'+expression_0+'"},\n';
 return code;
@@ -603,16 +889,17 @@ return code;
 
 
 setFloor_s
-    :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' EvalString Newline
+    :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' JsonEvalString Newline
 
 
 /* setFloor_s
 tooltip : setFloor：设置楼层属性；该楼层属性和编辑器中的楼层属性一一对应
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setFloor%ef%bc%9a%e8%ae%be%e7%bd%ae%e6%a5%bc%e5%b1%82%e5%b1%9e%e6%80%a7
-default : ["title","","'字符串类型的值要加引号，其他类型则不用'"]
+default : ["title","","\"新楼层名\""]
+allFloorIds : ['IdString_0']
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setFloor", "name": "'+Floor_Meta_List_0+'"'+IdString_0+', "value": "'+EvalString_0+'"},\n';
+var code = '{"type": "setFloor", "name": "'+Floor_Meta_List_0+'"'+IdString_0+', "value": '+JsonEvalString_0+'},\n';
 return code;
 */;
 
@@ -667,6 +954,8 @@ show_s
 tooltip : show: 将禁用事件启用,楼层和动画时间可不填,xy可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=show%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E7%A6%81%E7%94%A8%E4%BA%8B%E4%BB%B6%E5%90%AF%E7%94%A8
 default : ["","","","",false]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -693,13 +982,15 @@ return code;
 */;
 
 hide_s
-    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool? Newline
+    :   '隐藏事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '同时删除' Bool '动画时间' IntString? '不等待执行完毕' Bool? Newline
     
 
 /* hide_s
-tooltip : hide: 将一个启用事件禁用,所有参数均可不填,代表禁用事件自身,xy可用逗号分隔表示多个点
+tooltip : hide: 隐藏事件，同时可删除
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hide%EF%BC%9A%E5%B0%86%E4%B8%80%E4%B8%AA%E5%90%AF%E7%94%A8%E4%BA%8B%E4%BB%B6%E7%A6%81%E7%94%A8
-default : ["","","","",false]
+default : ["","","",true,"",false]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -720,22 +1011,27 @@ if (EvalString_0 && EvalString_1) {
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
-Bool_0 = Bool_0 ?', "async": true':'';
-var code = '{"type": "hide"'+floorstr+IdString_0+''+IntString_0+Bool_0+'},\n';
+Bool_0 = Bool_0 ?', "remove": true':'';
+Bool_1 = Bool_1 ?', "async": true':'';
+var code = '{"type": "hide"'+floorstr+IdString_0+Bool_0+IntString_0+Bool_1+'},\n';
 return code;
 */;
 
 trigger_s
-    :   '触发事件' 'x' PosString ',' 'y' PosString '不结束当前事件' Bool Newline
+    :   '触发系统事件' 'x' PosString? ',' 'y' PosString? Newline
     
 
 /* trigger_s
 tooltip : trigger: 立即触发另一个地点的事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=trigger%EF%BC%9A%E7%AB%8B%E5%8D%B3%E8%A7%A6%E5%8F%91%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%9C%B0%E7%82%B9%E7%9A%84%E4%BA%8B%E4%BB%B6
-default : ["0","0",false]
+default : ["",""]
+selectPoint : ["PosString_0", "PosString_1"]
 colour : this.eventColor
-Bool_0 = Bool_0 ?', "keep": true':'';
-var code = '{"type": "trigger", "loc": ['+PosString_0+','+PosString_1+']'+Bool_0+'},\n';
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "trigger"'+floorstr+'},\n';
 return code;
 */;
 
@@ -758,7 +1054,7 @@ return code;
 */;
 
 insert_2_s
-    :   '插入事件' 'x' PosString ',' 'y' PosString Event_List? '楼层' IdString? '参数列表' JsonEvalString? Newline
+    :   '插入事件' 'x' PosString? ',' 'y' PosString? Event_List? '楼层' IdString? '参数列表' JsonEvalString? Newline
 
 
 /* insert_2_s
@@ -766,6 +1062,8 @@ tooltip : insert: 立即插入另一个地点的事件执行，当前事件不�
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=insert%ef%bc%9a%e6%8f%92%e5%85%a5%e5%85%ac%e5%85%b1%e4%ba%8b%e4%bb%b6%e6%88%96%e5%8f%a6%e4%b8%80%e4%b8%aa%e5%9c%b0%e7%82%b9%e7%9a%84%e4%ba%8b%e4%bb%b6%e5%b9%b6%e6%89%a7%e8%a1%8c
 default : ["0","0",null,"",""]
 colour : this.eventColor
+allFloorIds : ['IdString_0']
+selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 if (JsonEvalString_0) {
     if (!(JSON.parse(JsonEvalString_0) instanceof Array))
@@ -775,7 +1073,11 @@ if (JsonEvalString_0) {
 if (Event_List_0 && Event_List_0 !=='null')
     Event_List_0 = ', "which": "'+Event_List_0+'"';
 else Event_List_0 = '';
-var code = '{"type": "insert", "loc": ['+PosString_0+','+PosString_1+']'+Event_List_0+IdString_0+JsonEvalString_0+'},\n';
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+var code = '{"type": "insert"'+floorstr+Event_List_0+IdString_0+JsonEvalString_0+'},\n';
 return code;
 */;
 
@@ -792,14 +1094,17 @@ return code;
 */;
 
 setBlock_s
-    :   '转变图块为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    :   '转变图块为' EvalString 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool Newline
     
 
 /* setBlock_s
 tooltip : setBlock：设置某个图块,忽略坐标楼层则为当前事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
 colour : this.mapColor
-default : ["yellowDoor","","",""]
+allFloorIds : ['IdString_0']
+allIds : ['EvalString_0']
+default : ["yellowDoor","","","","",false]
+selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
 var floorstr = '';
 if (EvalString_1 && EvalString_2) {
   var pattern1 = MotaActionFunctions.pattern.id;
@@ -818,7 +1123,44 @@ if (EvalString_1 && EvalString_2) {
   floorstr = ', "loc": ['+EvalString_1.join(',')+']';
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
+IntString_0 = IntString_0 && (', "time": ' + IntString_0);
+Bool_0 = Bool_0 ? (', "async": true') : '';
+var code = '{"type": "setBlock", "number": "'+EvalString_0+'"'+floorstr+IdString_0+IntString_0+Bool_0+'},\n';
+return code;
+*/;
+
+turnBlock_s
+    :   '事件转向' DirectionEx_List 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    
+
+/* turnBlock_s
+tooltip : turnBlock：事件转向；自动检索faceIds
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
+colour : this.mapColor
+allFloorIds : ['IdString_0']
+default : [null,"","",""]
+selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
+DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var code = '{"type": "turnBlock"'+DirectionEx_List_0+floorstr+IdString_0+'},\n';
 return code;
 */;
 
@@ -830,6 +1172,8 @@ showFloorImg_s
 tooltip : showFloorImg: 显示一个贴图，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showFloorImg%ef%bc%9a%e6%98%be%e7%a4%ba%e8%b4%b4%e5%9b%be
 default : ["","",""]
+allFloorIds : ['IdString_0']
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -861,7 +1205,9 @@ hideFloorImg_s
 tooltip : hideFloorImg: 隐藏一个贴图，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideFloorImg%ef%bc%9a%e9%9a%90%e8%97%8f%e8%b4%b4%e5%9b%be
 default : ["","",""]
+allFloorIds : ['IdString_0']
 colour : this.mapColor
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = MotaActionFunctions.pattern.id;
@@ -892,6 +1238,8 @@ showBgFgMap_s
 tooltip : showBgFgMap: 显示图层块，即背景图层/前景图层的某些图块，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showFloorImg%ef%bc%9a%e6%98%be%e7%a4%ba%e8%b4%b4%e5%9b%be
 default : ["bg","","",""]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -923,7 +1271,9 @@ hideBgFgMap_s
 tooltip : hideBgFgMap: 隐藏图层块，即背景图层/前景图层的某些图块，xy为左上角坐标，可用逗号分隔表示多个点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideFloorImg%ef%bc%9a%e9%9a%90%e8%97%8f%e8%b4%b4%e5%9b%be
 default : ["bg","","",""]
+allFloorIds : ['IdString_0']
 colour : this.mapColor
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = MotaActionFunctions.pattern.id;
@@ -954,6 +1304,9 @@ setBgFgBlock_s
 tooltip : setBgFgBlock：设置某个图层块,忽略坐标楼层则为当前点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setblock%EF%BC%9A%E8%AE%BE%E7%BD%AE%E6%9F%90%E4%B8%AA%E5%9B%BE%E5%9D%97
 colour : this.mapColor
+selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
+allIds : ['EvalString_0']
+allFloorIds : ['IdString_0']
 default : ["bg","yellowDoor","","",""]
 var floorstr = '';
 if (EvalString_1 && EvalString_2) {
@@ -986,6 +1339,7 @@ tooltip : setHeroIcon：更改角色行走图
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setheroicon%EF%BC%9A%E6%9B%B4%E6%94%B9%E8%A7%92%E8%89%B2%E8%A1%8C%E8%B5%B0%E5%9B%BE
 colour : this.dataColor
 default : ["hero.png"]
+allImages : ['EvalString_0']
 EvalString_0 = EvalString_0 && (', "name": "'+EvalString_0+'"');
 var code = '{"type": "setHeroIcon"'+EvalString_0+'},\n';
 return code;
@@ -1032,26 +1386,32 @@ return code;
 */;
 
 showHero_s
-    :   '显示勇士' Newline
+    :   '显示勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
 
 
 /* showHero_s
 tooltip : showHero: 显示勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showHero%3a+%e6%98%be%e7%a4%ba%e5%8b%87%e5%a3%ab
+default : ['',false]
 colour : this.soundColor
-var code = '{"type": "showHero"},\n';
+IntString_0 = IntString_0 && (', "time": ' + IntString_0);
+Bool_0 = Bool_0 ? (', "async": true') : '';
+var code = '{"type": "showHero"'+IntString_0+Bool_0+'},\n';
 return code;
 */;
 
 hideHero_s
-    :   '隐藏勇士' Newline
+    :   '隐藏勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
 
 
 /* hideHero_s
 tooltip : hideHero: 隐藏勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideHero%ef%bc%9a%e9%9a%90%e8%97%8f%e5%8b%87%e5%a3%ab
+default : ['',false]
 colour : this.soundColor
-var code = '{"type": "hideHero"},\n';
+IntString_0 = IntString_0 && (', "time": ' + IntString_0);
+Bool_0 = Bool_0 ? (', "async": true') : '';
+var code = '{"type": "hideHero"'+IntString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1078,6 +1438,7 @@ battle_s
 tooltip : battle: 强制战斗
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=battle%EF%BC%9A%E5%BC%BA%E5%88%B6%E6%88%98%E6%96%97
 default : ["greenSlime"]
+allEnemys : ['IdString_0']
 colour : this.dataColor
 var code = '{"type": "battle", "id": "'+IdString_0+'"},\n';
 return code;
@@ -1109,6 +1470,8 @@ openDoor_s
 tooltip : openDoor: 开门,楼层可不填表示当前层
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
 default : ["","","",false,false]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
 colour : this.mapColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = '';
@@ -1129,6 +1492,8 @@ closeDoor_s
 tooltip : closeDoor: 关门事件，需要该点本身无事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
 default : ["","","yellowDoor",false]
+selectPoint : ["PosString_0", "PosString_1"]
+allIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -1140,21 +1505,29 @@ return code;
 */;
 
 changeFloor_s
-    :   '楼层切换' IdString? 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? Newline
+    :   '楼层切换' Floor_List IdString? Stair_List 'x' PosString? ',' 'y' PosString? '朝向' DirectionEx_List '动画时间' IntString? Newline
     
 
 /* changeFloor_s
 tooltip : changeFloor: 楼层切换,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changefloor%EF%BC%9A%E6%A5%BC%E5%B1%82%E5%88%87%E6%8D%A2
-default : ["MTx","0","0",null,""]
+default : [null,"",null,"","",null,"",null]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0", true]
+allFloorIds : ['IdString_0']
 colour : this.dataColor
-DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
-IntString_0 = IntString_0  ?(', "time": '+IntString_0):'';
-var floorstr = '';
+var toFloorId = IdString_0;
+if (Floor_List_0!='floorId') toFloorId = Floor_List_0;
+toFloorId = toFloorId ? (', "floorId": "' + toFloorId +'"') : '';
+var loc = '';
 if (PosString_0 && PosString_1) {
-    floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+  loc = ', "loc": ['+PosString_0+', '+PosString_1+']';
 }
-var code = '{"type": "changeFloor", "floorId": "'+IdString_0+'"'+floorstr+DirectionEx_List_0+IntString_0+' },\n';
+if (Stair_List_0===':now') loc = '';
+else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
+DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+var code = '{"type": "changeFloor"'+toFloorId+loc+DirectionEx_List_0+IntString_0+' }\n';
 return code;
 */;
 
@@ -1166,8 +1539,10 @@ changePos_s
 tooltip : changePos: 当前位置切换
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changepos%EF%BC%9A%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E5%88%87%E6%8D%A2%E5%8B%87%E5%A3%AB%E8%BD%AC%E5%90%91
 default : ["","",null]
+selectPoint : ["PosString_0", "PosString_1"]
 colour : this.dataColor
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
+if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 var code = '{"type": "changePos"'+loc+DirectionEx_List_0+'},\n';
 return code;
@@ -1181,6 +1556,7 @@ useItem_s
 tooltip : useItem: 使用道具
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=useItem%ef%bc%9a%e4%bd%bf%e7%94%a8%e9%81%93%e5%85%b7
 colour : this.dataColor
+allItems : ['IdString_0']
 default : ["pickaxe"]
 var code = '{"type": "useItem", "id": "'+IdString_0+'"},\n';
 return code;
@@ -1195,6 +1571,7 @@ tooltip : loadEquip: 装上装备
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=useItem%ef%bc%9a%e4%bd%bf%e7%94%a8%e9%81%93%e5%85%b7
 colour : this.dataColor
 default : ["sword1"]
+allItems : ['IdString_0']
 var code = '{"type": "loadEquip", "id": "'+IdString_0+'"},\n';
 return code;
 */;
@@ -1221,6 +1598,7 @@ tooltip : 全局商店
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=openshop%EF%BC%9A%E6%89%93%E5%BC%80%E4%B8%80%E4%B8%AA%E5%85%A8%E5%B1%80%E5%95%86%E5%BA%97
 colour : this.dataColor
 default : ["shop1", true]
+allShops : ['IdString_0']
 Bool_0 = Bool_0 ? (', "open": true') : '';
 var code = '{"type": "openShop", "id": "'+IdString_0+'"'+Bool_0+'},\n';
 return code;
@@ -1234,6 +1612,7 @@ disableShop_s
 tooltip : 全局商店
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=disableshop%EF%BC%9A%E7%A6%81%E7%94%A8%E4%B8%80%E4%B8%AA%E5%85%A8%E5%B1%80%E5%95%86%E5%BA%97
 default : ["shop1"]
+allShops : ['IdString_0']
 colour : this.dataColor
 var code = '{"type": "disableShop", "id": "'+IdString_0+'"},\n';
 return code;
@@ -1247,6 +1626,7 @@ follow_s
 tooltip : follow: 跟随勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=follow%ef%bc%9a%e8%b7%9f%e9%9a%8f%e5%8b%87%e5%a3%ab
 default : ["npc.png"]
+allImages : ['EvalString_0']
 colour : this.dataColor
 var code = '{"type": "follow", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -1260,6 +1640,7 @@ unfollow_s
 tooltip : unfollow: 取消跟随
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=unfollow%ef%bc%9a%e5%8f%96%e6%b6%88%e8%b7%9f%e9%9a%8f
 default : [""]
+allImages : ['EvalString_0']
 colour : this.dataColor
 EvalString_0 = EvalString_0 ? (', "name": "' + EvalString_0 + '"') : "";
 var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
@@ -1289,6 +1670,8 @@ animate_s
 tooltip : animate：显示动画,位置填hero或者1,2形式的位置,或者不填代表当前事件点
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=animate%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%8A%A8%E7%94%BB
 default : ["zone","hero",false,false]
+allAnimates : ['IdString_0']
+selectPoint : ["EvalString_0", "EvalString_0"]
 colour : this.soundColor
 if (EvalString_0) {
   if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {
@@ -1315,6 +1698,7 @@ setViewport_s
 tooltip : setViewport: 设置视角
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=changepos%EF%BC%9A%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E5%88%87%E6%8D%A2%E5%8B%87%E5%A3%AB%E8%BD%AC%E5%90%91
 default : ["",""]
+selectPoint : ["PosString_0", "PosString_1"]
 colour : this.soundColor
 var loc = '';
 if (PosString_0 && PosString_1) {
@@ -1340,23 +1724,27 @@ return code;
 */;
 
 showImage_s
-    :   '显示图片' '图片编号' Int '图片' EvalString BGNL?
+    :   '显示图片' '图片编号' Int '图片' EvalString '翻转' Reverse_List BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showImage_s
 tooltip : showImage：显示图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
-default : [1,"bg.jpg","0","0",1,0,false]
+default : [1,"bg.jpg","null","0","0",1,0,false]
+allImages : ['EvalString_0']
 colour : this.printColor
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
 showImage_1_s
-    :   '显示图片' '图片编号' Int '图片' EvalString BGNL?
+    :   '显示图片' '图片编号' Int '图片' EvalString '翻转' Reverse_List BGNL?
         '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '不透明度' Number BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '时间' Int '不等待执行完毕' Bool Newline
 
@@ -1364,11 +1752,15 @@ showImage_1_s
 /* showImage_1_s
 tooltip : showImage_1：显示图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
-default : [1,"bg.jpg","0","0","","",1,"0","0","","",0,false]
+default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
+allImages : ['EvalString_0']
 colour : this.printColor
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'", '+
+var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', '+
            '"sloc": ['+PosString_0+','+PosString_1+','+PosString_2+','+PosString_3+'], '+
            '"loc": ['+PosString_4+','+PosString_5+','+PosString_6+','+PosString_7+'], '+
            '"opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
@@ -1383,6 +1775,7 @@ showTextImage_s
 /* showTextImage_s
 tooltip : showTextImage：显示图片化文本
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showTextImage%ef%bc%9a%e6%98%be%e7%a4%ba%e6%96%87%e6%9c%ac%e5%8c%96%e5%9b%be%e7%89%87
+doubleclicktext : EvalString_0
 colour : this.printColor
 default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1.4,1,0,false]
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
@@ -1414,6 +1807,7 @@ showGif_s
 tooltip : showGif：显示动图
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showgif%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%8A%A8%E5%9B%BE
 default : ["","",""]
+allImages : ['EvalString_0']
 colour : this.printColor
 EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
@@ -1511,6 +1905,7 @@ move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
 default : ["","",500,false,false,"上右3下2后4左前2"]
+selectPoint : ["PosString_0", "PosString_1"]
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -1523,8 +1918,21 @@ var code = '{"type": "move"'+floorstr+IntString_0+Bool_0+Bool_1+', "steps": '+JS
 return code;
 */;
 
+moveAction_s
+    :   '勇士前进一格或撞击' Newline
+    
+
+/* moveAction_s
+tooltip : moveAction: 前进一格或撞击
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=move%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AAnpc%E6%80%AA%E7%89%A9%E7%A7%BB%E5%8A%A8
+colour : this.dataColor
+return '{"type": "moveAction"},\n';
+*/;
+
+
+
 moveHero_s
-    :   '移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '无视地形移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? StepString Newline
     
 
 /* moveHero_s
@@ -1546,7 +1954,10 @@ jump_s
 tooltip : jump: 让某个NPC/怪物跳跃
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=jump%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AANPC%2F%E6%80%AA%E7%89%A9%E8%B7%B3%E8%B7%83
 default : ["","","","",500,true,false]
+selectPoint : ["PosString_2", "PosString_3"]
 colour : this.mapColor
+
+// selectPoint 跳跃暂时只考虑终点
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr += ', "from": ['+PosString_0+','+PosString_1+']';
@@ -1569,6 +1980,7 @@ jumpHero_s
 tooltip : jumpHero: 跳跃勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=jumpHero%EF%BC%9A%E8%B7%B3%E8%B7%83%E5%8B%87%E5%A3%AB
 default : ["","",500,false]
+selectPoint : ["PosString_0", "PosString_1"]
 colour : this.dataColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -1588,6 +2000,7 @@ playBgm_s
 tooltip : playBgm: 播放背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
 default : ["bgm.mp3", 0, true]
+allBgms : ['EvalString_0']
 colour : this.soundColor
 Int_0 = Int_0 ? (', "startTime": '+Int_0) : '';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
@@ -1628,6 +2041,7 @@ loadBgm_s
 tooltip : loadBgm: 预加载某个背景音乐，之后可以直接播放
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=loadBgm%ef%bc%9a%e9%a2%84%e5%8a%a0%e8%bd%bd%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90
 default : ["bgm.mp3"]
+allBgms : ['EvalString_0']
 colour : this.soundColor
 var code = '{"type": "loadBgm", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -1641,6 +2055,7 @@ freeBgm_s
 tooltip : freeBgm: 释放背景音乐的缓存
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=freeBgm%ef%bc%9a%e9%87%8a%e6%94%be%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90%e7%9a%84%e7%bc%93%e5%ad%98
 default : ["bgm.mp3"]
+allBgms : ['EvalString_0']
 colour : this.soundColor
 var code = '{"type": "freeBgm", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -1655,6 +2070,7 @@ tooltip : playSound: 播放音效
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playsound%EF%BC%9A%E6%92%AD%E6%94%BE%E9%9F%B3%E6%95%88
 default : ["item.mp3",false]
 colour : this.soundColor
+allSounds : ['EvalString_0']
 Bool_0 = Bool_0 ? ', "stop": true' : '';
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;
@@ -1815,7 +2231,9 @@ choices_s
 /* choices_s
 tooltip : choices: 给用户提供选项
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
-default : ["","流浪者","woman",0]
+doubleclicktext : EvalString_0
+default : ["","流浪者","trader",0]
+allIds : ['IdString_0']
 var title='';
 if (EvalString_1==''){
     if (IdString_0=='')title='';
@@ -1841,6 +2259,7 @@ choicesContext
 tooltip : 选项的选择
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=choices%EF%BC%9A%E7%BB%99%E7%94%A8%E6%88%B7%E6%8F%90%E4%BE%9B%E9%80%89%E9%A1%B9
 default : ["提示文字:红钥匙","","",""]
+allIds : ['IdString_0']
 colour : this.subColor
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
 EvalString_1 = EvalString_1 && (', "condition": "'+EvalString_1+'"')
@@ -1856,6 +2275,7 @@ confirm_s
 tooltip : 弹出确认框
 helpUrl : https://h5mota.com/games/template/_docs/#/
 default : ["确认要xxx吗?",0,false]
+doubleclicktext : EvalString_0
 Bool_0 = Bool_0?', "default": true':''
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
 var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_0,'",\n',
@@ -1987,6 +2407,7 @@ waitContext_2
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=wait%EF%BC%9A%E7%AD%89%E5%BE%85%E7%94%A8%E6%88%B7%E6%93%8D%E4%BD%9C
 default : [0,32,0,32]
+previewBlock : true
 colour : this.subColor
 var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + '], "action": [\n' + action_0 + ']},\n';
 return code;
@@ -2073,6 +2494,7 @@ previewUI_s
 /* previewUI_s
 tooltip : previewUI: ui绘制并预览
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=previewUI%ef%bc%9aUI%e7%bb%98%e5%88%b6%e5%b9%b6%e9%a2%84%e8%a7%88
+previewBlock : true
 var code = ['{"type": "previewUI", "action": [\n', action_0,']},\n'].join('');
 return code;
 */;
@@ -2086,6 +2508,7 @@ tooltip : clearMap: 清除画布
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=clearMap%ef%bc%9a%e6%b8%85%e9%99%a4%e7%94%bb%e5%b8%83
 colour : this.subColor
 default : ["0", "0", "100", "100"]
+previewBlock : true
 var code = '{"type": "clearMap", "x": ' + PosString_0 + ', "y": ' + PosString_1 +
     ', "width": ' + PosString_2 + ', "height": ' + PosString_3 + '},\n';
 return code;
@@ -2098,6 +2521,7 @@ clearMap_1_s
 /* clearMap_1_s
 tooltip : clearMap: 清除画布
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=clearMap%ef%bc%9a%e6%b8%85%e9%99%a4%e7%94%bb%e5%b8%83
+previewBlock : true
 colour : this.subColor
 var code = '{"type": "clearMap"},\n';
 return code;
@@ -2110,6 +2534,7 @@ setAttribute_s
 /* setAttribute_s
 tooltip : setAttribute：设置画布属性
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setAttribute%ef%bc%9a%e8%ae%be%e7%bd%ae%e7%94%bb%e5%b8%83%e5%b1%9e%e6%80%a7
+previewBlock : true
 colour : this.subColor
 default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null,""]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
@@ -2136,6 +2561,7 @@ fillText_s
 tooltip : fillText：绘制一行文本；可以设置最大宽度进行放缩
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillText%ef%bc%9a%e7%bb%98%e5%88%b6%e6%96%87%e6%9c%ac
 colour : this.subColor
+previewBlock : true
 default : ["0","0","",'rgba(255,255,255,1)',"","","绘制一行文本"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 FontString_0 = FontString_0 ? (', "font": "' + FontString_0 + '"') : '';
@@ -2151,6 +2577,7 @@ fillBoldText_s
 tooltip : fillBoldText：绘制一行描边文本
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillBoldText%ef%bc%9a%e7%bb%98%e5%88%b6%e6%8f%8f%e8%be%b9%e6%96%87%e6%9c%ac
 colour : this.subColor
+previewBlock : true
 default : ["0","0","",'rgba(255,255,255,1)',"",'rgba(0,0,0,1)',"","绘制一行描边文本"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 ColorString_1 = ColorString_1 ? (', "strokeStyle": ['+ColorString_1+']') : '';
@@ -2165,6 +2592,7 @@ drawTextContent_s
 /* drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawTextContent%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%a1%8c%e6%96%87%e6%9c%ac
+doubleclicktext : EvalString_0
 colour : this.subColor
 default : ["绘制多行文本\\n可双击编辑","0","0","","",'rgba(255,255,255,1)',null,"","",false]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
@@ -2178,29 +2606,33 @@ return code;
 */;
 
 fillRect_s
-    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour Newline
+    :   '绘制矩形' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '颜色' ColorString? Colour Newline
 
 /* fillRect_s
 tooltip : fillRect：绘制矩形
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2
 colour : this.subColor
-default : ["0","0","flag:x","300","",null]
+previewBlock : true
+default : ["0","0","flag:x","300","","",null]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
-var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+'},\n';
+PosString_4 = PosString_4 ? (', "radius": '+PosString_4) : '';
+var code = '{"type": "fillRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+PosString_4+ColorString_0+'},\n';
 return code;
 */;
 
 strokeRect_s
-    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+    :   '绘制矩形边框' '起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString '圆角半径' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeRect%ef%bc%9a%e7%bb%98%e5%88%b6%e7%9f%a9%e5%bd%a2%e8%be%b9%e6%a1%86
 colour : this.subColor
-default : ["0","0","flag:x","300","",null,""]
+previewBlock : true
+default : ["0","0","flag:x","300","","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
-var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+ColorString_0+IntString_0+'},\n';
+PosString_4 = PosString_4 ? (', "radius": '+PosString_4) : '';
+var code = '{"type": "strokeRect", "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+PosString_4+ColorString_0+IntString_0+'},\n';
 return code;
 */;
 
@@ -2211,6 +2643,7 @@ drawLine_s
 tooltip : drawLine：绘制线段
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawLine%ef%bc%9a%e7%bb%98%e5%88%b6%e7%ba%bf%e6%ae%b5
 colour : this.subColor
+previewBlock : true
 default : ["0","0","flag:x","300","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
@@ -2225,6 +2658,7 @@ drawArrow_s
 tooltip : drawArrow：绘制箭头
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawArrow%ef%bc%9a%e7%bb%98%e5%88%b6%e7%ae%ad%e5%a4%b4
 colour : this.subColor
+previewBlock : true
 default : ["0","0","flag:x","300","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
@@ -2240,6 +2674,7 @@ fillPolygon_s
 tooltip : fillPolygon：绘制多边形
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillPolygon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%be%b9%e5%bd%a2
 colour : this.subColor
+previewBlock : true
 default : ["0,0,100","0,100,0","",null]
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
 if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
@@ -2260,6 +2695,7 @@ strokePolygon_s
 tooltip : strokePolygon：绘制多边形边框
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokePolygon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%a4%9a%e8%be%b9%e5%bd%a2%e8%be%b9%e6%a1%86
 colour : this.subColor
+previewBlock : true
 default : ["0,0,100","0,100,0","",null,""]
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
 if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
@@ -2273,51 +2709,89 @@ var code = '{"type": "strokePolygon", "nodes": ['+EvalString_0+']'+ColorString_0
 return code;
 */;
 
-fillCircle_s
-    :   '绘制圆' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour Newline
+fillEllipse_s
+    :   '绘制椭圆' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '顺时针旋转度数' PosString? '颜色' ColorString? Colour Newline
 
-/* fillCircle_s
-tooltip : fillCircle：绘制圆
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+/* fillEllipse_s
+tooltip : fillEllipse：绘制椭圆
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
 colour : this.subColor
-default : ["0","0","100","",null]
+previewBlock : true
+default : ["0","0","100","100","0","",null]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
-var code = '{"type": "fillCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+'},\n';
+PosString_4 = PosString_4 ? (', "angle": ' + PosString_4) : '';
+var code = '{"type": "fillEllipse", "x": '+PosString_0+', "y": '+PosString_1+', "a": '+PosString_2+', "b": '+PosString_3+PosString_4+ColorString_0+'},\n';
 return code;
 */;
 
-strokeCircle_s
-    :   '绘制圆边框' '圆心' 'x' PosString 'y' PosString '半径' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+strokeEllipse_s
+    :   '绘制椭圆边框' '中心' 'x' PosString 'y' PosString '长半径' PosString '短半径' PosString '顺时针旋转度数' PosString? '颜色' ColorString? Colour '线宽' IntString? Newline
 
-/* strokeCircle_s
-tooltip : strokeCircle：绘制圆边框
-helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeCircle%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
+/* strokeEllipse_s
+tooltip : strokeEllipse：绘制椭圆边框
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=strokeEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86%e8%be%b9%e6%a1%86
 colour : this.subColor
-default : ["0","0","100","",null,""]
+previewBlock : true
+default : ["0","0","100","100","0","",null,""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
-var code = '{"type": "strokeCircle", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+ColorString_0+IntString_0+'},\n';
+PosString_4 = PosString_4 ? (', "angle": ' + PosString_4) : '';
+var code = '{"type": "strokeEllipse", "x": '+PosString_0+', "y": '+PosString_1+', "a": '+PosString_2+', "b": '+PosString_3+PosString_4+ColorString_0+IntString_0+'},\n';
 return code;
 */;
+
+fillArc_s
+    :   '绘制扇形' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour Newline
+
+/* fillArc_s
+tooltip : fillArc：绘制扇形
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+colour : this.subColor
+default : ["0","0","100","0","90","",null,""]
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+var code = '{"type": "fillArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+'},\n';
+return code;
+*/;
+
+
+strokeArc_s
+    :   '绘制弧' '中心' 'x' PosString 'y' PosString '半径' PosString '起点角度' PosString '终点角度' PosString '颜色' ColorString? Colour '线宽' IntString? Newline
+
+/* strokeArc_s
+tooltip : strokeArc：绘制弧
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=fillEllipse%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9c%86
+colour : this.subColor
+default : ["0","0","100","0","90","",null,""]
+ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
+IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
+var code = '{"type": "strokeArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+IntString_0+'},\n';
+return code;
+*/;
+
 
 
 drawImage_s
-    :   '绘制图片' EvalString '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
+    :   '绘制图片' EvalString '翻转' Reverse_List '起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? Newline
 
 
 /* drawImage_s
 tooltip : drawImage：绘制图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
-default : ["bg.jpg","0","0","",""]
+previewBlock : true
+allImages : ['EvalString_0']
+default : ["bg.jpg","null","0","0","",""]
 colour : this.subColor
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
 PosString_2 = PosString_2 ? (', "w": '+PosString_2) : '';
 PosString_3 = PosString_3 ? (', "h": '+PosString_3) : '';
-var code = '{"type": "drawImage", "image": "'+EvalString_0+'", "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
+var code = '{"type": "drawImage", "image": "'+EvalString_0+'"'+Reverse_List_0+', "x": '+PosString_0+', "y": '+PosString_1+PosString_2+PosString_3+'},\n';
 return code;
 */;
 
 drawImage_1_s
-    :   '绘制图片' EvalString '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
+    :   '绘制图片' EvalString '翻转' Reverse_List '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString '高' PosString Newline
 
 
@@ -2326,7 +2800,12 @@ tooltip : drawImage：绘制图片
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
 default : ["bg.jpg","0","0","32","32","0","0","32","32"]
 colour : this.subColor
-var code = '{"type": "drawImage", "image": "'+EvalString_0+'"'+
+allImages : ['EvalString_0']
+previewBlock : true
+if (Reverse_List_0 && Reverse_List_0 != 'null') {
+    Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
+} else Reverse_List_0 = '';
+var code = '{"type": "drawImage", "image": "'+EvalString_0+'"'+Reverse_List_0+
            ', "x": '+PosString_0+', "y": '+PosString_1+', "w": '+PosString_2+', "h": '+PosString_3+
            ', "x1": '+PosString_4+', "y1": '+PosString_5+', "w1": '+PosString_6+', "h1": '+PosString_7+'},\n';
 return code;
@@ -2340,6 +2819,8 @@ drawIcon_s
 tooltip : drawIcon：绘制图标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawIcon%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e6%a0%87
 default : ["yellowKey",0,"0","0","",""]
+previewBlock : true
+allIds : ['IdString_0']
 colour : this.subColor
 Int_0 = Int_0 ? (', "frame": '+Int_0) : '';
 PosString_2 = PosString_2 ? (', "width": '+PosString_2) : '';
@@ -2357,6 +2838,7 @@ tooltip : drawBackground：绘制背景
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawBackground%ef%bc%9a%e7%bb%98%e5%88%b6%e8%83%8c%e6%99%af%e5%9b%be
 default : ["winskin.png",null,"0","0","100","100"]
 colour : this.subColor
+previewBlock : true
 var colorRe = MotaActionFunctions.pattern.colorRe;
 if (colorRe.test(EvalString_0)) {
   EvalString_0 = ', "background": ['+EvalString_0+']';
@@ -2378,6 +2860,7 @@ drawSelector_s
 /* drawSelector_s
 tooltip : drawSelector：绘制闪烁光标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawSelector%ef%bc%9a%e7%bb%98%e5%88%b6%e9%97%aa%e7%83%81%e5%85%89%e6%a0%87
+previewBlock : true
 default : ["winskin.png","1","0","0","100","100"]
 colour : this.subColor
 var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "code": '+Int_0+', "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
@@ -2392,6 +2875,7 @@ drawSelector_1_s
 tooltip : drawSelector：清除闪烁光标
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%e6%98%be%e7%a4%ba%e5%9b%be%e7%89%87
 default : ["1"]
+previewBlock : true
 colour : this.subColor
 var code = '{"type": "drawSelector", "code": '+Int_0+'},\n';
 return code;
@@ -2422,6 +2906,7 @@ tooltip : 可双击多行编辑，请勿使用异步代码。常见API参见文�
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=function%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89js%E8%84%9A%E6%9C%AC
 default : [false,"alert(core.getStatus(\"atk\"));"]
 colour : this.dataColor
+doubleclicktext : RawEvalString_0
 Bool_0 = Bool_0?', "async": true':'';
 var code = '{"type": "function"'+Bool_0+', "function": "function(){\\n'+JSON.stringify(RawEvalString_0).slice(1,-1).split('\\\\n').join('\\n')+'\\n}"},\n';
 return code;
@@ -2443,9 +2928,15 @@ expression
     :   expression Arithmetic_List expression
     |   negate_e
     |   bool_e
+    |   idFixedList_e
+    |   idFlag_e
+    |   idTemp_e
+    |   idIdList_e
     |   idString_e
-    |   evFlag_e
-    |   evTemp_e
+    |   enemyattr_e
+    |   blockId_e
+    |   blockCls_e
+    |   equip_e
     |   evalString_e
     
 
@@ -2453,9 +2944,7 @@ expression
 //todo 修改recieveOrder,根据Arithmetic_List_0不同的值设定不同的recieveOrder
 var code = expression_0 + Arithmetic_List_0 + expression_1;
 var ops = {
-    '^': 'Math.pow('+expression_0+','+expression_1+')',
-    '和': expression_0+' && '+expression_1,
-    '或': expression_0+' || '+expression_1,
+    '^': 'Math.pow('+expression_0+','+expression_1+')'
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -2466,12 +2955,14 @@ var orders = {
     '^': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     '==': Blockly.JavaScript.ORDER_EQUALITY,
     '!=': Blockly.JavaScript.ORDER_EQUALITY,
+    '===': Blockly.JavaScript.ORDER_EQUALITY,
+    '!==': Blockly.JavaScript.ORDER_EQUALITY,
     '>': Blockly.JavaScript.ORDER_RELATIONAL,
     '<': Blockly.JavaScript.ORDER_RELATIONAL,
     '>=': Blockly.JavaScript.ORDER_RELATIONAL,
     '<=': Blockly.JavaScript.ORDER_RELATIONAL,
-    '和': Blockly.JavaScript.ORDER_LOGICAL_AND,
-    '或': Blockly.JavaScript.ORDER_LOGICAL_OR
+    '&&': Blockly.JavaScript.ORDER_LOGICAL_AND,
+    '||': Blockly.JavaScript.ORDER_LOGICAL_OR
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -2487,10 +2978,11 @@ return [code, Blockly.JavaScript.ORDER_LOGICAL_NOT];
 */;
 
 bool_e
-    :   Bool
+    :   ':' Bool
     
 
 /* bool_e
+tooltip : 逻辑是否
 var code = Bool_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
@@ -2507,90 +2999,78 @@ var code = IdString_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_1_e
+idIdList_e
     :   Id_List ':' IdText
     
 
-/* idString_1_e
+/* idIdList_e
 colour : this.idstring_eColor
 default : [null,"自定义flag"]
-//todo 将其output改成'idString_e'
 var code = MotaActionFunctions.replaceFromName(MotaActionFunctions.replaceToName(Id_List_0+':'+IdText_0));
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_2_e
+idFixedList_e
     :   FixedId_List
     
 
-/* idString_2_e
+/* idFixedList_e
 colour : this.idstring_eColor
-//todo 将其output改成'idString_e'
 var code = FixedId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_3_e
+enemyattr_e
     :   '怪物' IdString '的' EnemyId_List
 
 
-/* idString_3_e
-colour : this.idstring_eColor
+/* enemyattr_e
 default : ['greenSlime',"攻击"]
-//todo 将其output改成'idString_e'
+allEnemys : ['IdString_0']
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_4_e
+blockId_e
     :   '图块ID:' Int ',' Int
 
 
-/* idString_4_e
-colour : this.idstring_eColor
+/* blockId_e
 default : [0,0]
 var code = 'blockId:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_5_e
+blockCls_e
     :   '图块类别:' Int ',' Int
 
 
-/* idString_5_e
-colour : this.idstring_eColor
+/* blockCls_e
 default : [0,0]
 var code = 'blockCls:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-//这一条不会被antlr识别,总是会被归到idString_e
-idString_6_e
+equip_e
     :   '装备孔:' Int
 
 
-/* idString_6_e
-colour : this.idstring_eColor
+/* equip_e
 default : [0]
 var code = 'equip:'+Int_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evFlag_e
+idFlag_e
     :   '独立开关' Letter_List
 
 
-/* evFlag_e
+/* idFlag_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "switch:"+Letter_List_0;
@@ -2598,11 +3078,11 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
-evTemp_e
+idTemp_e
     :   '临时变量' Letter_List
 
 
-/* evTemp_e
+/* idTemp_e
 colour : this.idstring_eColor
 default : ["A"]
 var code = "temp:"+Letter_List_0;
@@ -2651,8 +3131,8 @@ FontString
     ;
 
 Floor_List
-    :   '楼层ID'|'前一楼'|'后一楼'
-    /*Floor_List ['floorId',':before',':next']*/;
+    :   '楼层ID'|'前一楼'|'后一楼'|'当前楼'
+    /*Floor_List ['floorId',':before',':next',':now']*/;
 
 Stair_List
     :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'|'中心对称点'|'x对称点'|'y对称点'
@@ -2670,13 +3150,17 @@ TextBaseline_List
     :   '不改变'|'顶部'|'悬挂'|'居中'|'标准值'|'ideographic'|'底部'
     /*TextBaseline_List ['null','top','hanging','middle','alphabetic','ideographic','bottom']*/;
 
+Reverse_List
+    :   '不改变'|'左右翻转'|'上下翻转'|'中心翻转'
+    /*Reverse_List ['null',':x',':y',':o']*/;
+
 ShopUse_List
     :   '金币' | '经验'
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'>'|'<'|'>='|'<='|'和'|'或'
-    ;
+    :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'==='|'!=='|'>'|'<'|'>='|'<='|'且'|'或'
+    /*Arithmetic_List ['+','-','*','/','^','==','!=','===','!==','>','<','>=','<=','&&','||']*/;
 
 AssignOperator_List
     :   '='|'+='|'-='|'*='|'/='|'**='|'//='|'%='
@@ -2698,30 +3182,34 @@ Bg_Fg_List
     :   '背景层'|'前景层'
     /*Bg_Fg_List ['bg','fg']*/;
 
+Bg_Fg2_List
+    :   '背景层'|'前景层'|'自适配'
+    /*Bg_Fg2_List ['bg','fg','auto']*/;
+
 IgnoreChangeFloor_List
     :   '全局默认值' | '可穿透' | '不可穿透'
     /*IgnoreChangeFloor_List ['null','true','false']*/;
 
 Event_List
-    :   '事件'|'战后事件'|'道具后事件'|'开门后事件'
+    :   '普通事件'|'战后事件'|'道具后事件'|'开门后事件'
     /*Event_List ['null','afterBattle','afterGetItem','afterOpenDoor']*/;
 
 Floor_Meta_List
     :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'楼层贴图'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
-    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'item_ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
+    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'ratio', 'upFloor', 'downFloor', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
-    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'难度显示文字色'|'楼层转换背景'|'楼层转换文字色'|'装备列表'
-    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'hardLabelColor', 'floorChangingBackground', 'floorChangingTextColor', 'equipName']*/;
+    :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'楼层转换样式'|'装备列表'
+    /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'floorChangingStyle', 'equipName']*/;
 
 Global_Value_List
     :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'动画时间'
-    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redJewel', 'blueJewel', 'greenJewel', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'animateSpeed']*/;
+    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redGem', 'blueGem', 'greenGem', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'animateSpeed']*/;
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'破墙镐四方向'|'炸弹四方向'|'冰冻徽章四方向'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'|'虚化前景层'|'检查控制台'
-    /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'pickaxeFourDirections', 'bombFourDirections', 'snowFourDirections', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage', 'blurFg']*/;
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'|'虚化前景层'|'检查控制台'
+    /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage', 'blurFg']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -2754,8 +3242,8 @@ Direction_List
     /*Direction_List ['up','down','left','right']*/;
 
 DirectionEx_List
-    :   '不变'|'上'|'下'|'左'|'右'
-    /*DirectionEx_List ['','up','down','left','right']*/;
+    :   '不变'|'朝上'|'朝下'|'朝左'|'朝右'|'左转'|'右转'|'背对'
+    /*DirectionEx_List ['null','up','down','left','right',':left',':right',':back']*/;
 
 StepString
     :   (Direction_List Int?)+
@@ -2766,8 +3254,8 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'
-    /*FixedId_List ['status:hp','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp']*/;
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'
+    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax']*/;
 
 Id_List
     :   '变量' | '状态' | '物品' | '独立开关' | '临时变量' |'全局存储'
@@ -2775,7 +3263,15 @@ Id_List
 
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
-    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
+    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','属性值','退化扣攻','退化扣防','不可炸','九宫格领域','领域范围','连击数','吸血到自身','固伤值']*/;
+
+Equip_List
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'魔力'|'魔力上限'
+    /*Equip_List ['hp','hpmax','atk','def','mdef','mana','manamax']*/;
+
+Key_List
+    :   '黄钥匙'|'蓝钥匙'|'红钥匙'|'绿钥匙'|'铁门钥匙'
+    /*Key_List ['yellowKey','blueKey','redKey','greenKey','steelKey']*/;
 
 //转blockly后不保留需要加"
 EvalString
@@ -2835,1161 +3331,14 @@ this.evisitor.mapColor=175;
 
 /* Function_1
 delete(this.block('negate_e').inputsInline);
-this.block('idString_1_e').output='idString_e';
-this.block('idString_2_e').output='idString_e';
-this.block('idString_3_e').output='idString_e';
-this.block('idString_4_e').output='idString_e';
-this.block('idString_5_e').output='idString_e';
-this.block('idString_6_e').output='idString_e';
-this.block('evFlag_e').output='idString_e';
-this.block('evTemp_e').output='idString_e';
+this.block('idIdList_e').output='idString_e';
+this.block('idFixedList_e').output='idString_e';
+this.block('idFlag_e').output='idString_e';
+this.block('idTemp_e').output='idString_e';
 */
 
 /* Functions
 
-function ActionParser(){
-}
-
-ActionParser.prototype.parse = function (obj,type) {
-  switch (type) {
-    case 'event':
-      if(!obj)obj={};
-      if(typeof(obj)===typeof('')) obj={'data':[obj]};
-      if(obj instanceof Array) obj={'data':obj};
-      return MotaActionBlocks['event_m'].xmlText([
-        obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,this.parseList(obj.data)
-      ]);
-    
-    case 'autoEvent':
-      if(!obj)obj={};
-      return MotaActionBlocks['autoEvent_m'].xmlText([
-        obj.condition,obj.priority,obj.currentFloor,obj.delayExecute,obj.multiExecute,this.parseList(obj.data)
-      ]);
-    
-    case 'changeFloor':
-      if(!obj)obj={};
-      if(!this.isset(obj.loc)) {
-        obj.loc=[0,0];
-        if (!this.isset(obj.stair)) obj.stair=':now';
-      }
-      if (obj.floorId==':before'||obj.floorId==':next') {
-        obj.floorType=obj.floorId;
-        delete obj.floorId;
-      }
-      return MotaActionBlocks['changeFloor_m'].xmlText([
-        obj.floorType||'floorId',obj.floorId,obj.stair||'loc',obj.loc[0],obj.loc[1],obj.direction,
-        obj.time,obj.ignoreChangeFloor
-      ]);
-
-    case 'level':
-      if(!obj)obj={};
-      var text_choices = null;
-      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
-        text_choices=MotaActionBlocks['levelCase'].xmlText([
-          MotaActionBlocks['evalString_e'].xmlText([choice.need]),choice.title,choice.clear||false,this.parseList(choice.action),text_choices]);
-      }
-      return MotaActionBlocks['level_m'].xmlText([text_choices]);
-
-    case 'shop':
-      var buildsub = function(obj,parser,next){
-        var text_choices = null;
-        for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
-          text_choices=MotaActionBlocks['shopChoices'].xmlText([
-            choice.text,choice.need||'',choice.icon,choice.color,'rgba('+choice.color+')',choice.condition,parser.parseList(choice.action),text_choices]);
-        }
-        var info = parser.getTitleAndPosition(obj.text || '');
-        return MotaActionBlocks['shopsub'].xmlText([
-          obj.id,obj[0],info[1],info[3],obj.textInList,obj.mustEnable,obj.disablePreview,text_choices,next
-        ]);
-      }
-      var buildcommentevent = function(obj,parser,next){
-        if (obj.args instanceof Array) {
-          obj.args = JSON.stringify(obj.args);
-        }
-        else obj.args = null;
-        return MotaActionBlocks['shopcommonevent'].xmlText([
-          obj.id,parser.EvalString(obj.textInList),obj.mustEnable,parser.EvalString(obj.commonEvent),obj.args,next
-        ]);
-      }
-      var builditem = function (obj,parser,next){
-        var text_choices = null;
-        for(var ii=obj.choices.length-1,choice;choice=obj.choices[ii];ii--) {
-          text_choices = MotaActionBlocks['shopItemChoices'].xmlText([
-            choice.id, choice.number == null ? "" : (""+choice.number), choice.money == null ? "" : (""+choice.money), 
-            choice.sell == null ? "" : (""+choice.sell), choice.condition || "", text_choices
-          ]);
-        }
-        return MotaActionBlocks['shopitem'].xmlText([
-          obj.id,obj.textInList,obj.mustEnable,text_choices,next
-        ]);
-      }
-      var next=null;
-      if(!obj)obj=[];
-      while(obj.length){
-        var shopobj=obj.pop()
-        if(shopobj.item)
-          next=builditem(shopobj,this,next);
-        else if(shopobj.choices)
-          next=buildsub(shopobj,this,next);
-        else if(shopobj.commonEvent)
-          next=buildcommentevent(shopobj,this,next);
-        else
-          throw new Error("[警告]出错啦！\n"+shopobj.id+" 无效的商店");
-      }
-      return MotaActionBlocks['shop_m'].xmlText([next]);
-    
-    default:
-      return MotaActionBlocks[type+'_m'].xmlText([this.parseList(obj)]);
-  }
-}
-
-////// 开始解析一系列自定义事件 //////
-ActionParser.prototype.parseList = function (list) {
-  if (!this.isset(list)) return MotaActionBlocks['pass_s'].xmlText([],true);
-  if (!(list instanceof Array)) {
-    list = [list];
-  }
-  if (list.length===0) return MotaActionBlocks['pass_s'].xmlText([],true);
-  this.event = {'id': 'action', 'data': {
-    'list': list
-  }}
-  this.next = null;
-  this.result = null;
-  this.parseAction();
-  return this.result;
-}
-
-////// 解析当前自定义事件列表中的最后一个事件 //////
-ActionParser.prototype.parseAction = function() {
-
-  // 事件处理完毕
-  if (this.event.data.list.length==0) {
-    this.result = this.next;
-    this.next = null;
-    return;
-  }
-
-  var data = this.event.data.list.pop();
-  this.event.data.current = data;
-
-  // 不同种类的事件
-
-  // 如果是文字：显示
-  if (typeof data == "string") {
-      data={"type": "text", "text": data}
-  }
-  this.event.data.type=data.type;
-  switch (data.type) {
-    case "_next":
-      this.result = this.next;
-      this.next = data.next;
-      return;
-    case "text": // 文字/对话
-      var info = this.getTitleAndPosition(data.text);
-      if (info[0] || info[1] || info[2]) {
-        this.next = MotaActionBlocks['text_1_s'].xmlText([
-          info[0], info[1], info[2], info[3], this.next]);
-      }
-      else {
-        this.next = MotaActionBlocks['text_0_s'].xmlText([info[3],this.next]);
-      }
-      break;
-    case "autoText": // 自动剧情文本
-      var info = this.getTitleAndPosition(data.text);
-      this.next = MotaActionBlocks['autoText_s'].xmlText([
-        info[0],info[1],info[2],data.time,info[3],this.next]);
-      break;
-    case "scrollText":
-      this.next = MotaActionBlocks['scrollText_s'].xmlText([
-        data.time, data.lineHeight||1.4, data.async||false, this.EvalString(data.text), this.next]);
-        break;
-    case "comment": // 注释
-      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString(data.text),this.next],null,data.text);
-      break;
-    case "setText": // 设置剧情文本的属性
-      data.title=this.Colour(data.title);
-      data.text=this.Colour(data.text);
-      if (!/^\w+\.png$/.test(data.background))
-        data.background=this.Colour(data.background);
-      this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.align,data.title,'rgba('+data.title+')',
-        data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
-        data.bold,data.titlefont,data.textfont,data.lineHeight,data.time,data.interval,this.next]);
-      break;
-    case "tip":
-      this.next = MotaActionBlocks['tip_s'].xmlText([
-        data.text,data.icon||"",this.next]);
-      break;
-    case "show": // 显示
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['show_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time,data.async||false,this.next]);
-      break;
-    case "hide": // 消失
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['hide_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.time,data.async||false,this.next]);
-      break;
-    case "setBlock": // 设置图块
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['setBlock_s'].xmlText([
-        data.number||0,x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
-      break;
-    case "showFloorImg": // 显示贴图
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['showFloorImg_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
-      break;
-    case "hideFloorImg": // 隐藏贴图
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['hideFloorImg_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
-      break;
-    case "showBgFgMap": // 显示图层块
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['showBgFgMap_s'].xmlText([
-        data.name||'bg', x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
-      break;
-    case "hideBgFgMap": // 隐藏图层块
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['hideBgFgMap_s'].xmlText([
-        data.name||'bg', x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
-      break;
-    case "setBgFgBlock": // 设置图块
-      data.loc=data.loc||[];
-      if (!(data.loc[0] instanceof Array))
-        data.loc = [data.loc];
-      var x_str=[],y_str=[];
-      data.loc.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['setBgFgBlock_s'].xmlText([
-        data.name||'bg', data.number||0, x_str.join(','),y_str.join(','),data.floorId||'',this.next]);
-      break;
-    case "setHeroIcon": // 改变勇士
-      this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([
-        data.name||"",this.next]);
-      break;
-    case "move": // 移动事件
-      data.loc=data.loc||['',''];
-      this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
-      break;
-    case "moveHero": // 移动勇士
-      this.next = MotaActionBlocks['moveHero_s'].xmlText([
-        data.time,data.async||false,this.StepString(data.steps),this.next]);
-      break;
-    case "jump": // 跳跃事件
-      data.from=data.from||['',''];
-      data.to=data.to||['',''];
-      this.next = MotaActionBlocks['jump_s'].xmlText([
-        data.from[0],data.from[1],data.to[0],data.to[1],data.time,data.keep||false,data.async||false,this.next]);
-      break;
-    case "jumpHero": // 跳跃勇士
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['jumpHero_s'].xmlText([
-        data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
-      break;
-    case "changeFloor": // 楼层转换
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['changeFloor_s'].xmlText([
-        data.floorId,data.loc[0],data.loc[1],data.direction,data.time,this.next]);
-      break;
-    case "changePos": // 直接更换勇士位置, 不切换楼层
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['changePos_s'].xmlText([
-        data.loc[0],data.loc[1],data.direction,this.next]);
-      break;
-    case "follow": // 跟随勇士
-      this.next = MotaActionBlocks['follow_s'].xmlText([data.name||"", this.next]);
-      break;
-    case "unfollow": // 取消跟随
-      this.next = MotaActionBlocks['unfollow_s'].xmlText([data.name||"", this.next]);
-      break;
-    case "animate": // 显示动画
-      var animate_loc = data.loc||'';
-      if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
-      this.next = MotaActionBlocks['animate_s'].xmlText([
-        data.name,animate_loc,data.alignWindow||false,data.async||false,this.next]);
-      break;
-    case "setViewport": // 设置视角
-      data.loc = data.loc||['',''];
-      this.next = MotaActionBlocks['setViewport_s'].xmlText([
-        data.loc[0],data.loc[1],this.next]);
-      break;
-    case "moveViewport": // 移动视角
-      this.next = MotaActionBlocks['moveViewport_s'].xmlText([
-        data.time,data.async||false,this.StepString(data.steps),this.next]);
-      break;
-    case "vibrate": // 画面震动
-      this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
-      break;
-    case "showImage": // 显示图片
-      data.loc=data.loc||['','']
-      if (data.sloc) {
-        this.next = MotaActionBlocks['showImage_1_s'].xmlText([
-            data.code,data.image||data.name,data.sloc[0],data.sloc[1],data.sloc[2],data.sloc[3],data.opacity,
-            data.loc[0],data.loc[1],data.loc[2],data.loc[3],data.time||0,data.async||false,this.next
-        ]);
-      }
-      else {
-        this.next = MotaActionBlocks['showImage_s'].xmlText([
-              data.code,data.image||data.name,data.loc[0],data.loc[1],data.opacity,data.time||0,data.async||false,this.next]);
-      }
-      break;
-    case "hideImage": // 清除图片
-      this.next = MotaActionBlocks['hideImage_s'].xmlText([
-        data.code,data.time||0,data.async||false,this.next]);
-      break;
-    case "showTextImage": // 显示图片化文本
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['showTextImage_s'].xmlText([
-        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.opacity,data.time||0,data.async||false,this.next]);
-      break;
-    case "moveImage": // 移动图片
-      data.to=data.to||['','']
-      this.next = MotaActionBlocks['moveImage_s'].xmlText([
-        data.code, data.to[0], data.to[1], data.opacity, data.time||0, data.async||false, this.next]);
-      break;
-    case "showGif": // 显示动图
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['showGif_s'].xmlText([
-        data.name,data.loc[0],data.loc[1],this.next]);
-      break;
-    case "setCurtain": // 颜色渐变
-      if(this.isset(data.color)){
-        data.color = this.Colour(data.color);
-        this.next = MotaActionBlocks['setCurtain_0_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time,data.keep||false,data.async||false,this.next]);
-      } else {
-        this.next = MotaActionBlocks['setCurtain_1_s'].xmlText([
-          data.time,data.async||false,this.next]);
-      }
-      break;
-    case "screenFlash": // 画面闪烁
-        data.color = this.Colour(data.color);
-        this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time||500,data.times,data.async||false,this.next]);
-      break;
-    case "setWeather": // 更改天气
-      this.next = MotaActionBlocks['setWeather_s'].xmlText([
-        data.name,data.level||1,data.keep||false,this.next]);
-      break;
-    case "openDoor": // 开一个门, 包括暗墙
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['openDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.floorId||'',data.needKey||false,data.async||false,this.next]);
-      break;
-    case "closeDoor": // 关一个门，需要该点无事件
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['closeDoor_s'].xmlText([
-        data.loc[0],data.loc[1],data.id,data.async||false,this.next]);
-      break;
-    case "useItem": // 使用道具
-      this.next = MotaActionBlocks['useItem_s'].xmlText([
-        data.id,this.next]);
-      break;
-    case "loadEquip": // 装上装备
-      this.next = MotaActionBlocks['loadEquip_s'].xmlText([
-        data.id,this.next]);
-      break;
-    case "unloadEquip": // 卸下装备
-      this.next = MotaActionBlocks['unloadEquip_s'].xmlText([
-        data.pos,this.next]);
-      break;
-    case "openShop": // 打开一个全局商店
-      this.next = MotaActionBlocks['openShop_s'].xmlText([
-        data.id,data.open||false,this.next]);
-      break;
-    case "disableShop": // 禁用一个全局商店
-      this.next = MotaActionBlocks['disableShop_s'].xmlText([
-        data.id,this.next]);
-      break;
-    case "battle": // 强制战斗
-      if (data.id) {
-        this.next = MotaActionBlocks['battle_s'].xmlText([
-          data.id,this.next]);
-      }
-      else {
-        data.loc = data.loc || [];
-        this.next = MotaActionBlocks['battle_1_s'].xmlText([
-          data.loc[0],data.loc[1],this.next]);
-      }
-      break;
-    case "trigger": // 触发另一个事件；当前事件会被立刻结束。需要另一个地点的事件是有效的
-      this.next = MotaActionBlocks['trigger_s'].xmlText([
-        data.loc[0],data.loc[1],data.keep,this.next]);
-      break;
-    case "insert": // 强制插入另一个点的事件在当前事件列表执行，当前坐标和楼层不会改变
-      if (data.args instanceof Array) {
-        data.args = JSON.stringify(data.args);
-      }
-      else data.args = null;
-      if (this.isset(data.name)) {
-        this.next = MotaActionBlocks['insert_1_s'].xmlText([
-          data.name, data.args||"", this.next]);
-      }
-      else {
-        this.next = MotaActionBlocks['insert_2_s'].xmlText([
-          data.loc[0],data.loc[1],data.which,data.floorId||'',data.args||"",this.next]);
-      }
-      break;
-    case "playSound":
-      this.next = MotaActionBlocks['playSound_s'].xmlText([
-        data.name,data.stop,this.next]);
-      break;
-    case "playBgm":
-      this.next = MotaActionBlocks['playBgm_s'].xmlText([
-        data.name,data.startTime||0,data.keep||false,this.next]);
-      break
-    case "pauseBgm":
-      this.next = MotaActionBlocks['pauseBgm_s'].xmlText([
-        this.next]);
-      break
-    case "resumeBgm":
-      this.next = MotaActionBlocks['resumeBgm_s'].xmlText([
-        data.resume||false,this.next]);
-      break
-    case "loadBgm":
-      this.next = MotaActionBlocks['loadBgm_s'].xmlText([
-        data.name,this.next]);
-      break
-    case "freeBgm":
-      this.next = MotaActionBlocks['freeBgm_s'].xmlText([
-        data.name,this.next]);
-      break
-    case "stopSound":
-      this.next = MotaActionBlocks['stopSound_s'].xmlText([
-        this.next]);
-      break
-    case "setVolume":
-      this.next = MotaActionBlocks['setVolume_s'].xmlText([
-        data.value, data.time, data.async||false, this.next]);
-      break
-    case "setValue":
-      this.next = MotaActionBlocks['setValue_s'].xmlText([
-        this.tryToUseEvFlag_e('idString_e', [data.name]), data["operator"]||'=',
-        MotaActionBlocks['evalString_e'].xmlText([data.value]),
-        data.norefresh || false,
-        this.next]);
-      break;
-    case "setEnemy":
-      this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        data.id, data.name, MotaActionBlocks['evalString_e'].xmlText([data.value]), this.next]);
-      break;
-    case "setFloor":
-      this.next = MotaActionBlocks['setFloor_s'].xmlText([
-        data.name, data.floorId||null, data.value, this.next]);
-      break;
-    case "setGlobalAttribute":
-      this.next = MotaActionBlocks['setGlobalAttribute_s'].xmlText([
-        data.name, data.value, this.next]);
-      break;
-    case "setGlobalValue":
-      this.next = MotaActionBlocks['setGlobalValue_s'].xmlText([
-        data.name, data.value, this.next]);
-      break;
-    case "setGlobalFlag":
-      this.next = MotaActionBlocks['setGlobalFlag_s'].xmlText([
-        data.name, data.value, this.next]);
-      break;
-    case "input":
-      this.next = MotaActionBlocks['input_s'].xmlText([
-        data.text,this.next]);
-      break;
-    case "input2":
-      this.next = MotaActionBlocks['input2_s'].xmlText([
-        data.text,this.next]);
-      break;
-    case "if": // 条件判断
-      if (data["false"]) {
-        this.next = MotaActionBlocks['if_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-          this.insertActionList(data["true"]),
-          this.insertActionList(data["false"]),
-          this.next]);
-      }
-      else {
-        this.next = MotaActionBlocks['if_1_s'].xmlText([
-          this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-          this.insertActionList(data["true"]),
-          this.next]);
-      }
-      break;
-    case "confirm": // 显示确认框
-      this.next = MotaActionBlocks['confirm_s'].xmlText([
-        this.EvalString(data.text), data.timeout||0, data["default"],
-        this.insertActionList(data["yes"]),
-        this.insertActionList(data["no"]),
-        this.next]);
-      break;
-    case "switch": // 多重条件分歧
-      var case_caseList = null;
-      for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
-        case_caseList=MotaActionBlocks['switchCase'].xmlText([
-          this.isset(caseNow.case)?MotaActionBlocks['evalString_e'].xmlText([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList]);
-      }
-      this.next = MotaActionBlocks['switch_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-        case_caseList,this.next]);
-      break;
-    case "choices": // 提供选项
-      var text_choices = null;
-      for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
-        choice.color = this.Colour(choice.color);
-        text_choices=MotaActionBlocks['choicesContext'].xmlText([
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.condition||'',this.insertActionList(choice.action),text_choices]);
-      }
-      if (!this.isset(data.text)) data.text = '';
-      var info = this.getTitleAndPosition(data.text);
-      this.next = MotaActionBlocks['choices_s'].xmlText([
-        info[3],info[0],info[1],data.timeout||0,text_choices,this.next]);
-      break;
-    case "for": // 循环遍历
-      this.next = MotaActionBlocks['for_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
-        data.from || 0, data.to || 0, data.step || 0,
-        this.insertActionList(data.data),
-        this.next]);
-      break;
-    case "forEach": // 循环遍历列表
-      this.next = MotaActionBlocks['forEach_s'].xmlText([
-        this.tryToUseEvFlag_e('evalString_e', [data.name]),
-        JSON.stringify(data.list),
-        this.insertActionList(data.data),
-        this.next]);
-      break;
-    case "while": // 前置条件循环处理
-      this.next = MotaActionBlocks['while_s'].xmlText([
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-        this.insertActionList(data.data),
-        this.next]);
-      break;
-    case "dowhile": // 后置条件循环处理
-      this.next = MotaActionBlocks['dowhile_s'].xmlText([
-        this.insertActionList(data.data),
-        // MotaActionBlocks['evalString_e'].xmlText([data.condition]),
-        this.tryToUseEvFlag_e('evalString_e', [data.condition]),
-        this.next]);
-      break;
-    case "break": // 跳出循环
-      this.next = MotaActionBlocks['break_s'].xmlText([
-        this.next]);
-      break;
-    case "continue": // 继续执行当前循环
-      this.next = MotaActionBlocks['continue_s'].xmlText([
-        this.next]);
-      break;
-    case "win":
-      this.next = MotaActionBlocks['win_s'].xmlText([
-        data.reason,data.norank?true:false,data.noexit?true:false,this.next]);
-      break;
-    case "lose":
-      this.next = MotaActionBlocks['lose_s'].xmlText([
-        data.reason,this.next]);
-      break;
-    case "restart":
-      this.next = MotaActionBlocks['restart_s'].xmlText([
-        this.next]);
-      break;
-    case "function":
-      var func = data["function"];
-      func=func.split('{').slice(1).join('{').split('}').slice(0,-1).join('}').trim().split('\n').join('\\n');
-      this.next = MotaActionBlocks['function_s'].xmlText([
-        data.async||false,func,this.next]);
-      break;
-    case "update":
-      this.next = MotaActionBlocks['update_s'].xmlText([
-        this.next, this.doNotCheckAutoEvents||false]);
-      break;
-    case "showStatusBar":
-      this.next = MotaActionBlocks['showStatusBar_s'].xmlText([
-        this.next]);
-      break;
-    case "hideStatusBar":
-      this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
-        data.toolbox||false,this.next]);
-      break;
-    case "showHero":
-      this.next = MotaActionBlocks['showHero_s'].xmlText([
-        this.next]);
-      break;
-    case "hideHero":
-      this.next = MotaActionBlocks['hideHero_s'].xmlText([
-        this.next]);
-      break;
-    case "sleep": // 等待多少毫秒
-      this.next = MotaActionBlocks['sleep_s'].xmlText([
-        data.time||0,data.noSkip||false,this.next]);
-      break;
-    case "wait": // 等待用户操作
-      var case_waitList = null;
-      if (data.data) {
-        for(var ii=data.data.length-1,caseNow;caseNow=data.data[ii];ii--) {
-          if (caseNow["case"] == "keyboard") {
-            case_waitList = MotaActionBlocks['waitContext_1'].xmlText([
-              caseNow.keycode || "0", this.insertActionList(caseNow.action), case_waitList
-            ]);
-          } else if (caseNow["case"] == "mouse") {
-            case_waitList = MotaActionBlocks['waitContext_2'].xmlText([
-              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], this.insertActionList(caseNow.action), case_waitList
-            ]);
-          }
-        }
-      }
-      this.next = MotaActionBlocks['wait_s'].xmlText([
-        data.timeout||0,case_waitList, this.next]);
-      break;
-    case "waitAsync": // 等待所有异步事件执行完毕
-      this.next = MotaActionBlocks['waitAsync_s'].xmlText([
-        this.next]);
-      break;
-    case "callBook": // 呼出怪物手册
-      this.next = MotaActionBlocks['callBook_s'].xmlText([
-        this.next]);
-      break;
-    case "callSave": // 呼出存档界面
-      this.next = MotaActionBlocks['callSave_s'].xmlText([
-        this.next]);
-      break;
-    case "autoSave": // 自动存档
-      this.next = MotaActionBlocks['autoSave_s'].xmlText([
-        data.nohint||false, this.next]);
-      break;
-    case "callLoad": // 呼出读档界面
-      this.next = MotaActionBlocks['callLoad_s'].xmlText([
-        this.next]);
-      break;
-    case "exit": // 立刻结束事件
-      this.next = MotaActionBlocks['exit_s'].xmlText([
-        this.next]);
-      break;
-    case "previewUI": // UI绘制预览
-      this.next = MotaActionBlocks['previewUI_s'].xmlText([
-        this.insertActionList(data.action), this.next
-      ]);
-      break;
-    case "clearMap": // 清除画布
-      if (data.x != null && data.y != null && data.width != null && data.height != null) {
-        this.next = MotaActionBlocks['clearMap_s'].xmlText([
-          data.x, data.y, data.width, data.height, this.next
-        ]);
-      }
-      else {
-        this.next = MotaActionBlocks['clearMap_1_s'].xmlText([this.next]);
-      }
-      break;
-    case "setAttribute": // 设置画布属性
-      data.fillStyle=this.Colour(data.fillStyle);
-      data.strokeStyle=this.Colour(data.strokeStyle);
-      this.next = MotaActionBlocks['setAttribute_s'].xmlText([
-        data.font,data.fillStyle,'rgba('+data.fillStyle+')',data.strokeStyle,'rgba('+data.strokeStyle+')',
-        data.lineWidth,data.alpha,data.align,data.baseline,data.z,this.next]);
-      break;
-    case "fillText": // 绘制一行文本
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['fillText_s'].xmlText([
-        data.x, data.y, data.style, 'rgba('+data.style+')', data.font, data.maxWidth, this.EvalString(data.text), this.next
-      ]);
-      break;
-    case "fillBoldText": // 绘制一行描边文本
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['fillBoldText_s'].xmlText([
-        data.x, data.y, data.style, 'rgba('+data.style+')', data.strokeStyle, 'rgba('+(data.strokeStyle||"0,0,0,1")+')', 
-        data.font, this.EvalString(data.text), this.next
-      ]);
-      break;
-    case "drawTextContent": // 绘制多行文本
-      data.color = this.Colour(data.color);
-      this.next = MotaActionBlocks['drawTextContent_s'].xmlText([
-        this.EvalString(data.text), data.left, data.top, data.maxWidth, data.color, 'rgba('+data.color+')',
-        data.align, data.fontSize, data.lineHeight, data.bold, this.next
-      ]);
-      break;
-    case "fillRect": // 绘制矩形
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['fillRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', this.next
-      ]);
-      break;
-    case "strokeRect": // 绘制矩形边框
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['strokeRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
-      ]);
-      break;
-    case "drawLine": // 绘制线段
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['drawLine_s'].xmlText([
-        data.x1, data.y1, data.x2, data.y2, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
-      ]);
-      break;
-    case "drawArrow": // 绘制线段
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['drawArrow_s'].xmlText([
-        data.x1, data.y1, data.x2, data.y2, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
-      ]);
-      break;
-    case "fillPolygon": // 绘制多边形
-      data.style = this.Colour(data.style);
-      var x_str=[],y_str=[];
-      data.nodes.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['fillPolygon_s'].xmlText([
-        x_str.join(','), y_str.join(','), data.style, 'rgba('+data.style+')', this.next
-      ]);
-      break;
-    case "strokePolygon": // 绘制多边形
-      data.style = this.Colour(data.style);
-      var x_str=[],y_str=[];
-      data.nodes.forEach(function (t) {
-        x_str.push(t[0]);
-        y_str.push(t[1]);
-      })
-      this.next = MotaActionBlocks['strokePolygon_s'].xmlText([
-        x_str.join(','), y_str.join(','), data.style, 'rgba('+data.style+')', data.lineWidth, this.next
-      ]);
-      break;
-    case "fillCircle": // 绘制圆
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['fillCircle_s'].xmlText([
-        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', this.next
-      ]);
-      break;
-    case "strokeCircle": // 绘制圆边框
-      data.style = this.Colour(data.style);
-      this.next = MotaActionBlocks['strokeCircle_s'].xmlText([
-        data.x, data.y, data.r, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
-      ]);
-      break;
-    case "drawImage": // 绘制图片
-      if (data.x1 != null && data.y1 != null && data.w1 != null && data.h1 != null) {
-        this.next = MotaActionBlocks['drawImage_1_s'].xmlText([
-          data.image, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, this.next
-        ]);
-      }
-      else {
-        this.next = MotaActionBlocks['drawImage_s'].xmlText([
-          data.image, data.x, data.y, data.w, data.h, this.next
-        ]);
-      }
-      break;
-    case "drawIcon": // 绘制图标
-      this.next = MotaActionBlocks['drawIcon_s'].xmlText([
-        data.id, data.frame||0, data.x, data.y, data.width, data.height, this.next
-      ]);
-      break;
-    case "drawBackground": // 绘制背景
-      if (!/^\w+\.png$/.test(data.background))
-        data.background=this.Colour(data.background);
-      this.next = MotaActionBlocks['drawBackground_s'].xmlText([
-        data.background, 'rgba('+data.background+')', data.x, data.y, data.width, data.height, this.next
-      ]);
-      break;
-    case "drawSelector": // 绘制光标
-      if (data.image) {
-        this.next = MotaActionBlocks['drawSelector_s'].xmlText([
-          data.image, data.code, data.x, data.y, data.width, data.height, this.next
-        ]);
-      }
-      else {
-        this.next = MotaActionBlocks['drawSelector_1_s'].xmlText([data.code, this.next]);
-      }
-    case "animateImage":  // 兼容 animateImage
-      break;
-    default:
-      this.next = MotaActionBlocks['unknown_s'].xmlText([
-        JSON.stringify(data),this.next]);
-  }
-  this.parseAction();
-  return;
-}
-
-////// 往当前事件列表之后添加一个事件组 //////
-ActionParser.prototype.insertActionList = function (actionList) {
-  if (actionList.length===0) return null;
-  this.event.data.list.push({"type": "_next", "next": this.next});
-  this.event.data.list=this.event.data.list.concat(actionList);
-  this.next = null;
-  this.parseAction();
-  return this.result;
-}
-
-////// 判断某对象是否不为undefined也不会null //////
-ActionParser.prototype.isset = function (val) {
-    if (val === undefined || val === null) {
-        return false;
-    }
-    return true
-}
-
-ActionParser.prototype.StepString = function(steplist) {
-  var stepchar = {
-    'up': '上',
-    'down': '下',
-    'left': '左',
-    'right': '右',
-    'forward': '前',
-    'backward': '后'
-  }
-  var StepString = '';
-  var last = null, number = 0;
-  steplist.forEach(function (v) {
-    if (v != last) {
-      if (last != null) {
-        StepString += stepchar[last];
-        if (number > 1) StepString += number;
-      }
-      last = v;
-      number = 1;
-    } else {
-      number++;
-    }
-  });
-  if (last != null) {
-      StepString += stepchar[last];
-      if (number > 1) StepString += number;
-  }
-  return StepString;
-}
-
-ActionParser.prototype.EvalString = function(EvalString) {
-  return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
-}
-
-ActionParser.prototype.getTitleAndPosition = function (string) {
-  string = this.EvalString(string);
-  var title = '', icon = '', position = '';
-  string = string.replace(/\\t\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3) {
-    if (s3) title = s3;
-    if (s2) { icon = s3; title = s2; }
-    if (icon && !/^(.*)\.(jpg|jpeg|png)$/.test(icon) 
-        && !/^[0-9a-zA-Z_][0-9a-zA-Z_:]*$/.test(icon)) { title += "," + icon; icon = ''; }
-    return "";
-  }).replace(/\\b\[(.*?)\]/g, function (s0, s1) {
-    position = s1; return "";
-  });
-  return [title, icon, position, string];
-}
-
-ActionParser.prototype.Colour = function(color) {
-  return color?JSON.stringify(color).slice(1,-1):null;
-}
-
-ActionParser.prototype.tryToUseEvFlag_e = function(defaultType, args, isShadow, comment) {
-  var match=/^switch:([A-Z])$/.exec(args[0])
-  if(match){
-    args[0]=match[1]
-    return MotaActionBlocks['evFlag_e'].xmlText(args, isShadow, comment);
-  }
-  match=/^temp:([A-Z])$/.exec(args[0])
-  if(match){
-    args[0]=match[1]
-    return MotaActionBlocks['evTemp_e'].xmlText(args, isShadow, comment);
-  }
-  return MotaActionBlocks[defaultType||'evalString_e'].xmlText(args, isShadow, comment);
-}
-
-MotaActionFunctions.actionParser = new ActionParser();
-
-MotaActionFunctions.workspace = function(){return workspace}
-
-MotaActionFunctions.parse = function(obj,type) {
-  try {
-    obj = JSON.parse(MotaActionFunctions.replaceToName(JSON.stringify(obj)));
-  } catch (e) {}
-  MotaActionFunctions.workspace().clear();
-  xml_text = MotaActionFunctions.actionParser.parse(obj,type||'event');
-  xml = Blockly.Xml.textToDom('<xml>'+xml_text+'</xml>');
-  Blockly.Xml.domToWorkspace(xml, MotaActionFunctions.workspace());
-}
-
-MotaActionFunctions.EvalString_pre = function(EvalString){
-  if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
-  EvalString = MotaActionFunctions.replaceFromName(EvalString);
-  return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"');
-}
-
-MotaActionFunctions.JsonEvalString_pre = function (JsonEvalString) {
-  if (JsonEvalString == '') return '';
-  JsonEvalString = MotaActionFunctions.replaceFromName(JsonEvalString);
-  try {
-    return JSON.stringify(JSON.parse(JsonEvalString));
-  } catch (e) {
-    throw new Error('此处需要填写一个合法的JSON内容');
-  }
-}
-
-MotaActionFunctions.IntString_pre = function (IntString) {
-  if (!/^\d*$/.test(IntString)) throw new Error('此项必须是整数或不填');
-  return IntString;
-}
-
-MotaActionFunctions.IdString_pre = function(IdString){
-  if (IdString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
-  IdString = MotaActionFunctions.replaceFromName(IdString);
-  if (IdString && !(MotaActionFunctions.pattern.id.test(IdString)) && !(MotaActionFunctions.pattern.idWithoutFlag.test(IdString)))
-      throw new Error('id: '+IdString+'中包含了0-9 a-z A-Z _ - :之外的字符');
-  return IdString;
-}
-
-MotaActionFunctions.PosString_pre = function(PosString){
-  if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
-  //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
-  return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
-}
-
-MotaActionFunctions.StepString_pre = function(StepString){
-  //StepString='上右3下2左上左2'
-  var route = StepString.replace(/上/g,'U').replace(/下/g,'D').replace(/左/g,'L').replace(/右/g,'R').replace(/前/g,'F').replace(/后/g,'B');
-
-  //copyed from core.js
-  var ans=[], index=0;
-
-  var isset = function(a) {
-    if (a == undefined || a == null) {
-      return false;
-    }
-    return true;
-  }
-  var getNumber = function (noparse) {
-    var num="";
-    while (index<route.length && !isNaN(route.charAt(index))) {
-      num+=route.charAt(index++);
-    }
-    if (num.length==0) num="1";
-    return isset(noparse)?num:parseInt(num);
-  }
-
-  while (index<route.length) {
-    var c=route.charAt(index++);
-    var number=getNumber();
-
-    switch (c) {
-      case "U": for (var i=0;i<number;i++) ans.push("up"); break;
-      case "D": for (var i=0;i<number;i++) ans.push("down"); break;
-      case "L": for (var i=0;i<number;i++) ans.push("left"); break;
-      case "R": for (var i=0;i<number;i++) ans.push("right"); break;
-      case "F": for (var i=0;i<number;i++) ans.push("forward"); break;
-      case "B": for (var i=0;i<number;i++) ans.push("backward"); break;
-    }
-  }
-  return ans;
-}
-
-MotaActionFunctions.ColorString_pre = function (ColorString) {
-  if (ColorString && !MotaActionFunctions.pattern.colorRe.test(ColorString))
-    throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
-  return ColorString;
-}
-
-MotaActionFunctions.FontString_pre = function (FontString) {
-  if (FontString && !MotaActionFunctions.pattern.fontRe.test(FontString))
-    throw new Error('字体必须是 [italic] [bold] 14px Verdana 这种形式或不填');
-  return FontString;
-}
-
-MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
-MotaActionFunctions.pattern.id=/^(flag|global):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
-MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
-MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
-MotaActionFunctions.pattern.colorRe=/^(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d),(25[0-5]|2[0-4]\d|1\d\d|[1-9]\d|\d)(,0(\.\d+)?|,1)?$/;
-MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
-
-
-MotaActionFunctions.pattern.replaceStatusList = [
-  // 保证顺序！
-  ["hpmax", "生命上限"],
-  ["hp", "生命"],
-  ["name", "名称"],
-  ["lv", "等级"],
-  ["atk", "攻击"],
-  ["def", "防御"],
-  ["mdef", "护盾"],
-  ["manamax", "魔力上限"],
-  ["mana", "魔力"],
-  ["money", "金币"],
-  ["exp", "经验"],
-  ["steps", "步数"],
-];
-
-MotaActionFunctions.pattern.replaceItemList = [
-  // 保证顺序！
-  ["yellowKey", "黄钥匙"],
-  ["blueKey", "蓝钥匙"],
-  ["redKey", "红钥匙"],
-  ["redJewel", "红宝石"],
-  ["blueJewel", "蓝宝石"],
-  ["greenJewel", "绿宝石"],
-  ["yellowJewel", "黄宝石"],
-  ["redPotion", "红血瓶"],
-  ["bluePotion", "蓝血瓶"],
-  ["yellowPotion", "黄血瓶"],
-  ["greenPotion", "绿血瓶"],
-  ["sword1", "铁剑"],
-  ["sword2", "银剑"],
-  ["sword3", "骑士剑"],
-  ["sword4", "圣剑"],
-  ["sword5", "神圣剑"],
-  ["shield1", "铁盾"],
-  ["shield2", "银盾"],
-  ["shield3", "骑士盾"],
-  ["shield4", "圣盾"],
-  ["shield5", "神圣盾"],
-  ["superPotion", "圣水"],
-  ["moneyPocket", "金钱袋"],
-  ["book", "怪物手册"],
-  ["fly", "楼层传送器"],
-  ["coin", "幸运金币"],
-  ["snow", "冰冻徽章"],
-  ["cross", "十字架"],
-  ["knife", "屠龙匕首"],
-  ["shoes", "绿鞋"],
-  ["bigKey", "大黄门钥匙"],
-  ["greenKey", "绿钥匙"],
-  ["steelKey", "铁门钥匙"],
-  ["pickaxe", "破墙镐"],
-  ["icePickaxe", "破冰镐"],
-  ["bomb", "炸弹"],
-  ["centerFly", "中心对称飞行器"],
-  ["upFly", "上楼器"],
-  ["downFly", "下楼器"],
-  ["earthquake", "地震卷轴"],
-  ["poisonWine", "解毒药水"],
-  ["weakWine", "解衰药水"],
-  ["curseWine", "解咒药水"],
-  ["superWine", "万能药水"],
-  ["hammer", "圣锤"],
-  ["lifeWand", "生命魔杖"],
-  ["jumpShoes", "跳跃靴"],
-];
-
-MotaActionFunctions.pattern.replaceEnemyList = [
-  // 保证顺序！
-  ["name", "名称"],
-  ["atk", "攻击"],
-  ["def", "防御"],
-  ["money", "金币"],
-  ["exp", "经验"],
-  ["point", "加点"],
-  ["special", "属性"],
-];
-
-MotaActionFunctions.disableReplace = false;
-
-MotaActionFunctions.replaceToName = function (str) {
-  if (!str || MotaActionFunctions.disableReplace) return str;
-  var map = {}, list = [];
-  MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
-    map[v[0]] = v[1]; list.push(v[0]);
-  });
-  str = str.replace(new RegExp("status:(" + list.join("|") + ")", "g"), function (a, b) {
-    return map[b] ? ("状态：" + map[b]) : b;
-  }).replace(/status:/g, "状态：");
-  map = {}; list = [];
-  MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
-    map[v[0]] = v[1]; list.push(v[0]);
-  });
-  str = str.replace(new RegExp("item:(" + list.join("|") + ")", "g"), function (a, b) {
-    return map[b] ? ("物品：" + map[b]) : b;
-  }).replace(/item:/g, "物品：");
-  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：").replace(/temp:/g, "临时变量：");
-
-  map = {}; list = [];
-  MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
-    map[v[0]] = v[1]; list.push(v[0]);
-  });
-  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+).(" + list.join("|") + ")", "g"), function (a, b, c) {
-    return map[c] ? ("怪物：" + b + "：" + map[c]) : c;
-  }).replace(/enemy:/g, "怪物：");
-
-  str = str.replace(/blockId:/g, "图块ID：").replace(/blockCls:/g, "图块类别：").replace(/equip:/g, "装备孔：");
-  return str;
-}
-
-MotaActionFunctions.replaceFromName = function (str) {
-  if (!str || MotaActionFunctions.disableReplace) return str;
-  var map = {}, list = [];
-  MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
-    map[v[1]] = v[0]; list.push(v[1]);
-  });
-  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")", "g"), function (a, b) {
-    return map[b] ? ("status:" + map[b]) : b;
-  }).replace(/状态[:：]/g, "status:");
-  map = {}; list = [];
-  MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
-    map[v[1]] = v[0]; list.push(v[1]);
-  });
-  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")", "g"), function (a, b) {
-    return map[b] ? ("item:" + map[b]) : b;
-  }).replace(/物品[:：]/g, "item:");
-  str = str.replace(/临时变量[:：]/g, "temp:").replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
-
-  map = {}; list = [];
-  MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
-    map[v[1]] = v[0]; list.push(v[1]);
-  });
-  str = str.replace(new RegExp("(enemy:|怪物[:：])([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")", "g"), function (a, b, c, d) {
-    return map[d] ? ("enemy:" + c + ":" + map[d]) : d;
-  }).replace(/怪物[:：]/g, "enemy:");
-
-  str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块类别[:：]/g, "blockCls:").replace(/装备孔[:：]/g, "equip:");
-
-  return str;
-}
+MotaActionParser()
 
 */

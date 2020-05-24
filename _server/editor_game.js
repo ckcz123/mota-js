@@ -135,7 +135,7 @@ editor_game_wrapper = function (editor, main, core) {
 
     // 获取当前地图
     editor_game.prototype.fetchMapFromCore = function () {
-        var mapArray = core.maps.saveMap(core.status.floorId);
+        var mapArray = core.getMapArray(core.status.floorId, true);
         editor.map = mapArray.map(function (v) {
             return v.map(function (v) {
                 var x = parseInt(v), y = editor.indexs[x];

@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv='content-type' content='text/html' charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=Edge, chrome=1'>
+    <meta name='author' content='ckcz123'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=yes'>
+    <title>HTML5魔塔样板V2.7接档工具</title>
+</head>
+<body>
+<h1>HTML5魔塔样板V2.7接档工具</h1>
+
+<script src='_server/fs.js'></script>
+<script src='project/data.js'></script>
+<script src='project/enemys.js'></script>
+<script src='project/functions.js'></script>
+<script src='project/icons.js'></script>
+<script src='project/items.js'></script>
+<script src='project/maps.js'></script>
+<script src='project/plugins.js'></script>
+
+<script>
+// 检查脚本编辑和插件编写；这两个绝对不能接
+if (functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events.setInitData || !plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1.shop) {
+    document.write("<h2 style='color:red'>错误：请勿覆盖脚本编辑（functions.js）和插件编写（plugins.js）！<br/>请从全新的V2.7样板中复制一个functions.js和plugins.js到project文件夹，再继续接档操作。</h2>");
+} else {
+    document.write("<p><button id='action' onclick='action()'>点此一键接档</button><p><p id='message' style='color:red; display:none'>接档成功！请重启编辑器并继续以下接档流程；若仍然无法打开编辑器请联系小艾处理。</p>");
+}
+
+</script>
+
+<h2>请严格按照如下流程，一步步进行接档操作。请勿随意增删接档过程，以免出现编辑器白屏、闪退等情况。</h2>
+
+<p>
+<ol>
+    <li><b style="color:red">做好备份，做好备份，做好备份！！！</b>接档前请一定先做好备份！</li>
+    <li>使用RM转H5刻塔器所刻的塔不适用于此接档工具。</li>
+    <li>将V2.6.6样板中project目录下，除了<code>project/functions.js</code>和<code>project/plugins.js</code>以外的其他文件和文件夹，直接复制到最新的V2.7样板中，然后打开本接档工具。</li>
+    <li>点击上述的「点此一键接档」，并看到红字提示接档成功。此时编辑器应该可以正常打开。若此时无法打开编辑器请联系小艾处理。</li>
+    <li>下拉框切到「全塔属性」，并注意以下内容：
+        <ul>
+            <li>现在素材和使用的其他图片等在文件夹中被拆分，请检查对应的图片文件已经正确移动到对应的文件夹。</li>
+            <li>「难度选择项」的逻辑在V2.7中被修改；请重新制作。</li>
+            <li>「全局商店」的结构在V2.7中被修改；请重新制作。</li>
+            <li>部分方框进行了合并，请一个个仔细检查是否存在问题。</li>
+        </ul>
+    </li>
+    <li>下拉框切到「楼层属性」，并注意以下内容：
+        <ul>
+            <li><code>item_ratio</code>被重命名为<code>ratio</code>，请自行修改。</li>
+            <li>楼层贴图的结构在V2.7中被修改；请重新制作。</li>
+        </ul>
+    </li>
+    <li>素材区的如下图块有所变动：
+        <ul>
+            <li>三色墙和六色门从terrains中解除引用；请用animates中的进行绘制。</li>
+            <li>如下图块的图块属性已被重置：三色墙、六色门、四色网、四个单向箭头、亮灯。</li>
+            <li>所有的<code>noPass:false</code>都改成<code>canPass:true</code>；请仔细检查可通行性。</li>
+            <li>如下道具的道具属性已被重置，请仔细检查：三色钥匙、四色宝石（已改名Gem）、四色血瓶、破墙、破冰、炸弹、地震、冰冻、大黄门钥匙、上下楼器。</li>
+            <li>即时道具获得的说明和提示文字均改成了<code>${}</code>计算，<code>ratio</code>需写明全称（参见宝石血瓶写法），请自行处理。</li>
+            <li>npc48的默认动画帧数<code>null</code>改回为4；如需静止状态请手动改成1。</li>
+        </ul>
+    </li>
+    <li>下拉框切换到「脚本编辑」，并请重新编辑各个自己改过的函数（可以双开一个原版V266项目和当前接档的项目进行处理）。
+        <ul>
+            <li>请注意：V2.7中的经验全部从<code>experience</code>替换成简写的<code>exp</code>；写伤害计算等时请尤其注意。</li>
+            <li>部分文案有所改变，如「阻击」从<code>snipe</code>改名<code>repulse</code>，<code>shoes</code>改名<code>amulet</code>等等，请自行处理。</li>
+            <li><code>setInitData</code>已被删除，请将需要的额外初始化代码写入<code>startText</code>中。</li>
+            <li><code>afterChangeLight, afterUseBomb, afterPassNet</code>已被删除，请去对应图块属性内修改。</li>
+            <li>其他基本每个函数都有大幅修改，<b style="color:red">请勿直接拿原来的脚本整体覆盖，而是重新对函数进行需要的编辑！</b></li>
+        </ul>
+    </li>
+    <li>下拉框切换到「插件编写」，并重新新增自己加过的插件。
+        <ul>
+            <li>V2.7不能保证插件的兼容性，请谨慎测试。</li>
+            <li>如果插件出现不可用问题，请自行联系插件原作者更新插件到支持V2.7的版本。</li>
+        </ul>
+    </li>
+    <li>请仔细检查每个道具的道具效果、每个怪物的属性、每个楼层属性、以及每个点的事件（建议双开对比）。主要变动如下：
+        <ul>
+            <li>「数值增减」事件已被删除并被数值操作+运算符替代，编辑器将解析为自定义事件；但是游戏中仍然可以正确执行（你可以选择替换与否）。</li>
+            <li>「隐藏事件」将不再默认删除该点（而只是纯粹的隐藏）；请给有需要的「隐藏事件」勾选「同时删除」选项。</li>
+            <li>「绘制圆」「绘制圆边框」「重启当前事件」已经被删除，并且无法再在游戏中使用，请替换成等价的写法。</li>
+        </ul>
+    </li>
+    <li><b style='color:red'>接档后请做好充分的测试！最好能跑通录像以确认接档无误！</b></li>
+</ol>
+</p>
+
+<script>
+
+function action() {
+    action_data(function() {
+        action_enemys(function() {
+            action_icons(function() {
+                action_items(function() {
+                    action_maps(function() {
+                        alert('接档成功！请重启编辑器并继续以下接档流程；若仍然无法打开编辑器请联系小艾处理。');
+                        document.getElementById('action').style.display = 'none';
+                        document.getElementById('message').style.display = 'block';
+                    })
+                })
+            })
+        })
+    })
+}
+
+function encode(str) {
+    return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
+        return String.fromCharCode(parseInt(p1, 16))
+    }))
+}
+
+// 接档全局属性
+function action_data(callback) {
+    var data = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
+    var main = data.main, firstData = data.firstData, values = data.values, flags = data.flags;
+
+    // Step 0: 移动目录
+    // materials
+    ['animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'icons', 'airwall', 'fog', 'keyboard'].forEach(function (one) {
+        fs.moveFile('project/images/'+one+".png", 'project/materials/'+one+'.png', function (e, d) {});
+    });
+    main.tilesets.forEach(function (one) {
+        if (one.indexOf('.')<0) one += '.png';
+        fs.moveFile('project/images/'+one, 'project/tilesets/'+one, function (e, d) {});
+    });
+    // bgms
+    main.bgms.forEach(function (one) {
+        fs.moveFile('project/sounds/'+one, 'project/bgms/'+one, function (e,d) {});
+    })
+
+    // Step 1: 重置levelChoose和shop
+    main.levelChoose = [];
+    firstData.shops = [];
+    main.fonts = [];
+
+    // Step 2: 合并main.styles
+    if (!main.styles) main.styles = {
+        "startBackground": "project/images/bg.jpg",
+        "startVerticalBackground": "project/images/bg.jpg",
+        "startLogoStyle": "color: black",
+        "startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;",
+        "statusLeftBackground": "url(project/materials/ground.png) repeat",
+        "statusTopBackground": "url(project/materials/ground.png) repeat",
+        "toolsBackground": "url(project/materials/ground.png) repeat",
+        "borderColor": [204,204,204,1],
+        "statusBarColor": [255,255,255,1],
+        "floorChangingStyle": "background-color: black; color: white",
+        "font": "Verdana"
+    };
+    ["startLogoStyle", "startButtonsStyle", "statusLeftBackground", "statusTopBackground", "toolsBackground", "font"].forEach(function (one) {
+        if (main[one]) main.styles[one] = main[one];
+    });
+    if (main.styles.startVerticalBackground == null) main.styles.startVerticalBackground = main.styles.startBackground;
+    for (var key in main.styles) delete main[key];
+    delete main.floorChangingBackground; delete main.floorChangingTextColor;
+
+    // Step 3: 重置勇士属性
+    if (main.images.indexOf('hero.png') < 0) main.images.push('hero.png');
+    firstData.hero.image = 'hero.png';
+    firstData.hero.followers = [];
+    if (firstData.hero.exp == null) firstData.hero.exp = firstData.hero.experience;
+    delete firstData.hero.experience;
+    delete firstData.hero.items.keys;
+
+    // Step 4: 重置全局开关
+    if (values.statusCanvasRowsOnMobile == null)
+        values.statusCanvasRowsOnMobile = flags.statusCanvasRowsOnMobile;
+    delete flags.statusCanvasRowsOnMobile;
+    if (values.redGem == null) values.redGem = values.redJewel;
+    if (values.blueGem == null) values.blueGem = values.blueJewel;
+    if (values.greenGem == null) values.greenGem = values.greenJewel;
+    delete values.redJewel;
+    delete values.blueJewel;
+    delete values.greenJewel;
+    delete values.moveSpeed;
+    delete values.floorChangeTime;
+    var statusList = [
+        "enableFloor",
+        "enableName",
+        "enableLv",
+        "enableHPMax",
+        "enableHP",
+        "enableMana",
+        "enableAtk",
+        "enableDef",
+        "enableMDef",
+        "enableMoney",
+        "enableExp",
+        "enableLevelUp",
+        "levelUpLeftMode",
+        "enableKeys",
+        "enableGreenKey",
+        "enablePZF",
+        "enableDebuff",
+        "enableSkill"
+    ];
+    if (flags.statusBarItems == null) {
+        flags.statusBarItems = [];
+        statusList.forEach(function (one) {
+            if (flags[one]) flags.statusBarItems.push(one);
+        });
+    }
+    statusList.forEach(function (one) { delete flags[one]; });
+    delete flags.pickaxeFourDirections;
+    delete flags.bombFourDirections;
+    delete flags.snowFourDirections;
+    delete flags.bigKeyIsBox;
+    delete flags.equipment;
+    delete flags.iconInEquipbox;
+    delete flags.hatredDecrease;
+    delete flags.betweenAttackCeil;
+    delete flags.startDirectly;
+    delete flags.enableDisabledShop;
+    delete flags.checkConsole;
+
+    // 写入
+    var datastr = 'var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = \n';
+    datastr += JSON.stringify(data, null, '\t');
+    fs.writeFile('project/data.js', encode(datastr), 'base64', function (err, data) {
+        if (err) {
+            alert('datas接档失败！请查看控制台报错，并刷新重试。');
+            console.error(err);
+        } else callback();
+    });
+}
+
+// 接档怪物：experience->exp
+function action_enemys(callback) {
+    var enemy = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
+    for (var id in enemy) {
+        if (enemy[id].experience != null) {
+            enemy[id].exp = enemy[id].experience;
+        }
+        delete enemy[id].experience;
+    }
+
+    var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
+    var emap = {};
+    var estr = JSON.stringify(enemy, function (k, t) {
+        if (t && t.hp != null) {
+            delete t.id;
+            var id_ = ":" + k + ":";
+            emap[id_] = JSON.stringify(t);
+            return id_;
+        } else return t;
+    }, '\t');
+    for (var id_ in emap) {
+        estr = estr.replace('"' + id_ + '"', emap[id_])
+    }
+    datastr += estr;
+    fs.writeFile('project/enemys.js', encode(datastr), 'base64', function (err, data) {
+        if (err) {
+            alert('enemys接档失败！请查看控制台报错，并刷新重试。');
+            console.error(err);
+        } else callback();
+    });
+}
+
+function action_icons(callback) {
+    var icons = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
+    var terrains = icons.terrains;
+    // 三色墙&六色门
+    delete terrains.yellowWall;
+    delete terrains.blueWall;
+    delete terrains.whiteWall;
+    delete terrains.yellowDoor;
+    delete terrains.blueDoor;
+    delete terrains.redDoor;
+    delete terrains.greenDoor;
+    delete terrains.specialDoor;
+    delete terrains.steelDoor;
+
+    // shop
+    if (terrains.blueShopLeft == null) terrains.blueShopLeft = terrains['blueShop-left'];
+    if (terrains.blueShopRight == null) terrains.blueShopRight = terrains['blueShop-right'];
+    if (terrains.pinkShopLeft == null) terrains.pinkShopLeft = terrains['pinkShop-left'];
+    if (terrains.pinkShopRight == null) terrains.pinkShopRight = terrains['pinkShop-right'];
+    delete terrains['blueShop-left'];
+    delete terrains['blueShop-right'];
+    delete terrains['pinkShop-left'];
+    delete terrains['pinkShop-right'];
+
+    if (icons.items.snow != null) icons.items.freezeBadge = icons.items.snow;
+    delete icons.items.snow;
+
+    var datastr = 'var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 = \n';
+    datastr += JSON.stringify(icons, null, '\t');
+    fs.writeFile('project/icons.js', encode(datastr), 'base64', function (err, data) {
+        if (err) {
+            alert('icons接档失败！请查看控制台报错，并刷新重试。');
+            console.error(err);
+        } else callback();
+    });
+
+    Object.keys(icons.autotile).forEach(function (one) {
+        fs.moveFile('project/images/'+one+'.png', 'project/autotiles/'+one+'.png', function (e,d) {});
+    });
+}
+
+function action_items(callback) {
+    if (!items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffect || !items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip) {
+        callback();
+        return;
+    }
+    // Step 1: 合并内容
+    var items = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.items;
+    ["itemEffect", "itemEffectTip", "useItemEvent", "useItemEffect", "canUseItemEffect", "equipCondition"].forEach(function(one) {
+        var data = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[one];
+        if (!data) return;
+        for (var id in data) {
+            if (data[id] != null && items[id])
+                items[id][one] = data[id];
+        }
+    });
+    
+    // Step 2: 重置道具效果
+    var data = {
+        "yellowKey": {
+            "cls": "tools",
+            "name": "黄钥匙",
+            "text": "可以打开一扇黄门",
+            "hideInToolbox": true
+        },
+        "blueKey": {
+            "cls": "tools",
+            "name": "蓝钥匙",
+            "text": "可以打开一扇蓝门",
+            "hideInToolbox": true
+        },
+        "redKey": {
+            "cls": "tools",
+            "name": "红钥匙",
+            "text": "可以打开一扇红门",
+            "hideInToolbox": true
+        },
+        "redGem": {
+            "cls": "items",
+            "name": "红宝石",
+            "text": "攻击+${core.values.redGem}",
+            "itemEffect": "core.status.hero.atk += core.values.redGem * core.status.thisMap.ratio",
+            "itemEffectTip": "，攻击+${core.values.redGem * core.status.thisMap.ratio}",
+            "useItemEffect": "core.status.hero.atk += core.values.redGem",
+            "canUseItemEffect": "true"
+        },
+        "blueGem": {
+            "cls": "items",
+            "name": "蓝宝石",
+            "text": "，防御+${core.values.blueGem}",
+            "itemEffect": "core.status.hero.def += core.values.blueGem * core.status.thisMap.ratio",
+            "itemEffectTip": "，防御+${core.values.blueGem * core.status.thisMap.ratio}",
+            "useItemEffect": "core.status.hero.def += core.values.blueGem",
+            "canUseItemEffect": "true"
+        },
+        "greenGem": {
+            "cls": "items",
+            "name": "绿宝石",
+            "text": "，护盾+${core.values.greenGem}",
+            "itemEffect": "core.status.hero.mdef += core.values.greenGem * core.status.thisMap.ratio",
+            "itemEffectTip": "，护盾+${core.values.greenGem * core.status.thisMap.ratio}",
+            "useItemEffect": "core.status.hero.mdef += core.values.greenGem",
+            "canUseItemEffect": "true"
+        },
+        "yellowGem": {
+            "cls": "items",
+            "name": "黄宝石",
+            "text": "可以进行加点",
+            "itemEffect": "core.status.hero.hp+=1000;core.status.hero.atk+=6;core.status.hero.def+=6;core.status.hero.mdef+=10;",
+            "itemEffectTip": "，全属性提升",
+            "useItemEvent": [
+                {
+                    "type": "choices",
+                    "choices": [
+                        {
+                            "text": "攻击+1",
+                            "action": [
+                                {
+                                    "type": "setValue",
+                                    "name": "status:atk",
+                                    "operator": "+=",
+                                    "value": "1"
+                                }
+                            ]
+                        },
+                        {
+                            "text": "防御+2",
+                            "action": [
+                                {
+                                    "type": "setValue",
+                                    "name": "status:def",
+                                    "operator": "+=",
+                                    "value": "2"
+                                }
+                            ]
+                        },
+                        {
+                            "text": "生命+200",
+                            "action": [
+                                {
+                                    "type": "setValue",
+                                    "name": "status:hp",
+                                    "operator": "+=",
+                                    "value": "200"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "canUseItemEffect": "true"
+        },
+        "redPotion": {
+            "cls": "items",
+            "name": "红血瓶",
+            "text": "，生命+${core.values.redPotion}",
+            "itemEffect": "core.status.hero.hp += core.values.redPotion * core.status.thisMap.ratio",
+            "itemEffectTip": "，生命+${core.values.redPotion * core.status.thisMap.ratio}",
+            "useItemEffect": "core.status.hero.hp += core.values.redPotion",
+            "canUseItemEffect": "true"
+        },
+        "bluePotion": {
+            "cls": "items",
+            "name": "蓝血瓶",
+            "text": "，生命+${core.values.bluePotion}",
+            "itemEffect": "core.status.hero.hp += core.values.bluePotion * core.status.thisMap.ratio",
+            "itemEffectTip": "，生命+${core.values.bluePotion * core.status.thisMap.ratio}",
+            "useItemEffect": "core.status.hero.hp += core.values.bluePotion",
+            "canUseItemEffect": "true"
+        },
+        "yellowPotion": {
+            "cls": "items",
+            "name": "黄血瓶",
+            "text": "，生命+${core.values.yellowPotion}",
+            "itemEffect": "core.status.hero.hp += core.values.yellowPotion * core.status.thisMap.ratio",
+            "itemEffectTip": "，生命+${core.values.yellowPotion * core.status.thisMap.ratio}",
+            "useItemEffect": "core.status.hero.hp += core.values.yellowPotion",
+            "canUseItemEffect": "true"
+        },
+        "greenPotion": {
+            "cls": "items",
+            "name": "绿血瓶",
+            "text": "，生命+${core.values.greenPotion}",
+            "itemEffect": "core.status.hero.hp += core.values.greenPotion * core.status.thisMap.ratio",
+            "itemEffectTip": "，生命+${core.values.greenPotion * core.status.thisMap.ratio}",
+            "useItemEffect": "core.status.hero.hp += core.values.greenPotion",
+            "canUseItemEffect": "true"
+        },
+        "freezeBadge": {
+            "cls": "constants",
+            "name": "冰冻徽章",
+            "text": "可以将面前的熔岩变成平地",
+            "useItemEffect": "(function () {\n\tvar success = false;\n\n\tvar snowFourDirections = false; // 是否四方向雪花；如果是将其改成true\n\tif (snowFourDirections) {\n\t\t// 四方向雪花\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (core.getBlockId(nx, ny) == 'lava') {\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t\tsuccess = true;\n\t\t\t}\n\t\t}\n\t} else {\n\t\tif (core.getBlockId(core.nextX(), core.nextY()) == 'lava') {\n\t\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\t\tsuccess = true;\n\t\t}\n\t}\n\n\tif (success) {\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t} else {\n\t\tcore.drawTip(\"当前无法使用\" + core.material.items[itemId].name);\n\t\tcore.addItem(itemId, 1);\n\t\treturn;\n\t}\n})();",
+            "canUseItemEffect": "true"
+        },
+        "bigKey": {
+            "cls": "tools",
+            "name": "大黄门钥匙",
+            "text": "可以开启当前层所有黄门",
+            "itemEffect": "core.status.hero.items.keys.yellowKey++;core.status.hero.items.keys.blueKey++;core.status.hero.items.keys.redKey++;",
+            "itemEffectTip": "，全钥匙+1",
+            "useItemEffect": "(function () {\n\tvar actions = core.searchBlock(\"yellowDoor\").map(function (block) {\n\t\treturn { \"type\": \"openDoor\", \"loc\": [block.x, block.y], \"async\": true };\n\t});\n\tactions.push({ \"type\": \"waitAsync\" });\n\tactions.push({ \"type\": \"tip\", \"text\": core.material.items[itemId].name + \"使用成功\" });\n\tcore.insertAction(actions);\n})();",
+            "canUseItemEffect": "(function () {\n\treturn core.searchBlock('yellowDoor').length > 0;\n})();"
+        },
+        "pickaxe": {
+            "cls": "tools",
+            "name": "破墙镐",
+            "text": "可以破坏勇士面前的墙",
+            "useItemEffect": "(function () {\n\tvar canBreak = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable) return false;\n\t\treturn block.block.event.canBreak;\n\t};\n\n\tvar success = false;\n\tvar pickaxeFourDirections = false; // 是否四方向破；如果是将其改成true\n\tif (pickaxeFourDirections) {\n\t\t// 四方向破\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (canBreak(nx, ny)) {\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t\tsuccess = true;\n\t\t\t}\n\t\t}\n\t} else {\n\t\t// 仅破当前\n\t\tif (canBreak(core.nextX(), core.nextY())) {\n\t\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\t\tsuccess = true;\n\t\t}\n\t}\n\n\tif (success) {\n\t\tcore.playSound('pickaxe.mp3');\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t} else {\n\t\t// 无法使用\n\t\tcore.drawTip(\"当前无法使用\" + core.material.items[itemId].name);\n\t\tcore.addItem(itemId, 1);\n\t\treturn;\n\t}\n})();",
+            "canUseItemEffect": "true"
+        },
+        "icePickaxe": {
+            "cls": "tools",
+            "name": "破冰镐",
+            "text": "可以破坏勇士面前的一堵冰墙",
+            "useItemEffect": "(function () {\n\tcore.removeBlock(core.nextX(), core.nextY());\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
+            "canUseItemEffect": "(function () {\n\treturn core.getBlockId(core.nextX(), core.nextY()) == 'ice';\n})();"
+        },
+        "bomb": {
+            "cls": "tools",
+            "name": "炸弹",
+            "text": "可以炸掉勇士面前的怪物",
+            "useItemEffect": "(function () {\n\tvar canBomb = function (x, y) {\n\t\tvar block = core.getBlock(x, y);\n\t\tif (block == null || block.block.disable || block.block.event.cls.indexOf('enemy') != 0) return false;\n\t\tvar enemy = core.material.enemys[block.block.event.id];\n\t\treturn enemy && !enemy.notBomb;\n\t};\n\n\tvar bombList = []; // 炸掉的怪物坐标列表\n\tvar bombFourDirections = false; // 是否四方向可炸；如果是将其改成true。\n\tif (bombFourDirections) {\n\t\t// 四方向炸\n\t\tfor (var direction in core.utils.scan) {\n\t\t\tvar delta = core.utils.scan[direction];\n\t\t\tvar nx = core.getHeroLoc('x') + delta.x,\n\t\t\t\tny = core.getHeroLoc('y') + delta.y;\n\t\t\tif (canBomb(nx, ny)) {\n\t\t\t\tbombList.push([nx, ny]);\n\t\t\t\tcore.removeBlock(nx, ny);\n\t\t\t}\n\t\t}\n\t} else {\n\t\t// 仅炸当前\n\t\tif (canBomb(core.nextX(), core.nextY())) {\n\t\t\tbombList.push([core.nextX(), core.nextY()]);\n\t\t\tcore.removeBlock(core.nextX(), core.nextY());\n\t\t}\n\t}\n\n\tif (bombList.length > 0) {\n\t\tcore.playSound('bomb.mp3');\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t} else {\n\t\tcore.drawTip('当前无法使用' + core.material.items[itemId].name);\n\t\tcore.addItem(itemId, 1);\n\t\treturn;\n\t}\n\n\t// 炸弹后事件\n\t// 这是一个使用炸弹也能开门的例子\n\t/*\n\tif (core.status.floorId=='xxx' && core.terrainExists(x0,y0,'specialDoor') // 某个楼层，该机关门存在\n\t\t&& !core.enemyExists(x1,y1) && !core.enemyExists(x2,y2)) // 且守门的怪物都不存在\n\t{\n\t\tcore.insertAction([ // 插入事件\n\t\t\t{\"type\": \"openDoor\", \"loc\": [x0,y0]} // 开门\n\t\t])\n\t}\n\t*/\n})();",
+            "canUseItemEffect": "true"
+        },
+        "upFly": {
+            "cls": "tools",
+            "name": "上楼器",
+            "text": "可以飞往楼上的相同位置",
+            "useItemEffect": "(function () {\n\tvar floorId = core.floorIds[core.floorIds.indexOf(core.status.floorId) + 1];\n\tif (core.status.event.id == 'action') {\n\t\tcore.insertAction([\n\t\t\t{ \"type\": \"changeFloor\", \"loc\": [core.getHeroLoc('x'), core.getHeroLoc('y')], \"floorId\": floorId },\n\t\t\t{ \"type\": \"tip\", \"text\": core.material.items[itemId].name + '使用成功' }\n\t\t]);\n\t} else {\n\t\tcore.changeFloor(floorId, null, core.status.hero.loc, null, function () {\n\t\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t\t\tcore.replay();\n\t\t});\n\t}\n})();",
+            "canUseItemEffect": "(function () {\n\tvar floorId = core.status.floorId,\n\t\tindex = core.floorIds.indexOf(floorId);\n\tif (index < core.floorIds.length - 1) {\n\t\tvar toId = core.floorIds[index + 1],\n\t\t\ttoX = core.getHeroLoc('x'),\n\t\t\ttoY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width,\n\t\t\tmh = core.floors[toId].height;\n\t\tif (toX >= 0 && toX < mw && toY >= 0 && toY < mh && core.getBlock(toX, toY, toId) == null) {\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();"
+        },
+        "downFly": {
+            "cls": "tools",
+            "name": "下楼器",
+            "text": "可以飞往楼下的相同位置",
+            "useItemEffect": "(function () {\n\tvar floorId = core.floorIds[core.floorIds.indexOf(core.status.floorId) - 1];\n\tif (core.status.event.id == 'action') {\n\t\tcore.insertAction([\n\t\t\t{ \"type\": \"changeFloor\", \"loc\": [core.getHeroLoc('x'), core.getHeroLoc('y')], \"floorId\": floorId },\n\t\t\t{ \"type\": \"tip\", \"text\": core.material.items[itemId].name + '使用成功' }\n\t\t]);\n\t} else {\n\t\tcore.changeFloor(floorId, null, core.status.hero.loc, null, function () {\n\t\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t\t\tcore.replay();\n\t\t});\n\t}\n})();",
+            "canUseItemEffect": "(function () {\n\tvar floorId = core.status.floorId,\n\t\tindex = core.floorIds.indexOf(floorId);\n\tif (index > 0) {\n\t\tvar toId = core.floorIds[index - 1],\n\t\t\ttoX = core.getHeroLoc('x'),\n\t\t\ttoY = core.getHeroLoc('y');\n\t\tvar mw = core.floors[toId].width,\n\t\t\tmh = core.floors[toId].height;\n\t\tif (toX >= 0 && toX < mw && toY >= 0 && toY < mh && core.getBlock(toX, toY, toId) == null) {\n\t\t\treturn true;\n\t\t}\n\t}\n\treturn false;\n})();"
+        },
+        "earthquake": {
+            "cls": "tools",
+            "name": "地震卷轴",
+            "text": "可以破坏当前层的所有墙",
+            "useItemEffect": "(function () {\n\tvar indexes = [];\n\tfor (var index in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[index];\n\t\tif (!block.disable && block.event.canBreak) {\n\t\t\tindexes.push(index);\n\t\t}\n\t}\n\tcore.removeBlockByIndexes(indexes);\n\tcore.drawMap(core.status.floorId, function () {\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t});\n})();",
+            "canUseItemEffect": "(function () {\n\treturn core.status.thisMap.blocks.filter(function (block) {\n\t\treturn !block.disable && block.event.canBreak;\n\t}).length > 0;\n})();"
+        },
+    };
+    for (var id in data) {
+        items[id] = data[id];
+    }
+
+    var datastr = 'var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
+    datastr += JSON.stringify(items, function (k, v) {
+        if (v && v.id != null) delete v.id;
+        return v;
+    }, '\t');
+    fs.writeFile('project/items.js', encode(datastr), 'base64', function (err, data) {
+        if (err) {
+            alert('items接档失败！请查看控制台报错，并刷新重试。');
+            console.error(err);
+        } else callback();
+    });
+}
+
+function action_maps(callback) {
+    var maps = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+
+    var data = {
+        "1": {"cls":"animates","id":"yellowWall","canBreak":true,"animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{}}},
+    	"2": {"cls":"animates","id":"whiteWall","canBreak":true,"animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{}}},
+	    "3": {"cls":"animates","id":"blueWall","canBreak":true,"animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{}}},
+        "7": {"cls":"terrains","id":"blueShopLeft"},
+        "8": {"cls":"terrains","id":"blueShopRight"},
+        "9": {"cls":"terrains","id":"pinkShopLeft"},
+        "10": {"cls":"terrains","id":"pinkShopRight"},
+        "11": {"cls":"animates","id":"lavaNet","canPass":true,"trigger":"null","script":"(function () {\n\t// 血网的伤害效果移动到 checkBlock 中处理\n\n\t// 如果要做一次性血网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})();","name":"血网"},
+        "12": {"cls":"animates","id":"poisonNet","canPass":true,"trigger":"null","script":"(function () {\n\t// 直接插入公共事件进行毒处理\n\tif (!core.hasItem('amulet')) {\n\t\tcore.insertAction({ \"type\": \"insert\", \"name\": \"毒衰咒处理\", \"args\": [0] });\n\t}\n\n\t// 如果要做一次性毒网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})()","name":"毒网"},
+        "13": {"cls":"animates","id":"weakNet","canPass":true,"trigger":"null","script":"(function () {\n\t// 直接插入公共事件进行衰处理\n\tif (!core.hasItem('amulet')) {\n\t\tcore.insertAction({ \"type\": \"insert\", \"name\": \"毒衰咒处理\", \"args\": [1] });\n\t}\n\n\t// 如果要做一次性衰网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})()","name":"衰网"},
+        "14": {"cls":"animates","id":"curseNet","canPass":true,"trigger":"null","script":"(function () {\n\t// 直接插入公共事件进行咒处理\n\tif (!core.hasItem('amulet')) {\n\t\tcore.insertAction({ \"type\": \"insert\", \"name\": \"毒衰咒处理\", \"args\": [2] });\n\t}\n\n\t// 如果要做一次性咒网，可直接注释掉下面这句话：\n\t// core.removeBlock(core.getHeroLoc('x'), core.getHeroLoc('y'));\n})()","name":"咒网"},
+    	"54": {"cls":"items","id":"freezeBadge"},
+        "81": {"cls":"animates","id":"yellowDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"yellowKey":1}},"name":"黄门"},
+        "82": {"cls":"animates","id":"blueDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"blueKey":1}},"name":"蓝门"},
+        "83": {"cls":"animates","id":"redDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"redKey":1}},"name":"红门"},
+        "84": {"cls":"animates","id":"greenDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"greenKey":1}},"name":"绿门"},
+        "85": {"cls":"animates","id":"specialDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"specialKey":1}},"name":"机关门"},
+        "86": {"cls":"animates","id":"steelDoor","trigger":"openDoor","animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{"steelKey":1}},"name":"铁门"},
+        "161": {"cls":"terrains","id":"arrowUp","canPass":true,"cannotOut":["left","right","down"],"cannotIn":["up"]},
+        "162": {"cls":"terrains","id":"arrowDown","canPass":true,"cannotOut":["left","right","up"],"cannotIn":["down"]},
+        "163": {"cls":"terrains","id":"arrowLeft","canPass":true,"cannotOut":["up","down","right"],"cannotIn":["left"]},
+        "164": {"cls":"terrains","id":"arrowRight","canPass":true,"cannotOut":["up","down","left"],"cannotIn":["right"]},
+        "165": {"cls":"terrains","id":"light","trigger":"null","canPass":true,"script":"(function () {\n\tcore.setBlock(core.getNumberById('darkLight'), core.getHeroLoc('x'), core.getHeroLoc('y'));\n})();"},
+    };
+
+    for (var id in data) {
+        maps[id] = data[id];
+    }
+
+    for (var id in maps) {
+        if (maps[id].noPass === false || maps[id].noPass === 'false')
+            maps[id].canPass = true;
+        delete maps[id].noPass;
+    }
+
+    var datastr = 'var maps_90f36752_8815_4be8_b32b_d7fad1d0542e = \n';
+    var emap = {};
+    var estr = JSON.stringify(maps, function (k, v) {
+        if (v && v.id != null) {
+            var id_ = ':' + v.id + ':';
+            emap[id_] = JSON.stringify(v);
+            return id_;
+        } else return v
+    }, '\t');
+    for (var id_ in emap) {
+        estr = estr.replace('"' + id_ + '"', emap[id_])
+    }
+    datastr += estr;
+
+    fs.writeFile('project/maps.js', encode(datastr), 'base64', function (err, data) {
+        if (err) {
+            alert('maps接档失败！请查看控制台报错，并刷新重试。');
+            console.error(err);
+        } else callback();
+    });
+}
+
+</script>
+
+</body>
+

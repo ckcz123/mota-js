@@ -156,91 +156,6 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 				]
 			}
 		],
-		"滑冰事件": [
-			{
-				"type": "comment",
-				"text": "公共事件：滑冰事件"
-			},
-			{
-				"type": "if",
-				"condition": "core.onSki()",
-				"true": [
-					{
-						"type": "if",
-						"condition": "core.canMoveHero()",
-						"true": [
-							{
-								"type": "comment",
-								"text": "检测下一个点是否可通行"
-							},
-							{
-								"type": "setValue",
-								"name": "flag:nx",
-								"value": "core.nextX()"
-							},
-							{
-								"type": "setValue",
-								"name": "flag:ny",
-								"value": "core.nextY()"
-							},
-							{
-								"type": "if",
-								"condition": "core.noPass(flag:nx, flag:ny)",
-								"true": [
-									{
-										"type": "comment",
-										"text": "不可通行，触发下一个点的事件"
-									},
-									{
-										"type": "trigger",
-										"loc": [
-											"flag:nx",
-											"flag:ny"
-										]
-									}
-								],
-								"false": [
-									{
-										"type": "comment",
-										"text": "可通行，先移动到下个点，然后检查阻激夹域，并尝试触发该点事件"
-									},
-									{
-										"type": "moveHero",
-										"time": 80,
-										"steps": [
-											"forward"
-										]
-									},
-									{
-										"type": "function",
-										"function": "function(){\ncore.checkBlock();\n}"
-									},
-									{
-										"type": "comment",
-										"text": "【触发事件】如果该点存在事件则会立刻结束当前事件"
-									},
-									{
-										"type": "trigger",
-										"loc": [
-											"flag:nx",
-											"flag:ny"
-										]
-									},
-									{
-										"type": "comment",
-										"text": "如果该点不存在事件，则继续检测该点是否是滑冰点"
-									},
-									{
-										"type": "function",
-										"function": "function(){\ncore.insertAction(\"滑冰事件\",null,null,null,true)\n}"
-									}
-								]
-							}
-						]
-					}
-				]
-			}
-		],
 		"回收钥匙商店": [
 			{
 				"type": "comment",
@@ -260,7 +175,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 				"data": [
 					{
 						"type": "choices",
-						"text": "\t[商人,woman]你有多余的钥匙想要出售吗？",
+						"text": "\t[商人,trader]你有多余的钥匙想要出售吗？",
 						"choices": [
 							{
 								"text": "黄钥匙（10金币）",
@@ -289,7 +204,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 											}
 										],
 										"false": [
-											"\t[商人,woman]你没有黄钥匙！"
+											"\t[商人,trader]你没有黄钥匙！"
 										]
 									}
 								]
@@ -321,7 +236,7 @@ var events_c12a15a8_c380_4b28_8144_256cba95f760 =
 											}
 										],
 										"false": [
-											"\t[商人,woman]你没有蓝钥匙！"
+											"\t[商人,trader]你没有蓝钥匙！"
 										]
 									}
 								]

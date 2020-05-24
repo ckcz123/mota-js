@@ -84,6 +84,7 @@ function core() {
     // 样式
     this.domStyle = {
         scale: 1.0,
+        availableScale: [],
         isVertical: false,
         showStatusBar: true,
         toolbarBtn: false,
@@ -190,15 +191,13 @@ function core() {
         },
         "globalAttribute": {
             'equipName': main.equipName || [],
-            "statusLeftBackground": main.statusLeftBackground || "url(project/images/ground.png) repeat",
-            "statusTopBackground": main.statusTopBackground || "url(project/images/ground.png) repeat",
-            "toolsBackground": main.toolsBackground || "url(project/images/ground.png) repeat",
-            "borderColor": main.borderColor || "white",
-            "statusBarColor": main.statusBarColor || "white",
-            "hardLabelColor": main.hardLabelColor || "red",
-            "floorChangingBackground": main.floorChangingBackground || "black",
-            "floorChangingTextColor": main.floorChangingTextColor || "white",
-            "font": main.font || "Verdana"
+            "statusLeftBackground": main.styles.statusLeftBackground || "url(project/materials/ground.png) repeat",
+            "statusTopBackground": main.styles.statusTopBackground || "url(project/materials/ground.png) repeat",
+            "toolsBackground": main.styles.toolsBackground || "url(project/materials/ground.png) repeat",
+            "borderColor": main.styles.borderColor || [204,204,204,1],
+            "statusBarColor": main.styles.statusBarColor || [255,255,255,1],
+            "floorChangingStyle": main.styles.floorChangingStyle || "background-color: black; color: white",
+            "font": main.styles.font || "Verdana"
         },
         'curtainColor': null,
         'openingDoor': null,
@@ -239,6 +238,10 @@ core.prototype._init_flags = function () {
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
+    
+    // 让你总是拼错！
+    window.on = true;
+    window.off = false;
 
     core.dom.versionLabel.innerText = core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;
@@ -277,7 +280,6 @@ core.prototype._init_flags = function () {
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
-    core.items._resetItems();
     core.material.icons = core.icons.getIcons();
 }
 
@@ -289,6 +291,12 @@ core.prototype._init_sys_flags = function () {
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', 500);
+    if (main.mode != 'editor') {
+        core.domStyle.scale = core.getLocalStorage('scale', 1);
+        if (core.domStyle.scale != 1) {
+            core.resize();
+        }
+    }
 }
 
 core.prototype._init_platform = function () {
@@ -371,8 +379,8 @@ core.prototype._init_others = function () {
     core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
-    core.loadImage('fog', function (name, img) { core.animateFrame.weather.fog = img; });
-    core.loadImage('keyboard', function (name, img) {core.material.images.keyboard = img; });
+    core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
+    core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
     core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });

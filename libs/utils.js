@@ -352,13 +352,13 @@ utils.prototype.splitImage = function (image, width, height) {
     width = width || 32;
     height = height || width;
     var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
     var ans = [];
     for (var j = 0; j < image.height; j += height) {
         for (var i = 0; i < image.width; i += width) {
             var w = Math.min(width, image.width - i), h = Math.min(height, image.height - j);
             canvas.width = w; canvas.height = h;
-            context.drawImage(image, i, j, w, h, 0, 0, w, h);
+            core.drawImage(ctx, image, i, j, w, h, 0, 0, w, h);
             var img = new Image();
             img.src = canvas.toDataURL("image/png");
             ans.push(img);
@@ -392,9 +392,16 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x) < 10 ? "0" + x : x;
 }
 
+utils.prototype.formatSize = function (size) {
+    if (size < 1024) return size + 'B';
+    else if (size < 1024 * 1024) return (size/1024).toFixed(2) + "KB";
+    else return (size/1024/1024).toFixed(2) + "MB";
+}
+
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
+    if (x > 1e24 || x < -1e24) return x;
 
     var c = x < 0 ? "-" : "";
     x = Math.abs(x);
@@ -430,12 +437,14 @@ utils.prototype.formatBigNumber = function (x, onMap) {
 
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
+    if (!(color instanceof Array)) return color;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255);
     return "#" + ((1 << 24) + (nowR << 16) + (nowG << 8) + nowB).toString(16).slice(1);
 }
 
 utils.prototype.arrayToRGBA = function (color) {
+    if (!(color instanceof Array)) return color;
     if (color[3] == null) color[3] = 1;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255), nowA = this.clamp(parseFloat(color[3]), 0, 1);
@@ -691,9 +700,19 @@ utils.prototype.strlen = function (str) {
     return count;
 };
 
-utils.prototype.reverseDirection = function (direction) {
+utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
-    return {"left":"right","right":"left","down":"up","up":"down"}[direction] || direction;
+    var directionList = ["left", "up", "right", "down"];
+    if (directionList.indexOf(turn) >= 0) return turn;
+    switch (turn) {
+        case ':left': turn = 3; break; // turn left
+        case ':right': turn = 1; break; // turn right
+        case ':back': turn = 2; break; // turn back
+        default: turn = 0; break;
+    }
+    var index = directionList.indexOf(direction);
+    if (index < 0) return direction;
+    return directionList[(index + (turn || 0)) % 4];
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {
@@ -1072,20 +1091,6 @@ utils.prototype._decodeCanvas = function (arr, width, height) {
     tempCanvas.putImageData(imgData, 0, 0);
 }
 
-utils.prototype.hashCode = function (obj) {
-    if (typeof obj == 'string') {
-        var hash = 0, i, chr;
-        if (obj.length === 0) return hash;
-        for (i = 0; i < obj.length; i++) {
-            chr = obj.charCodeAt(i);
-            hash = ((hash << 5) - hash) + chr;
-            hash |= 0;
-        }
-        return hash;
-    }
-    return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
-}
-
 utils.prototype.same = function (a, b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;
@@ -1107,51 +1112,6 @@ utils.prototype.same = function (a, b) {
         return true;
     }
     return false;
-}
-
-utils.prototype._export = function (floorIds) {
-    if (!floorIds) floorIds = [core.status.floorId];
-    else if (floorIds == 'all') floorIds = core.clone(core.floorIds);
-    else if (typeof floorIds == 'string') floorIds = [floorIds];
-
-    var monsterMap = {};
-
-    // map
-    var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
-    floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
-        content += arr.map(function (x) {
-            // check monster
-            x.forEach(function (t) {
-                var block = core.maps.getBlockByNumber(t);
-                if (block.event.cls.indexOf("enemy") == 0) {
-                    monsterMap[t] = block.event.id;
-                }
-            })
-            return x.join("\t");
-        }).join("\n") + "\n\n";
-    })
-
-    // values
-    content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
-        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x] || 0;
-    }).join(" ") + "\n\n";
-
-    // monster
-    content += Object.keys(monsterMap).length + "\n";
-    for (var t in monsterMap) {
-        var id = monsterMap[t], monster = core.material.enemys[id];
-        content += t + " " + monster.hp + " " + monster.atk + " " +
-            monster.def + " " + monster.money + " " + monster.special + "\n";
-    }
-    content += "\n0 0 0 0 0 0\n\n";
-    content += core.status.hero.hp + " " + core.status.hero.atk + " "
-        + core.status.hero.def + " " + core.status.hero.mdef + " " + core.status.hero.money + " "
-        + core.itemCount('yellowKey') + " " + core.itemCount("blueKey") + " " + core.itemCount("redKey") + " 0 "
-        + core.status.hero.loc.x + " " + core.status.hero.loc.y + "\n";
-
-    console.log(content);
 }
 
 utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
@@ -1217,7 +1177,7 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     };
     xhr.onprogress = function (e) {
         if (e.lengthComputable) {
-            if (onprogress) onprogress(e.loaded / e.total);
+            if (onprogress) onprogress(e.loaded, e.total);
         }
     }
     xhr.onabort = function () {

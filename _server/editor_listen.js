@@ -24,23 +24,27 @@ editor_listen_wrapper = function (editor) {
         editor.dom.iconExpandBtn.onclick = editor.uifunctions.fold_material_click
 
         editor.dom.iconLib.onmousedown = editor.uifunctions.material_ondown
+        editor.dom.iconLib.onmousemove = editor.uifunctions.material_onmove
+        editor.dom.iconLib.onmouseup = editor.uifunctions.material_onup
         editor.dom.iconLib.oncontextmenu = function (e) { e.preventDefault() }
 
         editor.dom.extraEvent.onmousedown = editor.uifunctions.extraEvent_click
         editor.dom.chooseThis.onmousedown = editor.uifunctions.chooseThis_click
         editor.dom.chooseInRight.onmousedown = editor.uifunctions.chooseInRight_click
         editor.dom.copyLoc.onmousedown = editor.uifunctions.copyLoc_click
-        editor.dom.moveLoc.onmousedown = editor.uifunctions.moveLoc_click
+        editor.dom.pasteLoc.onmousedown = editor.uifunctions.pasteLoc_click
         editor.dom.clearEvent.onmousedown = editor.uifunctions.clearEvent_click
         editor.dom.clearLoc.onmousedown = editor.uifunctions.clearLoc_click
 
         editor.dom.lastUsed.onmousedown = editor.uifunctions.lastUsed_click;
+        editor.dom.lastUsed.oncontextmenu = function (e) { e.preventDefault(); }
         editor.dom.clearLastUsedBtn.onclick = editor.uifunctions.clearLastUsedBtn_click;
         editor.dom.lockMode.onchange = editor.uifunctions.lockMode_onchange;
 
         editor.dom.brushMod.onchange = editor.uifunctions.brushMod_onchange
         if (editor.dom.brushMod2) editor.dom.brushMod2.onchange = editor.uifunctions.brushMod2_onchange;
         if (editor.dom.brushMod3) editor.dom.brushMod3.onchange = editor.uifunctions.brushMod3_onchange;
+        if (editor.dom.brushMod4) editor.dom.brushMod4.onchange = editor.uifunctions.brushMod4_onchange;
 
         editor.dom.layerMod.onchange = editor.uifunctions.layerMod_onchange
         if (editor.dom.layerMod2) editor.dom.layerMod2.onchange = editor.uifunctions.layerMod2_onchange;
@@ -126,10 +130,18 @@ editor_listen_wrapper = function (editor) {
         editor.dom.chooseInRight.onmousedown = null
         editor.dom.copyLoc.ontouchstart = editor.dom.copyLoc.onmousedown
         editor.dom.copyLoc.onmousedown = null
-        editor.dom.moveLoc.ontouchstart = editor.dom.moveLoc.onmousedown
-        editor.dom.moveLoc.onmousedown = null
+        editor.dom.pasteLoc.ontouchstart = editor.dom.pasteLoc.onmousedown
+        editor.dom.pasteLoc.onmousedown = null
         editor.dom.clearLoc.ontouchstart = editor.dom.clearLoc.onmousedown
         editor.dom.clearLoc.onmousedown = null
+        
+        // 不使用以下6语句, 会使得素材区手机无法拖动, 手机的框选素材只能放弃, 要通过弹框实现框选
+        // editor.dom.iconLib.ontouchstart = editor.dom.iconLib.onmousedown
+        // editor.dom.iconLib.onmousedown = null
+        // editor.dom.iconLib.ontouchmove = editor.dom.iconLib.onmousemove
+        // editor.dom.iconLib.onmousemove = null
+        // editor.dom.iconLib.ontouchend = editor.dom.iconLib.onmouseup
+        // editor.dom.iconLib.onmouseup = null
     }
 
     editor.constructor.prototype.mode_listen = function (callback) {
@@ -148,6 +160,7 @@ editor_listen_wrapper = function (editor) {
         editor.uifunctions.createNewMaps_func()
 
         editor.uifunctions.changeFloorId_func()
+        editor.uifunctions.changeFloorSize_func()
 
         editor.uifunctions.fixCtx_func()
 

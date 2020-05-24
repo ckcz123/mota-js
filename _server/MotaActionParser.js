@@ -107,8 +107,8 @@ ActionParser.prototype.parse = function (obj,type) {
     case 'mainStyle':
       if(!obj) obj={};
       return MotaActionBlocks['mainStyle_m'].xmlText([
-        obj.startBackground, obj.startLogoStyle, obj.startButtonsStyle, obj.statusLeftBackground, obj.statusTopBackground,
-        obj.toolsBackground, obj.floorChangingStyle,
+        obj.startBackground, obj.startVerticalBackground || obj.startBackground, obj.startLogoStyle, obj.startButtonsStyle, 
+        obj.statusLeftBackground, obj.statusTopBackground, obj.toolsBackground, obj.floorChangingStyle,
         obj.statusBarColor, 'rgba('+obj.statusBarColor+')', obj.borderColor, 'rgba('+obj.borderColor+')', obj.font
       ]);
 

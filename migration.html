@@ -138,6 +138,7 @@ function action_data(callback) {
     // Step 2: 合并main.styles
     if (!main.styles) main.styles = {
         "startBackground": "project/images/bg.jpg",
+        "startVerticalBackground": "project/images/bg.jpg",
         "startLogoStyle": "color: black",
         "startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;",
         "statusLeftBackground": "url(project/materials/ground.png) repeat",
@@ -150,7 +151,8 @@ function action_data(callback) {
     };
     ["startLogoStyle", "startButtonsStyle", "statusLeftBackground", "statusTopBackground", "toolsBackground", "font"].forEach(function (one) {
         if (main[one]) main.styles[one] = main[one];
-    })
+    });
+    if (main.styles.startVerticalBackground == null) main.styles.startVerticalBackground = main.styles.startBackground;
     for (var key in main.styles) delete main[key];
     delete main.floorChangingBackground; delete main.floorChangingTextColor;
 

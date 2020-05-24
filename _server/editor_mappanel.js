@@ -216,18 +216,18 @@ editor_mappanel_wrapper = function (editor) {
         ee.preventDefault();
         ee.stopPropagation();
         var e=editor.uivalues.lastMoveE;
+        if (e.buttons == 2 && (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y))) {
+            editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+            editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+            editor.uivalues.startPos = editor.uivalues.endPos = null;
+            return false;
+        }
         if (!selectBox.isSelected()) {
             if (e.buttons == 2) {
-                if (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y)) {
-                    // 右键点击: 弹菜单
-                    editor.uifunctions.showMidMenu(e.clientX, e.clientY);
-                    editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
-                } else {
-                    // 右键拖拽: 选中区域
-                    printf('已经选中该区域')
-                    editor.uivalues.selectedArea = Object.assign({}, editor.uivalues.startPos, {x1: editor.uivalues.endPos.x, y1: editor.uivalues.endPos.y});
-                    // 后续的处理
-                }
+                // 右键拖拽: 选中区域
+                printf('已经选中该区域')
+                editor.uivalues.selectedArea = Object.assign({}, editor.uivalues.startPos, {x1: editor.uivalues.endPos.x, y1: editor.uivalues.endPos.y});
+                // 后续的处理
             } else {
                 // 左键拖拽: 交换
                 //tip.whichShow(1);

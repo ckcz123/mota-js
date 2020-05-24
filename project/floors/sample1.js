@@ -12,8 +12,8 @@ main.floors.sample1=
             "canvas": "bg",
             "x": 0,
             "y": 0,
-            "w": 416,
-            "h": 416
+            "w": 480,
+            "h": 480
         }
     ],
     "weather": [

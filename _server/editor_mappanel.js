@@ -436,13 +436,9 @@ editor_mappanel_wrapper = function (editor) {
      * 隐藏右键菜单
      */
     editor.uifunctions.hideMidMenu = function () {
-        if (editor.isMobile) {
-            setTimeout(function () {
-                editor.dom.midMenu.style = 'display:none';
-            }, 200)
-        } else {
+        setTimeout(function () {
             editor.dom.midMenu.style = 'display:none';
-        }
+        }, 100)
     }
 
     /**
@@ -582,6 +578,8 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.chooseThis_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         selectBox.isSelected(false);
 
         editor_mode.onmode('nextChange');
@@ -589,6 +587,7 @@ editor_mappanel_wrapper = function (editor) {
         //editor_mode.loc();
         //tip.whichShow(1);
         if (editor.isMobile) editor.showdataarea(false);
+        return false;
     }
 
     /**
@@ -598,8 +597,11 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.chooseInRight_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         var thisevent = editor[editor.layerMod][editor.pos.y][editor.pos.x];
         editor.setSelectBoxFromInfo(thisevent, true);
+        return false;
     }
 
     /**
@@ -609,11 +611,12 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.copyLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
         editor_mode.onmode('');
         editor.uivalues.copyedInfo = editor.copyFromPos();
         printf('该点事件已复制');
-        return;
+        return false;
     }
 
     /**
@@ -623,10 +626,11 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.pasteLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
         if (!editor.uivalues.copyedInfo) {
             printe("没有复制的事件");
-            return;
+            return false;
         }
         editor.savePreMap();
         editor_mode.onmode('');
@@ -641,7 +645,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uifunctions.unhighlightSaveFloorButton();
             editor.drawPosSelection();
         });
-        return;
+        return false;
     }
 
     /**
@@ -650,8 +654,11 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearEvent_click = function (e) {
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         editor.clearPos(false);
         editor.uifunctions.unhighlightSaveFloorButton();
+        return false;
     }
 
     /**
@@ -660,8 +667,11 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearLoc_click = function (e) {
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         editor.clearPos(true);
         editor.uifunctions.unhighlightSaveFloorButton();
+        return false;
     }
 
     /**
@@ -820,7 +830,7 @@ editor_mappanel_wrapper = function (editor) {
 
     editor.uifunctions.highlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='#FFCCAA';
+        saveFloor.style.background='#fff4bb';
     }
 
     editor.uifunctions.unhighlightSaveFloorButton=function(){
@@ -845,7 +855,10 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.uifunctions.lastUsed_click = function (e) {
-        if (editor.isMobile) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+        if (editor.isMobile) return false;
 
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop

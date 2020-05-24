@@ -28,15 +28,15 @@ editor_listen_wrapper = function (editor) {
         editor.dom.iconLib.onmouseup = editor.uifunctions.material_onup
         editor.dom.iconLib.oncontextmenu = function (e) { e.preventDefault() }
 
-        editor.dom.extraEvent.onmousedown = editor.uifunctions.extraEvent_click
-        editor.dom.chooseThis.onmousedown = editor.uifunctions.chooseThis_click
-        editor.dom.chooseInRight.onmousedown = editor.uifunctions.chooseInRight_click
-        editor.dom.copyLoc.onmousedown = editor.uifunctions.copyLoc_click
-        editor.dom.pasteLoc.onmousedown = editor.uifunctions.pasteLoc_click
-        editor.dom.clearEvent.onmousedown = editor.uifunctions.clearEvent_click
-        editor.dom.clearLoc.onmousedown = editor.uifunctions.clearLoc_click
+        editor.dom.extraEvent.onmouseup = editor.uifunctions.extraEvent_click
+        editor.dom.chooseThis.onmouseup = editor.uifunctions.chooseThis_click
+        editor.dom.chooseInRight.onmouseup = editor.uifunctions.chooseInRight_click
+        editor.dom.copyLoc.onmouseup = editor.uifunctions.copyLoc_click
+        editor.dom.pasteLoc.onmouseup = editor.uifunctions.pasteLoc_click
+        editor.dom.clearEvent.onmouseup = editor.uifunctions.clearEvent_click
+        editor.dom.clearLoc.onmouseup = editor.uifunctions.clearLoc_click
 
-        editor.dom.lastUsed.onmousedown = editor.uifunctions.lastUsed_click;
+        editor.dom.lastUsed.onmouseup = editor.uifunctions.lastUsed_click;
         editor.dom.lastUsed.oncontextmenu = function (e) { e.preventDefault(); }
         editor.dom.clearLastUsedBtn.onclick = editor.uifunctions.clearLastUsedBtn_click;
         editor.dom.lockMode.onchange = editor.uifunctions.lockMode_onchange;

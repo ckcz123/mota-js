@@ -49,10 +49,11 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
         return /* html */`${prefixString}<input key='${key}' ctype='${typeof key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
     }
-    editor_table.prototype.editGrid = function (showComment, showEdit) {
+    editor_table.prototype.editGrid = function (showComment, showEdit, showCopy) {
         var list = [];
         if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
-        if (showEdit) list.push("<button onclick='editor.table.onEditBtnClick(this)'>编辑</button>");
+        if (showEdit) list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>编辑</button>");
+        if (showCopy) list.push("<button onclick='editor.table.onCopyBtnClick(this)'>复制</button>");
         return list.join(' ');
     }
 
@@ -70,7 +71,7 @@ editor_table_wrapper = function (editor) {
             <td>----</td>
             <td>----</td>
             <td>${field}</td>
-            <td><button style="background: #FFCCAA" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
+            <td><button style="background: #fff4bb" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
         </tr>\n`
     }
 
@@ -79,7 +80,7 @@ editor_table_wrapper = function (editor) {
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
         <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
-        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'disable')}</td>
+        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'disable', type == 'disable')}</td>
         </tr>\n`
     }
 
@@ -416,6 +417,22 @@ editor_table_wrapper = function (editor) {
         if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
         if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
         if (cobj._type === 'color') editor.table.selectColor(input);
+        if (cobj._type === 'point') editor.table.selectPoint(input);
+    }
+
+    editor_table.prototype.onCopyBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        var input = tr.children[2].children[0].children[0];
+        var value = JSON.parse(input.value);
+        if (value == null) {
+            printe('没有赋值的内容');
+            return;
+        }
+        if (core.copy(value.toString())) {
+            printf('复制成功！');
+        } else {
+            printe('无法复制此内容，请手动选择复制');
+        }
     }
 
     /**
@@ -431,6 +448,7 @@ editor_table_wrapper = function (editor) {
             if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
             if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
             if (cobj._type === 'color') editor.table.selectColor(input);
+            if (cobj._type === 'point') editor.table.selectPoint(input);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -462,6 +480,23 @@ editor_table_wrapper = function (editor) {
         openColorPicker(boundingBox.x, boundingBox.y + boundingBox.height, function (value) {
             value = value.replace(/[^\d.,]/g, '');
             input.value = '[' + value +']';
+            input.onchange();
+        })
+    }
+
+    editor_table.prototype.selectPoint = function (input) {
+        var x = 0, y = 0, value = input.value;
+        if (value != null) {
+            try {
+                var loc = JSON.parse(value);
+                if (loc instanceof Array && loc.length == 2) {
+                    x = loc[0];
+                    y = loc[1];
+                }
+            } catch (e) {}
+        }
+        editor.uievent.selectPoint(editor.currentFloorId, x, y, true, function (floorId, x, y) {
+            input.value = '['+x+','+y+']';
             input.onchange();
         })
     }

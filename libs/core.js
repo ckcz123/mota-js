@@ -230,7 +230,9 @@ core.prototype.init = function (coreData, callback) {
         core.extensions._load(function () {
             core._afterLoadResources(callback);
         });
-    });
+    });    
+    core.dom.musicBtn.style.display = 'block';
+    core.setMusicBtn();
 }
 
 core.prototype._init_flags = function () {

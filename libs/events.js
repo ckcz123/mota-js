@@ -2972,7 +2972,7 @@ events.prototype.checkLvUp = function () {
 }
 
 events.prototype._checkLvUp_check = function () {
-    if (core.flags.statusBarItems.indexOf('enableLevelUp')>=0 || !core.firstData.levelUp
+    if (core.flags.statusBarItems.indexOf('enableLevelUp')<0 || !core.firstData.levelUp
         || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});

@@ -71,7 +71,7 @@ editor_table_wrapper = function (editor) {
             <td>----</td>
             <td>----</td>
             <td>${field}</td>
-            <td><button style="background: #FFCCAA" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
+            <td><button style="background: #fff4bb" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
         </tr>\n`
     }
 

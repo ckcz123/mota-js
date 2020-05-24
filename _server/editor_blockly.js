@@ -147,7 +147,7 @@ editor_blockly = function () {
     editor_blockly.highlightParse = function (shouldHighLight) {
       if (shouldNotifyParse == shouldHighLight) return;
       shouldNotifyParse = shouldHighLight;
-      blocklyParseBtn.style.background = shouldNotifyParse ? '#FFCCAA' : 'unset';
+      blocklyParseBtn.style.background = shouldNotifyParse ? '#fff4bb' : 'unset';
     }
 
     editor_blockly.cancel = function () {

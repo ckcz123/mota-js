@@ -1821,9 +1821,9 @@ control.prototype._syncSave_http = function (type, saves) {
             core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
         }
         else {
-            core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
-                +response.code+"\n您的存档密码： "+response.msg
-                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。\n\r[yellow]另外请注意，存档同步只会保存一个月的时间。\r")
+            core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号+密码： \r[yellow]"
+                +response.code+response.msg
+                +"\r\n\n请牢记以上信息（如截图等），在从服务器\n同步存档时使用。\n\r[yellow]另外请注意，存档同步只会保存一个月的时间。\r")
         }
     }, function (e) {
         core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
@@ -1832,13 +1832,14 @@ control.prototype._syncSave_http = function (type, saves) {
 
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
-    core.myprompt("请输入存档编号", null, function (id) {
-        if (!id) return core.ui.drawSyncSave();
-        core.myprompt("请输入存档密码：", null, function (password) {
-            if (!password) return core.ui.drawSyncSave();
-            core.ui.drawWaiting("正在同步，请稍后...");
-            core.control._syncLoad_http(id, password);
-        });
+    core.myprompt("请输入存档编号+密码", null, function (idpassword) {
+        if (!idpassword) return core.ui.drawSyncSave();
+        if (!/^\d{6}\w{4}$/.test(idpassword)) {
+            core.drawText("不合法的存档编号+密码；应当为6位数字+4位数字字母的组合，如\r[yellow]123456abcd\r。");
+            return;
+        }
+        core.ui.drawWaiting("正在同步，请稍后...");
+        core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
     });
 }
 
@@ -2695,6 +2696,12 @@ control.prototype.resize = function() {
 }
 
 control.prototype._resize_gameGroup = function (obj) {
+    var startBackground = core.domStyle.isVertical ? (main.styles.startVerticalBackground || main.styles.startBackground) : main.styles.startBackground;
+    if (main.dom.startBackground.getAttribute('__src__') != startBackground) {
+        main.dom.startBackground.setAttribute('__src__', startBackground);
+        main.dom.startBackground.src = startBackground;
+    }
+
     var gameGroup = core.dom.gameGroup;
     var totalWidth, totalHeight;
     if (core.domStyle.isVertical) {

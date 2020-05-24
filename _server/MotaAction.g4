@@ -558,7 +558,8 @@ return '{' + [
 
 
 mainStyle_m
-    : '主要样式设置：' '标题界面背景图（全路径）：'  EvalString BGNL? Newline 
+    : '主要样式设置：' '标题界面背景图（544x422）：' EvalString BGNL? Newline 
+      '竖屏标题界面背景图（422x580）' EvalString BGNL? Newline 
       '标题样式；可写 display: none 隐藏标题' EvalString BGNL? Newline 
       '标题按钮样式：' EvalString BGNL? Newline 
       '横屏状态栏背景；url(...) 0 0/100% 100% no-repeat 可将图片拉伸自适配' BGNL? Newline EvalString BGNL? Newline  
@@ -569,19 +570,20 @@ mainStyle_m
 
 /* mainStyle_m
 tooltip : 主要样式设置
-default : ["project/images/bg.jpg", "color: black", "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "background-color: black; color: white", "255,255,255,1", "rgba(255,255,255,1)", "204,204,204,1", "rgba(204,204,204,1)", "Verdana"]
+default : ["project/images/bg.jpg", "project/images/bg.jpg", "color: black", "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "url(project/materials/ground.png) repeat", "background-color: black; color: white", "255,255,255,1", "rgba(255,255,255,1)", "204,204,204,1", "rgba(204,204,204,1)", "Verdana"]
 helpUrl : https://h5mota.com/games/template/_docs/#/event
 var code = {
     startBackground: EvalString_0,
-    startLogoStyle: EvalString_1,
-    startButtonsStyle: EvalString_2,
-    statusLeftBackground: EvalString_3,
-    statusTopBackground: EvalString_4,
-    toolsBackground: EvalString_5,
-    floorChangingStyle: EvalString_6,
+    startVerticalBackground: EvalString_1,
+    startLogoStyle: EvalString_2,
+    startButtonsStyle: EvalString_3,
+    statusLeftBackground: EvalString_4,
+    statusTopBackground: EvalString_5,
+    toolsBackground: EvalString_6,
+    floorChangingStyle: EvalString_7,
     statusBarColor: JSON.parse('['+ColorString_0+']'),
     borderColor: JSON.parse('['+ColorString_1+']'),
-    font: EvalString_7
+    font: EvalString_8
 };
 return JSON.stringify(code);
 */;

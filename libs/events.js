@@ -44,7 +44,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
     core.resetGame(core.firstData.hero, hard, null, core.clone(core.initStatus.maps));
-    var nowLoc = core.clone(core.getHeroLoc());
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 
@@ -64,7 +63,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     core.push(todo, {"type": "function", "function": "function() { core.events._startGame_setHard(); }"})
     core.push(todo, core.firstData.startText);
     this.insertAction(todo, null, null, function () {
-        core.events._startGame_afterStart(nowLoc, callback);
+        core.events._startGame_afterStart(callback);
     });
 
     if (route != null) core.startReplay(route);
@@ -86,11 +85,10 @@ events.prototype._startGame_setHard = function () {
     core.setFlag('__hardColor__', hardColor);
 }
 
-events.prototype._startGame_afterStart = function (nowLoc, callback) {
+events.prototype._startGame_afterStart = function (callback) {
     core.ui.closePanel();
     this._startGame_statusBar();
-    core.dom.musicBtn.style.display = 'none';
-    core.changeFloor(core.firstData.floorId, null, nowLoc, null, function () {
+    core.changeFloor(core.firstData.floorId, null, core.firstData.hero.loc, null, function () {
         // 插入一个空事件避免直接回放录像出错
         core.insertAction([]);
         if (callback) callback();

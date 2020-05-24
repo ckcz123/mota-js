@@ -2721,6 +2721,9 @@ control.prototype._resize_gameGroup = function (obj) {
     floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
     floorMsgGroup.style.width = obj.outerSize - 2 * obj.BORDER + "px";
     floorMsgGroup.style.height = totalHeight - 2 * obj.BORDER + "px";
+    floorMsgGroup.style.fontSize = 16 * core.domStyle.scale + "px";
+    // startPanel
+    core.dom.startPanel.style.fontSize = 16 * core.domStyle.scale + "px";
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
         core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";

@@ -2856,10 +2856,12 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });
+    core.status.heroMoving = -1;
     var animate=window.setInterval(function() {
         if (moveSteps.length==0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
+            core.status.heroMoving = 0;
             core.drawHero();
             if (callback) callback();
         }
@@ -2912,6 +2914,7 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
 }
 
 events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
+    core.status.heroMoving = -1;
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0)
             core.events._jumpHero_jumping(jumpInfo)
@@ -2940,6 +2943,7 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
     clearInterval(animate);
     core.setHeroLoc('x', ex);
     core.setHeroLoc('y', ey);
+    core.status.heroMoving = 0;
     core.drawHero();
     if (callback) callback();
 }

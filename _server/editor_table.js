@@ -49,11 +49,12 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
         return /* html */`${prefixString}<input key='${key}' ctype='${typeof key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
     }
-    editor_table.prototype.editGrid = function (showComment, showEdit, showCopy) {
+    editor_table.prototype.editGrid = function (showComment, type) {
         var list = [];
         if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
-        if (showEdit) list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>编辑</button>");
-        if (showCopy) list.push("<button onclick='editor.table.onCopyBtnClick(this)'>复制</button>");
+        if (type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'disable')
+            list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>编辑</button>");
+        if (type == 'disable') list.push("<button onclick='editor.table.onCopyBtnClick(this)'>复制</button>");
         return list.join(' ');
     }
 
@@ -80,13 +81,15 @@ editor_table_wrapper = function (editor) {
         <td title="${field}">${shortField}</td>
         <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
         <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
-        <td>${editor.table.editGrid(shortComment, type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'disable', type == 'disable')}</td>
+        <td>${editor.table.editGrid(shortComment, type)}</td>
         </tr>\n`
     }
 
 
     /**
      * checkboxset中checkbox的onchange
+     * 这个函数本质是模板editor_table.prototype.checkboxSetMember的一部分
+     * 故放在HTML模板分类下
      */
     editor_table.prototype.checkboxSetMemberOnchange = function (onemember) {
         var thisset=onemember.parentNode
@@ -287,7 +290,7 @@ editor_table_wrapper = function (editor) {
             case 'checkboxSet':
                 return editor.table.checkboxSet(thiseval, cobj._checkboxSet.key, cobj._checkboxSet.prefix);
             default: 
-                return editor.table.textarea(thiseval, cobj.indent || 0, cobj._type == 'disable');
+                return editor.table.textarea(thiseval, cobj.indent || 0, cobj._type == 'disable' || cobj._type == 'popCheckboxSet');
         }
     }
 
@@ -418,6 +421,7 @@ editor_table_wrapper = function (editor) {
         if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
         if (cobj._type === 'color') editor.table.selectColor(input);
         if (cobj._type === 'point') editor.table.selectPoint(input);
+        if (cobj._type === 'popCheckboxSet') editor.table.popCheckboxSet(input, cobj);
     }
 
     editor_table.prototype.onCopyBtnClick = function (button) {
@@ -449,6 +453,7 @@ editor_table_wrapper = function (editor) {
             if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
             if (cobj._type === 'color') editor.table.selectColor(input);
             if (cobj._type === 'point') editor.table.selectPoint(input);
+            if (cobj._type === 'popCheckboxSet') editor.table.popCheckboxSet(input, cobj);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -497,6 +502,13 @@ editor_table_wrapper = function (editor) {
         }
         editor.uievent.selectPoint(editor.currentFloorId, x, y, true, function (floorId, x, y) {
             input.value = '['+x+','+y+']';
+            input.onchange();
+        })
+    }
+
+    editor_table.prototype.popCheckboxSet = function (input, cobj) {
+        editor.uievent.popCheckboxSet(JSON.parse(input.value), cobj._checkboxSet, cobj._docs || cobj._data || '请选择多选项', function (value) {
+            input.value = JSON.stringify(value);
             input.onchange();
         })
     }

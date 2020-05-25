@@ -2505,7 +2505,7 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         var nowValue = core.getRealStatus(name);
         // 查询新值
         var newValue = (core.getStatus(name) + (compare.value[name] || 0))
-            * (core.getBuff(name) + (compare.percentage[name] || 0) / 100);
+            * ((core.getBuff(name) * 100 + (compare.percentage[name] || 0)) / 100);
         if (nowValue == newValue) continue;
         var text = this._drawEquipbox_getStatusName(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);

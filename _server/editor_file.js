@@ -919,10 +919,9 @@ editor_file = function (editor, callback) {
                 eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a" + value[1] + '=' + JSON.stringify(value[2]));
             });
             var datastr = 'var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
-            datastr += JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a, function (k, v) {
-                if (v.id != null) delete v.id;
-                return v;
-            }, '\t');
+            var items = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
+            for (var id in items) delete items[id].id;
+            datastr += JSON.stringify(items, null, '\t');
             fs.writeFile('project/items.js', encode(datastr), 'base64', function (err, data) {
                 callback(err);
             });
@@ -934,9 +933,10 @@ editor_file = function (editor, callback) {
             });
             var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
             var emap = {};
+            var enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
+            for (var id in enemys) delete enemys[id].id;
             var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80, function (k, v) {
-                if (v.hp != null) {
-                    delete v.id;
+                if (v && v.hp != null) {
                     var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;

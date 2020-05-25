@@ -401,7 +401,7 @@ utils.prototype.formatSize = function (size) {
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
-    if (x > 1e24 || x < -1e24) return x;
+    if (x > 1e24 || x < -1e24) return x.toExponential(2);
 
     var c = x < 0 ? "-" : "";
     x = Math.abs(x);
@@ -498,7 +498,7 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
     else if (t.indexOf('choices:') == 0)
         return "C" + t.substring(8);
     else if (t.indexOf('shop:') == 0)
-        return "S" + t.substring(5);
+        return "S" + t.substring(5) + ":";
     else if (t == 'turn')
         return 'T';
     else if (t.indexOf('turn:') == 0)

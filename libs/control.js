@@ -695,11 +695,7 @@ control.prototype._moveHero_moving = function () {
                 // 检测是否穿出去
                 var nx = core.nextX(), ny = core.nextY();
                 if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height) return;
-                core.status.heroMoving=-1;
-                core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, function () {
-                    core.status.heroMoving=0;
-                    move();
-                });
+                core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, move);
             }
             else {
                 core.moveAction();

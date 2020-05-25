@@ -78,6 +78,7 @@
   - color 取色器
   - point 地图选点
   - disable 不允许编辑
+  - popCheckBoxSet 以弹窗形式多选框
 
 当某个event例如 门信息编辑 无法适应修改后的数据结构, 可以修改事件编辑器, 也可以把_type改成textarea  
 以上类型的格式要如何写请搜索例如`"_type": "checkboxSet"`来查找例子, 此处不展示

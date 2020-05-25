@@ -475,8 +475,7 @@ editor_ui_wrapper = function (editor) {
     uievent.elements.selectPointButtons = document.getElementById('selectPointButtons');
     uievent.elements.canvas = document.getElementById('uievent');
     uievent.elements.usedFlags = document.getElementById('uieventUsedFlags');
-    uievent.elements.usedFlagList = document.getElementById('uieventUsedFlagList');
-    uievent.elements.materialList = document.getElementById('uieventMaterialList');
+    uievent.elements.extraBody = document.getElementById('uieventExtraBody');
 
     uievent.close = function () {
         uievent.isOpen = false;
@@ -524,7 +523,7 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'block';
         uievent.elements.usedFlags.style.display = 'none';
-        uievent.elements.usedFlagList.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
 
         uievent.values.list = list;
@@ -548,7 +547,7 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPointBox.style.display = 'block';
         uievent.elements.canvas.style.display = 'block';
         uievent.elements.usedFlags.style.display = 'none';
-        uievent.elements.usedFlagList.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
         uievent.elements.yes.onclick = function () {
             var floorId = uievent.values.floorId, x = uievent.values.x, y = uievent.values.y;
@@ -679,7 +678,7 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'none';
         uievent.elements.usedFlags.style.display = 'inline';
-        uievent.elements.usedFlagList.style.display = 'block';
+        uievent.elements.extraBody.style.display = 'block';
         uievent.elements.body.style.overflow = "auto";
 
         // build flags
@@ -708,7 +707,7 @@ editor_ui_wrapper = function (editor) {
             html += x;
         });
         html += "</ul>";
-        uievent.elements.usedFlagList.innerHTML = html;
+        uievent.elements.extraBody.innerHTML = html;
     }
 
     var hasUsedFlags = function (obj, flag) {
@@ -775,8 +774,7 @@ editor_ui_wrapper = function (editor) {
             uievent.elements.selectPointBox.style.display = 'none';
             uievent.elements.canvas.style.display = 'none';
             uievent.elements.usedFlags.style.display = 'none';
-            uievent.elements.usedFlagList.style.display = 'none';
-            uievent.elements.materialList.style.display = 'block';
+            uievent.elements.extraBody.style.display = 'block';
             uievent.elements.body.style.overflow = "auto";
 
             uievent.elements.yes.onclick = function () {
@@ -808,7 +806,7 @@ editor_ui_wrapper = function (editor) {
                 html += '<br/>';
             });
             html += "</p>";
-            uievent.elements.materialList.innerHTML = html;
+            uievent.elements.extraBody.innerHTML = html;
         });
     }
 
@@ -867,6 +865,66 @@ editor_ui_wrapper = function (editor) {
         element.setAttribute("value", value);
         audio.currentTime = audio.duration * value;
         if (audio.paused) audio.play();
+    }
+
+    // ------ 多选框 ------ //
+    uievent.popCheckboxSet = function (value, comments, title, callback) {
+        if (value == null) value = [];
+        if (!(value instanceof Array)) {
+            if (value == 0) value = [];
+            else value = [value];
+        }
+
+        uievent.isOpen = true;
+        uievent.elements.div.style.display = 'block';
+        uievent.mode = 'popCheckboxSet';
+        uievent.elements.selectPoint.style.display = 'none';
+        uievent.elements.yes.style.display = 'block';
+        uievent.elements.title.innerText = title;
+        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.selectFloor.style.display = 'none';
+        uievent.elements.selectPointBox.style.display = 'none';
+        uievent.elements.canvas.style.display = 'none';
+        uievent.elements.usedFlags.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'block';
+        uievent.elements.body.style.overflow = "auto";
+
+        uievent.elements.yes.onclick = function () {
+            var list = Array.from(document.getElementsByClassName('uieventCheckboxSet')).filter(function (one) {
+                return one.checked;
+            }).map(function (one) {
+                var value = one.getAttribute('key');
+                if (one.getAttribute('_type') == 'number') value = parseFloat(value);
+                return value; 
+            });
+            uievent.close();
+            if (callback) callback(list);
+        }
+
+        var keys=Array.from(comments.key)
+        var prefixStrings=Array.from(comments.prefix)
+        for (var index = 0; index < value.length; index++) {
+            if (keys.indexOf(value[index])==-1) {
+                prefixStrings.push(value[index]+': ')
+                keys.push(value[index])
+            }
+        }
+        var table = '<table style="width: 100%">';
+
+        for (var index = 0; index < keys.length; index++) {
+            var one = keys[index];
+            if (index % 3 == 0) {
+                table += '<tr>';
+            }
+            table += `<td style='color:black'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0? 'checked' : ''}/></td>`;
+            if (index % 3 == 2) {
+                table += '</tr>';
+            }
+        }
+        if (keys.length % 3 != 0) table += '</tr>';
+        table += '</table>';
+
+        uievent.elements.extraBody.innerHTML = "<p>"+table+"</p>";
     }
 
     editor.constructor.prototype.uievent=uievent;

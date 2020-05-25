@@ -52,8 +52,10 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.editGrid = function (showComment, type) {
         var list = [];
         if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
-        if (type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'disable')
+        if (type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'popCheckboxSet' && type != 'disable')
             list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>编辑</button>");
+        if (type == 'popCheckboxSet')
+        list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>多选框编辑</button>");
         if (type == 'disable') list.push("<button onclick='editor.table.onCopyBtnClick(this)'>复制</button>");
         return list.join(' ');
     }
@@ -290,7 +292,7 @@ editor_table_wrapper = function (editor) {
             case 'checkboxSet':
                 return editor.table.checkboxSet(thiseval, cobj._checkboxSet.key, cobj._checkboxSet.prefix);
             default: 
-                return editor.table.textarea(thiseval, cobj.indent || 0, cobj._type == 'disable' || cobj._type == 'popCheckboxSet');
+                return editor.table.textarea(thiseval, cobj.indent || 0, cobj._type == 'disable');
         }
     }
 

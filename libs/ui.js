@@ -126,60 +126,102 @@ ui.prototype._uievent_fillBoldText = function (data) {
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
-ui.prototype.fillRect = function (name, x, y, width, height, style) {
+ui.prototype.fillRect = function (name, x, y, width, height, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.fillRect(x, y, width, height);
+    if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
+        ctx.fillRect(x, y, width, height);
+        if (angle) {
+            ctx.restore();
+        }
+    }
 }
 
 ui.prototype._uievent_fillRect = function (data) {
     this._createUIEvent();
     if (data.radius) {
-        this.fillRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), core.calValue(data.radius), data.style);
+        this.fillRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+            core.calValue(data.radius), data.style, (core.calValue(data.angle) || 0) * Math.PI / 180);
     } else {
-        this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style);
+        this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+            data.style, (core.calValue(data.angle) || 0) * Math.PI / 180);
     }
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
-ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
+ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth, angle) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.strokeRect(x, y, width, height);
+    if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
+        ctx.strokeRect(x, y, width, height);
+        if (angle) {
+            ctx.restore();
+        }
+    }
 }
 
 ui.prototype._uievent_strokeRect = function (data) {
     this._createUIEvent();
     if (data.radius) {
         this.strokeRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
-            core.calValue(data.radius), data.style, data.lineWidth);
+            core.calValue(data.radius), data.style, data.lineWidth, (core.calValue(data.angle) || 0) * Math.PI / 180);
     } else {
-        this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style, data.lineWidth);
+        this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+            data.style, data.lineWidth, (core.calValue(data.angle) || 0) * Math.PI / 180);
     }
 }
 
 ////// 在某个canvas上绘制一个圆角矩形 //////
-ui.prototype.fillRoundRect = function (name, x, y, width, height, radius, style) {
+ui.prototype.fillRoundRect = function (name, x, y, width, height, radius, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
         this._roundRect_buildPath(ctx, x, y, width, height, radius);
         ctx.fill();
+        if (angle) {
+            ctx.restore();
+        }
     }
 }
 
 ////// 在某个canvas上绘制一个圆角矩形的边框 //////
-ui.prototype.strokeRoundRect = function (name, x, y, width, height, radius, style, lineWidth) {
+ui.prototype.strokeRoundRect = function (name, x, y, width, height, radius, style, lineWidth, angle) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
         this._roundRect_buildPath(ctx, x, y, width, height, radius);
         ctx.stroke();
+        if (angle) {
+            ctx.restore();
+        }
     }
 }
-
 
 ui.prototype._roundRect_buildPath = function (ctx, x, y, width, height, radius) {
     ctx.beginPath();
@@ -504,7 +546,7 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
 }
 
 ////// 绘制一张图片 //////
-ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
+ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1, angle) {
     // 检测文件名以 :x, :y, :o 结尾，表示左右翻转，上下翻转和中心翻转
     var ctx = this.getContextByName(name);
     if (!ctx) return;
@@ -516,7 +558,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
         }
         image = core.getMappedName(image);
         image = core.material.images.images[image];
-        if (!image || !(image instanceof Image)) return;
+        if (!image) return;
     }
 
     var scale = {
@@ -533,23 +575,25 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
             h = image.height;
         }
         if (x1 != null && y1 != null && w1 != null && h1 != null) {
-            if (reverse == null) {
+            if (!reverse && !angle) {
                 ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
             } else {
                 ctx.save();
                 ctx.translate(x1 + w1 / 2, y1 + h1 / 2);
-                ctx.scale(scale[reverse][0], scale[reverse][1]);
+                if (reverse) ctx.scale(scale[reverse][0], scale[reverse][1]);
+                if (angle) ctx.rotate(angle);
                 ctx.drawImage(image, x, y, w, h, -w1 / 2, -h1 / 2, w1, h1);
                 ctx.restore();
             }
             return;
         }
-        if (reverse == null) {
+        if (!reverse && !angle) {
             ctx.drawImage(image, x, y, w, h);
         } else {
             ctx.save();
             ctx.translate(x + w / 2, y + h / 2);
-            ctx.scale(scale[reverse][0], scale[reverse][1]);
+            if (reverse) ctx.scale(scale[reverse][0], scale[reverse][1]);
+            if (angle) ctx.rotate(angle);
             ctx.drawImage(image, -w / 2, -h / 2, w, h);
             ctx.restore();
         }
@@ -560,7 +604,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
 ui.prototype._uievent_drawImage = function (data) {
     this._createUIEvent();
     this.drawImage('uievent', data.image + (data.reverse || ''), core.calValue(data.x), core.calValue(data.y), core.calValue(data.w), core.calValue(data.h),
-        core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1));
+        core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1), (core.calValue(data.angle) || 0) * Math.PI / 180);
 }
 
 ui.prototype.drawIcon = function (name, id, x, y, w, h, frame) {

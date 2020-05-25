@@ -118,7 +118,7 @@ function encode(str) {
 }
 
 function random_string() {
-    return (Math.random()+"_"+Math.random()+"_"+Math.random()).replace(".", "");
+    return (Math.random()+"_"+Math.random()).replace(/\./g, "");
 }
 
 // 接档全局属性

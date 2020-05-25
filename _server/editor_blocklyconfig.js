@@ -204,7 +204,6 @@ editor_blocklyconfig=(function(){
     'UI绘制':[
       MotaActionBlocks['previewUI_s'].xmlText(),
       MotaActionBlocks['clearMap_s'].xmlText(),
-      MotaActionBlocks['clearMap_1_s'].xmlText(),
       MotaActionBlocks['setAttribute_s'].xmlText(),
       MotaActionBlocks['fillText_s'].xmlText(),
       MotaActionBlocks['fillBoldText_s'].xmlText(),

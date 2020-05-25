@@ -1154,13 +1154,15 @@ events.prototype.__precompile_getArray = function () {
         "fillArc", "strokeArc", "drawIcon", "drawSelector", "drawBackground",
     ];
     var others = {
-        "fillEllipse": ["a", "b"],
-        "strokeEllipse": ["a", "b"],
+        "fillEllipse": ["a", "b", "angle"],
+        "strokeEllipse": ["a", "b", "angle"],
+        "fillRect": ["radius", "angle"],
+        "strokeRect": ["radius", "angle"],
         "fillArc": ["r", "start", "end"],
         "strokeArc": ["r", "start", "end"],
         "drawLine": ["x1", "y1", "x2", "y2"],
         "drawArrow": ["x1", "y1", "x2", "y2"],
-        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1"],
+        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1", "angle"],
         "drawTextContent": ["left", "top"],
     };
     return {
@@ -1471,8 +1473,11 @@ events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
     data.text = core.replaceText(data.text, prefix);
+    var __tmpName = (Math.random()+"_"+Math.random()).replace(/\./g, "") + ".png";
+    core.material.images.images[__tmpName] = core.ui.textImage(data.text);
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, core.ui.textImage(data.text), null, loc, data.opacity, data.time);
+        data.code, __tmpName + (data.reverse || ""), null, loc, data.opacity, data.time);
+    delete core.material.images.images[__tmpName];
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {

@@ -99,8 +99,7 @@ editor_mappanel_wrapper = function (editor) {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow(1);
-            tip.showHelp(6);
+            editor.uifunctions.showTips(6);
             editor.uivalues.startPos = pos;
             editor.dom.euiCtx.strokeStyle = '#FF0000';
             editor.dom.euiCtx.lineWidth = 3;
@@ -127,7 +126,6 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         if (!selectBox.isSelected()) {
             if (editor.uivalues.startPos == null) return;
-            //tip.whichShow(1);
             var loc = editor.uifunctions.eToLoc(e);
             var pos = editor.uifunctions.locToPos(loc, true);
             if (editor.uivalues.endPos != null && editor.uivalues.endPos.x == pos.x && editor.uivalues.endPos.y == pos.y) return;
@@ -163,8 +161,6 @@ editor_mappanel_wrapper = function (editor) {
             // editor_mode.onmode('nextChange');
             // editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow(1);
-            // tip.showHelp(6);
             return false;
         }
 
@@ -230,7 +226,6 @@ editor_mappanel_wrapper = function (editor) {
                 // 后续的处理
             } else {
                 // 左键拖拽: 交换
-                //tip.whichShow(1);
                 // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.uifunctions.unhighlightSaveFloorButton();
@@ -585,7 +580,6 @@ editor_mappanel_wrapper = function (editor) {
         editor_mode.onmode('nextChange');
         editor_mode.onmode('loc');
         //editor_mode.loc();
-        //tip.whichShow(1);
         if (editor.isMobile) editor.showdataarea(false);
         return false;
     }
@@ -679,8 +673,7 @@ editor_mappanel_wrapper = function (editor) {
      * 点击【】
      */
     editor.uifunctions.lockMode_onchange = function () {
-        tip.msgs[11] = String('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
-        tip.whichShow(12);
+        printf('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
         editor.uivalues.lockMode = editor.dom.lockMode.checked;
     }
 
@@ -691,9 +684,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.brushMod_onchange = function () {
         editor.brushMod = editor.dom.brushMod.value;
         if (editor.brushMod == 'fill') {
-            tip.isSelectedBlock(false);
-            tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
-            tip.whichShow(12);
+            printf('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
         }
     }
 
@@ -714,17 +705,12 @@ editor_mappanel_wrapper = function (editor) {
             !confirm("从V2.7开始，请直接素材区拖框进行绘制区域。\n\n点取消将不再显示此提示。")) {
             editor.config.set('alertTileModeV2.7', true);
         }
-        // tip.showHelp(5)
-        tip.isSelectedBlock(false)
-        tip.msgs[11] = String('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
-        tip.whichShow(12);
+        printf('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
         editor.brushMod = editor.dom.brushMod3.value;
     }
 
     editor.uifunctions.brushMod4_onchange = function () {
-        tip.isSelectedBlock(false);
-        tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
-        tip.whichShow(12);
+        printf('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
         editor.brushMod = editor.dom.brushMod4.value;
     }
 

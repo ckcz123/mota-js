@@ -933,9 +933,9 @@ editor_file = function (editor, callback) {
             });
             var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
             var emap = {};
-            var enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
+            var enemys = core.clone(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80);
             for (var id in enemys) delete enemys[id].id;
-            var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80, function (k, v) {
+            var estr = JSON.stringify(enemys, function (k, v) {
                 if (v && v.hp != null) {
                     var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);

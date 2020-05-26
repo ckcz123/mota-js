@@ -6,118 +6,18 @@ editor_datapanel_wrapper = function (editor) {
     //////////////////// 地图编辑 //////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // 由于历史遗留原因, 以下变量作为全局变量使用
-    // pout exportMap mapEditArea mapEditArea copyMap clearMapButton deleteMap
-    window.pout = document.getElementById('pout')
-    window.exportMap = document.getElementById('exportMap')
-    exportMap.isExport=false
-    exportMap.onclick=function(){
-        editor.updateMap();
-        var sx=editor.map.length-1,sy=editor.map[0].length-1;
+    var pout = document.getElementById('pout');
+    var exportMap = document.getElementById('exportMap');
+    var importMap = document.getElementById('importMap');
+    var clearMapButton=document.getElementById('clearMapButton')
+    var deleteMap=document.getElementById('deleteMap')
 
-        var filestr = '';
-        for (var yy = 0; yy <= sy; yy++) {
-            filestr += '['
-            for (var xx = 0; xx <= sx; xx++) {
-                var mapxy = editor.map[yy][xx];
-                if (typeof(mapxy) == typeof({})) {
-                    if ('idnum' in mapxy) mapxy = mapxy.idnum;
-                    else {
-                        // mapxy='!!?';
-                        tip.whichShow(3);
-                        return;
-                    }
-                } else if (typeof(mapxy) == 'undefined') {
-                    tip.whichShow(3);
-                    return;
-                }
-                mapxy = String(mapxy);
-                mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
-                filestr += mapxy + (xx == sx ? '' : ',')
-            }
-
-            filestr += ']' + (yy == sy ? '' : ',\n');
-        }
-        pout.value = filestr;
-        mapEditArea.mapArr(filestr);
-        exportMap.isExport = true;
-        mapEditArea.error(0);
-        tip.whichShow(2);
-    }
-    window.mapEditArea = document.getElementById('mapEditArea')
-    mapEditArea.errors=[ // 编号1,2
-        "格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)",
-        "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！"
-    ]
-    mapEditArea.formatTimer=null
-    mapEditArea._mapArr=''
-    mapEditArea.mapArr=function(value){
-        if(value!=null){
-            var val=value
-            var oldval=mapEditArea._mapArr
-            if (val==oldval) return;
-
-            if (exportMap.isExport) {
-                exportMap.isExport = false;
-                return;
-            }
-            if (mapEditArea.formatArr()) {
-                mapEditArea.error(0);
-
-                setTimeout(function () {
-                    if (mapEditArea.formatArr())mapEditArea.mapArr(mapEditArea.formatArr());
-                    mapEditArea.drawMap();
-                    tip.whichShow(8)
-                }, 1000);
-                clearTimeout(mapEditArea.formatTimer);
-                mapEditArea.formatTimer = setTimeout(function () {
-                    pout.value = mapEditArea.formatArr();
-                }, 5000); //5s后再格式化，不然光标跳到最后很烦
-            } else {
-                mapEditArea.error(1);
-            }
-
-            mapEditArea._mapArr=value
-        }
-        return mapEditArea._mapArr
-    }
-    pout.oninput=function(){
-        mapEditArea.mapArr(pout.value)
-    }
-    mapEditArea._error=0
-    mapEditArea.error=function(value){
-        if(value!=null){
-            mapEditArea._error=value
-            if (value>0)
-            printe(mapEditArea.errors[value-1])
-        }
-        return mapEditArea._error
-    }
-    mapEditArea.drawMap= function () {
-        // var mapArray = mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ');
-        var mapArray = JSON.parse('[' + mapEditArea.mapArr() + ']');
-        var sy=editor.map.length,sx=editor.map[0].length;
-        for (var y = 0; y < sy; y++)
-            for (var x = 0; x < sx; x++) {
-                var num = mapArray[y][x];
-                if (num == 0)
-                    editor.map[y][x] = 0;
-                else if (typeof(editor.indexs[num][0]) == 'undefined') {
-                    mapEditArea.error(2);
-                    editor.map[y][x] = undefined;
-                } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
-            }
-
-        editor.updateMap();
-
-    }
-    mapEditArea.formatArr= function () {
+    var formatArr= function () {
         var formatArrStr = '';
-        console.log(1)
         
         var si=editor.map.length,sk=editor.map[0].length;
-        if (mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
-        var arr = mapEditArea.mapArr().replace(/\s+/g, '').split('],[');
+        if (pout.value.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
+        var arr = pout.value.replace(/\s+/g, '').split('],[');
 
         if (arr.length != si) return;
         for (var i = 0; i < si; i++) {
@@ -138,31 +38,71 @@ editor_datapanel_wrapper = function (editor) {
         }
         return formatArrStr;
     }
-    window.copyMap=document.getElementById('copyMap')
-    copyMap.err=''
-    copyMap.onclick=function(){
-        tip.whichShow(0);
-        if (pout.value.trim() != '') {
-            if (mapEditArea.error()) {
-                copyMap.err = mapEditArea.errors[mapEditArea.error() - 1];
-                tip.whichShow(5)
-                return;
+
+    exportMap.onclick=function(){
+        editor.updateMap();
+        var sx=editor.map.length-1,sy=editor.map[0].length-1;
+
+        var filestr = '';
+        for (var yy = 0; yy <= sy; yy++) {
+            filestr += '['
+            for (var xx = 0; xx <= sx; xx++) {
+                var mapxy = editor.map[yy][xx];
+                if (typeof(mapxy) == typeof({})) {
+                    if ('idnum' in mapxy) mapxy = mapxy.idnum;
+                    else {
+                        printe("生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！");
+                        return;
+                    }
+                } else if (typeof(mapxy) == 'undefined') {
+                    printe("生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！");
+                    return;
+                }
+                mapxy = String(mapxy);
+                mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
+                filestr += mapxy + (xx == sx ? '' : ',')
             }
-            try {
-                pout.focus();
-                pout.setSelectionRange(0, pout.value.length);
-                document.execCommand("Copy");
-                tip.whichShow(6);
-            } catch (e) {
-                copyMap.err = e;
-                tip.whichShow(5);
-            }
+
+            filestr += ']' + (yy == sy ? '' : ',\n');
+        }
+        pout.value = filestr;
+        if (formatArr()) {
+            pout.focus();
+            pout.setSelectionRange(0, pout.value.length);
+            document.execCommand("Copy");
+            printf("导出并复制成功！");
         } else {
-            tip.whichShow(7);
+            printe("无法导出并复制此地图，可能有不合法块。")
         }
     }
-    window.clearMapButton=document.getElementById('clearMapButton')
+    importMap.onclick= function () {
+        var sy=editor.map.length,sx=editor.map[0].length;
+        var mapArray;
+        try {
+            mapArray = JSON.parse('[' + pout.value + ']');
+            if (mapArray.length != sy || mapArray[0].length != sx) throw '';
+        } catch (e) {
+            printe('格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)');
+            return;
+        }
+        var hasError = false;
+        for (var y = 0; y < sy; y++)
+            for (var x = 0; x < sx; x++) {
+                var num = mapArray[y][x];
+                if (num == 0)
+                    editor.map[y][x] = 0;
+                else if (editor.indexs[num]==null || editor.indexs[num][0]==null) {
+                    printe('当前有未定义ID（在地图区域显示红块），请用有效的图块进行覆盖！')
+                    hasError = true;
+                    editor.map[y][x] = {};
+                } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
+            }
+        editor.updateMap();
+        if (!hasError) printf('地图导入成功！');
+    }
+
     clearMapButton.onclick=function () {
+        if (!confirm('你确定要清除地图上所有内容么？此过程不可逆！')) return;
         editor.mapInit();
         editor_mode.onmode('');
         editor.file.saveFloorFile(function (err) {
@@ -173,15 +113,10 @@ editor_datapanel_wrapper = function (editor) {
             ;printf('地图清除成功');
         });
         editor.updateMap();
-        clearTimeout(mapEditArea.formatTimer);
-        clearTimeout(tip.timer);
-        pout.value = '';
-        mapEditArea.mapArr('');
-        tip.whichShow(4);
-        mapEditArea.error(0);
     }
-    window.deleteMap=document.getElementById('deleteMap')
+
     deleteMap.onclick=function () {
+        if (!confirm('你确定要删除此地图么？此过程不可逆！')) return;
         editor_mode.onmode('');
         var index = core.floorIds.indexOf(editor.currentFloorId);
         if (index>=0) {
@@ -196,7 +131,6 @@ editor_datapanel_wrapper = function (editor) {
         }
         else printe('删除成功,请F5刷新编辑器生效');
     }
-
 
     editor.uifunctions.newMap_func = function () {
 

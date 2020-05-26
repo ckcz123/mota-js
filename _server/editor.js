@@ -232,7 +232,6 @@ editor.prototype.init = function (callback) {
         if (Boolean(callback)) callback();
 
     }
-
     
 }
 
@@ -410,6 +409,7 @@ editor.prototype.updateMap = function () {
     }
     // 绘制地图 end
 
+    editor.drawEventBlock();
     this.updateLastUsedMap();
 }
 
@@ -691,7 +691,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
         editor.updateLastUsedMap();
     });
     editor.info = JSON.parse(JSON.stringify(thisevent));
-    tip.infos(JSON.parse(JSON.stringify(thisevent)));
+    editor.uifunctions.showBlockInfo(JSON.parse(JSON.stringify(thisevent)));
     editor.pos=pos;
     editor_mode.onmode('nextChange');
     editor_mode.onmode('enemyitem');

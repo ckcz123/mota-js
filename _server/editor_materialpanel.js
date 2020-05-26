@@ -8,9 +8,6 @@ editor_materialpanel_wrapper = function (editor) {
     selectBox.isSelected=function(value){
         if(value!=null){
             selectBox._isSelected=value;
-            tip.isSelectedBlock(value);
-            tip.whichShow(0);
-            clearTimeout(tip.timer);
             editor.dom.dataSelection.style.display=value?'':'none'
         }
         return selectBox._isSelected
@@ -230,7 +227,7 @@ editor_materialpanel_wrapper = function (editor) {
                     }
 
                 }
-                tip.infos(JSON.parse(JSON.stringify(editor.info)));
+                editor.uifunctions.showBlockInfo(JSON.parse(JSON.stringify(editor.info)));
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('enemyitem');
                 editor.updateLastUsedMap();

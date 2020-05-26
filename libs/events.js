@@ -471,20 +471,22 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
     var keyInfo = doorInfo.keys || {};
     if (needKey) {
         for (var keyName in keyInfo) {
+            var keyValue = keyInfo[keyName];
+            if (keyName.endsWith(':o')) keyName = keyName.substring(0, keyName.length - 2);            
+
             // --- 如果是一个不存在的道具，则直接认为无法开启
             if (!core.material.items[keyName]) {
                 core.drawTip("无法开启此门");
                 return clearAndReturn();
             }
-            var keyValue = keyInfo[keyName];
             if (core.itemCount(keyName) < keyValue) {
-                core.drawTip("你没有" + ((core.material.items[keyName] || {}).name || "钥匙"), null, true);
+                core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", null, true);
                 return false;
             }
         }
         if (!core.status.event.id) core.autosave(true);
-        for (var keyName in keyInfo) {
-            core.removeItem(keyName, keyInfo[keyName]);
+        for (var keyName in keyInfo) {  
+            if (!keyName.endsWith(':o')) core.removeItem(keyName, keyInfo[keyName]);
         }
     }
     core.playSound(doorInfo.openSound);
@@ -1800,8 +1802,10 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
+        if (core.hasFlag('@temp@shop') && action.startsWith('shop:')) action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
+            if (index == "-1") index = data.choices.length - 1;
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
                 core.status.event.selection = index;
                 setTimeout(function () {

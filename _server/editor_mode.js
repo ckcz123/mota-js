@@ -128,7 +128,7 @@ editor_mode = function (editor) {
         editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
         editor.dom.editModeSelect.value = mode;
-        if (!selectBox.isSelected()) tip.showHelp();
+        if (!selectBox.isSelected()) editor.uifunctions.showTips();
     }
 
     editor_mode.prototype.change = function (value) {

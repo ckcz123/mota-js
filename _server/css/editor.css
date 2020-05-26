@@ -178,7 +178,12 @@ body {
     border: 1px solid #ccc;
     border-radius: 2px;
     font-size: 15px;
-    line-height: 14px;
+    line-height: 18px;
+}
+
+#tip p {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .files {

@@ -81,9 +81,11 @@ ActionParser.prototype.parse = function (obj,type) {
           var text_choices = null;
           var knownListKeys = MotaActionBlocks['Key_List'].options.map(function (one) {return one[1];})
           Object.keys(obj).sort().forEach(function (key) {
+            var noNeed = key.endsWith(':o');
+            if (noNeed) key = key.substring(0, key.length - 2);
             var one = knownListKeys.indexOf(key) >= 0 ? 'doorKeyKnown' : 'doorKeyUnknown';
             text_choices = MotaActionBlocks[one].xmlText([
-              one == 'doorKeyUnknown' ? MotaActionFunctions.replaceToName_token(key) : key, obj[key], text_choices
+              one == 'doorKeyUnknown' ? MotaActionFunctions.replaceToName_token(key) : key, obj[key], noNeed, text_choices
             ]);
           })
           return text_choices;

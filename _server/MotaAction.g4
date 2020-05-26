@@ -507,25 +507,27 @@ doorKeyList
 
 
 doorKeyKnown
-    : Key_List ':' Int BEND
+    : Key_List ':' Int '需要但不消耗' Bool BEND
 
 
 /* doorKeyKnown
 tooltip : 需要钥匙
-default : ['yellowKey', 1]
+default : ['yellowKey', 1, false]
 helpUrl : https://h5mota.com/games/template/_docs/#/event
+if (Bool_0) Key_List_0 += ':o';
 return '"'+Key_List_0+'": '+Int_0+', ';
 */;
 
 doorKeyUnknown
-    : IdString ':' Int BEND
+    : IdString ':' Int '需要但不消耗' Bool BEND
 
 
 /* doorKeyUnknown
 tooltip : 需要钥匙
-default : ['orangeKey', 1]
+default : ['orangeKey', 1, false]
 helpUrl : https://h5mota.com/games/template/_docs/#/event
 allItems : ['IdString_0']
+if (Bool_0) IdString_0 += ':o';
 return '"'+IdString_0+'": '+Int_0+', ';
 */;
 

@@ -2134,15 +2134,15 @@ ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
 }
 
 ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
-    var damageInfo = core.getDamageInfo(enemy, null, null, null, floorId);
+    var damageInfo = core.getDamageInfo(enemy.id, null, null, null, floorId);
     texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]"+((damageInfo||{}).turn||0));
     // 临界表
-    var criticals = core.enemys.nextCriticals(enemy, 8, null, null, floorId).map(function (v) {
+    var criticals = core.enemys.nextCriticals(enemy.id, 8, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
     texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]"+JSON.stringify(criticals));
-    var prevInfo = core.getDamageInfo(enemy, {atk: core.status.hero.atk-1}, null, null, floorId);
+    var prevInfo = core.getDamageInfo(enemy.id, {atk: core.status.hero.atk-1}, null, null, floorId);
     if (prevInfo != null && damageInfo != null) {
         if (damageInfo.damage != null) damageInfo = damageInfo.damage;
         if (prevInfo.damage != null) prevInfo = prevInfo.damage;
@@ -2548,8 +2548,8 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         if (typeof core.status.hero[name] != 'number') continue;
         var nowValue = core.getRealStatus(name);
         // 查询新值
-        var newValue = (core.getStatus(name) + (compare.value[name] || 0))
-            * ((core.getBuff(name) * 100 + (compare.percentage[name] || 0)) / 100);
+        var newValue = Math.floor((core.getStatus(name) + (compare.value[name] || 0))
+            * (core.getBuff(name) * 100 + (compare.percentage[name] || 0)) / 100);
         if (nowValue == newValue) continue;
         var text = this._drawEquipbox_getStatusName(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);

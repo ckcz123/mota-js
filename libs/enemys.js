@@ -77,7 +77,7 @@ enemys.prototype.getSpecialText = function (enemy) {
     return text;
 }
 
-////// 获得所有所有特殊属性的颜色 //////
+////// 获得所有特殊属性的颜色 //////
 enemys.prototype.getSpecialColor = function (enemy) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (!enemy) return [];
@@ -93,6 +93,23 @@ enemys.prototype.getSpecialColor = function (enemy) {
     }
     return colors;
 
+}
+
+////// 获得所有特殊属性的额外标记 //////
+enemys.prototype.getSpecialFlag = function (enemy) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (!enemy) return [];
+    var special = enemy.special;
+    var flag = 0;
+
+    var specials = this.getSpecials();
+    if (specials) {
+        for (var i = 0; i < specials.length; i++) {
+            if (this.hasSpecial(special, specials[i][0]))
+                flag |= (specials[i][4] || 0);
+        }
+    }
+    return flag;
 }
 
 ////// 获得每个特殊属性的说明 //////

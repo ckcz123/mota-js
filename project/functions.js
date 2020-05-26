@@ -432,8 +432,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
     "enemys": {
         "getSpecials": function () {
 	// 获得怪物的特殊属性，每一行定义一个特殊属性。
-	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
-	// 可以直接写字符串，也可以写个function将怪物传进去
+	// 分为五项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
+	// 第四项为该特殊属性的颜色，可以写十六进制 #RRGGBB 或者 [r,g,b,a] 四元数组
+	// 第五项为该特殊属性的标记；目前 1 代表是地图类技能（需要进行遍历全图）
+	// 名字和描述可以直接写字符串，也可以写个function将怪物传进去
 	return [
 		[1, "先攻", "怪物首先攻击"],
 		[2, "魔攻", "怪物无视勇士的防御", "#b6b0ff"],
@@ -459,8 +461,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，无视勇士护盾。"; }],
 		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"],
 		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }],
-		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#fff900"],
-		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。"],
+		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#fff900", 1],
+		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。", "#fff900", 1],
 		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。"]
 	];
 },
@@ -497,26 +499,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		mon_def = hero_atk - 1;
 	}
 
-	// ------ 支援 ------
 	var guards = [];
 
-	// 光环检查
-	// 在这里判定是否需要遍历全图（由于光环需要遍历全图，应尽可能不需要以减少计算量，尤其是大地图）
-	var query = function () {
-		var floorIds = ["MTx"]; // 在这里给出所有需要遍历的楼层（即有光环或支援等）
-		return core.inArray(floorIds, floorId); // 也可以写其他的判定条件
-	}
+	// 光环和支援检查
+	if (!core.status.checkBlock) core.status.checkBlock = {};
 
-	if (query()) {
+	if (core.status.checkBlock.needCache) {
 		// 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
-		// 检查当前楼层所有光环怪物（数字25）
 		var hp_buff = 0,
 			atk_buff = 0,
 			def_buff = 0,
 			cnt = 0;
-		// 检查光环缓存
+		// 检查光环和支援的缓存
 		var index = x != null && y != null ? (x + "," + y) : "floor";
-		if (!core.status.checkBlock) core.status.checkBlock = {};
 		if (!core.status.checkBlock.cache) core.status.checkBlock.cache = {};
 		var cache = core.status.checkBlock.cache[index];
 		if (!cache) {
@@ -527,17 +522,21 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					// 获得该图块的ID
 					var id = block.event.id,
 						enemy = core.material.enemys[id];
-					// 检查是不是怪物，且是否拥有该特殊属性
+					// 检查【光环】技能，数字25
 					if (enemy && core.hasSpecial(enemy.special, 25)) {
+						// 检查是否是范围光环
+						var inRange = enemy.range == null ||
+							(x != null && y != null && Math.abs(block.x - x) <= enemy.range && Math.abs(block.y - y) <= enemy.range);
 						// 检查是否可叠加
-						if (enemy.add || cnt == 0) {
+						if (inRange && (enemy.add || cnt == 0)) {
 							hp_buff += enemy.value || 0;
 							atk_buff += enemy.atkValue || 0;
 							def_buff += enemy.defValue || 0;
 							cnt++;
 						}
+
 					}
-					// 检查【支援】技能
+					// 检查【支援】技能，数字26
 					if (enemy && core.hasSpecial(enemy.special, 26) &&
 						// 检查支援条件，坐标存在，距离为1，且不能是自己
 						// 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
@@ -1061,6 +1060,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type = {}, // 每个点的伤害类型
 		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
+	var needCache = false;
 
 	// 计算血网和领域、阻击、激光的伤害，计算捕捉信息
 	for (var loc in blocks) {
@@ -1162,6 +1162,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				]);
 			}
 		}
+
+		// 检查地图范围类技能
+		var specialFlag = core.getSpecialFlag(enemy);
+		if (specialFlag & 1) needCache = true;
 	}
 
 	// 更新夹击伤害
@@ -1171,7 +1175,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			for (var y = 0; y < height; y++) {
 				var loc = x + "," + y;
 				// 夹击怪物的ID
-				var enemyId1 = null, enemyId2 = null;
+				var enemyId1 = null,
+					enemyId2 = null;
 				// 检查左右夹击
 				var leftBlock = blocks[(x - 1) + "," + y],
 					rightBlock = blocks[(x + 1) + "," + y];
@@ -1217,6 +1222,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type: type,
 		repulse: repulse,
 		ambush: ambush,
+		needCache: needCache,
 		cache: {} // clear cache
 	};
 },

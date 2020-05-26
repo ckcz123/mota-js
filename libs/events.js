@@ -1802,8 +1802,10 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
+        if (core.hasFlag('@temp@shop') && action.startsWith('shop:')) action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
+            if (index == "-1") index = data.choices.length - 1;
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
                 core.status.event.selection = index;
                 setTimeout(function () {

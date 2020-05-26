@@ -81,7 +81,7 @@ events.prototype._startGame_setHard = function () {
             core.insertAction(one.action);
         }
     });
-    core.setFlag('hard', 0);
+    core.setFlag('hard', hardValue || 0);
     core.setFlag('__hardColor__', hardColor);
 }
 

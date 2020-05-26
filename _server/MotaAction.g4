@@ -1528,7 +1528,7 @@ else if (Stair_List_0!=='loc')loc = ', "stair": "'+Stair_List_0+'"';
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
-var code = '{"type": "changeFloor"'+toFloorId+loc+DirectionEx_List_0+IntString_0+' }\n';
+var code = '{"type": "changeFloor"'+toFloorId+loc+DirectionEx_List_0+IntString_0+' },\n';
 return code;
 */;
 

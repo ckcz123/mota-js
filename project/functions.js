@@ -1123,7 +1123,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				type[currloc]["阻击伤害"] = true;
 
 				var rdir = core.turnDirection(":back", dir);
-				if (core.canMoveHero(x, y, rdir, floorId)) {
+				// 检查下一个点是否存在事件（从而判定是否移动）
+				var rnx = x + core.utils.scan[rdir].x,	
+					rny = y + core.utils.scan[rdir].y;
+				if (core.canMoveHero(x, y, rdir, floorId) && core.getBlock(rnx, rny, floorId) == null) {
 					repulse[currloc] = (repulse[currloc] || []).concat([
 						[x, y, id, rdir]
 					]);

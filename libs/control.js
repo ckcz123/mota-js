@@ -2780,7 +2780,7 @@ control.prototype._resize_statusBar = function (obj) {
     statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
     // 自绘状态栏
     if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH + "px";
+        core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH * core.domStyle.scale + "px";
         core.dom.statusCanvas.width = obj.CANVAS_WIDTH;
         core.dom.statusCanvas.style.height = obj.statusBarHeightInVertical - 3 + "px";
         core.dom.statusCanvas.height = obj.col * 32 + 9;

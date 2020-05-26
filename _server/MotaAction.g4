@@ -203,7 +203,7 @@ IntString_0 = IntString_0 ? (', "number": '+IntString_0) : '';
 EvalString_0 = EvalString_0 ? (', "money": "'+EvalString_0+'"') : '';
 EvalString_1 = EvalString_1 ? (', "sell": "'+EvalString_1+'"') : '';
 if (!EvalString_0 && !EvalString_1) throw "买入金额和卖出金额至少需要填写一个";
-EvalString_2 = EvalString_2 ? (', "condition": "'+EvalString_3+'"') : '';
+EvalString_2 = EvalString_2 ? (', "condition": "'+EvalString_2+'"') : '';
 var code = '{"id": "' + IdString_0 + '"' + IntString_0 + EvalString_0 + EvalString_1 + EvalString_2 + '},\n';
 return code;
 */;

@@ -126,6 +126,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
 	core.drawMap(floorId);
+	// item_ratio兼容性...
+	if (core.status.thisMap.ratio == null && core.status.thisMap.item_ratio != null) {
+		core.status.thisMap.ratio = core.status.thisMap.item_ratio;
+	}
 
 	// 切换楼层BGM
 	if (core.status.maps[floorId].bgm) {
@@ -546,6 +550,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					}
 
 					// TODO：如果有其他类型光环怪物在这里仿照添加检查
+					// 注：新增新的类光环属性（需要遍历全图的）需要在特殊属性定义那里的第五项写1，参见光环和支援的特殊属性定义。
 				}
 			});
 
@@ -1061,6 +1066,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
 	var needCache = false;
+	var canGoDeadZone = core.flags.canGoDeadZone;
+	core.flags.canGoDeadZone = true;
 
 	// 计算血网和领域、阻击、激光的伤害，计算捕捉信息
 	for (var loc in blocks) {
@@ -1116,10 +1123,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				type[currloc]["阻击伤害"] = true;
 
 				var rdir = core.turnDirection(":back", dir);
-				// 检查下一个点是否存在事件（从而判定是否移动）
-				var rnx = x + core.utils.scan[rdir].x,
-					rny = y + core.utils.scan[rdir].y;
-				if (rnx >= 0 && rnx < width && rny >= 0 && rny < height && core.getBlock(rnx, rny, floorId) == null) {
+				if (core.canMoveHero(x, y, rdir, floorId)) {
 					repulse[currloc] = (repulse[currloc] || []).concat([
 						[x, y, id, rdir]
 					]);
@@ -1217,6 +1221,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	}
 
+	core.flags.canGoDeadZone = canGoDeadZone;
 	core.status.checkBlock = {
 		damage: damage,
 		type: type,

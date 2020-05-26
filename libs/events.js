@@ -776,7 +776,7 @@ events.prototype.pushBox = function (data) {
     // 检测能否推上去
     if (!core.canMoveHero()) return;
     var canGoDeadZone = core.flags.canGoDeadZone;
-    core.flags.canGoDeadZone = false;
+    core.flags.canGoDeadZone = true;
     if (!core.canMoveHero(data.x, data.y, direction)) {
         core.flags.canGoDeadZone = canGoDeadZone;
         return;

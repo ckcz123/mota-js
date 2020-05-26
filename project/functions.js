@@ -427,7 +427,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 		*/
 	}
-},
+}
     },
     "enemys": {
         "getSpecials": function () {
@@ -436,30 +436,30 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 可以直接写字符串，也可以写个function将怪物传进去
 	return [
 		[1, "先攻", "怪物首先攻击"],
-		[2, "魔攻", "怪物无视勇士的防御"],
-		[3, "坚固", "怪物防御不小于勇士攻击-1"],
+		[2, "魔攻", "怪物无视勇士的防御", "#b6b0ff"],
+		[3, "坚固", "怪物防御不小于勇士攻击-1", "#b9822d"],
 		[4, "2连击", "怪物每回合攻击2次"],
 		[5, "3连击", "怪物每回合攻击3次"],
 		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
-		[7, "破甲", "战斗前，怪物附加角色防御的" + Math.floor(100 * core.values.breakArmor || 0) + "%作为伤害"],
-		[8, "反击", "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * core.values.counterAttack || 0) + "%作为伤害，无视角色防御"],
-		[9, "净化", "战斗前，怪物附加勇士护盾的" + core.values.purify + "倍作为伤害"],
-		[10, "模仿", "怪物的攻防和勇士攻防相等"],
-		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }],
-		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点"],
-		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%")],
-		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],
+		[7, "破甲", function (enemy) { return "战斗前，怪物附加角色防御的" + Math.floor(100 * (enemy.defValue || core.values.breakArmor || 0)) + "%作为伤害"; }, "#b30000"],
+		[8, "反击", function (enemy) { return "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * (enemy.atkValue || core.values.counterAttack || 0)) + "%作为伤害，无视角色防御"; }, "#bd26ce"],
+		[9, "净化", function (enemy) { return "战斗前，怪物附加勇士护盾的" + (enemy.n || core.values.purify) + "倍作为伤害"; }, "#00d2d4"],
+		[10, "模仿", "怪物的攻防和勇士攻防相等", "#ff00d2"],
+		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }, "#ff00d2"],
+		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点", "#4aff60"],
+		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%"), "#feccd0"],
+		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验", "#747dff"],
 		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }],
-		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半"],
+		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半", "#ff00d2"],
 		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）"],
 		[18, "阻击", function (enemy) { return "经过怪物的十字领域时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }],
-		[19, "自爆", "战斗后勇士的生命值变成1"],
-		[20, "无敌", "勇士无法打败怪物，除非拥有十字架"],
-		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }],
+		[19, "自爆", "战斗后勇士的生命值变成1", "#ff0000"],
+		[20, "无敌", "勇士无法打败怪物，除非拥有十字架", "#fbff00"],
+		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }, "#ff0000"],
 		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，无视勇士护盾。"; }],
 		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"],
 		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }],
-		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }],
+		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#fff900"],
 		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。"],
 		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。"]
 	];
@@ -658,18 +658,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 每回合的反击伤害；反击是按照勇士的攻击次数来计算回合
 	var counterDamage = 0;
-	if (core.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
+	if (core.hasSpecial(mon_special, 8))
+		counterDamage += Math.floor((enemy.atkValue || core.values.counterAttack) * hero_atk);
 
 	// 先攻
 	if (core.hasSpecial(mon_special, 1)) init_damage += per_damage;
 
 	// 破甲
 	if (core.hasSpecial(mon_special, 7))
-		init_damage += Math.floor(core.values.breakArmor * hero_def);
+		init_damage += Math.floor((enemy.defValue || core.values.breakArmor) * hero_def);
 
 	// 净化
 	if (core.hasSpecial(mon_special, 9))
-		init_damage += Math.floor(core.values.purify * hero_mdef);
+		init_damage += Math.floor((enemy.n || core.values.purify) * hero_mdef);
 
 	// 勇士每回合对怪物造成的伤害
 	var hero_per_damage = Math.max(hero_atk - mon_def, 0);

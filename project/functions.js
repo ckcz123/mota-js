@@ -357,7 +357,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果有加点
-	var point = core.material.enemys[enemyId].point;
+	var point =  guards.reduce(function (curr, g) {
+		return curr + core.material.enemys[g[2]].point;
+	}, enemy.point) || 0;
 	if (core.flags.enableAddPoint && point > 0) {
 		core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 	}

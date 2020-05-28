@@ -401,7 +401,7 @@ editor_file = function (editor, callback) {
         var mapActions = [];
 
         iconActions.push(["add", "['autotile']['" + filename + "']", 0]);
-        mapActions.push(["add", "['" + idnum + "']", {'cls': 'autotile', 'id': filename, 'noPass': true}]);
+        mapActions.push(["add", "['" + idnum + "']", {'cls': 'autotile', 'id': filename}]);
 
         var templist = [];
         var tempcallback = function (err) {
@@ -575,7 +575,7 @@ editor_file = function (editor, callback) {
                 var value=actionList[ii];
                 // 是tilesets 且未定义 且在这里是第一次定义
                 if(idnum>=editor.core.icons.tilesetStartOffset && !isset(editor.core.maps.blocksInfo[idnum]) && tempmap.indexOf(idnum)===-1){
-                    actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum, "noPass": true}]);
+                    actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum}]);
                     tempmap.push(idnum);
                     ii++;
                 }
@@ -588,7 +588,7 @@ editor_file = function (editor, callback) {
             callback([
                 (function () {
                     var sourceobj=editor.core.maps.blocksInfo[idnum];
-                    if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum, "noPass": true}
+                    if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum}
                     var locObj = Object.assign({}, sourceobj);
                     Object.keys(editor.file.comment._data.maps._data).forEach(function (v) {
                         if (!isset(sourceobj[v]))

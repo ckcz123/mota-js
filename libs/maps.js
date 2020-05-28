@@ -138,9 +138,9 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var block = {'x': x, 'y': y, 'id': id};
     if (disable != null) block.disable = disable;
 
-    if (id == 17) block.event = {"cls": "terrains", "id": "airwall", "noPass": true, "cannotIn":["up", "down", "left", "right"]};
+    if (id == 17) block.event = {"cls": "terrains", "id": "airwall", "cannotIn":["up", "down", "left", "right"]};
     else if (id in this.blocksInfo) block.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
-    else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id, "noPass": true};
+    else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id};
     else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
 
     if (block.event.noPass == null) {

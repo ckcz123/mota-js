@@ -462,9 +462,8 @@ table.row td {
     font: normal 13px Arial, sans-serif;
 }
 
-/* for vue dom */
-[v-cloak] {
-    display: none !important;
+textarea[disabled] {
+    color: #999999;
 }
 
 #searchBlock {

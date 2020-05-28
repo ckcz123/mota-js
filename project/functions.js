@@ -357,7 +357,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果有加点
-	var point = core.material.enemys[enemyId].point;
+	var point =  guards.reduce(function (curr, g) {
+		return curr + core.material.enemys[g[2]].point;
+	}, enemy.point) || 0;
 	if (core.flags.enableAddPoint && point > 0) {
 		core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 	}
@@ -529,8 +531,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					// 检查【光环】技能，数字25
 					if (enemy && core.hasSpecial(enemy.special, 25)) {
 						// 检查是否是范围光环
-						var inRange = enemy.range == null ||
-							(x != null && y != null && Math.abs(block.x - x) <= enemy.range && Math.abs(block.y - y) <= enemy.range);
+						var inRange = enemy.range == null;
+						if (enemy.range != null && x != null && y != null) {
+							var dx = Math.abs(block.x - x),
+								dy = Math.abs(block.y - y);
+							// 检查十字和九宫格光环
+							if (dx + dy <= enemy.range) inRange = true;
+							if (enemy.zoneSquare && dx <= enemy.range && dy <= enemy.range) inRange = true;
+						}
 						// 检查是否可叠加
 						if (inRange && (enemy.add || cnt == 0)) {
 							hp_buff += enemy.value || 0;

@@ -407,7 +407,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"canUseQuickShop": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_docs": "可快捷商店",
+							"_docs": "快捷商店",
 							"_data": "该层是否允许使用快捷商店"
 						},
 						"cannotViewMap": {
@@ -421,6 +421,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "checkbox",
 							"_docs": "不可瞬移",
 							"_data": "该层是否不允许瞬间移动；如果勾上则不可在此层进行瞬移"
+						},
+						"underGround": {
+							"_leaf": true,
+							"_type": "checkbox",
+							"_docs": "地下层",
+							"_data": "是否是地下层；如果该项为true则同层传送将传送至上楼梯"
 						},
 						"firstArrive": {
 							"_leaf": true,
@@ -497,12 +503,6 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_range": "(thiseval==~~thiseval && thiseval>=0)||thiseval==null",
 							"_docs": "宝石血瓶效果",
 							"_data": "每一层的宝石/血瓶效果，即获得宝石和血瓶时框内\"ratio\"的值。"
-						},
-						"underGround": {
-							"_leaf": true,
-							"_type": "checkbox",
-							"_docs": "是否是地下层",
-							"_data": "是否是地下层；如果该项为true则同层传送将传送至上楼梯"
 						}
 					}
 				},

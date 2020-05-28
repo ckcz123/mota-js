@@ -325,7 +325,7 @@ editor.prototype.drawEventBlock = function () {
                 color.push('#00FF00');
             if (editor.currentFloorData.afterGetItem[loc])
                 color.push('#00FFFF');
-            if (editor.currentFloorData.cannotMove[loc])
+            if (editor.currentFloorData.cannotMove[loc] && editor.currentFloorData.cannotMove[loc].length > 0)
                 color.push('#0000FF');
             if (editor.currentFloorData.afterOpenDoor[loc])
                 color.push('#FF00FF');
@@ -691,10 +691,10 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
         editor.updateLastUsedMap();
     });
     editor.info = JSON.parse(JSON.stringify(thisevent));
-    editor.uifunctions.showBlockInfo(JSON.parse(JSON.stringify(thisevent)));
     editor.pos=pos;
     editor_mode.onmode('nextChange');
     editor_mode.onmode('enemyitem');
+    editor.uifunctions.showBlockInfo(JSON.parse(JSON.stringify(thisevent)));
 }
 
 editor.prototype.addUsedFlags = function (s) {

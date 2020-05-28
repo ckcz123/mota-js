@@ -214,6 +214,8 @@ editor_mappanel_wrapper = function (editor) {
         var e=editor.uivalues.lastMoveE;
         if (e.buttons == 2 && (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y))) {
             editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+            editor.uivalues.holdingPath = 0;
+            editor.uivalues.stepPostfix = [];
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             return false;

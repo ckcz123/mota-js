@@ -342,6 +342,8 @@ editor_datapanel_wrapper = function (editor) {
     editor.uifunctions.copyPasteEnemyItem_func = function () {
         var copyEnemyItem = document.getElementById('copyEnemyItem');
         var pasteEnemyItem = document.getElementById('pasteEnemyItem');
+        var clearEnemyItem = document.getElementById('clearEnemyItem');
+        var clearAllEnemyItem = document.getElementById('clearAllEnemyItem');
 
         copyEnemyItem.onclick = function () {
             var cls = (editor_mode.info || {}).images;
@@ -351,13 +353,8 @@ editor_datapanel_wrapper = function (editor) {
             if (cls == 'enemys' || cls == 'enemy48') {
                 editor.uivalues.copyEnemyItem.data = core.clone(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id]);
                 printf("怪物属性复制成功");
-            } else {
-                editor.uivalues.copyEnemyItem.data = {};
-                for (var x in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
-                    if (items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] != null) {
-                        editor.uivalues.copyEnemyItem.data[x] = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id]);
-                    }
-                }
+            } else if (cls == 'items') {
+                editor.uivalues.copyEnemyItem.data = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id]);
                 printf("道具属性复制成功");
             }
         }
@@ -368,25 +365,95 @@ editor_datapanel_wrapper = function (editor) {
             var id = editor_mode.info.id;
             if (cls == 'enemys' || cls == 'enemy48') {
                 if (confirm("你确定要覆盖此怪物的全部属性么？这是个不可逆操作！")) {
+                    var name = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].name;
+                    var displayIdInBook = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].displayIdInBook;
                     enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id] = core.clone(editor.uivalues.copyEnemyItem.data);
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].id = id;
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].name = name;
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].displayIdInBook = displayIdInBook;
                     editor.file.saveSetting('enemys', [], function (err) {
                         if (err) printe(err);
                         else printf("怪物属性粘贴成功\n请再重新选中该怪物方可查看更新后的表格。");
                     })
                 }
-            } else {
+            } else if (cls == 'items') {
                 if (confirm("你确定要覆盖此道具的全部属性么？这是个不可逆操作！")) {
-                    for (var x in editor.uivalues.copyEnemyItem.data) {
-                        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] = core.clone(editor.uivalues.copyEnemyItem.data[x]);
-                    }
+                    var name = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].name;
+                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id] = core.clone(editor.uivalues.copyEnemyItem.data[x]);
+                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].id = id;
+                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].name = name;
                     editor.file.saveSetting('items', [], function (err) {
                         if (err) printe(err);
                         else printf("道具属性粘贴成功\n请再重新选中该道具方可查看更新后的表格。");
                     })
                 }
             }
-
         }
+
+        var _clearEnemy = function (id) {
+            var info = core.clone(comment_c456ea59_6018_45ef_8bcc_211a24c627dc._data.enemys_template);
+            info.id = id;
+            info.name = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].name;
+            info.displayIdInBook = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].displayIdInBook;
+            enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id] = info;
+        }
+
+        var _clearItem = function (id) {
+            for (var x in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id]) {
+                if (x != 'id' && x!='cls' && x != 'name') delete items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id][x];
+            }
+        }
+
+        clearEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || !cls) return;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                if (confirm("你确定要清空本怪物的全部属性么？这是个不可逆操作！")) {
+                    _clearEnemy(id);
+                    editor.file.saveSetting('enemys', [], function (err) {
+                        if (err) printe(err);
+                        else printf("怪物属性清空成功\n请再重新选中该怪物方可查看更新后的表格。");
+                    })
+                }
+            } else if (cls == 'items') {
+                if (confirm("你确定要清空本道具的全部属性么？这是个不可逆操作！")) {
+                    _clearItem(id);
+                    editor.file.saveSetting('items', [], function (err) {
+                        if (err) printe(err);
+                        else printf("道具属性清空成功\n请再重新选中该道具方可查看更新后的表格。");
+                    })
+                }
+            }
+        }
+
+        clearAllEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || !cls) return;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                if (confirm("你确定要批量清空【全塔怪物】的全部属性么？这是个不可逆操作！")) {
+                    for (var id in enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80)
+                        _clearEnemy(id);
+                    editor.file.saveSetting('enemys', [], function (err) {
+                        if (err) printe(err);
+                        else printf("全塔全部怪物属性清空成功！");
+                    })
+                }
+            } else if (cls == 'items') {
+                if (confirm("你确定要批量清空【全塔道具】的全部属性么？这是个不可逆操作！")) {
+                    for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a)
+                        _clearItem(id);
+                    editor.file.saveSetting('items', [], function (err) {
+                        if (err) printe(err);
+                        else printf("全塔全部道具属性清空成功！");
+                    })
+                }
+            }
+        }
+
+
+
 
 
     }

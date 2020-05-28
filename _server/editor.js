@@ -691,10 +691,10 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
         editor.updateLastUsedMap();
     });
     editor.info = JSON.parse(JSON.stringify(thisevent));
-    editor.uifunctions.showBlockInfo(JSON.parse(JSON.stringify(thisevent)));
     editor.pos=pos;
     editor_mode.onmode('nextChange');
     editor_mode.onmode('enemyitem');
+    editor.uifunctions.showBlockInfo(JSON.parse(JSON.stringify(thisevent)));
 }
 
 editor.prototype.addUsedFlags = function (s) {

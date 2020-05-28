@@ -462,9 +462,8 @@ div.row .rowtd .rowtext{
     font: normal 2.5vw Arial, sans-serif;
 }
 
-/* for vue dom */
-[v-cloak] {
-    display: none !important;
+textarea[disabled] {
+    color: #999999;
 }
 
 #down{

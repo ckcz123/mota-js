@@ -816,7 +816,7 @@ editor_mappanel_wrapper = function (editor) {
 
     editor.uifunctions.highlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='#fff4bb';
+        saveFloor.style.background='#ffd700';
     }
 
     editor.uifunctions.unhighlightSaveFloorButton=function(){

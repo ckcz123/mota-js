@@ -2,15 +2,15 @@
     fs = {};
 
 
-    var _isset = function (val) {
+    const _isset = function (val) {
         if (val == undefined || val == null || (typeof val=='number' && isNaN(val))) {
             return false;
         }
         return true
     }
 
-    var _http = function (type, url, formData, success, error, mimeType, responseType) {
-        var xhr = new XMLHttpRequest();
+    const _http = function (type, url, formData, success, error, mimeType, responseType) {
+        const xhr = new XMLHttpRequest();
         xhr.open(type, url, true);
         if (_isset(mimeType))
             xhr.overrideMimeType(mimeType);
@@ -45,7 +45,7 @@
     }
 
 
-    var postsomething = function (data, _ip, callback) {
+    const postsomething = function (data, _ip, callback) {
         if (typeof(data) == typeof([][0]) || data == null) data = JSON.stringify({1: 2});
 
         _http("POST", _ip, data, function (data) {
@@ -70,7 +70,7 @@
             //filename:支持"/"做分隔符
             //callback:function(err, data)
             //data:字符串
-            var data = '';
+            let data = '';
             data += 'type=utf8&';
             data += 'name=' + filename;
             postsomething(data, '/readFile', callback);
@@ -81,7 +81,7 @@
             //filename:支持"/"做分隔符
             //callback:function(err, data)
             //data:base64字符串
-            var data = '';
+            let data = '';
             data += 'type=base64&';
             data += 'name=' + filename;
             postsomething(data, '/readFile', callback);
@@ -98,7 +98,7 @@
             //filename:支持"/"做分隔符
             //callback:function(err)
             //datastr:字符串
-            var data = '';
+            let data = '';
             data += 'type=utf8&';
             data += 'name=' + filename;
             data += '&value=' + datastr;
@@ -110,7 +110,7 @@
             //filename:支持"/"做分隔符
             //callback:function(err)
             //datastr:base64字符串
-            var data = '';
+            let data = '';
             data += 'type=base64&';
             data += 'name=' + filename;
             data += '&value=' + datastr;
@@ -130,7 +130,7 @@
         //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
         if (typeof(path) != typeof(''))
             throw 'Type Error in fs.readdir';
-        var data = '';
+        let data = '';
         data += 'name=' + path;
         postsomething(data, '/listFile', function (err, data) {
             try {
@@ -152,7 +152,7 @@
         //callback:function(err, data)
         if (typeof(path) != typeof(''))
             throw 'Type Error in fs.readdir';
-        var data = '';
+        let data = '';
         data += 'name=' + path;
         postsomething(data, '/makeDir', callback);
         return;
@@ -165,7 +165,7 @@
     fs.moveFile = function (src, dest, callback) {
         if (typeof(src) != typeof('') || typeof(dest) != typeof(''))
             throw 'Type Error in fs.readdir';
-        var data = '';
+        let data = '';
         data += 'src=' + src + "&dest=" + dest;
         postsomething(data, '/moveFile', callback);
         return;
@@ -178,7 +178,7 @@
     fs.deleteFile = function (path, callback) {
         if (typeof(path) != typeof(''))
             throw 'Type Error in fs.readdir';
-        var data = '';
+        let data = '';
         data += 'name=' + path;
         postsomething(data, '/deleteFile', callback);
         return;

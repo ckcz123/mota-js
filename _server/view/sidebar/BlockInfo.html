@@ -1,0 +1,82 @@
+<template>
+    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- enemyitem -->
+        <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('enemyitem')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div id="enemyItemTable"><!-- enemy and item -->
+                <data-tree></data-tree>
+                <div style="margin-top: -10px; margin-bottom: 10px">
+                    <button id="copyEnemyItem">复制属性</button>
+                    <button id="pasteEnemyItem">粘贴属性</button>
+                    <button id="clearEnemyItem">清空属性</button>
+                    <button id="clearAllEnemyItem">批量清空属性</button>
+                </div>
+            </div>
+            <div id='newIdIdnum'><!-- id and idnum -->
+                <input placeholder="新id（唯一标识符）"/>
+                <input placeholder="新idnum（10000以内数字）"/>
+                <button>save</button>
+                <br/>
+                <button style="margin-top: 10px">自动注册</button>
+            </div>
+            <div id='changeId'><!-- id and idnum -->
+                <input placeholder="修改图块id为"/>
+                <button>save</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    export default class BlockInfo extends AMEFComponent {
+        
+        enemyitem(callback) {
+            //editor.info=editor.ids[editor.indexs[201]];
+            if (!core.isset(editor.info)) return;
+
+            if (Object.keys(editor.info).length !== 0 && editor.info.idnum != 17) editor_mode.info = editor.info;//避免editor.info被清空导致无法获得是物品还是怪物
+
+            if (!core.isset(editor_mode.info.id)) {
+                // document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = '';
+                document.getElementById('newIdIdnum').style.display = 'block';
+                document.getElementById('enemyItemTable').style.display = 'none';
+                document.getElementById('changeId').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('newIdIdnum').style.display = 'none';
+            document.getElementById('enemyItemTable').style.display = 'block';
+            document.getElementById('changeId').style.display = 'block';
+
+            var objs = [];
+            if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
+                editor.file.editEnemy(editor_mode.info.id, [], function (objs_) {
+                    objs = objs_;
+                    //console.log(objs_)
+                });
+            } else if (editor_mode.info.images == 'items') {
+                editor.file.editItem(editor_mode.info.id, [], function (objs_) {
+                    objs = objs_;
+                    //console.log(objs_)
+                });
+            } else {
+                /* document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML='';
+                return; */
+                editor.file.editMapBlocksInfo(editor_mode.info.idnum, [], function (objs_) {
+                    objs = objs_;
+                    //console.log(objs_)
+                });
+            }
+            //只查询不修改时,内部实现不是异步的,所以可以这么写
+            var tableinfo = editor.table.objToTable(objs[0], objs[1]);
+            document.getElementById('table_a3f03d4c_55b8_4ef6_b362_b345783acd72').innerHTML = tableinfo.HTML;
+            tableinfo.listen(tableinfo.guids);
+
+            if (Boolean(callback)) callback();
+        }
+    }
+</script>
+
+<style>
+    
+</style>

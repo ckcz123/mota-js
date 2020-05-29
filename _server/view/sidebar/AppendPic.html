@@ -1,0 +1,44 @@
+<template>
+    <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><!-- appendpic -->
+        <h3 class="leftTabHeader">追加素材</h3>
+        <div class="leftTabContent">
+            <p>
+                <input id="selectFileBtn" type="button" value="导入文件到画板"/>
+                <select id="selectAppend"></select>
+                <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
+                <input id="appendConfirm" type="button" value="追加"/>
+                <input id="quickAppendConfirm" type="button" value="快速追加"/>
+                <span style="font-size: 13px">&nbsp;&nbsp;自动注册</span><input id="appendRegister" type="checkbox" checked/>
+            </p>
+            <p>
+                色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
+                <datalist id="huelists" style="display: none">
+                    <option value="0"/><option value="1"/><option value="2"/>
+                    <option value="3"/><option value="4"/><option value="5"/>
+                    <option value="6"/><option value="7"/><option value="8"/>
+                    <option value="9"/><option value="10"/><option value="11"/><option value="12"/>
+                </datalist>
+            </p>
+            <div id="appendPicCanvas" style="position:relative;overflow: auto;height:470px;">
+                <canvas style="position:absolute"></canvas><!-- 用于画出灰白相间背景 -->
+                <canvas style="position:absolute"></canvas><!-- 用于画出选中文件 -->
+                <canvas style="position:absolute;z-index:100"></canvas><!-- 用于响应鼠标点击 -->
+                <canvas style="position:absolute;display:none;"></canvas><!-- 画出追加后的sprite用于储存 -->
+                <div id="appendPicSelection">
+                    <div class="appendSelection"><span style="top: 0; left: 2px;">1</span></div>
+                    <div class="appendSelection"><span style="top: 0; left: 14px;">2</span></div>
+                    <div class="appendSelection"><span style="top: 12px; left: 2px;">3</span></div>
+                    <div class="appendSelection"><span style="top: 12px; left: 14px;">4</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    export default class AppendPic extends AMEFComponent {
+        $setup() {
+
+        }
+    }
+</script>

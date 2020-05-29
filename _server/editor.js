@@ -150,14 +150,12 @@ editor.prototype.init = function (callback) {
     editor.airwallImg = new Image();
     editor.airwallImg.src = './project/materials/airwall.png';
 
-    fs.readFile("index.html", 'utf-8', function(err, data) {
-        var str = data.split('<!-- injection -->');
+    fs.readFile("index.html", 'utf-8', (err, data) => {
+        const str = data.split('<!-- injection -->');
         if (str.length != 3) window.onerror("index.html格式不正确");
         editor.dom.gameInject.innerHTML = str[1];
         
-        var cvs = ['bg', 'fg', 'event', 'event2'].map(function(e) {
-            return document.getElementById(e);
-        });
+        const cvs = ['bg', 'fg', 'event', 'event2'].map((e) =>  document.getElementById(e));
         ['bg', 'fg', 'ev', 'ev2'].forEach(function(e, i) {
             editor.dom[e+'c'] = cvs[i];
             editor.dom[e+'Ctx'] = cvs[i].getContext('2d');
@@ -165,7 +163,7 @@ editor.prototype.init = function (callback) {
             editor.dom.mapEdit.insertBefore(cvs[i], document.getElementById('efg'));
         });
 
-        var mainScript = document.createElement('script');
+        const mainScript = document.createElement('script');
 
         mainScript.onload = function() {
     

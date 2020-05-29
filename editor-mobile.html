@@ -18,56 +18,7 @@
     }
 </script>
 <div class="main">
-    <div id="left" style="z-index:-1;opacity: 0;"><!-- map -->
-        <div id="arrEditor">
-            <table class="col" id='arrColMark'></table>
-            <table class="row" id='arrRowMark'></table>
-            <div id="mapEditArea">
-                <textarea cols="10" rows="10" id="pout"></textarea>
-            </div>
-            <div id="editTip">
-                <input id='newFileName' placeholder="新楼层id" style="width: 100px"/>
-                <span style="vertical-align: bottom">宽</span>
-                <input id='newMapWidth' value="13" style="width: 20px"/>
-                <span style="vertical-align: bottom">高</span>
-                <input id='newMapHeight' value="13" style="width: 20px"/>
-                <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
-                <span style='vertical-align: bottom;'>保留楼层属性</span>
-                <br/>
-                <input type="button" value="新建空白地图" id='newMap'/>
-            </div>
-            <div id='editBtns'>
-                <input type="button" value="导出并复制地图" id="exportMap"/>
-                <input type="button" value="导入地图" id="importMap"/>
-                <input type="button" value="清除地图" id='clearMapButton'/>
-                <input type="button" value="删除地图" id="deleteMap"/>
-            </div>
-            <input type="button" value="批量创建空白地图 ↓" id='newMaps'/>
-            <div id='newFloors' style='display:none'>
-                <span style="vertical-align: bottom">楼层ID格式: </span>
-                <input id='newFloorIds' style="width: 70px" value='MT${i}'/>
-                <br/>
-                <span style="vertical-align: bottom">地图中文名格式: </span>
-                <input id='newFloorTitles' style="width: 100px" value='主塔 ${i} 层'/>
-                <br/>
-                <span style="vertical-align: bottom">状态栏名称: </span>
-                <input id='newFloorNames' style="width: 70px" value='${i}'/>
-                <br/>
-                <span style="vertical-align: bottom">宽</span>
-                <input id='newMapsWidth' value="13" style="width: 20px"/>
-                <span style="vertical-align: bottom">高</span>
-                <input id='newMapsHeight' value="13" style="width: 20px"/>
-                <input type="checkbox" id='newMapsStatus' checked='checked' style='vertical-align: bottom'/>
-                <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
-                <br/>
-                <span style="vertical-align: bottom">从 i=</span>
-                <input id='newMapsFrom' value="1" style="width: 20px"/>
-                <span style="vertical-align: bottom">到</span>
-                <input id='newMapsTo' value="5" style="width: 20px"/>
-                <input type="button" value="确认创建" id='createNewMaps'>
-            </div>
-        </div>
-    </div>
+    <arr-editor></arr-editor>
     <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><!-- appendpic -->
         <h3 class="leftTabHeader">追加素材</h3>
         <div class="leftTabContent">

@@ -1,0 +1,239 @@
+<template>
+    <div id="left">
+        <div id="arrEditor">
+            <table class="col" id='arrColMark'></table>
+            <table class="row" id='arrRowMark'></table>
+            <div id="mapEditArea">
+                <textarea cols="10" rows="10" @ref="pout"></textarea>
+            </div>
+            <div id="editTip">
+                <input id='newFileName' placeholder="新楼层id" style="width: 100px"/>
+                <span style="vertical-align: bottom">宽</span>
+                <input id='newMapWidth' value="13" style="width: 20px"/>
+                <span style="vertical-align: bottom">高</span>
+                <input id='newMapHeight' value="13" style="width: 20px"/>
+                <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
+                <span style='vertical-align: bottom;'>保留楼层属性</span>
+                <br/>
+                <input type="button" value="新建空白地图" id='newMap'/>
+            </div>
+            <div id='editBtns'>
+                <input type="button" value="导出并复制地图" @click="exportMap"/>
+                <input type="button" value="导入地图" @click="importMap"/>
+                <input type="button" value="清除地图" @click='clearMapButton'/>
+                <input type="button" value="删除地图" @click="deleteMap"/>
+            </div>
+            <input type="button" value="批量创建空白地图 ↓" id='newMaps' @click="showNewMap"/>
+            <div ref='newFloors' style='display:none'>
+                <span>楼层ID格式: </span>
+                <input ref='newFloorIds' style="width: 70px"/>
+                <br/>
+                <span>地图中文名格式: </span>
+                <input ref='newFloorTitles' style="width: 100px"/>
+                <br/>
+                <span>状态栏名称: </span>
+                <input ref='newFloorNames' style="width: 70px"/>
+                <br/>
+                <span>宽</span> 
+                <input ref='newMapsWidth' style="width: 20px"/>
+                <span>高</span>
+                <input ref='newMapsHeight' style="width: 20px"/>
+                <input type="checkbox" ref='newMapsStatus' style='vertical-align: bottom'/>
+                <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
+                <br/>
+                <span>从 i=</span>
+                <input ref='newMapsFrom' style="width: 20px"/>
+                <span>到</span>
+                <input ref='newMapsTo' style="width: 20px"/>
+                <input type="button" value="确认创建" @click="createNewMaps">
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    export default class ArrEditor extends AMEFComponent {
+
+        $data = {
+            floorIds: "MT${i}",
+            titles: "主塔 ${i} 层",
+            names: "${i}",
+            from: 1,
+            to: 5,
+            width: 13,
+            height: 13,
+            extends: true,
+        }
+
+        $setup() {
+            this.$bind([
+                ['newFloorIds', "floorIds"],
+                ['newFloorTitles', "titles"],
+                ['newFloorNames', "names"],
+                ['newMapsFrom', "from"],
+                ['newMapsTo', "to"],
+                ['newMapsWidth', "width"],
+                ['newMapsHeight', "height"],
+                ['newMapsStatus', 'extends'],
+            ]);
+        }
+        
+        importMap() {
+            const sy = editor.map.length, sx = editor.map[0].length;
+            var mapArray;
+            try {
+                mapArray = JSON.parse('[' + pout.value + ']');
+                if (mapArray.length != sy || mapArray[0].length != sx) throw '';
+            } catch (e) {
+                this.$error('格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)');
+                return;
+            }
+            var hasError = false;
+            for (var y = 0; y < sy; y++) {
+                for (var x = 0; x < sx; x++) {
+                    var num = mapArray[y][x];
+                    if (num == 0)
+                        editor.map[y][x] = 0;
+                    else if (editor.indexs[num]==null || editor.indexs[num][0]==null) {
+                        this.$error('当前有未定义ID（在地图区域显示红块），请用有效的图块进行覆盖！')
+                        hasError = true;
+                        editor.map[y][x] = {};
+                    } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
+                }
+            }
+            editor.updateMap();
+            if (!hasError) printf('地图导入成功！');
+        }
+
+        formatArr() {
+            var formatArrStr = '';
+            
+            var si=editor.map.length,sk=editor.map[0].length;
+            if (pout.value.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
+            var arr = pout.value.replace(/\s+/g, '').split('],[');
+
+            if (arr.length != si) return;
+            for (var i = 0; i < si; i++) {
+                var a = [];
+                formatArrStr += '[';
+                if (i == 0 || i == si-1) a = arr[i].split(/\D+/).join(' ').trim().split(' ');
+                else a = arr[i].split(/\D+/);
+                if (a.length != sk) {
+                    formatArrStr = '';
+                    return;
+                }
+
+                for (var k = 0; k < sk; k++) {
+                    var num = parseInt(a[k]);
+                    formatArrStr += Array(Math.max(4 - String(num).length, 0)).join(' ') + num + (k == sk-1 ? '' : ',');
+                }
+                formatArrStr += ']' + (i == si-1 ? '' : ',\n');
+            }
+            return formatArrStr;
+        }
+
+        exportMap() {
+            editor.updateMap();
+            let sx = editor.map.length-1, sy = editor.map[0].length-1;
+
+            let filestr = '';
+            for (let yy = 0; yy <= sy; yy++) {
+                filestr += '['
+                for (let xx = 0; xx <= sx; xx++) {
+                    let mapxy = editor.map[yy][xx];
+                    if (typeof(mapxy) == typeof({})) {
+                        if ('idnum' in mapxy) mapxy = mapxy.idnum;
+                        else {
+                            printe("生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！");
+                            return;
+                        }
+                    } else if (typeof(mapxy) == 'undefined') {
+                        printe("生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！");
+                        return;
+                    }
+                    mapxy = String(mapxy);
+                    mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
+                    filestr += mapxy + (xx == sx ? '' : ',')
+                }
+
+                filestr += ']' + (yy == sy ? '' : ',\n');
+            }
+            pout.value = filestr;
+            if (formatArr()) {
+                pout.focus();
+                pout.setSelectionRange(0, pout.value.length);
+                document.execCommand("Copy");
+                printf("导出并复制成功！");
+            } else {
+                printe("无法导出并复制此地图，可能有不合法块。")
+            }
+        }
+
+        showNewMap() {
+            this.$refs("newFloors").toggle();
+        }
+
+        async createNewMaps() {
+            if (!this.floorIds) return;
+            const from = this.from, to = this.to;
+            if (!core.isset(from) || !core.isset(to) || from > to || from < 0 || to < 0) {
+                this.$error("请输入有效的起始和终止楼层");
+                return;
+            }
+            if (to - from >= 100) {
+                this.$error("一次最多创建99个楼层");
+                return;
+            }
+            const floorIdList = [];
+            for (let i = from; i <= to; i++) {
+                const floorId = floorIds.replace(/\${(.*?)}/g, (word, value) => {
+                    return eval(value);
+                });
+                if (core.floorIds.includes(floorId)) {
+                    this.$error("要创建的楼层 " + floorId + " 已存在！");
+                    return;
+                }
+                if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(floorId)) {
+                    this.$error("楼层名 " + floorId + " 不合法！请使用字母、数字、下划线，且不能以数字开头！");
+                    return;
+                }
+                if (floorIdList.includes(floorId)) {
+                    this.$error("尝试重复创建楼层 " + floorId + " ！");
+                    return;
+                }
+                floorIdList.push(floorId);
+            }
+
+            const width = this.width, height = this.height;
+            if (!core.isset(width) || !core.isset(height) || width < core.__SIZE__ || height < core.__SIZE__ || width * height > 1000) {
+                this.$error("新建地图的宽高都不得小于" + core.__SIZE__ + "，且宽高之积不能超过1000");
+                return;
+            }
+
+            editor_mode.onmode('');
+
+            const err = await this.$game.createNewMaps(floorIdList);
+
+            if (err) {
+                this.$print(err);
+                throw (err)
+            }
+
+            this.$print('批量创建 ' + floorIdList[0] + '~' + floorIdList[floorIdList.length - 1] + ' 成功,请F5刷新编辑器生效');
+
+            core.floorIds = core.floorIds.concat(floorIdList);
+            editor.file.editTower([['change', "['main']['floorIds']", core.floorIds]], function (objs_) {//console.log(objs_);
+                if (objs_.slice(-1)[0] != null) {
+                    this.$print(objs_.slice(-1)[0]);
+                    throw (objs_.slice(-1)[0])
+                }
+            });
+        }
+    }
+</script>
+
+<style lang="less">
+#newFloor span {
+    vertical-align: bottom
+}
+</style>

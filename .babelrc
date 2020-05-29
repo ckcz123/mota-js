@@ -1,0 +1,14 @@
+{
+    "presets": [
+        ["@babel/preset-env", {
+            "targets": {
+                "electron": "8"
+            }
+        }],
+        "@vue/babel-preset-jsx"
+    ],
+    "plugins": [
+        "@babel/plugin-proposal-class-properties"
+    ]
+}
+  

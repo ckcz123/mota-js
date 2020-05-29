@@ -53,5 +53,7 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
-
-
+# npm
+node_modules
+release
+package-lock.json

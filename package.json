@@ -1,0 +1,44 @@
+{
+  "name": "mota-js",
+  "version": "2.7.0",
+  "description": "HTML5 canvas制作的魔塔样板，支持全平台游戏！\r **即使完全不会编程的用户，按照模板和说明文档也能很快做出一个魔塔游戏！**",
+  "main": "main.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ckcz123/mota-js.git"
+  },
+  "keywords": [
+    "game",
+    "engine"
+  ],
+  "author": "ckcz123",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/ckcz123/mota-js/issues"
+  },
+  "dependencies": {
+    "@babel/core": "^7.8.7",
+    "@babel/plugin-proposal-class-properties": "^7.8.3",
+    "@babel/preset-env": "^7.9.5",
+    "@rollup/plugin-node-resolve": "^7.1.2",
+    "@types/gulp": "^4.0.6",
+    "eslint": "^6.8.0",
+    "gulp": "^4.0.2",
+    "gulp-babel": "^8.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-preprocess": "^3.0.3",
+    "gulp-typescript": "^6.0.0-alpha.1",
+    "rollup": "^2.3.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "typescript": "^3.8.3"
+  },
+  "homepage": "https://github.com/ckcz123/mota-js#readme"
+}

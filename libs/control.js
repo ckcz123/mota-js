@@ -695,11 +695,7 @@ control.prototype._moveHero_moving = function () {
                 // 检测是否穿出去
                 var nx = core.nextX(), ny = core.nextY();
                 if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height) return;
-                core.status.heroMoving=-1;
-                core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, function () {
-                    core.status.heroMoving=0;
-                    move();
-                });
+                core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, move);
             }
             else {
                 core.moveAction();
@@ -1760,8 +1756,6 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (!data) return core.drawTip("无效的存档");
     if (data.version != core.firstData.version) return core.drawTip("存档版本不匹配");
     if (data.hard != core.status.hard) core.drawTip("游戏难度不匹配！");
-    if (data.hashCode != null && data.hashCode != core.utils.hashCode(data.hero))
-        return alert("存档校验失败，请勿修改存档文件！");
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
     if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
         return core.drawTip("无法从此存档回放录像");
@@ -1823,9 +1817,9 @@ control.prototype._syncSave_http = function (type, saves) {
             core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+response.msg);
         }
         else {
-            core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号： "
-                +response.code+"\n您的存档密码： "+response.msg
-                +"\n\n请牢记以上两个信息（如截图等），在从服务器\n同步存档时使用。\n\r[yellow]另外请注意，存档同步只会保存一个月的时间。\r")
+            core.drawText((type=='all'?"所有存档":"存档"+core.saves.saveIndex)+"同步成功！\n\n您的存档编号+密码： \r[yellow]"
+                +response.code+response.msg
+                +"\r\n\n请牢记以上信息（如截图等），在从服务器\n同步存档时使用。\n\r[yellow]另外请注意，存档同步只会保存一个月的时间。\r")
         }
     }, function (e) {
         core.drawText("出错啦！\n无法同步存档到服务器。\n错误原因："+e);
@@ -1834,13 +1828,14 @@ control.prototype._syncSave_http = function (type, saves) {
 
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
-    core.myprompt("请输入存档编号", null, function (id) {
-        if (!id) return core.ui.drawSyncSave();
-        core.myprompt("请输入存档密码：", null, function (password) {
-            if (!password) return core.ui.drawSyncSave();
-            core.ui.drawWaiting("正在同步，请稍后...");
-            core.control._syncLoad_http(id, password);
-        });
+    core.myprompt("请输入存档编号+密码", null, function (idpassword) {
+        if (!idpassword) return core.ui.drawSyncSave();
+        if (!/^\d{6}\w{4}$/.test(idpassword)) {
+            core.drawText("不合法的存档编号+密码；应当为6位数字+4位数字字母的组合，如\r[yellow]123456abcd\r。");
+            return;
+        }
+        core.ui.drawWaiting("正在同步，请稍后...");
+        core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
     });
 }
 
@@ -2697,6 +2692,12 @@ control.prototype.resize = function() {
 }
 
 control.prototype._resize_gameGroup = function (obj) {
+    var startBackground = core.domStyle.isVertical ? (main.styles.startVerticalBackground || main.styles.startBackground) : main.styles.startBackground;
+    if (main.dom.startBackground.getAttribute('__src__') != startBackground) {
+        main.dom.startBackground.setAttribute('__src__', startBackground);
+        main.dom.startBackground.src = startBackground;
+    }
+
     var gameGroup = core.dom.gameGroup;
     var totalWidth, totalHeight;
     if (core.domStyle.isVertical) {
@@ -2716,6 +2717,9 @@ control.prototype._resize_gameGroup = function (obj) {
     floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
     floorMsgGroup.style.width = obj.outerSize - 2 * obj.BORDER + "px";
     floorMsgGroup.style.height = totalHeight - 2 * obj.BORDER + "px";
+    floorMsgGroup.style.fontSize = 16 * core.domStyle.scale + "px";
+    // startPanel
+    core.dom.startPanel.style.fontSize = 16 * core.domStyle.scale + "px";
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
         core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";
@@ -2776,7 +2780,7 @@ control.prototype._resize_statusBar = function (obj) {
     statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
     // 自绘状态栏
     if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH + "px";
+        core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH * core.domStyle.scale + "px";
         core.dom.statusCanvas.width = obj.CANVAS_WIDTH;
         core.dom.statusCanvas.style.height = obj.statusBarHeightInVertical - 3 + "px";
         core.dom.statusCanvas.height = obj.col * 32 + 9;
@@ -2809,7 +2813,7 @@ control.prototype._resize_status = function (obj) {
         core.dom.statusLabels[i].style.marginLeft = 6 * core.domStyle.scale + "px";
     }
     for (var i = 0; i < core.dom.statusTexts.length; ++i) {
-        core.dom.statusTexts[i].style.color = obj.globalAttribute.statusBarColor;
+        core.dom.statusTexts[i].style.color = core.arrayToRGBA(obj.globalAttribute.statusBarColor);
     }
     // keys
     if (core.flags.statusBarItems.indexOf('enableGreenKey')>=0) {

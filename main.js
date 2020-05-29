@@ -186,8 +186,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.6.6";
-    this.__VERSION_CODE__ = 99;
+    this.__VERSION__ = "2.7";
+    this.__VERSION_CODE__ = 127;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -207,7 +207,6 @@ main.prototype.init = function (mode, callback) {
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
         
-        main.dom.startBackground.src = main.styles.startBackground;
         main.dom.startLogo.style=main.styles.startLogoStyle;
         main.dom.startButtonGroup.style = main.styles.startButtonsStyle;
         main.levelChoose = main.levelChoose || [];

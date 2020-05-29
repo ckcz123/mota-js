@@ -44,7 +44,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
     core.resetGame(core.firstData.hero, hard, null, core.clone(core.initStatus.maps));
-    var nowLoc = core.clone(core.getHeroLoc());
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 
@@ -64,7 +63,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     core.push(todo, {"type": "function", "function": "function() { core.events._startGame_setHard(); }"})
     core.push(todo, core.firstData.startText);
     this.insertAction(todo, null, null, function () {
-        core.events._startGame_afterStart(nowLoc, callback);
+        core.events._startGame_afterStart(callback);
     });
 
     if (route != null) core.startReplay(route);
@@ -82,15 +81,14 @@ events.prototype._startGame_setHard = function () {
             core.insertAction(one.action);
         }
     });
-    core.setFlag('hard', 0);
+    core.setFlag('hard', hardValue || 0);
     core.setFlag('__hardColor__', hardColor);
 }
 
-events.prototype._startGame_afterStart = function (nowLoc, callback) {
+events.prototype._startGame_afterStart = function (callback) {
     core.ui.closePanel();
     this._startGame_statusBar();
-    core.dom.musicBtn.style.display = 'none';
-    core.changeFloor(core.firstData.floorId, null, nowLoc, null, function () {
+    core.changeFloor(core.firstData.floorId, null, core.firstData.hero.loc, null, function () {
         // 插入一个空事件避免直接回放录像出错
         core.insertAction([]);
         if (callback) callback();
@@ -473,20 +471,22 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
     var keyInfo = doorInfo.keys || {};
     if (needKey) {
         for (var keyName in keyInfo) {
+            var keyValue = keyInfo[keyName];
+            if (keyName.endsWith(':o')) keyName = keyName.substring(0, keyName.length - 2);            
+
             // --- 如果是一个不存在的道具，则直接认为无法开启
             if (!core.material.items[keyName]) {
                 core.drawTip("无法开启此门");
                 return clearAndReturn();
             }
-            var keyValue = keyInfo[keyName];
             if (core.itemCount(keyName) < keyValue) {
-                core.drawTip("你没有" + ((core.material.items[keyName] || {}).name || "钥匙"), null, true);
+                core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", null, true);
                 return false;
             }
         }
         if (!core.status.event.id) core.autosave(true);
-        for (var keyName in keyInfo) {
-            core.removeItem(keyName, keyInfo[keyName]);
+        for (var keyName in keyInfo) {  
+            if (!keyName.endsWith(':o')) core.removeItem(keyName, keyInfo[keyName]);
         }
     }
     core.playSound(doorInfo.openSound);
@@ -776,7 +776,7 @@ events.prototype.pushBox = function (data) {
     // 检测能否推上去
     if (!core.canMoveHero()) return;
     var canGoDeadZone = core.flags.canGoDeadZone;
-    core.flags.canGoDeadZone = false;
+    core.flags.canGoDeadZone = true;
     if (!core.canMoveHero(data.x, data.y, direction)) {
         core.flags.canGoDeadZone = canGoDeadZone;
         return;
@@ -1156,13 +1156,15 @@ events.prototype.__precompile_getArray = function () {
         "fillArc", "strokeArc", "drawIcon", "drawSelector", "drawBackground",
     ];
     var others = {
-        "fillEllipse": ["a", "b"],
-        "strokeEllipse": ["a", "b"],
+        "fillEllipse": ["a", "b", "angle"],
+        "strokeEllipse": ["a", "b", "angle"],
+        "fillRect": ["radius", "angle"],
+        "strokeRect": ["radius", "angle"],
         "fillArc": ["r", "start", "end"],
         "strokeArc": ["r", "start", "end"],
         "drawLine": ["x1", "y1", "x2", "y2"],
         "drawArrow": ["x1", "y1", "x2", "y2"],
-        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1"],
+        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1", "angle"],
         "drawTextContent": ["left", "top"],
     };
     return {
@@ -1473,8 +1475,11 @@ events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
     data.text = core.replaceText(data.text, prefix);
+    var __tmpName = (Math.random()+"_"+Math.random()).replace(/\./g, "") + ".png";
+    core.material.images.images[__tmpName] = core.ui.textImage(data.text);
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, core.ui.textImage(data.text), null, loc, data.opacity, data.time);
+        data.code, __tmpName + (data.reverse || ""), null, loc, data.opacity, data.time);
+    delete core.material.images.images[__tmpName];
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {
@@ -1797,8 +1802,10 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
+        if (core.hasFlag('@temp@shop') && action.startsWith('shop:')) action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
+            if (index == "-1") index = data.choices.length - 1;
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
                 core.status.event.selection = index;
                 setTimeout(function () {
@@ -2858,10 +2865,12 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });
+    core.status.heroMoving = -1;
     var animate=window.setInterval(function() {
         if (moveSteps.length==0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
+            core.status.heroMoving = 0;
             core.drawHero();
             if (callback) callback();
         }
@@ -2914,6 +2923,7 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
 }
 
 events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
+    core.status.heroMoving = -1;
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0)
             core.events._jumpHero_jumping(jumpInfo)
@@ -2942,6 +2952,7 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
     clearInterval(animate);
     core.setHeroLoc('x', ex);
     core.setHeroLoc('y', ey);
+    core.status.heroMoving = 0;
     core.drawHero();
     if (callback) callback();
 }
@@ -2974,7 +2985,7 @@ events.prototype.checkLvUp = function () {
 }
 
 events.prototype._checkLvUp_check = function () {
-    if (core.flags.statusBarItems.indexOf('enableLevelUp')>=0 || !core.firstData.levelUp
+    if (core.flags.statusBarItems.indexOf('enableLevelUp')<0 || !core.firstData.levelUp
         || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});

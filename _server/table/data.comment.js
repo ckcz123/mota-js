@@ -23,7 +23,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "editor.mode.checkImages(thiseval, './project/images/')",
 					"_directory": "./project/images/",
 					"_transform": (function (one) {
-						if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || end.endsWith('.gif'))
+						if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif'))
 							return one;
 						return null;
 					}).toString(),
@@ -71,7 +71,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "editor.mode.checkUnique(thiseval)",
 					"_directory": "./project/bgms/",
 					"_transform": (function (one) {
-						if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || end.endsWith('.wav'))
+						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav'))
 							return one;
 						return null;
 					}).toString(),
@@ -84,7 +84,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "editor.mode.checkUnique(thiseval)",
 					"_directory": "./project/sounds/",
 					"_transform": (function (one) {
-						if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || end.endsWith('.wav'))
+						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav'))
 							return one;
 						return null;
 					}).toString(),
@@ -430,19 +430,19 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "破甲比例",
-					"_data": "破甲的比例（战斗前，怪物附加角色防御的x倍作为伤害）"
+					"_data": "破甲的比例（战斗前，怪物附加角色防御的x倍作为伤害）；可以用怪物的 defValue 覆盖此值。"
 				},
 				"counterAttack": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "反击比例",
-					"_data": "反击的比例（战斗时，怪物每回合附加角色攻击的x倍作为伤害，无视角色防御）"
+					"_data": "反击的比例（战斗时，怪物每回合附加角色攻击的x倍作为伤害，无视角色防御）；可以用怪物的 atkValue 覆盖此值。"
 				},
 				"purify": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "净化比例",
-					"_data": "净化的比例（战斗前，怪物附加勇士护盾的x倍作为伤害）"
+					"_data": "净化的比例（战斗前，怪物附加勇士护盾的x倍作为伤害）；可以用怪物的 n 覆盖此值。"
 				},
 				"hatred": {
 					"_leaf": true,

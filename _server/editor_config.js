@@ -28,7 +28,7 @@ editor_config.prototype.set = function(key, value, callback) {
 
 editor_config.prototype.save = function(callback) {
     fs.writeFile(this.address, JSON.stringify(this.config) ,'utf-8', function(e) {
-        if (e) alert("写入配置文件失败");
+        if (e) printe("写入配置文件失败");
         if (callback instanceof Function) callback();
     })
 }

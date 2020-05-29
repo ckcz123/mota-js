@@ -73,6 +73,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"startBgm": null,
 		"styles": {
 			"startBackground": "project/images/bg.jpg",
+			"startVerticalBackground": "project/images/bg.jpg",
 			"startLogoStyle": "color: black",
 			"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;",
 			"statusLeftBackground": "url(project/materials/ground.png) repeat",
@@ -87,7 +88,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.6.6",
+		"version": "Ver 2.7",
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",

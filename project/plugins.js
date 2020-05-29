@@ -124,38 +124,42 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	////// 将一个全局商店转变成可预览的公共事件 //////
 	this._convertShop = function (shop) {
-		return [{
-			"type": "while",
-			"condition": "true",
-			"data": [
-				// 检测能否访问该商店
-				{
-					"type": "if",
-					"condition": "core.isShopVisited('" + shop.id + "')",
-					"true": [
-						// 可以访问，直接插入执行效果
-						{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', false) }" },
-					],
-					"false": [
-						// 不能访问的情况下：检测能否预览
-						{
-							"type": "if",
-							"condition": shop.disablePreview,
-							"true": [
-								// 不可预览，提示并退出
-								"当前无法访问该商店！",
-								{ "type": "break" },
-							],
-							"false": [
-								// 可以预览：将商店全部内容进行替换
-								{ "type": "tip", "text": "当前处于预览模式，不可购买" },
-								{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', true) }" },
-							]
-						}
-					]
-				}
-			]
-		}];
+		return [
+			{ "type": "function", "function": "function() {core.setFlag('@temp@shop', true);}" },
+			{
+				"type": "while",
+				"condition": "true",
+				"data": [
+					// 检测能否访问该商店
+					{
+						"type": "if",
+						"condition": "core.isShopVisited('" + shop.id + "')",
+						"true": [
+							// 可以访问，直接插入执行效果
+							{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', false) }" },
+						],
+						"false": [
+							// 不能访问的情况下：检测能否预览
+							{
+								"type": "if",
+								"condition": shop.disablePreview,
+								"true": [
+									// 不可预览，提示并退出
+									"当前无法访问该商店！",
+									{ "type": "break" },
+								],
+								"false": [
+									// 可以预览：将商店全部内容进行替换
+									{ "type": "tip", "text": "当前处于预览模式，不可购买" },
+									{ "type": "function", "function": "function() { core.plugin._convertShop_replaceChoices('" + shop.id + "', true) }" },
+								]
+							}
+						]
+					}
+				]
+			},
+			{ "type": "function", "function": "function() {core.removeFlag('@temp@shop');}" }
+		];
 	}
 
 	this._convertShop_replaceChoices = function (shopId, previewMode) {
@@ -220,6 +224,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return null;
 	}
 
+	/// 允许商店X键退出
+	core.registerAction('keyUp', 'shops', function (keycode) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		if (keycode == 88) { // X
+			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
+			return true;
+		}
+	}, 60);
+
 },
     "removeMap": function () {
 	// 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。
@@ -263,6 +280,540 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			}
 		}
 	}
+},
+    "fiveLayers": function () {
+	// 是否启用五图层（增加背景2层和前景2层） 将__enableFiveLayers置为true即会启用；启用后请保存后刷新编辑器
+	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
+	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
+	// 插件作者：ad
+	var __enableFiveLayers = false;
+	if (!__enableFiveLayers) return;
+
+	// 创建新图层
+	function createCanvas(name, zIndex) {
+		if (!name) return;
+		var canvas = document.createElement('canvas');
+		canvas.id = name;
+		canvas.className = 'gameCanvas';
+		canvas.width = canvas.height = core.__PIXELS__;
+		// 编辑器模式下设置zIndex会导致加入的图层覆盖优先级过高
+		if (main.mode != "editor") canvas.style.zIndex = zIndex || 0;
+		// 将图层插入进游戏内容
+		document.getElementById('gameDraw').appendChild(canvas);
+		var ctx = canvas.getContext('2d');
+		core.canvas[name] = ctx;
+		return canvas;
+	}
+
+	var bg2Canvas = createCanvas('bg2', 20);
+	var fg2Canvas = createCanvas('fg2', 63);
+	// 大地图适配
+	core.bigmap.canvas = ["bg2", "fg2", "bg", "event", "event2", "fg", "damage"];
+
+	if (main.mode == 'editor') {
+		/*插入编辑器的图层 不做此步新增图层无法在编辑器显示*/
+		// 编辑器图层覆盖优先级 eui > efg > fg(前景层) > event2(48*32图块的事件层) > event(事件层) > bg(背景层)
+		// 背景层2(bg2) 插入事件层(event)之前(即bg与event之间)
+		document.getElementById('mapEdit').insertBefore(bg2Canvas, document.getElementById('event'));
+		// 前景层2(fg2) 插入编辑器前景(efg)之前(即fg之后)
+		document.getElementById('mapEdit').insertBefore(fg2Canvas, document.getElementById('efg'));
+		// 原本有三个图层 从4开始添加
+		var num = 4;
+		// 新增图层存入editor.dom中
+		editor.dom.bg2c = core.canvas.bg2.canvas;
+		editor.dom.bg2Ctx = core.canvas.bg2;
+		editor.dom.fg2c = core.canvas.fg2.canvas;
+		editor.dom.fg2Ctx = core.canvas.fg2;
+
+		// 默认全空
+		var defaultMap = [];
+		for (var i = 0; i < core.__SIZE__; ++i) {
+			var row = [];
+			for (var j = 0; j < core.__SIZE__; ++j) {
+				row.push(0);
+			}
+			defaultMap.push(row);
+		}
+
+		// 创建编辑器上的按钮
+		var createCanvasBtn = function (name) {
+			// 电脑端创建按钮
+			var input = document.createElement('input');
+			// layerMod4/layerMod5
+			var id = 'layerMod' + num++;
+			// bg2map/fg2map
+			var value = name + 'map';
+			input.type = 'radio';
+			input.name = 'layerMod';
+			input.id = id;
+			input.value = value;
+			editor.dom[id] = input;
+			editor[value] = editor[value] || defaultMap;
+			return input;
+		};
+
+		var createCanvasBtn_mobile = function (name) {
+			// 手机端往选择列表中添加子选项
+			var input = document.createElement('option');
+			var id = 'layerMod' + num++;
+			var value = name + 'map';
+			input.name = 'layerMod';
+			input.value = value;
+			editor.dom[id] = input;
+			editor[value] = editor[value] || defaultMap;
+			return input;
+		};
+		if (!editor.isMobile) {
+			var input = createCanvasBtn('bg2');
+			var input2 = createCanvasBtn('fg2');
+			// 获取事件层及其父节点
+			var child = document.getElementById('layerMod'),
+				parent = child.parentNode;
+			// 背景层2插入事件层前
+			parent.insertBefore(input, child);
+			// 不能直接更改背景层2的innerText 所以创建文本节点
+			var txt = document.createTextNode('背景层2');
+			// 插入事件层前(即新插入的背景层2前)
+			parent.insertBefore(txt, child);
+			// 向最后插入前景层2(即插入前景层后)
+			parent.appendChild(input2);
+			var txt2 = document.createTextNode('前景层2');
+			parent.appendChild(txt2);
+		} else {
+			var input = createCanvasBtn_mobile('bg2');
+			var input2 = createCanvasBtn_mobile('fg2');
+			// 手机端因为是选项 所以可以直接改innerText
+			input.innerText = '背景层2';
+			input2.innerText = '前景层2';
+			var parent = document.getElementById('layerMod');
+			parent.insertBefore(input, parent.children[1]);
+			parent.appendChild(input2);
+		}
+
+		var _isEditorInit = false;
+
+		// 这里写编辑器复写的内容 有关游戏进程的函数复写请在下面复写
+		var _afterEditorInit = function (callback) {
+			// 防止多次调用
+			if (_isEditorInit) {
+				if (callback) callback();
+				return;
+			}
+			_isEditorInit = true;
+			// 编辑器更新地图
+			editor.updateMap = function () {
+				var blocks = core.maps._mapIntoBlocks(editor.map.map(function (v) {
+					return v.map(function (v) {
+						try {
+							return v.idnum || v || 0;
+						} catch (e) {
+							console.log("Unable to read idnum from " + v);
+							return 0;
+						}
+					});
+				}), { 'events': editor.currentFloorData.events }, editor.currentFloorId);
+				core.status.thisMap.blocks = blocks;
+
+				var updateMap = function () {
+					// 新增图层也需要刷新
+					core.removeGlobalAnimate();
+					core.clearMap('bg');
+					core.clearMap('bg2');
+					core.clearMap('event');
+					core.clearMap('event2');
+					core.clearMap('fg');
+					core.clearMap('fg2');
+					core.maps._drawMap_drawAll();
+				};
+				updateMap();
+
+				var drawTile = function (ctx, x, y, tileInfo) { // 绘制一个普通块
+
+					//ctx.clearRect(x*32, y*32, 32, 32);
+					if (tileInfo == 0) return;
+
+					if (typeof (tileInfo) == typeof ([][0]) || !Object.prototype.hasOwnProperty.call(tileInfo, 'idnum')) { //未定义块画红块
+						if (typeof (tileInfo) != typeof ([][0]) && Object.prototype.hasOwnProperty.call(tileInfo, 'images')) {
+							ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y * 32, 32, 32, x * 32, y * 32, 32, 32);
+						}
+						ctx.strokeStyle = 'red';
+						var OFFSET = 2;
+						ctx.lineWidth = OFFSET;
+						ctx.strokeRect(x * 32 + OFFSET, y * 32 + OFFSET, 32 - OFFSET * 2, 32 - OFFSET * 2);
+						ctx.font = "30px Verdana";
+						ctx.textAlign = 'center';
+						ctx.fillStyle = 'red';
+						ctx.fillText("?", x * 32 + 16, y * 32 + 27);
+						return;
+					}
+					//ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
+				};
+				// 绘制地图 start
+				for (var y = 0; y < editor.map.length; y++) {
+					for (var x = 0; x < editor.map[0].length; x++) {
+						var tileInfo = editor.map[y][x];
+						drawTile(editor.dom.evCtx, x, y, tileInfo);
+						tileInfo = editor.fgmap[y][x];
+						drawTile(editor.dom.fgCtx, x, y, tileInfo);
+						tileInfo = editor.bgmap[y][x];
+						drawTile(editor.dom.bgCtx, x, y, tileInfo);
+						// 新增图层的未定义图块绘制
+						tileInfo = editor.fg2map[y][x];
+						drawTile(editor.dom.fgCtx, x, y, tileInfo);
+						tileInfo = editor.bg2map[y][x];
+						drawTile(editor.dom.bgCtx, x, y, tileInfo);
+					}
+				}
+				// 绘制地图 end
+
+				// 下面这行是2.7新增内容
+				editor.drawEventBlock();
+				this.updateLastUsedMap();
+			};
+			// 编辑器写入文件
+			editor.file.saveFloor = function (floorData, callback) {
+				//callback(err:String)
+				var floorId = floorData.floorId;
+				var filename = 'project/floors/' + floorId + '.js';
+				var datastr = ['main.floors.', floorId, '=\n'];
+
+				var tempJsonObj = Object.assign({}, floorData);
+				// 多写入两个图层
+				var tempMap = [
+					['map', editor.util.guid()],
+					['bgmap', editor.util.guid()],
+					['bg2map', editor.util.guid()],
+					['fgmap', editor.util.guid()],
+					['fg2map', editor.util.guid()]
+				];
+				tempMap.forEach(function (v) {
+					v[2] = tempJsonObj[v[0]];
+					tempJsonObj[v[0]] = v[1];
+				});
+				var tempJson = JSON.stringify(tempJsonObj, editor.game.replacerForSaving, 4);
+				tempMap.forEach(function (v) {
+					tempJson = tempJson.replace('"' + v[1] + '"', '[\n' + editor.file.formatMap(v[2], v[0] != 'map') + '\n]');
+				});
+				datastr = datastr.concat([tempJson]);
+				datastr = datastr.join('');
+				editor.file.alertWhenCompress();
+				editor.fs.writeFile(filename, editor.util.encode64(datastr), 'base64', function (err, data) {
+					editor.addUsedFlags(datastr);
+					callback(err);
+				});
+			};
+			editor.file.saveFloorFile = function (callback) {
+				//callback(err:String)
+				editor.util.checkCallback(callback);
+				/* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
+				  callback('未选中文件或无数据');
+				} */
+				if (core.floorIds.indexOf(editor.currentFloorId) >= 0) {
+					// 增加背景层2与前景层2的当前地图数据绑定
+					for (var ii = 0, name; name = ['map', 'bgmap', 'bg2map', 'fgmap', 'fg2map'][ii]; ii++) {
+						var mapArray = editor[name].map(function (v) {
+							return v.map(function (v) {
+								return v.idnum || v || 0;
+							})
+						});
+						editor.currentFloorData[name] = mapArray;
+					}
+				}
+				editor.file.saveFloor(editor.currentFloorData, callback);
+			};
+			// 编辑器取得地图数据
+			editor.game.fetchMapFromCore = function () {
+				var mapArray = core.getMapArray(core.status.floorId, true);
+				// 2.6.6原写法:var mapArray = core.maps.saveMap(core.status.floorId);
+				editor.map = mapArray.map(function (v) {
+					return v.map(function (v) {
+						var x = parseInt(v),
+							y = editor.indexs[x];
+						if (y == null) {
+							printe("素材数字" + x + "未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
+							y = [0];
+						}
+						return editor.ids[y[0]];
+					});
+				});
+				editor.currentFloorId = core.status.floorId;
+				editor.currentFloorData = core.floors[core.status.floorId];
+				// 补出缺省的数据
+				editor.currentFloorData.autoEvent = editor.currentFloorData.autoEvent || {};
+				// 前景层2与背景层2的editor地图数据绑定
+				for (var ii = 0, name; name = ['bgmap', 'bg2map', 'fgmap', 'fg2map'][ii]; ii++) {
+					var mapArray = editor.currentFloorData[name];
+					if (!mapArray || JSON.stringify(mapArray) == JSON.stringify([])) { //未设置或空数组
+						//与editor.map同形的全0
+						mapArray = eval('[' + Array(editor.map.length + 1).join('[' + Array(editor.map[0].length + 1).join('0,') + '],') + ']');
+					}
+					editor[name] = mapArray.map(function (v) {
+						return v.map(function (v) {
+							var x = parseInt(v),
+								y = editor.indexs[x];
+							if (y == null) {
+								printe("素材数字" + x + "未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
+								y = [0];
+							}
+							return editor.ids[y[0]];
+						});
+					});
+				}
+			};
+			// 选中背景层2或前景层2时其他图层的透明度变更
+			editor.uifunctions.layerMod_onchange = function () {
+				editor.layerMod = editor.dom.layerMod.value;
+				[editor.dom.bg2c, editor.dom.fg2c, editor.dom.bgc, editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
+					x.style.opacity = 1;
+				});
+
+				// 手机端....
+				if (editor.isMobile) {
+					var arr = ["bg", "bg2", "fg", "fg2"];
+					for (var i = 0; i < arr.length; i++) {
+						if (editor.dom.layerMod.value == arr[i] + "map") {
+							var newArr = arr.concat(["ev", "ev2"]);
+							for (var ii = 0; ii < newArr.length; ii++) {
+								if (ii != i) editor.dom[newArr[ii] + "c"].style.opacity = 0.3;
+							}
+							return;
+						}
+					}
+				}
+			};
+			editor.uifunctions.layerMod2_onchange = function () {
+				editor.layerMod = editor.dom.layerMod2.value;
+				[editor.dom.bg2c, editor.dom.fg2c, editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
+					x.style.opacity = 0.3;
+				});
+				editor.dom.bgc.style.opacity = 1;
+			};
+			editor.uifunctions.layerMod3_onchange = function () {
+				editor.layerMod = editor.dom.layerMod3.value;
+				[editor.dom.bg2c, editor.dom.fg2c, editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
+					x.style.opacity = 0.3;
+				});
+				editor.dom.fgc.style.opacity = 1;
+			};
+			// 当背景层2按钮选中情况发生变动
+			editor.uifunctions.layerMod4_onchange = function () {
+				editor.layerMod = editor.dom.layerMod4.value;
+				[editor.dom.fgc, editor.dom.fg2c, editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
+					x.style.opacity = 0.3;
+				});
+				editor.dom.bg2c.style.opacity = 1;
+			};
+			// 当前景层2按钮选中情况发生变动
+			editor.uifunctions.layerMod5_onchange = function () {
+				editor.layerMod = editor.dom.layerMod5.value;
+				[editor.dom.bg2c, editor.dom.fgc, editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
+					x.style.opacity = 0.3;
+				});
+				editor.dom.fg2c.style.opacity = 1;
+			};
+			// 绑定onchange
+			editor.dom.layerMod4.onchange = editor.uifunctions.layerMod4_onchange;
+			editor.dom.layerMod5.onchange = editor.uifunctions.layerMod5_onchange;
+			// 编辑器下移动图块
+			editor.constructor.moveBgFg = function (startPos, endPos, name, callback) {
+				if (!startPos || !endPos || ["bgmap", "bg2map", "fgmap", "fg2map"].indexOf(name) < 0) return;
+				if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+				editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
+				editor[name][startPos.y][startPos.x] = 0;
+				editor.updateMap();
+				editor.file.saveFloorFile(function (err) {
+					if (err) {
+						printe(err);
+						throw (err);
+					}
+					printf('移动图块成功');
+					editor.drawPosSelection();
+					if (callback) callback();
+				});
+			};
+			// 编辑器下交换图块
+			editor.constructor.exchangeBgFg = function (startPos, endPos, name, callback) {
+				if (!startPos || !endPos || ["bgmap", "bg2map", "fgmap", "fg2map"].indexOf(name) < 0) return;
+				if (startPos.x == endPos.x && startPos.y == endPos.y) return;
+				var value = editor[name][endPos.y][endPos.x];
+				editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
+				editor[name][startPos.y][startPos.x] = value;
+				editor.updateMap();
+				editor.file.saveFloorFile(function (err) {
+					if (err) {
+						printe(err);
+						throw (err);
+					}
+					printf('交换图块成功');
+					editor.drawPosSelection();
+					if (callback) callback();
+				});
+			};
+			// 继续进行afterCoreReset
+			if (callback) callback();
+		};
+		// 将复写编辑器的内容插入changeFloor之后 afterCoreReset之前
+		// 加载队列:int main => core => plugin(即plugin这个文件里的插件内容) => editor(此时才开始加载编辑器)=> afterMainInit
+		// => editor_file(此时才能开始复写编辑器内容) => changeFloor(在这里插入编辑器复写内容的加载) => afterCoreReset(此时才开始进行地图的绘制)
+		// 直接复写由于加载插件时 复写的editor函数还未加载 会导致出错
+		var _changeFloor = core.events.changeFloor;
+		core.events.changeFloor = function (floorId, stair, heroLoc, time, callback) {
+			return _changeFloor.call(core.events, floorId, stair, heroLoc, time, function () {
+				_afterEditorInit(callback);
+			});
+		};
+	}
+
+	////// 绘制背景层 //////
+	core.maps.drawBg = function (floorId, ctx) {
+		floorId = floorId || core.status.floorId;
+		var onMap = ctx == null;
+		if (onMap) {
+			ctx = core.canvas.bg;
+			core.clearMap(ctx);
+			core.status.floorAnimateObjs = this._getFloorImages(floorId);
+		}
+		core.maps._drawBg_drawBackground(floorId, ctx);
+		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
+		core.maps._drawFloorImages(floorId, ctx, 'bg');
+		core.maps._drawBgFgMap(floorId, ctx, 'bg', onMap);
+		// 绘制背景层2
+		core.maps._drawBgFgMap(floorId, ctx, 'bg2', onMap);
+	};
+
+	////// 绘制前景层 //////
+	core.maps.drawFg = function (floorId, ctx) {
+		floorId = floorId || core.status.floorId;
+		var onMap = ctx == null;
+		if (onMap) {
+			ctx = core.canvas.fg;
+			core.status.floorAnimateObjs = this._getFloorImages(floorId);
+		}
+		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
+		this._drawFloorImages(floorId, ctx, 'fg');
+		this._drawBgFgMap(floorId, ctx, 'fg', onMap);
+		// 绘制前景层2
+		this._drawBgFgMap(floorId, ctx, 'fg2', onMap);
+	};
+	/* cannotIn/cannotOut适配 start*/
+	core.maps.generateMovableArray = function (floorId, x, y, direction) {
+		floorId = floorId || core.status.floorId;
+		if (!floorId) return null;
+		var width = core.floors[floorId].width,
+			height = core.floors[floorId].height;
+		var bgArray = this.getBgMapArray(floorId),
+			bg2Array = this._getBgFgMapArray('bg2', floorId),
+			fgArray = this.getFgMapArray(floorId),
+			fg2Array = this._getBgFgMapArray('fg2', floorId),
+			eventArray = this.getMapArray(floorId);
+
+		var generate = function (x, y, direction) {
+			if (direction != null) {
+				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
+					bgArray: bgArray,
+					fgArray: fgArray,
+					bg2Array: bg2Array,
+					fg2Array: fg2Array,
+					eventArray: eventArray
+				});
+			}
+			return ["left", "down", "up", "right"].filter(function (direction) {
+				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
+					bgArray: bgArray,
+					fgArray: fgArray,
+					bg2Array: bg2Array,
+					fg2Array: fg2Array,
+					eventArray: eventArray
+				});
+			});
+		};
+
+		if (x != null && y != null) return generate(x, y, direction);
+		var array = [];
+		for (var x = 0; x < width; x++) {
+			array[x] = [];
+			for (var y = 0; y < height; y++) {
+				array[x][y] = generate(x, y);
+			}
+		}
+		return array;
+	};
+	core.maps._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
+		// 1. 检查该点 cannotMove
+		if (core.inArray((core.floors[floorId].cannotMove || {})[x + "," + y], direction))
+			return false;
+
+		var nx = x + core.utils.scan[direction].x,
+			ny = y + core.utils.scan[direction].y;
+		if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].height)
+			return false;
+
+		// 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
+		if (this._canMoveHero_checkCannotInOut([
+				extraData.bgArray[y][x], extraData.bg2Array[y][x], extraData.fgArray[y][x], extraData.fg2Array[y][x], extraData.eventArray[y][x]
+			], "cannotOut", direction))
+			return false;
+		if (this._canMoveHero_checkCannotInOut([
+				extraData.bgArray[ny][nx], extraData.bg2Array[y][x], extraData.fgArray[ny][nx], extraData.fg2Array[y][x], extraData.eventArray[ny][nx]
+			], "cannotIn", direction))
+			return false;
+
+		// 3. 检查是否能进将死的领域
+		if (floorId == core.status.floorId && !core.flags.canGoDeadZone &&
+			core.status.hero.hp <= (core.status.checkBlock.damage[nx + "," + ny] || 0) &&
+			extraData.eventArray[ny][nx] == 0)
+			return false;
+
+		return true;
+	};
+	/* cannotIn/cannotOut适配 end*/
+	// 前景层2与背景层2的隐藏与显示适配
+	// 比如:可以用core.hideBgFgMap("bg2",[x, y], floorId)隐藏当前楼层的背景层2图块
+	core.maps._triggerBgFgMap = function (type, name, loc, floorId, callback) {
+		if (type != 'show') type = 'hide';
+		if (!name) name = 'bg';
+		if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
+			loc = [loc];
+		floorId = floorId || core.status.floorId;
+		if (!floorId) return;
+
+		if (loc.length == 0) return;
+		loc.forEach(function (t) {
+			var x = t[0],
+				y = t[1];
+			var flag = "__" + name + "Map__" + floorId + "_" + x + "_" + y;
+			if (type == 'hide') core.setFlag(flag, true);
+			else core.removeFlag(flag);
+		});
+		core.status[name + "maps"][floorId] = null;
+
+		if (floorId == core.status.floorId) {
+			core.drawMap(floorId, callback);
+		} else {
+			if (callback) callback();
+		}
+	};
+	// 改变背景层2与前景层2图块 例:core.setBgFgBlock('fg2',312,core.nextX(),core.nextY())
+	core.maps.setBgFgBlock = function (name, number, x, y, floorId) {
+		floorId = floorId || core.status.floorId;
+		if (!floorId || number == null || x == null || y == null) return;
+		if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
+		if (name != 'bg' && name != 'fg' && name != 'bg2' && name != 'fg2') return;
+		if (typeof number == 'string') {
+			if (/^\d+$/.test(number)) number = parseInt(number);
+			else number = core.getNumberById(number);
+		}
+
+		var vFlag = "__" + name + "Value__" + floorId + "_" + x + "_" + y;
+		core.setFlag(vFlag, number);
+		core.status[name + "maps"][floorId] = null;
+
+		if (floorId == core.status.floorId) {
+			core.clearMap(name);
+			if (name.startsWith('bg')) core.drawBg(floorId);
+			else core.drawFg(floorId);
+		}
+	};
 },
     "itemShop": function () {
 	// 道具商店相关的插件
@@ -570,8 +1121,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 },
     "smoothCamera": function () {
+	// 此插件开启后，大地图的瞬间移动将开启平滑镜头移动，避免突兀感
+	// 插件作者：老黄鸡
 
-    // 是否启用本插件，默认不启用
+	// 是否启用本插件，默认不启用
 	this.__enableSmoothCamera = false;
 	if (!this.__enableSmoothCamera) return;
 

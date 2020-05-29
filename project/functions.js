@@ -126,6 +126,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
 	core.drawMap(floorId);
+	// item_ratio兼容性...
+	if (core.status.thisMap.ratio == null && core.status.thisMap.item_ratio != null) {
+		core.status.thisMap.ratio = core.status.thisMap.item_ratio;
+	}
 
 	// 切换楼层BGM
 	if (core.status.maps[floorId].bgm) {
@@ -353,7 +357,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果有加点
-	var point = core.material.enemys[enemyId].point;
+	var point =  guards.reduce(function (curr, g) {
+		return curr + core.material.enemys[g[2]].point;
+	}, enemy.point) || 0;
 	if (core.flags.enableAddPoint && point > 0) {
 		core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 	}
@@ -427,40 +433,42 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 		*/
 	}
-},
+}
     },
     "enemys": {
         "getSpecials": function () {
 	// 获得怪物的特殊属性，每一行定义一个特殊属性。
-	// 分为三项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
-	// 可以直接写字符串，也可以写个function将怪物传进去
+	// 分为五项，第一项为该特殊属性的数字，第二项为特殊属性的名字，第三项为特殊属性的描述
+	// 第四项为该特殊属性的颜色，可以写十六进制 #RRGGBB 或者 [r,g,b,a] 四元数组
+	// 第五项为该特殊属性的标记；目前 1 代表是地图类技能（需要进行遍历全图）
+	// 名字和描述可以直接写字符串，也可以写个function将怪物传进去
 	return [
 		[1, "先攻", "怪物首先攻击"],
-		[2, "魔攻", "怪物无视勇士的防御"],
-		[3, "坚固", "怪物防御不小于勇士攻击-1"],
+		[2, "魔攻", "怪物无视勇士的防御", "#b6b0ff"],
+		[3, "坚固", "怪物防御不小于勇士攻击-1", "#b9822d"],
 		[4, "2连击", "怪物每回合攻击2次"],
 		[5, "3连击", "怪物每回合攻击3次"],
 		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
-		[7, "破甲", "战斗前，怪物附加角色防御的" + Math.floor(100 * core.values.breakArmor || 0) + "%作为伤害"],
-		[8, "反击", "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * core.values.counterAttack || 0) + "%作为伤害，无视角色防御"],
-		[9, "净化", "战斗前，怪物附加勇士护盾的" + core.values.purify + "倍作为伤害"],
-		[10, "模仿", "怪物的攻防和勇士攻防相等"],
-		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }],
-		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点"],
-		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%")],
-		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验"],
+		[7, "破甲", function (enemy) { return "战斗前，怪物附加角色防御的" + Math.floor(100 * (enemy.defValue || core.values.breakArmor || 0)) + "%作为伤害"; }, "#b30000"],
+		[8, "反击", function (enemy) { return "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * (enemy.atkValue || core.values.counterAttack || 0)) + "%作为伤害，无视角色防御"; }, "#bd26ce"],
+		[9, "净化", function (enemy) { return "战斗前，怪物附加勇士护盾的" + (enemy.n || core.values.purify) + "倍作为伤害"; }, "#00d2d4"],
+		[10, "模仿", "怪物的攻防和勇士攻防相等", "#ff00d2"],
+		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }, "#ff00d2"],
+		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点", "#4aff60"],
+		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%"), "#feccd0"],
+		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验", "#747dff"],
 		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }],
-		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半"],
+		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半", "#ff00d2"],
 		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）"],
 		[18, "阻击", function (enemy) { return "经过怪物的十字领域时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }],
-		[19, "自爆", "战斗后勇士的生命值变成1"],
-		[20, "无敌", "勇士无法打败怪物，除非拥有十字架"],
-		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }],
+		[19, "自爆", "战斗后勇士的生命值变成1", "#ff0000"],
+		[20, "无敌", "勇士无法打败怪物，除非拥有十字架", "#fbff00"],
+		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }, "#ff0000"],
 		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，无视勇士护盾。"; }],
 		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"],
 		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }],
-		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }],
-		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。"],
+		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#fff900", 1],
+		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。", "#fff900", 1],
 		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。"]
 	];
 },
@@ -497,26 +505,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		mon_def = hero_atk - 1;
 	}
 
-	// ------ 支援 ------
 	var guards = [];
 
-	// 光环检查
-	// 在这里判定是否需要遍历全图（由于光环需要遍历全图，应尽可能不需要以减少计算量，尤其是大地图）
-	var query = function () {
-		var floorIds = ["MTx"]; // 在这里给出所有需要遍历的楼层（即有光环或支援等）
-		return core.inArray(floorIds, floorId); // 也可以写其他的判定条件
-	}
+	// 光环和支援检查
+	if (!core.status.checkBlock) core.status.checkBlock = {};
 
-	if (query()) {
+	if (core.status.checkBlock.needCache) {
 		// 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
-		// 检查当前楼层所有光环怪物（数字25）
 		var hp_buff = 0,
 			atk_buff = 0,
 			def_buff = 0,
 			cnt = 0;
-		// 检查光环缓存
+		// 检查光环和支援的缓存
 		var index = x != null && y != null ? (x + "," + y) : "floor";
-		if (!core.status.checkBlock) core.status.checkBlock = {};
 		if (!core.status.checkBlock.cache) core.status.checkBlock.cache = {};
 		var cache = core.status.checkBlock.cache[index];
 		if (!cache) {
@@ -527,17 +528,27 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					// 获得该图块的ID
 					var id = block.event.id,
 						enemy = core.material.enemys[id];
-					// 检查是不是怪物，且是否拥有该特殊属性
+					// 检查【光环】技能，数字25
 					if (enemy && core.hasSpecial(enemy.special, 25)) {
+						// 检查是否是范围光环
+						var inRange = enemy.range == null;
+						if (enemy.range != null && x != null && y != null) {
+							var dx = Math.abs(block.x - x),
+								dy = Math.abs(block.y - y);
+							// 检查十字和九宫格光环
+							if (dx + dy <= enemy.range) inRange = true;
+							if (enemy.zoneSquare && dx <= enemy.range && dy <= enemy.range) inRange = true;
+						}
 						// 检查是否可叠加
-						if (enemy.add || cnt == 0) {
+						if (inRange && (enemy.add || cnt == 0)) {
 							hp_buff += enemy.value || 0;
 							atk_buff += enemy.atkValue || 0;
 							def_buff += enemy.defValue || 0;
 							cnt++;
 						}
+
 					}
-					// 检查【支援】技能
+					// 检查【支援】技能，数字26
 					if (enemy && core.hasSpecial(enemy.special, 26) &&
 						// 检查支援条件，坐标存在，距离为1，且不能是自己
 						// 其他类型的支援怪，比如十字之类的话.... 看着做是一样的
@@ -547,6 +558,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					}
 
 					// TODO：如果有其他类型光环怪物在这里仿照添加检查
+					// 注：新增新的类光环属性（需要遍历全图的）需要在特殊属性定义那里的第五项写1，参见光环和支援的特殊属性定义。
 				}
 			});
 
@@ -658,18 +670,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 每回合的反击伤害；反击是按照勇士的攻击次数来计算回合
 	var counterDamage = 0;
-	if (core.hasSpecial(mon_special, 8)) counterDamage += Math.floor(core.values.counterAttack * hero_atk);
+	if (core.hasSpecial(mon_special, 8))
+		counterDamage += Math.floor((enemy.atkValue || core.values.counterAttack) * hero_atk);
 
 	// 先攻
 	if (core.hasSpecial(mon_special, 1)) init_damage += per_damage;
 
 	// 破甲
 	if (core.hasSpecial(mon_special, 7))
-		init_damage += Math.floor(core.values.breakArmor * hero_def);
+		init_damage += Math.floor((enemy.defValue || core.values.breakArmor) * hero_def);
 
 	// 净化
 	if (core.hasSpecial(mon_special, 9))
-		init_damage += Math.floor(core.values.purify * hero_mdef);
+		init_damage += Math.floor((enemy.n || core.values.purify) * hero_mdef);
 
 	// 勇士每回合对怪物造成的伤害
 	var hero_per_damage = Math.max(hero_atk - mon_def, 0);
@@ -1060,6 +1073,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type = {}, // 每个点的伤害类型
 		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
+	var needCache = false;
+	var canGoDeadZone = core.flags.canGoDeadZone;
+	core.flags.canGoDeadZone = true;
 
 	// 计算血网和领域、阻击、激光的伤害，计算捕捉信息
 	for (var loc in blocks) {
@@ -1116,9 +1132,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 				var rdir = core.turnDirection(":back", dir);
 				// 检查下一个点是否存在事件（从而判定是否移动）
-				var rnx = x + core.utils.scan[rdir].x,
+				var rnx = x + core.utils.scan[rdir].x,	
 					rny = y + core.utils.scan[rdir].y;
-				if (rnx >= 0 && rnx < width && rny >= 0 && rny < height && core.getBlock(rnx, rny, floorId) == null) {
+				if (core.canMoveHero(x, y, rdir, floorId) && core.getBlock(rnx, rny, floorId) == null) {
 					repulse[currloc] = (repulse[currloc] || []).concat([
 						[x, y, id, rdir]
 					]);
@@ -1161,6 +1177,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				]);
 			}
 		}
+
+		// 检查地图范围类技能
+		var specialFlag = core.getSpecialFlag(enemy);
+		if (specialFlag & 1) needCache = true;
 	}
 
 	// 更新夹击伤害
@@ -1170,7 +1190,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			for (var y = 0; y < height; y++) {
 				var loc = x + "," + y;
 				// 夹击怪物的ID
-				var enemyId1 = null, enemyId2 = null;
+				var enemyId1 = null,
+					enemyId2 = null;
 				// 检查左右夹击
 				var leftBlock = blocks[(x - 1) + "," + y],
 					rightBlock = blocks[(x + 1) + "," + y];
@@ -1211,11 +1232,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	}
 
+	core.flags.canGoDeadZone = canGoDeadZone;
 	core.status.checkBlock = {
 		damage: damage,
 		type: type,
 		repulse: repulse,
 		ambush: ambush,
+		needCache: needCache,
 		cache: {} // clear cache
 	};
 },

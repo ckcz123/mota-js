@@ -401,7 +401,7 @@ editor_file = function (editor, callback) {
         var mapActions = [];
 
         iconActions.push(["add", "['autotile']['" + filename + "']", 0]);
-        mapActions.push(["add", "['" + idnum + "']", {'cls': 'autotile', 'id': filename, 'noPass': true}]);
+        mapActions.push(["add", "['" + idnum + "']", {'cls': 'autotile', 'id': filename}]);
 
         var templist = [];
         var tempcallback = function (err) {
@@ -575,7 +575,7 @@ editor_file = function (editor, callback) {
                 var value=actionList[ii];
                 // 是tilesets 且未定义 且在这里是第一次定义
                 if(idnum>=editor.core.icons.tilesetStartOffset && !isset(editor.core.maps.blocksInfo[idnum]) && tempmap.indexOf(idnum)===-1){
-                    actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum, "noPass": true}]);
+                    actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum}]);
                     tempmap.push(idnum);
                     ii++;
                 }
@@ -588,7 +588,7 @@ editor_file = function (editor, callback) {
             callback([
                 (function () {
                     var sourceobj=editor.core.maps.blocksInfo[idnum];
-                    if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum, "noPass": true}
+                    if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum}
                     var locObj = Object.assign({}, sourceobj);
                     Object.keys(editor.file.comment._data.maps._data).forEach(function (v) {
                         if (!isset(sourceobj[v]))
@@ -919,10 +919,9 @@ editor_file = function (editor, callback) {
                 eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a" + value[1] + '=' + JSON.stringify(value[2]));
             });
             var datastr = 'var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
-            datastr += JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a, function (k, v) {
-                if (v.id != null) delete v.id;
-                return v;
-            }, '\t');
+            var items = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
+            for (var id in items) delete items[id].id;
+            datastr += JSON.stringify(items, null, '\t');
             fs.writeFile('project/items.js', encode(datastr), 'base64', function (err, data) {
                 callback(err);
             });
@@ -934,9 +933,10 @@ editor_file = function (editor, callback) {
             });
             var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
             var emap = {};
-            var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80, function (k, v) {
-                if (v.hp != null) {
-                    delete v.id;
+            var enemys = core.clone(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80);
+            for (var id in enemys) delete enemys[id].id;
+            var estr = JSON.stringify(enemys, function (k, v) {
+                if (v && v.hp != null) {
                     var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;

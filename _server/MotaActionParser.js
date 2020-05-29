@@ -81,9 +81,11 @@ ActionParser.prototype.parse = function (obj,type) {
           var text_choices = null;
           var knownListKeys = MotaActionBlocks['Key_List'].options.map(function (one) {return one[1];})
           Object.keys(obj).sort().forEach(function (key) {
+            var noNeed = key.endsWith(':o');
+            if (noNeed) key = key.substring(0, key.length - 2);
             var one = knownListKeys.indexOf(key) >= 0 ? 'doorKeyKnown' : 'doorKeyUnknown';
             text_choices = MotaActionBlocks[one].xmlText([
-              one == 'doorKeyUnknown' ? MotaActionFunctions.replaceToName_token(key) : key, obj[key], text_choices
+              one == 'doorKeyUnknown' ? MotaActionFunctions.replaceToName_token(key) : key, obj[key], noNeed, text_choices
             ]);
           })
           return text_choices;
@@ -107,8 +109,8 @@ ActionParser.prototype.parse = function (obj,type) {
     case 'mainStyle':
       if(!obj) obj={};
       return MotaActionBlocks['mainStyle_m'].xmlText([
-        obj.startBackground, obj.startLogoStyle, obj.startButtonsStyle, obj.statusLeftBackground, obj.statusTopBackground,
-        obj.toolsBackground, obj.floorChangingStyle,
+        obj.startBackground, obj.startVerticalBackground || obj.startBackground, obj.startLogoStyle, obj.startButtonsStyle, 
+        obj.statusLeftBackground, obj.statusTopBackground, obj.toolsBackground, obj.floorChangingStyle,
         obj.statusBarColor, 'rgba('+obj.statusBarColor+')', obj.borderColor, 'rgba('+obj.borderColor+')', obj.font
       ]);
 
@@ -439,7 +441,7 @@ ActionParser.prototype.parseAction = function() {
     case "showTextImage": // 显示图片化文本
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showTextImage_s'].xmlText([
-        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.opacity,data.time||0,data.async||false,this.next]);
+        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.reverse,data.opacity,data.time||0,data.async||false,this.next]);
       break;
     case "moveImage": // 移动图片
       data.to=data.to||['','']
@@ -766,14 +768,9 @@ ActionParser.prototype.parseAction = function() {
       ]);
       break;
     case "clearMap": // 清除画布
-      if (data.x != null && data.y != null && data.width != null && data.height != null) {
-        this.next = MotaActionBlocks['clearMap_s'].xmlText([
-          data.x, data.y, data.width, data.height, this.next
-        ]);
-      }
-      else {
-        this.next = MotaActionBlocks['clearMap_1_s'].xmlText([this.next]);
-      }
+      this.next = MotaActionBlocks['clearMap_s'].xmlText([
+        data.x, data.y, data.width, data.height, this.next
+      ]);
       break;
     case "setAttribute": // 设置画布属性
       data.fillStyle=this.Colour(data.fillStyle);
@@ -805,13 +802,13 @@ ActionParser.prototype.parseAction = function() {
     case "fillRect": // 绘制矩形
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['fillRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', this.next
+        data.x, data.y, data.width, data.height, data.radius, data.angle, data.style, 'rgba('+data.style+')', this.next
       ]);
       break;
     case "strokeRect": // 绘制矩形边框
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['strokeRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+        data.x, data.y, data.width, data.height, data.radius, data.angle, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawLine": // 绘制线段
@@ -875,12 +872,12 @@ ActionParser.prototype.parseAction = function() {
     case "drawImage": // 绘制图片
       if (data.x1 != null && data.y1 != null && data.w1 != null && data.h1 != null) {
         this.next = MotaActionBlocks['drawImage_1_s'].xmlText([
-          data.image, data.reverse, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, this.next
+          data.image, data.reverse, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, data.angle, this.next
         ]);
       }
       else {
         this.next = MotaActionBlocks['drawImage_s'].xmlText([
-          data.image, data.reverse, data.x, data.y, data.w, data.h, this.next
+          data.image, data.reverse, data.x, data.y, data.w, data.h, data.angle, this.next
         ]);
       }
       break;

@@ -99,8 +99,7 @@ editor_mappanel_wrapper = function (editor) {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow(1);
-            tip.showHelp(6);
+            editor.uifunctions.showTips(6);
             editor.uivalues.startPos = pos;
             editor.dom.euiCtx.strokeStyle = '#FF0000';
             editor.dom.euiCtx.lineWidth = 3;
@@ -127,7 +126,6 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         if (!selectBox.isSelected()) {
             if (editor.uivalues.startPos == null) return;
-            //tip.whichShow(1);
             var loc = editor.uifunctions.eToLoc(e);
             var pos = editor.uifunctions.locToPos(loc, true);
             if (editor.uivalues.endPos != null && editor.uivalues.endPos.x == pos.x && editor.uivalues.endPos.y == pos.y) return;
@@ -163,8 +161,6 @@ editor_mappanel_wrapper = function (editor) {
             // editor_mode.onmode('nextChange');
             // editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow(1);
-            // tip.showHelp(6);
             return false;
         }
 
@@ -216,21 +212,22 @@ editor_mappanel_wrapper = function (editor) {
         ee.preventDefault();
         ee.stopPropagation();
         var e=editor.uivalues.lastMoveE;
+        if (e.buttons == 2 && (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y))) {
+            editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+            editor.uivalues.holdingPath = 0;
+            editor.uivalues.stepPostfix = [];
+            editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+            editor.uivalues.startPos = editor.uivalues.endPos = null;
+            return false;
+        }
         if (!selectBox.isSelected()) {
             if (e.buttons == 2) {
-                if (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y)) {
-                    // 右键点击: 弹菜单
-                    editor.uifunctions.showMidMenu(e.clientX, e.clientY);
-                    editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
-                } else {
-                    // 右键拖拽: 选中区域
-                    printf('已经选中该区域')
-                    editor.uivalues.selectedArea = Object.assign({}, editor.uivalues.startPos, {x1: editor.uivalues.endPos.x, y1: editor.uivalues.endPos.y});
-                    // 后续的处理
-                }
+                // 右键拖拽: 选中区域
+                printf('已经选中该区域')
+                editor.uivalues.selectedArea = Object.assign({}, editor.uivalues.startPos, {x1: editor.uivalues.endPos.x, y1: editor.uivalues.endPos.y});
+                // 后续的处理
             } else {
                 // 左键拖拽: 交换
-                //tip.whichShow(1);
                 // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.uifunctions.unhighlightSaveFloorButton();
@@ -286,8 +283,20 @@ editor_mappanel_wrapper = function (editor) {
                     editor.uivalues.stepPostfix = editor.uifunctions._fillMode_bfs(editor[editor.layerMod], editor.uivalues.stepPostfix[0].x, editor.uivalues.stepPostfix[0].y,
                         editor[editor.layerMod][0].length, editor[editor.layerMod].length);
                 } 
-                for (var ii = 0; ii < editor.uivalues.stepPostfix.length; ii++)
-                    editor[editor.layerMod][editor.uivalues.stepPostfix[ii].y][editor.uivalues.stepPostfix[ii].x] = editor.info;
+                for (var ii = 0; ii < editor.uivalues.stepPostfix.length; ii++) {
+                    var currx = editor.uivalues.stepPostfix[ii].x, curry = editor.uivalues.stepPostfix[ii].y;
+                    editor[editor.layerMod][curry][currx] = editor.info;
+                    // 检查上下楼梯绑定
+                    if (editor.layerMod == 'map' && editor.info && editor.info.id == 'upFloor') {
+                        editor.currentFloorData.changeFloor[currx+","+curry] = { "floorId": ":next", "stair": "downFloor" };
+                        editor.drawEventBlock();
+                    }
+                    if (editor.layerMod == 'map' && editor.info && editor.info.id == 'downFloor') {
+                        editor.currentFloorData.changeFloor[currx+","+curry] = { "floorId": ":before", "stair": "upFloor" };
+                        editor.drawEventBlock();
+                    }
+                }
+                    
             }
             // console.log(editor.map);
             if (editor.info.y != null) {
@@ -424,13 +433,10 @@ editor_mappanel_wrapper = function (editor) {
      * 隐藏右键菜单
      */
     editor.uifunctions.hideMidMenu = function () {
-        if (editor.isMobile) {
-            setTimeout(function () {
-                editor.dom.midMenu.style = 'display:none';
-            }, 200)
-        } else {
+        editor.uivalues.lastMoveE={buttons:0,clientX:0,clientY:0};
+        setTimeout(function () {
             editor.dom.midMenu.style = 'display:none';
-        }
+        }, 100)
     }
 
     /**
@@ -570,13 +576,15 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.chooseThis_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         selectBox.isSelected(false);
 
         editor_mode.onmode('nextChange');
         editor_mode.onmode('loc');
         //editor_mode.loc();
-        //tip.whichShow(1);
         if (editor.isMobile) editor.showdataarea(false);
+        return false;
     }
 
     /**
@@ -586,8 +594,11 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.chooseInRight_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         var thisevent = editor[editor.layerMod][editor.pos.y][editor.pos.x];
         editor.setSelectBoxFromInfo(thisevent, true);
+        return false;
     }
 
     /**
@@ -597,11 +608,12 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.copyLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
         editor_mode.onmode('');
         editor.uivalues.copyedInfo = editor.copyFromPos();
         printf('该点事件已复制');
-        return;
+        return false;
     }
 
     /**
@@ -611,10 +623,11 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.pasteLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
         if (!editor.uivalues.copyedInfo) {
             printe("没有复制的事件");
-            return;
+            return false;
         }
         editor.savePreMap();
         editor_mode.onmode('');
@@ -629,7 +642,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uifunctions.unhighlightSaveFloorButton();
             editor.drawPosSelection();
         });
-        return;
+        return false;
     }
 
     /**
@@ -638,8 +651,11 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearEvent_click = function (e) {
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         editor.clearPos(false);
         editor.uifunctions.unhighlightSaveFloorButton();
+        return false;
     }
 
     /**
@@ -648,8 +664,11 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearLoc_click = function (e) {
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         editor.clearPos(true);
         editor.uifunctions.unhighlightSaveFloorButton();
+        return false;
     }
 
     /**
@@ -657,8 +676,7 @@ editor_mappanel_wrapper = function (editor) {
      * 点击【】
      */
     editor.uifunctions.lockMode_onchange = function () {
-        tip.msgs[11] = String('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
-        tip.whichShow(12);
+        printf('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
         editor.uivalues.lockMode = editor.dom.lockMode.checked;
     }
 
@@ -669,9 +687,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.brushMod_onchange = function () {
         editor.brushMod = editor.dom.brushMod.value;
         if (editor.brushMod == 'fill') {
-            tip.isSelectedBlock(false);
-            tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
-            tip.whichShow(12);
+            printf('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
         }
     }
 
@@ -692,17 +708,12 @@ editor_mappanel_wrapper = function (editor) {
             !confirm("从V2.7开始，请直接素材区拖框进行绘制区域。\n\n点取消将不再显示此提示。")) {
             editor.config.set('alertTileModeV2.7', true);
         }
-        // tip.showHelp(5)
-        tip.isSelectedBlock(false)
-        tip.msgs[11] = String('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
-        tip.whichShow(12);
+        printf('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
         editor.brushMod = editor.dom.brushMod3.value;
     }
 
     editor.uifunctions.brushMod4_onchange = function () {
-        tip.isSelectedBlock(false);
-        tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
-        tip.whichShow(12);
+        printf('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
         editor.brushMod = editor.dom.brushMod4.value;
     }
 
@@ -808,7 +819,7 @@ editor_mappanel_wrapper = function (editor) {
 
     editor.uifunctions.highlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='#FFCCAA';
+        saveFloor.style.background='#ffd700';
     }
 
     editor.uifunctions.unhighlightSaveFloorButton=function(){
@@ -833,7 +844,10 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.uifunctions.lastUsed_click = function (e) {
-        if (editor.isMobile) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+        if (editor.isMobile) return false;
 
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop

@@ -77,10 +77,10 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     var ctx = this.getContextByName(name);
     if (ctx) {
         // 如果存在最大宽度
-        if (maxWidth != null)
-            this._fillTextWithMaxWidth(ctx, text, x, y, maxWidth);
-        else
-            ctx.fillText(text, x, y);
+        if (maxWidth != null) {
+            this.setFontForMaxWidth(ctx, text, maxWidth);
+        }
+        ctx.fillText(text, x, y);
     }
 }
 
@@ -90,16 +90,15 @@ ui.prototype._uievent_fillText = function (data) {
 }
 
 ////// 自适配字体大小
-ui.prototype._fillTextWithMaxWidth = function (ctx, text, x, y, maxWidth) {
-    // 获得当前字体
+ui.prototype.setFontForMaxWidth = function (name, text, maxWidth, font) {
+    var ctx = this.getContextByName(name);
+    if (font) core.setFont(name, font);
     var font = ctx.font, u = /(\d+)px/.exec(font);
-    if (u == null) return ctx.fillText(text, x, y);
+    if (u == null) return;
     for (var font_size = parseInt(u[1]); font_size >= 8; font_size--) {
         ctx.font = font.replace(/(\d+)px/, font_size+"px");
-        if (ctx.measureText(text).width <= maxWidth) break;
+        if (ctx.measureText(text).width <= maxWidth) return;
     }
-    ctx.fillText(text, x, y);
-    ctx.font = font;
 }
 
 ////// 在某个canvas上绘制粗体 //////
@@ -126,60 +125,102 @@ ui.prototype._uievent_fillBoldText = function (data) {
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
-ui.prototype.fillRect = function (name, x, y, width, height, style) {
+ui.prototype.fillRect = function (name, x, y, width, height, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.fillRect(x, y, width, height);
+    if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
+        ctx.fillRect(x, y, width, height);
+        if (angle) {
+            ctx.restore();
+        }
+    }
 }
 
 ui.prototype._uievent_fillRect = function (data) {
     this._createUIEvent();
     if (data.radius) {
-        this.fillRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), core.calValue(data.radius), data.style);
+        this.fillRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+            core.calValue(data.radius), data.style, (core.calValue(data.angle) || 0) * Math.PI / 180);
     } else {
-        this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style);
+        this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+            data.style, (core.calValue(data.angle) || 0) * Math.PI / 180);
     }
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
-ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth) {
+ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth, angle) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.strokeRect(x, y, width, height);
+    if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
+        ctx.strokeRect(x, y, width, height);
+        if (angle) {
+            ctx.restore();
+        }
+    }
 }
 
 ui.prototype._uievent_strokeRect = function (data) {
     this._createUIEvent();
     if (data.radius) {
         this.strokeRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
-            core.calValue(data.radius), data.style, data.lineWidth);
+            core.calValue(data.radius), data.style, data.lineWidth, (core.calValue(data.angle) || 0) * Math.PI / 180);
     } else {
-        this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.style, data.lineWidth);
+        this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+            data.style, data.lineWidth, (core.calValue(data.angle) || 0) * Math.PI / 180);
     }
 }
 
 ////// 在某个canvas上绘制一个圆角矩形 //////
-ui.prototype.fillRoundRect = function (name, x, y, width, height, radius, style) {
+ui.prototype.fillRoundRect = function (name, x, y, width, height, radius, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
         this._roundRect_buildPath(ctx, x, y, width, height, radius);
         ctx.fill();
+        if (angle) {
+            ctx.restore();
+        }
     }
 }
 
 ////// 在某个canvas上绘制一个圆角矩形的边框 //////
-ui.prototype.strokeRoundRect = function (name, x, y, width, height, radius, style, lineWidth) {
+ui.prototype.strokeRoundRect = function (name, x, y, width, height, radius, style, lineWidth, angle) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (ctx) {
+        if (angle) {
+            ctx.save();
+            ctx.translate(x + width / 2, y + height / 2);
+            ctx.rotate(angle);
+            ctx.translate(-x - width / 2, -y - height / 2);
+        }
         this._roundRect_buildPath(ctx, x, y, width, height, radius);
         ctx.stroke();
+        if (angle) {
+            ctx.restore();
+        }
     }
 }
-
 
 ui.prototype._roundRect_buildPath = function (ctx, x, y, width, height, radius) {
     ctx.beginPath();
@@ -504,7 +545,7 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
 }
 
 ////// 绘制一张图片 //////
-ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
+ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1, angle) {
     // 检测文件名以 :x, :y, :o 结尾，表示左右翻转，上下翻转和中心翻转
     var ctx = this.getContextByName(name);
     if (!ctx) return;
@@ -516,7 +557,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
         }
         image = core.getMappedName(image);
         image = core.material.images.images[image];
-        if (!image || !(image instanceof Image)) return;
+        if (!image) return;
     }
 
     var scale = {
@@ -533,23 +574,25 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
             h = image.height;
         }
         if (x1 != null && y1 != null && w1 != null && h1 != null) {
-            if (reverse == null) {
+            if (!reverse && !angle) {
                 ctx.drawImage(image, x, y, w, h, x1, y1, w1, h1);
             } else {
                 ctx.save();
                 ctx.translate(x1 + w1 / 2, y1 + h1 / 2);
-                ctx.scale(scale[reverse][0], scale[reverse][1]);
+                if (reverse) ctx.scale(scale[reverse][0], scale[reverse][1]);
+                if (angle) ctx.rotate(angle);
                 ctx.drawImage(image, x, y, w, h, -w1 / 2, -h1 / 2, w1, h1);
                 ctx.restore();
             }
             return;
         }
-        if (reverse == null) {
+        if (!reverse && !angle) {
             ctx.drawImage(image, x, y, w, h);
         } else {
             ctx.save();
             ctx.translate(x + w / 2, y + h / 2);
-            ctx.scale(scale[reverse][0], scale[reverse][1]);
+            if (reverse) ctx.scale(scale[reverse][0], scale[reverse][1]);
+            if (angle) ctx.rotate(angle);
             ctx.drawImage(image, -w / 2, -h / 2, w, h);
             ctx.restore();
         }
@@ -560,7 +603,7 @@ ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1) {
 ui.prototype._uievent_drawImage = function (data) {
     this._createUIEvent();
     this.drawImage('uievent', data.image + (data.reverse || ''), core.calValue(data.x), core.calValue(data.y), core.calValue(data.w), core.calValue(data.h),
-        core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1));
+        core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1), (core.calValue(data.angle) || 0) * Math.PI / 180);
 }
 
 ui.prototype.drawIcon = function (name, id, x, y, w, h, frame) {
@@ -1878,15 +1921,37 @@ ui.prototype._drawBook_drawName = function (index, enemy, top, left, width) {
     // 绘制第零列（名称和特殊属性）
     // 如果需要添加自己的比如怪物的称号等，也可以在这里绘制
     core.setTextAlign('ui', 'center');
-    if (enemy.specialText=='') {
+    if (enemy.specialText.length == 0) {
         core.fillText('ui', enemy.name, left + width / 2,
             top + 35, '#DDDDDD', this._buildFont(17, true), width);
     }
     else {
         core.fillText('ui', enemy.name, left + width / 2,
             top + 28, '#DDDDDD', this._buildFont(17, true), width);
-        core.fillText('ui', enemy.specialText, left + width / 2,
-            top + 50, '#FF6A6A', this._buildFont(15, true), width);
+        switch (enemy.specialText.length) {
+            case 1:
+                core.fillText('ui', enemy.specialText[0], left + width / 2,
+                    top + 50, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'), 
+                    this._buildFont(15, true), width);
+                break;
+            case 2:
+                // Step 1: 计算字体
+                var text = enemy.specialText[0] + "  " + enemy.specialText[1];
+                core.setFontForMaxWidth('ui', text, width, this._buildFont(15, true));
+                // Step 2: 计算总宽度
+                var totalWidth = core.calWidth('ui', text);
+                var leftWidth = core.calWidth('ui', enemy.specialText[0]);
+                var rightWidth = core.calWidth('ui', enemy.specialText[1]);
+                // Step 3: 绘制
+                core.fillText('ui', enemy.specialText[0], left + (width + leftWidth - totalWidth) / 2,
+                    top+50, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'));
+                core.fillText('ui', enemy.specialText[1], left + (width + totalWidth - rightWidth) / 2,
+                    top+50, core.arrayToRGBA((enemy.specialColor || [])[1] || '#FF6A6A'));
+                break;
+            default:
+                core.fillText('ui', '多属性...', left + width / 2,
+                    top + 50, '#FF6A6A', this._buildFont(15, true), width);
+        }
     }
 }
 
@@ -2090,15 +2155,15 @@ ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
 }
 
 ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
-    var damageInfo = core.getDamageInfo(enemy, null, null, null, floorId);
+    var damageInfo = core.getDamageInfo(enemy.id, null, null, null, floorId);
     texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]"+((damageInfo||{}).turn||0));
     // 临界表
-    var criticals = core.enemys.nextCriticals(enemy, 8, null, null, floorId).map(function (v) {
+    var criticals = core.enemys.nextCriticals(enemy.id, 8, null, null, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
     texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]"+JSON.stringify(criticals));
-    var prevInfo = core.getDamageInfo(enemy, {atk: core.status.hero.atk-1}, null, null, floorId);
+    var prevInfo = core.getDamageInfo(enemy.id, {atk: core.status.hero.atk-1}, null, null, floorId);
     if (prevInfo != null && damageInfo != null) {
         if (damageInfo.damage != null) damageInfo = damageInfo.damage;
         if (prevInfo.damage != null) prevInfo = prevInfo.damage;
@@ -2504,8 +2569,8 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         if (typeof core.status.hero[name] != 'number') continue;
         var nowValue = core.getRealStatus(name);
         // 查询新值
-        var newValue = (core.getStatus(name) + (compare.value[name] || 0))
-            * (core.getBuff(name) + (compare.percentage[name] || 0) / 100);
+        var newValue = Math.floor((core.getStatus(name) + (compare.value[name] || 0))
+            * (core.getBuff(name) * 100 + (compare.percentage[name] || 0)) / 100);
         if (nowValue == newValue) continue;
         var text = this._drawEquipbox_getStatusName(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
@@ -2651,7 +2716,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });
         if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {
-            core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4], 2);
+            core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4]);
             core.fillText('ui', data.hard, x, parseInt(y+22+size/2), data.hero.flags.__hardColor__ || 'red', this._buildFont(30,true));
         }
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
@@ -2661,8 +2726,8 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
     }
     else {
-        core.fillRect('ui', x-size/2, y+15, size, size, '#333333', 2);
-        core.fillText('ui', '空', x, parseInt(y+22+size/2), '#FFFFFF', this._buildFont(30,true));
+        core.fillRect('ui', x-size/2, y+15, size, size, '#333333');
+        core.fillText('ui', '空', x, parseInt(y+22+size/2), '#FFFFFF', this._buildFont(30, true));
     } 
 }
 

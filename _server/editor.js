@@ -27,14 +27,6 @@ function editor() {
         brushMod2:document.getElementById('brushMod2'),
         brushMod3:document.getElementById('brushMod3'),
         brushMod4:document.getElementById('brushMod4'),
-        bgc : document.getElementById('bg'),
-        bgCtx : document.getElementById('bg').getContext('2d'),
-        fgc : document.getElementById('fg'),
-        fgCtx : document.getElementById('fg').getContext('2d'),
-        evc : document.getElementById('event'),
-        evCtx : document.getElementById('event').getContext('2d'),
-        ev2c : document.getElementById('event2'),
-        ev2Ctx : document.getElementById('event2').getContext('2d'),
         layerMod:document.getElementById('layerMod'),
         layerMod2:document.getElementById('layerMod2'),
         layerMod3:document.getElementById('layerMod3'),
@@ -60,6 +52,7 @@ function editor() {
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
         lockMode: document.getElementById('lockMode'),
+        gameInject: document.getElementById('gameInject'),
     };
 
     this.uivalues={
@@ -153,85 +146,111 @@ editor.info
 /////////// 数据相关 ///////////
 
 editor.prototype.init = function (callback) {
-    
-    var useCompress = main.useCompress;
-    main.useCompress = false;
+
     editor.airwallImg = new Image();
     editor.airwallImg.src = './project/materials/airwall.png';
 
-    main.init('editor', function () {
-        editor.config = new editor_config();
-        editor.config.load(function() {
-            editor_util_wrapper(editor);
-            editor_game_wrapper(editor, main, core);
-            editor_file_wrapper(editor);
-            editor_table_wrapper(editor);
-            editor_ui_wrapper(editor);
-            editor_mappanel_wrapper(editor);
-            editor_datapanel_wrapper(editor);
-            editor_materialpanel_wrapper(editor);
-            editor_listen_wrapper(editor);
-            editor.printe=printe;
-            afterMainInit();
-        })
-    });
-
-    var afterMainInit = function () {
-        editor.game.fixFunctionInGameData();
-        editor.main = main;
-        editor.core = core;
-        editor.fs = fs;
-        editor_file = editor_file(editor, function () {
-            editor.file = editor_file;
-            editor_mode = editor_mode(editor);
-            editor.mode = editor_mode;
-            core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-            var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
-            if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
-            core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
-                afterCoreReset();
-            }, true);
+    fs.readFile("index.html", 'utf-8', function(err, data) {
+        var str = data.split('<!-- injection -->');
+        if (str.length != 3) window.onerror("index.html格式不正确");
+        editor.dom.gameInject.innerHTML = str[1];
+        
+        var cvs = ['bg', 'fg', 'event', 'event2'].map(function(e) {
+            return document.getElementById(e);
         });
-    }
+        ['bg', 'fg', 'ev', 'ev2'].forEach(function(e, i) {
+            editor.dom[e+'c'] = cvs[i];
+            editor.dom[e+'Ctx'] = cvs[i].getContext('2d');
+            
+            editor.dom.mapEdit.insertBefore(cvs[i], document.getElementById('efg'));
+        });
 
-    var afterCoreReset = function () {
-        
-        editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
-        editor.drawInitData(core.icons.icons); // 初始化绘图
+        var mainScript = document.createElement('script');
 
-        editor.game.fetchMapFromCore();
-        editor.updateMap();
-        editor.buildMark();
-        editor.drawEventBlock();
+        mainScript.onload = function() {
+    
+            var useCompress = main.useCompress;
+            main.useCompress = false;
         
-        editor.pos = {x: 0, y: 0};
-        editor.mode.loc();
-        editor.info = editor.ids[editor.indexs[201]];
-        editor.mode.enemyitem();
-        editor.mode.floor();
-        editor.mode.tower();
-        editor.mode.functions();
-        editor.mode.commonevent();
-        editor.mode.showMode('tower');
+            main.init('editor', function () {
+                editor.config = new editor_config();
+                editor.config.load(function() {
+                    editor_util_wrapper(editor);
+                    editor_game_wrapper(editor, main, core);
+                    editor_file_wrapper(editor);
+                    editor_table_wrapper(editor);
+                    editor_ui_wrapper(editor);
+                    editor_mappanel_wrapper(editor);
+                    editor_datapanel_wrapper(editor);
+                    editor_materialpanel_wrapper(editor);
+                    editor_listen_wrapper(editor);
+                    editor.printe=printe;
+                    afterMainInit();
+                })
+            });
         
-        editor_multi = editor_multi();
-        editor_blockly = editor_blockly();
-
-        // --- 所有用到的flags
-        editor.used_flags = {};
-        for (var floorId in editor.main.floors) {
-            editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
-        }
-        if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-            for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-                editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
+            var afterMainInit = function () {
+                editor.game.fixFunctionInGameData();
+                editor.main = main;
+                editor.core = core;
+                editor.fs = fs;
+                editor_file = editor_file(editor, function () {
+                    editor.file = editor_file;
+                    editor_mode = editor_mode(editor);
+                    editor.mode = editor_mode;
+                    core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
+                    var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
+                    if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
+                    core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
+                        afterCoreReset();
+                    }, true);
+                });
+            }
+        
+            var afterCoreReset = function () {
+                
+                editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
+                editor.drawInitData(core.icons.icons); // 初始化绘图
+        
+                editor.game.fetchMapFromCore();
+                editor.updateMap();
+                editor.buildMark();
+                editor.drawEventBlock();
+                
+                editor.pos = {x: 0, y: 0};
+                editor.mode.loc();
+                editor.info = editor.ids[editor.indexs[201]];
+                editor.mode.enemyitem();
+                editor.mode.floor();
+                editor.mode.tower();
+                editor.mode.functions();
+                editor.mode.commonevent();
+                editor.mode.showMode('tower');
+                
+                editor_multi = editor_multi();
+                editor_blockly = editor_blockly();
+        
+                // --- 所有用到的flags
+                editor.used_flags = {};
+                for (var floorId in editor.main.floors) {
+                    editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
+                }
+                if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                    for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                        editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
+                    }
+                }
+        
+                if (editor.useCompress == null) editor.useCompress = useCompress;
+                if (Boolean(callback)) callback();
+        
             }
         }
 
-        if (editor.useCompress == null) editor.useCompress = useCompress;
-        if (Boolean(callback)) callback();
-
-    }
+        mainScript.id = "mainScript";
+        mainScript.src = "main.js";
+        editor.dom.gameInject.appendChild(mainScript);
+    })
     
 }
 

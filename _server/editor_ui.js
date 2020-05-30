@@ -190,9 +190,9 @@ editor_ui_wrapper = function (editor) {
                 e.preventDefault();
                 if (editor.uivalues.preMapData.length > 0) {
                     var data = editor.uivalues.preMapData.pop();
-                    editor.map = JSON.parse(JSON.stringify(data.map));
-                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
-                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.dom.maps.forEach(function (one) {
+                        editor[one] = JSON.parse(JSON.stringify(data[one]));
+                    });
                     editor.updateMap();
                     editor.uivalues.postMapData.push(data);
                     editor.uifunctions.highlightSaveFloorButton();
@@ -205,9 +205,9 @@ editor_ui_wrapper = function (editor) {
                 e.preventDefault();
                 if (editor.uivalues.postMapData.length > 0) {
                     var data = editor.uivalues.postMapData.pop();
-                    editor.map = JSON.parse(JSON.stringify(data.map));
-                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
-                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.dom.maps.forEach(function (one) {
+                        editor[one] = JSON.parse(JSON.stringify(data[one]));
+                    });
                     editor.updateMap();
                     editor.uivalues.preMapData.push(data);
                     editor.uifunctions.highlightSaveFloorButton();
@@ -709,6 +709,7 @@ editor_ui_wrapper = function (editor) {
                 html += '<br/>';
             });
             html += "</p>";
+            html += "<p style='margin-left: 10px'><small>如果文件未在此列表显示，请检查文件名是否合法（只能由数字字母下划线横线和点组成），后缀名是否正确。</small></p>";
             uievent.elements.extraBody.innerHTML = html;
         });
     }

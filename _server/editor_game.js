@@ -151,7 +151,8 @@ editor_game_wrapper = function (editor, main, core) {
         // 补出缺省的数据
         editor.currentFloorData.autoEvent = editor.currentFloorData.autoEvent || {};
         //
-        for (var ii = 0, name; name = ['bgmap', 'fgmap'][ii]; ii++) {
+        for (var ii = 0, name; name = editor.dom.canvas[ii]; ii++) {
+            name += 'map';
             var mapArray = editor.currentFloorData[name];
             if (!mapArray || JSON.stringify(mapArray) == JSON.stringify([])) {//未设置或空数组
                 //与editor.map同形的全0

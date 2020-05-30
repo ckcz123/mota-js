@@ -530,7 +530,7 @@ editor_datapanel_wrapper = function (editor) {
             newFloorData.height = height;
 
             // Step 2:更新map, bgmap和fgmap
-            ["bgmap", "fgmap", "map"].forEach(function (name) {
+            editor.dom.maps.forEach(function (name) {
                 newFloorData[name] = [];
                 if (currentFloorData[name] && currentFloorData[name].length > 0) {
                     for (var j = 0; j < height; ++j) {

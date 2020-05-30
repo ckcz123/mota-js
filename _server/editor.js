@@ -53,6 +53,8 @@ function editor() {
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
         lockMode: document.getElementById('lockMode'),
         gameInject: document.getElementById('gameInject'),
+        maps: ['bgmap', 'fgmap', 'map'],
+        canvas: ['bg', 'fg'],
     };
 
     this.uivalues={
@@ -266,11 +268,9 @@ editor.prototype.mapInit = function () {
             editor.map[y][x] = 0;
         }
     }
-    editor.fgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.bgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.currentFloorData.map = editor.map;
-    editor.currentFloorData.fgmap = editor.fgmap;
-    editor.currentFloorData.bgmap = editor.bgmap;
+    editor.dom.maps.forEach(function (one) {
+        editor.currentFloorData[one] = editor[one] = JSON.parse(JSON.stringify(editor.map));
+    });
     editor.currentFloorData.firstArrive = [];
     editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
@@ -282,7 +282,7 @@ editor.prototype.mapInit = function () {
 }
 
 editor.prototype.changeFloor = function (floorId, callback) {
-    for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+    for(var ii=0,name;name=editor.dom.maps[ii];ii++){
         var mapArray=editor[name].map(function (v) {
             return v.map(function (v) {
                 return v.idnum || v || 0
@@ -386,10 +386,11 @@ editor.prototype.updateMap = function () {
 
     var updateMap = function () {
         core.removeGlobalAnimate();
-        core.clearMap('bg');
+        editor.dom.canvas.forEach(function (one) {
+            core.clearMap(one);
+        });
         core.clearMap('event');
         core.clearMap('event2');
-        core.clearMap('fg');
         core.maps._drawMap_drawAll();
     }
     updateMap();
@@ -418,12 +419,10 @@ editor.prototype.updateMap = function () {
     // 绘制地图 start
     for (var y = 0; y < editor.map.length; y++) {
         for (var x = 0; x < editor.map[0].length; x++) {
-            var tileInfo = editor.map[y][x];
-            drawTile(editor.dom.evCtx, x, y, tileInfo);
-            tileInfo = editor.fgmap[y][x];
-            drawTile(editor.dom.fgCtx, x, y, tileInfo);
-            tileInfo = editor.bgmap[y][x];
-            drawTile(editor.dom.bgCtx, x, y, tileInfo);
+            drawTile(editor.dom.evCtx, x, y, editor.map[y][x]);
+            editor.dom.canvas.forEach(function (one) {
+                drawTile(editor.dom[one + 'Ctx'], x, y, editor[one+'map'][y][x]);
+            });
         }
     }
     // 绘制地图 end

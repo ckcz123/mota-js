@@ -1487,6 +1487,7 @@ maps.prototype._removeBlockFromMap = function (floorId, block) {
     if (block.event.cls == 'autotile') {
         core.drawMap();
     } else {
+        var x = block.x, y = block.y;
         core.removeGlobalAnimate(x, y);
         core.clearMap('event', x * 32, y * 32, 32, 32);
         var height = block.event.height || 32;

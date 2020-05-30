@@ -324,6 +324,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		editor.dom.bg2Ctx = core.canvas.bg2;
 		editor.dom.fg2c = core.canvas.fg2.canvas;
 		editor.dom.fg2Ctx = core.canvas.fg2;
+		editor.dom.maps.push('bg2map', 'fg2map');
+		editor.dom.canvas.push('bg2', 'fg2');
 
 		// 默认全空
 		var defaultMap = [];
@@ -400,255 +402,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				return;
 			}
 			_isEditorInit = true;
-			// 编辑器更新地图
-			editor.updateMap = function () {
-				var blocks = core.maps._mapIntoBlocks(editor.map.map(function (v) {
-					return v.map(function (v) {
-						try {
-							return v.idnum || v || 0;
-						} catch (e) {
-							console.log("Unable to read idnum from " + v);
-							return 0;
-						}
-					});
-				}), { 'events': editor.currentFloorData.events }, editor.currentFloorId);
-				core.status.thisMap.blocks = blocks;
-
-				var updateMap = function () {
-					// 新增图层也需要刷新
-					core.removeGlobalAnimate();
-					core.clearMap('bg');
-					core.clearMap('bg2');
-					core.clearMap('event');
-					core.clearMap('event2');
-					core.clearMap('fg');
-					core.clearMap('fg2');
-					core.maps._drawMap_drawAll();
-				};
-				updateMap();
-
-				var drawTile = function (ctx, x, y, tileInfo) { // 绘制一个普通块
-
-					//ctx.clearRect(x*32, y*32, 32, 32);
-					if (tileInfo == 0) return;
-
-					if (typeof (tileInfo) == typeof ([][0]) || !Object.prototype.hasOwnProperty.call(tileInfo, 'idnum')) { //未定义块画红块
-						if (typeof (tileInfo) != typeof ([][0]) && Object.prototype.hasOwnProperty.call(tileInfo, 'images')) {
-							ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y * 32, 32, 32, x * 32, y * 32, 32, 32);
-						}
-						ctx.strokeStyle = 'red';
-						var OFFSET = 2;
-						ctx.lineWidth = OFFSET;
-						ctx.strokeRect(x * 32 + OFFSET, y * 32 + OFFSET, 32 - OFFSET * 2, 32 - OFFSET * 2);
-						ctx.font = "30px Verdana";
-						ctx.textAlign = 'center';
-						ctx.fillStyle = 'red';
-						ctx.fillText("?", x * 32 + 16, y * 32 + 27);
-						return;
-					}
-					//ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
-				};
-				// 绘制地图 start
-				for (var y = 0; y < editor.map.length; y++) {
-					for (var x = 0; x < editor.map[0].length; x++) {
-						var tileInfo = editor.map[y][x];
-						drawTile(editor.dom.evCtx, x, y, tileInfo);
-						tileInfo = editor.fgmap[y][x];
-						drawTile(editor.dom.fgCtx, x, y, tileInfo);
-						tileInfo = editor.bgmap[y][x];
-						drawTile(editor.dom.bgCtx, x, y, tileInfo);
-						// 新增图层的未定义图块绘制
-						tileInfo = editor.fg2map[y][x];
-						drawTile(editor.dom.fgCtx, x, y, tileInfo);
-						tileInfo = editor.bg2map[y][x];
-						drawTile(editor.dom.bgCtx, x, y, tileInfo);
-					}
-				}
-				// 绘制地图 end
-
-				// 下面这行是2.7新增内容
-				editor.drawEventBlock();
-				this.updateLastUsedMap();
-			};
-			// 编辑器写入文件
-			editor.file.saveFloor = function (floorData, callback) {
-				//callback(err:String)
-				var floorId = floorData.floorId;
-				var filename = 'project/floors/' + floorId + '.js';
-				var datastr = ['main.floors.', floorId, '=\n'];
-
-				var tempJsonObj = Object.assign({}, floorData);
-				// 多写入两个图层
-				var tempMap = [
-					['map', editor.util.guid()],
-					['bgmap', editor.util.guid()],
-					['bg2map', editor.util.guid()],
-					['fgmap', editor.util.guid()],
-					['fg2map', editor.util.guid()]
-				];
-				tempMap.forEach(function (v) {
-					v[2] = tempJsonObj[v[0]];
-					tempJsonObj[v[0]] = v[1];
-				});
-				var tempJson = JSON.stringify(tempJsonObj, editor.game.replacerForSaving, 4);
-				tempMap.forEach(function (v) {
-					tempJson = tempJson.replace('"' + v[1] + '"', '[\n' + editor.file.formatMap(v[2], v[0] != 'map') + '\n]');
-				});
-				datastr = datastr.concat([tempJson]);
-				datastr = datastr.join('');
-				editor.file.alertWhenCompress();
-				editor.fs.writeFile(filename, editor.util.encode64(datastr), 'base64', function (err, data) {
-					editor.addUsedFlags(datastr);
-					callback(err);
-				});
-			};
-			editor.file.saveFloorFile = function (callback) {
-				//callback(err:String)
-				editor.util.checkCallback(callback);
-				/* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
-				  callback('未选中文件或无数据');
-				} */
-				if (core.floorIds.indexOf(editor.currentFloorId) >= 0) {
-					// 增加背景层2与前景层2的当前地图数据绑定
-					for (var ii = 0, name; name = ['map', 'bgmap', 'bg2map', 'fgmap', 'fg2map'][ii]; ii++) {
-						var mapArray = editor[name].map(function (v) {
-							return v.map(function (v) {
-								return v.idnum || v || 0;
-							})
-						});
-						editor.currentFloorData[name] = mapArray;
-					}
-				}
-				editor.file.saveFloor(editor.currentFloorData, callback);
-			};
-			// 编辑器取得地图数据
-			editor.game.fetchMapFromCore = function () {
-				var mapArray = core.getMapArray(core.status.floorId, true);
-				// 2.6.6原写法:var mapArray = core.maps.saveMap(core.status.floorId);
-				editor.map = mapArray.map(function (v) {
-					return v.map(function (v) {
-						var x = parseInt(v),
-							y = editor.indexs[x];
-						if (y == null) {
-							printe("素材数字" + x + "未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
-							y = [0];
-						}
-						return editor.ids[y[0]];
-					});
-				});
-				editor.currentFloorId = core.status.floorId;
-				editor.currentFloorData = core.floors[core.status.floorId];
-				// 补出缺省的数据
-				editor.currentFloorData.autoEvent = editor.currentFloorData.autoEvent || {};
-				// 前景层2与背景层2的editor地图数据绑定
-				for (var ii = 0, name; name = ['bgmap', 'bg2map', 'fgmap', 'fg2map'][ii]; ii++) {
-					var mapArray = editor.currentFloorData[name];
-					if (!mapArray || JSON.stringify(mapArray) == JSON.stringify([])) { //未设置或空数组
-						//与editor.map同形的全0
-						mapArray = eval('[' + Array(editor.map.length + 1).join('[' + Array(editor.map[0].length + 1).join('0,') + '],') + ']');
-					}
-					editor[name] = mapArray.map(function (v) {
-						return v.map(function (v) {
-							var x = parseInt(v),
-								y = editor.indexs[x];
-							if (y == null) {
-								printe("素材数字" + x + "未定义。是不是忘了注册，或者接档时没有覆盖icons.js和maps.js？");
-								y = [0];
-							}
-							return editor.ids[y[0]];
-						});
-					});
-				}
-			};
-			// 选中背景层2或前景层2时其他图层的透明度变更
-			editor.uifunctions.layerMod_onchange = function () {
-				editor.layerMod = editor.dom.layerMod.value;
-				[editor.dom.bg2c, editor.dom.fg2c, editor.dom.bgc, editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-					x.style.opacity = 1;
-				});
-
-				// 手机端....
-				if (editor.isMobile) {
-					var arr = ["bg", "bg2", "fg", "fg2"];
-					for (var i = 0; i < arr.length; i++) {
-						if (editor.dom.layerMod.value == arr[i] + "map") {
-							var newArr = arr.concat(["ev", "ev2"]);
-							for (var ii = 0; ii < newArr.length; ii++) {
-								if (ii != i) editor.dom[newArr[ii] + "c"].style.opacity = 0.3;
-							}
-							return;
-						}
-					}
-				}
-			};
-			editor.uifunctions.layerMod2_onchange = function () {
-				editor.layerMod = editor.dom.layerMod2.value;
-				[editor.dom.bg2c, editor.dom.fg2c, editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-					x.style.opacity = 0.3;
-				});
-				editor.dom.bgc.style.opacity = 1;
-			};
-			editor.uifunctions.layerMod3_onchange = function () {
-				editor.layerMod = editor.dom.layerMod3.value;
-				[editor.dom.bg2c, editor.dom.fg2c, editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-					x.style.opacity = 0.3;
-				});
-				editor.dom.fgc.style.opacity = 1;
-			};
-			// 当背景层2按钮选中情况发生变动
-			editor.uifunctions.layerMod4_onchange = function () {
-				editor.layerMod = editor.dom.layerMod4.value;
-				[editor.dom.fgc, editor.dom.fg2c, editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-					x.style.opacity = 0.3;
-				});
-				editor.dom.bg2c.style.opacity = 1;
-			};
-			// 当前景层2按钮选中情况发生变动
-			editor.uifunctions.layerMod5_onchange = function () {
-				editor.layerMod = editor.dom.layerMod5.value;
-				[editor.dom.bg2c, editor.dom.fgc, editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-					x.style.opacity = 0.3;
-				});
-				editor.dom.fg2c.style.opacity = 1;
-			};
 			// 绑定onchange
-			editor.dom.layerMod4.onchange = editor.uifunctions.layerMod4_onchange;
-			editor.dom.layerMod5.onchange = editor.uifunctions.layerMod5_onchange;
-			// 编辑器下移动图块
-			editor.constructor.moveBgFg = function (startPos, endPos, name, callback) {
-				if (!startPos || !endPos || ["bgmap", "bg2map", "fgmap", "fg2map"].indexOf(name) < 0) return;
-				if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-				editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
-				editor[name][startPos.y][startPos.x] = 0;
-				editor.updateMap();
-				editor.file.saveFloorFile(function (err) {
-					if (err) {
-						printe(err);
-						throw (err);
-					}
-					printf('移动图块成功');
-					editor.drawPosSelection();
-					if (callback) callback();
-				});
+			editor.dom.layerMod4.onchange = function () {
+				editor.uifunctions.setLayerMod('bg2map');
 			};
-			// 编辑器下交换图块
-			editor.constructor.exchangeBgFg = function (startPos, endPos, name, callback) {
-				if (!startPos || !endPos || ["bgmap", "bg2map", "fgmap", "fg2map"].indexOf(name) < 0) return;
-				if (startPos.x == endPos.x && startPos.y == endPos.y) return;
-				var value = editor[name][endPos.y][endPos.x];
-				editor[name][endPos.y][endPos.x] = editor[name][startPos.y][startPos.x];
-				editor[name][startPos.y][startPos.x] = value;
-				editor.updateMap();
-				editor.file.saveFloorFile(function (err) {
-					if (err) {
-						printe(err);
-						throw (err);
-					}
-					printf('交换图块成功');
-					editor.drawPosSelection();
-					if (callback) callback();
-				});
-			};
+			editor.dom.layerMod5.onchange = function () {
+				editor.uifunctions.setLayerMod('fg2map');
+			}
 			// 继续进行afterCoreReset
 			if (callback) callback();
 		};
@@ -754,7 +514,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			], "cannotOut", direction))
 			return false;
 		if (this._canMoveHero_checkCannotInOut([
-				extraData.bgArray[ny][nx], extraData.bg2Array[y][x], extraData.fgArray[ny][nx], extraData.fg2Array[y][x], extraData.eventArray[ny][nx]
+				extraData.bgArray[ny][nx], extraData.bg2Array[ny][nx], extraData.fgArray[ny][nx], extraData.fg2Array[ny][nx], extraData.eventArray[ny][nx]
 			], "cannotIn", direction))
 			return false;
 

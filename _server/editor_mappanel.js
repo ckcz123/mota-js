@@ -717,29 +717,27 @@ editor_mappanel_wrapper = function (editor) {
         editor.brushMod = editor.dom.brushMod4.value;
     }
 
+    editor.uifunctions.setLayerMod = function (layer) {
+        editor.layerMod = layer;
+        var canvas = ['ev', 'ev2'].concat(editor.dom.canvas);
+        canvas.forEach(function (one) {
+            editor.dom[one+'c'].style.opacity = 1;
+        });
+        if (layer != 'map') {
+            canvas.filter(function (one) {
+                return one + 'map' != editor.layerMod
+            }).forEach(function (one) {
+                editor.dom[one+'c'].style.opacity = 0.3;
+            });
+        }
+    }
+
     /**
      * editor.dom.layerMod.onchange
      * 切换编辑的层
      */
     editor.uifunctions.layerMod_onchange = function () {
-        editor.layerMod = editor.dom.layerMod.value;
-        [editor.dom.bgc, editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-            x.style.opacity = 1;
-        });
-
-        // 手机端....
-        if (editor.isMobile) {
-            if (editor.dom.layerMod.value == 'bgmap') {
-                [editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-                    x.style.opacity = 0.3;
-                });
-            }
-            if (editor.dom.layerMod.value == 'fgmap') {
-                [editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-                    x.style.opacity = 0.3;
-                });
-            }
-        }
+        editor.uifunctions.setLayerMod(editor.dom.layerMod.value);
     }
 
     /**
@@ -747,11 +745,7 @@ editor_mappanel_wrapper = function (editor) {
      * 切换编辑的层
      */
     editor.uifunctions.layerMod2_onchange = function () {
-        editor.layerMod = editor.dom.layerMod2.value;
-        [editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-            x.style.opacity = 0.3;
-        });
-        editor.dom.bgc.style.opacity = 1;
+        editor.uifunctions.setLayerMod('bgmap');
     }
 
     /**
@@ -759,11 +753,7 @@ editor_mappanel_wrapper = function (editor) {
      * 切换编辑的层
      */
     editor.uifunctions.layerMod3_onchange = function () {
-        editor.layerMod = editor.dom.layerMod3.value;
-        [editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-            x.style.opacity = 0.3;
-        });
-        editor.dom.fgc.style.opacity = 1;
+        editor.uifunctions.setLayerMod('fgmap');
     }
 
     /**
@@ -977,11 +967,10 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.constructor.prototype.savePreMap = function () {
-        var dt = {
-            map: editor.map,
-            fgmap: editor.fgmap,
-            bgmap: editor.bgmap,
-        };
+        var dt = {};
+        editor.dom.maps.forEach(function (one) {
+            dt[one] = editor[one];
+        });
         if (editor.uivalues.preMapData.length == 0
             || !core.same(editor.uivalues.preMapData[editor.uivalues.preMapData.length - 1], dt)) {
             editor.uivalues.preMapData.push(core.clone(dt));

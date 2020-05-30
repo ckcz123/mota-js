@@ -502,7 +502,7 @@ editor_table_wrapper = function (editor) {
                 }
             } catch (e) {}
         }
-        editor.uievent.selectPoint(editor.currentFloorId, x, y, true, function (floorId, x, y) {
+        editor.uievent.selectPoint(editor.currentFloorId, x, y, false, function (floorId, x, y) {
             input.value = '['+x+','+y+']';
             input.onchange();
         })

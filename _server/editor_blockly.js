@@ -369,7 +369,7 @@ editor_blockly = function () {
             if (!isNaN(yv)) y = yv;
             if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
         }
-        editor.uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+        editor.uievent.selectPoint(floorId, x, y, false, function (fv, xv, yv) {
             if (!arr) return;
             if (arr[2] != null) {
                 if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);

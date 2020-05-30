@@ -406,11 +406,9 @@ editor_ui_wrapper = function (editor) {
         uievent.drawPreviewUI();
     }
 
-    uievent.selectPoint = function (floorId, x, y, hideFloor, callback) {
-        uievent.values.hideFloor = hideFloor;
+    uievent.selectPoint = function (floorId, x, y, bigmap, callback) {
+        uievent.values.bigmap = bigmap;
         uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32;
-        uievent.elements.selectPointBox.style.width = (uievent.values.size - 6) + "px";
-        uievent.elements.selectPointBox.style.height = (uievent.values.size - 6) + "px";
 
         uievent.isOpen = true;
         uievent.elements.div.style.display = 'block';
@@ -418,7 +416,6 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPoint.style.display = 'block';
         uievent.elements.yes.style.display = 'inline';
         uievent.elements.selectBackground.style.display = 'none';
-        // uievent.elements.selectFloor.style.display = hideFloor ? 'none' : 'inline';
         uievent.elements.selectFloor.style.display = 'inline';
         uievent.elements.selectPointBox.style.display = 'block';
         uievent.elements.canvas.style.display = 'block';
@@ -451,11 +448,26 @@ editor_ui_wrapper = function (editor) {
             core.drawThumbnail(uievent.values.floorId, null, null,
                 {
                     ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
-                    centerY: uievent.values.top + core.__HALF_SIZE__
+                    centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
                 });
         }
-        uievent.elements.selectPointBox.style.left = uievent.values.size * (uievent.values.x - uievent.values.left) + "px";
-        uievent.elements.selectPointBox.style.top = uievent.values.size * (uievent.values.y - uievent.values.top) + "px";
+        // 计算size
+        uievent.values.boxSize = uievent.values.size * 
+            (uievent.values.bigmap ? (core.__SIZE__ / Math.max(uievent.values.width, uievent.values.height)) : 1);
+        uievent.values.boxLeft = uievent.values.bigmap ?
+            (core.__PIXELS__ * Math.max(0, (1 - uievent.values.width / uievent.values.height) / 2)) : 0;
+        uievent.values.boxTop = uievent.values.bigmap ?
+            (core.__PIXELS__ * Math.max(0, (1 - uievent.values.height / uievent.values.width) / 2)) : 0;
+
+        if (uievent.values.bigmap) {
+            uievent.elements.selectPointBox.style.left = uievent.values.boxSize * uievent.values.x + uievent.values.boxLeft + "px";
+            uievent.elements.selectPointBox.style.top = uievent.values.boxSize * uievent.values.y + uievent.values.boxTop + "px";
+        } else {
+            uievent.elements.selectPointBox.style.left = uievent.values.boxSize * (uievent.values.x - uievent.values.left) + "px";
+            uievent.elements.selectPointBox.style.top = uievent.values.boxSize * (uievent.values.y - uievent.values.top) + "px";
+        }
+        uievent.elements.selectPointBox.style.width = uievent.values.boxSize - 6 + "px";
+        uievent.elements.selectPointBox.style.height = uievent.values.boxSize - 6 + "px";
     }
 
     uievent.setPoint = function (floorId, x, y) {
@@ -481,16 +493,28 @@ editor_ui_wrapper = function (editor) {
 
     uievent.elements.body.onclick = function (e) {
         if (uievent.mode != 'selectPoint') return;
-        uievent.values.x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
-        uievent.values.y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
+        if (uievent.values.bigmap) {
+            uievent.values.x = core.clamp(Math.floor((e.offsetX - uievent.values.boxLeft) / uievent.values.boxSize), 0, uievent.values.width - 1);
+            uievent.values.y = core.clamp(Math.floor((e.offsetY - uievent.values.boxTop) / uievent.values.boxSize), 0, uievent.values.height - 1);
+        } else {
+            uievent.values.x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
+            uievent.values.y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
+        }
         uievent.updateSelectPoint(false);
     }
 
     uievent.move = function (dx, dy) {
         if (uievent.mode != 'selectPoint') return;
+        if (uievent.values.bigmap) return;
         uievent.values.left = core.clamp(uievent.values.left + dx, 0, uievent.values.width - core.__SIZE__);
         uievent.values.top = core.clamp(uievent.values.top + dy, 0, uievent.values.height - core.__SIZE__);
         this.updateSelectPoint(true);
+    };
+
+    uievent.triggerBigmap = function () {
+        if (uievent.mode != 'selectPoint') return;
+        uievent.values.bigmap = !uievent.values.bigmap;
+        uievent.setPoint(uievent.values.floorId);
     };
 
     (function () {
@@ -498,6 +522,10 @@ editor_ui_wrapper = function (editor) {
         var viewportButtons = uievent.elements.selectPointButtons;
         var pressTimer = null;
         for (var ii = 0, node; node = viewportButtons.children[ii]; ii++) {
+            if (ii == 4) {
+                node.onclick = uievent.triggerBigmap;
+                continue;
+            }
             (function (x, y) {
                 var move = function () {
                     uievent.move(x, y);
@@ -527,7 +555,6 @@ editor_ui_wrapper = function (editor) {
     })();
 
     uievent.elements.div.onmousewheel = function (e) {
-        // if (uievent.mode != 'selectPoint' || uievent.values.hideFloor) return;
         if (uievent.mode != 'selectPoint') return;
         var index = core.floorIds.indexOf(uievent.values.floorId);
         try {

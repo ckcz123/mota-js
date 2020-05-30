@@ -772,6 +772,13 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.viewportButtons_func = function () {
         var pressTimer = null;
         for (var ii = 0, node; node = editor.dom.viewportButtons.children[ii]; ii++) {
+            if (ii == 4) {
+                // 大地图
+                node.onclick = function () {
+                    editor.uievent.selectPoint(null, editor.pos.x, editor.pos.y, true);
+                }
+                continue;
+            }
             (function (x, y) {
                 var move = function () {
                     editor.moveViewport(x, y);

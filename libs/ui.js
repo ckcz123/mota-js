@@ -2984,7 +2984,7 @@ ui.prototype.drawHelp = function () {
         core.status.event.id = 'help';
         core.lockControl();
         core.setAlpha('ui', 1);
-        core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#FFFFFF');
+        core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
         core.drawImage('ui', core.material.images.keyboard, 32 * (this.HSIZE - 6), 32 * (this.HSIZE - 6));
     }
     else {

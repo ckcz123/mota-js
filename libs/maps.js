@@ -1439,10 +1439,14 @@ maps.prototype.showBlock = function (x, y, floorId) {
         block.disable = false;
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
-            core.drawBlock(block);
-            core.addGlobalAnimate(block);
+            if (block.event.cls == 'autotile') {
+                core.drawMap();
+            } else {
+                core.drawBlock(block);
+                core.addGlobalAnimate(block);
+                core.updateStatusBar();
+            }
         }
-        core.updateStatusBar();
     }
 }
 
@@ -1454,17 +1458,10 @@ maps.prototype.hideBlock = function (x, y, floorId) {
     var block = core.getBlock(x, y, floorId, true);
     if (block == null) return; // 不存在
 
-    // 删除动画，清除地图
-    if (floorId == core.status.floorId) {
-        core.removeGlobalAnimate(x, y);
-        core.clearMap('event', x * 32, y * 32, 32, 32);
-        var height = block.block.event.height || 32;
-        if (height > 32)
-            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
-    }
-
     core.hideBlockByIndex(block.index, floorId);
-    core.updateStatusBar();
+
+    // 删除动画，清除地图
+    this._removeBlockFromMap(floorId, block.block);
 }
 
 ////// 根据图块的索引来隐藏图块 //////
@@ -1485,6 +1482,20 @@ maps.prototype.hideBlockByIndexes = function (indexes, floorId) {
     });
 }
 
+maps.prototype._removeBlockFromMap = function (floorId, block) {
+    if (floorId != core.status.floorId) return;
+    if (block.event.cls == 'autotile') {
+        core.drawMap();
+    } else {
+        core.removeGlobalAnimate(x, y);
+        core.clearMap('event', x * 32, y * 32, 32, 32);
+        var height = block.event.height || 32;
+        if (height > 32)
+            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
+        core.updateStatusBar();
+    }
+}
+
 ////// 删除某个图块 //////
 maps.prototype.removeBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
@@ -1493,17 +1504,10 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     var block = core.getBlock(x, y, floorId, true);
     if (block == null) return false; // 不存在
 
-    // 删除动画，清除地图
-    if (floorId == core.status.floorId) {
-        core.removeGlobalAnimate(x, y);
-        core.clearMap('event', x * 32, y * 32, 32, 32);
-        var height = block.block.event.height || 32;
-        if (height > 32)
-            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
-    }
-
     core.removeBlockByIndex(block.index, floorId);
-    core.updateStatusBar();
+
+    // 删除动画，清除地图
+    this._removeBlockFromMap(floorId, block.block);
     return true;
 }
 
@@ -1612,7 +1616,9 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         return;
     }
     var originBlock = core.getBlock(x, y, floorId, true);
+    var originEvent = originBlock == null ? null : originBlock.block.event;
     if (floorId == core.status.floorId) {
+
         core.removeGlobalAnimate(x, y);
         core.clearMap('event', x * 32, y * 32, 32, 32);
         if (originBlock != null) {
@@ -1629,11 +1635,21 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
         originBlock.block.event = block.event;
         block = originBlock.block;
     }
-    if (floorId == core.status.floorId && !block.disable) {
-        core.drawBlock(block);
-        if (block.event.cls != 'autotile')
-            core.addGlobalAnimate(block);
-        core.updateStatusBar();
+    if (floorId == core.status.floorId) {
+        // 有任何一个是autotile直接重绘地图
+        if ((originEvent != null && originEvent.cls == 'autotile') || block.event.cls == 'autotile') {
+            core.drawMap();
+        } else {
+            if (originEvent != null) {
+                this._removeBlockFromMap(floorId, {event: originEvent});
+            }
+            if (!block.disable) {
+                core.drawBlock(block);
+            }
+        }
+        if (originEvent != null) {
+            this._removeBlockFromMap()
+        }
     }
 }
 

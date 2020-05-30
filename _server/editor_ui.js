@@ -123,7 +123,7 @@ editor_ui_wrapper = function (editor) {
         if (e.button != 2 && !editor.isMobile) {
             editor.uifunctions.hideMidMenu();
         }
-        if (clickpath.indexOf('down') !== -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1) {
+        if (clickpath.indexOf('down') !== -1 && clickpath.indexOf('midMenu') === -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1) {
             editor.uifunctions.hideMidMenu();
         }
         if (clickpath.length >= 2 && clickpath[0].indexOf('id_') === 0) { editor.lastClickId = clickpath[0] }

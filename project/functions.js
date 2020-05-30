@@ -15,6 +15,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.played = true;
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
+	window.hero = core.status.hero;
 	window.flags = core.status.hero.flags;
 	core.events.setHeroIcon(core.status.hero.image, true);
 	core.control._initStatistics(core.animateFrame.totalTime);
@@ -510,7 +511,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 光环和支援检查
 	if (!core.status.checkBlock) core.status.checkBlock = {};
 
-	if (core.status.checkBlock.needCache) {
+	if (core.status.checkBlock.needCache || floorId != core.status.floorId) {
 		// 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
 		var hp_buff = 0,
 			atk_buff = 0,

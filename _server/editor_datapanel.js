@@ -441,9 +441,12 @@ editor_datapanel_wrapper = function (editor) {
                     })
                 }
             } else if (cls == 'items') {
-                if (confirm("你确定要批量清空【全塔道具】的全部属性么？这是个不可逆操作！")) {
-                    for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a)
-                        _clearItem(id);
+                if (confirm("你确定要批量清空【全塔所有自动注册且未修改ID的道具】的全部属性么？这是个不可逆操作！")) {
+                    for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+                        if (/^I\d+$/.test(id)) {
+                            _clearItem(id);
+                        }
+                    }
                     editor.file.saveSetting('items', [], function (err) {
                         if (err) printe(err);
                         else printf("全塔全部道具属性清空成功！");

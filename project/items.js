@@ -296,7 +296,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "items",
 		"name": "圣水",
 		"itemEffect": "core.status.hero.hp *= 2",
-		"itemEffectTip": "，生命值翻倍"
+		"itemEffectTip": "，生命值翻倍",
+		"useItemEffect": "core.status.hero.hp *= 2;",
+		"canUseItemEffect": "true",
+		"text": "生命值翻倍"
 	},
 	"silverCoin": {
 		"cls": "items",

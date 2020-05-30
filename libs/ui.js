@@ -2921,6 +2921,8 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
         def = core.status.hero.def - temp.def;
         mdef = core.status.hero.mdef - temp.mdef;
         core.status.hero = temp;
+        window.hero = core.status.hero;
+        window.flags = core.status.hero.flags;
     }
     else if (obj.cls[id]=='equips') {
         var values = core.material.items[id].equip || {};

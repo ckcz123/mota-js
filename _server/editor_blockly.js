@@ -491,6 +491,15 @@ editor_blockly = function () {
             }).sort();
         }
 
+        // 提供 hero.xxx 补全
+        index = content.lastIndexOf("hero.");
+        if (index >= 0) {
+            var token = content.substring(index+6);
+            return Object.keys(core.status.hero).filter(function (one) {
+                return one != token && one.startsWith(token);
+            }).sort();
+        }
+
         var namesObj={};
 
         namesObj.allIds = ["this"].concat(core.getAllIconIds());

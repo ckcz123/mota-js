@@ -52,7 +52,7 @@ main.floors.sample1=
         "1,7": [
             {
                 "type": "setBlock",
-                "number": "redMS",
+                "number": "redKing",
                 "loc": [
                     [
                         1,
@@ -65,10 +65,10 @@ main.floors.sample1=
                 "type": "sleep",
                 "time": 500
             },
-            "\t[redMS]\b[this,1,5]欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一的决斗。\n现在你必须接受我的安排。",
+            "\t[redKing]\b[this,1,5]欢迎来到魔塔，你是第一百位挑战者。\n若你能打败我所有的手下，我就与你一对一的决斗。\n现在你必须接受我的安排。",
             {
                 "type": "setBlock",
-                "number": "blueMS",
+                "number": "blueKing",
                 "loc": [
                     [
                         1,
@@ -252,9 +252,9 @@ main.floors.sample1=
             }
         ],
         "10,4": [
-            "\t[blackMS]\b[this]你终于还是来了。",
+            "\t[blackKing]\b[this]你终于还是来了。",
             "\t[hero]\b[hero]放开我们的公主！",
-            "\t[blackMS]\b[this]如果我不愿意呢？",
+            "\t[blackKing]\b[this]如果我不愿意呢？",
             "\t[hero]\b[hero]无需多说，拔剑吧！",
             {
                 "type": "battle",
@@ -270,7 +270,7 @@ main.floors.sample1=
                     7
                 ]
             },
-            "\t[blackMS]没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。",
+            "\t[blackKing]没想到你已经变得这么强大了... 算你厉害。\n公主就交给你了，请好好对她。",
             {
                 "type": "hide"
             }

@@ -1618,16 +1618,6 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     }
     var originBlock = core.getBlock(x, y, floorId, true);
     var originEvent = originBlock == null ? null : originBlock.block.event;
-    if (floorId == core.status.floorId) {
-
-        core.removeGlobalAnimate(x, y);
-        core.clearMap('event', x * 32, y * 32, 32, 32);
-        if (originBlock != null) {
-            var height = (originBlock.block.event || {}).height || 32;
-            if (height > 32)
-                core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
-        }
-    }
     if (originBlock == null) {
         core.status.maps[floorId].blocks.push(block);
     }
@@ -1642,14 +1632,13 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
             core.drawMap();
         } else {
             if (originEvent != null) {
-                this._removeBlockFromMap(floorId, {event: originEvent});
+                this._removeBlockFromMap(floorId, {x: x, y: y, event: originEvent});
             }
             if (!block.disable) {
                 core.drawBlock(block);
+                core.addGlobalAnimate(block);
+                core.updateStatusBar();
             }
-        }
-        if (originEvent != null) {
-            this._removeBlockFromMap()
         }
     }
 }

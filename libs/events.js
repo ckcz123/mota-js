@@ -2643,7 +2643,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     }
 
     // 关门动画
-    core.playSound(doorInfo.closeDoor);
+    core.playSound(doorInfo.closeSound);
     var blockInfo = core.getBlockInfo(id);
     var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 

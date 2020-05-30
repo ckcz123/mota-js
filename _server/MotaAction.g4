@@ -1,6 +1,6 @@
 // 编辑此文件用的vscode插件: https://marketplace.visualstudio.com/items?itemName=zhaouv.vscode-mota-js-extension
 // 此文件通过antlr-blockly生成编辑器中的图块, 相关帮助说明: https://zhaouv.github.io/antlr-blockly/docs/#/README
-
+// 添加和修改图块的说明见 _docs/editor.md ~ http://127.0.0.1:1055/_docs/#/editor?id=修改事件编辑器
 
 /*
 特殊注入demo
@@ -1454,6 +1454,7 @@ battle_1_s
 tooltip : battle: 强制战斗
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=battle%EF%BC%9A%E5%BC%BA%E5%88%B6%E6%88%98%E6%96%97
 default : ["","",""]
+selectPoint : ["PosString_0", "PosString_1"]
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
@@ -1494,7 +1495,7 @@ tooltip : closeDoor: 关门事件，需要该点本身无事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=opendoor%EF%BC%9A%E5%BC%80%E9%97%A8
 default : ["","","yellowDoor",false]
 selectPoint : ["PosString_0", "PosString_1"]
-allIds : ['IdString_0']
+allDoors : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {

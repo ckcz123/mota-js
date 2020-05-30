@@ -369,7 +369,7 @@ editor_blockly = function () {
             if (!isNaN(yv)) y = yv;
             if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
         }
-        editor.uievent.selectPoint(floorId, x, y, arr && arr[2] == null, function (fv, xv, yv) {
+        editor.uievent.selectPoint(floorId, x, y, false, function (fv, xv, yv) {
             if (!arr) return;
             if (arr[2] != null) {
                 if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);
@@ -519,6 +519,10 @@ editor_blockly = function () {
         namesObj.allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
                          "maroon（深红色）", "navy（深蓝色）", "gold（金色）",  "olive（黄褐色）", "orange（橙色）", "purple（品红色）", 
                          "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
+        namesObj.allDoors = ["this"].concat(Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e)
+            .map(function (key) { return maps_90f36752_8815_4be8_b32b_d7fad1d0542e[key]; })
+            .filter(function (one) { return one.doorInfo != null; })
+            .map(function (one) { return one.id; }));
         var filter = function (list, content) {
           return list.filter(function (one) {
             return one != content && one.startsWith(content);
@@ -534,7 +538,7 @@ editor_blockly = function () {
         // 对音效进行补全
         // 对全局商店进行补全
         // 对楼层名进行补全
-        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds'][ii];ii++){
+        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors'][ii];ii++){
             if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
                 return filter(namesObj[names], content);
             }

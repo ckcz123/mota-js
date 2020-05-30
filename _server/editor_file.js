@@ -83,7 +83,9 @@ editor_file_wrapper = function (editor) {
         var datastr = ['main.floors.', floorId, '=\n'];
 
         var tempJsonObj = Object.assign({}, floorData);
-        var tempMap = [['map', editor.util.guid()], ['bgmap', editor.util.guid()], ['fgmap', editor.util.guid()]];
+        var tempMap = editor.dom.maps.map(function (one) {
+            return [one, editor.util.guid()]
+        });
         tempMap.forEach(function (v) {
             v[2] = tempJsonObj[v[0]];
             tempJsonObj[v[0]] = v[1];
@@ -164,11 +166,8 @@ editor_file = function (editor, callback) {
         /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
           callback('未选中文件或无数据');
         } */
-        var filename = 'project/floors/' + editor.currentFloorId + '.js';
-        var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
-
         if (core.floorIds.indexOf(editor.currentFloorId) >= 0) {
-            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+            for(var ii=0,name;name=editor.dom.maps[ii];ii++){
                 var mapArray=editor[name].map(function (v) {
                     return v.map(function (v) {
                         return v.idnum || v || 0
@@ -667,9 +666,7 @@ editor_file = function (editor, callback) {
                     Object.keys(editor.file.comment._data.floors._data.loc._data).forEach(function (v) {
                         delete(locObj[v]);
                     });
-                    delete(locObj.map);
-                    delete(locObj.bgmap);
-                    delete(locObj.fgmap);
+                    editor.dom.maps.forEach(function (one) { delete locObj[one]; });
                     return locObj;
                 })(),
                 editor.file.comment._data.floors._data.floor,

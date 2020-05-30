@@ -2057,6 +2057,22 @@ control.prototype.getRealStatusOrDefault = function (status, name) {
     return Math.floor(this.getStatusOrDefault(status, name) * this.getBuff(name));
 }
 
+////// 获得勇士原始属性（无装备和衰弱影响） //////
+control.prototype.getNakedStatus = function (name) {
+    var value = this.getStatus(name);
+    if (value == null) return value;
+    // 装备增幅
+    core.status.hero.equipment.forEach(function (v) {
+        if (!v || !(core.material.items[v] || {}).equip) return;
+        value -= core.material.items[v].equip.value[name] || 0;
+    });
+    // 衰弱扣除
+    if (core.hasFlag('weak') && core.values.weakValue >= 1 && (name == 'atk' || name == 'def')) {
+        value += core.values.weakValue;
+    }
+    return value;
+}
+
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
     // 仅保留三位有效buff值

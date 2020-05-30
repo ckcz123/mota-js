@@ -27,14 +27,6 @@ function editor() {
         brushMod2:document.getElementById('brushMod2'),
         brushMod3:document.getElementById('brushMod3'),
         brushMod4:document.getElementById('brushMod4'),
-        bgc : document.getElementById('bg'),
-        bgCtx : document.getElementById('bg').getContext('2d'),
-        fgc : document.getElementById('fg'),
-        fgCtx : document.getElementById('fg').getContext('2d'),
-        evc : document.getElementById('event'),
-        evCtx : document.getElementById('event').getContext('2d'),
-        ev2c : document.getElementById('event2'),
-        ev2Ctx : document.getElementById('event2').getContext('2d'),
         layerMod:document.getElementById('layerMod'),
         layerMod2:document.getElementById('layerMod2'),
         layerMod3:document.getElementById('layerMod3'),
@@ -60,6 +52,9 @@ function editor() {
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
         lockMode: document.getElementById('lockMode'),
+        gameInject: document.getElementById('gameInject'),
+        maps: ['bgmap', 'fgmap', 'map'],
+        canvas: ['bg', 'fg'],
     };
 
     this.uivalues={
@@ -153,86 +148,121 @@ editor.info
 /////////// 数据相关 ///////////
 
 editor.prototype.init = function (callback) {
-    
-    var useCompress = main.useCompress;
-    main.useCompress = false;
+
     editor.airwallImg = new Image();
     editor.airwallImg.src = './project/materials/airwall.png';
 
-    main.init('editor', function () {
-        editor.config = new editor_config();
-        editor.config.load(function() {
-            editor_util_wrapper(editor);
-            editor_game_wrapper(editor, main, core);
-            editor_file_wrapper(editor);
-            editor_table_wrapper(editor);
-            editor_ui_wrapper(editor);
-            editor_mappanel_wrapper(editor);
-            editor_datapanel_wrapper(editor);
-            editor_materialpanel_wrapper(editor);
-            editor_listen_wrapper(editor);
-            editor.printe=printe;
-            afterMainInit();
-        })
-    });
-
-    var afterMainInit = function () {
-        editor.game.fixFunctionInGameData();
-        editor.main = main;
-        editor.core = core;
-        editor.fs = fs;
-        editor_file = editor_file(editor, function () {
-            editor.file = editor_file;
-            editor_mode = editor_mode(editor);
-            editor.mode = editor_mode;
-            core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-            var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
-            if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
-            core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
-                afterCoreReset();
-            }, true);
-        });
-    }
-
-    var afterCoreReset = function () {
-        
-        editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
-        editor.drawInitData(core.icons.icons); // 初始化绘图
-
-        editor.game.fetchMapFromCore();
-        editor.updateMap();
-        editor.buildMark();
-        editor.drawEventBlock();
-        
-        editor.pos = {x: 0, y: 0};
-        editor.mode.loc();
-        editor.info = editor.ids[editor.indexs[201]];
-        editor.mode.enemyitem();
-        editor.mode.floor();
-        editor.mode.tower();
-        editor.mode.functions();
-        editor.mode.commonevent();
-        editor.mode.showMode('tower');
-        
-        editor_multi = editor_multi();
-        editor_blockly = editor_blockly();
-
-        // --- 所有用到的flags
-        editor.used_flags = {};
-        for (var floorId in editor.main.floors) {
-            editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'index.html', true);
+    xhr.onload = function () {
+        if (xhr.status != 200) {
+            alert("HTTP " + xhr.status);
+            return;
         }
-        if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-            for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-                editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
+        var str = xhr.response.split('<!-- injection -->');
+        if (str.length != 3) window.onerror("index.html格式不正确");
+        editor.dom.gameInject.innerHTML = str[1];
+        
+        var cvs = ['bg', 'fg', 'event', 'event2'].map(function(e) {
+            return document.getElementById(e);
+        });
+        ['bg', 'fg', 'ev', 'ev2'].forEach(function(e, i) {
+            editor.dom[e+'c'] = cvs[i];
+            editor.dom[e+'Ctx'] = cvs[i].getContext('2d');
+            
+            editor.dom.mapEdit.insertBefore(cvs[i], document.getElementById('efg'));
+        });
+
+        var mainScript = document.createElement('script');
+
+        mainScript.onload = function() {
+    
+            var useCompress = main.useCompress;
+            main.useCompress = false;
+        
+            main.init('editor', function () {
+                editor.config = new editor_config();
+                editor.config.load(function() {
+                    editor_util_wrapper(editor);
+                    editor_game_wrapper(editor, main, core);
+                    editor_file_wrapper(editor);
+                    editor_table_wrapper(editor);
+                    editor_ui_wrapper(editor);
+                    editor_mappanel_wrapper(editor);
+                    editor_datapanel_wrapper(editor);
+                    editor_materialpanel_wrapper(editor);
+                    editor_listen_wrapper(editor);
+                    editor.printe=printe;
+                    afterMainInit();
+                })
+            });
+        
+            var afterMainInit = function () {
+                editor.game.fixFunctionInGameData();
+                editor.main = main;
+                editor.core = core;
+                editor.fs = fs;
+                editor_file = editor_file(editor, function () {
+                    editor.file = editor_file;
+                    editor_mode = editor_mode(editor);
+                    editor.mode = editor_mode;
+                    core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
+                    var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
+                    if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
+                    core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
+                        afterCoreReset();
+                    }, true);
+                });
+            }
+        
+            var afterCoreReset = function () {
+                
+                editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
+                editor.drawInitData(core.icons.icons); // 初始化绘图
+        
+                editor.game.fetchMapFromCore();
+                editor.updateMap();
+                editor.buildMark();
+                editor.drawEventBlock();
+                
+                editor.pos = {x: 0, y: 0};
+                editor.mode.loc();
+                editor.info = editor.ids[editor.indexs[201]];
+                editor.mode.enemyitem();
+                editor.mode.floor();
+                editor.mode.tower();
+                editor.mode.functions();
+                editor.mode.commonevent();
+                editor.mode.showMode('tower');
+                
+                editor_multi = editor_multi();
+                editor_blockly = editor_blockly();
+        
+                // --- 所有用到的flags
+                editor.used_flags = {};
+                for (var floorId in editor.main.floors) {
+                    editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
+                }
+                if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                    for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                        editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
+                    }
+                }
+        
+                if (editor.useCompress == null) editor.useCompress = useCompress;
+                if (Boolean(callback)) callback();
+        
             }
         }
 
-        if (editor.useCompress == null) editor.useCompress = useCompress;
-        if (Boolean(callback)) callback();
-
+        mainScript.id = "mainScript";
+        mainScript.src = "main.js";
+        editor.dom.gameInject.appendChild(mainScript);
+    };
+    xhr.onabort = xhr.ontimeout = xhr.onerror = function () {
+        alert("无法访问index.html");
     }
-    
+    xhr.send();
 }
 
 editor.prototype.mapInit = function () {
@@ -247,11 +277,9 @@ editor.prototype.mapInit = function () {
             editor.map[y][x] = 0;
         }
     }
-    editor.fgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.bgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.currentFloorData.map = editor.map;
-    editor.currentFloorData.fgmap = editor.fgmap;
-    editor.currentFloorData.bgmap = editor.bgmap;
+    editor.dom.maps.forEach(function (one) {
+        editor.currentFloorData[one] = editor[one] = JSON.parse(JSON.stringify(editor.map));
+    });
     editor.currentFloorData.firstArrive = [];
     editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
@@ -263,7 +291,7 @@ editor.prototype.mapInit = function () {
 }
 
 editor.prototype.changeFloor = function (floorId, callback) {
-    for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+    for(var ii=0,name;name=editor.dom.maps[ii];ii++){
         var mapArray=editor[name].map(function (v) {
             return v.map(function (v) {
                 return v.idnum || v || 0
@@ -367,10 +395,11 @@ editor.prototype.updateMap = function () {
 
     var updateMap = function () {
         core.removeGlobalAnimate();
-        core.clearMap('bg');
+        editor.dom.canvas.forEach(function (one) {
+            core.clearMap(one);
+        });
         core.clearMap('event');
         core.clearMap('event2');
-        core.clearMap('fg');
         core.maps._drawMap_drawAll();
     }
     updateMap();
@@ -399,12 +428,10 @@ editor.prototype.updateMap = function () {
     // 绘制地图 start
     for (var y = 0; y < editor.map.length; y++) {
         for (var x = 0; x < editor.map[0].length; x++) {
-            var tileInfo = editor.map[y][x];
-            drawTile(editor.dom.evCtx, x, y, tileInfo);
-            tileInfo = editor.fgmap[y][x];
-            drawTile(editor.dom.fgCtx, x, y, tileInfo);
-            tileInfo = editor.bgmap[y][x];
-            drawTile(editor.dom.bgCtx, x, y, tileInfo);
+            drawTile(editor.dom.evCtx, x, y, editor.map[y][x]);
+            editor.dom.canvas.forEach(function (one) {
+                drawTile(editor.dom[one + 'Ctx'], x, y, editor[one+'map'][y][x]);
+            });
         }
     }
     // 绘制地图 end

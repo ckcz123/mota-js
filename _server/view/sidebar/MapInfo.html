@@ -1,0 +1,37 @@
+<template>
+    <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><!-- floor -->
+        <h3 class="leftTabHeader">楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('floor')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <data-tree ref=tree></data-tree>
+            <div id='changeFloorId'><!-- id and idnum -->
+                <input placeholder="修改floorId为"/>
+                <button>save</button>
+            </div>
+            <div id='changeFloorSize' style="font-size: 13px;">
+                修改地图大小：宽<input style="width: 25px;" value="13" />，高<input style="width: 25px;" value="13" />，
+                偏移x<input style="width: 25px;" value="0" /> y<input style="width: 25px;" value="0" /> 
+                <button>save</button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+export default class MapInfo extends AMEFComponent {
+    floor(callback) {
+        var objs = [];
+        editor.file.editFloor([], function (objs_) {
+            objs = objs_;
+            //console.log(objs_)
+        });
+        //只查询不修改时,内部实现不是异步的,所以可以这么写
+        var tableinfo = editor.table.objToTable(objs[0], objs[1]);
+        document.getElementById('table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74').innerHTML = tableinfo.HTML;
+        tableinfo.listen(tableinfo.guids);
+        if (Boolean(callback)) callback();
+    }
+}
+</script>
+
+<script></script>

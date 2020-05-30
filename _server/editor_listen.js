@@ -164,7 +164,6 @@ editor_listen_wrapper = function (editor) {
 
         editor.uifunctions.selectAppend_func()
         editor.uifunctions.selectFileBtn_func()
-        editor.uifunctions.changeColorInput_func()
         editor.uifunctions.picClick_func()
         editor.uifunctions.appendConfirm_func()
 

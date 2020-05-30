@@ -671,33 +671,7 @@ editor_datapanel_wrapper = function (editor) {
     }
 
 
-    editor.uifunctions.changeColorInput_func = function () {
-        var changeColorInput = document.getElementById('changeColorInput')
-        changeColorInput.oninput = function () {
-            var delta = (~~changeColorInput.value) * 30;
-            var imgData = editor_mode.appendPic.sourceImageData;
-            var nimgData = new ImageData(imgData.width, imgData.height);
-            // ImageData .data 形如一维数组,依次排着每个点的 R(0~255) G(0~255) B(0~255) A(0~255)
-            var convert = function (rgba, delta) {
-                var rgbToHsl = editor.util.rgbToHsl
-                var hue2rgb = editor.util.hue2rgb
-                var hslToRgb = editor.util.hslToRgb
-                //
-                var hsl = rgbToHsl(rgba)
-                hsl[0] = (hsl[0] + delta) % 360
-                var nrgb = hslToRgb(hsl)
-                nrgb.push(rgba[3])
-                return nrgb
-            }
-            for (var x = 0; x < imgData.width; x++) {
-                for (var y = 0; y < imgData.height; y++) {
-                    editor.util.setPixel(nimgData, x, y, convert(editor.util.getPixel(imgData, x, y), delta))
-                }
-            }
-            editor.dom.appendSourceCtx.clearRect(0, 0, imgData.width, imgData.height);
-            editor.dom.appendSourceCtx.putImageData(nimgData, 0, 0);
-        }
-    }
+    
 
 
     editor.uifunctions.picClick_func = function () {

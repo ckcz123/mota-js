@@ -152,8 +152,14 @@ editor.prototype.init = function (callback) {
     editor.airwallImg = new Image();
     editor.airwallImg.src = './project/materials/airwall.png';
 
-    fs.readFile("index.html", 'utf-8', function(err, data) {
-        var str = data.split('<!-- injection -->');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'index.html', true);
+    xhr.onload = function () {
+        if (xhr.status != 200) {
+            alert("HTTP " + xhr.status);
+            return;
+        }
+        var str = xhr.response.split('<!-- injection -->');
         if (str.length != 3) window.onerror("index.html格式不正确");
         editor.dom.gameInject.innerHTML = str[1];
         
@@ -252,8 +258,11 @@ editor.prototype.init = function (callback) {
         mainScript.id = "mainScript";
         mainScript.src = "main.js";
         editor.dom.gameInject.appendChild(mainScript);
-    })
-    
+    };
+    xhr.onabort = xhr.ontimeout = xhr.onerror = function () {
+        alert("无法访问index.html");
+    }
+    xhr.send();
 }
 
 editor.prototype.mapInit = function () {

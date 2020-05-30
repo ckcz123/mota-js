@@ -1369,6 +1369,9 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, 
         var min_width = 220 - paddingLeft, max_width = validWidth;
         // 无行走图或头像，则可以适当缩小min_width
         if (titleInfo.image == null) min_width = 160;
+        if (titleInfo.title) {
+            min_width = core.clamp(core.calWidth('ui', titleInfo.title, this._buildFont(core.status.textAttribute.titlefont, true)), min_width, max_width);
+        }
         validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
         width = validWidth + paddingLeft + paddingRight;
         left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);

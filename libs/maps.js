@@ -1595,6 +1595,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     if (originBlock == null) {
         core.status.maps[floorId].blocks.push(block);
         core.setFlag([floorId, x, y, 'md'].join('@'), false);
+        delete block.disable;
     }
     else {
         originBlock.block.id = number;

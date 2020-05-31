@@ -2712,7 +2712,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
         var map = core.maps.loadMap(data.maps, data.floorId);
-        core.extractBlocks(map);
+        core.extractBlocks(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
             heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags
         }, {

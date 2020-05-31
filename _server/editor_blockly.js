@@ -291,7 +291,7 @@ editor_blockly = function () {
         'sleep_s',
         'setBlock_s',
         'insert_1_s'
-    ]; // 最常用的15个图块
+    ]; // 最常用的15个事件
     editor_blockly.lastUsedTypeNum=15;
 
     editor_blockly.addIntoLastUsedType=function(blockId) {

@@ -541,7 +541,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		loc.forEach(function (t) {
 			var x = t[0],
 				y = t[1];
-			var flag = "__" + name + "Map__" + floorId + "_" + x + "_" + y;
+			var flag = [floorId, x, y, name+'_disable'].join('@');
 			if (type == 'hide') core.setFlag(flag, true);
 			else core.removeFlag(flag);
 		});
@@ -564,7 +564,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			else number = core.getNumberById(number);
 		}
 
-		var vFlag = "__" + name + "Value__" + floorId + "_" + x + "_" + y;
+		var vFlag = [floorId, x, y, name + "_value"].join('@');
 		core.setFlag(vFlag, number);
 		core.status[name + "maps"][floorId] = null;
 

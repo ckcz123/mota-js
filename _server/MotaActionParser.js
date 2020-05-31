@@ -1329,7 +1329,7 @@ MotaActionFunctions.replaceToName = function (str) {
   str = str.replace(new RegExp("item:(" + list.join("|") + ")\\b", "g"), function (a, b) {
     return map[b] ? ("物品：" + map[b]) : b;
   }).replace(/item:/g, "物品：");
-  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：").replace(/temp:/g, "临时变量：");
+  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：");
 
 
   MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
@@ -1367,7 +1367,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
-  str = str.replace(/临时变量[:：]/g, "temp d:").replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
+  str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
 
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {

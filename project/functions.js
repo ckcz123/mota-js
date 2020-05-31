@@ -120,6 +120,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.status.maps[floorId].blocks.forEach(function (block) {
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
+				core.setFlag([floorId, block.x, block.y, 'md'].join('@'), false);
 			}
 		});
 		core.control.gatherFollowers();
@@ -947,7 +948,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 读档操作；从存储中读取了内容后的行为
 
 	// 重置游戏和路线
-	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps), data.values);
+	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps, null, data.hero.flags), data.values);
 	core.status.route = core.decodeRoute(data.route);
 	// 文字属性，全局属性
 	core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);

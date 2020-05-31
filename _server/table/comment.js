@@ -169,18 +169,19 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"special": {
 					"_leaf": true,
 					"_type": "popCheckboxSet",
-					"_checkboxSet":function(){
-						var array=functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials()
-						var b=[],c=[];
+					"_checkboxSet": function () {
+						var array = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials()
+						var b = [],
+							c = [];
 						for (var index = 0; index < array.length; index++) {
 							b.push(array[index][0])
 							var name = array[index][1];
 							if (name instanceof Function) name = name({});
-							c.push(name+"("+array[index][0]+")")
+							c.push(name + "(" + array[index][0] + ")")
 						}
 						return {
-							"prefix":c,
-							"key":b
+							"prefix": c,
+							"key": b
 						}
 					},
 					"_data": "特殊属性"
@@ -310,8 +311,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkboxSet",
 					"_checkboxSet": {
-						"prefix":["上: ","下: ","<br>左: ","右: "],
-						"key":["up","down","left","right"]
+						"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+						"key": ["up", "down", "left", "right"]
 					},
 					"_docs": "不可出方向",
 					"_data": "该图块的不可出方向\n对背景层、事件层、前景层上的图块均有效"
@@ -320,8 +321,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkboxSet",
 					"_checkboxSet": {
-						"prefix":["上: ","下: ","<br>左: ","右: "],
-						"key":["up","down","left","right"]
+						"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+						"key": ["up", "down", "left", "right"]
 					},
 					"_docs": "不可入方向",
 					"_data": "该图块的不可入方向\n对背景层、事件层、前景层上的图块均有效"
@@ -336,7 +337,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "select",
 					"_select": {
-						"values": [null,1,2,3,4],
+						"values": [null, 1, 2, 3, 4],
 					},
 					"_docs": "动画帧数",
 					"_data": "null代表素材默认帧数"
@@ -344,7 +345,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"doorInfo": {
 					"_leaf": true,
 					"_type": "event",
-					"_event": "doorInfo", 
+					"_event": "doorInfo",
 					"_docs": "门信息",
 					"_data": "该图块的门信息，仅对animates和npc48生效。"
 				},
@@ -465,6 +466,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_docs": "下楼点",
 							"_data": "该层下楼点，如[2,3]。\n如果此项不为null，则楼层转换时的stair:downFloor，以及楼传器的落点会被替换成该点而不是该层的下楼梯。"
 						},
+						"flyPoint": {
+							"_leaf": true,
+							"_type": "point",
+							"_range": "thiseval==null||((thiseval instanceof Array) && thiseval.length==2)",
+							"_docs": "楼传落点",
+							"_data": "该层楼传落点，如[2,3]。\n如果此项不为null，则楼层飞行器强行落到此点，无视上下楼或平面塔属性。"
+						},
 						"defaultGround": {
 							"_leaf": true,
 							"_type": "textarea",
@@ -567,8 +575,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_leaf": true,
 							"_type": "checkboxSet",
 							"_checkboxSet": {
-								"prefix":["上: ","下: ","<br>左: ","右: "],
-								"key":["up","down","left","right"]
+								"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+								"key": ["up", "down", "left", "right"]
 							},
 							"_docs": "不可通行性",
 							"_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表该点不能往上和左走"

@@ -194,6 +194,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.flyRecordPosition) {
 		loc = core.getFlag("__leaveLoc__", {})[toId] || null;
 	}
+	if (core.status.maps[toId].flyPoint != null && core.status.maps[toId].flyPoint.length == 2) {
+		loc = {x: core.status.maps[toId].flyPoint[0], y: core.status.maps[toId].flyPoint[1]};
+	}
 	if (loc == null) {
 		// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
 		var fromIndex = core.floorIds.indexOf(fromId),

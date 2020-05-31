@@ -526,6 +526,11 @@ editor_ui_wrapper = function (editor) {
                 node.onclick = uievent.triggerBigmap;
                 continue;
             }
+            if (ii == 5) {
+                node.onclick = function () {
+                    alert(core.copy(uievent.values.floorId) ? ('楼层ID '+ui.values.floorId+' 已成功复制到剪切板') : '无法复制楼层ID');
+                }
+            }
             (function (x, y) {
                 var move = function () {
                     uievent.move(x, y);

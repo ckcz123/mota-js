@@ -325,9 +325,12 @@ events.prototype.trigger = function (x, y, callback) {
         return;
     }
     if (core.status.gameOver) return _executeCallback();
-    if (core.status.event.id && core.status.event.id != 'action') return _executeCallback();
-
-    var inAction = core.status.event.id == 'action';
+    if (core.status.event.id == 'action') {
+        core.insertAction({"type": "function", "function": "function () { core.events._trigger_inAction("+x+","+y+"); }", "async": true},
+            null, null, null, true);
+        return _executeCallback();
+    }
+    if (core.status.event.id) return _executeCallback();
 
     var block = core.getBlock(x, y);
     if (block == null) return _executeCallback();
@@ -343,24 +346,37 @@ events.prototype.trigger = function (x, y, callback) {
         if (noPass) core.clearAutomaticRouteNode(x, y);
 
         // 转换楼层能否穿透
-        if (!inAction && trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
+        if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
             return;
         core.status.automaticRoute.moveDirectly = false;
-        if (inAction) {
-            // 切换事件点的坐标
-            this.setEvents(null, block.x, block.y);
-            if (block.event.trigger == 'action') {
-                this.insertAction(block.event.data);
-            }
-            else {
-                this.doSystemEvent(block.event.trigger, block, _executeCallback);
-                return;
-            }
-        } else {
-            this.doSystemEvent(trigger, block);
-        }
+        this.doSystemEvent(trigger, block);
     }
     return _executeCallback();
+}
+
+events.prototype._trigger_inAction = function (x, y) {
+    if (core.status.gameOver || core.status.event.id != 'action') return;
+    
+    var block = core.getBlock(x, y);
+    if (block == null) return core.doAction();
+    block = block.block;
+
+    // 执行该点的脚本
+    try {
+        eval(block.event.script);
+    } catch (e) { main.log(e); }
+
+    if (block.event.trigger && block.event.trigger != 'null') {
+        this.setEvents(null, x, y);
+        if (block.event.trigger == 'action') {
+            this.insertAction(block.event.data);
+        }
+        else {
+            this.doSystemEvent(block.event.trigger, block, core.doAction);
+            return;
+        }
+    }
+    return core.doAction();
 }
 
 events.prototype._trigger_ignoreChangeFloor = function (block) {
@@ -871,7 +887,10 @@ events.prototype.doEvent = function (data, x, y, prefix) {
 events.prototype.setEvents = function (list, x, y, callback) {
     var data = core.status.event.data || {};
     if (list) {
-        data.list = [{todo: core.clone(list), total: core.clone(list), condition: "false"}];
+        var l = core.clone(list);
+        if (!(l instanceof Array)) l = [l];
+        l.push({"type": "_label"});
+        data.list = [{todo: l, total: core.clone(l), condition: "false"}];
         // 结束所有正在执行的自动事件
         if (list.length == 0) {
             core.status.autoEvents.forEach(function (autoEvent) {
@@ -975,10 +994,17 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
         this.startEvents(action, x, y, callback);
     }
     else {
-        if (addToLast)
-            core.push(core.status.event.data.list[0].todo, action)
-        else
-            core.unshift(core.status.event.data.list[0].todo, action);
+        if (addToLast) {
+            var list = core.status.event.data.list[0].todo;
+            var index = 0;
+            for (var index = 0; index < list.length; index++) {
+                if (list[index].type == '_label') {
+                    list.splice(index, 0, action);
+                    break;
+                }
+            } 
+        }
+        else core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
 }
@@ -1258,6 +1284,10 @@ events.prototype._action_comment = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action__label = function (data, x, y, prefix) {
+    core.doAction();
+}
+
 events.prototype._action_setText = function (data, x, y, prefix) {
     ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "interval"].forEach(function (t) {
         if (data[t] != null) core.status.textAttribute[t] = data[t];
@@ -1410,6 +1440,7 @@ events.prototype._action_moveAction = function (data, x, y, prefix) {
             core.insertAction([
                 {"type": "moveHero", "steps": ["forward"]},
                 {"type": "function", "function": "function() { core.moveOneStep(core.doAction); }", "async": true},
+                {"type": "_label"},
             ]);
         }
     }
@@ -1594,7 +1625,7 @@ events.prototype._action_battle = function (data, x, y, prefix) {
 
 events.prototype._action_trigger = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.trigger(loc[0], loc[1], core.doAction);
+    this._trigger_inAction(loc[0], loc[1]);
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
@@ -1941,8 +1972,11 @@ events.prototype._precompile_forEach = function (data) {
 
 events.prototype._action_while = function (data, x, y, prefix) {
     if (core.calValue(data.condition, prefix)) {
+        var list = core.clone(data.data);
+        if (!(list instanceof Array)) list = [list];
+        list.push({"type": "_label"});
         core.unshift(core.status.event.data.list,
-            {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+            {"todo": list, "total": core.clone(list), "condition": data.condition}
         );
     }
     core.doAction();
@@ -1955,8 +1989,11 @@ events.prototype._precompile_while = function (data) {
 }
 
 events.prototype._action_dowhile = function (data, x, y, prefix) {
+    var list = core.clone(data.data);
+    if (!(list instanceof Array)) list = [list];
+    list.push({"type": "_label"});
     core.unshift(core.status.event.data.list,
-        {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+        {"todo": list, "total": core.clone(list), "condition": data.condition}
     );
     core.doAction();
 }

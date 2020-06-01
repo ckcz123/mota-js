@@ -57,7 +57,7 @@ autoEvent_m
 /* autoEvent_m
 tooltip : 自动事件
 helpUrl : https://h5mota.com/games/template/_docs/#/event
-default : ["flag:__door__==2",0,true,false,false,null]
+default : ["flag:__door__===2",0,true,false,false,null]
 var code = {
     "condition": EvalString_0, // 条件不可为null
     "currentFloor": Bool_0, // 是否仅在本层检测
@@ -487,7 +487,7 @@ return code;
 
 // doorInfo 事件编辑器入口之一
 doorInfo_m 
-    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ BEND
+    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ '如需撞到开门还需要把图块触发器改成 openDoor' BEND
 
 
 /* doorInfo_m
@@ -2951,7 +2951,7 @@ var orders = {
     '-': Blockly.JavaScript.ORDER_SUBTRACTION,
     '*': Blockly.JavaScript.ORDER_MULTIPLICATION,
     '/': Blockly.JavaScript.ORDER_DIVISION,
-    '^': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    '**': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     '==': Blockly.JavaScript.ORDER_EQUALITY,
     '!=': Blockly.JavaScript.ORDER_EQUALITY,
     '===': Blockly.JavaScript.ORDER_EQUALITY,
@@ -3158,8 +3158,8 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '+'|'-'|'*'|'/'|'^'|'=='|'!='|'==='|'!=='|'>'|'<'|'>='|'<='|'且'|'或'
-    /*Arithmetic_List ['+','-','*','/','^','==','!=','===','!==','>','<','>=','<=','&&','||']*/;
+    :   '加'|'减'|'乘'|'除'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'弱等于'|'弱不等于'
+    /*Arithmetic_List ['+','-','*','/','**','===','!==','>','<','>=','<=','&&','||','==','!=']*/;
 
 AssignOperator_List
     :   '='|'+='|'-='|'*='|'/='|'**='|'//='|'%='
@@ -3261,8 +3261,8 @@ Id_List
     /*Id_List ['flag','status','item', 'switch', 'temp', 'global']*/;
 
 EnemyId_List
-    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'value'|'atkValue'|'defValue'|'notBomb'|'zoneSquare'|'range'|'n'|'add'|'damage'
-    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','属性值','退化扣攻','退化扣防','不可炸','九宫格领域','领域范围','连击数','吸血到自身','固伤值']*/;
+    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'属性值'|'退化扣攻'|'退化扣防'|'不可炸'|'九宫格领域'|'领域范围'|'连击数'|'吸血到自身'|'固伤值'
+    /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
 
 Equip_List
     :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'魔力'|'魔力上限'

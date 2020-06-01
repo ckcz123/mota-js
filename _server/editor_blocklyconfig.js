@@ -24,7 +24,7 @@ editor_blocklyconfig=(function(){
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionFunctions.actionParser.parse({
-        "condition": "flag:__door__==2",
+        "condition": "flag:__door__===2",
         "currentFloor": true,
         "priority": 0,
         "delayExecute": false,
@@ -302,7 +302,7 @@ editor_blocklyconfig=(function(){
       '<label text="打怪开门"></label>',
       MotaActionFunctions.actionParser.parse([
         {"type": "setValue", "name": "flag:__door__", "operator": "+=", "value": "1"},
-        {"type": "if", "condition": "flag:__door__==2", 
+        {"type": "if", "condition": "flag:__door__===2", 
           "true": [
             {"type": "openDoor", "loc": [10,5]}
           ],

@@ -2577,10 +2577,11 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         if (nowValue == newValue) continue;
         var text = this._drawEquipbox_getStatusName(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
+        var color = newValue>nowValue?'#00FF00':'#FF0000';
         nowValue = core.formatBigNumber(nowValue);
         newValue = core.formatBigNumber(newValue);
         this._drawEquipbox_drawStatusChanged_draw(nowValue+"->", '#CCCCCC', obj);
-        this._drawEquipbox_drawStatusChanged_draw(newValue, newValue>nowValue?'#00FF00':'#FF0000', obj);
+        this._drawEquipbox_drawStatusChanged_draw(newValue, color, obj);
         obj.drawOffset += 8;
     }
 }

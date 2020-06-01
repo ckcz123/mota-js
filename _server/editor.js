@@ -240,14 +240,22 @@ editor.prototype.init = function (callback) {
         
                 // --- 所有用到的flags
                 editor.used_flags = {};
+                // 楼层属性
                 for (var floorId in editor.main.floors) {
                     editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
                 }
+                // 公共事件
                 if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
                     for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
                         editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
                     }
                 }
+                // 道具效果
+                for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+                    editor.addUsedFlags(JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id]));
+                }
+                // 全局商店
+                editor.addUsedFlags(JSON.stringify(editor.main.core.firstData.shops));
         
                 if (editor.useCompress == null) editor.useCompress = useCompress;
                 if (Boolean(callback)) callback();

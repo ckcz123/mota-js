@@ -216,6 +216,10 @@ editor.prototype.init = function (callback) {
             }
         
             var afterCoreReset = function () {
+                var canvases = document.getElementsByClassName('gameCanvas');
+                for (var one in canvases) {
+                    canvases[one].width = canvases[one].height = core.__PIXELS__;
+                }
                 
                 editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
                 editor.drawInitData(core.icons.icons); // 初始化绘图

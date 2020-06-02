@@ -295,8 +295,8 @@
         <table class="col" id='mapColMark'></table>
         <table class="row" id='mapRowMark'></table>
         <div class="map" id="mapEdit">
-            <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+            <canvas class='gameCanvas' id='efg'></canvas>
+            <canvas class='gameCanvas' id='eui' style='z-index:100'></canvas>
         </div>
         <div class="tools">
             <div id="tip"></div>
@@ -342,7 +342,7 @@
     <div id="mid2">
         <p style="margin: 10px"><span id='lastUsedTitle'></span><small>（Ctrl+滚轮放缩，右键置顶）</small> <button id='clearLastUsedBtn'>清除</button></p>
         <div class="map" id="lastUsedDiv">
-            <canvas id='lastUsed' width='416' height='416' style="overflow: hidden"></canvas>
+            <canvas id='lastUsed' class="gameCanvas" style="overflow: hidden"></canvas>
         </div>
     </div>
     <div id="right">
@@ -386,7 +386,7 @@
         </div>
         <hr style="clear: both; margin-top: 0"/>
         <div id='uieventBody'>
-            <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
+            <canvas class='gameCanvas' id='uievent'></canvas>
             <div id="selectPointBox"></div>
             <div id="uieventExtraBody" style="display: none; margin-top: -10px"></div>
         </div>

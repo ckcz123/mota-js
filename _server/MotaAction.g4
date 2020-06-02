@@ -2943,7 +2943,7 @@ expression
 //todo 修改recieveOrder,根据Arithmetic_List_0不同的值设定不同的recieveOrder
 var code = expression_0 + Arithmetic_List_0 + expression_1;
 var ops = {
-    '^': 'Math.pow('+expression_0+','+expression_1+')'
+    '**': 'Math.pow('+expression_0+','+expression_1+')'
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -2951,6 +2951,7 @@ var orders = {
     '-': Blockly.JavaScript.ORDER_SUBTRACTION,
     '*': Blockly.JavaScript.ORDER_MULTIPLICATION,
     '/': Blockly.JavaScript.ORDER_DIVISION,
+    '%': Blockly.JavaScript.ORDER_MODULUS,
     '**': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     '==': Blockly.JavaScript.ORDER_EQUALITY,
     '!=': Blockly.JavaScript.ORDER_EQUALITY,
@@ -2961,7 +2962,8 @@ var orders = {
     '>=': Blockly.JavaScript.ORDER_RELATIONAL,
     '<=': Blockly.JavaScript.ORDER_RELATIONAL,
     '&&': Blockly.JavaScript.ORDER_LOGICAL_AND,
-    '||': Blockly.JavaScript.ORDER_LOGICAL_OR
+    '||': Blockly.JavaScript.ORDER_LOGICAL_OR,
+    '^': Blockly.JavaScript.ORDER_BITWISE_XOR
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -3158,8 +3160,8 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'弱等于'|'弱不等于'
-    /*Arithmetic_List ['+','-','*','/','**','===','!==','>','<','>=','<=','&&','||','==','!=']*/;
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'弱等于'|'弱不等于'
+    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','==','!=']*/;
 
 AssignOperator_List
     :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'

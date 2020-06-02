@@ -350,6 +350,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			input.id = id;
 			input.value = value;
 			editor.dom[id] = input;
+			input.onchange = function () {
+				editor.uifunctions.setLayerMod(value);
+			}
 			editor[value] = editor[value] || defaultMap;
 			return input;
 		};
@@ -391,37 +394,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			parent.insertBefore(input, parent.children[1]);
 			parent.appendChild(input2);
 		}
-
-		var _isEditorInit = false;
-
-		// 这里写编辑器复写的内容 有关游戏进程的函数复写请在下面复写
-		var _afterEditorInit = function (callback) {
-			// 防止多次调用
-			if (_isEditorInit) {
-				if (callback) callback();
-				return;
-			}
-			_isEditorInit = true;
-			// 绑定onchange
-			editor.dom.layerMod4.onchange = function () {
-				editor.uifunctions.setLayerMod('bg2map');
-			};
-			editor.dom.layerMod5.onchange = function () {
-				editor.uifunctions.setLayerMod('fg2map');
-			}
-			// 继续进行afterCoreReset
-			if (callback) callback();
-		};
-		// 将复写编辑器的内容插入changeFloor之后 afterCoreReset之前
-		// 加载队列:int main => core => plugin(即plugin这个文件里的插件内容) => editor(此时才开始加载编辑器)=> afterMainInit
-		// => editor_file(此时才能开始复写编辑器内容) => changeFloor(在这里插入编辑器复写内容的加载) => afterCoreReset(此时才开始进行地图的绘制)
-		// 直接复写由于加载插件时 复写的editor函数还未加载 会导致出错
-		var _changeFloor = core.events.changeFloor;
-		core.events.changeFloor = function (floorId, stair, heroLoc, time, callback) {
-			return _changeFloor.call(core.events, floorId, stair, heroLoc, time, function () {
-				_afterEditorInit(callback);
-			});
-		};
 	}
 
 	////// 绘制背景层 //////
@@ -541,7 +513,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		loc.forEach(function (t) {
 			var x = t[0],
 				y = t[1];
-			var flag = [floorId, x, y, name+'_disable'].join('@');
+			var flag = [floorId, x, y, name + '_disable'].join('@');
 			if (type == 'hide') core.setFlag(flag, true);
 			else core.removeFlag(flag);
 		});

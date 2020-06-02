@@ -795,6 +795,7 @@ tooltip : 立绘
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
 default : ["fairy.png","null","0","0","","","","","","","",""]
 colour : this.subColor
+previewBlock : true
 allImages : ['EvalString_0']
 if (Reverse_List_0 && Reverse_List_0 != 'null') EvalString_0 += Reverse_List_0;
 var list = [EvalString_0, IntString_0, IntString_1];
@@ -1815,6 +1816,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%
 default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
 colour : this.printColor
+previewBlock : true
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1836,6 +1838,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%
 default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
 colour : this.printColor
+previewBlock : true
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1893,6 +1896,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showgif%EF%BC%9A%E6
 default : ["","",""]
 allImages : ['EvalString_0']
 colour : this.printColor
+previewBlock : true
 EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
 var code = '{"type": "showGif"'+EvalString_0+loc+'},\n';
@@ -1928,6 +1932,7 @@ tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,true,false]
 colour : this.soundColor
+previewBlock : true
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
 var async = Bool_1?', "async": true':'';
@@ -2085,6 +2090,7 @@ tooltip : playBgm: 播放背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
 default : ["bgm.mp3", 0, true]
 allBgms : ['EvalString_0']
+material : ["./project/bgms/", "EvalString_0"]
 colour : this.soundColor
 Int_0 = Int_0 ? (', "startTime": '+Int_0) : '';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
@@ -2126,6 +2132,7 @@ tooltip : loadBgm: 预加载某个背景音乐，之后可以直接播放
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=loadBgm%ef%bc%9a%e9%a2%84%e5%8a%a0%e8%bd%bd%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90
 default : ["bgm.mp3"]
 allBgms : ['EvalString_0']
+material : ["./project/bgms/", "EvalString_0"]
 colour : this.soundColor
 var code = '{"type": "loadBgm", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -2155,6 +2162,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playsound%EF%BC%9A%
 default : ["item.mp3",false]
 colour : this.soundColor
 allSounds : ['EvalString_0']
+material : ["./project/sounds/", "EvalString_0"]
 Bool_0 = Bool_0 ? ', "stop": true' : '';
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;

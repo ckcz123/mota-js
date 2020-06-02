@@ -568,7 +568,6 @@ editor_ui_wrapper = function (editor) {
 
     uievent.onKeyDown = function (e) {
         if (e.keyCode == 27) editor.uievent.close();
-        else if (e.keyCode == 13) editor.uievent.confirm();
         if (uievent.mode == 'selectPoint') {
             if (e.keyCode == 87) editor.uievent.move(0, -1)
             if (e.keyCode == 65) editor.uievent.move(-1, 0)

@@ -1976,7 +1976,6 @@ maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
     var block = blockArr[0], blockInfo = blockArr[1];
     var canvases = this._initDetachedBlock(blockInfo, sx, sy, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * sx, 32 * sy, 1, canvases);
-    core.playSound('jump.mp3');
     var jumpInfo = this.__generateJumpInfo(sx, sy, ex, ey, time);
     jumpInfo.keep = keep;
 
@@ -2164,7 +2163,7 @@ maps.prototype.drawBoxAnimate = function () {
         core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
         core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
         core.drawImage('ui', obj.image, core.status.globalAnimateStatus % obj.animate * 32, obj.pos,
-            32, obj.height, obj.x, obj.y, 32, obj.height);
+            32, obj.height, obj.x, obj.y, obj.dw || 32, obj.dh || obj.height);
     });
 }
 

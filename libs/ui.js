@@ -1915,11 +1915,21 @@ ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
     var img_top = border_top + 5, img_left = border_left + 5;
     core.strokeRect('ui', 22, border_top, 42, 42, '#DDDDDD', 2);
     var blockInfo = core.getBlockInfo(enemy.id);
-    core.status.boxAnimateObjs.push({
-        'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
-        'x': img_left, 'y': img_top, 'height': 32, 'animate': blockInfo.animate,
-        'image': blockInfo.image, 'pos': blockInfo.posY * blockInfo.height
-    });
+    if (blockInfo.height >= 42) {
+        var drawWidth = 42 * 32 / blockInfo.height;
+        core.status.boxAnimateObjs.push({
+            'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
+            'x': img_left - 5 + (42 - drawWidth) / 2, 'y': img_top - 5, 'dw': drawWidth, 'dh': 42,
+            'height': blockInfo.height, 'animate': blockInfo.animate,
+            'image': blockInfo.image, 'pos': blockInfo.posY * blockInfo.height
+        });
+    } else {
+        core.status.boxAnimateObjs.push({
+            'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
+            'x': img_left, 'y': img_top, 'height': 32, 'animate': blockInfo.animate,
+            'image': blockInfo.image, 'pos': blockInfo.posY * blockInfo.height
+        });
+    }
 }
 
 ui.prototype._drawBook_drawName = function (index, enemy, top, left, width) {

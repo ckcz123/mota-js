@@ -2950,7 +2950,6 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
     if (!core.isset(ex)) ex=sx;
     if (!core.isset(ey)) ey=sy;
-    core.playSound('jump.mp3');
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];
     jumpInfo.width = core.material.icons.hero.width || 32;

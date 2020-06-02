@@ -228,7 +228,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (guards.length > 0) {
 			// 记录flag，当前要参与支援的怪物
 			core.setFlag("__guards__" + x + "_" + y, guards);
-			var actions = [];
+			var actions = [{ "type": "playSound", "name": "jump.mp3" }];
 			// 增加支援的特效动画（图块跳跃）
 			guards.forEach(function (g) {
 				core.push(actions, { "type": "jump", "from": [g[0], g[1]], "to": [x, y], "time": 300, "keep": false, "async": true });

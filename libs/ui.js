@@ -1347,9 +1347,11 @@ ui.prototype._drawTextBox_drawImages = function (content) {
             core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]));
         else if (ss.length==5)
             core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
-        else if (ss.length==9 || ss.length==10) {
-            if (ss.length==10) core.setAlpha('ui', parseFloat(ss[9]));
-            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), parseFloat(ss[5]), parseFloat(ss[6]), parseFloat(ss[7]), parseFloat(ss[8]));
+        else if (ss.length >= 9) {
+            if (ss.length >= 10) core.setAlpha('ui', parseFloat(ss[9]));
+            var angle = (parseFloat(ss[10]) || 0) * Math.PI / 180;
+            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), 
+                parseFloat(ss[5]), parseFloat(ss[6]), parseFloat(ss[7]), parseFloat(ss[8]), angle);
             core.setAlpha('ui', 1);
         }
         return "";

@@ -87,6 +87,7 @@ editor_blocklyconfig=(function(){
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
+      MotaActionFunctions.actionParser.parseList("\t[小妖精,fairy]\f[fairy.png,0,0]欢迎使用事件编辑器(双击方块进入多行编辑)"),
       MotaActionBlocks['comment_s'].xmlText(),
       MotaActionBlocks['autoText_s'].xmlText(),
       MotaActionBlocks['scrollText_s'].xmlText(),

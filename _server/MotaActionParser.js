@@ -210,7 +210,38 @@ ActionParser.prototype.parseAction = function() {
       return;
     case "text": // 文字/对话
       var info = this.getTitleAndPosition(data.text);
-      if (info[0] || info[1] || info[2]) {
+      var textDrawing = [];
+      info[3] = (info[3] || "").replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
+        var ss = str.split(",");
+        if (ss.length == 3 || ss.length == 5 || ss.length >=9) {
+          var swap = function (i, j) { var x = ss[i]; ss[i] = ss[j]; ss[j] = x;}
+          if (ss.length >= 9) {
+            swap(1,5); swap(2,6); swap(3,7); swap(4,8);
+          }
+          textDrawing.push(ss);
+        }
+        return '';
+      });
+      if (textDrawing.length > 0) {
+        var buildTextDrawing = function (obj) {
+          if(!obj) obj=[];
+          var text_choices = null;
+          for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+            var reverse = 'null';
+            if (choice[0].endsWith(':o') || choice[0].endsWith(':x') || choice[0].endsWith(':y')) {
+              reverse = choice[0].substring(choice[0].length - 2);
+              choice[0] = choice[0].substring(0, choice[0].length - 2);
+            }
+            text_choices=MotaActionBlocks['textDrawing'].xmlText([
+              choice[0], reverse, choice[1], choice[2], choice[3], choice[4], choice[5], choice[6], 
+              choice[7], choice[8], choice[9], choice[10], text_choices]);
+          }
+          return text_choices;
+        }
+        this.next = MotaActionBlocks['text_2_s'].xmlText([
+          info[0], info[1], info[2], info[3], buildTextDrawing(textDrawing), this.next
+        ]);
+      } else if (info[0] || info[1] || info[2]) {
         this.next = MotaActionBlocks['text_1_s'].xmlText([
           info[0], info[1], info[2], info[3], this.next]);
       }
@@ -1154,7 +1185,7 @@ MotaActionFunctions.JsonEvalString_pre = function (JsonEvalString) {
 }
 
 MotaActionFunctions.IntString_pre = function (IntString) {
-  if (!/^\d*$/.test(IntString)) throw new Error('此项必须是整数或不填');
+  if (!/^[+-]?\d*$/.test(IntString)) throw new Error('此项必须是整数或不填');
   return IntString;
 }
 

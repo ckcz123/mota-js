@@ -595,6 +595,7 @@ return JSON.stringify(code);
 action
     :   text_0_s
     |   text_1_s
+    |   text_2_s
     |   comment_s
     |   autoText_s
     |   scrollText_s
@@ -751,6 +752,85 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+EvalString_3+'",\n';
+return code;
+*/;
+
+text_2_s
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? ':' EvalString BGNL? Newline textDrawingList* Newline
+    
+
+/* text_2_s
+tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=text%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%96%87%E5%AD%97%EF%BC%88%E5%89%A7%E6%83%85%EF%BC%89
+doubleclicktext : EvalString_3
+allIds : ['EvalString_1']
+default : ["小妖精","fairy","","欢迎使用事件编辑器(双击方块进入多行编辑)",null]
+var title='';
+if (EvalString_0==''){
+    if (EvalString_1=='' )title='';
+    else title='\\t['+EvalString_1+']';
+} else {
+    if (EvalString_1=='')title='\\t['+EvalString_0+']';
+    else title='\\t['+EvalString_0+','+EvalString_1+']';
+}
+if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
+  throw new Error('对话框效果的用法请右键点击帮助');
+}
+EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
+var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_3+'",\n';
+return code;
+*/;
+
+textDrawingList
+    : textDrawing
+    | textDrawingEmpty;
+
+
+textDrawing
+    : '立绘' EvalString '翻转' Reverse_List '绘制坐标' 'x' IntString 'y' IntString '宽' IntString? '高' IntString? BGNL? Newline
+      '裁剪坐标' 'x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '不透明度' EvalString? '旋转角度' IntString?
+
+/* textDrawing
+tooltip : 立绘
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
+default : ["fairy.png","null","0","0","","","","","","","",""]
+colour : this.subColor
+previewBlock : true
+allImages : ['EvalString_0']
+if (Reverse_List_0 && Reverse_List_0 != 'null') EvalString_0 += Reverse_List_0;
+var list = [EvalString_0, IntString_0, IntString_1];
+if (IntString_2 || IntString_3) {
+    if (list.length != 3 || !IntString_2 || !IntString_3) {
+        throw "绘制的宽和高需同时设置";
+    }
+    list.push(IntString_2);
+    list.push(IntString_3);
+}
+if (IntString_4 || IntString_5 || IntString_6 || IntString_7) {
+    if (list.length != 5) throw "如设置裁剪区域，请先设置绘制区域的宽高";
+    if (!IntString_4 || !IntString_5 || !IntString_6 || !IntString_7) {
+        throw "如设置裁剪区域，请同时设置全部的裁剪坐标和宽高";
+    }
+    list.splice(1, 0, IntString_4, IntString_5, IntString_6, IntString_7);
+}
+if (EvalString_1) {
+    if (list.length != 9) throw "如设置不透明度，需填满所有坐标和宽高";
+    var opacity = parseFloat(EvalString_1);
+    if (isNaN(opacity) || opacity < 0 || opacity > 1) throw "不合法的不透明度，必须是0到1之间"
+    list.push(opacity);
+}
+if (IntString_8) {
+    if (list.length != 10) throw "如设置旋转角度，需填满所有坐标和宽高，以及不透明度";
+    list.push(IntString_8);
+}
+return "\\f[" + list.join(",")+"]";
+*/;
+
+textDrawingEmpty
+    :   Newline
+    
+/* textDrawingEmpty
+var code = '';
 return code;
 */;
 
@@ -1736,6 +1816,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%
 default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
 colour : this.printColor
+previewBlock : true
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1757,6 +1838,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showImage%ef%bc%9a%
 default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
 colour : this.printColor
+previewBlock : true
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1814,6 +1896,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showgif%EF%BC%9A%E6
 default : ["","",""]
 allImages : ['EvalString_0']
 colour : this.printColor
+previewBlock : true
 EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
 var code = '{"type": "showGif"'+EvalString_0+loc+'},\n';
@@ -1849,6 +1932,7 @@ tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setcurtain%EF%BC%9A%E6%9B%B4%E6%94%B9%E7%94%BB%E9%9D%A2%E8%89%B2%E8%B0%83
 default : ["255,255,255,1",'rgba(255,255,255,1)',500,true,false]
 colour : this.soundColor
+previewBlock : true
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
 var async = Bool_1?', "async": true':'';
@@ -2006,6 +2090,7 @@ tooltip : playBgm: 播放背景音乐
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playbgm%EF%BC%9A%E6%92%AD%E6%94%BE%E8%83%8C%E6%99%AF%E9%9F%B3%E4%B9%90
 default : ["bgm.mp3", 0, true]
 allBgms : ['EvalString_0']
+material : ["./project/bgms/", "EvalString_0"]
 colour : this.soundColor
 Int_0 = Int_0 ? (', "startTime": '+Int_0) : '';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
@@ -2047,6 +2132,7 @@ tooltip : loadBgm: 预加载某个背景音乐，之后可以直接播放
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=loadBgm%ef%bc%9a%e9%a2%84%e5%8a%a0%e8%bd%bd%e4%b8%80%e4%b8%aa%e8%83%8c%e6%99%af%e9%9f%b3%e4%b9%90
 default : ["bgm.mp3"]
 allBgms : ['EvalString_0']
+material : ["./project/bgms/", "EvalString_0"]
 colour : this.soundColor
 var code = '{"type": "loadBgm", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -2076,6 +2162,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=playsound%EF%BC%9A%
 default : ["item.mp3",false]
 colour : this.soundColor
 allSounds : ['EvalString_0']
+material : ["./project/sounds/", "EvalString_0"]
 Bool_0 = Bool_0 ? ', "stop": true' : '';
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
 return code;
@@ -2943,7 +3030,7 @@ expression
 //todo 修改recieveOrder,根据Arithmetic_List_0不同的值设定不同的recieveOrder
 var code = expression_0 + Arithmetic_List_0 + expression_1;
 var ops = {
-    '^': 'Math.pow('+expression_0+','+expression_1+')'
+    '**': 'Math.pow('+expression_0+','+expression_1+')'
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -2951,6 +3038,7 @@ var orders = {
     '-': Blockly.JavaScript.ORDER_SUBTRACTION,
     '*': Blockly.JavaScript.ORDER_MULTIPLICATION,
     '/': Blockly.JavaScript.ORDER_DIVISION,
+    '%': Blockly.JavaScript.ORDER_MODULUS,
     '**': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     '==': Blockly.JavaScript.ORDER_EQUALITY,
     '!=': Blockly.JavaScript.ORDER_EQUALITY,
@@ -2961,7 +3049,8 @@ var orders = {
     '>=': Blockly.JavaScript.ORDER_RELATIONAL,
     '<=': Blockly.JavaScript.ORDER_RELATIONAL,
     '&&': Blockly.JavaScript.ORDER_LOGICAL_AND,
-    '||': Blockly.JavaScript.ORDER_LOGICAL_OR
+    '||': Blockly.JavaScript.ORDER_LOGICAL_OR,
+    '^': Blockly.JavaScript.ORDER_BITWISE_XOR
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -3158,12 +3247,12 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'弱等于'|'弱不等于'
-    /*Arithmetic_List ['+','-','*','/','**','===','!==','>','<','>=','<=','&&','||','==','!=']*/;
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'弱等于'|'弱不等于'
+    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','==','!=']*/;
 
 AssignOperator_List
-    :   '='|'+='|'-='|'*='|'/='|'**='|'//='|'%='
-    ;  
+    :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'
+    /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=']*/;  
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'

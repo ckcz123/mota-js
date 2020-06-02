@@ -234,18 +234,86 @@ editor_blockly = function () {
 
         if (b && MotaActionBlocks[b.type].previewBlock) {
             try {
+                // 特殊处理立绘
+                if (b.type == 'textDrawing') {
+                    var str = Blockly.JavaScript.blockToCode(b);
+                    var list = str.substring(str.indexOf('[')+1, str.lastIndexOf(']')).split(",");
+                    if (list.length == 3 || list.length == 5 || list.length >= 9) {
+                        var arr = [];
+                        var name = list[0];
+                        var obj = {"type": "drawImage"};
+                        if (name.endsWith(":o") || name.endsWith(":x") || name.endsWith(":y")) {
+                            obj.reverse = name.substring(name.length-2);
+                            name = name.substring(0, name.length - 2);
+                        }
+                        obj.image = name;
+                        obj.x = parseFloat(list[1]);
+                        obj.y = parseFloat(list[2]);
+                        if (list.length >= 5) {
+                            obj.w = parseFloat(list[3]);
+                            obj.h = parseFloat(list[4]);
+                        }
+                        if (list.length >= 9) {
+                            obj.x1 = parseFloat(list[5]);
+                            obj.y1 = parseFloat(list[6]);
+                            obj.w1 = parseFloat(list[7]);
+                            obj.h1 = parseFloat(list[8]);
+                        }
+                        if (list.length >= 10) {
+                            arr.push({"type": "setAttribute", "alpha": parseFloat(list[9])});
+                        }
+                        if (list.length >= 11) {
+                            obj.angle = parseFloat(list[10]);
+                        }
+                        arr.push(obj);
+                        console.log(arr);
+                        editor.uievent.previewUI(arr);
+                    }
+                    return true;
+                }
+
                 var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|z)/g, '\\\\$1') + "]";
                 eval("var obj="+code);
-                if (obj.length > 0 && b.type == 'waitContext_2') {
-                    var dt = obj[0];
-                    editor.uievent.previewUI([{"type": "fillRect", "x": dt.px[0], "y": dt.py[0],
-                        "width": "(" + dt.px[1] + ")-(" + dt.px[0] + ")", "height": "(" + dt.py[1] + ")-(" + dt.py[0] + ")",
-                        "style": "rgba(255,0,0,0.5)"}])
-                }
-                else if (obj.length > 0 && b.type.startsWith(obj[0].type)) {
-                    if (b.type == 'previewUI_s')
-                        editor.uievent.previewUI(obj[0].action);
-                    else editor.uievent.previewUI([obj[0]]);
+                if (obj.length == 0) return true;
+                obj = obj[0];
+                switch (b.type) {
+                case 'waitContext_2': // 等待用户操作坐标预览
+                    editor.uievent.previewUI([{"type": "fillRect", "x": obj.px[0], "y": obj.py[0],
+                        "width": "(" + obj.px[1] + ")-(" + obj.px[0] + ")", "height": "(" + obj.py[1] + ")-(" + obj.py[0] + ")",
+                        "style": "rgba(255,0,0,0.5)"}]);
+                    break;
+                case 'showImage_s': // 显示图片
+                case 'showImage_1_s':
+                    if (obj.sloc) {
+                        editor.uievent.previewUI([
+                            {type: "setAttribute", alpha: obj.opacity},
+                            {type: "drawImage", image: obj.image, x: obj.sloc[0], y: obj.sloc[1], w: obj.sloc[2], h: obj.sloc[3],
+                                x1: obj.loc[0], y1: obj.loc[1], w1: obj.loc[2], h1: obj.loc[3], reverse: obj.reverse}
+                        ]);
+                    } else {
+                        editor.uievent.previewUI([
+                            {type: "setAttribute", alpha: obj.opacity},
+                            {type: "drawImage", image: obj.image, x: obj.loc[0], y: obj.loc[1], w: obj.loc[2], h: obj.loc[3], reverse: obj.reverse}
+                        ]);
+                    }
+                    break;
+                case 'showGif_s': // 显示动图
+                    if (obj.name && obj.loc) {
+                        editor.uievent.previewUI([{type: "drawImage", image: obj.name, x: obj.loc[0], y: obj.loc[1]}]);
+                    }
+                    break;
+                case 'setCurtain_0_s': // 更改色调
+                    if (obj.color) {
+                        editor.uievent.previewUI([{type: "fillRect", x: 0, y: 0, width: core.__PIXELS__, height: core.__PIXELS__, style: obj.color}]);
+                    }
+                    break;
+                case 'previewUI_s': // 预览
+                    editor.uievent.previewUI(obj.action);
+                    break;
+                default:
+                    if (b.type.startsWith(obj.type)) {
+                        editor.uievent.previewUI([obj]);
+                    }
                 }
             } catch (e) {main.log(e);}
             return true;
@@ -260,6 +328,19 @@ editor_blockly = function () {
 
         if (b && MotaActionBlocks[b.type].selectPoint) { // selectPoint
             this.selectPoint();
+            return;
+        }
+
+        if (b && MotaActionBlocks[b.type].material) {
+            var material = JSON.parse(MotaActionBlocks[b.type].material);
+            console.log(material);
+            editor.uievent.selectMaterial([b.getFieldValue(material[1])], '请选择素材', material[0], function (one) {
+                return /^[-A-Za-z0-9_.]+$/.test(one) ? one : null;
+            }, function (value) {
+                if (value instanceof Array && value.length > 0) {
+                    b.setFieldValue(value[0], material[1]);
+                }
+            });
             return;
         }
 

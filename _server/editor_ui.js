@@ -137,13 +137,7 @@ editor_ui_wrapper = function (editor) {
 
         // UI预览 & 地图选点
         if (editor.uievent && editor.uievent.isOpen) {
-            e.preventDefault();
-            if (e.keyCode == 27) editor.uievent.close();
-            else if (e.keyCode == 13) editor.uievent.confirm();
-            else if (e.keyCode == 87) editor.uievent.move(0, -1)
-            else if (e.keyCode == 65) editor.uievent.move(-1, 0)
-            else if (e.keyCode == 83) editor.uievent.move(0, 1);
-            else if (e.keyCode == 68) editor.uievent.move(1, 0);
+            editor.uievent.onKeyDown(e);
             return;
         }
 
@@ -570,6 +564,17 @@ editor_ui_wrapper = function (editor) {
         } catch (ee) { main.log(ee); }
         index = core.clamp(index, 0, core.floorIds.length - 1);
         uievent.setPoint(core.floorIds[index]);
+    }
+
+    uievent.onKeyDown = function (e) {
+        if (e.keyCode == 27) editor.uievent.close();
+        else if (e.keyCode == 13) editor.uievent.confirm();
+        if (uievent.mode == 'selectPoint') {
+            if (e.keyCode == 87) editor.uievent.move(0, -1)
+            if (e.keyCode == 65) editor.uievent.move(-1, 0)
+            if (e.keyCode == 83) editor.uievent.move(0, 1);
+            if (e.keyCode == 68) editor.uievent.move(1, 0);
+        }
     }
 
     // ------ 搜索变量出现的位置，也放在uievent好了 ------ //

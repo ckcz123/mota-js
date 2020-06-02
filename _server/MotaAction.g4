@@ -595,6 +595,7 @@ return JSON.stringify(code);
 action
     :   text_0_s
     |   text_1_s
+    |   text_2_s
     |   comment_s
     |   autoText_s
     |   scrollText_s
@@ -751,6 +752,84 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+EvalString_3+'",\n';
+return code;
+*/;
+
+text_2_s
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? ':' EvalString BGNL? Newline textDrawingList* Newline
+    
+
+/* text_2_s
+tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=text%EF%BC%9A%E6%98%BE%E7%A4%BA%E4%B8%80%E6%AE%B5%E6%96%87%E5%AD%97%EF%BC%88%E5%89%A7%E6%83%85%EF%BC%89
+doubleclicktext : EvalString_3
+allIds : ['EvalString_1']
+default : ["小妖精","fairy","","欢迎使用事件编辑器(双击方块进入多行编辑)",null]
+var title='';
+if (EvalString_0==''){
+    if (EvalString_1=='' )title='';
+    else title='\\t['+EvalString_1+']';
+} else {
+    if (EvalString_1=='')title='\\t['+EvalString_0+']';
+    else title='\\t['+EvalString_0+','+EvalString_1+']';
+}
+if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
+  throw new Error('对话框效果的用法请右键点击帮助');
+}
+EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
+var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_3+'",\n';
+return code;
+*/;
+
+textDrawingList
+    : textDrawing
+    | textDrawingEmpty;
+
+
+textDrawing
+    : '立绘' EvalString '翻转' Reverse_List '绘制坐标' 'x' IntString 'y' IntString '宽' IntString? '高' IntString? BGNL? Newline
+      '裁剪坐标' 'x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '不透明度' EvalString? '旋转角度' IntString?
+
+/* textDrawing
+tooltip : 立绘
+helpUrl : https://h5mota.com/games/template/_docs/#/event?id=drawImage%ef%bc%9a%e7%bb%98%e5%88%b6%e5%9b%be%e7%89%87
+default : ["fairy.png","null","0","0","","","","","","","",""]
+colour : this.subColor
+allImages : ['EvalString_0']
+if (Reverse_List_0 && Reverse_List_0 != 'null') EvalString_0 += Reverse_List_0;
+var list = [EvalString_0, IntString_0, IntString_1];
+if (IntString_2 || IntString_3) {
+    if (list.length != 3 || !IntString_2 || !IntString_3) {
+        throw "绘制的宽和高需同时设置";
+    }
+    list.push(IntString_2);
+    list.push(IntString_3);
+}
+if (IntString_4 || IntString_5 || IntString_6 || IntString_7) {
+    if (list.length != 5) throw "如设置裁剪区域，请先设置绘制区域的宽高";
+    if (!IntString_4 || !IntString_5 || !IntString_6 || !IntString_7) {
+        throw "如设置裁剪区域，请同时设置全部的裁剪坐标和宽高";
+    }
+    list.splice(1, 0, IntString_4, IntString_5, IntString_6, IntString_7);
+}
+if (EvalString_1) {
+    if (list.length != 9) throw "如设置不透明度，需填满所有坐标和宽高";
+    var opacity = parseFloat(EvalString_1);
+    if (isNaN(opacity) || opacity < 0 || opacity > 1) throw "不合法的不透明度，必须是0到1之间"
+    list.push(opacity);
+}
+if (IntString_8) {
+    if (list.length != 10) throw "如设置旋转角度，需填满所有坐标和宽高，以及不透明度";
+    list.push(IntString_8);
+}
+return "\\f[" + list.join(",")+"]";
+*/;
+
+textDrawingEmpty
+    :   Newline
+    
+/* textDrawingEmpty
+var code = '';
 return code;
 */;
 

@@ -1010,12 +1010,24 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 }
 
 ////// 往当前事件列表之前或之后添加一个公共事件 //////
-events.prototype.insertCommonEvent = function (name, x, y, callback, addToLast) {
+events.prototype.insertCommonEvent = function (name, args, x, y, callback, addToLast) {
     var commonEvent = this.getCommonEvent(name);
     if (!commonEvent) {
         if (callback) callback();
         return;
     }
+
+    // 设置参数
+    core.setFlag('arg0', name);
+    if (args instanceof Array) {
+        for (var i = 0; i < args.length; ++i) {
+            try {
+                if (args[i] != null)
+                    core.setFlag('arg'+(i+1), args[i]);
+            } catch (e) { main.log(e); }
+        }
+    }
+
     this.insertAction({"type": "dowhile", "condition": "false", "data": commonEvent}, x, y, callback, addToLast);
 }
 
@@ -1629,20 +1641,19 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
-    // 设置参数
-    if (data.args instanceof Array) {
-       for (var i = 0; i < data.args.length; ++i) {
-           try {
-               if (data.args[i] != null)
-                   core.setFlag('arg'+(i+1), data.args[i]);
-           } catch (e) { main.log(e); }
-       }
-    }
     if (data.name) { // 公共事件
-        core.setFlag('arg0', data.name);
         core.insertCommonEvent(data.name);
     }
     else {
+        // 设置参数
+        if (data.args instanceof Array) {
+           for (var i = 0; i < data.args.length; ++i) {
+               try {
+                   if (data.args[i] != null)
+                       core.setFlag('arg'+(i+1), data.args[i]);
+               } catch (e) { main.log(e); }
+           }
+        }
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         core.setFlag('arg0', loc);
         var floorId = data.floorId;

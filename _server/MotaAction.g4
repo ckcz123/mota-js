@@ -18,6 +18,8 @@ allBgms : ['EvalString_1']
 allSounds : ['EvalString_1']
 allShops : ['EvalString_1']
 allFloorIds : ['EvalString_1']
+// 选择素材
+material : ["./project/animates/", "IdString_0"]
 */
 
 
@@ -1759,6 +1761,7 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=animate%EF%BC%9A%E6
 default : ["zone","hero",false,false]
 allAnimates : ['IdString_0']
 material : ["./project/animates/", "IdString_0"]
+menu : [['选择位置','editor_blockly.selectPoint(block,["EvalString_0","EvalString_0"])']]
 colour : this.soundColor
 if (EvalString_0) {
   if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {
@@ -2049,9 +2052,9 @@ tooltip : jump: 让某个NPC/怪物跳跃
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=jump%EF%BC%9A%E8%AE%A9%E6%9F%90%E4%B8%AANPC%2F%E6%80%AA%E7%89%A9%E8%B7%B3%E8%B7%83
 default : ["","","","",500,true,false]
 selectPoint : ["PosString_2", "PosString_3"]
+menu : [['选择起点位置','editor_blockly.selectPoint(block,["PosString_0", "PosString_1"])']]
 colour : this.mapColor
 
-// selectPoint 跳跃暂时只考虑终点
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr += ', "from": ['+PosString_0+','+PosString_1+']';

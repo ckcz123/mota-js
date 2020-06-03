@@ -538,7 +538,7 @@ editor_blockly = function () {
                     if (index2 >= 0) {
                         before = content.substring(0, index2);
                         if (before.endsWith("怪物") || (ch == ':' && ch2 == ':' && before.endsWith("enemy"))) {
-                            var list = ["name", "hp", "atk", "def", "money", "exp", "point", "special"];
+                            var list = MotaActionBlocks['EnemyId_List'].options.map(function(v){return v[1]});
                             if (before.endsWith("怪物") && MotaActionFunctions) {
                                 list = MotaActionFunctions.pattern.replaceEnemyValueList.map(function (v) {
                                     return v[1];

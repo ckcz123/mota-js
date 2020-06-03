@@ -1758,7 +1758,7 @@ tooltip : animate：显示动画,位置填hero或者1,2形式的位置,或者不
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=animate%EF%BC%9A%E6%98%BE%E7%A4%BA%E5%8A%A8%E7%94%BB
 default : ["zone","hero",false,false]
 allAnimates : ['IdString_0']
-selectPoint : ["EvalString_0", "EvalString_0"]
+material : ["./project/animates/", "IdString_0"]
 colour : this.soundColor
 if (EvalString_0) {
   if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {

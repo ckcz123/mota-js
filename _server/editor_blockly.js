@@ -341,6 +341,9 @@ editor_blockly = function () {
         if (b && MotaActionBlocks[b.type].material) {
             var material = JSON.parse(MotaActionBlocks[b.type].material);
             editor.uievent.selectMaterial([b.getFieldValue(material[1])], '请选择素材', material[0], function (one) {
+                if (b.type == 'animate_s') {
+                    return /^[-A-Za-z0-9_.]+\.animate$/.test(one) ? one.substring(0, one.length - 8) : null;
+                }
                 return /^[-A-Za-z0-9_.]+$/.test(one) ? one : null;
             }, function (value) {
                 if (value instanceof Array && value.length > 0) {

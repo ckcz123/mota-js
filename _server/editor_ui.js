@@ -350,6 +350,10 @@ editor_ui_wrapper = function (editor) {
     uievent.close = function () {
         uievent.isOpen = false;
         uievent.elements.div.style.display = 'none';
+        if (uievent.values.interval) {
+            clearTimeout(uievent.values.interval);
+            clearInterval(uievent.values.interval);
+        }
         uievent.values = {};
     }
     uievent.elements.no.onclick = uievent.close;
@@ -715,6 +719,14 @@ editor_ui_wrapper = function (editor) {
                         <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
                         <progress value="0" max="1" style="display:none; width:100%" onclick="editor.uievent._previewMaterialAudio_seek(this, event)"></progress>`;
                 }
+                // 预览动画
+                if (directory.indexOf('animates') >= 0) {
+                    html += "<button onclick='editor.uievent._previewMaterialAnimate(this)' style='margin-left: 10px'>预览</button>";
+                    html += `<span style="display:none; margin-left: 10px" key="${directory+one+'.animate'}"><br/>音效：<input type="text" />
+                        <button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style='marin-left: 10px'>试听</button>
+                        <button onclick="editor.uievent._previewMaterialAnimate_saveSound(this)">保存</button><br/>
+                        </span>`;
+                }
                 html += '<br/>';
             });
             html += "</p>";
@@ -778,6 +790,95 @@ editor_ui_wrapper = function (editor) {
         element.setAttribute("value", value);
         audio.currentTime = audio.duration * value;
         if (audio.paused) audio.play();
+    }
+
+    var _previewMaterialAnimate = function (span, content) {
+        var input = span.children[1];
+        input.value = content.se || "";
+
+        // 创建dom
+        if (!uievent.values.dom) {
+            var dom = document.createElement('span');
+            dom.style.position = "relative";
+            dom.style.marginLeft = "-10px";
+            var canvas = document.createElement('canvas');
+            canvas.width = canvas.height = core.__PIXELS__;
+            canvas.style.position = 'absolute';
+            core.drawThumbnail(editor.currentFloorId, null, {}, canvas.getContext('2d'));
+            dom.appendChild(canvas);
+            var canvas2 = document.createElement('canvas');
+            canvas2.style.position = 'absolute';
+            canvas2.width = canvas2.height = core.__PIXELS__;
+            uievent.values.ctx = canvas2.getContext('2d');
+            dom.appendChild(canvas2);
+            var canvas3 = document.createElement('canvas');
+            canvas3.width = canvas3.height = core.__PIXELS__;
+            dom.appendChild(canvas3);
+            uievent.values.dom = dom;
+        }
+
+        span.appendChild(uievent.values.dom);
+        clearInterval(uievent.values.interval);
+        var frame = 0;
+        uievent.values.interval = setInterval(function () {
+            if (span.style.display == 'none') {
+                clearInterval(uievent.values.interval);
+                uievent.values.interval = null;
+                span.removeChild(uievent.values.dom);
+                return;
+            }
+            core.clearMap(uievent.values.ctx);
+            core.maps._drawAnimateFrame(uievent.values.ctx, content, core.__PIXELS__ / 2, core.__PIXELS__ / 2, frame++);
+        }, 50);
+    }
+
+    uievent._previewMaterialAnimate = function (button) {
+        var span = button.nextElementSibling;
+        var filename = span.getAttribute("key");
+        uievent.values.animates = uievent.values.animates || {};
+        if (span.style.display == 'none') {
+            button.innerText = '收起';
+            span.style.display = 'inline';
+            if (uievent.values.animates[filename]) {
+                _previewMaterialAnimate(span, uievent.values.animates[filename]);
+            } else {
+                fs.readFile(filename, 'utf-8', function (e, d) {
+                    if (e) {
+                        alert('无法打开动画文件！'+e); return;
+                    }
+                    uievent.values.animates[filename] = core.loader._loadAnimate(d);
+                    if (uievent.values.animates[filename]) {
+                        uievent.values.animates[filename + ':raw'] = JSON.parse(d);
+                        _previewMaterialAnimate(span, uievent.values.animates[filename]);
+                    }
+                })
+            }
+        } else {
+            button.innerText = '预览';
+            span.style.display = 'none';
+        }
+    }
+
+    uievent._previewMaterialAnimate_previewSound = function (button) {
+        var input = button.previousElementSibling;
+        if (!input.value) return;
+        if (!uievent.values.audio)
+            uievent.values.audio = new Audio();
+        uievent.values.audio.src = './project/sounds/' + input.value;
+        uievent.values.audio.play();
+    }
+
+    uievent._previewMaterialAnimate_saveSound = function (button) {
+        var input = button.previousElementSibling.previousElementSibling;
+        var filename = button.parentElement.getAttribute("key");
+        if (!filename || !uievent.values.animates[filename]) return;
+        uievent.values.animates[filename+':raw'].se = input.value || "";
+        fs.writeFile(filename, JSON.stringify(uievent.values.animates[filename+':raw']), 'utf-8', function (e, d) {
+            if (e) alert('无法修改音效文件！'+e);
+            else {
+                alert('动画音效修改成功！别忘了在全塔属性中注册本音效哦！');
+            }
+        })
     }
 
     // ------ 多选框 ------ //

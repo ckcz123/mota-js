@@ -176,9 +176,9 @@ control.prototype._animationFrame_animate = function (timestamp) {
     });
     core.status.animateObjs.forEach(function (obj) {
         if (obj.hero) {
-            core.maps._drawAnimateFrame(obj.animate, core.status.heroCenter.px, core.status.heroCenter.py, obj.index++);
+            core.maps._drawAnimateFrame('animate', obj.animate, core.status.heroCenter.px, core.status.heroCenter.py, obj.index++);
         } else {
-            core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+            core.maps._drawAnimateFrame('animate', obj.animate, obj.centerX, obj.centerY, obj.index++);
         }
     });
     core.animateFrame.animateTime = timestamp;

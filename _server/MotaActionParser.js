@@ -385,7 +385,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setHeroIcon": // 改变勇士
       this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([
-        data.name||"",this.next]);
+        data.name||"", data.noDraw || false, this.next]);
       break;
     case "move": // 移动事件
       data.loc=data.loc||['',''];

@@ -464,6 +464,7 @@ tooltip : 楼层贴图
 default : ["bg.jpg","null","bg",0,0,false,"","","","",""]
 helpUrl : https://h5mota.com/games/template/_docs/#/event
 allImages : ['EvalString_0']
+previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
@@ -955,7 +956,7 @@ return code;
 
 
 setEnemy_s
-    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List '值' expression Newline
+    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List '为' expression Newline
 
 
 /* setEnemy_s
@@ -970,7 +971,7 @@ return code;
 
 
 setFloor_s
-    :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '值' JsonEvalString Newline
+    :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '为' JsonEvalString Newline
 
 
 /* setFloor_s
@@ -986,7 +987,7 @@ return code;
 
 
 setGlobalAttribute_s
-    :   '设置全局属性' ':' Global_Attribute_List '值' EvalString Newline
+    :   '设置全局属性' ':' Global_Attribute_List '为' EvalString Newline
 
 
 /* setGlobalAttribute_s
@@ -1000,7 +1001,7 @@ return code;
 
 
 setGlobalValue_s
-    :   '设置全局数值' ':' Global_Value_List '值' EvalString Newline
+    :   '设置全局数值' ':' Global_Value_List '为' EvalString Newline
 
 
 /* setGlobalValue_s
@@ -1412,17 +1413,19 @@ return code;
 */;
 
 setHeroIcon_s
-    :   '更改角色行走图' EvalString? Newline
+    :   '更改角色行走图' EvalString? '不重绘' Bool Newline
     
 
 /* setHeroIcon_s
 tooltip : setHeroIcon：更改角色行走图
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=setheroicon%EF%BC%9A%E6%9B%B4%E6%94%B9%E8%A7%92%E8%89%B2%E8%A1%8C%E8%B5%B0%E5%9B%BE
 colour : this.dataColor
-default : ["hero.png"]
+default : ["hero.png", false]
 allImages : ['EvalString_0']
+material : ["./project/images/", "EvalString_0"]
 EvalString_0 = EvalString_0 && (', "name": "'+EvalString_0+'"');
-var code = '{"type": "setHeroIcon"'+EvalString_0+'},\n';
+Bool_0 = Bool_0 ? (', "noDraw": true') : '';
+var code = '{"type": "setHeroIcon"'+EvalString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1709,6 +1712,7 @@ tooltip : follow: 跟随勇士
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=follow%ef%bc%9a%e8%b7%9f%e9%9a%8f%e5%8b%87%e5%a3%ab
 default : ["npc.png"]
 allImages : ['EvalString_0']
+material : ["./project/images/", "EvalString_0"]
 colour : this.dataColor
 var code = '{"type": "follow", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -1723,6 +1727,7 @@ tooltip : unfollow: 取消跟随
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=unfollow%ef%bc%9a%e5%8f%96%e6%b6%88%e8%b7%9f%e9%9a%8f
 default : [""]
 allImages : ['EvalString_0']
+material : ["./project/images/", "EvalString_0"]
 colour : this.dataColor
 EvalString_0 = EvalString_0 ? (', "name": "' + EvalString_0 + '"') : "";
 var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
@@ -3283,8 +3288,8 @@ Event_List
     /*Event_List ['null','afterBattle','afterGetItem','afterOpenDoor']*/;
 
 Floor_Meta_List
-    :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'楼层贴图'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'楼传落点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
-    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'images', 'ratio', 'upFloor', 'downFloor', 'fwlyPoint', 'bgm', 'color', 'weather', 'underGround']*/;
+    :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'楼传落点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
+    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'ratio', 'upFloor', 'downFloor', 'fwlyPoint', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
     :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'楼层转换样式'|'装备列表'
@@ -3296,7 +3301,7 @@ Global_Value_List
 
 
 Global_Flag_List
-    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'|'虚化前景层'|'检查控制台'
+    :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'|'虚化前景层'
     /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage', 'blurFg']*/;
 
 Colour

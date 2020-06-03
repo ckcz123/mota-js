@@ -1741,7 +1741,7 @@ events.prototype._action_setGlobalFlag = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
-    this.setHeroIcon(data.name);
+    this.setHeroIcon(data.name, data.noDraw);
     core.doAction();
 }
 

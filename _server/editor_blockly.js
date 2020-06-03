@@ -307,6 +307,13 @@ editor_blockly = function () {
                         editor.uievent.previewUI([{type: "fillRect", x: 0, y: 0, width: core.__PIXELS__, height: core.__PIXELS__, style: obj.color}]);
                     }
                     break;
+                case 'floorOneImage': // 楼层贴图
+                    obj.w = obj.w / (obj.frame || 1);
+                    editor.uievent.previewUI([
+                        {type: "drawImage", image: obj.name, x: obj.sx || 0, y: obj.sy || 0, w: obj.w, h: obj.h,
+                            x1: obj.x, y1: obj.y, w1: obj.w, h1: obj.h, reverse: obj.reverse}
+                    ]);
+                    break;
                 case 'previewUI_s': // 预览
                     editor.uievent.previewUI(obj.action);
                     break;
@@ -333,7 +340,6 @@ editor_blockly = function () {
 
         if (b && MotaActionBlocks[b.type].material) {
             var material = JSON.parse(MotaActionBlocks[b.type].material);
-            console.log(material);
             editor.uievent.selectMaterial([b.getFieldValue(material[1])], '请选择素材', material[0], function (one) {
                 return /^[-A-Za-z0-9_.]+$/.test(one) ? one : null;
             }, function (value) {

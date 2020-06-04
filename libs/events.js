@@ -1010,12 +1010,24 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 }
 
 ////// 往当前事件列表之前或之后添加一个公共事件 //////
-events.prototype.insertCommonEvent = function (name, x, y, callback, addToLast) {
+events.prototype.insertCommonEvent = function (name, args, x, y, callback, addToLast) {
     var commonEvent = this.getCommonEvent(name);
     if (!commonEvent) {
         if (callback) callback();
         return;
     }
+
+    // 设置参数
+    core.setFlag('arg0', name);
+    if (args instanceof Array) {
+        for (var i = 0; i < args.length; ++i) {
+            try {
+                if (args[i] != null)
+                    core.setFlag('arg'+(i+1), args[i]);
+            } catch (e) { main.log(e); }
+        }
+    }
+
     this.insertAction({"type": "dowhile", "condition": "false", "data": commonEvent}, x, y, callback, addToLast);
 }
 
@@ -1629,20 +1641,19 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
-    // 设置参数
-    if (data.args instanceof Array) {
-       for (var i = 0; i < data.args.length; ++i) {
-           try {
-               if (data.args[i] != null)
-                   core.setFlag('arg'+(i+1), data.args[i]);
-           } catch (e) { main.log(e); }
-       }
-    }
     if (data.name) { // 公共事件
-        core.setFlag('arg0', data.name);
-        core.insertCommonEvent(data.name);
+        core.insertCommonEvent(data.name, data.args);
     }
     else {
+        // 设置参数
+        if (data.args instanceof Array) {
+           for (var i = 0; i < data.args.length; ++i) {
+               try {
+                   if (data.args[i] != null)
+                       core.setFlag('arg'+(i+1), data.args[i]);
+               } catch (e) { main.log(e); }
+           }
+        }
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         core.setFlag('arg0', loc);
         var floorId = data.floorId;
@@ -1804,7 +1815,7 @@ events.prototype._action_switch = function (data, x, y, prefix) {
     var list = [];
     for (var i = 0; i < data.caseList.length; i++) {
         var condition = data.caseList[i]["case"];
-        if (condition == "default" || core.calValue(condition, prefix) == key) {
+        if (condition == "default" || core.calValue(condition, prefix) === key) {
             core.push(list, data.caseList[i].action);
             if (!data.caseList[i].nobreak)
                 break;
@@ -1916,10 +1927,18 @@ events.prototype._action_for = function (data, x, y, prefix) {
         return core.doAction();
     }
     var from = core.calValue(data.from);
-    if (typeof from != 'number') {
-        core.insertAction('循环遍历事件要求【起始点】仅能是数字！');
+    var to = core.calValue(data.to);
+    var step = core.calValue(data.step);
+    if (typeof from != 'number' || typeof to !='number' || typeof step != 'number') {
+        core.insertAction('循环遍历事件要求【起始点】【终止点】【每步】仅能是数字！');
         return core.doAction();
     }
+    // 首次判定
+    if ((step > 0 && from > to) || (step < 0 && from < to)) {
+        core.doAction();
+        return;
+    }
+
     var letter = data.name.substring(5);
     core.setFlag('@temp@' + letter, from);
     var toName = '@temp@for-to@' + letter;
@@ -2005,16 +2024,19 @@ events.prototype._precompile_dowhile = function (data) {
 }
 
 events.prototype._action_break = function (data, x, y, prefix) {
-    core.status.event.data.list.shift();
+    if (core.status.event.data.list.length > 1)
+        core.status.event.data.list.shift();
     core.doAction();
 }
 
 events.prototype._action_continue = function (data, x, y, prefix) {
-    if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
-        core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
-    }
-    else {
-        core.status.event.data.list.shift();
+    if (core.status.event.data.list.length > 1) {
+        if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
+            core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
+        }
+        else {
+            core.status.event.data.list.shift();
+        }
     }
     core.doAction();
 }

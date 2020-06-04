@@ -2,6 +2,7 @@
  * 表格配置项。
  * 在这里可以对表格中的各项显示进行配置，包括表格项、提示内容等内容。具体写法照葫芦画瓢即可。
  * 本配置项包括：道具、怪物、图块属性、楼层属性等内容。
+ * 相关文档 _docs/editor.md ~ http://127.0.0.1:1055/_docs/#/editor?id=修改表格
  */
 
 var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
@@ -167,19 +168,20 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"special": {
 					"_leaf": true,
-					"_type": "checkboxSet",
-					"_checkboxSet":function(){
-						var array=functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials()
-						var b=[],c=[];
+					"_type": "popCheckboxSet",
+					"_checkboxSet": function () {
+						var array = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials()
+						var b = [],
+							c = [];
 						for (var index = 0; index < array.length; index++) {
 							b.push(array[index][0])
 							var name = array[index][1];
 							if (name instanceof Function) name = name({});
-							c.push((index%2==0&&index>0?'<br>':'')+name+'')
+							c.push(name + "(" + array[index][0] + ")")
 						}
 						return {
-							"prefix":c,
-							"key":b
+							"prefix": c,
+							"key": b
 						}
 					},
 					"_data": "特殊属性"
@@ -282,7 +284,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "select",
 					"_select": {
 						"values": [
-							"null",
+							null,
 							"openDoor",
 							"pushBox",
 							"ski",
@@ -309,8 +311,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkboxSet",
 					"_checkboxSet": {
-						"prefix":["上: ","下: ","<br>左: ","右: "],
-						"key":["up","down","left","right"]
+						"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+						"key": ["up", "down", "left", "right"]
 					},
 					"_docs": "不可出方向",
 					"_data": "该图块的不可出方向\n对背景层、事件层、前景层上的图块均有效"
@@ -319,8 +321,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkboxSet",
 					"_checkboxSet": {
-						"prefix":["上: ","下: ","<br>左: ","右: "],
-						"key":["up","down","left","right"]
+						"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+						"key": ["up", "down", "left", "right"]
 					},
 					"_docs": "不可入方向",
 					"_data": "该图块的不可入方向\n对背景层、事件层、前景层上的图块均有效"
@@ -335,7 +337,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "select",
 					"_select": {
-						"values": [null,1,2,3,4],
+						"values": [null, 1, 2, 3, 4],
 					},
 					"_docs": "动画帧数",
 					"_data": "null代表素材默认帧数"
@@ -343,7 +345,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"doorInfo": {
 					"_leaf": true,
 					"_type": "event",
-					"_event": "doorInfo", 
+					"_event": "doorInfo",
 					"_docs": "门信息",
 					"_data": "该图块的门信息，仅对animates和npc48生效。"
 				},
@@ -407,7 +409,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"canUseQuickShop": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_docs": "可快捷商店",
+							"_docs": "快捷商店",
 							"_data": "该层是否允许使用快捷商店"
 						},
 						"cannotViewMap": {
@@ -421,6 +423,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "checkbox",
 							"_docs": "不可瞬移",
 							"_data": "该层是否不允许瞬间移动；如果勾上则不可在此层进行瞬移"
+						},
+						"underGround": {
+							"_leaf": true,
+							"_type": "checkbox",
+							"_docs": "地下层",
+							"_data": "是否是地下层；如果该项为true则同层传送将传送至上楼梯"
 						},
 						"firstArrive": {
 							"_leaf": true,
@@ -446,17 +454,24 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"upFloor": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "point",
 							"_range": "thiseval==null||((thiseval instanceof Array) && thiseval.length==2)",
 							"_docs": "上楼点",
 							"_data": "该层上楼点，如[2,3]。\n如果此项不为null，则楼层转换时的stair:upFloor，以及楼传器的落点会被替换成该点而不是该层的上楼梯。"
 						},
 						"downFloor": {
 							"_leaf": true,
-							"_type": "textarea",
+							"_type": "point",
 							"_range": "thiseval==null||((thiseval instanceof Array) && thiseval.length==2)",
 							"_docs": "下楼点",
 							"_data": "该层下楼点，如[2,3]。\n如果此项不为null，则楼层转换时的stair:downFloor，以及楼传器的落点会被替换成该点而不是该层的下楼梯。"
+						},
+						"flyPoint": {
+							"_leaf": true,
+							"_type": "point",
+							"_range": "thiseval==null||((thiseval instanceof Array) && thiseval.length==2)",
+							"_docs": "楼传落点",
+							"_data": "该层楼传落点，如[2,3]。\n如果此项不为null，则楼层飞行器强行落到此点，无视上下楼或平面塔属性。"
 						},
 						"defaultGround": {
 							"_leaf": true,
@@ -494,15 +509,9 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"ratio": {
 							"_leaf": true,
 							"_type": "textarea",
-							"_range": "(thiseval==~~thiseval && thiseval>=0)||thiseval==null",
+							"_range": "thiseval==~~thiseval && thiseval>=0",
 							"_docs": "宝石血瓶效果",
 							"_data": "每一层的宝石/血瓶效果，即获得宝石和血瓶时框内\"ratio\"的值。"
-						},
-						"underGround": {
-							"_leaf": true,
-							"_type": "checkbox",
-							"_docs": "是否是地下层",
-							"_data": "是否是地下层；如果该项为true则同层传送将传送至上楼梯"
 						}
 					}
 				},
@@ -566,8 +575,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_leaf": true,
 							"_type": "checkboxSet",
 							"_checkboxSet": {
-								"prefix":["上: ","下: ","<br>左: ","右: "],
-								"key":["up","down","left","right"]
+								"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+								"key": ["up", "down", "left", "right"]
 							},
 							"_docs": "不可通行性",
 							"_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表该点不能往上和左走"

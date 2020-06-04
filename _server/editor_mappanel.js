@@ -99,8 +99,7 @@ editor_mappanel_wrapper = function (editor) {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow(1);
-            tip.showHelp(6);
+            editor.uifunctions.showTips(6);
             editor.uivalues.startPos = pos;
             editor.dom.euiCtx.strokeStyle = '#FF0000';
             editor.dom.euiCtx.lineWidth = 3;
@@ -127,7 +126,6 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         if (!selectBox.isSelected()) {
             if (editor.uivalues.startPos == null) return;
-            //tip.whichShow(1);
             var loc = editor.uifunctions.eToLoc(e);
             var pos = editor.uifunctions.locToPos(loc, true);
             if (editor.uivalues.endPos != null && editor.uivalues.endPos.x == pos.x && editor.uivalues.endPos.y == pos.y) return;
@@ -163,8 +161,6 @@ editor_mappanel_wrapper = function (editor) {
             // editor_mode.onmode('nextChange');
             // editor_mode.onmode('loc');
             //editor_mode.loc();
-            //tip.whichShow(1);
-            // tip.showHelp(6);
             return false;
         }
 
@@ -218,6 +214,8 @@ editor_mappanel_wrapper = function (editor) {
         var e=editor.uivalues.lastMoveE;
         if (e.buttons == 2 && (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y))) {
             editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+            editor.uivalues.holdingPath = 0;
+            editor.uivalues.stepPostfix = [];
             editor.dom.euiCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             return false;
@@ -230,7 +228,6 @@ editor_mappanel_wrapper = function (editor) {
                 // 后续的处理
             } else {
                 // 左键拖拽: 交换
-                //tip.whichShow(1);
                 // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.uifunctions.unhighlightSaveFloorButton();
@@ -436,13 +433,10 @@ editor_mappanel_wrapper = function (editor) {
      * 隐藏右键菜单
      */
     editor.uifunctions.hideMidMenu = function () {
-        if (editor.isMobile) {
-            setTimeout(function () {
-                editor.dom.midMenu.style = 'display:none';
-            }, 200)
-        } else {
+        editor.uivalues.lastMoveE={buttons:0,clientX:0,clientY:0};
+        setTimeout(function () {
             editor.dom.midMenu.style = 'display:none';
-        }
+        }, 100)
     }
 
     /**
@@ -582,13 +576,15 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.chooseThis_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         selectBox.isSelected(false);
 
         editor_mode.onmode('nextChange');
         editor_mode.onmode('loc');
         //editor_mode.loc();
-        //tip.whichShow(1);
         if (editor.isMobile) editor.showdataarea(false);
+        return false;
     }
 
     /**
@@ -598,8 +594,11 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.chooseInRight_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         var thisevent = editor[editor.layerMod][editor.pos.y][editor.pos.x];
         editor.setSelectBoxFromInfo(thisevent, true);
+        return false;
     }
 
     /**
@@ -609,11 +608,12 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.copyLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
         editor_mode.onmode('');
         editor.uivalues.copyedInfo = editor.copyFromPos();
         printf('该点事件已复制');
-        return;
+        return false;
     }
 
     /**
@@ -623,10 +623,11 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.pasteLoc_click = function (e) {
         editor.uifunctions.hideMidMenu();
         e.stopPropagation();
+        e.stopImmediatePropagation();
         e.preventDefault();
         if (!editor.uivalues.copyedInfo) {
             printe("没有复制的事件");
-            return;
+            return false;
         }
         editor.savePreMap();
         editor_mode.onmode('');
@@ -641,7 +642,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uifunctions.unhighlightSaveFloorButton();
             editor.drawPosSelection();
         });
-        return;
+        return false;
     }
 
     /**
@@ -650,8 +651,11 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearEvent_click = function (e) {
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         editor.clearPos(false);
         editor.uifunctions.unhighlightSaveFloorButton();
+        return false;
     }
 
     /**
@@ -660,8 +664,11 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.clearLoc_click = function (e) {
         e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
         editor.clearPos(true);
         editor.uifunctions.unhighlightSaveFloorButton();
+        return false;
     }
 
     /**
@@ -669,8 +676,7 @@ editor_mappanel_wrapper = function (editor) {
      * 点击【】
      */
     editor.uifunctions.lockMode_onchange = function () {
-        tip.msgs[11] = String('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
-        tip.whichShow(12);
+        printf('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
         editor.uivalues.lockMode = editor.dom.lockMode.checked;
     }
 
@@ -681,9 +687,7 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.brushMod_onchange = function () {
         editor.brushMod = editor.dom.brushMod.value;
         if (editor.brushMod == 'fill') {
-            tip.isSelectedBlock(false);
-            tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
-            tip.whichShow(12);
+            printf('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
         }
     }
 
@@ -704,18 +708,28 @@ editor_mappanel_wrapper = function (editor) {
             !confirm("从V2.7开始，请直接素材区拖框进行绘制区域。\n\n点取消将不再显示此提示。")) {
             editor.config.set('alertTileModeV2.7', true);
         }
-        // tip.showHelp(5)
-        tip.isSelectedBlock(false)
-        tip.msgs[11] = String('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
-        tip.whichShow(12);
+        printf('tileset平铺模式下可以按选中tileset素材，并在地图上拖动来一次绘制一个区域');
         editor.brushMod = editor.dom.brushMod3.value;
     }
 
     editor.uifunctions.brushMod4_onchange = function () {
-        tip.isSelectedBlock(false);
-        tip.msgs[11] = String('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
-        tip.whichShow(12);
+        printf('填充模式下，将会用选中的素材替换所有和目标点联通的相同素材');
         editor.brushMod = editor.dom.brushMod4.value;
+    }
+
+    editor.uifunctions.setLayerMod = function (layer) {
+        editor.layerMod = layer;
+        var canvas = ['ev', 'ev2'].concat(editor.dom.canvas);
+        canvas.forEach(function (one) {
+            editor.dom[one+'c'].style.opacity = 1;
+        });
+        if (layer != 'map') {
+            canvas.filter(function (one) {
+                return one + 'map' != editor.layerMod
+            }).forEach(function (one) {
+                editor.dom[one+'c'].style.opacity = 0.3;
+            });
+        }
     }
 
     /**
@@ -723,24 +737,7 @@ editor_mappanel_wrapper = function (editor) {
      * 切换编辑的层
      */
     editor.uifunctions.layerMod_onchange = function () {
-        editor.layerMod = editor.dom.layerMod.value;
-        [editor.dom.bgc, editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-            x.style.opacity = 1;
-        });
-
-        // 手机端....
-        if (editor.isMobile) {
-            if (editor.dom.layerMod.value == 'bgmap') {
-                [editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-                    x.style.opacity = 0.3;
-                });
-            }
-            if (editor.dom.layerMod.value == 'fgmap') {
-                [editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-                    x.style.opacity = 0.3;
-                });
-            }
-        }
+        editor.uifunctions.setLayerMod(editor.dom.layerMod.value);
     }
 
     /**
@@ -748,11 +745,7 @@ editor_mappanel_wrapper = function (editor) {
      * 切换编辑的层
      */
     editor.uifunctions.layerMod2_onchange = function () {
-        editor.layerMod = editor.dom.layerMod2.value;
-        [editor.dom.fgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-            x.style.opacity = 0.3;
-        });
-        editor.dom.bgc.style.opacity = 1;
+        editor.uifunctions.setLayerMod('bgmap');
     }
 
     /**
@@ -760,11 +753,7 @@ editor_mappanel_wrapper = function (editor) {
      * 切换编辑的层
      */
     editor.uifunctions.layerMod3_onchange = function () {
-        editor.layerMod = editor.dom.layerMod3.value;
-        [editor.dom.bgc, editor.dom.evc, editor.dom.ev2c].forEach(function (x) {
-            x.style.opacity = 0.3;
-        });
-        editor.dom.fgc.style.opacity = 1;
+        editor.uifunctions.setLayerMod('fgmap');
     }
 
     /**
@@ -773,6 +762,13 @@ editor_mappanel_wrapper = function (editor) {
     editor.uifunctions.viewportButtons_func = function () {
         var pressTimer = null;
         for (var ii = 0, node; node = editor.dom.viewportButtons.children[ii]; ii++) {
+            if (ii == 4) {
+                // 大地图
+                node.onclick = function () {
+                    editor.uievent.selectPoint(null, editor.pos.x, editor.pos.y, true);
+                }
+                continue;
+            }
             (function (x, y) {
                 var move = function () {
                     editor.moveViewport(x, y);
@@ -820,7 +816,7 @@ editor_mappanel_wrapper = function (editor) {
 
     editor.uifunctions.highlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='#FFCCAA';
+        saveFloor.style.background='#ffd700';
     }
 
     editor.uifunctions.unhighlightSaveFloorButton=function(){
@@ -845,7 +841,10 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.uifunctions.lastUsed_click = function (e) {
-        if (editor.isMobile) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        e.stopPropagation();
+        if (editor.isMobile) return false;
 
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
@@ -968,11 +967,10 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.constructor.prototype.savePreMap = function () {
-        var dt = {
-            map: editor.map,
-            fgmap: editor.fgmap,
-            bgmap: editor.bgmap,
-        };
+        var dt = {};
+        editor.dom.maps.forEach(function (one) {
+            dt[one] = editor[one];
+        });
         if (editor.uivalues.preMapData.length == 0
             || !core.same(editor.uivalues.preMapData[editor.uivalues.preMapData.length - 1], dt)) {
             editor.uivalues.preMapData.push(core.clone(dt));

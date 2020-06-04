@@ -45,12 +45,6 @@ if (functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events.setInitData || !plugin
             <li>部分方框进行了合并，请一个个仔细检查是否存在问题。</li>
         </ul>
     </li>
-    <li>下拉框切到「楼层属性」，并注意以下内容：
-        <ul>
-            <li><code>item_ratio</code>被重命名为<code>ratio</code>，请自行修改。</li>
-            <li>楼层贴图的结构在V2.7中被修改；请重新制作。</li>
-        </ul>
-    </li>
     <li>素材区的如下图块有所变动：
         <ul>
             <li>三色墙和六色门从terrains中解除引用；请用animates中的进行绘制。</li>
@@ -59,6 +53,13 @@ if (functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events.setInitData || !plugin
             <li>如下道具的道具属性已被重置，请仔细检查：三色钥匙、四色宝石（已改名Gem）、四色血瓶、破墙、破冰、炸弹、地震、冰冻、大黄门钥匙、上下楼器。</li>
             <li>即时道具获得的说明和提示文字均改成了<code>${}</code>计算，<code>ratio</code>需写明全称（参见宝石血瓶写法），请自行处理。</li>
             <li>npc48的默认动画帧数<code>null</code>改回为4；如需静止状态请手动改成1。</li>
+        </ul>
+    </li>
+    <li>下拉框切到「楼层属性」，并注意以下内容：
+        <ul>
+            <li><code>item_ratio</code>被重命名为<code>ratio</code>，请自行修改。</li>
+            <li>（你也可以直接改宝石和血瓶的效果，将<code>core.status.thisMap.ratio</code>改成<code>core.status.thisMap.item_ratio</code>。)</li>
+            <li>楼层贴图的结构在V2.7中被修改；请重新制作。</li>
         </ul>
     </li>
     <li>下拉框切换到「脚本编辑」，并请重新编辑各个自己改过的函数（可以双开一个原版V266项目和当前接档的项目进行处理）。
@@ -81,6 +82,11 @@ if (functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.events.setInitData || !plugin
             <li>「数值增减」事件已被删除并被数值操作+运算符替代，编辑器将解析为自定义事件；但是游戏中仍然可以正确执行（你可以选择替换与否）。</li>
             <li>「隐藏事件」将不再默认删除该点（而只是纯粹的隐藏）；请给有需要的「隐藏事件」勾选「同时删除」选项。</li>
             <li>「绘制圆」「绘制圆边框」「重启当前事件」已经被删除，并且无法再在游戏中使用，请替换成等价的写法。</li>
+        </ul>
+    </li>
+    <li>其他
+        <ul>
+            <li>V2.7默认采用新版图标；如果觉得不合适可以将<code>materials</code>目录下的<code>icons_old.png</code>替换掉<code>icons.png</code>以使用原版图标。</li>
         </ul>
     </li>
     <li><b style='color:red'>接档后请做好充分的测试！最好能跑通录像以确认接档无误！</b></li>
@@ -111,6 +117,10 @@ function encode(str) {
     }))
 }
 
+function random_string() {
+    return (Math.random()+"_"+Math.random()).replace(/\./g, "");
+}
+
 // 接档全局属性
 function action_data(callback) {
     var data = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
@@ -118,7 +128,7 @@ function action_data(callback) {
 
     // Step 0: 移动目录
     // materials
-    ['animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'icons', 'airwall', 'fog', 'keyboard'].forEach(function (one) {
+    ['animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'airwall', 'fog', 'keyboard'].forEach(function (one) {
         fs.moveFile('project/images/'+one+".png", 'project/materials/'+one+'.png', function (e, d) {});
     });
     main.tilesets.forEach(function (one) {
@@ -176,6 +186,11 @@ function action_data(callback) {
     delete values.greenJewel;
     delete values.moveSpeed;
     delete values.floorChangeTime;
+
+    if (flags.enableExperience != null) {
+        flags.enableExp = flags.enableExperience;
+        delete flags.enableExperience;
+    }
     var statusList = [
         "enableFloor",
         "enableName",
@@ -203,6 +218,7 @@ function action_data(callback) {
         });
     }
     statusList.forEach(function (one) { delete flags[one]; });
+    delete flags.enableExperience;
     delete flags.pickaxeFourDirections;
     delete flags.bombFourDirections;
     delete flags.snowFourDirections;
@@ -213,6 +229,7 @@ function action_data(callback) {
     delete flags.betweenAttackCeil;
     delete flags.startDirectly;
     delete flags.enableDisabledShop;
+    delete flags.potionWhileRouting;
     delete flags.checkConsole;
 
     // 写入
@@ -241,7 +258,7 @@ function action_enemys(callback) {
     var estr = JSON.stringify(enemy, function (k, t) {
         if (t && t.hp != null) {
             delete t.id;
-            var id_ = ":" + k + ":";
+            var id_ = random_string();
             emap[id_] = JSON.stringify(t);
             return id_;
         } else return t;
@@ -335,7 +352,7 @@ function action_items(callback) {
             "text": "可以打开一扇红门",
             "hideInToolbox": true
         },
-        "redGem": {
+        "redJewel": {
             "cls": "items",
             "name": "红宝石",
             "text": "攻击+${core.values.redGem}",
@@ -344,7 +361,7 @@ function action_items(callback) {
             "useItemEffect": "core.status.hero.atk += core.values.redGem",
             "canUseItemEffect": "true"
         },
-        "blueGem": {
+        "blueJewel": {
             "cls": "items",
             "name": "蓝宝石",
             "text": "，防御+${core.values.blueGem}",
@@ -353,7 +370,7 @@ function action_items(callback) {
             "useItemEffect": "core.status.hero.def += core.values.blueGem",
             "canUseItemEffect": "true"
         },
-        "greenGem": {
+        "greenJewel": {
             "cls": "items",
             "name": "绿宝石",
             "text": "，护盾+${core.values.greenGem}",
@@ -362,7 +379,7 @@ function action_items(callback) {
             "useItemEffect": "core.status.hero.mdef += core.values.greenGem",
             "canUseItemEffect": "true"
         },
-        "yellowGem": {
+        "yellowJewel": {
             "cls": "items",
             "name": "黄宝石",
             "text": "可以进行加点",
@@ -508,12 +525,11 @@ function action_items(callback) {
     for (var id in data) {
         items[id] = data[id];
     }
+    delete items.snow;
 
     var datastr = 'var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
-    datastr += JSON.stringify(items, function (k, v) {
-        if (v && v.id != null) delete v.id;
-        return v;
-    }, '\t');
+    for (var id in items) delete items[id].id;
+    datastr += JSON.stringify(items, null, '\t');
     fs.writeFile('project/items.js', encode(datastr), 'base64', function (err, data) {
         if (err) {
             alert('items接档失败！请查看控制台报错，并刷新重试。');
@@ -565,7 +581,7 @@ function action_maps(callback) {
     var emap = {};
     var estr = JSON.stringify(maps, function (k, v) {
         if (v && v.id != null) {
-            var id_ = ':' + v.id + ':';
+            var id_ = random_string();
             emap[id_] = JSON.stringify(v);
             return id_;
         } else return v

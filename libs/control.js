@@ -176,9 +176,9 @@ control.prototype._animationFrame_animate = function (timestamp) {
     });
     core.status.animateObjs.forEach(function (obj) {
         if (obj.hero) {
-            core.maps._drawAnimateFrame(obj.animate, core.status.heroCenter.px, core.status.heroCenter.py, obj.index++);
+            core.maps._drawAnimateFrame('animate', obj.animate, core.status.heroCenter.px, core.status.heroCenter.py, obj.index++);
         } else {
-            core.maps._drawAnimateFrame(obj.animate, obj.centerX, obj.centerY, obj.index++);
+            core.maps._drawAnimateFrame('animate', obj.animate, obj.centerX, obj.centerY, obj.index++);
         }
     });
     core.animateFrame.animateTime = timestamp;
@@ -695,11 +695,7 @@ control.prototype._moveHero_moving = function () {
                 // 检测是否穿出去
                 var nx = core.nextX(), ny = core.nextY();
                 if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height) return;
-                core.status.heroMoving=-1;
-                core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, function () {
-                    core.status.heroMoving=0;
-                    move();
-                });
+                core.eventMoveHero([core.getHeroLoc('direction')], core.values.moveSpeed, move);
             }
             else {
                 core.moveAction();
@@ -2061,6 +2057,22 @@ control.prototype.getRealStatusOrDefault = function (status, name) {
     return Math.floor(this.getStatusOrDefault(status, name) * this.getBuff(name));
 }
 
+////// 获得勇士原始属性（无装备和衰弱影响） //////
+control.prototype.getNakedStatus = function (name) {
+    var value = this.getStatus(name);
+    if (value == null) return value;
+    // 装备增幅
+    core.status.hero.equipment.forEach(function (v) {
+        if (!v || !(core.material.items[v] || {}).equip) return;
+        value -= core.material.items[v].equip.value[name] || 0;
+    });
+    // 衰弱扣除
+    if (core.hasFlag('weak') && core.values.weakValue >= 1 && (name == 'atk' || name == 'def')) {
+        value += core.values.weakValue;
+    }
+    return value;
+}
+
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
     // 仅保留三位有效buff值
@@ -2721,6 +2733,9 @@ control.prototype._resize_gameGroup = function (obj) {
     floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
     floorMsgGroup.style.width = obj.outerSize - 2 * obj.BORDER + "px";
     floorMsgGroup.style.height = totalHeight - 2 * obj.BORDER + "px";
+    floorMsgGroup.style.fontSize = 16 * core.domStyle.scale + "px";
+    // startPanel
+    core.dom.startPanel.style.fontSize = 16 * core.domStyle.scale + "px";
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
         core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";
@@ -2781,7 +2796,7 @@ control.prototype._resize_statusBar = function (obj) {
     statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
     // 自绘状态栏
     if (core.domStyle.isVertical) {
-        core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH + "px";
+        core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH * core.domStyle.scale + "px";
         core.dom.statusCanvas.width = obj.CANVAS_WIDTH;
         core.dom.statusCanvas.style.height = obj.statusBarHeightInVertical - 3 + "px";
         core.dom.statusCanvas.height = obj.col * 32 + 9;

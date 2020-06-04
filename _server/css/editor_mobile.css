@@ -153,7 +153,7 @@ body {
     border: 1px solid #ccc;
     border-radius: 2px;
     font-size: 1rem;
-    line-height: 0.93rem;
+    line-height: 1.2rem;
 }
 
 #tip p{
@@ -462,9 +462,8 @@ div.row .rowtd .rowtext{
     font: normal 2.5vw Arial, sans-serif;
 }
 
-/* for vue dom */
-[v-cloak] {
-    display: none !important;
+textarea[disabled] {
+    color: #999999;
 }
 
 #down{

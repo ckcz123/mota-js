@@ -391,14 +391,3 @@ items.prototype.quickLoadEquip = function (index) {
 
     core.drawTip("成功换上" + index + "号套装");
 }
-
-////// 获得装备直接增加的属性数据 //////
-items.prototype.getEquippedStatus = function (name) {
-    var value = 0;
-    core.status.hero.equipment.forEach(function (v) {
-        if (!v || !(core.material.items[v] || {}).equip) return;
-        if (core.material.items[v].equip.percentage) return;
-        value += core.material.items[v].equip[name] || 0;
-    });
-    return value;
-}

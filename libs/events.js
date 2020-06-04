@@ -81,7 +81,7 @@ events.prototype._startGame_setHard = function () {
             core.insertAction(one.action);
         }
     });
-    core.setFlag('hard', 0);
+    core.setFlag('hard', hardValue || 0);
     core.setFlag('__hardColor__', hardColor);
 }
 
@@ -325,9 +325,12 @@ events.prototype.trigger = function (x, y, callback) {
         return;
     }
     if (core.status.gameOver) return _executeCallback();
-    if (core.status.event.id && core.status.event.id != 'action') return _executeCallback();
-
-    var inAction = core.status.event.id == 'action';
+    if (core.status.event.id == 'action') {
+        core.insertAction({"type": "function", "function": "function () { core.events._trigger_inAction("+x+","+y+"); }", "async": true},
+            null, null, null, true);
+        return _executeCallback();
+    }
+    if (core.status.event.id) return _executeCallback();
 
     var block = core.getBlock(x, y);
     if (block == null) return _executeCallback();
@@ -343,24 +346,37 @@ events.prototype.trigger = function (x, y, callback) {
         if (noPass) core.clearAutomaticRouteNode(x, y);
 
         // 转换楼层能否穿透
-        if (!inAction && trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
+        if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
             return;
         core.status.automaticRoute.moveDirectly = false;
-        if (inAction) {
-            // 切换事件点的坐标
-            this.setEvents(null, block.x, block.y);
-            if (block.event.trigger == 'action') {
-                this.insertAction(block.event.data);
-            }
-            else {
-                this.doSystemEvent(block.event.trigger, block, _executeCallback);
-                return;
-            }
-        } else {
-            this.doSystemEvent(trigger, block);
-        }
+        this.doSystemEvent(trigger, block);
     }
     return _executeCallback();
+}
+
+events.prototype._trigger_inAction = function (x, y) {
+    if (core.status.gameOver || core.status.event.id != 'action') return;
+    
+    var block = core.getBlock(x, y);
+    if (block == null) return core.doAction();
+    block = block.block;
+
+    // 执行该点的脚本
+    try {
+        eval(block.event.script);
+    } catch (e) { main.log(e); }
+
+    if (block.event.trigger && block.event.trigger != 'null') {
+        this.setEvents(null, x, y);
+        if (block.event.trigger == 'action') {
+            this.insertAction(block.event.data);
+        }
+        else {
+            this.doSystemEvent(block.event.trigger, block, core.doAction);
+            return;
+        }
+    }
+    return core.doAction();
 }
 
 events.prototype._trigger_ignoreChangeFloor = function (block) {
@@ -471,20 +487,22 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
     var keyInfo = doorInfo.keys || {};
     if (needKey) {
         for (var keyName in keyInfo) {
+            var keyValue = keyInfo[keyName];
+            if (keyName.endsWith(':o')) keyName = keyName.substring(0, keyName.length - 2);            
+
             // --- 如果是一个不存在的道具，则直接认为无法开启
             if (!core.material.items[keyName]) {
                 core.drawTip("无法开启此门");
                 return clearAndReturn();
             }
-            var keyValue = keyInfo[keyName];
             if (core.itemCount(keyName) < keyValue) {
-                core.drawTip("你没有" + ((core.material.items[keyName] || {}).name || "钥匙"), null, true);
+                core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", null, true);
                 return false;
             }
         }
         if (!core.status.event.id) core.autosave(true);
-        for (var keyName in keyInfo) {
-            core.removeItem(keyName, keyInfo[keyName]);
+        for (var keyName in keyInfo) {  
+            if (!keyName.endsWith(':o')) core.removeItem(keyName, keyInfo[keyName]);
         }
     }
     core.playSound(doorInfo.openSound);
@@ -774,7 +792,7 @@ events.prototype.pushBox = function (data) {
     // 检测能否推上去
     if (!core.canMoveHero()) return;
     var canGoDeadZone = core.flags.canGoDeadZone;
-    core.flags.canGoDeadZone = false;
+    core.flags.canGoDeadZone = true;
     if (!core.canMoveHero(data.x, data.y, direction)) {
         core.flags.canGoDeadZone = canGoDeadZone;
         return;
@@ -869,7 +887,10 @@ events.prototype.doEvent = function (data, x, y, prefix) {
 events.prototype.setEvents = function (list, x, y, callback) {
     var data = core.status.event.data || {};
     if (list) {
-        data.list = [{todo: core.clone(list), total: core.clone(list), condition: "false"}];
+        var l = core.clone(list);
+        if (!(l instanceof Array)) l = [l];
+        l.push({"type": "_label"});
+        data.list = [{todo: l, total: core.clone(l), condition: "false"}];
         // 结束所有正在执行的自动事件
         if (list.length == 0) {
             core.status.autoEvents.forEach(function (autoEvent) {
@@ -973,21 +994,40 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
         this.startEvents(action, x, y, callback);
     }
     else {
-        if (addToLast)
-            core.push(core.status.event.data.list[0].todo, action)
-        else
-            core.unshift(core.status.event.data.list[0].todo, action);
+        if (addToLast) {
+            var list = core.status.event.data.list[0].todo;
+            var index = 0;
+            for (var index = 0; index < list.length; index++) {
+                if (list[index].type == '_label') {
+                    list.splice(index, 0, action);
+                    break;
+                }
+            } 
+        }
+        else core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
 }
 
 ////// 往当前事件列表之前或之后添加一个公共事件 //////
-events.prototype.insertCommonEvent = function (name, x, y, callback, addToLast) {
+events.prototype.insertCommonEvent = function (name, args, x, y, callback, addToLast) {
     var commonEvent = this.getCommonEvent(name);
     if (!commonEvent) {
         if (callback) callback();
         return;
     }
+
+    // 设置参数
+    core.setFlag('arg0', name);
+    if (args instanceof Array) {
+        for (var i = 0; i < args.length; ++i) {
+            try {
+                if (args[i] != null)
+                    core.setFlag('arg'+(i+1), args[i]);
+            } catch (e) { main.log(e); }
+        }
+    }
+
     this.insertAction({"type": "dowhile", "condition": "false", "data": commonEvent}, x, y, callback, addToLast);
 }
 
@@ -1154,13 +1194,15 @@ events.prototype.__precompile_getArray = function () {
         "fillArc", "strokeArc", "drawIcon", "drawSelector", "drawBackground",
     ];
     var others = {
-        "fillEllipse": ["a", "b"],
-        "strokeEllipse": ["a", "b"],
+        "fillEllipse": ["a", "b", "angle"],
+        "strokeEllipse": ["a", "b", "angle"],
+        "fillRect": ["radius", "angle"],
+        "strokeRect": ["radius", "angle"],
         "fillArc": ["r", "start", "end"],
         "strokeArc": ["r", "start", "end"],
         "drawLine": ["x1", "y1", "x2", "y2"],
         "drawArrow": ["x1", "y1", "x2", "y2"],
-        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1"],
+        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1", "angle"],
         "drawTextContent": ["left", "top"],
     };
     return {
@@ -1251,6 +1293,10 @@ events.prototype._action_scrollText = function (data, x, y, prefix) {
 }
 
 events.prototype._action_comment = function (data, x, y, prefix) {
+    core.doAction();
+}
+
+events.prototype._action__label = function (data, x, y, prefix) {
     core.doAction();
 }
 
@@ -1406,6 +1452,7 @@ events.prototype._action_moveAction = function (data, x, y, prefix) {
             core.insertAction([
                 {"type": "moveHero", "steps": ["forward"]},
                 {"type": "function", "function": "function() { core.moveOneStep(core.doAction); }", "async": true},
+                {"type": "_label"},
             ]);
         }
     }
@@ -1471,8 +1518,11 @@ events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
     data.text = core.replaceText(data.text, prefix);
+    var __tmpName = (Math.random()+"_"+Math.random()).replace(/\./g, "") + ".png";
+    core.material.images.images[__tmpName] = core.ui.textImage(data.text);
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, core.ui.textImage(data.text), null, loc, data.opacity, data.time);
+        data.code, __tmpName + (data.reverse || ""), null, loc, data.opacity, data.time);
+    delete core.material.images.images[__tmpName];
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {
@@ -1587,24 +1637,23 @@ events.prototype._action_battle = function (data, x, y, prefix) {
 
 events.prototype._action_trigger = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    core.trigger(loc[0], loc[1], core.doAction);
+    this._trigger_inAction(loc[0], loc[1]);
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
-    // 设置参数
-    if (data.args instanceof Array) {
-       for (var i = 0; i < data.args.length; ++i) {
-           try {
-               if (data.args[i] != null)
-                   core.setFlag('arg'+(i+1), data.args[i]);
-           } catch (e) { main.log(e); }
-       }
-    }
     if (data.name) { // 公共事件
-        core.setFlag('arg0', data.name);
-        core.insertCommonEvent(data.name);
+        core.insertCommonEvent(data.name, data.args);
     }
     else {
+        // 设置参数
+        if (data.args instanceof Array) {
+           for (var i = 0; i < data.args.length; ++i) {
+               try {
+                   if (data.args[i] != null)
+                       core.setFlag('arg'+(i+1), data.args[i]);
+               } catch (e) { main.log(e); }
+           }
+        }
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         core.setFlag('arg0', loc);
         var floorId = data.floorId;
@@ -1703,7 +1752,7 @@ events.prototype._action_setGlobalFlag = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
-    this.setHeroIcon(data.name);
+    this.setHeroIcon(data.name, data.noDraw);
     core.doAction();
 }
 
@@ -1766,7 +1815,7 @@ events.prototype._action_switch = function (data, x, y, prefix) {
     var list = [];
     for (var i = 0; i < data.caseList.length; i++) {
         var condition = data.caseList[i]["case"];
-        if (condition == "default" || core.calValue(condition, prefix) == key) {
+        if (condition == "default" || core.calValue(condition, prefix) === key) {
             core.push(list, data.caseList[i].action);
             if (!data.caseList[i].nobreak)
                 break;
@@ -1795,8 +1844,10 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
+        if (core.hasFlag('@temp@shop') && action.startsWith('shop:')) action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
+            if (index == "-1") index = data.choices.length - 1;
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
                 core.status.event.selection = index;
                 setTimeout(function () {
@@ -1876,10 +1927,18 @@ events.prototype._action_for = function (data, x, y, prefix) {
         return core.doAction();
     }
     var from = core.calValue(data.from);
-    if (typeof from != 'number') {
-        core.insertAction('循环遍历事件要求【起始点】仅能是数字！');
+    var to = core.calValue(data.to);
+    var step = core.calValue(data.step);
+    if (typeof from != 'number' || typeof to !='number' || typeof step != 'number') {
+        core.insertAction('循环遍历事件要求【起始点】【终止点】【每步】仅能是数字！');
         return core.doAction();
     }
+    // 首次判定
+    if ((step > 0 && from > to) || (step < 0 && from < to)) {
+        core.doAction();
+        return;
+    }
+
     var letter = data.name.substring(5);
     core.setFlag('@temp@' + letter, from);
     var toName = '@temp@for-to@' + letter;
@@ -1932,8 +1991,11 @@ events.prototype._precompile_forEach = function (data) {
 
 events.prototype._action_while = function (data, x, y, prefix) {
     if (core.calValue(data.condition, prefix)) {
+        var list = core.clone(data.data);
+        if (!(list instanceof Array)) list = [list];
+        list.push({"type": "_label"});
         core.unshift(core.status.event.data.list,
-            {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+            {"todo": list, "total": core.clone(list), "condition": data.condition}
         );
     }
     core.doAction();
@@ -1946,8 +2008,11 @@ events.prototype._precompile_while = function (data) {
 }
 
 events.prototype._action_dowhile = function (data, x, y, prefix) {
+    var list = core.clone(data.data);
+    if (!(list instanceof Array)) list = [list];
+    list.push({"type": "_label"});
     core.unshift(core.status.event.data.list,
-        {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+        {"todo": list, "total": core.clone(list), "condition": data.condition}
     );
     core.doAction();
 }
@@ -1959,16 +2024,19 @@ events.prototype._precompile_dowhile = function (data) {
 }
 
 events.prototype._action_break = function (data, x, y, prefix) {
-    core.status.event.data.list.shift();
+    if (core.status.event.data.list.length > 1)
+        core.status.event.data.list.shift();
     core.doAction();
 }
 
 events.prototype._action_continue = function (data, x, y, prefix) {
-    if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
-        core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
-    }
-    else {
-        core.status.event.data.list.shift();
+    if (core.status.event.data.list.length > 1) {
+        if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
+            core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
+        }
+        else {
+            core.status.event.data.list.shift();
+        }
     }
     core.doAction();
 }
@@ -2634,7 +2702,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     }
 
     // 关门动画
-    core.playSound(doorInfo.closeDoor);
+    core.playSound(doorInfo.closeSound);
     var blockInfo = core.getBlockInfo(id);
     var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 
@@ -2856,10 +2924,12 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });
+    core.status.heroMoving = -1;
     var animate=window.setInterval(function() {
         if (moveSteps.length==0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
+            core.status.heroMoving = 0;
             core.drawHero();
             if (callback) callback();
         }
@@ -2902,7 +2972,6 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
     if (!core.isset(ex)) ex=sx;
     if (!core.isset(ey)) ey=sy;
-    core.playSound('jump.mp3');
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];
     jumpInfo.width = core.material.icons.hero.width || 32;
@@ -2912,6 +2981,7 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
 }
 
 events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
+    core.status.heroMoving = -1;
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0)
             core.events._jumpHero_jumping(jumpInfo)
@@ -2940,6 +3010,7 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
     clearInterval(animate);
     core.setHeroLoc('x', ex);
     core.setHeroLoc('y', ey);
+    core.status.heroMoving = 0;
     core.drawHero();
     if (callback) callback();
 }
@@ -2972,7 +3043,7 @@ events.prototype.checkLvUp = function () {
 }
 
 events.prototype._checkLvUp_check = function () {
-    if (core.flags.statusBarItems.indexOf('enableLevelUp')>=0 || !core.firstData.levelUp
+    if (core.flags.statusBarItems.indexOf('enableLevelUp')<0 || !core.firstData.levelUp
         || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});

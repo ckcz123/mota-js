@@ -24,7 +24,7 @@ editor_blocklyconfig=(function(){
         {"type": "hide", "time": 500},
       ],'event'),
       MotaActionFunctions.actionParser.parse({
-        "condition": "flag:__door__==2",
+        "condition": "flag:__door__===2",
         "currentFloor": true,
         "priority": 0,
         "delayExecute": false,
@@ -87,6 +87,7 @@ editor_blocklyconfig=(function(){
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
+      MotaActionFunctions.actionParser.parseList("\t[小妖精,fairy]\f[fairy.png,0,0]欢迎使用事件编辑器(双击方块进入多行编辑)"),
       MotaActionBlocks['comment_s'].xmlText(),
       MotaActionBlocks['autoText_s'].xmlText(),
       MotaActionBlocks['scrollText_s'].xmlText(),
@@ -204,7 +205,6 @@ editor_blocklyconfig=(function(){
     'UI绘制':[
       MotaActionBlocks['previewUI_s'].xmlText(),
       MotaActionBlocks['clearMap_s'].xmlText(),
-      MotaActionBlocks['clearMap_1_s'].xmlText(),
       MotaActionBlocks['setAttribute_s'].xmlText(),
       MotaActionBlocks['fillText_s'].xmlText(),
       MotaActionBlocks['fillBoldText_s'].xmlText(),
@@ -303,7 +303,7 @@ editor_blocklyconfig=(function(){
       '<label text="打怪开门"></label>',
       MotaActionFunctions.actionParser.parse([
         {"type": "setValue", "name": "flag:__door__", "operator": "+=", "value": "1"},
-        {"type": "if", "condition": "flag:__door__==2", 
+        {"type": "if", "condition": "flag:__door__===2", 
           "true": [
             {"type": "openDoor", "loc": [10,5]}
           ],

@@ -2,6 +2,7 @@
  * 表格配置项。
  * 在这里可以对表格中的各项显示进行配置，包括表格项、提示内容等内容。具体写法照葫芦画瓢即可。
  * 本配置项包括：全塔属性的配置项。
+ * 相关文档 _docs/editor.md ~ http://127.0.0.1:1055/_docs/#/editor?id=修改表格
  */
 
 var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
@@ -430,19 +431,19 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "破甲比例",
-					"_data": "破甲的比例（战斗前，怪物附加角色防御的x倍作为伤害）"
+					"_data": "破甲的比例（战斗前，怪物附加角色防御的x倍作为伤害）；可以用怪物的 defValue 覆盖此值。"
 				},
 				"counterAttack": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "反击比例",
-					"_data": "反击的比例（战斗时，怪物每回合附加角色攻击的x倍作为伤害，无视角色防御）"
+					"_data": "反击的比例（战斗时，怪物每回合附加角色攻击的x倍作为伤害，无视角色防御）；可以用怪物的 atkValue 覆盖此值。"
 				},
 				"purify": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "净化比例",
-					"_data": "净化的比例（战斗前，怪物附加勇士护盾的x倍作为伤害）"
+					"_data": "净化的比例（战斗前，怪物附加勇士护盾的x倍作为伤害）；可以用怪物的 n 覆盖此值。"
 				},
 				"hatred": {
 					"_leaf": true,

@@ -77,6 +77,41 @@ enemys.prototype.getSpecialText = function (enemy) {
     return text;
 }
 
+////// 获得所有特殊属性的颜色 //////
+enemys.prototype.getSpecialColor = function (enemy) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (!enemy) return [];
+    var special = enemy.special;
+    var colors = [];
+
+    var specials = this.getSpecials();
+    if (specials) {
+        for (var i = 0; i < specials.length; i++) {
+            if (this.hasSpecial(special, specials[i][0]))
+                colors.push(specials[i][3] || null);
+        }
+    }
+    return colors;
+
+}
+
+////// 获得所有特殊属性的额外标记 //////
+enemys.prototype.getSpecialFlag = function (enemy) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (!enemy) return [];
+    var special = enemy.special;
+    var flag = 0;
+
+    var specials = this.getSpecials();
+    if (specials) {
+        for (var i = 0; i < specials.length; i++) {
+            if (this.hasSpecial(special, specials[i][0]))
+                flag |= (specials[i][4] || 0);
+        }
+    }
+    return flag;
+}
+
 ////// 获得每个特殊属性的说明 //////
 enemys.prototype.getSpecialHint = function (enemy, special) {
     var specials = this.getSpecials();
@@ -86,7 +121,8 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         var hints = [];
         for (var i = 0; i < specials.length; i++) {
             if (this.hasSpecial(enemy, specials[i][0]))
-                hints.push("\r[#FF6A6A]\\d"+this._calSpecialContent(enemy, specials[i][1]) + "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]));
+                hints.push("\r[" + core.arrayToRGBA(specials[i][3] || "#FF6A6A") + "]\\d" + this._calSpecialContent(enemy, specials[i][1]) +
+                    "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]));
         }
         return hints;
     }
@@ -323,8 +359,7 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, f
 
     var enemyInfo = this.getEnemyInfo(enemy, null, null, null, floorId);
     var specialText = core.enemys.getSpecialText(enemy);
-    if (specialText.length >= 3) specialText = "多属性...";
-    else specialText = specialText.join("  ");
+    var specialColor = core.enemys.getSpecialColor(enemy);
 
     var critical = this.nextCriticals(enemy, 1, null, null, floorId);
     if (critical.length > 0) critical = critical[0];
@@ -334,6 +369,7 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, f
         e[x] = enemyInfo[x];
     }
     e.specialText = specialText;
+    e.specialColor = specialColor;
     e.damage = this.getDamage(enemy, null, null, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];

@@ -1,29 +1,46 @@
 editor_ui_wrapper = function (editor) {
 
-    // 由于历史遗留原因, 以下变量作为全局变量使用
-    // printf printe tip
-    window.printf = function (str_, type) {
-        selectBox.isSelected(false);
-        if (!type) {
-            tip.whichShow(11);
-        } else {
-            tip.whichShow(12);
+    var tip=document.getElementById('tip');
+    var print = function (msg, cls) {
+        if (msg == '') {
+            tip.innerHTML = '';
+            return;
         }
-        setTimeout(function () {
-            if (!type) {
-                tip.msgs[11] = String(str_);
-                tip.whichShow(12);
-            } else {
-                tip.msgs[10] = String(str_);
-                tip.whichShow(11);
-            }
-        }, 1);
+        tip.innerHTML = '<p class="'+cls+'">' + msg + "</p>";
     }
-    window.printe = function (str_) {
-        printf(str_, 'error')
+
+    window.printf = function (msg) {
+        selectBox.isSelected(false);
+        print(msg, 'successText');
     }
-    window.tip=document.getElementById('tip')
-    tip.showHelp = function(value) {
+    window.printe = function (msg) {
+        selectBox.isSelected(false);
+        print(msg, 'warnText');
+    }
+    window.printi = function (msg) {
+        print(msg, 'infoText');
+    }
+
+    editor.uifunctions.showBlockInfo = function (value) {
+        if (value == 0) {
+            printi("当前选择为清除块，可擦除地图上块");
+            return;
+        }
+        var hasId = 'id' in value;
+        if (hasId && value.idnum == 17) {
+            printi("当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图");
+            return;
+        }
+        var isAutotile = hasId && value.images == "autotile";
+        tip.innerHTML = (hasId?`<p>图块编号：<span class="infoText">${ value['idnum'] }</span></p>
+        <p>图块ID：<span class="infoText">${ value['id'] }</span></p>`:`
+        <p class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>`)+`
+        <p>图块所在素材：<span class="infoText">${ value['images'] + (isAutotile ? '( '+value['id']+' )' : '') }</span>
+        </p>
+        <p>图块索引：<span class="infoText">${ value['y'] }</span></p>`;
+    }
+
+    editor.uifunctions.showTips = function (value) {
         var tips = [
             '表格的文本域可以双击进行编辑',
             '双击地图可以选中素材，右键可以弹出菜单',
@@ -37,147 +54,6 @@ editor_ui_wrapper = function (editor) {
         if (value == null) value = Math.floor(Math.random() * tips.length);
         printf('tips: ' + tips[value])
     }
-    tip._infos= {}
-    tip.infos=function(value){
-        if(value!=null){
-            var val=value
-            var oldval=tip._infos
-    
-            tip.isClearBlock(false);
-            tip.isAirwall(false);
-            if (typeof(val) != 'undefined') {
-                if (val == 0) {
-                    tip.isClearBlock(true);
-                    return;
-                }
-                if ('id' in val) {
-                    if (val.idnum == 17) {
-                        tip.isAirwall(true);
-                        return;
-                    }
-                    tip.hasId = true;
-                } else {
-                    tip.hasId = false;
-                }
-                tip.isAutotile = false;
-                if (val.images == "autotile" && tip.hasId) tip.isAutotile = true;
-                document.getElementById('isAirwall-else').innerHTML=(tip.hasId?`<p>图块编号：<span class="infoText">${ value['idnum'] }</span></p>
-                <p>图块ID：<span class="infoText">${ value['id'] }</span></p>`:`
-                <p class="warnText">该图块无对应的数字或ID存在，请先前往icons.js和maps.js中进行定义！</p>`)+`
-                <p>图块所在素材：<span class="infoText">${ value['images'] + (tip.isAutotile ? '( '+value['id']+' )' : '') }</span>
-                </p>
-                <p>图块索引：<span class="infoText">${ value['y'] }</span></p>`
-            }
-    
-            tip._infos=value
-        }
-        return tip._infos
-    }
-    tip.hasId= true
-    tip.isAutotile= false
-    tip._isSelectedBlock= false
-    tip.isSelectedBlock=function(value){
-        if(value!=null){
-            var dshow=document.getElementById('isSelectedBlock-if')
-            var dhide=document.getElementById('isSelectedBlock-else')
-            if(!value){
-                var dtemp=dshow
-                dshow=dhide
-                dhide=dtemp
-            }
-            dshow.style.display=''
-            dhide.style.display='none'
-            tip._isSelectedBlock=value
-        }
-        return tip._isSelectedBlock
-    }
-    tip._isClearBlock= false
-    tip.isClearBlock=function(value){
-        if(value!=null){
-            var dshow=document.getElementById('isClearBlock-if')
-            var dhide=document.getElementById('isClearBlock-else')
-            if(!value){
-                var dtemp=dshow
-                dshow=dhide
-                dhide=dtemp
-            }
-            dshow.style.display=''
-            dhide.style.display='none'
-            tip._isClearBlock=value
-        }
-        return tip._isClearBlock
-    }
-    tip._isAirwall= false
-    tip.isAirwall=function(value){
-        if(value!=null){
-            var dshow=document.getElementById('isAirwall-if')
-            var dhide=document.getElementById('isAirwall-else')
-            if(!value){
-                var dtemp=dshow
-                dshow=dhide
-                dhide=dtemp
-            }
-            dshow.style.display=''
-            dhide.style.display='none'
-            tip._isAirwall=value
-        }
-        return tip._isAirwall
-    }
-    tip.geneMapSuccess= false
-    tip.timer= null
-    tip.msgs= [ //分别编号1,2,3,4,5,6,7,8,9,10；奇数警告，偶数成功
-        "当前未选择任何图块，请先在右边选择要画的图块!",
-        "生成地图成功！可点击复制按钮复制地图数组到剪切板",
-        "生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！",
-        "地图清除成功!",
-        "复制失败！",
-        "复制成功！可直接粘贴到楼层文件的地图数组中。",
-        "复制失败！当前还没有数据",
-        "修改成功！可点击复制按钮复制地图数组到剪切板",
-        "选择背景图片失败！文件名格式错误或图片不存在！",
-        "更新背景图片成功！",
-        "11:警告",
-        "12:成功"
-    ]
-    tip._mapMsg= ''
-    tip.mapMsg=function(value){
-        if(value!=null){
-            document.getElementById('whichShow-if').innerText=value
-            tip._mapMsg=value
-        }
-        return tip._mapMsg
-    }
-    tip._whichShow= 0
-    tip.whichShow=function(value){
-        if(value!=null){
-    
-            var dshow=document.getElementById('whichShow-if')
-            var dhide=null
-            if(!value){
-                var dtemp=dshow
-                dshow=dhide
-                dhide=dtemp
-            }
-            if(dshow)dshow.style.display=''
-            if(dhide)dhide.style.display='none'
-    
-            if(dshow)dshow.setAttribute('class',(value%2) ? 'warnText' : 'successText')
-    
-            tip.mapMsg('');
-            tip.msgs[4] = "复制失败！" + editTip.err;
-            clearTimeout(tip.timer);
-            if (value) {
-                tip.mapMsg(tip.msgs[value - 1]);
-                tip.timer = setTimeout(function () {
-                    if (!(value % 2))
-                    value = 0;
-                }, 5000); //5秒后自动清除success，warn不清除
-            }
-            tip._whichShow=value
-        }
-        return tip._whichShow
-    }
-
 
     /**
      * 根据鼠标点击, 得到从元素向上到body的所有id
@@ -247,7 +123,7 @@ editor_ui_wrapper = function (editor) {
         if (e.button != 2 && !editor.isMobile) {
             editor.uifunctions.hideMidMenu();
         }
-        if (clickpath.indexOf('down') !== -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1) {
+        if (clickpath.indexOf('down') !== -1 && clickpath.indexOf('midMenu') === -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1) {
             editor.uifunctions.hideMidMenu();
         }
         if (clickpath.length >= 2 && clickpath[0].indexOf('id_') === 0) { editor.lastClickId = clickpath[0] }
@@ -261,13 +137,7 @@ editor_ui_wrapper = function (editor) {
 
         // UI预览 & 地图选点
         if (editor.uievent && editor.uievent.isOpen) {
-            e.preventDefault();
-            if (e.keyCode == 27) editor.uievent.close();
-            else if (e.keyCode == 13) editor.uievent.confirm();
-            else if (e.keyCode == 87) editor.uievent.move(0, -1)
-            else if (e.keyCode == 65) editor.uievent.move(-1, 0)
-            else if (e.keyCode == 83) editor.uievent.move(0, 1);
-            else if (e.keyCode == 68) editor.uievent.move(1, 0);
+            editor.uievent.onKeyDown(e);
             return;
         }
 
@@ -314,9 +184,9 @@ editor_ui_wrapper = function (editor) {
                 e.preventDefault();
                 if (editor.uivalues.preMapData.length > 0) {
                     var data = editor.uivalues.preMapData.pop();
-                    editor.map = JSON.parse(JSON.stringify(data.map));
-                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
-                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.dom.maps.forEach(function (one) {
+                        editor[one] = JSON.parse(JSON.stringify(data[one]));
+                    });
                     editor.updateMap();
                     editor.uivalues.postMapData.push(data);
                     editor.uifunctions.highlightSaveFloorButton();
@@ -329,9 +199,9 @@ editor_ui_wrapper = function (editor) {
                 e.preventDefault();
                 if (editor.uivalues.postMapData.length > 0) {
                     var data = editor.uivalues.postMapData.pop();
-                    editor.map = JSON.parse(JSON.stringify(data.map));
-                    editor.fgmap = JSON.parse(JSON.stringify(data.fgmap));
-                    editor.bgmap = JSON.parse(JSON.stringify(data.bgmap));
+                    editor.dom.maps.forEach(function (one) {
+                        editor[one] = JSON.parse(JSON.stringify(data[one]));
+                    });
                     editor.updateMap();
                     editor.uivalues.preMapData.push(data);
                     editor.uifunctions.highlightSaveFloorButton();
@@ -475,12 +345,15 @@ editor_ui_wrapper = function (editor) {
     uievent.elements.selectPointButtons = document.getElementById('selectPointButtons');
     uievent.elements.canvas = document.getElementById('uievent');
     uievent.elements.usedFlags = document.getElementById('uieventUsedFlags');
-    uievent.elements.usedFlagList = document.getElementById('uieventUsedFlagList');
-    uievent.elements.materialList = document.getElementById('uieventMaterialList');
+    uievent.elements.extraBody = document.getElementById('uieventExtraBody');
 
     uievent.close = function () {
         uievent.isOpen = false;
         uievent.elements.div.style.display = 'none';
+        if (uievent.values.interval) {
+            clearTimeout(uievent.values.interval);
+            clearInterval(uievent.values.interval);
+        }
         uievent.values = {};
     }
     uievent.elements.no.onclick = uievent.close;
@@ -524,18 +397,16 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'block';
         uievent.elements.usedFlags.style.display = 'none';
-        uievent.elements.usedFlagList.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
 
         uievent.values.list = list;
         uievent.drawPreviewUI();
     }
 
-    uievent.selectPoint = function (floorId, x, y, hideFloor, callback) {
-        uievent.values.hideFloor = hideFloor;
+    uievent.selectPoint = function (floorId, x, y, bigmap, callback) {
+        uievent.values.bigmap = bigmap;
         uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32;
-        uievent.elements.selectPointBox.style.width = (uievent.values.size - 6) + "px";
-        uievent.elements.selectPointBox.style.height = (uievent.values.size - 6) + "px";
 
         uievent.isOpen = true;
         uievent.elements.div.style.display = 'block';
@@ -543,12 +414,11 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPoint.style.display = 'block';
         uievent.elements.yes.style.display = 'inline';
         uievent.elements.selectBackground.style.display = 'none';
-        // uievent.elements.selectFloor.style.display = hideFloor ? 'none' : 'inline';
         uievent.elements.selectFloor.style.display = 'inline';
         uievent.elements.selectPointBox.style.display = 'block';
         uievent.elements.canvas.style.display = 'block';
         uievent.elements.usedFlags.style.display = 'none';
-        uievent.elements.usedFlagList.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
         uievent.elements.yes.onclick = function () {
             var floorId = uievent.values.floorId, x = uievent.values.x, y = uievent.values.y;
@@ -576,11 +446,26 @@ editor_ui_wrapper = function (editor) {
             core.drawThumbnail(uievent.values.floorId, null, null,
                 {
                     ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
-                    centerY: uievent.values.top + core.__HALF_SIZE__
+                    centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
                 });
         }
-        uievent.elements.selectPointBox.style.left = uievent.values.size * (uievent.values.x - uievent.values.left) + "px";
-        uievent.elements.selectPointBox.style.top = uievent.values.size * (uievent.values.y - uievent.values.top) + "px";
+        // 计算size
+        uievent.values.boxSize = uievent.values.size * 
+            (uievent.values.bigmap ? (core.__SIZE__ / Math.max(uievent.values.width, uievent.values.height)) : 1);
+        uievent.values.boxLeft = uievent.values.bigmap ?
+            (core.__PIXELS__ * Math.max(0, (1 - uievent.values.width / uievent.values.height) / 2)) : 0;
+        uievent.values.boxTop = uievent.values.bigmap ?
+            (core.__PIXELS__ * Math.max(0, (1 - uievent.values.height / uievent.values.width) / 2)) : 0;
+
+        if (uievent.values.bigmap) {
+            uievent.elements.selectPointBox.style.left = uievent.values.boxSize * uievent.values.x + uievent.values.boxLeft + "px";
+            uievent.elements.selectPointBox.style.top = uievent.values.boxSize * uievent.values.y + uievent.values.boxTop + "px";
+        } else {
+            uievent.elements.selectPointBox.style.left = uievent.values.boxSize * (uievent.values.x - uievent.values.left) + "px";
+            uievent.elements.selectPointBox.style.top = uievent.values.boxSize * (uievent.values.y - uievent.values.top) + "px";
+        }
+        uievent.elements.selectPointBox.style.width = uievent.values.boxSize - 6 + "px";
+        uievent.elements.selectPointBox.style.height = uievent.values.boxSize - 6 + "px";
     }
 
     uievent.setPoint = function (floorId, x, y) {
@@ -606,16 +491,28 @@ editor_ui_wrapper = function (editor) {
 
     uievent.elements.body.onclick = function (e) {
         if (uievent.mode != 'selectPoint') return;
-        uievent.values.x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
-        uievent.values.y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
+        if (uievent.values.bigmap) {
+            uievent.values.x = core.clamp(Math.floor((e.offsetX - uievent.values.boxLeft) / uievent.values.boxSize), 0, uievent.values.width - 1);
+            uievent.values.y = core.clamp(Math.floor((e.offsetY - uievent.values.boxTop) / uievent.values.boxSize), 0, uievent.values.height - 1);
+        } else {
+            uievent.values.x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
+            uievent.values.y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
+        }
         uievent.updateSelectPoint(false);
     }
 
     uievent.move = function (dx, dy) {
         if (uievent.mode != 'selectPoint') return;
+        if (uievent.values.bigmap) return;
         uievent.values.left = core.clamp(uievent.values.left + dx, 0, uievent.values.width - core.__SIZE__);
         uievent.values.top = core.clamp(uievent.values.top + dy, 0, uievent.values.height - core.__SIZE__);
         this.updateSelectPoint(true);
+    };
+
+    uievent.triggerBigmap = function () {
+        if (uievent.mode != 'selectPoint') return;
+        uievent.values.bigmap = !uievent.values.bigmap;
+        uievent.setPoint(uievent.values.floorId);
     };
 
     (function () {
@@ -623,6 +520,15 @@ editor_ui_wrapper = function (editor) {
         var viewportButtons = uievent.elements.selectPointButtons;
         var pressTimer = null;
         for (var ii = 0, node; node = viewportButtons.children[ii]; ii++) {
+            if (ii == 4) {
+                node.onclick = uievent.triggerBigmap;
+                continue;
+            }
+            if (ii == 5) {
+                node.onclick = function () {
+                    alert(core.copy(uievent.values.floorId) ? ('楼层ID '+uievent.values.floorId+' 已成功复制到剪切板') : '无法复制楼层ID');
+                }
+            }
             (function (x, y) {
                 var move = function () {
                     uievent.move(x, y);
@@ -652,7 +558,6 @@ editor_ui_wrapper = function (editor) {
     })();
 
     uievent.elements.div.onmousewheel = function (e) {
-        // if (uievent.mode != 'selectPoint' || uievent.values.hideFloor) return;
         if (uievent.mode != 'selectPoint') return;
         var index = core.floorIds.indexOf(uievent.values.floorId);
         try {
@@ -663,6 +568,16 @@ editor_ui_wrapper = function (editor) {
         } catch (ee) { main.log(ee); }
         index = core.clamp(index, 0, core.floorIds.length - 1);
         uievent.setPoint(core.floorIds[index]);
+    }
+
+    uievent.onKeyDown = function (e) {
+        if (e.keyCode == 27) editor.uievent.close();
+        if (uievent.mode == 'selectPoint') {
+            if (e.keyCode == 87) editor.uievent.move(0, -1)
+            if (e.keyCode == 65) editor.uievent.move(-1, 0)
+            if (e.keyCode == 83) editor.uievent.move(0, 1);
+            if (e.keyCode == 68) editor.uievent.move(1, 0);
+        }
     }
 
     // ------ 搜索变量出现的位置，也放在uievent好了 ------ //
@@ -679,7 +594,7 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'none';
         uievent.elements.usedFlags.style.display = 'inline';
-        uievent.elements.usedFlagList.style.display = 'block';
+        uievent.elements.extraBody.style.display = 'block';
         uievent.elements.body.style.overflow = "auto";
 
         // build flags
@@ -708,7 +623,7 @@ editor_ui_wrapper = function (editor) {
             html += x;
         });
         html += "</ul>";
-        uievent.elements.usedFlagList.innerHTML = html;
+        uievent.elements.extraBody.innerHTML = html;
     }
 
     var hasUsedFlags = function (obj, flag) {
@@ -775,8 +690,7 @@ editor_ui_wrapper = function (editor) {
             uievent.elements.selectPointBox.style.display = 'none';
             uievent.elements.canvas.style.display = 'none';
             uievent.elements.usedFlags.style.display = 'none';
-            uievent.elements.usedFlagList.style.display = 'none';
-            uievent.elements.materialList.style.display = 'block';
+            uievent.elements.extraBody.style.display = 'block';
             uievent.elements.body.style.overflow = "auto";
 
             uievent.elements.yes.onclick = function () {
@@ -805,10 +719,19 @@ editor_ui_wrapper = function (editor) {
                         <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
                         <progress value="0" max="1" style="display:none; width:100%" onclick="editor.uievent._previewMaterialAudio_seek(this, event)"></progress>`;
                 }
+                // 预览动画
+                if (directory.indexOf('animates') >= 0) {
+                    html += "<button onclick='editor.uievent._previewMaterialAnimate(this)' style='margin-left: 10px'>预览</button>";
+                    html += `<span style="display:none; margin-left: 10px" key="${directory+one+'.animate'}"><br/>音效：<input type="text" />
+                        <button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style='marin-left: 10px'>试听</button>
+                        <button onclick="editor.uievent._previewMaterialAnimate_saveSound(this)">保存</button><br/>
+                        </span>`;
+                }
                 html += '<br/>';
             });
             html += "</p>";
-            uievent.elements.materialList.innerHTML = html;
+            html += "<p style='margin-left: 10px'><small>如果文件未在此列表显示，请检查文件名是否合法（只能由数字字母下划线横线和点组成），后缀名是否正确。</small></p>";
+            uievent.elements.extraBody.innerHTML = html;
         });
     }
 
@@ -867,6 +790,155 @@ editor_ui_wrapper = function (editor) {
         element.setAttribute("value", value);
         audio.currentTime = audio.duration * value;
         if (audio.paused) audio.play();
+    }
+
+    var _previewMaterialAnimate = function (span, content) {
+        var input = span.children[1];
+        input.value = content.se || "";
+
+        // 创建dom
+        if (!uievent.values.dom) {
+            var dom = document.createElement('span');
+            dom.style.position = "relative";
+            dom.style.marginLeft = "-10px";
+            var canvas = document.createElement('canvas');
+            canvas.width = canvas.height = core.__PIXELS__;
+            canvas.style.position = 'absolute';
+            core.drawThumbnail(editor.currentFloorId, null, {}, canvas.getContext('2d'));
+            dom.appendChild(canvas);
+            var canvas2 = document.createElement('canvas');
+            canvas2.style.position = 'absolute';
+            canvas2.width = canvas2.height = core.__PIXELS__;
+            uievent.values.ctx = canvas2.getContext('2d');
+            dom.appendChild(canvas2);
+            var canvas3 = document.createElement('canvas');
+            canvas3.width = canvas3.height = core.__PIXELS__;
+            dom.appendChild(canvas3);
+            uievent.values.dom = dom;
+        }
+
+        span.appendChild(uievent.values.dom);
+        clearInterval(uievent.values.interval);
+        var frame = 0;
+        uievent.values.interval = setInterval(function () {
+            if (span.style.display == 'none') {
+                clearInterval(uievent.values.interval);
+                uievent.values.interval = null;
+                span.removeChild(uievent.values.dom);
+                return;
+            }
+            core.clearMap(uievent.values.ctx);
+            core.maps._drawAnimateFrame(uievent.values.ctx, content, core.__PIXELS__ / 2, core.__PIXELS__ / 2, frame++);
+        }, 50);
+    }
+
+    uievent._previewMaterialAnimate = function (button) {
+        var span = button.nextElementSibling;
+        var filename = span.getAttribute("key");
+        uievent.values.animates = uievent.values.animates || {};
+        if (span.style.display == 'none') {
+            button.innerText = '收起';
+            span.style.display = 'inline';
+            if (uievent.values.animates[filename]) {
+                _previewMaterialAnimate(span, uievent.values.animates[filename]);
+            } else {
+                fs.readFile(filename, 'utf-8', function (e, d) {
+                    if (e) {
+                        alert('无法打开动画文件！'+e); return;
+                    }
+                    uievent.values.animates[filename] = core.loader._loadAnimate(d);
+                    if (uievent.values.animates[filename]) {
+                        uievent.values.animates[filename + ':raw'] = JSON.parse(d);
+                        _previewMaterialAnimate(span, uievent.values.animates[filename]);
+                    }
+                })
+            }
+        } else {
+            button.innerText = '预览';
+            span.style.display = 'none';
+        }
+    }
+
+    uievent._previewMaterialAnimate_previewSound = function (button) {
+        var input = button.previousElementSibling;
+        if (!input.value) return;
+        if (!uievent.values.audio)
+            uievent.values.audio = new Audio();
+        uievent.values.audio.src = './project/sounds/' + input.value;
+        uievent.values.audio.play();
+    }
+
+    uievent._previewMaterialAnimate_saveSound = function (button) {
+        var input = button.previousElementSibling.previousElementSibling;
+        var filename = button.parentElement.getAttribute("key");
+        if (!filename || !uievent.values.animates[filename]) return;
+        uievent.values.animates[filename+':raw'].se = input.value || "";
+        fs.writeFile(filename, JSON.stringify(uievent.values.animates[filename+':raw']), 'utf-8', function (e, d) {
+            if (e) alert('无法修改音效文件！'+e);
+            else {
+                alert('动画音效修改成功！别忘了在全塔属性中注册本音效哦！');
+            }
+        })
+    }
+
+    // ------ 多选框 ------ //
+    uievent.popCheckboxSet = function (value, comments, title, callback) {
+        if (value == null) value = [];
+        if (!(value instanceof Array)) {
+            if (value == 0) value = [];
+            else value = [value];
+        }
+
+        uievent.isOpen = true;
+        uievent.elements.div.style.display = 'block';
+        uievent.mode = 'popCheckboxSet';
+        uievent.elements.selectPoint.style.display = 'none';
+        uievent.elements.yes.style.display = 'block';
+        uievent.elements.title.innerText = title;
+        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.selectFloor.style.display = 'none';
+        uievent.elements.selectPointBox.style.display = 'none';
+        uievent.elements.canvas.style.display = 'none';
+        uievent.elements.usedFlags.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'block';
+        uievent.elements.body.style.overflow = "auto";
+
+        uievent.elements.yes.onclick = function () {
+            var list = Array.from(document.getElementsByClassName('uieventCheckboxSet')).filter(function (one) {
+                return one.checked;
+            }).map(function (one) {
+                var value = one.getAttribute('key');
+                if (one.getAttribute('_type') == 'number') value = parseFloat(value);
+                return value; 
+            });
+            uievent.close();
+            if (callback) callback(list);
+        }
+
+        var keys=Array.from(comments.key)
+        var prefixStrings=Array.from(comments.prefix)
+        for (var index = 0; index < value.length; index++) {
+            if (keys.indexOf(value[index])==-1) {
+                prefixStrings.push(value[index]+': ')
+                keys.push(value[index])
+            }
+        }
+        var table = '<table style="width: 100%">';
+
+        for (var index = 0; index < keys.length; index++) {
+            var one = keys[index];
+            if (index % 3 == 0) {
+                table += '<tr>';
+            }
+            table += `<td style='color:black'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0? 'checked' : ''}/></td>`;
+            if (index % 3 == 2) {
+                table += '</tr>';
+            }
+        }
+        if (keys.length % 3 != 0) table += '</tr>';
+        table += '</table>';
+
+        uievent.elements.extraBody.innerHTML = "<p>"+table+"</p>";
     }
 
     editor.constructor.prototype.uievent=uievent;

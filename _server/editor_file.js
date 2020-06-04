@@ -83,7 +83,9 @@ editor_file_wrapper = function (editor) {
         var datastr = ['main.floors.', floorId, '=\n'];
 
         var tempJsonObj = Object.assign({}, floorData);
-        var tempMap = [['map', editor.util.guid()], ['bgmap', editor.util.guid()], ['fgmap', editor.util.guid()]];
+        var tempMap = editor.dom.maps.map(function (one) {
+            return [one, editor.util.guid()]
+        });
         tempMap.forEach(function (v) {
             v[2] = tempJsonObj[v[0]];
             tempJsonObj[v[0]] = v[1];
@@ -164,11 +166,8 @@ editor_file = function (editor, callback) {
         /* if (!isset(editor.currentFloorId) || !isset(editor.currentFloorData)) {
           callback('未选中文件或无数据');
         } */
-        var filename = 'project/floors/' + editor.currentFloorId + '.js';
-        var datastr = ['main.floors.', editor.currentFloorId, '=\n'];
-
         if (core.floorIds.indexOf(editor.currentFloorId) >= 0) {
-            for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+            for(var ii=0,name;name=editor.dom.maps[ii];ii++){
                 var mapArray=editor[name].map(function (v) {
                     return v.map(function (v) {
                         return v.idnum || v || 0
@@ -401,7 +400,7 @@ editor_file = function (editor, callback) {
         var mapActions = [];
 
         iconActions.push(["add", "['autotile']['" + filename + "']", 0]);
-        mapActions.push(["add", "['" + idnum + "']", {'cls': 'autotile', 'id': filename, 'noPass': true}]);
+        mapActions.push(["add", "['" + idnum + "']", {'cls': 'autotile', 'id': filename}]);
 
         var templist = [];
         var tempcallback = function (err) {
@@ -575,7 +574,7 @@ editor_file = function (editor, callback) {
                 var value=actionList[ii];
                 // 是tilesets 且未定义 且在这里是第一次定义
                 if(idnum>=editor.core.icons.tilesetStartOffset && !isset(editor.core.maps.blocksInfo[idnum]) && tempmap.indexOf(idnum)===-1){
-                    actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum, "noPass": true}]);
+                    actionList.splice(ii,0,["add","['" + idnum + "']",{"cls": "tileset", "id": "X"+idnum}]);
                     tempmap.push(idnum);
                     ii++;
                 }
@@ -588,7 +587,7 @@ editor_file = function (editor, callback) {
             callback([
                 (function () {
                     var sourceobj=editor.core.maps.blocksInfo[idnum];
-                    if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum, "noPass": true}
+                    if(!isset(sourceobj) && idnum>=editor.core.icons.tilesetStartOffset)sourceobj={"cls": "tileset", "id": "X"+idnum}
                     var locObj = Object.assign({}, sourceobj);
                     Object.keys(editor.file.comment._data.maps._data).forEach(function (v) {
                         if (!isset(sourceobj[v]))
@@ -667,9 +666,7 @@ editor_file = function (editor, callback) {
                     Object.keys(editor.file.comment._data.floors._data.loc._data).forEach(function (v) {
                         delete(locObj[v]);
                     });
-                    delete(locObj.map);
-                    delete(locObj.bgmap);
-                    delete(locObj.fgmap);
+                    editor.dom.maps.forEach(function (one) { delete locObj[one]; });
                     return locObj;
                 })(),
                 editor.file.comment._data.floors._data.floor,
@@ -919,10 +916,9 @@ editor_file = function (editor, callback) {
                 eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a" + value[1] + '=' + JSON.stringify(value[2]));
             });
             var datastr = 'var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
-            datastr += JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a, function (k, v) {
-                if (v.id != null) delete v.id;
-                return v;
-            }, '\t');
+            var items = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
+            for (var id in items) delete items[id].id;
+            datastr += JSON.stringify(items, null, '\t');
             fs.writeFile('project/items.js', encode(datastr), 'base64', function (err, data) {
                 callback(err);
             });
@@ -934,9 +930,10 @@ editor_file = function (editor, callback) {
             });
             var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
             var emap = {};
-            var estr = JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80, function (k, v) {
-                if (v.hp != null) {
-                    delete v.id;
+            var enemys = core.clone(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80);
+            for (var id in enemys) delete enemys[id].id;
+            var estr = JSON.stringify(enemys, function (k, v) {
+                if (v && v.hp != null) {
                     var id_ = editor.util.guid();
                     emap[id_] = JSON.stringify(v);
                     return id_;

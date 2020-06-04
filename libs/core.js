@@ -226,11 +226,18 @@ core.prototype.init = function (coreData, callback) {
     this._init_others();
     this._initPlugins();
 
+    // 初始化画布
+    for (var name in core.canvas) {
+        core.canvas[name].canvas.width = core.canvas[name].canvas.height = core.__PIXELS__;
+    }
+
     core.loader._load(function () {
         core.extensions._load(function () {
             core._afterLoadResources(callback);
         });
-    });
+    });    
+    core.dom.musicBtn.style.display = 'block';
+    core.setMusicBtn();
 }
 
 core.prototype._init_flags = function () {

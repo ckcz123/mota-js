@@ -135,7 +135,7 @@ editor_game_wrapper = function (editor, main, core) {
 
     // 获取当前地图
     editor_game.prototype.fetchMapFromCore = function () {
-        var mapArray = core.getMapArray(core.status.floorId, true);
+        var mapArray = core.getMapArray(core.status.floorId);
         editor.map = mapArray.map(function (v) {
             return v.map(function (v) {
                 var x = parseInt(v), y = editor.indexs[x];
@@ -151,7 +151,8 @@ editor_game_wrapper = function (editor, main, core) {
         // 补出缺省的数据
         editor.currentFloorData.autoEvent = editor.currentFloorData.autoEvent || {};
         //
-        for (var ii = 0, name; name = ['bgmap', 'fgmap'][ii]; ii++) {
+        for (var ii = 0, name; name = editor.dom.canvas[ii]; ii++) {
+            name += 'map';
             var mapArray = editor.currentFloorData[name];
             if (!mapArray || JSON.stringify(mapArray) == JSON.stringify([])) {//未设置或空数组
                 //与editor.map同形的全0

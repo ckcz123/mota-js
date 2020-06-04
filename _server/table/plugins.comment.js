@@ -2,6 +2,7 @@
  * 表格配置项。
  * 在这里可以对表格中的各项显示进行配置，包括表格项、提示内容等内容。具体写法照葫芦画瓢即可。
  * 本配置项包括：插件编写。
+ * 相关文档 _docs/editor.md ~ http://127.0.0.1:1055/_docs/#/editor?id=修改表格
  */
 
 var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
@@ -31,6 +32,12 @@ var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"_type": "textarea",
 				"_range": "typeof(thiseval)=='string' || thiseval==null",
 				"_data": "砍层插件"
+			},
+			"fiveLayers": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string' || thiseval==null",
+				"_data": "五图层(背景前景2)"
 			},
 			"itemShop": {
 				"_leaf": true,

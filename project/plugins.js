@@ -113,7 +113,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			return;
 		}
 		if (shop.commonEvent) {
-			core.insertAction({ "type": "insert", "name": shop.commonEvent, "args": shop.args });
+			core.insertCommonEvent(shop.commonEvent, shop.args);
 			return;
 		}
 
@@ -280,6 +280,272 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			}
 		}
 	}
+},
+    "fiveLayers": function () {
+	// 是否启用五图层（增加背景2层和前景2层） 将__enableFiveLayers置为true即会启用；启用后请保存后刷新编辑器
+	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
+	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
+	// 插件作者：ad
+	var __enableFiveLayers = false;
+	if (!__enableFiveLayers) return;
+
+	// 创建新图层
+	function createCanvas(name, zIndex) {
+		if (!name) return;
+		var canvas = document.createElement('canvas');
+		canvas.id = name;
+		canvas.className = 'gameCanvas';
+		canvas.width = canvas.height = core.__PIXELS__;
+		// 编辑器模式下设置zIndex会导致加入的图层覆盖优先级过高
+		if (main.mode != "editor") canvas.style.zIndex = zIndex || 0;
+		// 将图层插入进游戏内容
+		document.getElementById('gameDraw').appendChild(canvas);
+		var ctx = canvas.getContext('2d');
+		core.canvas[name] = ctx;
+		return canvas;
+	}
+
+	var bg2Canvas = createCanvas('bg2', 20);
+	var fg2Canvas = createCanvas('fg2', 63);
+	// 大地图适配
+	core.bigmap.canvas = ["bg2", "fg2", "bg", "event", "event2", "fg", "damage"];
+
+	if (main.mode == 'editor') {
+		/*插入编辑器的图层 不做此步新增图层无法在编辑器显示*/
+		// 编辑器图层覆盖优先级 eui > efg > fg(前景层) > event2(48*32图块的事件层) > event(事件层) > bg(背景层)
+		// 背景层2(bg2) 插入事件层(event)之前(即bg与event之间)
+		document.getElementById('mapEdit').insertBefore(bg2Canvas, document.getElementById('event'));
+		// 前景层2(fg2) 插入编辑器前景(efg)之前(即fg之后)
+		document.getElementById('mapEdit').insertBefore(fg2Canvas, document.getElementById('efg'));
+		// 原本有三个图层 从4开始添加
+		var num = 4;
+		// 新增图层存入editor.dom中
+		editor.dom.bg2c = core.canvas.bg2.canvas;
+		editor.dom.bg2Ctx = core.canvas.bg2;
+		editor.dom.fg2c = core.canvas.fg2.canvas;
+		editor.dom.fg2Ctx = core.canvas.fg2;
+		editor.dom.maps.push('bg2map', 'fg2map');
+		editor.dom.canvas.push('bg2', 'fg2');
+
+		// 默认全空
+		var defaultMap = [];
+		for (var i = 0; i < core.__SIZE__; ++i) {
+			var row = [];
+			for (var j = 0; j < core.__SIZE__; ++j) {
+				row.push(0);
+			}
+			defaultMap.push(row);
+		}
+
+		// 创建编辑器上的按钮
+		var createCanvasBtn = function (name) {
+			// 电脑端创建按钮
+			var input = document.createElement('input');
+			// layerMod4/layerMod5
+			var id = 'layerMod' + num++;
+			// bg2map/fg2map
+			var value = name + 'map';
+			input.type = 'radio';
+			input.name = 'layerMod';
+			input.id = id;
+			input.value = value;
+			editor.dom[id] = input;
+			input.onchange = function () {
+				editor.uifunctions.setLayerMod(value);
+			}
+			editor[value] = editor[value] || defaultMap;
+			return input;
+		};
+
+		var createCanvasBtn_mobile = function (name) {
+			// 手机端往选择列表中添加子选项
+			var input = document.createElement('option');
+			var id = 'layerMod' + num++;
+			var value = name + 'map';
+			input.name = 'layerMod';
+			input.value = value;
+			editor.dom[id] = input;
+			editor[value] = editor[value] || defaultMap;
+			return input;
+		};
+		if (!editor.isMobile) {
+			var input = createCanvasBtn('bg2');
+			var input2 = createCanvasBtn('fg2');
+			// 获取事件层及其父节点
+			var child = document.getElementById('layerMod'),
+				parent = child.parentNode;
+			// 背景层2插入事件层前
+			parent.insertBefore(input, child);
+			// 不能直接更改背景层2的innerText 所以创建文本节点
+			var txt = document.createTextNode('背景层2');
+			// 插入事件层前(即新插入的背景层2前)
+			parent.insertBefore(txt, child);
+			// 向最后插入前景层2(即插入前景层后)
+			parent.appendChild(input2);
+			var txt2 = document.createTextNode('前景层2');
+			parent.appendChild(txt2);
+		} else {
+			var input = createCanvasBtn_mobile('bg2');
+			var input2 = createCanvasBtn_mobile('fg2');
+			// 手机端因为是选项 所以可以直接改innerText
+			input.innerText = '背景层2';
+			input2.innerText = '前景层2';
+			var parent = document.getElementById('layerMod');
+			parent.insertBefore(input, parent.children[1]);
+			parent.appendChild(input2);
+		}
+	}
+
+	////// 绘制背景层 //////
+	core.maps.drawBg = function (floorId, ctx) {
+		floorId = floorId || core.status.floorId;
+		var onMap = ctx == null;
+		if (onMap) {
+			ctx = core.canvas.bg;
+			core.clearMap(ctx);
+			core.status.floorAnimateObjs = this._getFloorImages(floorId);
+		}
+		core.maps._drawBg_drawBackground(floorId, ctx);
+		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
+		core.maps._drawFloorImages(floorId, ctx, 'bg');
+		core.maps._drawBgFgMap(floorId, ctx, 'bg', onMap);
+		// 绘制背景层2
+		core.maps._drawBgFgMap(floorId, ctx, 'bg2', onMap);
+	};
+
+	////// 绘制前景层 //////
+	core.maps.drawFg = function (floorId, ctx) {
+		floorId = floorId || core.status.floorId;
+		var onMap = ctx == null;
+		if (onMap) {
+			ctx = core.canvas.fg;
+			core.status.floorAnimateObjs = this._getFloorImages(floorId);
+		}
+		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
+		this._drawFloorImages(floorId, ctx, 'fg');
+		this._drawBgFgMap(floorId, ctx, 'fg', onMap);
+		// 绘制前景层2
+		this._drawBgFgMap(floorId, ctx, 'fg2', onMap);
+	};
+	/* cannotIn/cannotOut适配 start*/
+	core.maps.generateMovableArray = function (floorId, x, y, direction) {
+		floorId = floorId || core.status.floorId;
+		if (!floorId) return null;
+		var width = core.floors[floorId].width,
+			height = core.floors[floorId].height;
+		var bgArray = this.getBgMapArray(floorId),
+			bg2Array = this._getBgFgMapArray('bg2', floorId),
+			fgArray = this.getFgMapArray(floorId),
+			fg2Array = this._getBgFgMapArray('fg2', floorId),
+			eventArray = this.getMapArray(floorId);
+
+		var generate = function (x, y, direction) {
+			if (direction != null) {
+				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
+					bgArray: bgArray,
+					fgArray: fgArray,
+					bg2Array: bg2Array,
+					fg2Array: fg2Array,
+					eventArray: eventArray
+				});
+			}
+			return ["left", "down", "up", "right"].filter(function (direction) {
+				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
+					bgArray: bgArray,
+					fgArray: fgArray,
+					bg2Array: bg2Array,
+					fg2Array: fg2Array,
+					eventArray: eventArray
+				});
+			});
+		};
+
+		if (x != null && y != null) return generate(x, y, direction);
+		var array = [];
+		for (var x = 0; x < width; x++) {
+			array[x] = [];
+			for (var y = 0; y < height; y++) {
+				array[x][y] = generate(x, y);
+			}
+		}
+		return array;
+	};
+	core.maps._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
+		// 1. 检查该点 cannotMove
+		if (core.inArray((core.floors[floorId].cannotMove || {})[x + "," + y], direction))
+			return false;
+
+		var nx = x + core.utils.scan[direction].x,
+			ny = y + core.utils.scan[direction].y;
+		if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].height)
+			return false;
+
+		// 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
+		if (this._canMoveHero_checkCannotInOut([
+				extraData.bgArray[y][x], extraData.bg2Array[y][x], extraData.fgArray[y][x], extraData.fg2Array[y][x], extraData.eventArray[y][x]
+			], "cannotOut", direction))
+			return false;
+		if (this._canMoveHero_checkCannotInOut([
+				extraData.bgArray[ny][nx], extraData.bg2Array[ny][nx], extraData.fgArray[ny][nx], extraData.fg2Array[ny][nx], extraData.eventArray[ny][nx]
+			], "cannotIn", direction))
+			return false;
+
+		// 3. 检查是否能进将死的领域
+		if (floorId == core.status.floorId && !core.flags.canGoDeadZone &&
+			core.status.hero.hp <= (core.status.checkBlock.damage[nx + "," + ny] || 0) &&
+			extraData.eventArray[ny][nx] == 0)
+			return false;
+
+		return true;
+	};
+	/* cannotIn/cannotOut适配 end*/
+	// 前景层2与背景层2的隐藏与显示适配
+	// 比如:可以用core.hideBgFgMap("bg2",[x, y], floorId)隐藏当前楼层的背景层2图块
+	core.maps._triggerBgFgMap = function (type, name, loc, floorId, callback) {
+		if (type != 'show') type = 'hide';
+		if (!name) name = 'bg';
+		if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
+			loc = [loc];
+		floorId = floorId || core.status.floorId;
+		if (!floorId) return;
+
+		if (loc.length == 0) return;
+		loc.forEach(function (t) {
+			var x = t[0],
+				y = t[1];
+			var flag = [floorId, x, y, name + '_disable'].join('@');
+			if (type == 'hide') core.setFlag(flag, true);
+			else core.removeFlag(flag);
+		});
+		core.status[name + "maps"][floorId] = null;
+
+		if (floorId == core.status.floorId) {
+			core.drawMap(floorId, callback);
+		} else {
+			if (callback) callback();
+		}
+	};
+	// 改变背景层2与前景层2图块 例:core.setBgFgBlock('fg2',312,core.nextX(),core.nextY())
+	core.maps.setBgFgBlock = function (name, number, x, y, floorId) {
+		floorId = floorId || core.status.floorId;
+		if (!floorId || number == null || x == null || y == null) return;
+		if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
+		if (name != 'bg' && name != 'fg' && name != 'bg2' && name != 'fg2') return;
+		if (typeof number == 'string') {
+			if (/^\d+$/.test(number)) number = parseInt(number);
+			else number = core.getNumberById(number);
+		}
+
+		var vFlag = [floorId, x, y, name + "_value"].join('@');
+		core.setFlag(vFlag, number);
+		core.status[name + "maps"][floorId] = null;
+
+		if (floorId == core.status.floorId) {
+			core.clearMap(name);
+			if (name.startsWith('bg')) core.drawBg(floorId);
+			else core.drawFg(floorId);
+		}
+	};
 },
     "itemShop": function () {
 	// 道具商店相关的插件
@@ -587,8 +853,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 },
     "smoothCamera": function () {
+	// 此插件开启后，大地图的瞬间移动将开启平滑镜头移动，避免突兀感
+	// 插件作者：老黄鸡
 
-    // 是否启用本插件，默认不启用
+	// 是否启用本插件，默认不启用
 	this.__enableSmoothCamera = false;
 	if (!this.__enableSmoothCamera) return;
 

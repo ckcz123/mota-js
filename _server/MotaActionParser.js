@@ -81,9 +81,11 @@ ActionParser.prototype.parse = function (obj,type) {
           var text_choices = null;
           var knownListKeys = MotaActionBlocks['Key_List'].options.map(function (one) {return one[1];})
           Object.keys(obj).sort().forEach(function (key) {
+            var noNeed = key.endsWith(':o');
+            if (noNeed) key = key.substring(0, key.length - 2);
             var one = knownListKeys.indexOf(key) >= 0 ? 'doorKeyKnown' : 'doorKeyUnknown';
             text_choices = MotaActionBlocks[one].xmlText([
-              one == 'doorKeyUnknown' ? MotaActionFunctions.replaceToName_token(key) : key, obj[key], text_choices
+              one == 'doorKeyUnknown' ? MotaActionFunctions.replaceToName_token(key) : key, obj[key], noNeed, text_choices
             ]);
           })
           return text_choices;
@@ -208,7 +210,38 @@ ActionParser.prototype.parseAction = function() {
       return;
     case "text": // 文字/对话
       var info = this.getTitleAndPosition(data.text);
-      if (info[0] || info[1] || info[2]) {
+      var textDrawing = [];
+      info[3] = (info[3] || "").replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
+        var ss = str.split(",");
+        if (ss.length == 3 || ss.length == 5 || ss.length >=9) {
+          var swap = function (i, j) { var x = ss[i]; ss[i] = ss[j]; ss[j] = x;}
+          if (ss.length >= 9) {
+            swap(1,5); swap(2,6); swap(3,7); swap(4,8);
+          }
+          textDrawing.push(ss);
+        }
+        return '';
+      });
+      if (textDrawing.length > 0) {
+        var buildTextDrawing = function (obj) {
+          if(!obj) obj=[];
+          var text_choices = null;
+          for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+            var reverse = 'null';
+            if (choice[0].endsWith(':o') || choice[0].endsWith(':x') || choice[0].endsWith(':y')) {
+              reverse = choice[0].substring(choice[0].length - 2);
+              choice[0] = choice[0].substring(0, choice[0].length - 2);
+            }
+            text_choices=MotaActionBlocks['textDrawing'].xmlText([
+              choice[0], reverse, choice[1], choice[2], choice[3], choice[4], choice[5], choice[6], 
+              choice[7], choice[8], choice[9], choice[10], text_choices]);
+          }
+          return text_choices;
+        }
+        this.next = MotaActionBlocks['text_2_s'].xmlText([
+          info[0], info[1], info[2], info[3], buildTextDrawing(textDrawing), this.next
+        ]);
+      } else if (info[0] || info[1] || info[2]) {
         this.next = MotaActionBlocks['text_1_s'].xmlText([
           info[0], info[1], info[2], info[3], this.next]);
       }
@@ -352,7 +385,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setHeroIcon": // 改变勇士
       this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([
-        data.name||"",this.next]);
+        data.name||"", data.noDraw || false, this.next]);
       break;
     case "move": // 移动事件
       data.loc=data.loc||['',''];
@@ -439,7 +472,7 @@ ActionParser.prototype.parseAction = function() {
     case "showTextImage": // 显示图片化文本
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showTextImage_s'].xmlText([
-        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.opacity,data.time||0,data.async||false,this.next]);
+        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.reverse,data.opacity,data.time||0,data.async||false,this.next]);
       break;
     case "moveImage": // 移动图片
       data.to=data.to||['','']
@@ -766,14 +799,9 @@ ActionParser.prototype.parseAction = function() {
       ]);
       break;
     case "clearMap": // 清除画布
-      if (data.x != null && data.y != null && data.width != null && data.height != null) {
-        this.next = MotaActionBlocks['clearMap_s'].xmlText([
-          data.x, data.y, data.width, data.height, this.next
-        ]);
-      }
-      else {
-        this.next = MotaActionBlocks['clearMap_1_s'].xmlText([this.next]);
-      }
+      this.next = MotaActionBlocks['clearMap_s'].xmlText([
+        data.x, data.y, data.width, data.height, this.next
+      ]);
       break;
     case "setAttribute": // 设置画布属性
       data.fillStyle=this.Colour(data.fillStyle);
@@ -805,13 +833,13 @@ ActionParser.prototype.parseAction = function() {
     case "fillRect": // 绘制矩形
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['fillRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', this.next
+        data.x, data.y, data.width, data.height, data.radius, data.angle, data.style, 'rgba('+data.style+')', this.next
       ]);
       break;
     case "strokeRect": // 绘制矩形边框
       data.style = this.Colour(data.style);
       this.next = MotaActionBlocks['strokeRect_s'].xmlText([
-        data.x, data.y, data.width, data.height, data.radius, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
+        data.x, data.y, data.width, data.height, data.radius, data.angle, data.style, 'rgba('+data.style+')', data.lineWidth, this.next
       ]);
       break;
     case "drawLine": // 绘制线段
@@ -875,12 +903,12 @@ ActionParser.prototype.parseAction = function() {
     case "drawImage": // 绘制图片
       if (data.x1 != null && data.y1 != null && data.w1 != null && data.h1 != null) {
         this.next = MotaActionBlocks['drawImage_1_s'].xmlText([
-          data.image, data.reverse, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, this.next
+          data.image, data.reverse, data.x, data.y, data.w, data.h, data.x1, data.y1, data.w1, data.h1, data.angle, this.next
         ]);
       }
       else {
         this.next = MotaActionBlocks['drawImage_s'].xmlText([
-          data.image, data.reverse, data.x, data.y, data.w, data.h, this.next
+          data.image, data.reverse, data.x, data.y, data.w, data.h, data.angle, this.next
         ]);
       }
       break;
@@ -1157,7 +1185,7 @@ MotaActionFunctions.JsonEvalString_pre = function (JsonEvalString) {
 }
 
 MotaActionFunctions.IntString_pre = function (IntString) {
-  if (!/^\d*$/.test(IntString)) throw new Error('此项必须是整数或不填');
+  if (!/^[+-]?\d*$/.test(IntString)) throw new Error('此项必须是整数或不填');
   return IntString;
 }
 
@@ -1173,6 +1201,8 @@ MotaActionFunctions.IdString_pre = function(IdString){
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
   //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
+  var comma = PosString.indexOf(',');
+  if (comma >= 0 && PosString.substring(0, comma).indexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
 }
 
@@ -1332,7 +1362,7 @@ MotaActionFunctions.replaceToName = function (str) {
   str = str.replace(new RegExp("item:(" + list.join("|") + ")\\b", "g"), function (a, b) {
     return map[b] ? ("物品：" + map[b]) : b;
   }).replace(/item:/g, "物品：");
-  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：").replace(/temp:/g, "临时变量：");
+  str = str.replace(/flag:/g, "变量：").replace(/switch:/g, "独立开关：").replace(/global:/g, "全局存储：");
 
 
   MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
@@ -1370,7 +1400,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
-  str = str.replace(/临时变量[:：]/g, "temp d:").replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
+  str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
 
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {

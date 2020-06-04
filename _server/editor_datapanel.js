@@ -6,118 +6,18 @@ editor_datapanel_wrapper = function (editor) {
     //////////////////// 地图编辑 //////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////
 
-    // 由于历史遗留原因, 以下变量作为全局变量使用
-    // pout exportMap mapEditArea mapEditArea copyMap clearMapButton deleteMap
-    window.pout = document.getElementById('pout')
-    window.exportMap = document.getElementById('exportMap')
-    exportMap.isExport=false
-    exportMap.onclick=function(){
-        editor.updateMap();
-        var sx=editor.map.length-1,sy=editor.map[0].length-1;
+    var pout = document.getElementById('pout');
+    var exportMap = document.getElementById('exportMap');
+    var importMap = document.getElementById('importMap');
+    var clearMapButton=document.getElementById('clearMapButton')
+    var deleteMap=document.getElementById('deleteMap')
 
-        var filestr = '';
-        for (var yy = 0; yy <= sy; yy++) {
-            filestr += '['
-            for (var xx = 0; xx <= sx; xx++) {
-                var mapxy = editor.map[yy][xx];
-                if (typeof(mapxy) == typeof({})) {
-                    if ('idnum' in mapxy) mapxy = mapxy.idnum;
-                    else {
-                        // mapxy='!!?';
-                        tip.whichShow(3);
-                        return;
-                    }
-                } else if (typeof(mapxy) == 'undefined') {
-                    tip.whichShow(3);
-                    return;
-                }
-                mapxy = String(mapxy);
-                mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
-                filestr += mapxy + (xx == sx ? '' : ',')
-            }
-
-            filestr += ']' + (yy == sy ? '' : ',\n');
-        }
-        pout.value = filestr;
-        mapEditArea.mapArr(filestr);
-        exportMap.isExport = true;
-        mapEditArea.error(0);
-        tip.whichShow(2);
-    }
-    window.mapEditArea = document.getElementById('mapEditArea')
-    mapEditArea.errors=[ // 编号1,2
-        "格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)",
-        "当前有未定义ID（在地图区域显示红块），请修改ID或者到icons.js和maps.js中进行定义！"
-    ]
-    mapEditArea.formatTimer=null
-    mapEditArea._mapArr=''
-    mapEditArea.mapArr=function(value){
-        if(value!=null){
-            var val=value
-            var oldval=mapEditArea._mapArr
-            if (val==oldval) return;
-
-            if (exportMap.isExport) {
-                exportMap.isExport = false;
-                return;
-            }
-            if (mapEditArea.formatArr()) {
-                mapEditArea.error(0);
-
-                setTimeout(function () {
-                    if (mapEditArea.formatArr())mapEditArea.mapArr(mapEditArea.formatArr());
-                    mapEditArea.drawMap();
-                    tip.whichShow(8)
-                }, 1000);
-                clearTimeout(mapEditArea.formatTimer);
-                mapEditArea.formatTimer = setTimeout(function () {
-                    pout.value = mapEditArea.formatArr();
-                }, 5000); //5s后再格式化，不然光标跳到最后很烦
-            } else {
-                mapEditArea.error(1);
-            }
-
-            mapEditArea._mapArr=value
-        }
-        return mapEditArea._mapArr
-    }
-    pout.oninput=function(){
-        mapEditArea.mapArr(pout.value)
-    }
-    mapEditArea._error=0
-    mapEditArea.error=function(value){
-        if(value!=null){
-            mapEditArea._error=value
-            if (value>0)
-            printe(mapEditArea.errors[value-1])
-        }
-        return mapEditArea._error
-    }
-    mapEditArea.drawMap= function () {
-        // var mapArray = mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ');
-        var mapArray = JSON.parse('[' + mapEditArea.mapArr() + ']');
-        var sy=editor.map.length,sx=editor.map[0].length;
-        for (var y = 0; y < sy; y++)
-            for (var x = 0; x < sx; x++) {
-                var num = mapArray[y][x];
-                if (num == 0)
-                    editor.map[y][x] = 0;
-                else if (typeof(editor.indexs[num][0]) == 'undefined') {
-                    mapEditArea.error(2);
-                    editor.map[y][x] = undefined;
-                } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
-            }
-
-        editor.updateMap();
-
-    }
-    mapEditArea.formatArr= function () {
+    var formatArr= function () {
         var formatArrStr = '';
-        console.log(1)
         
         var si=editor.map.length,sk=editor.map[0].length;
-        if (mapEditArea.mapArr().split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
-        var arr = mapEditArea.mapArr().replace(/\s+/g, '').split('],[');
+        if (pout.value.split(/\D+/).join(' ').trim().split(' ').length != si*sk) return false;
+        var arr = pout.value.replace(/\s+/g, '').split('],[');
 
         if (arr.length != si) return;
         for (var i = 0; i < si; i++) {
@@ -138,31 +38,71 @@ editor_datapanel_wrapper = function (editor) {
         }
         return formatArrStr;
     }
-    window.copyMap=document.getElementById('copyMap')
-    copyMap.err=''
-    copyMap.onclick=function(){
-        tip.whichShow(0);
-        if (pout.value.trim() != '') {
-            if (mapEditArea.error()) {
-                copyMap.err = mapEditArea.errors[mapEditArea.error() - 1];
-                tip.whichShow(5)
-                return;
+
+    exportMap.onclick=function(){
+        editor.updateMap();
+        var sx=editor.map.length-1,sy=editor.map[0].length-1;
+
+        var filestr = '';
+        for (var yy = 0; yy <= sy; yy++) {
+            filestr += '['
+            for (var xx = 0; xx <= sx; xx++) {
+                var mapxy = editor.map[yy][xx];
+                if (typeof(mapxy) == typeof({})) {
+                    if ('idnum' in mapxy) mapxy = mapxy.idnum;
+                    else {
+                        printe("生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！");
+                        return;
+                    }
+                } else if (typeof(mapxy) == 'undefined') {
+                    printe("生成失败! 地图中有未定义的图块，建议先用其他有效图块覆盖或点击清除地图！");
+                    return;
+                }
+                mapxy = String(mapxy);
+                mapxy = Array(Math.max(4 - mapxy.length, 0)).join(' ') + mapxy;
+                filestr += mapxy + (xx == sx ? '' : ',')
             }
-            try {
-                pout.focus();
-                pout.setSelectionRange(0, pout.value.length);
-                document.execCommand("Copy");
-                tip.whichShow(6);
-            } catch (e) {
-                copyMap.err = e;
-                tip.whichShow(5);
-            }
+
+            filestr += ']' + (yy == sy ? '' : ',\n');
+        }
+        pout.value = filestr;
+        if (formatArr()) {
+            pout.focus();
+            pout.setSelectionRange(0, pout.value.length);
+            document.execCommand("Copy");
+            printf("导出并复制成功！");
         } else {
-            tip.whichShow(7);
+            printe("无法导出并复制此地图，可能有不合法块。")
         }
     }
-    window.clearMapButton=document.getElementById('clearMapButton')
+    importMap.onclick= function () {
+        var sy=editor.map.length,sx=editor.map[0].length;
+        var mapArray;
+        try {
+            mapArray = JSON.parse('[' + pout.value + ']');
+            if (mapArray.length != sy || mapArray[0].length != sx) throw '';
+        } catch (e) {
+            printe('格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)');
+            return;
+        }
+        var hasError = false;
+        for (var y = 0; y < sy; y++)
+            for (var x = 0; x < sx; x++) {
+                var num = mapArray[y][x];
+                if (num == 0)
+                    editor.map[y][x] = 0;
+                else if (editor.indexs[num]==null || editor.indexs[num][0]==null) {
+                    printe('当前有未定义ID（在地图区域显示红块），请用有效的图块进行覆盖！')
+                    hasError = true;
+                    editor.map[y][x] = {};
+                } else editor.map[y][x] = editor.ids[[editor.indexs[num][0]]];
+            }
+        editor.updateMap();
+        if (!hasError) printf('地图导入成功！');
+    }
+
     clearMapButton.onclick=function () {
+        if (!confirm('你确定要清除地图上所有内容么？此过程不可逆！')) return;
         editor.mapInit();
         editor_mode.onmode('');
         editor.file.saveFloorFile(function (err) {
@@ -173,15 +113,10 @@ editor_datapanel_wrapper = function (editor) {
             ;printf('地图清除成功');
         });
         editor.updateMap();
-        clearTimeout(mapEditArea.formatTimer);
-        clearTimeout(tip.timer);
-        pout.value = '';
-        mapEditArea.mapArr('');
-        tip.whichShow(4);
-        mapEditArea.error(0);
     }
-    window.deleteMap=document.getElementById('deleteMap')
+
     deleteMap.onclick=function () {
+        if (!confirm('你确定要删除此地图么？此过程不可逆！')) return;
         editor_mode.onmode('');
         var index = core.floorIds.indexOf(editor.currentFloorId);
         if (index>=0) {
@@ -196,7 +131,6 @@ editor_datapanel_wrapper = function (editor) {
         }
         else printe('删除成功,请F5刷新编辑器生效');
     }
-
 
     editor.uifunctions.newMap_func = function () {
 
@@ -408,6 +342,8 @@ editor_datapanel_wrapper = function (editor) {
     editor.uifunctions.copyPasteEnemyItem_func = function () {
         var copyEnemyItem = document.getElementById('copyEnemyItem');
         var pasteEnemyItem = document.getElementById('pasteEnemyItem');
+        var clearEnemyItem = document.getElementById('clearEnemyItem');
+        var clearAllEnemyItem = document.getElementById('clearAllEnemyItem');
 
         copyEnemyItem.onclick = function () {
             var cls = (editor_mode.info || {}).images;
@@ -417,13 +353,8 @@ editor_datapanel_wrapper = function (editor) {
             if (cls == 'enemys' || cls == 'enemy48') {
                 editor.uivalues.copyEnemyItem.data = core.clone(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id]);
                 printf("怪物属性复制成功");
-            } else {
-                editor.uivalues.copyEnemyItem.data = {};
-                for (var x in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
-                    if (items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] != null) {
-                        editor.uivalues.copyEnemyItem.data[x] = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id]);
-                    }
-                }
+            } else if (cls == 'items') {
+                editor.uivalues.copyEnemyItem.data = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id]);
                 printf("道具属性复制成功");
             }
         }
@@ -434,25 +365,98 @@ editor_datapanel_wrapper = function (editor) {
             var id = editor_mode.info.id;
             if (cls == 'enemys' || cls == 'enemy48') {
                 if (confirm("你确定要覆盖此怪物的全部属性么？这是个不可逆操作！")) {
+                    var name = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].name;
+                    var displayIdInBook = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].displayIdInBook;
                     enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id] = core.clone(editor.uivalues.copyEnemyItem.data);
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].id = id;
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].name = name;
+                    enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].displayIdInBook = displayIdInBook;
                     editor.file.saveSetting('enemys', [], function (err) {
                         if (err) printe(err);
                         else printf("怪物属性粘贴成功\n请再重新选中该怪物方可查看更新后的表格。");
                     })
                 }
-            } else {
+            } else if (cls == 'items') {
                 if (confirm("你确定要覆盖此道具的全部属性么？这是个不可逆操作！")) {
-                    for (var x in editor.uivalues.copyEnemyItem.data) {
-                        items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[x][id] = core.clone(editor.uivalues.copyEnemyItem.data[x]);
-                    }
+                    var name = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].name;
+                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id] = core.clone(editor.uivalues.copyEnemyItem.data[x]);
+                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].id = id;
+                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].name = name;
                     editor.file.saveSetting('items', [], function (err) {
                         if (err) printe(err);
                         else printf("道具属性粘贴成功\n请再重新选中该道具方可查看更新后的表格。");
                     })
                 }
             }
-
         }
+
+        var _clearEnemy = function (id) {
+            var info = core.clone(comment_c456ea59_6018_45ef_8bcc_211a24c627dc._data.enemys_template);
+            info.id = id;
+            info.name = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].name;
+            info.displayIdInBook = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id].displayIdInBook;
+            enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id] = info;
+        }
+
+        var _clearItem = function (id) {
+            for (var x in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id]) {
+                if (x != 'id' && x!='cls' && x != 'name') delete items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id][x];
+            }
+        }
+
+        clearEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || !cls) return;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                if (confirm("你确定要清空本怪物的全部属性么？这是个不可逆操作！")) {
+                    _clearEnemy(id);
+                    editor.file.saveSetting('enemys', [], function (err) {
+                        if (err) printe(err);
+                        else printf("怪物属性清空成功\n请再重新选中该怪物方可查看更新后的表格。");
+                    })
+                }
+            } else if (cls == 'items') {
+                if (confirm("你确定要清空本道具的全部属性么？这是个不可逆操作！")) {
+                    _clearItem(id);
+                    editor.file.saveSetting('items', [], function (err) {
+                        if (err) printe(err);
+                        else printf("道具属性清空成功\n请再重新选中该道具方可查看更新后的表格。");
+                    })
+                }
+            }
+        }
+
+        clearAllEnemyItem.onclick = function () {
+            var cls = (editor_mode.info || {}).images;
+            if (editor_mode.mode != 'enemyitem' || !cls) return;
+            var id = editor_mode.info.id;
+            if (cls == 'enemys' || cls == 'enemy48') {
+                if (confirm("你确定要批量清空【全塔怪物】的全部属性么？这是个不可逆操作！")) {
+                    for (var id in enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80)
+                        _clearEnemy(id);
+                    editor.file.saveSetting('enemys', [], function (err) {
+                        if (err) printe(err);
+                        else printf("全塔全部怪物属性清空成功！");
+                    })
+                }
+            } else if (cls == 'items') {
+                if (confirm("你确定要批量清空【全塔所有自动注册且未修改ID的道具】的全部属性么？这是个不可逆操作！")) {
+                    for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+                        if (/^I\d+$/.test(id)) {
+                            _clearItem(id);
+                        }
+                    }
+                    editor.file.saveSetting('items', [], function (err) {
+                        if (err) printe(err);
+                        else printf("全塔全部道具属性清空成功！");
+                    })
+                }
+            }
+        }
+
+
+
 
 
     }
@@ -529,7 +533,7 @@ editor_datapanel_wrapper = function (editor) {
             newFloorData.height = height;
 
             // Step 2:更新map, bgmap和fgmap
-            ["bgmap", "fgmap", "map"].forEach(function (name) {
+            editor.dom.maps.forEach(function (name) {
                 newFloorData[name] = [];
                 if (currentFloorData[name] && currentFloorData[name].length > 0) {
                     for (var j = 0; j < height; ++j) {

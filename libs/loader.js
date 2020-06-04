@@ -301,8 +301,8 @@ loader.prototype._loadAnimates_sync = function () {
     this._setStartLoadTipText("正在加载动画文件...");
 
     core.animates.forEach(function (t) {
-        core.http('GET', 'project/animates/' + t + ".animate?v=" + main.version, null, function (content) {
-            core.loader._loadAnimate(t, content);
+        core.http('GET', 'project/animates/' + t + ".animate?v=" + main.version, null, function (content) {        
+            core.material.animates[t] = core.loader._loadAnimate(content);
         }, function (e) {
             main.log(e);
             core.material.animates[t] = null;
@@ -316,14 +316,14 @@ loader.prototype._loadAnimates_async = function (onprogress, onfinished) {
             if (name.endsWith(".animate")) {
                 var t = name.substring(0, name.length - 8);
                 if (core.animates.indexOf(t) >= 0)
-                    core.loader._loadAnimate(t, animates[name]);
+                    core.material.animates[t] = core.loader._loadAnimate(animates[name]);
             }
         }
         onfinished();
     }, null, true, onprogress);
 }
 
-loader.prototype._loadAnimate = function (name, content) {
+loader.prototype._loadAnimate = function (content) {
     try {
         content = JSON.parse(content);
         var data = {};
@@ -362,12 +362,12 @@ loader.prototype._loadAnimate = function (name, content) {
                 })
             })
             data.frames.push(info);
-        })
-        core.material.animates[name] = data;
+        });
+        return data;
     }
     catch (e) {
         main.log(e);
-        core.material.animates[name] = null;
+        return null;
     }
 }
 

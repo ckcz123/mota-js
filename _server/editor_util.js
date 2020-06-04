@@ -1,6 +1,5 @@
-editor_util_wrapper = function (editor) {
 
-    editor_util = function () {
+    function editor_util() {
 
     }
 
@@ -168,6 +167,5 @@ editor_util_wrapper = function (editor) {
         }
     }
 
-    editor.constructor.prototype.util = new editor_util();
-}
+    export default new editor_util();
 //editor_util_wrapper(editor);

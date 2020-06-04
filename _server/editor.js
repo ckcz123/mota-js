@@ -1,3 +1,5 @@
+import editor_util from "./editor_util.js";
+
 function editor() {
     this.version = "2.0";
     this.brushMod = "line";//["line","rectangle","tileset"]
@@ -183,7 +185,7 @@ editor.prototype.init = function (callback) {
             main.init('editor', function () {
                 editor.config = new editor_config();
                 editor.config.load(function() {
-                    editor_util_wrapper(editor);
+                    editor.util = editor_util;
                     editor_game_wrapper(editor, main, core);
                     editor_file_wrapper(editor);
                     editor_table_wrapper(editor);
@@ -216,9 +218,9 @@ editor.prototype.init = function (callback) {
             }
         
             var afterCoreReset = function () {
-                var canvases = document.getElementsByClassName('gameCanvas');
-                for (var one in canvases) {
-                    canvases[one].width = canvases[one].height = core.__PIXELS__;
+                const canvases = document.getElementsByClassName('gameCanvas');
+                for (let i = 0; i < canvases.length; i++) {
+                    canvases[i].width = canvases[i].height = core.__PIXELS__;
                 }
                 
                 editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
@@ -762,5 +764,5 @@ editor.prototype.mobile_listen=function(){
 
 
 
-
 editor = new editor();
+window.editor = editor;

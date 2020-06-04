@@ -1642,7 +1642,7 @@ events.prototype._action_trigger = function (data, x, y, prefix) {
 
 events.prototype._action_insert = function (data, x, y, prefix) {
     if (data.name) { // 公共事件
-        core.insertCommonEvent(data.name);
+        core.insertCommonEvent(data.name, data.args);
     }
     else {
         // 设置参数

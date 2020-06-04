@@ -18,6 +18,7 @@ editor_multi = function () {
         lint: true,
         autocomplete: true,
         autoCloseBrackets: true,
+        styleActiveLine: true,
         highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
     });
 

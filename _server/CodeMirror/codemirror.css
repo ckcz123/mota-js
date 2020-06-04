@@ -539,7 +539,7 @@ span.CodeMirror-selectedtext {
 
 .CodeMirror-hints {
   position: absolute;
-  z-index: 301;
+  z-index: 340;
   overflow: hidden;
   list-style: none;
 
@@ -787,7 +787,7 @@ li.CodeMirror-hint-active {
 
   max-width: 40em;
   position: absolute;
-  z-index: 330;
+  z-index: 320;
   -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
   -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
   box-shadow: 2px 3px 5px rgba(0,0,0,.2);

@@ -1258,7 +1258,6 @@ tooltip : showFloorImg: 显示一个贴图，xy为左上角坐标，可用逗号
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=showFloorImg%ef%bc%9a%e6%98%be%e7%a4%ba%e8%b4%b4%e5%9b%be
 default : ["","",""]
 allFloorIds : ['IdString_0']
-selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
@@ -1292,7 +1291,6 @@ helpUrl : https://h5mota.com/games/template/_docs/#/event?id=hideFloorImg%ef%bc%
 default : ["","",""]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = MotaActionFunctions.pattern.id;
@@ -2445,7 +2443,7 @@ break_s
     :   '跳出当前循环或公共事件' Newline
 
 /* break_s
-tooltip : break：跳出循环, 如果break事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
+tooltip : break：跳出循环或公共事件！
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=break%EF%BC%9A%E8%B7%B3%E5%87%BA%E5%BE%AA%E7%8E%AF
 colour : this.eventColor
 var code = '{"type": "break"},\n';
@@ -2453,10 +2451,10 @@ return code;
 */;
 
 continue_s
-    :   '继续当前循环' Newline
+    :   '提前结束本轮循环或跳出公共事件' Newline
 
 /* continue_s
-tooltip : continue：继续执行当前循环的下一轮, 如果continue事件不在任何循环中被执行，则和exit等价，即会立刻结束当前事件！
+tooltip : continue：继续执行当前循环的下一轮，或跳出公共事件！
 helpUrl : https://h5mota.com/games/template/_docs/#/event?id=continue%EF%BC%9A%E7%BB%A7%E7%BB%AD%E6%89%A7%E8%A1%8C%E5%BD%93%E5%89%8D%E5%BE%AA%E7%8E%AF
 colour : this.eventColor
 var code = '{"type": "continue"},\n';

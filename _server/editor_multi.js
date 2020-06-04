@@ -21,14 +21,27 @@ editor_multi = function () {
         highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
     });
 
+    var ternServer = new CodeMirror.TernServer({
+        defs: terndefs_f6783a0a_522d_417e_8407_94c67b692e50,
+        plugins: {
+            doc_comments: true,
+            complete_strings: true,
+        },
+        useWorker: false
+    });
+
     editor_multi.codeEditor = codeEditor;
+
+    codeEditor.on("cursorActivity", function (cm) {
+        ternServer.updateArgHints(cm);
+    });
 
     codeEditor.on("keyup", function (cm, event) {
         if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
             (event.keyCode >= 65 && event.keyCode <= 90) ||
             (!event.shiftKey && event.keyCode == 190) || (event.shiftKey && event.keyCode == 189))) {
             try {
-                CodeMirror.commands.autocomplete(cm, null, { completeSingle: false });
+                ternServer.complete(cm);
             } catch (e) {
             }
         }
@@ -66,11 +79,17 @@ editor_multi = function () {
 
     var _format = function () {
         if (!editor_multi.lintAutocomplete) return;
-        codeEditor.setValue(js_beautify(codeEditor.getValue(), {
+        _setValue(js_beautify(codeEditor.getValue(), {
             brace_style: "collapse-preserve-inline",
             indent_with_tabs: true,
             jslint_happy: true
         }));
+    }
+
+    var _setValue = function (val) {
+        codeEditor.setValue(val || '');
+        ternServer.delDoc('doc');
+        ternServer.addDoc('doc', new CodeMirror.Doc(val || '', 'javascript'));
     }
 
     editor_multi.format = function () {
@@ -103,7 +122,7 @@ editor_multi = function () {
             input.value = '"function () {\\n\\t// 在此增加新插件\\n\\t\\n}"';
         if (input.value.slice(0, 1) === '"' || args.string) {
             editor_multi.isString = true;
-            codeEditor.setValue(JSON.parse(input.value) || '');
+            _setValue(JSON.parse(input.value) || '');
         } else {
             var num = editor_multi.indent(field);
             eval('var tobj=' + (input.value || 'null'));
@@ -118,7 +137,7 @@ editor_multi = function () {
             for (var id_ in tmap) {
                 tstr = tstr.replace('"' + id_ + '"', tmap[id_])
             }
-            codeEditor.setValue(tstr || '');
+            _setValue(tstr || '');
         }
         document.getElementById('showPlugins').style.display = editor_mode.mode == 'plugins' ? 'block': 'none';
         editor_multi.show();
@@ -194,7 +213,7 @@ editor_multi = function () {
     var multiLineArgs = [null, null, null];
     editor_multi.multiLineEdit = function (value, b, f, args, callback) {
         editor_multi.id = 'callFromBlockly';
-        codeEditor.setValue(value.split('\\n').join('\n') || '');
+        _setValue(value.split('\\n').join('\n') || '');
         multiLineArgs[0] = b;
         multiLineArgs[1] = f;
         multiLineArgs[2] = callback;
@@ -212,16 +231,16 @@ editor_multi = function () {
     editor_multi.importFile = function (filename) {
         editor_multi.id = 'importFile'
         _fileValues[0] = filename
-        codeEditor.setValue('loading')
+        _setValue('loading')
         editor_multi.show();
         fs.readFile(filename, 'base64', function (e, d) {
             if (e) {
-                codeEditor.setValue('加载文件失败:\n' + e)
+                _setValue('加载文件失败:\n' + e)
                 editor_multi.id = ''
                 return;
             }
             var str = editor.util.decode64(d)
-            codeEditor.setValue(str)
+            _setValue(str)
             _fileValues[1] = str
         })
     }

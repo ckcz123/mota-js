@@ -289,7 +289,6 @@ declare class control {
     /** 立刻聚集所有的跟随者 */
     gatherFollowers(): void
 
-
     /** 回放下一个操作 */
     replay(): void
     
@@ -367,7 +366,7 @@ declare class control {
      * @param status 绘制第几帧（默认支持1、2、4，推荐在project\icons.js中把第三帧也注册了，这里预留了一个'midFoot'作为其枚举值），不填视为静止帧（第一帧）。
      * @param offset 相对主角逻辑位置的偏移量，不填视为无偏移。用于绘制行走中的主角（正数表示前进，负数表示后退，但跟随者的后退很难看）或表现一些特殊的演出效果
      */
-    drawHero(status?: 'stop' | 'leftFoot' | 'rightFoot' | 'midFoot', offset?: number): void
+    drawHero(status?: 'stop' | 'leftFoot' | 'rightFoot', offset?: number, frame?: number): void
     
     /**
      * 获取主角面前第n格的横坐标
@@ -474,7 +473,6 @@ declare class control {
      * @returns name ? core.status.hero.loc[name] : core.status.hero.loc
      */
     getHeroLoc(): { x: number, y: number, direction: direction }
-    setHeroLoc(name: 'x' | 'y'): number
     getHeroLoc(name: 'direction'):  | direction
     
     /**
@@ -552,6 +550,240 @@ declare class control {
      * @param startTime 跳过前多少秒，不填则不跳过
      */
     playBgm(bgm: string, startTime?: number): void
+
+    /**
+     * 注册一个 animationFrame 
+     * @param name 名称，可用来作为注销使用
+     * @param needPlaying 是否只在游戏运行时才执行（在标题界面不执行）
+     * @param func 要执行的函数，或插件中的函数名；可接受timestamp（从页面加载完毕到当前所经过的时间）作为参数
+     */ 
+    registerAnimationFrame(name: string, needPlaying: bool, func?: (timestamp: number) => void): void
+
+    /** 注销一个animationFrame */
+    unregisterAnimationFrame(name: string): void
+
+    /** 游戏是否已经开始 */
+    isPlaying(): boolean
+
+    /** 清除游戏状态和数据 */
+    clearStatus(): void
+
+    /** 清除自动寻路路线 */
+    clearAutomaticRouteNode(x?: any, y?: any): void
+
+    /** 停止自动寻路操作 */
+    stopAutomaticRoute(): void
+
+    /** 保存剩下的寻路，并停止 */
+    saveAndStopAutomaticRoute(): void
+
+    /** 继续剩下的自动寻路操作 */
+    continueAutomaticRoute(): void
+
+    /** 清空剩下的自动寻路列表 */
+    clearContinueAutomaticRoute(callback?: () => any): void
+
+    /** 显示离散的寻路点 */
+    fillPosWithPoint(pos?: any): void
+
+    /** 设置行走的效果动画 */
+    setHeroMoveInterval(callback?: () => any): void
+
+    /** 每移动一格后执行的事件 */
+    moveOneStep(callback?: () => any): void
+
+    /** 当前是否正在移动 */
+    isMoving(): boolean
+
+    /** 瞬间移动 */
+    moveDirectly(destX?: any, destY?: any, ignoreSteps?: any): void
+
+    /** 改变勇士的显隐状态 */
+    triggerHero(type?: 'show' | 'hide', time?: any, callback?: () => any): void
+
+    /** 加减画布偏移 */
+    addGameCanvasTranslate(x?: number, y?: number): void
+
+    /** 设置视野范围 */
+    setViewport(x?: number, y?: number): void
+
+    /** 移动视野范围 */
+    moveViewport(steps?: any, time?: number, callback?: () => any): void
+
+    /** 更新跟随者坐标 */
+    updateFollowers(): void
+
+    /** 更新领域、夹击、阻击的伤害地图 */
+    updateCheckBlock(floorId?: string): void
+
+    /** 检查并执行领域、夹击、阻击事件 */
+    checkBlock(): void
+
+    /** 选择录像文件 */
+    chooseReplayFile(): void
+
+    /** 开始播放 */
+    startReplay(list?: any): void
+
+    /** 更改播放状态 */
+    triggerReplay(): void
+
+    /** 暂停播放 */
+    pauseReplay(): void
+
+    /** 恢复播放 */
+    resumeReplay(): void
+
+    /** 单步播放 */
+    stepReplay(): void
+
+    /** 加速播放 */
+    speedUpReplay(): void
+
+    /** 减速播放 */
+    speedDownReplay(): void
+
+    /** 设置播放速度 */
+    setReplaySpeed(speed?: number): void
+
+    /** 停止播放 */
+    stopReplay(force?: boolean): void
+
+    /** 回退 */
+    rewindReplay(): void
+
+    /** 回放时存档 */
+    saveReplay(): void
+
+    /** 回放时查看怪物手册 */
+    bookReplay(): void
+
+    /** 回放录像时浏览地图 */
+    viewMapReplay(): void
+
+    /** 回放录像时打开道具栏 */
+    toolboxReplay(): void
+
+    /** 回放录像时打开装备栏 */
+    equipboxReplay(): void
+
+    /** 是否正在播放录像 */
+    isReplaying(): boolean
+
+    /**
+     * 注册一个录像行为
+     * @param name 自定义名称，可用于注销使用
+     * @param func 具体执行录像的函数，可为一个函数或插件中的函数名；
+     *              需要接受一个action参数，代表录像回放时的下一个操作
+     *              func返回true代表成功处理了此录像行为，false代表没有处理此录像行为。
+     */
+    registerReplayAction(name: string, func: (action?: string) => bool): void
+
+    /** 注销一个录像行为 */
+    unregisterReplayAction(name: string): void
+
+    /** 自动存档 */
+    autosave(removeLast?: any): void
+
+    /** 实际进行自动存档 */
+    checkAutosave(): void
+
+    /** 实际进行存读档事件 */
+    doSL(id?: string, type?: any): void
+
+    /** 同步存档到服务器 */
+    syncSave(type?: any): void
+
+    /** 从服务器加载存档 */
+    syncLoad(): void
+
+    /** 存档到本地 */
+    saveData(): any
+
+    /** 从本地读档 */
+    loadData(data?: any, callback?: () => any): any
+
+    /** 获得某个存档内容 */
+    getSave(index?: any, callback?: () => any): any
+
+    /** 获得某些存档内容 */
+    getSaves(ids?: any, callback?: () => any): any
+
+    /** 获得所有存档内容 */
+    getAllSaves(callback?: () => any): any
+
+    /** 获得所有存在存档的存档位 */
+    getSaveIndexes(callback?: () => any): any
+
+    /** 判断某个存档位是否存在存档 */
+    hasSave(index?: number): boolean
+
+    /** 删除某个存档 */
+    removeSave(index?: number, callback?: () => any): void
+
+    /** 从status中获得属性，如果不存在则从勇士属性中获取 */
+    getStatusOrDefault(status?: any, name?: string): any
+
+    /** 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 */
+    getRealStatusOrDefault(status?: any, name?: string): any
+
+    /** 获得勇士原始属性（无装备和衰弱影响） */
+    getNakedStatus(name?: string): any
+
+    /** 锁定状态栏，常常用于事件处理 */
+    lockControl(): void
+
+    /** 解锁状态栏 */
+    unLockControl(): void
+
+    /** 获得映射文件名 */
+    getMappedName(name?: string): string
+
+    /** 暂停背景音乐的播放 */
+    pauseBgm(): void
+
+    /** 恢复背景音乐的播放 */
+    resumeBgm(resumeTime?: number): void
+
+    /** 设置音乐图标的显隐状态 */
+    setMusicBtn(): void
+
+    /** 更改背景音乐的播放 */
+    triggerBgm(): void
+
+    /** 停止所有音频 */
+    stopSound(): void
+
+    /** 检查bgm状态 */
+    checkBgm(): void
+
+    /** 清空状态栏 */
+    clearStatusBar(): void
+
+    /** 显示状态栏 */
+    showStatusBar(): void
+
+    /** 隐藏状态栏 */
+    hideStatusBar(showToolbox?: boolean): void
+
+    /** 更新状态栏的勇士图标 */
+    updateHeroIcon(name: string): void
+
+    /** 改变工具栏为按钮1-8 */
+    setToolbarButton(useButton?: boolean): void
+
+    /**
+     * 注册一个resize函数
+     * @param name 名称，可供注销使用
+     * @param func 可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
+     */
+    registerResize(name: string, func: (obj: any) => void): void
+
+    /** 注销一个resize函数 */
+    unregisterResize(name: string): void
+
+    /** 屏幕分辨率改变后重新自适应 */
+    resize(): void
 }
 
 /**@file events.js将处理所有和事件相关的操作。 */
@@ -755,14 +987,6 @@ declare class events {
     jumpHero(ex?: number, ey?: number, time?: number, callback?: () => void): void
     
     /**
-     * 打开一个全局商店
-     * @example core.openShop('moneyShop1', true); // 远程访问贪婪之神1来购买能力值，要求已经接触过神的本体
-     * @param shopId 商店id
-     * @param needVisited true表示需要已接触过商店老板本体
-     */
-    openShop(shopId: string, needVisited?: boolean): void
-    
-    /**
      * 更改主角行走图
      * @example core.setHeroIcon('npc48.png'); // 把主角从阳光变成样板0层左下角的小姐姐，但不立即刷新
      * @param name 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入flags.heroIcon
@@ -776,6 +1000,223 @@ declare class events {
      * @param itemId 道具id，其中敌人手册、传送器和飞行器会被特殊处理
      */
     tryUseItem(itemId: string): void
+
+    /** 初始化游戏 */
+    resetGame(hero?: any, hard?: any, floorId?: string, maps?: any, values?: any): void
+
+    /** 游戏获胜事件 */
+    win(reason?: anstringy, norank?: boolean, noexit?: boolean): void
+
+    /** 游戏失败事件 */
+    lose(reason?: string): void
+
+    /** 重新开始游戏；此函数将回到标题页面 */
+    restart(): void
+
+    /** 询问是否需要重新开始 */
+    confirmRestart(): void
+
+    /**
+     * 注册一个系统事件
+     * @param type 事件名
+     * @param func 为事件的处理函数，可接受(data,callback)参数 
+     */
+    registerSystemEvent(type: string, func: (data?: any, callback?: () => void) => void): void
+
+    /** 注销一个系统事件 */
+    unregisterSystemEvent(type: string): void
+
+    /** 执行一个系统事件 */
+    doSystemEvent(type: string, data?: any, callback?: () => any): void
+
+    /** 触发(x,y)点的事件 */
+    trigger(x?: number, y?: number, callback?: () => any): void
+
+    /** 战斗前触发的事件 */
+    beforeBattle(enemyId?: string, x?: number, y?: number): void
+
+    /** 战斗结束后触发的事件 */
+    afterBattle(enemyId?: string, x?: number, y?: number): void
+
+    /** 开一个门后触发的事件 */
+    afterOpenDoor(doorId?: string, x?: number, y?: number): void
+
+    /** 获得一个道具后的shij  */
+    afterGetItem(id?: string, x?: number, y?: number, isGentleClick?: boolean): void
+
+    /** 获得面前的物品（轻按） */
+    getNextItem(noRoute?: boolean): void
+
+    /** 楼层转换中 */
+    changingFloor(floorId?: string, heroLoc?: any): void
+
+    /** 转换楼层结束的事件 */
+    afterChangeFloor(floorId?: string): void
+
+    /** 是否到达过某个楼层 */
+    hasVisitedFloor(floorId?: string): boolean
+
+    /** 到达某楼层 */
+    visitFloor(floorId?: string): void
+
+    /** 推箱子 */
+    pushBox(data?: any): void
+
+    /** 推箱子后的事件 */
+    afterPushBox(): void
+
+    /** 当前是否在冰上 */
+    onSki(number?: number): boolean
+
+    /** 
+     * 注册一个自定义事件
+     * @param type 事件类型
+     * @param func 事件的处理函数，可接受(data, x, y, prefix)参数
+     *             data为事件内容，x和y为当前点坐标（可为null），prefix为当前点前缀
+     */
+    registerEvent(type: string, func: (data: any, x?: number, y?: number, prefix?: string) => void): void
+
+    /** 注销一个自定义事件 */
+    unregisterEvent(type: string): void
+
+    /** 执行一个自定义事件 */
+    doEvent(data?: any, x?: number, y?: number, prefix?: any): void
+
+    /** 直接设置事件列表 */
+    setEvents(list?: any, x?: number, y?: number, callback?: () => any): void
+
+    /** 开始执行一系列自定义事件 */
+    startEvents(list?: any, x?: number, y?: number, callback?: () => any): void
+
+    /** 往当前事件列表之前或之后添加一个公共事件 */
+    insertCommonEvent(name?: string, args?: any, x?: number, y?: number, callback?: () => any, addToLast?: boolean): void
+
+    /** 获得一个公共事件 */
+    getCommonEvent(name: string): any
+
+    /** 恢复一个事件 */
+    recoverEvents(data?: any): void
+
+    /** 检测自动事件 */
+    checkAutoEvents(): void
+
+    /** 当前是否在执行某个自动事件 */
+    autoEventExecuting(symbol?: string, value?: any): boolean
+
+    /** 当前是否执行过某个自动事件 */
+    autoEventExecuted(symbol?: string, value?: any): boolean
+
+    /** 将当前点坐标入栈 */
+    pushEventLoc(x?: number, y?: number, floorId?: string): boolean
+
+    /** 将当前点坐标入栈 */
+    popEventLoc(): any
+
+    /** 预编辑事件 */
+    precompile(data?: any): any
+
+    /** 点击怪物手册时的打开操作 */
+    openBook(fromUserAction?: boolean): void
+
+    /** 点击楼层传送器时的打开操作 */
+    useFly(fromUserAction?: boolean): void
+
+    /** 飞往某一层 */
+    flyTo(toId?: string, callback?: () => boolean): void
+
+    /** 点击装备栏时的打开操作 */
+    openEquipbox(fromUserAction?: boolean): void
+
+    /** 点击工具栏时的打开操作 */
+    openToolbox(fromUserAction?: boolean): void
+
+    /** 点击快捷商店按钮时的打开操作 */
+    openQuickShop(fromUserAction?: boolean): void
+
+    /** 点击虚拟键盘时的打开操作 */
+    openKeyBoard(fromUserAction?: boolean): void
+
+    /** 点击设置按钮时的操作 */
+    openSettings(fromUserAction?: boolean): void
+
+    /** 当前是否有未处理完毕的异步事件 */
+    hasAsync(): boolean
+
+    /** 跟随 */
+    follow(name: string): void
+
+    /** 取消跟随 */
+    unfollow(name?: string): void
+
+    /** 数值操作 */
+    setValue(name: string, operator: string, value: any, prefix?: string): void
+
+    /** 数值增减 */
+    addValue(name: string, value: any, prefix?: string): void
+
+    /** 设置全塔属性 */
+    setGlobalAttribute(name: string, value: any): void
+
+    /** 检查升级事件 */
+    checkLvUp(): void
+}
+
+/** @file actions.js 定义了玩家的操作控制 */
+declare class actions {
+    /**
+     * 此函数将注册一个用户交互行为。
+     * @param action 要注册的交互类型，如 ondown, onclick, keyDown 等等。
+     * @param name 你的自定义名称，可被注销使用；同名重复注册将后者覆盖前者。
+     * @param func 执行函数。
+     *             如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
+     * @param priority 优先级；优先级高的将会被执行。此项可不填，默认为0
+     */
+    registerAction(action: string, name: string, func: string | ((...params: any) => void), priority?: number): void
+
+    /** 注销一个用户交互行为 */
+    unregisterAction(action: string, name: string): void
+
+    /** 执行一个用户交互行为 */
+    doRegisteredAction(action: string, ...params: any): void
+
+    /** 按下某个键时 */
+    onkeyDown(e: KeyboardEvent): void
+
+    /** 放开某个键时 */
+    onkeyUp(e: KeyboardEvent): void
+
+    /** 按住某个键时 */
+    pressKey(keyCode: number): void
+
+    /** 根据按下键的code来执行一系列操作 */
+    keyDown(keyCode: number): void
+
+    /** 根据放开键的code来执行一系列操作 */
+    keyUp(keyCode: number, altKey?: boolean, fromReplay?: boolean): void
+
+    /** 点击（触摸）事件按下时 */
+    ondown(loc: number[]): void
+
+    /** 当在触摸屏上滑动时 */
+    onmove(loc: number[]): void
+
+    /** 当点击（触摸）事件放开时 */
+    onup(loc: number[]): void
+
+    /** 具体点击屏幕上(x,y)点时，执行的操作 */
+    onclick(x: number, y: number, stepPostfix?: any): void
+
+    /** 滑动鼠标滚轮时的操作 */
+    onmousewheel(direct: 1 | -1): void
+
+    /** 长按Ctrl键时 */
+    keyDownCtrl(): void
+
+    /** 长按 */
+    longClick(x: number, y: number, fromEvent?: boolean): void
+
+    /** 点击自绘状态栏时 */
+    onStatusBarClick(e?: MouseEvent): void
 }
 
 /** @file enemys.js 定义了一系列和敌人相关的API函数。 */
@@ -883,6 +1324,24 @@ declare class enemys {
      * @returns true表示有敌人被漏打，false表示敌人已死光
      */
     hasEnemyLeft(enemyId?: string, floorId?: string | string[]): boolean
+
+    /** 获得所有怪物 */
+    getEnemys(): any
+
+    /** 获得所有特殊属性定义 */
+    getSpecials(): void
+
+    /** 获得所有特殊属性的颜色 */
+    getSpecialColor(enemy: string | Enemy): void
+
+    /** 获得所有特殊属性的额外标记 */
+    getSpecialFlag(enemy: string | Enemy): void
+
+    /** 获得怪物真实属性 */
+    getEnemyInfo(enemy: string | Enemy, hero?: any, x?: number, y?: number, floorId?: string): void
+
+    /** 获得战斗伤害信息（实际伤害计算函数） */
+    getDamageInfo(enemy: string | Enemy, hero?: any, x?: number, y?: number, floorId?: string): void
 }
 
 /** @file maps.js负责一切和地图相关的处理内容 */
@@ -897,21 +1356,13 @@ declare class maps {
     getNumberById(id: string): number
     
     /**
-     * 删除不可再到达的地图
-     * @example core.removeMaps('MT0', 'MT99'); // 删除主塔0到99层，这些楼层不可再被飞到、不可再被浏览、也不计入存档
-     * @param fromId 要删除的第一张地图id
-     * @param toId 要删除的最后一张地图id，不填视为只删除第一张
-     */
-    removeMaps(fromId: string, toId?: string): void
-    
-    /**
      * 生成事件层矩阵
      * @example core.getMapArray('MT0'); // 生成主塔0层的事件层矩阵，隐藏的图块视为0
      * @param floorId 地图id，不填视为当前地图
      * @param showDisable 可选，true表示隐藏的图块也会被表示出来
      * @returns 事件层矩阵，注意对其阵元的访问是[y][x]
      */
-    getMapArray(floorId?: string, showDisable?: boolean): number[][]
+    getMapArray(floorId?: string): number[][]
     
     /**
      * 生成背景层矩阵
@@ -1189,6 +1640,144 @@ declare class maps {
      * @returns 一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
      */
     drawAnimate(name: string, x: number, y: number, alignWindow: boolean, callback?: () => void): number
+
+    /** 加载某个楼层（从剧本或存档中） */
+    loadFloor(floorId?: string, map?: any): any
+
+    /** 根据需求解析出blocks */
+    extractBlocks(map?: any, flags?: any): void
+
+    /** 根据数字获得图块 */
+    getBlockByNumber(number: number): any
+
+    /** 根据ID获得图块 */
+    getBlockById(id: string): any
+
+    /** 获得当前事件点的ID */
+    getIdOfThis(id?: string): string
+
+    /** 初始化一个图块 */
+    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any, flags?: any): any
+
+    /** 压缩地图 */
+    compressMap(mapArr?: any, floorId?: string): any
+
+    /** 解压缩地图 */
+    decompressMap(mapArr?: any, floorId?: string): any
+
+    /** 将当前地图重新变成数字，以便于存档 */
+    saveMap(floorId?: string): any
+
+    /** 将存档中的地图信息重新读取出来 */
+    loadMap(data?: any, floorId?: string): any
+
+    /** 更改地图画布的尺寸 */
+    resizeMap(floorId?: string): void
+
+    /** 以x,y的形式返回每个点的事件 */
+    getMapBlocksObj(floorId?: string, showDisable?: any): any
+
+    /** 获得某些点可否通行的信息 */
+    canMoveDirectlyArray(locs?: any): any
+
+    /** 绘制一个图块 */
+    drawBlock(block?: any, animate?: any): void
+
+    /** 生成groundPattern */
+    generateGroundPattern(floorId?: string): void
+
+    /** 某个点是否存在NPC */
+    npcExists(x?: number, y?: number, floorId?: string): boolean
+
+    /** 某个点是否存在（指定的）地形 */
+    terrainExists(x?: number, y?: number, id?: string, floorId?: string): boolean
+
+    /** 某个点是否存在楼梯 */
+    stairExists(x?: number, y?: number, floorId?: string): boolean
+
+    /** 当前位置是否在楼梯边 */
+    nearStair(): boolean
+
+    /** 某个点是否存在（指定的）怪物 */
+    enemyExists(x?: number, y?: number, id?: string, floorId?: string): boolean
+
+    /** 获得某个点的block */
+    getBlock(x?: number, y?: number, floorId?: string, showDisable?: boolean): any
+
+    /** 获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等 */
+    getBlockInfo(block?: any): any
+
+    /** 根据图块的索引来隐藏图块 */
+    hideBlockByIndex(index?: any, floorId?: string): void
+
+    /** 一次性隐藏多个block */
+    hideBlockByIndexes(indexes?: any, floorId?: string): void
+
+    /** 根据block的索引（尽可能）删除该块 */
+    removeBlockByIndex(index?: any, floorId?: string): void
+
+    /** 一次性删除多个block */
+    removeBlockByIndexes(indexes?: any, floorId?: string): void
+
+    /** 显示前景/背景地图 */
+    showBgFgMap(name?: string, loc?: any, floorId?: string, callback?: () => any): void
+
+    /** 隐藏前景/背景地图 */
+    hideBgFgMap(name?: string, loc?: any, floorId?: string, callback?: () => any): void
+
+    /** 显示一个楼层贴图 */
+    showFloorImage(loc?: any, floorId?: string, callback?: () => any): void
+
+    /** 隐藏一个楼层贴图 */
+    hideFloorImage(loc?: any, floorId?: string, callback?: () => any): void
+
+    /** 动画形式转变某点图块 */
+    animateSetBlock(number?: number | string, x?: number, y?: number, floorId?: string, time?: number, callback?: () => any): void
+
+    /** 动画形式同时转变若干点图块 */
+    animateSetBlocks(number?: number | string, locs?: any, floorId?: string, time?: number, callback?: () => any): void
+
+    /** 事件转向 */
+    turnBlock(direction?: string, x?: number, y?: number, floorId?: string): void
+
+    /** 重置地图 */
+    resetMap(floorId?: string | string[]): void
+
+    /** 显示/隐藏某个块时的动画效果 */
+    animateBlock(loc?: any, type?: any, time?: any, callback?: () => any): void
+
+    /** 添加一个全局动画 */
+    addGlobalAnimate(block?: any): void
+
+    /** 删除一个或所有全局动画 */
+    removeGlobalAnimate(x?: number, y?: number, name?: string): void
+
+    /** 绘制UI层的box动画 */
+    drawBoxAnimate(): void
+}
+
+/** @file loader.js 主要负责资源的加载 */
+declare class loader {
+    /** 加载一系列图片 */
+    loadImages(dir: any, names: any, toSave: any, callback?: () => any) : any
+
+    /** 加载某一张图片 */
+    loadImage(dir: any, imgName?: any, callback?: () => any): any
+
+    /** 从zip中加载一系列图片 */
+    loadImagesFromZip(url?: any, names?: any, toSave?: any, onprogress?: any, onfinished?: any): any
+
+    /** 加载一个音乐 */
+    loadOneMusic(name?: string): any
+
+    /** 加载一个音效 */
+    loadOneSound(name?: string): any
+
+    /** 加载一个bgm */
+    loadBgm(name?: string): any
+
+    /** 释放一个bgm的缓存 */
+    freeBgm(name?: string): any
 }
 
 /** @file items.js 主要负责一切和道具相关的内容。 */
@@ -1331,12 +1920,14 @@ declare class items {
      */
     quickLoadEquip(index: number): void
 
-    /**
-     * 计算某种属性被当前套装增加的常数值
-     * @example core.getEquippedStatus('atk') // 当前套装共加多少点攻击
-     * @param name 属性的英文缩写
-     */
-    getEquippedStatus(name: string): number
+    /** 获得所有道具 */
+    getItems(): void
+
+    /** 删除某个物品 */
+    removeItem(itemId?: string, itemNum?: number): void
+
+    /** 根据类型获得一个可用的装备孔 */
+    getEquipTypeByName(name?: string): void
 }
 
 /** @file ui.js 主要用来进行UI窗口的绘制，如对话框、怪物手册、楼传器、存读档界面等等。*/
@@ -1386,43 +1977,6 @@ declare class ui {
      */
     strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string): void
 
-
-
-    // core.ui.drawLine(name, x1, y1, x2, y2, style, lineWidth)
-    // 绘制一条线。lineWidth可选为线宽。
-
-
-    // core.ui.drawArrow(name, x1, y1, x2, y2, style, lineWidth)
-    // 绘制一个箭头。
-
-
-    // core.ui.setFont(name, font) / core.ui.setLineWidth(name, lineWidth)
-    // 设置一个画布的字体/线宽。
-
-
-    // core.ui.setAlpha(name, font) / core.ui.setOpacity(name, font)
-    // 设置一个画布的绘制不透明度和画布本身的不透明度。
-    // 两者区别如下：
-    //  - setAlpha是设置"接下来绘制的内容的不透明度"，不会对已经绘制的内容产生影响。比如setAlpha('ui', 0.5)则会在接下来的绘制中使用0.5的不透明度。
-    //  - setOpacity是设置"画布本身的不透明度"，已经绘制的内容也会产生影响。比如我已经在UI层绘制了一段文字，再setOpacity则也会看起来变得透明。
-    // 尽量不要对系统画布使用setOpacity（因为会对已经绘制的内容产生影响），自定义创建的画布则不受此限制。
-
-
-    // core.ui.setFillStyle(name, style) / core.ui.setStrokeStyle(name, style)
-    // 设置一个画布的填充样式/描边样式。
-
-
-    // core.ui.setTextAlign(name, align)
-    // 设置一个画布的文字对齐模式。
-
-
-    // core.ui.calWidth(name, text, font)
-    // 计算一段文字在画布上的绘制宽度
-    // font可选，如果存在则会先设置该画布上的字体。
-
-
-    //---------------------//
-
     /**
      * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
      * x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。
@@ -1440,7 +1994,6 @@ declare class ui {
     /** 重新定位一个自定义画布 */
     relocateCanvas(name: string, x: number, y: number): void
 
-
     /** 重新设置一个自定义画布的大小 */
     resizeCanvas(name: string, x: number, y: number): void
 
@@ -1450,19 +2003,6 @@ declare class ui {
 
     /** 清空所有的自定义画布 */
     deleteAllCanvas(): void
-
-    /**
-     * 绘制一个缩略图，比如楼传器界面，存读档界面等情况
-     * @param floorId 目标楼层ID
-     * @param canvas 绘制到的图层
-     * @param blocks 绘制的所有图块
-     * @param x 该图层开始绘制的起始点坐标
-     * @param y 该图层开始绘制的起始点坐标
-     * @param size 每一格的像素
-     * @param heroLoc 勇士坐标
-     * @param heroIcon 勇士图标
-     */
-    drawThumbnail(floorId: string, canvas: CtxRefer, blocks: any[], x: number, y: number, size: number, heroLoc: any, heroIcon: string): void
 
     /**
      *  在一个画布上绘制图片
@@ -1478,6 +2018,212 @@ declare class ui {
     drawImage(name: CtxRefer,
         image: CanvasImageSource | string,
         sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number): void
+
+    /** 根据最大宽度自动缩小字体 */
+    setFontForMaxWidth(name: string | CanvasRenderingContext2D, text: string, maxWidth: number, font?: any): string
+
+    /** 在某个canvas上绘制一个圆角矩形 */
+    fillRoundRect(name: string | CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, style?: string, angle?: number): void
+
+    /** 在某个canvas上绘制一个圆角矩形的边框 */
+    strokeRoundRect(name: string | CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, style?: string, lineWidth?: number, angle?: number): void
+
+    /** 在某个canvas上绘制一个多边形 */
+    fillPolygon(name: string | CanvasRenderingContext2D, nodes?: any, style?: string): void
+
+    /** 在某个canvas上绘制一个多边形的边框 */
+    strokePolygon(name: string | CanvasRenderingContext2D, nodes?: any, style?: string, lineWidth?: number): void
+
+    /** 在某个canvas上绘制一个椭圆 */
+    fillEllipse(name: string | CanvasRenderingContext2D, x: number, y: number, a: number, b: number, angle?: number, style?: any): void
+
+    /** 在某个canvas上绘制一个圆 */
+    fillCircle(name: string | CanvasRenderingContext2D, x: number, y: number, r: number, style?: string): void
+
+    /** 在某个canvas上绘制一个椭圆的边框 */
+    strokeEllipse(name: string | CanvasRenderingContext2D, x: number, y: number, a: number, b: number, angle?: number, style?: string, lineWidth?: number): void
+
+    /** 在某个canvas上绘制一个圆的边框 */
+    strokeCircle(name: string | CanvasRenderingContext2D, x: number, y: number, r: any, style?: string, lineWidth?: number): void
+
+    /** 在某个canvas上绘制一个扇形 */
+    fillArc(name: string | CanvasRenderingContext2D, x: number, y: number, r: number, start: number, end: number, style?: string): void
+
+    /** 在某个canvas上绘制一段弧 */
+    strokeArc(name: string | CanvasRenderingContext2D, x: number, y: number, r: number, start: number, end: number, style?: string, lineWidth?: number): void
+
+    /** 保存某个canvas状态 */
+    saveCanvas(name: string | CanvasRenderingContext2D): void
+
+    /** 加载某个canvas状态 */
+    loadCanvas(name: string | CanvasRenderingContext2D): void
+
+    /** 设置某个canvas的baseline */
+    setTextBaseline(name: string | CanvasRenderingContext2D, baseline: any): void
+
+    /** 字符串自动换行的分割 */
+    splitLines(name: string | CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string): void
+
+    /** 在某个canvas上绘制一个图标 */
+    drawIcon(name: string | CanvasRenderingContext2D, id: string, x: number, y: number, w?: number, h?: number, frame?: number): void
+
+    /** 结束一切事件和绘制，关闭UI窗口，返回游戏进程 */
+    closePanel(): void
+
+    /** 清空UI层内容 */
+    clearUI(): void
+
+    /** 左上角绘制一段提示 */
+    drawTip(text: string, id?: string, frame?: number): void
+
+    /** 清除提示内容 */
+    clearTip(): void
+
+    /** 地图中间绘制一段文字 */
+    drawText(contents: string, callback?: () => any): void
+
+    /** 绘制选择光标 */
+    drawWindowSelector(background: any, x: number, y: number, w: number, h: number): void
+
+    /** 绘制WindowSkin */
+    drawWindowSkin(background: any, ctx: string | CanvasRenderingContext2D, x: number, y: number, w: string, h: string, direction?: any, px?: any, py?: any): void
+
+    /** 绘制一个背景图，可绘制winskin或纯色背景；支持小箭头绘制 */
+    drawBackground(left: string, top: string, right: string, bottom: string, posInfo?: any): void
+
+    /** 
+     * 绘制一段文字到某个画布上面
+     * @param ctx 要绘制到的画布
+     * @param content 要绘制的内容；转义字符不允许保留 \t, \b 和 \f
+     * @param config 绘制配置项，目前暂时包含如下内容（均为可选）
+     *                left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
+     *                fontSize：字体大小；lineHeight：行高；time：打字机间隔
+     * @returns 绘制信息 
+     */ 
+    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: any): any
+
+    /** 获得某段文字的预计绘制高度；参见 drawTextContent */
+    getTextContentHeight(content: string, config?: any): void
+
+    /** 绘制一个对话框 */
+    drawTextBox(content: string, showAll?: boolean): void
+
+    /** 绘制滚动字幕 */
+    drawScrollText(content: string, time: number, lineHeight?: number, callback?: () => any): void
+
+    /** 文本图片化 */
+    textImage(content: string, lineHeight?: number): any
+
+    /** 绘制一个选项界面 */
+    drawChoices(content: string, choices: any): void
+
+    /** 绘制等待界面 */
+    drawWaiting(text: string): void
+
+    /** 绘制系统设置界面 */
+    drawSwitchs(): void
+
+    /** 绘制系统菜单栏 */
+    drawSettings(): void
+
+    /** 绘制快捷商店选择栏 */
+    drawQuickShop(): void
+
+    /** 绘制存档同步界面 */
+    drawSyncSave(): void
+
+    /** 绘制存档同步选择页面 */
+    drawSyncSelect(): void
+
+    /** 绘制单存档界面 */
+    drawLocalSaveSelect(): void
+
+    /** 绘制存档删除页面 */
+    drawStorageRemove(): void
+
+    /** 绘制回放界面 */
+    drawReplay(): void
+
+    /** 绘制游戏信息界面 */
+    drawGameInfo(): void
+
+    /** 绘制分页 */
+    drawPagination(page?: any, totalPage?: any, y?: number): void
+
+    /** 绘制键盘光标 */
+    drawCursor(): void
+
+    /** 绘制怪物手册 */
+    drawBook(index?: any): void
+
+    /** 绘制怪物属性的详细信息 */
+    drawBookDetail(index?: any): void
+
+    /** 绘制楼层传送器 */
+    drawFly(page?: any): void
+
+    /** 绘制中心对称飞行器 */
+    drawCenterFly(): void
+
+    /** 绘制浏览地图界面 */
+    drawMaps(index?: any, x?: number, y?: number): void
+
+    /** 绘制道具栏 */
+    drawToolbox(index?: any): void
+
+    /** 绘制装备界面 */
+    drawEquipbox(index?: any): void
+
+    /** 绘制存档/读档界面 */
+    drawSLPanel(index?: any, refresh?: any): void
+
+    /** 绘制虚拟键盘 */
+    drawKeyBoard(): void
+
+    /** 绘制状态栏 */
+    drawStatusBar(): void
+
+    /** 绘制“数据统计”界面 */
+    drawStatistics(floorIds?: string): void
+
+    /** 绘制“关于”界面 */
+    drawAbout(): void
+
+    /** 绘制帮助页面 */
+    drawHelp(): void
+
+    /** 绘制灯光效果 */
+    drawLight(name: string | CanvasRenderingContext2D, color?: any, lights?: any, lightDec?: number): void
+
+    /** 在某个canvas上绘制一条线 */
+    drawLine(name: string | CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number): void
+
+    /** 在某个canvas上绘制一个箭头 */
+    drawArrow(name: string | CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number): void
+
+    /** 设置某个canvas的文字字体 */
+    setFont(name: string | CanvasRenderingContext2D, font: string): void
+
+    /** 设置某个canvas的线宽度 */
+    setLineWidth(name: string | CanvasRenderingContext2D, lineWidth: number): void
+
+    /** 设置某个canvas的alpha值 */
+    setAlpha(name: string | CanvasRenderingContext2D, alpha: number): void
+
+    /** 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 */
+    setOpacity(name: string | CanvasRenderingContext2D, opacity: number): void
+
+    /** 设置某个canvas的绘制属性（如颜色等） */
+    setFillStyle(name: string | CanvasRenderingContext2D, style: string): void
+
+    /** 设置某个canvas边框属性 */
+    setStrokeStyle(name: string | CanvasRenderingContext2D, style: string): void
+
+    /** 设置某个canvas的对齐 */
+    setTextAlign(name: string | CanvasRenderingContext2D, align: string): void
+
+    /** 计算某段文字的宽度 */
+    calWidth(name: string | CanvasRenderingContext2D, text: string, font?: string): number
 }
 
 /** 工具类 主要用来进行一些辅助函数的计算 */
@@ -1487,11 +2233,9 @@ declare class utils {
      * 将一段文字中的${}（表达式）进行替换。
      * @example core.replaceText('衬衫的价格是${status:hp}镑${item:yellowKey}便士。'); // 把主角的生命值和持有的黄钥匙数量代入这句话
      * @param text 模板字符串，可以使用${}计算js表达式，支持“状态、物品、变量、独立开关、全局存储、图块id、图块类型、敌人数据、装备id”等量参与运算
-     * @param need 全局商店价格，一般可省略
-     * @param times 全局商店已购次数，一般可省略
      * @returns 替换完毕后的字符串
      */
-    replaceText(text: string, prefix?: string, need?: number, times?: number): string
+    replaceText(text: string, prefix?: string): string
 
     /**
      * 对一个表达式中的特殊规则进行替换，如status:xxx等。
@@ -1506,11 +2250,9 @@ declare class utils {
      * @example core.calValue('status:hp + status:def'); // 计算主角的生命值加防御力
      * @param value 待求值的表达式
      * @param prefix 独立开关前缀，一般可省略
-     * @param need 全局商店价格，一般可省略
-     * @param times 全局商店已购次数，一般可省略
      * @returns 求出的值
      */
-    calValue(value: string, prefix?: string, need?: number, times?: number): any
+    calValue(value: string, prefix?: string): any
 
     /**
      * 将b（可以是另一个数组）插入数组a的开头，此函数用于弥补a.unshift(b)中b只能是单项的不足。
@@ -1661,14 +2403,6 @@ declare class utils {
     strlen(str: string): number
 
     /**
-     * 反转朝向，即旋转180°
-     * @example core.turnHero(core.reverseDirection(core.status.hero.loc.direction)); // 主角原地转身180°
-     * @param direction 原朝向，不填则取主角当前朝向
-     * @returns 反转后的朝向
-     */
-    reverseDirection(direction?: direction): direction
-
-    /**
      * 通配符匹配，用于搜索图块等批量处理。
      * @example core.playSound(core.matchWildcard('*Key', itemId) ? 'item.mp3' : 'door.mp3'); // 判断捡到的是钥匙还是别的道具，从而播放不同的音效
      * @param pattern 模式串，每个星号表示任意多个（0个起）字符
@@ -1760,6 +2494,83 @@ declare class utils {
      * @param error 失败后的回调
      */
     http(type: 'GET' | 'POST', url: string, formData: FormData, success: () => void, error: () => void): void
+
+    /** 解压缩一个数据 */
+    decompress(value: any): any
+
+    /** 设置本地存储 */
+    setLocalStorage(key: string, value?: any): void
+
+    /** 获得本地存储 */
+    getLocalStorage(key: string, defaultValue?: any): any
+
+    /** 移除本地存储 */
+    removeLocalStorage(key: string): void
+
+    /** 往数据库写入一段数据 */
+    setLocalForage(key: string, value?: any, successCallback?: () => void, errorCallback?: () => void): void
+
+    /** 从数据库读出一段数据 */
+    getLocalForage(key: string, defaultValue?: any, successCallback?: (data: any) => void, errorCallback?: () => void): void
+
+    /** 移除数据库的数据 */
+    removeLocalForage(key: string, successCallback?: () => void, errorCallback?: () => void): void
+
+    /** 格式化日期为字符串 */
+    formatDate(date: Date): string
+
+    /** 格式化日期为最简字符串 */
+    formatDate2(date: Date): string
+
+    /** 格式化时间 */
+    formatTime(time: number): string
+
+    /** 两位数显示 */
+    setTwoDigits(x: number): string
+
+    /** 格式化文件大小 */
+    formatSize(size: number): string
+
+    /** 访问浏览器cookie */
+    getCookie(name: string): string
+
+    /**
+     * 转向某方向
+     * @param turn 转向的方向
+     * @param direction 当前方向
+     */
+    turnDirection(turn: 'up' | 'down' | 'left' | 'right' | ':left' | ':right' | ':back', direction?: string): string
+
+    /** 是否满足正则表达式 */
+    matchRegex(pattern: string, string: string): string
+
+    /** 让用户输入一段文字 */
+    myprompt(hint: string, value: string, callback?: (data?: string) => any): void
+
+    /** 动画显示某对象 */
+    showWithAnimate(obj?: any, speed?: number, callback?: () => any): void
+
+    /** 动画使某对象消失 */
+    hideWithAnimate(obj?: any, speed?: number, callback?: () => any): void
+
+    /** 解压一段内容 */
+    unzip(blobOrUrl?: any, success?: (data: any) => void, error?: (error: string) => void, convertToText?: bool, onprogress?: (loaded: number, total: number) => void): void
+}
+
+/** 和图标相关的函数 */
+declare class icons {
+
+    /** 获得所有图标类型 */
+    getIcons(): void
+
+    /** 根据ID获得其类型 */
+    getClsFromId(id?: string): void
+
+    /** 获得所有图标的ID */
+    getAllIconIds(): void
+
+    /** 根据图块数字或ID获得所在的tileset和坐标信息 */
+    getTilesetOffset(id?: string): void
 }
 
 type core = {
@@ -1890,13 +2701,16 @@ type core = {
     floors: { [key: string]: Floor }
 
     control: control
+    loader: loader
     events: events
     enemys: enemys
     items: items
     maps: maps
     ui: ui
     utils: utils
+    icons: icons
+    actions: actions
 
-} & control & events & enemys & items & maps & ui & utils
+} & control & events & loader & enemys & items & maps & ui & utils & icons & actions
 
 declare var core: core

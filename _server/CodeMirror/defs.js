@@ -1178,5 +1178,440 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
     },
     "!doc": "JSON (JavaScript Object Notation) is a data-interchange format.  It closely resembles a subset of JavaScript syntax, although it is not a strict subset. (See JSON in the JavaScript Reference for full details.)  It is useful when writing any kind of JavaScript-based application, including websites and browser extensions.  For example, you might store user information in JSON format in a cookie, or you might store extension preferences in JSON in a string-valued browser preference."
   }
+},
+{
+  "!name": "core",
+  "!define": {
+    "hero": {
+      "image": {
+        "!type": "string",
+        "!doc": "行走图"
+      },
+      "animate": {
+        "!type": "bool",
+        "!doc": "是否开启帧动画"
+      },
+      "name": {
+        "!type": "string",
+        "!doc": "勇士名"
+      },
+      "lv": {
+        "!type": "number",
+        "!doc": "勇士等级"
+      },
+      "hpmax": {
+        "!type": "number",
+        "!doc": "勇士生命上限"
+      },
+      "hp": {
+        "!type": "number",
+        "!doc": "勇士当前生命值 "
+      },
+      "atk": {
+        "!type": "number",
+        "!doc": "勇士当前攻击力"
+      },
+      "def": {
+        "!type": "number",
+        "!doc": "勇士当前防御力"
+      },
+      "manamax": {
+        "!type": "number",
+        "!doc": "勇士当前魔力上线"
+      },
+      "mana": {
+        "!type": "number",
+        "!doc": "勇士当前魔力值"
+      },
+      "mdef": {
+        "!type": "number",
+        "!doc": "勇士当前护盾值"
+      },
+      "money": {
+        "!type": "number",
+        "!doc": "勇士当前金币"
+      },
+      "exp": {
+        "!type": "number",
+        "!doc": "勇士当前经验"
+      },
+      "equipment": {
+        "!type": "[string]",
+        "!doc": "勇士当前装备"
+      },
+      "items": {
+        "!doc": "勇士当前道具",
+        "constants": {
+          "!doc": "永久道具"
+        },
+        "tools": {
+          "!doc": "消耗道具"
+        },
+        "equips": {
+          "!doc": "未装备上的装备"
+        },
+      },
+      "loc": {
+        "!doc": "勇士当前坐标和朝向",
+        "x": {
+          "!type": "number",
+          "!doc": "当前x坐标"
+        },
+        "y": {
+          "!type": "number",
+          "!doc": "当前y坐标"
+        },
+        "direction": {
+          "!type": "number",
+          "!doc": "当前朝向"
+        },
+      },
+      "flags": {
+        "!doc": "当前变量"
+      },
+      "followers": {
+        "!type": "[?]",
+        "!doc": "跟随者信息"
+      },
+      "steps": {
+        "!type": "number",
+        "!doc": "当前步数"
+      }
+    },
+    "block": {
+      "x": {
+        "!type": "number",
+        "!doc": "图块的x坐标"
+      },
+      "y": {
+        "!type": "number",
+        "!doc": "图块的y坐标"
+      },
+      "id": {
+        "!type": "number",
+        "!doc": "图块的数字"
+      },
+      "event": {
+        "id": {
+          "!type": "string",
+          "!doc": "图块的ID"
+        },
+        "cls": {
+          "!type": "string",
+          "!doc": "图块的类别"
+        },
+        "disabled": {
+          "!type": "bool",
+          "!doc": "启用状态"
+        }
+      }
+    },
+    "enemy": {
+      "id": {
+        "!type": "string",
+        "!doc": "怪物ID"
+      },
+      "name": {
+        "!type": "string",
+        "!doc": "怪物名称"
+      },
+      "displayIdInBook": {
+        "!type": "string",
+        "!doc": "在怪物手册映射ID"
+      },
+      "hp": {
+        "!type": "number",
+        "!doc": "怪物生命值"
+      },
+      "atk": {
+        "!type": "number",
+        "!doc": "怪物攻击"
+      },
+      "def": {
+        "!type": "number",
+        "!doc": "怪物防御"
+      },
+      "money": {
+        "!type": "number",
+        "!doc": "怪物金币"
+      },
+      "exp": {
+        "!type": "number",
+        "!doc": "怪物经验"
+      },
+      "special": {
+        "!type": "[number]",
+        "!doc": "怪物特殊属性"
+      },
+      "point": {
+        "!type": "number",
+        "!doc": "怪物加点"
+      },
+      "value": {
+        "!type": "number",
+        "!doc": "怪物特殊属性值：阻激夹域伤害值；吸血比例；光环增加生命比例"
+      },
+      "zoneSquare": {
+        "!type": "bool",
+        "!doc": "领域怪是否九宫格伤害；区域光环是否九宫格范围"
+      },
+      "range": {
+        "!type": "number",
+        "!doc": "领域伤害的范围；区域光环范围"
+      },
+      "notBomb": {
+        "!type": "bool",
+        "!doc": "怪物不可炸"
+      },
+      "n": {
+        "!type": "number",
+        "!doc": "多连击的连击数；净化比例"
+      },
+      "add": {
+        "!type": "bool",
+        "!doc": "吸血是否加到自身；光环是否叠加"
+      },
+      "atkValue": {
+        "!type": "number",
+        "!doc": "反击比例；退化扣除攻击；光环增加攻击；"
+      },
+      "defValue": {
+        "!type": "number",
+        "!doc": "破甲比例；退化扣除防御；光环增加防御"
+      },
+      "damage": {
+        "!type": "number",
+        "!doc": "固伤值"
+      },
+    },
+    "item":{
+      "id": {
+        "!type": "string",
+        "!doc": "道具ID"
+      },
+      "cls": {
+        "!type": "string",
+        "!doc": "道具类型"
+      },
+      "name": {
+        "!type": "string",
+        "!doc": "道具名称"
+      },
+      "text": {
+        "!type": "string",
+        "!doc": "道具描述"
+      },
+      "hideInToolbox": {
+        "!type": "bool",
+        "!doc": "不显示在道具栏"
+      },
+      "equip": {
+        "!doc": "装备属性",
+        "type": {
+          "!type": "number|string",
+          "!doc": "装备类型"
+        },
+        "animate": {
+          "!type": "string",
+          "!doc": "装备动画"
+        },
+        "value": {
+          "!doc": "数值加成"
+        },
+        "percentage": {
+          "!doc": "比例加成"
+        }
+      },
+      "hideInReplay": {
+        "!type": "bool",
+        "!doc": "回放不绘制道具栏"
+      },
+    },
+    "floor": {
+      "floorId": {
+        "!type": "string",
+        "!doc": "楼层ID"
+      },
+      "title": {
+        "!type": "string",
+        "!doc": "楼层中文名"
+      },
+      "name": {
+        "!type": "string",
+        "!doc": "状态栏显示值"
+      },
+      "width": {
+        "!type": "number",
+        "!doc": "地图宽"
+      },
+      "height": {
+        "!type": "number",
+        "!doc": "地图高"
+      },
+      "canFlyTo": {
+        "!type": "bool",
+        "!doc": "该楼是否可以楼传"
+      },
+      "canUseQuickShop": {
+        "!type": "bool",
+        "!doc": "该楼是否可快捷商店"
+      },
+      "cannotViewMap": {
+        "!type": "bool",
+        "!doc": "该层是否不允许被浏览地图看到"
+      },
+      "cannotMoveDirectly": {
+        "!type": "bool",
+        "!doc": "该层是否不允许瞬间移动"
+      },
+      "upFloor": {
+        "!type": "[number]",
+        "!doc": "上楼点"
+      },
+      "downFloor": {
+        "!type": "[number]",
+        "!doc": "下楼点"
+      },
+      "flyPoint": {
+        "!type": "[number]",
+        "!doc": "楼传落点"
+      },
+      "color": {
+        "!doc": "楼层色调"
+      },
+      "weather": {
+        "!doc": "楼层天气"
+      },
+      "bgm": {
+        "!type": "string",
+        "!doc": "楼层背景音乐"
+      },
+      "ratio": {
+        "!type": "number",
+        "!doc": "宝石/血瓶效果"
+      },
+      "map": {
+        "!type": "[[number]]",
+        "!doc": "地图数据"
+      },
+      "blocks": {
+        "!type": "[block]",
+        "!doc": "本层图块信息"
+      }
+    },
+    "animate": {
+      "!doc": "动画",
+      "se": {
+        "!type": "string",
+        "!doc": "动画音效"
+      }
+    }
+  },
+  "core": {
+    "__SIZE__": {
+      "!type": "number",
+      "!doc": "窗口宽度的，为13或15"
+    },
+    "__PIXELS__": {
+      "!type": "number",
+      "!doc": "窗口像素宽度，为416或480"
+    },
+    "material": {
+      "animates": {
+        "!doc": "注册的动画"
+      },
+      "images": {
+        "!doc": "注册过的图片"
+      },
+      "bgms": {
+        "!doc": "注册的背景音乐"
+      },
+      "sounds": {
+        "!doc": "注册的音效"
+      },
+      "enemys": {
+        "!doc": "怪物定义",
+      },
+      "items": {
+        "!doc": "道具定义"
+      }
+    },
+    "musicStatus": {
+      "bgmStatus": {
+        "!type": "bool",
+        "!doc": "是否播放BGM"
+      },
+      "soundStatus": {
+        "!type": "bool",
+        "!doc": "是否播放SE"
+      },
+      "playingBgm": {
+        "!type": "string",
+        "!doc": "正在播放的bgm"
+      },
+      "lastBgm": {
+        "!type": "string",
+        "!doc": "上次播放的bgm"
+      },
+      "playingSounds": {
+        "!doc": "正在播放的SE"
+      },
+      "volume": {
+        "!type": "number",
+        "!doc": "当前音量"
+      }
+    },
+    "platform": {
+      "!doc": "平台信息",
+      "isPC": "bool",
+      "isAndroid": "bool",
+      "isIOS": "bool",
+      "useLocalForage": "bool"
+    },
+    "domStyle": {
+      "!doc": "界面样式",
+      "scale": {
+        "!type": "number",
+        "!doc": "当前界面放缩比例",
+      },
+      "availableScale": {
+        "!type": "[number]",
+        "!doc": "当前界面支持的放缩比例"
+      },
+      "isVertical": {
+        "!type": "bool",
+        "!doc": "当前是否是竖屏"
+      },
+      "showStatusBar": {
+        "!type": "bool",
+        "!doc": "当前是否显示状态栏"
+      },
+      "showStatusBar": {
+        "!type": "bool",
+        "!doc": "当前工具栏是否是1-8的按钮"
+      },
+    },
+    "bigmap": {
+
+    },
+    "status": {
+      "hero": {
+        "!type": "hero",
+        "!doc": "勇士信息"
+      },
+      "thisMap": {
+        "!type": "floor",
+        "!doc": "当前地图信息"
+      }
+    },
+    "hasSpecial": {
+      "!type": "fn(special: ?, test: number) -> bool",
+      "!doc": "判定怪物是否拥有某种特殊属性；special - 怪物的ID、特殊属性值或怪物本身；test - 待检查的的属性编号；"
+    },
+    "getBlock": {
+      "!type": "fn(x?: number, y?: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}",
+      "_doc": "返回地图上某个点的图块信息"
+    }
+  },
 }
 ];

@@ -22,6 +22,61 @@ editor_multi = function () {
         highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
     });
 
+    var coredef = terndefs_f6783a0a_522d_417e_8407_94c67b692e50[2];
+    Object.keys(core.material.enemys).forEach(function (name){
+        coredef.core.material.enemys[name] = {
+            "!type": "enemy",
+            "!doc": core.material.enemys[name].name || "怪物"
+        }
+    });
+    Object.keys(core.material.bgms).forEach(function (name) {
+        coredef.core.material.bgms[name] = {
+            "!type": "?",
+            "!doc": "背景音乐"
+        }
+    });
+    Object.keys(core.material.sounds).forEach(function (name) {
+        coredef.core.material.sounds[name] = {
+            "!type": "?",
+            "!doc": "音效"
+        }
+    });
+    Object.keys(core.material.animates).forEach(function (name) {
+        coredef.core.material.animates[name] = {
+            "!type": "animate",
+            "!doc": "动画"
+        }
+    });
+    Object.keys(core.material.images).forEach(function (name) {
+        if (core.material.images[name] instanceof Image) {
+            coredef.core.material.images[name] = {
+                "!type": "?",
+                "!doc": "系统图片"
+            }
+        } else {
+            coredef.core.material.images[name] = {
+                "!doc": name == 'autotile' ? '自动元件' : name == 'tilesets' ? '额外素材' : name == 'images' ? '自定义图片' : '系统图片'
+            }
+            for (var v in core.material.images[name]) {
+                coredef.core.material.images[name][v] = {
+                    "!type": "?",
+                }
+            }
+        }
+
+    })
+    Object.keys(core.material.items).forEach(function (name) {
+        coredef.core.material.items[name] = {
+            "!type": "item",
+            "!doc": core.material.items[name].name || "道具"
+        }
+    });
+    functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials().forEach(function (one) {
+        var name = one[1];
+        if (name instanceof Function) name = name({});
+        coredef.core.hasSpecial["!doc"] += name + "(" + one[0] + "); ";
+    });
+
     var ternServer = new CodeMirror.TernServer({
         defs: terndefs_f6783a0a_522d_417e_8407_94c67b692e50,
         plugins: {

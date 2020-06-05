@@ -473,7 +473,8 @@ declare class control {
      * @returns name ? core.status.hero.loc[name] : core.status.hero.loc
      */
     getHeroLoc(): { x: number, y: number, direction: direction }
-    getHeroLoc(name: 'direction'):  | direction
+    getHeroLoc(name: 'x' | 'y'): number
+    getHeroLoc(name: 'direction'): direction
     
     /**
      * 根据级别的数字获取对应的名称，后者定义在全塔属性
@@ -557,7 +558,7 @@ declare class control {
      * @param needPlaying 是否只在游戏运行时才执行（在标题界面不执行）
      * @param func 要执行的函数，或插件中的函数名；可接受timestamp（从页面加载完毕到当前所经过的时间）作为参数
      */ 
-    registerAnimationFrame(name: string, needPlaying: bool, func?: (timestamp: number) => void): void
+    registerAnimationFrame(name: string, needPlaying: boolean, func?: (timestamp: number) => void): void
 
     /** 注销一个animationFrame */
     unregisterAnimationFrame(name: string): void
@@ -677,7 +678,7 @@ declare class control {
      *              需要接受一个action参数，代表录像回放时的下一个操作
      *              func返回true代表成功处理了此录像行为，false代表没有处理此录像行为。
      */
-    registerReplayAction(name: string, func: (action?: string) => bool): void
+    registerReplayAction(name: string, func: (action?: string) => boolean): void
 
     /** 注销一个录像行为 */
     unregisterReplayAction(name: string): void
@@ -1005,7 +1006,7 @@ declare class events {
     resetGame(hero?: any, hard?: any, floorId?: string, maps?: any, values?: any): void
 
     /** 游戏获胜事件 */
-    win(reason?: anstringy, norank?: boolean, noexit?: boolean): void
+    win(reason?: string, norank?: boolean, noexit?: boolean): void
 
     /** 游戏失败事件 */
     lose(reason?: string): void
@@ -2554,7 +2555,7 @@ declare class utils {
     hideWithAnimate(obj?: any, speed?: number, callback?: () => any): void
 
     /** 解压一段内容 */
-    unzip(blobOrUrl?: any, success?: (data: any) => void, error?: (error: string) => void, convertToText?: bool, onprogress?: (loaded: number, total: number) => void): void
+    unzip(blobOrUrl?: any, success?: (data: any) => void, error?: (error: string) => void, convertToText?: boolean, onprogress?: (loaded: number, total: number) => void): void
 }
 
 /** 和图标相关的函数 */

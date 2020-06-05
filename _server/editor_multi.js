@@ -76,6 +76,50 @@ editor_multi = function () {
         if (name instanceof Function) name = name({});
         coredef.core.hasSpecial["!doc"] += name + "(" + one[0] + "); ";
     });
+    Object.keys(core.canvas).forEach(function (name) {
+        coredef.core.canvas[name] = {
+            "!type": "CanvasRenderingContext2D",
+            "!doc": "系统画布"
+        }
+    });
+    Object.keys(core.status.maps).forEach(function (name) {
+        coredef.core.status.maps[name] = {
+            "!type": "floor",
+            "!doc": core.status.maps[name].title || ''
+        }
+        coredef.core.status.bgmaps[name] = {
+            "!type": "[[number]]",
+            "!doc": core.status.maps[name].title || ''
+        }
+        coredef.core.status.fgmaps[name] = {
+            "!type": "[[number]]",
+            "!doc": core.status.maps[name].title || ''
+        }
+    });
+    Object.keys(core.status.shops).forEach(function (id) {
+        coredef.core.status.shops[id] = {
+            "!doc": core.status.shops[id].textInList || "全局商店"
+        }
+    });
+    Object.keys(core.status.textAttribute).forEach(function (id) {
+        coredef.core.status.textAttribute[id] = {};
+    });
+    Object.keys(core.values).forEach(function (id) {
+        var one = data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc._data.values._data[id];
+        if (!one) return;
+        coredef.core.values[id] = {
+            "!type": "number",
+            "!doc": one._data,
+        }
+    });
+    Object.keys(core.flags).forEach(function (id) {
+        var one = data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc._data.flags._data[id];
+        if (!one) return;
+        coredef.core.flags[id] = {
+            "!type": id == 'statusBarItems' ? '[string]' : 'bool',
+            "!doc": one._data,
+        }
+    });
 
     var ternServer = new CodeMirror.TernServer({
         defs: terndefs_f6783a0a_522d_417e_8407_94c67b692e50,

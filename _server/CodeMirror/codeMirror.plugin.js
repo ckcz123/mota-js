@@ -1860,21 +1860,21 @@
 
   function showContextInfo(ts, cm, pos, queryName, c) {
     ts.request(cm, queryName, function(error, data) {
-      if (error) return showError(ts, cm, error);
-      if (ts.options.typeTip) {
-        var tip = ts.options.typeTip(data);
-      } else {
+      data = data || {};
+      data.type = data.type || '';
+      data.doc = data.doc || '';
+      if (!error && (data.type.startsWith('fn(') || data.doc)) {
         var tip = elt("span", null, elt("strong", null, data.type || "not found"));
         if (data.doc)
-          tip.appendChild(document.createTextNode(" — " + data.doc));
-        if (data.url) {
+          tip.appendChild(document.createTextNode(" — " + data.doc)); /*
+        if (data.type.startsWith('fn(') && data.url) {
           tip.appendChild(document.createTextNode(" "));
           var child = tip.appendChild(elt("a", null, "[docs]"));
           child.href = data.url;
           child.target = "_blank";
-        }
+        } */
+        tempTooltip(cm, tip, ts);
       }
-      tempTooltip(cm, tip, ts);
       if (c) c();
     }, pos);
   }
@@ -2204,7 +2204,6 @@
   }
 
   // Tooltips
-
   function tempTooltip(cm, content, ts) {
     if (cm.state.ternTooltip) remove(cm.state.ternTooltip);
     var where = cm.cursorCoords();
@@ -2215,7 +2214,7 @@
     }
     function clear() {
       cm.state.ternTooltip = null;
-      if (tip.parentNode) fadeOut(tip)
+      if (tip.parentNode) remove(tip)
       clearActivity()
     }
     var mouseOnTip = false, old = false;

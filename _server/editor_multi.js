@@ -34,7 +34,10 @@ editor_multi = function () {
     editor_multi.codeEditor = codeEditor;
 
     codeEditor.on("cursorActivity", function (cm) {
-        ternServer.updateArgHints(cm);
+        if (codeEditor.getOption("autocomplete")) {
+            ternServer.updateArgHints(cm);
+            ternServer.showDocs(cm);
+        }
     });
 
     codeEditor.on("keyup", function (cm, event) {

@@ -1866,13 +1866,13 @@
       if (!error && (data.type.startsWith('fn(') || data.doc)) {
         var tip = elt("span", null, elt("strong", null, data.type || "not found"));
         if (data.doc)
-          tip.appendChild(document.createTextNode(" — " + data.doc)); /*
-        if (data.type.startsWith('fn(') && data.url) {
-          tip.appendChild(document.createTextNode(" "));
-          var child = tip.appendChild(elt("a", null, "[docs]"));
+          tip.appendChild(document.createTextNode("\n" + data.doc.replace(/<br\/?>/g,"\n")));
+        if (data.url) {
+          tip.appendChild(document.createTextNode("\n"));
+          var child = tip.appendChild(elt("a", null, "[文档]"));
           child.href = data.url;
           child.target = "_blank";
-        } */
+        }
         tempTooltip(cm, tip, ts);
       }
       if (c) c();
@@ -2208,25 +2208,19 @@
     if (cm.state.ternTooltip) remove(cm.state.ternTooltip);
     var where = cm.cursorCoords();
     var tip = cm.state.ternTooltip = makeTooltip(where.right + 1, where.bottom, content);
-    function maybeClear() {
-      old = true;
-      if (!mouseOnTip) clear();
-    }
     function clear() {
+      if (mouseOnTip) {
+        mouseOnTip = false;
+        setTimeout(clear, 50);
+        return;
+      }
       cm.state.ternTooltip = null;
       if (tip.parentNode) remove(tip)
       clearActivity()
     }
-    var mouseOnTip = false, old = false;
+    var mouseOnTip = false;
     CodeMirror.on(tip, "mousemove", function() { mouseOnTip = true; });
-    CodeMirror.on(tip, "mouseout", function(e) {
-      var related = e.relatedTarget || e.toElement
-      if (!related || !CodeMirror.contains(tip, related)) {
-        if (old) clear();
-        else mouseOnTip = false;
-      }
-    });
-    setTimeout(maybeClear, ts.options.hintDelay ? ts.options.hintDelay : 1700);
+    CodeMirror.on(tip, "mouseout", function(e) { mouseOnTip = false; });
     var clearActivity = onEditorActivity(cm, clear)
   }
 
@@ -2244,6 +2238,9 @@
   }
 
   function makeTooltip(x, y, content) {
+    if (typeof content === 'string') {
+      content = content.replace(/<br\/?>/g, '\n')
+    }
     var node = elt("div", cls + "tooltip", content);
     node.style.left = x + "px";
     node.style.top = y + "px";

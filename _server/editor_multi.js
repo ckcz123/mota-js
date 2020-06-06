@@ -31,13 +31,13 @@ editor_multi = function () {
     });
     Object.keys(core.material.bgms).forEach(function (name) {
         coredef.core.material.bgms[name] = {
-            "!type": "?",
+            "!type": "audio",
             "!doc": "背景音乐"
         }
     });
     Object.keys(core.material.sounds).forEach(function (name) {
         coredef.core.material.sounds[name] = {
-            "!type": "?",
+            "!type": "audio",
             "!doc": "音效"
         }
     });
@@ -50,7 +50,7 @@ editor_multi = function () {
     Object.keys(core.material.images).forEach(function (name) {
         if (core.material.images[name] instanceof Image) {
             coredef.core.material.images[name] = {
-                "!type": "?",
+                "!type": "image",
                 "!doc": "系统图片"
             }
         } else {
@@ -59,7 +59,7 @@ editor_multi = function () {
             }
             for (var v in core.material.images[name]) {
                 coredef.core.material.images[name][v] = {
-                    "!type": "?",
+                    "!type": "image",
                 }
             }
         }
@@ -74,7 +74,7 @@ editor_multi = function () {
     functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials().forEach(function (one) {
         var name = one[1];
         if (name instanceof Function) name = name({});
-        coredef.core.hasSpecial["!doc"] += name + "(" + one[0] + "); ";
+        coredef.core.enemys.hasSpecial["!doc"] += name + "(" + one[0] + "); ";
     });
     Object.keys(core.canvas).forEach(function (name) {
         coredef.core.canvas[name] = {
@@ -104,6 +104,23 @@ editor_multi = function () {
     Object.keys(core.status.textAttribute).forEach(function (id) {
         coredef.core.status.textAttribute[id] = {};
     });
+    // --- 转发函数
+    for (var name in coredef.core) {
+        if (typeof coredef.core[name] === 'object') {
+            for (var funcname in coredef.core[name]) {
+                var one = coredef.core[name][funcname] || {};
+                var type = one["!type"] || "";
+                if (type.startsWith("fn(")) {
+                    coredef.core[funcname] = {
+                        "!type": one["!type"],
+                        "!doc": one["!doc"] + "<br/>（转发到 " + name + " 中）"
+                    };
+                    if (one["!url"]) coredef.core[funcname]["!url"] = one["!url"];
+                }
+            }
+        }
+    }
+
     Object.keys(core.values).forEach(function (id) {
         var one = data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc._data.values._data[id];
         if (!one) return;

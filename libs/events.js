@@ -448,7 +448,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
     if (!this._openDoor_check(id, x, y, needKey)) {
         var locked = core.status.lockControl;
         core.waitHeroToStop(function () {
-            if (!locked) core.unLockControl();
+            if (!locked) core.unlockControl();
             if (callback) callback();
         });
         return;
@@ -531,7 +531,7 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
         if (state == 4) {
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
-            if (!locked) core.unLockControl();
+            if (!locked) core.unlockControl();
             core.status.replay.animate = false;
             core.events.afterOpenDoor(id, x, y);
             if (callback) callback();
@@ -747,7 +747,7 @@ events.prototype._changeFloor_changing = function (info, callback) {
 }
 
 events.prototype._changeFloor_afterChange = function (info, callback) {
-    if (!info.locked) core.unLockControl();
+    if (!info.locked) core.unlockControl();
     core.status.replay.animate = false;
     core.events.afterChangeFloor(info.floorId);
 
@@ -2426,14 +2426,14 @@ events.prototype.useFly = function (fromUserAction) {
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
         core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name);
-        core.unLockControl();
+        core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
     if (!core.canUseItem('fly')) {
         core.drawTip(core.material.items['fly'].name + "好像失效了");
-        core.unLockControl();
+        core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;

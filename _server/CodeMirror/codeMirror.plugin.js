@@ -1831,11 +1831,11 @@
 
       var obj = {from: from, to: to, list: completions};
       var tooltip = null;
-      CodeMirror.on(obj, "close", function() { remove(tooltip); });
+      CodeMirror.on(obj, "close", function() { remove(tooltip); }); 
       CodeMirror.on(obj, "update", function() { remove(tooltip); });
       CodeMirror.on(obj, "select", function(cur, node) {
         remove(tooltip);
-        var content = ts.options.completionTip ? ts.options.completionTip(cur.data) : cur.data.doc;
+        var content = ts.options.completionTip ? ts.options.completionTip(cur.data) : buildTooltip(cur.data);
         if (content) {
           tooltip = makeTooltip(node.parentNode.getBoundingClientRect().right + window.pageXOffset,
                                 node.getBoundingClientRect().top + window.pageYOffset, content);
@@ -1860,23 +1860,30 @@
 
   function showContextInfo(ts, cm, pos, queryName, c) {
     ts.request(cm, queryName, function(error, data) {
-      data = data || {};
-      data.type = data.type || '';
-      data.doc = data.doc || '';
-      if (!error && (data.type.startsWith('fn(') || data.doc)) {
-        var tip = elt("span", null, elt("strong", null, data.type || "not found"));
-        if (data.doc)
-          tip.appendChild(document.createTextNode("\n" + data.doc.replace(/<br\/?>/g,"\n")));
-        if (data.url) {
-          tip.appendChild(document.createTextNode("\n"));
-          var child = tip.appendChild(elt("a", null, "[文档]"));
-          child.href = data.url;
-          child.target = "_blank";
-        }
-        tempTooltip(cm, tip, ts);
+      if (!error) {
+        var tip = buildTooltip(data);
+        if (tip) tempTooltip(cm, tip, ts);
       }
       if (c) c();
     }, pos);
+  }
+
+  function buildTooltip(data) {
+    data = data || {};
+    data.type = data.type || '';
+    data.doc = data.doc || '';
+    if (data.type.startsWith('fn(') || data.doc) {
+      var tip = elt("span", null, elt("strong", null, data.type || "not found"));
+      if (data.doc)
+        tip.appendChild(document.createTextNode("\n" + data.doc.replace(/<br\/?>/g,"\n")));
+      if (data.url) {
+        tip.appendChild(document.createTextNode("\n"));
+        var child = tip.appendChild(elt("a", null, "[文档]"));
+        child.href = data.url;
+        child.target = "_blank";
+      }
+      return tip;
+    }
   }
 
   // Maintaining argument hints
@@ -2211,7 +2218,7 @@
     function clear() {
       if (mouseOnTip) {
         mouseOnTip = false;
-        setTimeout(clear, 50);
+        setTimeout(clear, 100);
         return;
       }
       cm.state.ternTooltip = null;

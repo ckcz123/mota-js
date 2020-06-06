@@ -2155,7 +2155,7 @@ control.prototype.lockControl = function () {
 }
 
 ////// 解锁状态栏 //////
-control.prototype.unLockControl = function () {
+control.prototype.unlockControl = function () {
     core.status.lockControl = false;
 }
 

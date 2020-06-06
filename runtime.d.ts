@@ -252,8 +252,9 @@ declare class control {
 
     /**
      * 立刻刷新状态栏和地图显伤
+     * @param doNotCheckAutoEvents 是否不检查自动事件
      */
-    updateStatusBar(): void
+    updateStatusBar(doNotCheckAutoEvents?: boolean): void
 
     /**
      * 设置某个自定义变量或flag
@@ -311,7 +312,7 @@ declare class control {
      * 半自动寻路，用于鼠标或手指拖动
      * @example core.setAutomaticRoute(0, 0, [{direction: "right", x: 4, y: 9}, {direction: "right", x: 5, y: 9}, {direction: "right", x: 6, y: 9}, {direction: "up", x: 6, y: 8}]);
      * @param destX 鼠标或手指的起拖点横坐标
-     * @param destY 鼠标或手指的起拖点横坐标
+     * @param destY 鼠标或手指的起拖点纵坐标
      * @param stepPostfix 拖动轨迹的数组表示，每项为一步的方向和目标点。
      */
     setAutomaticRoute(destX: number, destY: number, stepPostfix: Array<{ direction: direction, x: number, y: number }>): void
@@ -348,7 +349,7 @@ declare class control {
     /**
      * 主角转向并计入录像，不会导致跟随者聚集，会导致视野重置到以主角为中心
      * @example core.turnHero(); // 主角顺时针旋转90°，即单击主角或按下Z键的效果
-     * @param direction 主角的新朝向，可选
+     * @param direction 主角的新朝向，可为 up, down, left, right, :left, :right, :back 七种之一
      */
     turnHero(direction?: direction): void
     
@@ -362,9 +363,10 @@ declare class control {
     
     /**
      * 绘制主角和跟随者并重置视野到以主角为中心
-     * @example core.drawHero(); // 原地绘制主角的静止帧（第一帧）并重置视野，这样调用一般就是用来重置视野
-     * @param status 绘制第几帧（默认支持1、2、4，推荐在project\icons.js中把第三帧也注册了，这里预留了一个'midFoot'作为其枚举值），不填视为静止帧（第一帧）。
-     * @param offset 相对主角逻辑位置的偏移量，不填视为无偏移。用于绘制行走中的主角（正数表示前进，负数表示后退，但跟随者的后退很难看）或表现一些特殊的演出效果
+     * @example core.drawHero(); // 原地绘制主角的静止帧
+     * @param status 绘制状态，一般用stop
+     * @param offset 相对主角逻辑位置的偏移量，不填视为无偏移
+     * @param frame 绘制第几帧
      */
     drawHero(status?: 'stop' | 'leftFoot' | 'rightFoot', offset?: number, frame?: number): void
     
@@ -383,7 +385,7 @@ declare class control {
     nextY(n?: number): number
     
     /**
-     * 判定主角是否身处某个点的锯齿领域(即曼哈顿距离)
+     * 判定主角是否身处某个点的锯齿领域(取曼哈顿距离)
      * @example core.nearHero(6, 6, 6); // 判定主角是否身处点（6，6）的半径为6的锯齿领域
      * @param x 领域的中心横坐标
      * @param y 领域的中心纵坐标
@@ -604,7 +606,10 @@ declare class control {
     /** 加减画布偏移 */
     addGameCanvasTranslate(x?: number, y?: number): void
 
-    /** 设置视野范围 */
+    /**
+     * 设置视野范围 
+     * x,y: 左上角相对大地图的像素坐标，不需要为32倍数
+     */
     setViewport(x?: number, y?: number): void
 
     /** 移动视野范围 */
@@ -730,11 +735,11 @@ declare class control {
     /** 获得勇士原始属性（无装备和衰弱影响） */
     getNakedStatus(name?: string): any
 
-    /** 锁定状态栏，常常用于事件处理 */
+    /** 锁定用户控制，常常用于事件处理 */
     lockControl(): void
 
-    /** 解锁状态栏 */
-    unLockControl(): void
+    /** 解锁用户控制 */
+    unlockControl(): void
 
     /** 获得映射文件名 */
     getMappedName(name?: string): string
@@ -748,8 +753,11 @@ declare class control {
     /** 设置音乐图标的显隐状态 */
     setMusicBtn(): void
 
-    /** 更改背景音乐的播放 */
+    /** 开启或关闭背景音乐的播放 */
     triggerBgm(): void
+
+    /** 播放一个音效 */
+    playSound(sound: string): void
 
     /** 停止所有音频 */
     stopSound(): void
@@ -842,15 +850,14 @@ declare class events {
     
     /**
      * 场景切换
-     * @example core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取全塔属性中的值
+     * @example core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取用户设置值
      * @param floorId 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上
      * @param stair 传送的位置，可以填':now'（保持不变，可省略）,':symmetry'（中心对称）,':symmetry_x'（左右对称）,':symmetry_y'（上下对称）或图块id（该图块最好在目标层唯一，一般为'downFloor'或'upFloor'）
      * @param heroLoc 传送的坐标（如果填写了，就会覆盖上述的粗略目标位置）和传送后主角的朝向（不填表示保持不变）
-     * @param time 传送的黑屏时间，单位为毫秒。可以填0（无黑屏）或不小于100的正整数，也可以省略（取全塔属性中的值）
-     * @param callback 黑屏结束后的回调函数，可选（这居然不是最后一个参数）
-     * @param fromLoad 本次场景切换是否为读档，读档会提示且没有黑屏，不会触发“每次到达事件”，也不会导致重生怪复活
+     * @param time 传送的黑屏时间，单位为毫秒。不填为用户设置值
+     * @param callback 黑屏结束后的回调函数，可选
      */
-    changeFloor(floorId: string, stair?: string, heroLoc?: { x?: number, y?: number, direction?: direction }, time?: number, callback?: () => void, fromLoad?: boolean): void
+    changeFloor(floorId: string, stair?: string, heroLoc?: { x?: number, y?: number, direction?: direction }, time?: number, callback?: () => void): void
     
     /**
      * 执行下一个事件指令，常作为回调
@@ -860,12 +867,12 @@ declare class events {
     doAction(keepUI?: true): void
     
     /**
-     * 插入事件
-     * @example core.insertAction('回收钥匙商店'); // 插入公共事件“回收钥匙商店”
-     * @param action 公共事件名，或单个事件指令，或事件指令数组
+     * 插入一段事件；此项不可插入公共事件，请用 core.insertCommonEvent
+     * @example core.insertAction('一段文字'); // 插入一个显示文章
+     * @param action 单个事件指令，或事件指令数组
      * @param x 新的当前点横坐标，可选
      * @param y 新的当前点纵坐标，可选
-     * @param callback 新的回调函数，可选（这居然也不是最后一个参数）
+     * @param callback 新的回调函数，可选
      * @param addToLast 插入的位置，true表示插入到末尾，否则插入到开头
      */
     insertAction(action: string | MotaAction | MotaAction[], x?: number, y?: number, callback?: () => void, addToLast?: boolean): void
@@ -883,8 +890,8 @@ declare class events {
     /**
      * 设置一项楼层属性并刷新状态栏
      * @example core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
-     * @param name 'title','name','canFlyTo','canUseQuickShop','cannotViewMap','cannotMoveDirectly','upFloor','downFloor','defaultGround','images','color','weather','bgm','ratio','underGround'之一
-     * @param values 属性的新值，可选。对'title'、'name'、'defaultGround'和'bgm'需要是字符串，对'underGround'和四个'canXxx'需要是布尔值，对两个'xxxFloor'需要是一行两列的自然数数组，对'ratio'需要是数字
+     * @param name 要求改的属性名
+     * @param values 属性的新值
      * @param floorId 楼层id，不填视为当前层
      * @param prefix 独立开关前缀，一般不需要，下同
      */
@@ -1029,7 +1036,9 @@ declare class events {
     /** 执行一个系统事件 */
     doSystemEvent(type: string, data?: any, callback?: () => any): void
 
-    /** 触发(x,y)点的事件 */
+    /** 
+     * 触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等
+     */
     trigger(x?: number, y?: number, callback?: () => any): void
 
     /** 战斗前触发的事件 */
@@ -1044,7 +1053,10 @@ declare class events {
     /** 获得一个道具后的shij  */
     afterGetItem(id?: string, x?: number, y?: number, isGentleClick?: boolean): void
 
-    /** 获得面前的物品（轻按） */
+    /** 
+     * 轻按获得面前的物品或周围唯一物品
+     * @param noRoute 若为true则不计入录像 
+     */
     getNextItem(noRoute?: boolean): void
 
     /** 楼层转换中 */
@@ -1088,7 +1100,16 @@ declare class events {
     /** 开始执行一系列自定义事件 */
     startEvents(list?: any, x?: number, y?: number, callback?: () => any): void
 
-    /** 往当前事件列表之前或之后添加一个公共事件 */
+    /**
+     * 插入一个公共事件
+     * @example core.insertCommonEvent('毒衰咒处理', [0]);
+     * @param name 公共事件名；如果公共事件不存在则直接忽略 
+     * @param args 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...
+     * @param x 新的当前点横坐标，可选
+     * @param y 新的当前点纵坐标，可选
+     * @param callback 新的回调函数，可选
+     * @param addToLast 插入的位置，true表示插入到末尾，否则插入到开头
+     */
     insertCommonEvent(name?: string, args?: any, x?: number, y?: number, callback?: () => any, addToLast?: boolean): void
 
     /** 获得一个公共事件 */
@@ -1142,10 +1163,16 @@ declare class events {
     /** 当前是否有未处理完毕的异步事件 */
     hasAsync(): boolean
 
-    /** 跟随 */
+    /** 
+     * 跟随
+     * @param name 要跟随的一个合法的4x4的行走图名称，需要在全塔属性注册
+     */
     follow(name: string): void
 
-    /** 取消跟随 */
+    /** 
+     * 取消跟随 
+     * @param name 取消跟随的行走图，不填则取消全部跟随者
+     */
     unfollow(name?: string): void
 
     /** 数值操作 */
@@ -1383,24 +1410,24 @@ declare class maps {
     getFgMapArray(floorId?: string, noCache?: boolean): number[][]
     
     /**
-     * 判定背景层的一个位置是什么，主要用于滑冰（167）
-     * @example core.getBgNumber(core.status.hero.loc.x, core.status.hero.loc.y); // 判断主角脚下的背景层图块的数字
-     * @param x 横坐标
-     * @param y 纵坐标
+     * 判定背景层的一个位置是什么
+     * @example core.getBgNumber(); // 判断主角脚下的背景层图块的数字
+     * @param x 横坐标，不填为当前勇士坐标
+     * @param y 纵坐标，不填为当前勇士坐标
      * @param floorId 地图id，不填视为当前地图
-     * @param 可选，true表示不使用缓存
+     * @param 可选，true表示不使用缓存而强制重算
      */
-    getBgNumber(x: number, y: number, floorId?: string, noCache?: boolean): number
+    getBgNumber(x?: number, y?: number, floorId?: string, noCache?: boolean): number
     
     /**
      * 判定前景层的一个位置是什么
-     * @example core.getFgNumber(core.status.hero.loc.x, core.status.hero.loc.y); // 判断主角脚下的前景层图块的数字
-     * @param x 横坐标
-     * @param y 纵坐标
+     * @example core.getFgNumber(); // 判断主角脚下的前景层图块的数字
+     * @param x 横坐标，不填为当前勇士坐标
+     * @param y 纵坐标，不填为当前勇士坐标
      * @param floorId 地图id，不填视为当前地图
-     * @param 可选，true表示不使用缓存
+     * @param 可选，true表示不使用缓存而强制重算
      */
-    getFgNumber(x: number, y: number, floorId?: string, noCache?: boolean): number
+    getFgNumber(x?: number, y?: number, floorId?: string, noCache?: boolean): number
     
     /**
      * 可通行性判定
@@ -1425,7 +1452,7 @@ declare class maps {
     canMoveHero(x?: number, y?: number, direction?: direction, floorId?: string): boolean
     
     /**
-     * 能否瞬移到某点，并求出节约的步数。此函数会无视可通行图块的script属性，如需使用该属性请手动禁止瞬移
+     * 能否瞬移到某点，并求出节约的步数。
      * @example core.canMoveDirectly(0, 0); // 能否瞬移到地图左上角
      * @param destX 目标点的横坐标
      * @param destY 目标点的纵坐标
@@ -1444,8 +1471,8 @@ declare class maps {
     
     /**
      * 地图重绘
-     * @example core.drawMap(); // 重绘当前地图，常用于更改贴图后的刷新
-     * @param floorId 地图id，建议省略
+     * @example core.drawMap(); // 重绘当前地图，常用于更改贴图后或自动元件的刷新
+     * @param floorId 地图id，省略表示当前楼层
      * @param callback 重绘完毕后的回调函数，可选
      */
     drawMap(floorId?: string, callback?: () => void): void
@@ -1537,7 +1564,7 @@ declare class maps {
     showBlock(x: number, y: number, floorId?: string): void
     
     /**
-     * 隐藏（显示或隐藏的）图块，此函数不会被任何事件指令【直接】调用
+     * 隐藏一个图块，对应于「隐藏事件」且不删除
      * @example core.hideBlock(0, 0); // 隐藏地图左上角的图块
      * @param x 横坐标
      * @param y 纵坐标
@@ -1546,7 +1573,7 @@ declare class maps {
     hideBlock(x: number, y: number, floorId?: string): void
     
     /**
-     * 尝试删除一个图块，此函数会被打怪开门捡道具、“隐藏事件”指令和“移动/跳跃事件”指令的起点直接调用。
+     * 删除一个图块，对应于「隐藏事件」并同时删除
      * @example core.removeBlock(0, 0); // 尝试删除地图左上角的图块
      * @param x 横坐标
      * @param y 纵坐标
@@ -1610,7 +1637,7 @@ declare class maps {
      * @example core.moveBlock(0, 0, ['down']); // 令地图左上角的图块下移一格，用时半秒，再花半秒淡出
      * @param x 起点的横坐标
      * @param y 起点的纵坐标
-     * @param steps 步伐数组，前进和后退用于带朝向的npc
+     * @param steps 步伐数组
      * @param time 单步和淡出用时，单位为毫秒。不填视为半秒
      * @param keep 是否不淡出，true表示不淡出
      * @param callback 移动或淡出后的回调函数，可选
@@ -1618,7 +1645,7 @@ declare class maps {
     moveBlock(x: number, y: number, steps: step[], time?: number, keep?: boolean, callback?: () => void): void
     
     /**
-     * 跳跃图块
+     * 跳跃图块；从V2.7开始不再有音效
      * @example core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出
      * @param sx 起点的横坐标
      * @param sy 起点的纵坐标
@@ -1632,10 +1659,11 @@ declare class maps {
     
     /**
      * 播放动画，注意即使指定了主角的坐标也不会跟随主角移动，如有需要请使用core.drawHeroAnimate(name, callback)函数
-     * @example core.drawAnimate('attack', core.nextX(), core.nextY(), core.vibrate); // 在主角面前一格播放普攻动画，动画停止后视野左右抖动1秒
+     * @example core.drawAnimate('attack', core.nextX(), core.nextY(), false, core.vibrate); // 在主角面前一格播放普攻动画，动画停止后视野左右抖动1秒
      * @param name 动画文件名，不含后缀
      * @param x 绝对横坐标
      * @param y 绝对纵坐标
+     * @param alignWindow 是否是相对窗口的坐标
      * @param callback 动画停止后的回调函数，可选
      * @returns 一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
      */
@@ -1695,7 +1723,7 @@ declare class maps {
     /** 某个点是否存在楼梯 */
     stairExists(x?: number, y?: number, floorId?: string): boolean
 
-    /** 当前位置是否在楼梯边 */
+    /** 当前位置是否在楼梯边；在楼传平面塔模式下对箭头也有效 */
     nearStair(): boolean
 
     /** 某个点是否存在（指定的）怪物 */
@@ -1850,7 +1878,7 @@ declare class items {
 
     /**
      * 设置某种道具的持有量
-     * @example core.setItem('shoes') // 没收绿鞋，重新启用passNet触发器
+     * @example core.setItem('yellowKey', 3) // 设置黄钥匙为3把
      * @param itemId 道具id
      * @param itemNum 新的持有量，可选，自然数，默认为0
      */
@@ -1882,8 +1910,8 @@ declare class items {
     canEquip(equipId: string, hint: boolean): boolean
 
     /**
-     * 尝试穿上某件装备并提示
-     * @example core.loadEquip('sword5') // 尝试装备上神圣剑，无回调
+     * 尝试穿上某件背包里的装备并提示
+     * @example core.loadEquip('sword5') // 尝试装备上背包里的神圣剑，无回调
      * @param equipId 装备id
      * @param callback 穿戴成功或失败后的回调函数
      */
@@ -1958,9 +1986,10 @@ declare class ui {
      * 在某个画布上绘制一个描黑边的文字
      * @param text 要绘制的文本
      * @param style 绘制的样式
+     * @param strokeStyle 绘制的描边颜色
      * @param font 绘制的字体
      */
-    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style: string, font: string): void
+    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style: string, strokeStyle: string, font: string): void
 
     /**
      * 绘制一个矩形。style可选为绘制样式
@@ -1981,13 +2010,7 @@ declare class ui {
      * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
      * x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。
      * zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。
-     * 返回创建的画布的context，也可以通过core.dymCanvas[name]调用。
-     * @param name 
-     * @param x 
-     * @param y 
-     * @param width 
-     * @param height 
-     * @param zIndex 
+     * 返回创建的画布的context，也可以通过core.dymCanvas[name]调用
      */
     createCanvas(name: string, x: number, y: number, width: number, height: number, zIndex: number): CanvasRenderingContext2D
 
@@ -2061,7 +2084,7 @@ declare class ui {
     /** 设置某个canvas的baseline */
     setTextBaseline(name: string | CanvasRenderingContext2D, baseline: any): void
 
-    /** 字符串自动换行的分割 */
+    /** 字符串自动换行的分割；具有标点禁则功能 */
     splitLines(name: string | CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string): void
 
     /** 在某个canvas上绘制一个图标 */
@@ -2073,7 +2096,12 @@ declare class ui {
     /** 清空UI层内容 */
     clearUI(): void
 
-    /** 左上角绘制一段提示 */
+    /** 
+     * 左上角绘制一段提示
+     * @param text 要提示的文字内容，支持 ${} 语法
+     * @param id 要绘制的图标ID
+     * @param frame 要绘制图标的第几帧
+     */
     drawTip(text: string, id?: string, frame?: number): void
 
     /** 清除提示内容 */
@@ -2332,7 +2360,7 @@ declare class utils {
      * @param color 一行三列或一行四列的数组，前三个元素必须为不大于255的自然数。第四个元素（如果有）必须为0或不大于1的数字，第四个元素不填视为1
      * @returns 该颜色的字符串表示
      */
-    arrayToRGB(color: [number, number, number, number]): string
+    arrayToRGBA(color: [number, number, number, number]): string
 
     /**
      * 录像一压，其结果会被再次base64压缩
@@ -2369,7 +2397,6 @@ declare class utils {
 
     /**
      * 判定array是不是一个数组，以及element是否在该数组中。
-     * @example core.inArray(core.material.enemys.greenSlime.special, 1); // 判定绿头怪除先攻外还有无其他特殊属性
      * @param array 可能的数组，不为数组或不填将导致返回值为false
      * @param element 待查找的元素
      * @returns 如果array为数组且具有element这项，就返回true，否则返回false
@@ -2535,7 +2562,7 @@ declare class utils {
     getCookie(name: string): string
 
     /**
-     * 转向某方向
+     * 计算应当转向某个方向
      * @param turn 转向的方向
      * @param direction 当前方向
      */

@@ -650,7 +650,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "返回一个布尔值,指示对象是否具有指定的属性.",
         }
       },
-      "!doc": "创建对象包装器.",
     },
     "Function": {
       "!type": "fn(body: string) -> fn()",
@@ -676,7 +675,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "prototype": "?"
       },
-      "!doc": " JavaScript中的每个函数实际上都是一个Function对象."
     },
     "Array": {
       "!type": "fn(size: number) -> !custom:Array_ctor",
@@ -813,7 +811,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "确定数组是否包含某个元素,并根据需要返回true或false.,",
         }
       },
-      "!doc": " JavaScript Array全局对象是数组的构造函数,这些数组是高级的,类似于列表的对象.",
     },
     "String": {
       "!type": "fn(value: ?) -> string",
@@ -842,11 +839,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "substring": {
           "!type": "fn(from: number, to?: number) -> string",
-          "!doc": "返回一个索引与另一个索引之间或字符串末尾的字符串子集.",
+          "!doc": "返回一个索引与另一个索引之间或字符串末尾的字符串子集.<br/>from为起始位置，to为终止位置.",
         },
         "substr": {
           "!type": "fn(from: number, length?: number) -> string",
-          "!doc": "以指定的字符数返回从指定位置开始的字符串中的字符.",
+          "!doc": "以指定的字符数返回从指定位置开始的字符串中的字符.<br/>from为起始位置，length为长度",
         },
         "slice": {
           "!type": "fn(from: number, to?: number) -> string",
@@ -905,7 +902,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": " startsWith()方法确定一个字符串是否以另一个字符串的字符开头,并根据需要返回true或false.,",
         }
       },
-      "!doc": " String全局对象是字符串或字符序列的构造函数.",
     },
     "Number": {
       "!type": "fn(value: ?) -> number",
@@ -980,14 +976,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!type": "fn(string: string, radix?: number) -> number",
         "!doc": " Number.parseInt()方法解析字符串参数并返回指定基数或基数的整数.,",
       },
-      "!doc": " Number JavaScript对象是一个包装器对象,允许您使用数值.使用Number()构造函数创建Number对象.",
     },
     "Boolean": {
       "!type": "fn(value: ?) -> bool",
       "prototype": {
         "!stdProto": "Boolean"
       },
-      "!doc": "布尔对象是布尔值的对象包装.",
     },
     "RegExp": {
       "!type": "fn(source: string, flags?: string)",
@@ -2027,11 +2021,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "startReplay": {
-          "!doc": "开始播放", 
+          "!doc": "开始播放录像", 
           "!type": "fn(list: [string])"
         }, 
         "triggerReplay": {
-          "!doc": "更改播放状态", 
+          "!doc": "播放或暂停录像回放", 
           "!type": "fn()"
         }, 
         "screenFlash": {
@@ -2078,8 +2072,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "回放录像时浏览地图", 
           "!type": "fn()"
         }, 
+        "playSound": {
+          "!doc": "播放一个音效",
+          "!tyoe": "fn(sound: string)"
+        },
         "stopSound": {
-          "!doc": "停止所有音频", 
+          "!doc": "停止所有SE", 
           "!type": "fn()"
         }, 
         "addGameCanvasTranslate": {
@@ -2091,7 +2089,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, value: number)"
         }, 
         "drawHero": {
-          "!doc": "绘制主角和跟随者并重置视野到以主角为中心<br/>例如：core.drawHero(); // 原地绘制主角的静止帧（第一帧）并重置视野，这样调用一般就是用来重置视野<br/>status: 绘制第几帧（默认支持1、2、4，推荐在project\\icons.js中把第三帧也注册了，这里预留了一个'midFoot'作为其枚举值），不填视为静止帧（第一帧）。<br/>offset: 相对主角逻辑位置的偏移量，不填视为无偏移。用于绘制行走中的主角（正数表示前进，负数表示后退，但跟随者的后退很难看）或表现一些特殊的演出效果", 
+          "!doc": "绘制主角和跟随者并重置视野到以主角为中心<br/>例如：core.drawHero(); // 原地绘制主角的静止帧并重置视野野<br/>status: 只能为 stop, leftFoot 和 rightFoot，不填用stop。<br/>offset: 相对主角逻辑位置的偏移量，不填视为无偏移。<br/>frame: 绘制的第几帧", 
           "!type": "fn(status?: string, offset?: number, frame?: number)"
         }, 
         "pauseBgm": {
@@ -2115,7 +2113,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, value: number)"
         }, 
         "setAutomaticRoute": {
-          "!doc": "半自动寻路，用于鼠标或手指拖动<br/>例如：core.setAutomaticRoute(0, 0, [{direction: \"right\", x: 4, y: 9}, {direction: \"right\", x: 5, y: 9}, {direction: \"right\", x: 6, y: 9}, {direction: \"up\", x: 6, y: 8}]);<br/>destX: 鼠标或手指的起拖点横坐标<br/>destY: 鼠标或手指的起拖点横坐标<br/>stepPostfix: 拖动轨迹的数组表示，每项为一步的方向和目标点。", 
+          "!doc": "半自动寻路，用于鼠标或手指拖动<br/>例如：core.setAutomaticRoute(0, 0, [{direction: \"right\", x: 4, y: 9}, {direction: \"right\", x: 5, y: 9}]);<br/>destX: 鼠标或手指的起拖点横坐标<br/>destY: 鼠标或手指的起拖点纵坐标<br/>stepPostfix: 拖动轨迹的数组表示，每项为一步的方向和目标点。", 
           "!type": "fn(destX: number, destY: number, stepPostfix: [loc])"
         }, 
         "triggerHero": {
@@ -2171,7 +2169,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(callback?: fn())"
         }, 
         "hideStatusBar": {
-          "!doc": "隐藏状态栏", 
+          "!doc": "隐藏状态栏<br/>showToolbox: 是否不隐藏竖屏工具栏", 
           "!type": "fn(showToolbox?: bool)"
         }, 
         "getBuff": {
@@ -2247,7 +2245,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn() -> bool"
         }, 
         "triggerBgm": {
-          "!doc": "更改背景音乐的播放", 
+          "!doc": "开启或关闭背景音乐的播放", 
           "!type": "fn()"
         }, 
         "moveHero": {
@@ -2279,8 +2277,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(type?: string, level?: number)"
         }, 
         "updateStatusBar": {
-          "!doc": "立刻刷新状态栏和地图显伤", 
-          "!type": "fn()"
+          "!doc": "立刻刷新状态栏和地图显伤<br/>doNotCheckAutoEvents: 是否不检查自动事件", 
+          "!type": "fn(doNotCheckAutoEvents?: bool)"
         }, 
         "autosave": {
           "!doc": "自动存档", 
@@ -2291,7 +2289,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "moveAction": {
-          "!doc": "尝试前进一步，如果面前不可被踏入就会直接触发该点事件<br/>例如：core.moveAction(core.doAction); // 尝试前进一步，然后继续事件处理。常用于在事件流中让主角像自由行动时一样前进一步，可以照常触发moveOneStep（跑毒和计步）和面前的事件（包括但不限于阻激夹域捕）<br/>callback: 走一步后的回调函数，可选", 
+          "!doc": "尝试前进一步，如果面前不可被踏入就会直接触发该点事件<br/>请勿直接使用此函数，如有需要请使用「勇士前进一步或撞击」事件", 
           "!type": "fn(callback?: fn())"
         }, 
         "hasFlag": {
@@ -2299,7 +2297,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string) -> bool"
         }, 
         "rewindReplay": {
-          "!doc": "回退", 
+          "!doc": "回退到上一个录像节点", 
           "!type": "fn()"
         }, 
         "toolboxReplay": {
@@ -2322,8 +2320,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "获得所有存在存档的存档位", 
           "!type": "fn(callback?: fn())"
         }, 
-        "unLockControl": {
-          "!doc": "解锁状态栏", 
+        "unlockControl": {
+          "!doc": "解锁用户控制行为", 
           "!type": "fn()"
         }, 
         "syncSave": {
@@ -2347,7 +2345,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "turnHero": {
-          "!doc": "主角转向并计入录像，不会导致跟随者聚集，会导致视野重置到以主角为中心<br/>例如：core.turnHero(); // 主角顺时针旋转90°，即单击主角或按下Z键的效果<br/>direction: 主角的新朝向，可选", 
+          "!doc": "主角转向并计入录像，不会导致跟随者聚集，会导致视野重置到以主角为中心<br/>例如：core.turnHero(); // 主角顺时针旋转90°，即单击主角或按下Z键的效果<br/>direction: 主角的新朝向，可为 up, down, left, right, :left, :right, :back 七种之一", 
           "!type": "fn(direction?: string)"
         }, 
         "resumeReplay": {
@@ -2367,7 +2365,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(index?: number, callback?: fn(data: ?))"
         }, 
         "setViewport": {
-          "!doc": "设置视野范围", 
+          "!doc": "设置视野范围<br/>x,y: 左上角相对大地图的像素坐标，不需要为32倍数", 
           "!type": "fn(x?: number, y?: number)"
         }, 
         "chooseReplayFile": {
@@ -2375,7 +2373,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "lockControl": {
-          "!doc": "锁定状态栏，常常用于事件处理", 
+          "!doc": "锁定用户控制，常常用于事件处理", 
           "!type": "fn()"
         }, 
         "updateCheckBlock": {
@@ -2399,7 +2397,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string)"
         }, 
         "nearHero": {
-          "!doc": "判定主角是否身处某个点的锯齿领域(即曼哈顿距离)<br/>例如：core.nearHero(6, 6, 6); // 判定主角是否身处点（6，6）的半径为6的锯齿领域<br/>x: 领域的中心横坐标<br/>y: 领域的中心纵坐标<br/>n: 领域的半径，不填视为1", 
+          "!doc": "判定主角是否身处某个点的锯齿领域(取曼哈顿距离)<br/>例如：core.nearHero(6, 6, 6); // 判定主角是否身处点（6，6）的半径为6的锯齿领域<br/>x: 领域的中心横坐标<br/>y: 领域的中心纵坐标<br/>n: 领域的半径，不填视为1", 
           "!type": "fn(x: number, y: number, n?: number) -> bool"
         }, 
         "stepReplay": {
@@ -2435,7 +2433,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "resumeBgm": {
-          "!doc": "恢复背景音乐的播放", 
+          "!doc": "恢复背景音乐的播放<br/>resumeTime: 从哪一秒开始恢复播放", 
           "!type": "fn(resumeTime?: number)"
         }, 
         "setGameCanvasTranslate": {
@@ -2497,7 +2495,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(equipType: number) -> string"
         }, 
         "loadEquip": {
-          "!doc": "尝试穿上某件装备并提示<br/>例如：core.loadEquip('sword5') // 尝试装备上神圣剑，无回调<br/>equipId: 装备id<br/>callback: 穿戴成功或失败后的回调函数", 
+          "!doc": "尝试穿上某件背包里面的装备并提示<br/>例如：core.loadEquip('sword5') // 尝试装备上背包里面的神圣剑，无回调<br/>equipId: 装备id<br/>callback: 穿戴成功或失败后的回调函数", 
           "!type": "fn(equipId: string, callback?: fn())"
         }, 
         "itemCount": {
@@ -2537,7 +2535,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(index: number)"
         }, 
         "setItem": {
-          "!doc": "设置某种道具的持有量<br/>例如：core.setItem('shoes') // 没收绿鞋，重新启用passNet触发器<br/>itemId: 道具id<br/>itemNum: 新的持有量，可选，自然数，默认为0", 
+          "!doc": "设置某种道具的持有量<br/>例如：core.setItem('yellowKey', 3) // 设置黄钥匙为3把<br/>itemId: 道具id<br/>itemNum: 新的持有量，可选，自然数，默认为0", 
           "!type": "fn(itemId: string, itemNum?: number)"
         }, 
         "compareEquipment": {
@@ -2699,7 +2697,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(a?: [?], b?: [?]) -> [?]|null"
         }, 
         "turnDirection": {
-          "!doc": "转向某方向<br/>turn: 转向的方向，可为 up,down,left,right,:left,:right,:back 七种<br/>direction: 当前方向", 
+          "!doc": "计算应当转向某个方向<br/>turn: 转向的方向，可为 up,down,left,right,:left,:right,:back 七种<br/>direction: 当前方向", 
           "!type": "fn(turn: string, direction?: string) -> string"
         }, 
         "myconfirm": {
@@ -2727,7 +2725,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(key: string, defaultValue?: ?)"
         }, 
         "arrayToRGB": {
-          "!doc": "颜色数组转字符串<br/>例如：core.arrayToRGBA([102, 204, 255]); // \"rgba(102,204,255,1)\"<br/>color: 一行三列或一行四列的数组，前三个元素必须为不大于255的自然数。第四个元素（如果有）必须为0或不大于1的数字，第四个元素不填视为1<br/>返回值：该颜色的字符串表示", 
+          "!doc": "颜色数组转字符串<br/>例如：core.arrayToRGB([102, 204, 255]); // \"#66ccff\"<br/>color: 一行三列的数组，必须为不大于255的自然数<br/>返回值：该颜色的#xxxxxx字符串表示", 
+          "!type": "fn(color: [number]) -> string"
+        }, 
+        "arrayToRGBA": {
+          "!doc": "颜色数组转字符串<br/>例如：core.arrayToRGBA([102, 204, 255, 0.3]); // \"rgba(102,204,255,0.3)\"<br/>color: 一行三列或一行四列的数组，前三个元素必须为不大于255的自然数。第四个元素（如果有）必须为0或不大于1的数字，第四个元素不填视为1<br/>返回值：该颜色的rgba(...)字符串表示", 
           "!type": "fn(color: [number]) -> string"
         }, 
         "formatBigNumber": {
@@ -2767,7 +2769,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(key: string, defaultValue?: ?, successCallback?: fn(data: ?), errorCallback?: fn())"
         }, 
         "inArray": {
-          "!doc": "判定array是不是一个数组，以及element是否在该数组中。<br/>例如：core.inArray(core.material.enemys.greenSlime.special, 1); // 判定绿头怪除先攻外还有无其他特殊属性<br/>array: 可能的数组，不为数组或不填将导致返回值为false<br/>element: 待查找的元素<br/>返回值：如果array为数组且具有element这项，就返回true，否则返回false", 
+          "!doc": "判定array是不是一个数组，以及element是否在该数组中。<br/>array: 可能的数组，不为数组或不填将导致返回值为false<br/>element: 待查找的元素<br/>返回值：如果array为数组且具有element这项，就返回true，否则返回false", 
           "!type": "fn(array?: ?, element?: ?) -> bool"
         }, 
         "setGlobal": {
@@ -2900,7 +2902,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(x: number, y: number, floorId?: string) -> bool"
         }, 
         "drawAnimate": {
-          "!doc": "播放动画，注意即使指定了主角的坐标也不会跟随主角移动，如有需要请使用core.drawHeroAnimate(name, callback)函数<br/>例如：core.drawAnimate('attack', core.nextX(), core.nextY(), core.vibrate); // 在主角面前一格播放普攻动画，动画停止后视野左右抖动1秒<br/>name: 动画文件名，不含后缀<br/>x: 绝对横坐标<br/>y: 绝对纵坐标<br/>callback: 动画停止后的回调函数，可选<br/>返回值：一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）", 
+          "!doc": "播放动画，注意即使指定了主角的坐标也不会跟随主角移动，如有需要请使用core.drawHeroAnimate(name, callback)函数<br/>例如：core.drawAnimate('attack', core.nextX(), core.nextY(), false, core.vibrate); // 在主角面前一格播放普攻动画，动画停止后视野左右抖动1秒<br/>name: 动画文件名，不含后缀<br/>x: 横坐标<br/>y: 纵坐标<br/>alignWindow: 是否是相对窗口的坐标<br/>callback: 动画停止后的回调函数，可选<br/>返回值：一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）", 
           "!type": "fn(name: string, x: number, y: number, alignWindow: bool, callback?: fn()) -> number"
         }, 
         "getBlockCls": {
@@ -2908,11 +2910,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string"
         }, 
         "drawMap": {
-          "!doc": "地图重绘<br/>例如：core.drawMap(); // 重绘当前地图，常用于更改贴图后的刷新<br/>floorId: 地图id，建议省略<br/>callback: 重绘完毕后的回调函数，可选", 
+          "!doc": "地图重绘<br/>例如：core.drawMap(); // 重绘当前地图，常用于更改贴图或改变自动元件后的刷新<br/>floorId: 地图id，可省略表示当前楼层<br/>callback: 重绘完毕后的回调函数，可选", 
           "!type": "fn(floorId?: string)"
         }, 
         "nearStair": {
-          "!doc": "当前位置是否在楼梯边", 
+          "!doc": "当前位置是否在楼梯边；在楼传平面塔模式下对箭头也有效", 
           "!type": "fn() -> bool"
         }, 
         "turnBlock": {
@@ -2924,7 +2926,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(floorId?: string) -> [[number]]"
         }, 
         "jumpBlock": {
-          "!doc": "跳跃图块<br/>例如：core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出<br/>sx: 起点的横坐标<br/>sy: 起点的纵坐标<br/>ex: 终点的横坐标<br/>ey: 终点的纵坐标<br/>time: 单步和淡出用时，单位为毫秒。不填视为半秒<br/>keep: 是否不淡出，true表示不淡出<br/>callback: 落地或淡出后的回调函数，可选", 
+          "!doc": "跳跃图块；从V2.7开始不再有音效<br/>例如：core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出<br/>sx: 起点的横坐标<br/>sy: 起点的纵坐标<br/>ex: 终点的横坐标<br/>ey: 终点的纵坐标<br/>time: 单步和淡出用时，单位为毫秒。不填视为半秒<br/>keep: 是否不淡出，true表示不淡出<br/>callback: 落地或淡出后的回调函数，可选", 
           "!type": "fn(sx: number, sy: number, ex: number, ey: number, time?: number, keep?: bool, callback?: fn())"
         }, 
         "replaceBlock": {
@@ -2964,11 +2966,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(number: number) -> block"
         }, 
         "removeBlock": {
-          "!doc": "尝试删除一个图块，此函数会被打怪开门捡道具、“隐藏事件”指令和“移动/跳跃事件”指令的起点直接调用。<br/>例如：core.removeBlock(0, 0); // 尝试删除地图左上角的图块<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图", 
+          "!doc": "删除一个图块，对应于「隐藏事件」并同时删除<br/>例如：core.removeBlock(0, 0); // 尝试删除地图左上角的图块<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图", 
           "!type": "fn(x: number, y: number, floorId?: string)"
         }, 
         "hideBlock": {
-          "!doc": "隐藏（显示或隐藏的）图块，此函数不会被任何事件指令【直接】调用<br/>例如：core.hideBlock(0, 0); // 隐藏地图左上角的图块<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图", 
+          "!doc": "隐藏一个图块，对应于「隐藏事件」且不删除<br/>例如：core.hideBlock(0, 0); // 隐藏地图左上角的图块<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图", 
           "!type": "fn(x: number, y: number, floorId?: string)"
         }, 
         "removeBlockByIndex": {
@@ -2992,16 +2994,16 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(floorId?: string)"
         }, 
         "getFgNumber": {
-          "!doc": "判定前景层的一个位置是什么<br/>例如：core.getFgNumber(core.status.hero.loc.x, core.status.hero.loc.y); // 判断主角脚下的前景层图块的数字<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>noCache: 可选，true表示不使用缓存", 
+          "!doc": "判定某点的前景层的数字<br/>例如：core.getFgNumber(); // 判断主角脚下的前景层图块的数字<br/>x: 横坐标，不填为勇士坐标<br/>y: 纵坐标，不填为勇士坐标floorId: 地图id，不填视为当前地图<br/>noCache: 可选，true表示不使用缓存而强制重算", 
           "!type": "fn(x: number, y: number, floorId?: string, noCache?: bool) -> number"
         }, 
         "moveBlock": {
-          "!doc": "移动图块<br/>例如：core.moveBlock(0, 0, ['down']); // 令地图左上角的图块下移一格，用时半秒，再花半秒淡出<br/>x: 起点的横坐标<br/>y: 起点的纵坐标<br/>steps: 步伐数组，前进和后退用于带朝向的npc<br/>time: 单步和淡出用时，单位为毫秒。不填视为半秒<br/>keep: 是否不淡出，true表示不淡出<br/>callback: 移动或淡出后的回调函数，可选", 
+          "!doc": "移动图块<br/>例如：core.moveBlock(0, 0, ['down']); // 令地图左上角的图块下移一格<br/>x: 起点的横坐标<br/>y: 起点的纵坐标<br/>steps: 步伐数组<br/>time: 单步和淡出用时，单位为毫秒。不填视为半秒<br/>keep: 是否不淡出，true表示不淡出<br/>callback: 移动或淡出后的回调函数，可选", 
           "!type": "fn(x: number, y: number, steps: [string], time?: number, keep?: bool, callback?: fn())"
         }, 
         "getBgNumber": {
-          "!doc": "判定背景层的一个位置是什么，主要用于滑冰（167）<br/>例如：core.getBgNumber(core.status.hero.loc.x, core.status.hero.loc.y); // 判断主角脚下的背景层图块的数字<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>@param 可选，true表示不使用缓存", 
-          "!type": "fn(x: number, y: number, floorId?: string, noCache?: bool) -> number"
+          "!doc": "判定某点的背景层的数字<br/>例如：core.getBgNumber(); // 判断主角脚下的背景层图块的数字<br/>x: 横坐标，不填为勇士坐标<br/>y: 纵坐标，不填为勇士坐标<br/>floorId: 地图id，不填视为当前地图<br/>noCache: 可选，true表示不使用缓存而强制重算", 
+          "!type": "fn(x?: number, y?: number, floorId?: string, noCache?: bool) -> number"
         }, 
         "getIdOfThis": {
           "!doc": "获得当前事件点的ID", 
@@ -3072,7 +3074,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(floorId?: string, blocks?: [block], ctx?: CanvasRenderingContext2D)"
         }, 
         "canMoveDirectly": {
-          "!doc": "能否瞬移到某点，并求出节约的步数。此函数会无视可通行图块的script属性，如需使用该属性请手动禁止瞬移<br/>例如：core.canMoveDirectly(0, 0); // 能否瞬移到地图左上角<br/>destX: 目标点的横坐标<br/>destY: 目标点的纵坐标<br/>返回值：正数表示节约的步数，-1表示不可瞬移", 
+          "!doc": "能否瞬移到某点，并求出节约的步数。<br/>例如：core.canMoveDirectly(0, 0); // 能否瞬移到地图左上角<br/>destX: 目标点的横坐标<br/>destY: 目标点的纵坐标<br/>返回值：正数表示节约的步数，-1表示不可瞬移", 
           "!type": "fn(destX: number, destY: number) -> number"
         }, 
         "saveMap": {
@@ -3124,7 +3126,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(floorId?: string, noCache?: bool) -> [[number]]"
         }, 
         "canMoveHero": {
-          "!doc": "单点单朝向的可通行性判定<br/>@exmaple core.canMoveHero(); // 判断主角是否可以前进一步<br/>x: 起点横坐标，不填视为主角当前的<br/>y: 起点纵坐标，不填视为主角当前的<br/>direction: 移动的方向，不填视为主角面对的方向<br/>floorId: 地图id，不填视为当前地图<br/>返回值：true表示可移动，false表示不可移动", 
+          "!doc": "单点单朝向的可通行性判定；受各图层cannotInOut、起点cannotMove和canGoDeadZone影响，不受canPass和noPass影响<br/>x: 起点横坐标，不填视为主角当前的<br/>y: 起点纵坐标，不填视为主角当前的<br/>direction: 移动的方向，不填视为主角面对的方向<br/>floorId: 地图id，不填视为当前地图", 
           "!type": "fn(x?: number, y?: number, direction?: string, floorId?: string) -> bool"
         }, 
         "drawThumbnail": {
@@ -3195,7 +3197,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(page?: ?)"
         }, 
         "setOpacity": {
-          "!doc": "设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现", 
+          "!doc": "设置某个canvas整体的透明度；此函数直接改变画布本身，对已经绘制的内容也生效<br/>如果仅想对接下来的绘制生效请使用setAlpha", 
           "!type": "fn(name: string|CanvasRenderingContext2D, opacity: number)"
         }, 
         "drawAbout": {
@@ -3249,7 +3251,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, image: string|image, x: number, y: number, w?: number, h?: number, x1?: number, y1?: number, w1?: number, h1?: number, angle?: number)"
         }, 
         "drawTip": {
-          "!doc": "左上角绘制一段提示", 
+          "!doc": "左上角绘制一段提示<br/>text: 要提示的字符串，支持${}语法<br/>id: 要绘制的图标ID<br/>frame: 要绘制该图标的第几帧", 
           "!type": "fn(text: string, id?: string, frame?: number)"
         }, 
         "drawBackground": {
@@ -3283,7 +3285,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, font?: string, maxWidth?: number)"
         }, 
         "setTextBaseline": {
-          "!doc": "设置某个canvas的baseline", 
+          "!doc": "设置某个canvas的基准线<br/>baseline: 可为alphabetic, top, hanging, middle, ideographic, bottom", 
           "!url": "https://www.w3school.com.cn/tags/canvas_textbaseline.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, baseline: string)"
         }, 
@@ -3296,11 +3298,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D)"
         }, 
         "splitLines": {
-          "!doc": "字符串自动换行的分割", 
+          "!doc": "字符串自动换行的分割；具有标点禁则功能", 
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string)"
         }, 
         "setAlpha": {
-          "!doc": "设置某个canvas的alpha值", 
+          "!doc": "设置某个canvas接下来绘制的不透明度；不会影响已经绘制的内容<br/>如果需要修改画布本身的不透明度请使用setOpacity", 
           "!url": "https://www.w3school.com.cn/tags/canvas_globalalpha.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, alpha: number)"
         }, 
@@ -3449,7 +3451,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "strokeRect": {
           "!doc": "绘制一个矩形的边框<br/>style: 绘制的样式", 
           "!url": "https://www.w3school.com.cn/tags/canvas_strokerect.asp",
-          "!type": "fn(name: CtxRefer, x: number, y: number, width: number, height: number, style: string)"
+          "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style: string)"
         }, 
         "drawBook": {
           "!doc": "绘制怪物手册", 
@@ -3460,8 +3462,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, style?: string, angle?: number)"
         }, 
         "fillBoldText": {
-          "!doc": "在某个画布上绘制一个描黑边的文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>font: 绘制的字体", 
-          "!type": "fn(name: CtxRefer, text: string, x: number, y: number, style: string, font: string)"
+          "!doc": "在某个画布上绘制一个描边文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>strokeStyle: 要绘制的描边颜色<br/>font: 绘制的字体", 
+          "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string)"
         }, 
         "drawSyncSave": {
           "!doc": "绘制存档同步界面", 
@@ -3476,7 +3478,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         },
         "createCanvas": {
-          "!doc": "动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。<br/>x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。<br/>zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。<br/>返回创建的画布的context，也可以通过core.dymCanvas[name]调用。<br/>name:<br/>x:<br/>y:<br/>width:<br/>height:<br/>zIndex:", 
+          "!doc": "动态创建一个画布。<br/>name： 要创建的画布名，如果已存在则会直接取用当前存在的。<br/>x,y: 创建的画布相对窗口左上角的像素坐标<br/>width,height: 创建的长宽。<br/>zIndex: 创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。<br/>返回创建的画布的context，也可以通过core.dymCanvas[name]调用。", 
           "!type": "fn(name: string, x: number, y: number, width: number, height: number, zIndex: number) -> CanvasRenderingContext2D"
         }, 
         "setTextAlign": {
@@ -3535,11 +3537,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "insertAction": {
-          "!doc": "插入事件<br/>例如：core.insertAction('一段文字'); // 插入一个显示文章<br/>action: 单个事件指令，或事件指令数组<br/>x: 新的当前点横坐标，可选<br/>y: 新的当前点纵坐标，可选<br/>callback: 新的回调函数，可选<br/>addToLast: 插入的位置，true表示插入到末尾，否则插入到开头", 
+          "!doc": "插入一段事件；此项不可插入公共事件，请用 core.insertCommonEvent<br/>例如：core.insertAction('一段文字'); // 插入一个显示文章<br/>action: 单个事件指令，或事件指令数组<br/>x: 新的当前点横坐标，可选<br/>y: 新的当前点纵坐标，可选<br/>callback: 新的回调函数，可选<br/>addToLast: 插入的位置，true表示插入到末尾，否则插入到开头", 
           "!type": "fn(action: string|?|[?], x?: number, y?: number, callback?: fn(), addToLast?: bool)"
         }, 
         "unfollow": {
-          "!doc": "取消跟随", 
+          "!doc": "取消跟随<br/>name: 取消跟随的行走图，不填则取消全部跟随者", 
           "!type": "fn(name?: string)"
         }, 
         "hasVisitedFloor": {
@@ -3583,7 +3585,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(id: string, x?: number, y?: number, force?: bool, callback?: fn())"
         }, 
         "follow": {
-          "!doc": "跟随", 
+          "!doc": "跟随<br/>name: 要跟随的一个合法的4x4的行走图名称，需要在全塔属性注册", 
           "!type": "fn(name: string)"
         }, 
         "beforeBattle": {
@@ -3611,7 +3613,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(fromUserAction?: bool)"
         }, 
         "getNextItem": {
-          "!doc": "获得面前的物品（轻按）", 
+          "!doc": "轻按获得面前的物品或周围唯一物品<br/>noRoute: 若为true则不计入录像", 
           "!type": "fn(noRoute?: bool)"
         }, 
         "hasAsync": {
@@ -3647,7 +3649,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(type: string)"
         }, 
         "trigger": {
-          "!doc": "触发(x,y)点的事件", 
+          "!doc": "触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等<br/>callback: 执行完毕的回调函数", 
           "!type": "fn(x?: number, y?: number, callback?: fn())"
         }, 
         "restart": {
@@ -3683,7 +3685,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(fromUserAction?: bool)"
         }, 
         "insertCommonEvent": {
-          "!doc": "往当前事件列表之前或之后添加一个公共事件", 
+          "!doc": "插入一个公共事件<br/>例如：core.insertCommonEvent('毒衰咒处理', [0]);<br/>name: 公共事件名；如果公共事件不存在则直接忽略<br/>args: 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...<br/>x: 新的当前点横坐标，可选<br/>y: 新的当前点纵坐标，可选<br/>callback： 新的回调函数，可选<br/>addToLast: 插入的位置，true表示插入到末尾，否则插入到开头", 
           "!type": "fn(name?: string, args?: [?], x?: number, y?: number, callback?: fn(), addToLast?: bool)"
         }, 
         "hideImage": {
@@ -3709,11 +3711,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "autoEventExecuted": {
           "!doc": "当前是否执行过某个自动事件", 
           "!type": "fn(symbol?: string, value?: ?) -> bool"
-        }, 
-        "addValue": {
-          "!doc": "数值增减", 
-          "!type": "fn(name: string, value: ?, prefix?: string)"
-        }, 
+        },
         "onSki": {
           "!doc": "当前是否在冰上", 
           "!type": "fn(number?: number) -> bool"
@@ -3743,7 +3741,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(hero?: ?, hard?: ?, floorId?: string, maps?: ?, values?: ?)"
         }, 
         "setFloorInfo": {
-          "!doc": "设置一项楼层属性并刷新状态栏<br/>例如：core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果<br/>name: 'title','name','canFlyTo','canUseQuickShop','cannotViewMap','cannotMoveDirectly','upFloor','downFloor','defaultGround','images','color','weather','bgm','ratio','underGround'之一<br/>values: 属性的新值，可选。对'title'、'name'、'defaultGround'和'bgm'需要是字符串，对'underGround'和四个'canXxx'需要是布尔值，对两个'xxxFloor'需要是一行两列的自然数数组，对'ratio'需要是数字<br/>floorId: 楼层id，不填视为当前层<br/>prefix: 独立开关前缀，一般不需要，下同", 
+          "!doc": "设置一项楼层属性并刷新状态栏<br/>例如：core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果<br/>name: 要修改的属性名<br/>values: 属性的新值。<br/>floorId: 楼层id，不填视为当前层<br/>prefix: 独立开关前缀，一般不需要", 
           "!type": "fn(name: string, values: ?, floorId?: string, prefix?: string)"
         }, 
         "openDoor": {
@@ -3783,8 +3781,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(steps: [step], time?: number, callback?: fn())"
         }, 
         "changeFloor": {
-          "!doc": "场景切换<br/>例如：core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取全塔属性中的值<br/>floorId: 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上<br/>stair: 传送的位置，可以填':now'（保持不变，可省略）,':symmetry'（中心对称）,':symmetry_x'（左右对称）,':symmetry_y'（上下对称）或图块id（该图块最好在目标层唯一，一般为'downFloor'或'upFloor'）<br/>heroLoc: 传送的坐标（如果填写了，就会覆盖上述的粗略目标位置）和传送后主角的朝向（不填表示保持不变）<br/>time: 传送的黑屏时间，单位为毫秒。可以填0（无黑屏）或不小于100的正整数，也可以省略（取全塔属性中的值）<br/>callback: 黑屏结束后的回调函数，可选（这居然不是最后一个参数）<br/>fromLoad: 本次场景切换是否为读档，读档会提示且没有黑屏，不会触发“每次到达事件”，也不会导致重生怪复活", 
-          "!type": "fn(floorId: string, stair?: string, heroLoc?: {x?: number, y?: number, direction?: string}, time?: number, callback?: fn(), fromLoad?: bool)"
+          "!doc": "场景切换<br/>例如：core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取用户定义的值<br/>floorId: 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上<br/>stair: 传送的位置<br/>heroLoc: 传送的坐标；会覆盖stair<br/>time: 传送的黑屏时间，单位为毫秒；不填为用户设置值<br/>callback: 传送的回调函数", 
+          "!type": "fn(floorId: string, stair?: string, heroLoc?: {x?: number, y?: number, direction?: string}, time?: number, callback?: fn())"
         }, 
         "getCommonEvent": {
           "!doc": "获得一个公共事件", 

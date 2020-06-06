@@ -32,6 +32,7 @@ editor_multi = function () {
         styleActiveLine: true,
         extraKeys: extraKeys,
         foldGutter: true,
+        inputStyle: "textarea",
         highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
     });
 
@@ -141,9 +142,10 @@ editor_multi = function () {
                 var one = coredef.core[name][funcname] || {};
                 var type = one["!type"] || "";
                 if (type.startsWith("fn(")) {
+                    var forwardname = (functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a[name] || {})[funcname] ? '脚本编辑' : name;
                     coredef.core[funcname] = {
                         "!type": one["!type"],
-                        "!doc": one["!doc"] + "<br/>（转发到 " + name + " 中）"
+                        "!doc": one["!doc"] + "<br/>（转发到" + forwardname + "中）"
                     };
                     if (one["!url"]) coredef.core[funcname]["!url"] = one["!url"];
                 }
@@ -180,7 +182,8 @@ editor_multi = function () {
     editor_multi.codeEditor = codeEditor;
 
     codeEditor.on("cursorActivity", function (cm) {
-        if (codeEditor.getOption("autocomplete")) {
+        var cursor = cm.getCursor();
+        if (codeEditor.getOption("autocomplete") && !(cursor.line == 0 && cursor.ch == 0)) {
             ternServer.updateArgHints(cm);
             ternServer.showDocs(cm);
         }

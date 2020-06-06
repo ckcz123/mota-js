@@ -6,62 +6,62 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
       "prototype": {
         "nextSibling": {
           "!type": "+Element",
-          "!doc": "Returns the node immediately following the specified one in its parent's childNodes list, or null if the specified node is the last node in that list."
+          "!doc": "返回紧接其父节点的childNodes列表中指定节点之后的节点；如果指定节点是该列表中的最后一个节点,则返回null.",
         },
         "previousSibling": {
           "!type": "+Element",
-          "!doc": "Returns the node immediately preceding the specified one in its parent's childNodes list, null if the specified node is the first in that list."
+          "!doc": "返回紧接其父节点的childNodes列表中指定节点之前的节点,如果指定节点是该列表中的第一个节点,则返回null.",
         },
         "lastChild": {
           "!type": "+Element",
-          "!doc": "Returns the last child of a node."
+          "!doc": "返回节点的最后一个孩子."
         },
         "firstChild": {
           "!type": "+Element",
-          "!doc": "Returns the node's first child in the tree, or null if the node is childless. If the node is a Document, it returns the first node in the list of its direct children."
+          "!doc": "返回树中该节点的第一个子节点；如果该节点为无子节点,则返回null.如果该节点是Document,则返回其直接子节点列表中的第一个节点.",
         },
         "childNodes": {
           "!type": "+NodeList",
-          "!doc": "Returns a collection of child nodes of the given element."
+          "!doc": "返回给定元素的子节点的集合."
         },
         "parentNode": {
           "!type": "+Element",
-          "!doc": "Returns the parent of the specified node in the DOM tree."
+          "!doc": "返回DOM树中指定节点的父级."
         },
         "tagName": {
           "!type": "string",
-          "!doc": "Returns the name of the current node as a string."
+          "!doc": "将当前节点的名称作为字符串返回."
         },
         "insertBefore": {
           "!type": "fn(newElt: +Element, before: +Element) -> +Element",
-          "!doc": "Inserts the specified node before a reference element as a child of the current node."
+          "!doc": "将指定的节点插入到参考元素之前,作为当前节点的子级.",
         },
         "removeChild": {
           "!type": "fn(oldNode: +Element) -> +Element",
-          "!doc": "Removes a child node from the DOM. Returns removed node."
+          "!doc": "从DOM中删除一个子节点.返回已删除的节点.",
         },
         "appendChild": {
           "!type": "fn(newNode: +Element) -> +Element",
-          "!doc": "Adds a node to the end of the list of children of a specified parent node. If the node already exists it is removed from current parent node, then added to new parent node."
+          "!doc": "将一个节点添加到指定父节点的子节点列表的末尾.如果该节点已经存在,则将其从当前父节点中删除,然后添加到新的父节点中.",
         },
         "cloneNode": {
           "!type": "fn(deep: bool) -> +Element",
-          "!doc": "Returns a duplicate of the node on which this method was called."
+          "!doc": "返回在其上调用此方法的节点的副本."
         },
         "addEventListener": {
           "!type": "fn(type: string, listener: fn(e: +Event), capture: bool)",
-          "!doc": "Registers a single event listener on a single target. The event target may be a single element in a document, the document itself, a window, or an XMLHttpRequest."
+          "!doc": "在单个目标上注册单个事件侦听器.事件目标可以是文档中的单个元素,文档本身,窗口或XMLHttpRequest.",
         },
         "removeEventListener": {
           "!type": "fn(type: string, listener: fn(), capture: bool)",
-          "!doc": "Allows the removal of event listeners from the event target."
+          "!doc": "允许从事件目标中删除事件侦听器.",
         },
         "innerText": {
           "!type": "string",
-          "!doc": "Gets or sets the text content of a node and its descendants."
+          "!doc": "获取或设置节点及其后代的文本内容."
         }
       },
-      "!doc": "A Node is an interface from which a number of DOM types inherit, and allows these various types to be treated (or tested) similarly."
+      "!doc": "节点是一个接口,许多DOM类型都从该接口继承,并允许类似地对待(或测试)这些各种类型.",
     },
     "Element": {
       "!type": "fn()",
@@ -69,31 +69,31 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!proto": "Node.prototype",
         "getAttribute": {
           "!type": "fn(name: string) -> string",
-          "!doc": "Returns the value of the named attribute on the specified element. If the named attribute does not exist, the value returned will either be null or \"\" (the empty string)."
+          "!doc": "返回指定元素上的命名属性的值.如果命名属性不存在,则返回的值将为null或\" \"(空字符串).",
         },
         "setAttribute": {
           "!type": "fn(name: string, value: string)",
-          "!doc": "Adds a new attribute or changes the value of an existing attribute on the specified element."
+          "!doc": "在指定元素上添加新属性或更改现有属性的值.",
         },
         "removeAttribute": {
           "!type": "fn(name: string)",
-          "!doc": "Removes an attribute from the specified element."
+          "!doc": "从指定元素中删除属性.",
         },
         "getElementsByTagName": {
           "!type": "fn(tagName: string) -> +NodeList",
-          "!doc": "Returns a list of elements with the given tag name. The subtree underneath the specified element is searched, excluding the element itself. The returned list is live, meaning that it updates itself with the DOM tree automatically. Consequently, there is no need to call several times element.getElementsByTagName with the same element and arguments."
+          "!doc": "返回具有给定标签名的元素列表.搜索指定元素下面的子树,不包括元素本身.返回的列表是活动的,这意味着它将自动使用DOM树进行更新.因此,无需使用相同的元素和参数多次调用element.getElementsByTagName."
         },
         "getElementsByClassName": {
           "!type": "fn(name: string) -> +NodeList",
-          "!doc": "Returns a set of elements which have all the given class names. When called on the document object, the complete document is searched, including the root node. You may also call getElementsByClassName on any element; it will return only elements which are descendants of the specified root element with the given class names."
+          "!doc": "返回具有所有给定类名称的一组元素.在文档对象上调用时,将搜索整个文档,包括根节点.您还可以在任何元素上调用getElementsByClassName；它将仅返回元素,它们是具有给定类名的指定根元素的后代."
         },
         "children": {
           "!type": "+HTMLCollection",
-          "!doc": "Returns a collection of child elements of the given element."
+          "!doc": "返回给定元素的子元素的集合."
         },
         "className": {
           "!type": "string",
-          "!doc": "Gets and sets the value of the class attribute of the specified element."
+          "!doc": "获取并设置指定元素的class属性的值.",
         },
         "style": {
           "cssText": "string",
@@ -286,34 +286,34 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "writingMode": "string",
           "zIndex": "string",
           "zoom": "string",
-          "!doc": "Returns an object that represents the element's style attribute."
+          "!doc": "返回一个表示元素的style属性的对象."
         },
         "classList": {
           "!type": "+DOMTokenList",
-          "!doc": "Returns a token list of the class attribute of the element."
+          "!doc": "返回元素的class属性的标记列表."
         },
         "title": {
           "!type": "string",
-          "!doc": "Establishes the text to be displayed in a 'tool tip' popup when the mouse is over the displayed node."
+          "!doc":" \"\u5efa\u7acb\u5f53\u9f20\u6807\u60ac\u505c\u5728\u663e\u793a\u7684\u8282\u70b9\u4e0a\u65f6\u5728\"\u5de5\u5177\u63d0\u793a\"\u5f39\u51fa\u7a97\u53e3\u4e2d\u663e\u793a\u7684\u6587\u672c.\","
         },
         "width": {
           "!type": "number",
-          "!doc": "Returns the layout width of an element."
+          "!doc": "返回元素的布局宽度."
         },
         "height": {
           "!type": "number",
-          "!doc": "Height of an element relative to the element's offsetParent."
+          "!doc": "元素相对于元素的offsetParent的高度."
         },
         "getContext": {
           "!type": "fn(id: string) -> CanvasRenderingContext2D",
-          "!doc": "DOM canvas elements expose the HTMLCanvasElement interface, which provides properties and methods for manipulating the layout and presentation of canvas elements. The HTMLCanvasElement interface inherits the properties and methods of the element object interface."
+          "!doc": " DOM画布元素公开了HTMLCanvasElement接口,该接口提供了用于操纵画布元素的布局和表示的属性和方法.HTMLCanvasElement接口继承了元素对象接口的属性和方法.",
         },
         "innerHTML": {
           "!type": "string",
-          "!doc": "Sets or gets the HTML syntax describing the element's descendants."
+          "!doc": "设置或获取描述元素后代的HTML语法.",
         }
       },
-      "!doc": "Represents an element in an HTML or XML document."
+      "!doc": "表示HTML或XML文档中的元素.",
     },
     "Document": {
       "!type": "fn()",
@@ -321,227 +321,227 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!proto": "Node.prototype",
         "height": {
           "!type": "number",
-          "!doc": "Returns the height of the <body> element of the current document."
+          "!doc": "返回当前文档的<body>元素的高度.",
         },
         "width": {
           "!type": "number",
-          "!doc": "Returns the width of the <body> element of the current document in pixels."
+          "!doc": "以像素为单位返回当前文档的<body>元素的宽度.",
         },
         "body": {
           "!type": "+Element",
-          "!doc": "Returns the <body> or <frameset> node of the current document."
+          "!doc": "返回当前文档的<body>或<frameset>节点.",
         },
         "cookie": {
           "!type": "string",
-          "!doc": "Get and set the cookies associated with the current document."
+          "!doc": "获取并设置与当前文档关联的cookie.",
         },
         "URL": "string",
         "title": {
           "!type": "string",
-          "!doc": "Gets or sets the title of the document."
+          "!doc": "获取或设置文档的标题."
         },
         "getElementById": {
           "!type": "fn(id: string) -> +Element",
-          "!doc": "Returns a reference to the element by its ID."
+          "!doc": "通过元素ID返回对该元素的引用."
         },
         "getElementsByTagName": {
           "!type": "fn(tagName: string) -> +NodeList",
-          "!doc": "Returns a NodeList of elements with the given tag name. The complete document is searched, including the root node. The returned NodeList is live, meaning that it updates itself automatically to stay in sync with the DOM tree without having to call document.getElementsByTagName again."
+          "!doc": "返回具有给定标签名称的元素的NodeList.将搜索整个文档,包括根节点.返回的NodeList处于活动状态,这意味着它会自动更新自身以与DOM树保持同步,而无需再次调用document.getElementsByTagName."
         },
         "getElementsByName": {
           "!type": "fn(name: string) -> +HTMLCollection",
-          "!doc": "Returns a list of elements with a given name in the HTML document."
+          "!doc": "返回HTML文档中具有给定名称的元素列表.",
         },
         "getElementsByClassName": "Element.prototype.getElementsByClassName"
       },
-      "!doc": "Each web page loaded in the browser has its own document object. This object serves as an entry point to the web page's content (the DOM tree, including elements such as <body> and <table>) and provides functionality global to the document (such as obtaining the page's URL and creating new elements in the document)."
+      "!doc": "浏览器中加载的每个网页都有其自己的文档对象.此对象用作网页内容(DOM树,包括诸如<body>和<table>之类的元素)的入口点,并提供文档的全局功能(例如获取页面的URL和在文档中创建新元素)."
     },
     "document": {
       "!type": "+Document",
-      "!doc": "Each web page loaded in the browser has its own document object. This object serves as an entry point to the web page's content (the DOM tree, including elements such as <body> and <table>) and provides functionality global to the document (such as obtaining the page's URL and creating new elements in the document)."
+      "!doc": "浏览器中加载的每个网页都有其自己的文档对象.此对象用作网页内容(DOM树,包括诸如<body>和<table>之类的元素)的入口点,并提供文档的全局功能(例如获取页面的URL和在文档中创建新元素)."
     },
     "Event": {
       "!type": "fn()",
       "prototype": {
         "stopPropagation": {
           "!type": "fn()",
-          "!doc": "Prevents further propagation of the current event."
+          "!doc": "防止当前事件进一步传播."
         },
         "preventDefault": {
           "!type": "fn()",
-          "!doc": "Cancels the event if it is cancelable, without stopping further propagation of the event."
+          "!doc": "如果可以取消事件,则取消该事件,而不停止事件的进一步传播."
         },
         "stopImmediatePropagation": {
           "!type": "fn()",
-          "!doc": "Prevents other listeners of the same event to be called."
+          "!doc": "防止同一事件的其他侦听器被调用."
         },
         "type": {
           "!type": "string",
-          "!doc": "Returns a string containing the type of event."
+          "!doc": "返回包含事件类型的字符串."
         },
         "target": {
           "!type": "+Element",
-          "!doc": "An EventTarget is a DOM interface implemented by objects that can receive DOM events and have listeners for them. The most common EventTargets are DOM elements, although other objects can be EventTargets too, for example document, window, XMLHttpRequest, and others."
+          "!doc": " EventTarget是由对象实现的DOM接口,这些对象可以接收DOM事件并具有侦听器.最常见的EventTarget是DOM元素,尽管其他对象也可以是EventTarget,例如文档,窗口,XMLHttpRequest,和别的."
         },
         "clientX": {
           "!type": "number",
-          "!doc": "Returns the horizontal coordinate within the application's client area at which the event occurred (as opposed to the coordinates within the page). For example, clicking in the top-left corner of the client area will always result in a mouse event with a clientX value of 0, regardless of whether the page is scrolled horizontally."
+          "!doc": "返回事件发生的应用程序客户区域内的水平坐标(与页面内的坐标相反).例如,单击客户区域左上角将始终显示clientX值为0的鼠标事件,无论页面是否水平滚动."
         },
         "clientY": {
           "!type": "number",
-          "!doc": "Returns the vertical coordinate within the application's client area at which the event occurred (as opposed to the coordinates within the page). For example, clicking in the top-left corner of the client area will always result in a mouse event with a clientY value of 0, regardless of whether the page is scrolled vertically."
+          "!doc": "返回事件发生在应用程序客户区中的垂直坐标(与页面中的坐标相反).例如,单击客户区左上角将始终显示不管页面是否垂直滚动,clientY值为0的鼠标事件."
         },
         "keyCode": {
           "!type": "number",
-          "!doc": "Returns the Unicode value of a non-character key in a keypress event or any key in any other type of keyboard event."
+          "!doc": "返回按键事件中的非字符键或任何其他类型的键盘事件中的任何键的Unicode值.",
         },
         "charCode": {
           "!type": "number",
-          "!doc": "Returns the Unicode value of a character key pressed during a keypress event."
+          "!doc": "返回在按键事件期间按下的字符键的Unicode值."
         },
         "which": {
           "!type": "number",
-          "!doc": "Returns the numeric keyCode of the key pressed, or the character code (charCode) for an alphanumeric key pressed."
+          "!doc": "返回所按下键的数字keyCode或所按下字母数字键的字符代码(charCode)."
         },
         "button": {
           "!type": "number",
-          "!doc": "Indicates which mouse button caused the event."
+          "!doc": "指示导致事件的鼠标按钮."
         },
         "shiftKey": {
           "!type": "bool",
-          "!doc": "Indicates whether the SHIFT key was pressed when the event fired."
+          "!doc": "指示事件触发时是否按下SHIFT键.",
         },
         "ctrlKey": {
           "!type": "bool",
-          "!doc": "Indicates whether the CTRL key was pressed when the event fired."
+          "!doc": "指示事件触发时是否按下了CTRL键.",
         },
         "altKey": {
           "!type": "bool",
-          "!doc": "Indicates whether the ALT key was pressed when the event fired."
+          "!doc": "指示事件触发时是否按下ALT键.",
         }
       }
     },
     "Storage": {
       "length": {
         "!type": "number",
-        "!doc": "The length read-only property of the Storage interface returns an integer representing the number of data items stored in the Storage object."
+        "!doc": "存储接口的length只读属性返回一个整数,该整数表示存储在存储对象中的数据项的数量.",
       },
       "setItem": {
         "!type": "fn(name: string, value: string)",
-        "!doc": "The setItem() method of the Storage interface, when passed a key name and value, will add that key to the storage, or update that key's value if it already exists."
+        "!doc": "存储接口的setItem()方法在传递键名称和值时,会将该键添加到存储中,或者更新该键的值(如果已存在).",
       },
       "getItem": {
         "!type": "fn(name: string) -> string",
-        "!doc": "The getItem() method of the Storage interface, when passed a key name, will return that key's value."
+        "!doc": "存储接口的getItem()方法在传递键名时将返回该键的值.",
       },
       "key": {
         "!type": "fn(index: number) -> string",
-        "!doc": "The key() method of the Storage interface, when passed a number n, returns the name of the nth key in the storage. The order of keys is user-agent defined, so you should not rely on it."
+        "!doc": "存储接口的key()方法传递数字n时,返回存储中第n个键的名称.键的顺序是用户代理定义的,因此您不应依赖它."
       },
       "removeItem": {
         "!type": "fn(key: string)",
-        "!doc": "The removeItem() method of the Storage interface, when passed a key name, will remove that key from the storage."
+        "!doc": "存储接口的removeItem()方法在传递了键名后,将从存储中删除该键.",
       },
       "clear": {
         "!type": "fn()",
-        "!doc": "The clear() method of the Storage interface, when invoked, will empty all keys out of the storage"
+        "!doc": "存储接口的clear()方法在被调用时将从存储中清空所有键."
       }
     },
     "localStorage": {
       "!type": "Storage",
-      "!doc": "The localStorage property allows you to access a local Storage object. localStorage is similar to sessionStorage. The only difference is that, while data stored in localStorage has no expiration time, data stored in sessionStorage gets cleared when the browsing session ends - that is, when the browser is closed.\n\nIt should be noted that data stored in either localStorage or sessionStorage is specific to the protocol of the page."
+      "!doc": " localStorage属性允许您访问本地存储对象.localStorage与sessionStorage类似.唯一的区别是,虽然存储在localStorage中的数据没有到期时间,但是浏览会话时存储在sessionStorage中的数据将被清除.结束-也就是说,当浏览器关闭时.\ n \ n请注意,存储在localStorage或sessionStorage中的数据特定于页面协议."
     },
     "console": {
       "assert": {
         "!type": "fn(assertion: bool, text: string)",
-        "!doc": "Writes an error message to the console if the assertion is false."
+        "!doc": "如果断言为false,则将错误消息写入控制台.",
       },
       "error": {
         "!type": "fn(...msg: ?)",
-        "!doc": "Outputs an error message to the Web Console."
+        "!doc": "将错误消息输出到Web控制台.",
       },
       "info": {
         "!type": "fn(...msg: ?)",
-        "!doc": "Outputs an informational message to the Web Console."
+        "!doc": "将参考消息输出到Web控制台.",
       },
       "log": {
         "!type": "fn(...msg: ?)",
-        "!doc": "Outputs a message to the Web Console."
+        "!doc": "将消息输出到Web控制台.",
       },
       "time": {
         "!type": "fn(label: string)",
-        "!doc": "Starts a timer you can use to track how long an operation takes."
+        "!doc": "启动计时器,您可以使用该计时器来跟踪操作需要多长时间.",
       },
       "timeEnd": {
         "!type": "fn(label: string)",
-        "!doc": "Stops a timer that was previously started by calling console.time()."
+        "!doc": "停止以前通过调用console.time()启动的计时器.",
       },
       "trace": {
         "!type": "fn()",
-        "!doc": "Outputs a stack trace to the Web Console."
+        "!doc": "将堆栈跟踪输出到Web控制台.",
       },
       "warn": {
         "!type": "fn(...msg: ?)",
-        "!doc": "Outputs a warning message to the Web Console."
+        "!doc": "将警告消息输出到Web控制台.",
       },
-      "!doc": "The console object provides access to the browser's debugging console. The specifics of how it works vary from browser to browser, but there is a de facto set of features that are typically provided."
+      "!doc": "控制台对象提供对浏览器调试控制台的访问.其工作方式的细节因浏览器而异,但实际上提供了一组事实上的功能.",
     },
     "window": {
       "!type": "<top>",
-      "!doc": "The window object represents a window containing a DOM document."
+      "!doc": "窗口对象代表一个包含DOM文档的窗口.",
     },
     "self": {
       "!type": "<top>",
-      "!doc": "Returns an object reference to the window object. "
+      "!doc": "将对象引用返回到窗口对象.",
     },
     "devicePixelRatio": "number",
     "requestAnimationFrame": {
       "!type": "fn(callback: fn(timestamp: number)) -> number",
-      "!doc": "The Window.requestAnimationFrame() method tells the browser that you wish to perform an animation and requests that the browser call a specified function to update an animation before the next repaint. The method takes as an argument a callback to be invoked before the repaint."
+      "!doc": " Window.requestAnimationFrame()方法告诉浏览器您希望执行动画,并请求浏览器在下一次重绘之前调用指定的函数来更新动画.该方法将回调作为参数在重新粉刷之前被调用."
     },
     "cancelAnimationFrame": {
       "!type": "fn(number)n",
-      "!doc": "Cancels a previously scheduled animation frame request."
+      "!doc": "取消先前安排的动画帧请求.",
     },
     "alert": {
       "!type": "fn(message: string)",
-      "!doc": "Display an alert dialog with the specified content and an OK button."
+      "!doc": "显示具有指定内容和确定按钮的警报对话框."
     },
     "confirm": {
       "!type": "fn(message: string) -> bool",
-      "!doc": "Displays a modal dialog with a message and two buttons, OK and Cancel."
+      "!doc": "显示带有消息和两个按钮(确定和取消)的模式对话框.",
     },
     "prompt": {
       "!type": "fn(message: string, value: string) -> string",
-      "!doc": "Displays a dialog with a message prompting the user to input some text."
+      "!doc": "显示一个对话框,提示用户输入一些文本.",
     },
     "setTimeout": {
       "!type": "fn(f: fn(), ms: number) -> number",
-      "!doc": "Calls a function or executes a code snippet after specified delay."
+      "!doc": "在指定的延迟后调用函数或执行代码段."
     },
     "clearTimeout": {
       "!type": "fn(timeout: number)",
-      "!doc": "Clears the delay set by window.setTimeout()."
+      "!doc": "清除window.setTimeout()设置的延迟.",
     },
     "setInterval": {
       "!type": "fn(f: fn(), ms: number) -> number",
-      "!doc": "Calls a function or executes a code snippet repeatedly, with a fixed time delay between each call to that function."
+      "!doc": "反复调用一个函数或执行代码段,每次调用该函数之间有固定的时间延迟.",
     },
     "clearInterval": {
       "!type": "fn(interval: number)",
-      "!doc": "Cancels repeated action which was set up using setInterval."
+      "!doc": "取消使用setInterval设置的重复操作.",
     },
     "atob": {
       "!type": "fn(encoded: string) -> string",
-      "!doc": "Decodes a string of data which has been encoded using base-64 encoding."
+      "!doc": "解码使用base-64编码编码的数据字符串."
     },
     "btoa": {
       "!type": "fn(data: string) -> string",
-      "!doc": "Creates a base-64 encoded ASCII string from a string of binary data."
+      "!doc": "从一串二进制数据创建一个base-64编码的ASCII字符串.",
     },
     "getComputedStyle": {
       "!type": "fn(node: +Element, pseudo?: string) -> Element.prototype.style",
-      "!doc": "Gives the final used values of all the CSS properties of an element."
+      "!doc": "给出元素的所有CSS属性的最终使用值.",
     },
     "CanvasRenderingContext2D": {
       "canvas": "+Element",
@@ -607,54 +607,54 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
     },
     "Image": {
       "!type": "fn(width?: number, height?: number) -> +HTMLImageElement",
-      "!doc": "Image Element constructor. Accepts two optional parameters: Image([unsigned long width, unsigned long height]). Returns an HTMLImageElement instance just as document.createElement('img') would."
+      "!doc": "图像元素构造函数.接受两个可选参数: Image([unsigned long width,unsigned long height]).返回HTMLImageElement实例,就像document.createElement('img')一样.",
     }
   },
   {
     "!name": "ecmascript",
     "Infinity": {
       "!type": "number",
-      "!doc": "A numeric value representing infinity."
+      "!doc": "代表无穷大的数值."
     },
     "undefined": {
       "!type": "?",
-      "!doc": "The value undefined."
+      "!doc": "该值未定义.",
     },
     "NaN": {
       "!type": "number",
-      "!doc": "A value representing Not-A-Number."
+      "!doc": "代表非数字的值."
     },
     "Object": {
       "!type": "fn()",
       "create": {
         "!type": "fn(proto: ?) -> !custom:Object_create",
-        "!doc": "Creates a new object with the specified prototype object and properties."
+        "!doc": "使用指定的原型对象和属性创建一个新对象.",
       },
       "defineProperty": {
         "!type": "fn(obj: ?, prop: string, desc: propertyDescriptor) -> !custom:Object_defineProperty",
-        "!doc": "Defines a new property directly on an object, or modifies an existing property on an object, and returns the object. If you want to see how to use the Object.defineProperty method with a binary-flags-like syntax, see this article."
+        "!doc": "直接在对象上定义新属性,或修改对象上的现有属性,然后返回对象.如果想了解如何将Object.defineProperty方法与类似二进制标志的语法一起使用,请参阅本文."
       },
       "keys": {
         "!type": "fn(obj: ?) -> [string]",
-        "!doc": "Returns an array of a given object's own enumerable properties, in the same order as that provided by a for-in loop (the difference being that a for-in loop enumerates properties in the prototype chain as well)."
+        "!doc": "返回一个给定对象自己的可枚举属性的数组,其顺序与for-in循环所提供的顺序相同(不同之处在于for-in循环也枚举了原型链中的属性). "
       },
       "assign": {
         "!type": "fn(target: ?, source: ?, source?: ?) -> !0",
         "!effects": ["copy !1 !0", "copy !2 !0", "copy !3 !0"],
-        "!doc": "The Object.assign() method is used to copy the values of all enumerable own properties from one or more source objects to a target object. It will return the target object.",
+        "!doc": " Object.assign()方法用于将所有可枚举的自身属性的值从一个或多个源对象复制到目标对象.它将返回目标对象.,",
       },
       "prototype": {
         "!stdProto": "Object",
         "toString": {
           "!type": "fn() -> string",
-          "!doc": "Returns a string representing the object."
+          "!doc": "返回表示对象的字符串."
         },
         "hasOwnProperty": {
           "!type": "fn(prop: string) -> bool",
-          "!doc": "Returns a boolean indicating whether the object has the specified property."
+          "!doc": "返回一个布尔值,指示对象是否具有指定的属性.",
         }
       },
-      "!doc": "Creates an object wrapper."
+      "!doc": "创建对象包装器.",
     },
     "Function": {
       "!type": "fn(body: string) -> fn()",
@@ -665,159 +665,159 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!effects": [
             "call and return !this this=!0 !1.<i> !1.<i> !1.<i>"
           ],
-          "!doc": "Calls a function with a given this value and arguments provided as an array (or an array like object)."
+          "!doc": "调用具有给定值的函数,并以数组(或类似对象的数组)形式提供参数.",
         },
         "call": {
           "!type": "fn(this: ?, args?: ?) -> !this.!ret",
           "!effects": [
             "call and return !this this=!0 !1 !2 !3 !4"
           ],
-          "!doc": "Calls a function with a given this value and arguments provided individually."
+          "!doc": "调用具有给定值和单独提供的参数的函数.",
         },
         "bind": {
           "!type": "fn(this: ?, args?: ?) -> !custom:Function_bind",
-          "!doc": "Creates a new function that, when called, has its this keyword set to the provided value, with a given sequence of arguments preceding any provided when the new function was called."
+          "!doc": "创建一个新函数,该函数在被调用时将其this关键字设置为提供的值,并在调用新函数时提供给定的参数序列.",
         },
         "prototype": "?"
       },
-      "!doc": "Every function in JavaScript is actually a Function object."
+      "!doc": " JavaScript中的每个函数实际上都是一个Function对象."
     },
     "Array": {
       "!type": "fn(size: number) -> !custom:Array_ctor",
       "isArray": {
         "!type": "fn(value: ?) -> bool",
-        "!doc": "Returns true if an object is an array, false if it is not."
+        "!doc": "如果对象是数组,则返回true,否则返回false.",
       },
       "from": {
         "!type": "fn(arrayLike: ?, mapFn?: fn(elt: ?, i: number) -> ?, thisArg?: ?) -> [!0.<i>]",
         "!effects": [
           "call !1 this=!2 !0.<i> number"
         ],
-        "!doc": "The Array.from() method creates a new Array instance from an array-like or iterable object.",
+        "!doc": " Array.from()方法从类似数组或可迭代的对象创建一个新的Array实例.,",
       },
       "of": {
         "!type": "fn(elementN: ?) -> [!0]",
-        "!doc": "The Array.of() method creates a new Array instance with a variable number of arguments, regardless of number or type of the arguments.",
+        "!doc": " Array.of()方法创建一个新的Array实例,该实例具有可变数量的参数,而不考虑参数的数量或类型.,",
       },
       "prototype": {
         "!stdProto": "Array",
         "length": {
           "!type": "number",
-          "!doc": "An unsigned, 32-bit integer that specifies the number of elements in an array."
+          "!doc": "一个无符号的32位整数,指定数组中的元素数.",
         },
         "concat": {
           "!type": "fn(other: [?]) -> !this",
-          "!doc": "Returns a new array comprised of this array joined with other array(s) and/or value(s)."
+          "!doc": "返回一个新数组,该数组由该数组与其他数组和/或值组成.",
         },
         "join": {
           "!type": "fn(separator?: string) -> string",
-          "!doc": "Joins all elements of an array into a string."
+          "!doc": "将数组的所有元素连接到字符串中."
         },
         "splice": {
           "!type": "fn(pos: number, amount: number, newelt?: ?) -> [?]",
-          "!doc": "Changes the content of an array, adding new elements while removing old elements."
+          "!doc": "更改数组的内容,在删除旧元素的同时添加新元素.",
         },
         "pop": {
           "!type": "fn() -> !this.<i>",
-          "!doc": "Removes the last element from an array and returns that element."
+          "!doc": "从数组中删除最后一个元素并返回该元素.",
         },
         "push": {
           "!type": "fn(newelt: ?) -> number",
           "!effects": [
             "propagate !0 !this.<i>"
           ],
-          "!doc": "Mutates an array by appending the given elements and returning the new length of the array."
+          "!doc": "通过添加给定元素并返回数组的新长度来更改数组.",
         },
         "shift": {
           "!type": "fn() -> !this.<i>",
-          "!doc": "Removes the first element from an array and returns that element. This method changes the length of the array."
+          "!doc": "从数组中删除第一个元素并返回该元素.此方法更改数组的长度.",
         },
         "unshift": {
           "!type": "fn(newelt: ?) -> number",
           "!effects": [
             "propagate !0 !this.<i>"
           ],
-          "!doc": "Adds one or more elements to the beginning of an array and returns the new length of the array."
+          "!doc": "将一个或多个元素添加到数组的开头,并返回数组的新长度.",
         },
         "slice": {
           "!type": "fn(from?: number, to?: number) -> !this",
-          "!doc": "Returns a shallow copy of a portion of an array."
+          "!doc": "返回数组一部分的浅表副本."
         },
         "reverse": {
           "!type": "fn()",
-          "!doc": "Reverses an array in place.  The first array element becomes the last and the last becomes the first."
+          "!doc": "就地反转数组.第一个数组元素变为最后一个,而最后一个数组变为第一个.",
         },
         "sort": {
           "!type": "fn(compare?: fn(a: ?, b: ?) -> number)",
           "!effects": [
             "call !0 !this.<i> !this.<i>"
           ],
-          "!doc": "Sorts the elements of an array in place and returns the array."
+          "!doc": "将数组中的元素排序并返回数组."
         },
         "indexOf": {
           "!type": "fn(elt: ?, from?: number) -> number",
-          "!doc": "Returns the first index at which a given element can be found in the array, or -1 if it is not present."
+          "!doc": "返回在数组中可以找到给定元素的第一个索引；如果不存在,则返回-1.",
         },
         "lastIndexOf": {
           "!type": "fn(elt: ?, from?: number) -> number",
-          "!doc": "Returns the last index at which a given element can be found in the array, or -1 if it is not present. The array is searched backwards, starting at fromIndex."
+          "!doc": "返回在数组中找到给定元素的最后一个索引,如果不存在则返回-1.从fromIndex开始向后搜索数组.",
         },
         "filter": {
           "!type": "fn(test: fn(elt: ?, i: number, array: +Array) -> bool, context?: ?) -> !this",
           "!effects": [
             "call !0 this=!1 !this.<i> number !this"
           ],
-          "!doc": "Creates a new array with all elements that pass the test implemented by the provided function."
+          "!doc": "创建一个新数组,其中包含所有通过提供的功能实现的测试的元素.",
         },
         "forEach": {
           "!type": "fn(f: fn(elt: ?, i: number, array: +Array), context?: ?)",
           "!effects": [
             "call !0 this=!1 !this.<i> number !this"
           ],
-          "!doc": "Executes a provided function once per array element."
+          "!doc": "每个数组元素执行一次提供的功能."
         },
         "map": {
           "!type": "fn(f: fn(elt: ?, i: number, array: +Array) -> ?, context?: ?) -> [!0.!ret]",
           "!effects": [
             "call !0 this=!1 !this.<i> number !this"
           ],
-          "!doc": "Creates a new array with the results of calling a provided function on every element in this array."
+          "!doc": "创建一个新数组,其结果是对该数组中的每个元素调用提供的函数.",
         },
         "reduce": {
           "!type": "fn(combine: fn(sum: ?, elt: ?, i: number, array: +Array) -> ?, init?: ?) -> !0.!ret",
           "!effects": [
             "call !0 !1 !this.<i> number !this"
           ],
-          "!doc": "Apply a function against an accumulator and each value of the array (from left-to-right) as to reduce it to a single value."
+          "!doc": "对一个累加器和数组的每个值(从左到右)应用一个函数,以将其减小为单个值.",
         },
         "fill": {
           "!type": "fn(value: ?, start?: number, end?: number) -> !this",
-          "!doc": "The fill() method fills all the elements of an array from a start index to an end index with a static value.",
+          "!doc": " fill()方法使用静态值填充数组的所有元素,从开始索引到结束索引.,",
         },
         "find": {
           "!type": "fn(callback: fn(element: ?, index: number, array: [?]) -> bool, thisArg?: ?) -> !this.<i>",
           "!effects": ["call !0 this=!2 !this.<i> number"],
-          "!doc": "The find() method returns a value in the array, if an element in the array satisfies the provided testing function. Otherwise undefined is returned.",
+          "!doc": "如果数组中的元素满足提供的测试功能,则find()方法将在数组中返回一个值.否则,返回undefined.,",
         },
         "findIndex": {
           "!type": "fn(callback: fn(element: ?, index: number, array: [?]), thisArg?: ?) -> number",
           "!effects": ["call !0 this=!2 !this.<i> number"],
-          "!doc": "The findIndex() method returns an index in the array, if an element in the array satisfies the provided testing function. Otherwise -1 is returned.",
+          "!doc": "如果数组中的元素满足提供的测试功能,则findIndex()方法将返回数组中的索引.否则返回-1.,",
         },
         "keys": {
           "!type": "fn() -> +iter[:t=number]",
-          "!doc": "The keys() method returns a new Array Iterator that contains the keys for each index in the array.",
+          "!doc": " keys()方法返回一个新的数组迭代器,其中包含数组中每个索引的键.,",
         },
         "values": {
           "!type": "fn() -> +iter[:t=!this.<i>]",
-          "!doc": "The values() method returns a new Array Iterator object that contains the values for each index in the array.",
+          "!doc": " values()方法返回一个新的Array Iterator对象,该对象包含数组中每个索引的值.,",
         },
         "includes": {
           "!type": "fn(value: ?, fromIndex?: number) -> bool",
-          "!doc": "Determines whether an array includes a certain element, returning true or false as appropriate.",
+          "!doc": "确定数组是否包含某个元素,并根据需要返回true或false.,",
         }
       },
-      "!doc": "The JavaScript Array global object is a constructor for arrays, which are high-level, list-like objects."
+      "!doc": " JavaScript Array全局对象是数组的构造函数,这些数组是高级的,类似于列表的对象.",
     },
     "String": {
       "!type": "fn(value: ?) -> string",
@@ -825,173 +825,173 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!stdProto": "String",
         "length": {
           "!type": "number",
-          "!doc": "Represents the length of a string."
+          "!doc": "表示字符串的长度."
         },
         "<i>": "string",
         "charAt": {
           "!type": "fn(i: number) -> string",
-          "!doc": "Returns the specified character from a string."
+          "!doc": "从字符串中返回指定的字符.",
         },
         "charCodeAt": {
           "!type": "fn(i: number) -> number",
-          "!doc": "Returns the numeric Unicode value of the character at the given index (except for unicode codepoints > 0x10000)."
+          "!doc": "返回给定索引处字符的数字Unicode值(Unicode代码点> 0x10000除外).",
         },
         "indexOf": {
           "!type": "fn(char: string, from?: number) -> number",
-          "!doc": "Returns the index within the calling String object of the first occurrence of the specified value, starting the search at fromIndex,\nreturns -1 if the value is not found."
+          "!doc": "返回指定值首次出现的调用String对象中的索引,从fromIndex开始搜索,\ n如果未找到该值,则返回-1.",
         },
         "lastIndexOf": {
           "!type": "fn(char: string, from?: number) -> number",
-          "!doc": "Returns the index within the calling String object of the last occurrence of the specified value, or -1 if not found. The calling string is searched backward, starting at fromIndex."
+          "!doc": "返回指定值最后一次出现的调用String对象内的索引,如果未找到则返回-1.从fromIndex开始向后搜索调用字符串.",
         },
         "substring": {
           "!type": "fn(from: number, to?: number) -> string",
-          "!doc": "Returns a subset of a string between one index and another, or through the end of the string."
+          "!doc": "返回一个索引与另一个索引之间或字符串末尾的字符串子集.",
         },
         "substr": {
           "!type": "fn(from: number, length?: number) -> string",
-          "!doc": "Returns the characters in a string beginning at the specified location through the specified number of characters."
+          "!doc": "以指定的字符数返回从指定位置开始的字符串中的字符.",
         },
         "slice": {
           "!type": "fn(from: number, to?: number) -> string",
-          "!doc": "Extracts a section of a string and returns a new string."
+          "!doc": "提取字符串的一部分并返回新的字符串.",
         },
         "padStart": {
           "!type": "fn(targetLength: number, padString?: string) -> string",
-          "!doc": "Pads the current string with another string (repeated, if needed) so that the resulting string reaches the given length."
+          "!doc": "用另一个字符串(如果需要,重复)填充当前字符串,以使结果字符串达到给定的长度.",
         },
         "padEnd": {
           "!type": "fn(targetLength: number, padString?: string) -> string",
-          "!doc": "pads the current string with a given string (repeated, if needed) so that the resulting string reaches a given length."
+          "!doc": "用给定的字符串(如果需要,重复)填充当前字符串,以使结果字符串达到给定的长度.",
         },
         "trim": {
           "!type": "fn() -> string",
-          "!doc": "Removes whitespace from both ends of the string."
+          "!doc": "从字符串的两端删除空格.",
         },
         "trimStart": {
           "!type": "fn() -> string",
-          "!doc": "Removes whitespace from the beginning of a string. "
+          "!doc": "从字符串的开头删除空格.",
         },
         "trimEnd": {
           "!type": "fn() -> string",
-          "!doc": "Removes whitespace from the end of a string."
+          "!doc": "从字符串末尾删除空格.",
         },
         "toUpperCase": {
           "!type": "fn() -> string",
-          "!doc": "Returns the calling string value converted to uppercase."
+          "!doc": "返回转换为大写的调用字符串值."
         },
         "toLowerCase": {
           "!type": "fn() -> string",
-          "!doc": "Returns the calling string value converted to lowercase."
+          "!doc": "返回转换为小写的调用字符串值."
         },
         "split": {
           "!type": "fn(pattern?: string|+RegExp, limit?: number) -> [string]",
-          "!doc": "Splits a String object into an array of strings by separating the string into substrings."
+          "!doc": "通过将字符串分成子字符串,将String对象拆分为字符串数组.",
         },
         "concat": {
           "!type": "fn(other: string) -> string",
-          "!doc": "Combines the text of two or more strings and returns a new string."
+          "!doc": "将两个或多个字符串的文本合并,并返回一个新字符串."
         },
         "match": {
           "!type": "fn(pattern: +RegExp) -> [string]",
-          "!doc": "Used to retrieve the matches when matching a string against a regular expression."
+          "!doc": "用于将字符串与正则表达式匹配时用于检索匹配.",
         },
         "replace": {
           "!type": "fn(pattern: string|+RegExp, replacement: string) -> string",
-          "!doc": "Returns a new string with some or all matches of a pattern replaced by a replacement.  The pattern can be a string or a RegExp, and the replacement can be a string or a function to be called for each match."
+          "!doc": "返回一个新字符串,该字符串的某个或所有匹配项都由替换项替换.该模式可以是字符串或RegExp,并且替换项可以是字符串或每个匹配项将调用的函数. "
         },
         "endsWith": {
           "!type": "fn(searchString: string, position?: number) -> bool",
-          "!doc": "The endsWith() method determines whether a string ends with the characters of another string, returning true or false as appropriate.",
+          "!doc": " endsWith()方法确定一个字符串是否以另一个字符串的字符结尾,并根据需要返回true或false.,",
         },
         "startsWith": {
           "!type": "fn(searchString: string, position?: number) -> bool",
-          "!doc": "The startsWith() method determines whether a string begins with the characters of another string, returning true or false as appropriate.",
+          "!doc": " startsWith()方法确定一个字符串是否以另一个字符串的字符开头,并根据需要返回true或false.,",
         }
       },
-      "!doc": "The String global object is a constructor for strings, or a sequence of characters."
+      "!doc": " String全局对象是字符串或字符序列的构造函数.",
     },
     "Number": {
       "!type": "fn(value: ?) -> number",
       "MAX_VALUE": {
         "!type": "number",
-        "!doc": "The maximum numeric value representable in JavaScript."
+        "!doc": " JavaScript中可表示的最大数值."
       },
       "MIN_VALUE": {
         "!type": "number",
-        "!doc": "The smallest positive numeric value representable in JavaScript."
+        "!doc": " JavaScript中可表示的最小正数值."
       },
       "POSITIVE_INFINITY": {
         "!type": "number",
-        "!doc": "A value representing the positive Infinity value."
+        "!doc": "代表正无穷大值的值."
       },
       "NEGATIVE_INFINITY": {
         "!type": "number",
-        "!doc": "A value representing the negative Infinity value."
+        "!doc": "代表负无穷大值的值."
       },
       "prototype": {
         "!stdProto": "Number",
         "toString": {
           "!type": "fn(radix?: number) -> string",
-          "!doc": "Returns a string representing the specified Number object"
+          "!doc": "返回代表指定Number对象的字符串"
         },
         "toFixed": {
           "!type": "fn(digits: number) -> string",
-          "!doc": "Formats a number using fixed-point notation"
+          "!doc": "使用定点符号格式化数字"
         },
         "toExponential": {
           "!type": "fn(digits: number) -> string",
-          "!doc": "Returns a string representing the Number object in exponential notation"
+          "!doc": "返回以指数表示形式表示Number对象的字符串"
         },
         "toPrecision": {
           "!type": "fn(digits: number) -> string",
-          "!doc": "The toPrecision() method returns a string representing the number to the specified precision."
+          "!doc": " toPrecision()方法返回一个字符串,该数字表示指定精度的数字.",
         }
       },
       "EPSILON": {
         "!type": "number",
-        "!doc": "The Number.EPSILON property represents the difference between one and the smallest value greater than one that can be represented as a Number.",
+        "!doc": " Number.EPSILON属性表示一个数值与可以表示为Number的最小值之间的差异.,",
       },
       "MAX_SAFE_INTEGER": {
         "!type": "number",
-        "!doc": "The Number.MAX_SAFE_INTEGER constant represents the maximum safe integer in JavaScript (2^53 - 1).",
+        "!doc": " Number.MAX_SAFE_INTEGER常量表示JavaScript中的最大安全整数(2 ^ 53-1).,",
       },
       "MIN_SAFE_INTEGER": {
         "!type": "number",
-        "!doc": "The Number.MIN_SAFE_INTEGER constant represents the minimum safe integer in JavaScript (-(2^53 - 1)).",
+        "!doc": " Number.MIN_SAFE_INTEGER常量表示JavaScript(-(2 ^ 53-1))中的最小安全整数.,",
       },
       "isFinite": {
         "!type": "fn(testValue: ?) -> bool",
-        "!doc": "The Number.isFinite() method determines whether the passed value is finite.",
+        "!doc": " Number.isFinite()方法确定传递的值是否为有限值.,",
       },
       "isInteger": {
         "!type": "fn(testValue: ?) -> bool",
-        "!doc": "The Number.isInteger() method determines whether the passed value is an integer.",
+        "!doc": " Number.isInteger()方法确定传递的值是否为整数.,",
       },
       "isNaN": {
         "!type": "fn(testValue: ?) -> bool",
-        "!doc": "The Number.isNaN() method determines whether the passed value is NaN. More robust version of the original global isNaN().",
+        "!doc": " Number.isNaN()方法确定传递的值是否为NaN.原始全局isNaN()的更可靠的版本.,",
       },
       "isSafeInteger": {
         "!type": "fn(testValue: ?) -> bool",
-        "!doc": "The Number.isSafeInteger() method determines whether the provided value is a number that is a safe integer. A safe integer is an integer that",
+        "!doc": " Number.isSafeInteger()方法确定所提供的值是否是一个安全整数的数字.安全整数是该数字的整数." ,
       },
       "parseFloat": {
         "!type": "fn(string: string) -> number",
-        "!doc": "The Number.parseFloat() method parses a string argument and returns a floating point number.",
+        "!doc": " Number.parseFloat()方法解析字符串参数并返回浮点数.,",
       },
       "parseInt": {
         "!type": "fn(string: string, radix?: number) -> number",
-        "!doc": "The Number.parseInt() method parses a string argument and returns an integer of the specified radix or base.",
+        "!doc": " Number.parseInt()方法解析字符串参数并返回指定基数或基数的整数.,",
       },
-      "!doc": "The Number JavaScript object is a wrapper object allowing you to work with numerical values. A Number object is created using the Number() constructor."
+      "!doc": " Number JavaScript对象是一个包装器对象,允许您使用数值.使用Number()构造函数创建Number对象.",
     },
     "Boolean": {
       "!type": "fn(value: ?) -> bool",
       "prototype": {
         "!stdProto": "Boolean"
       },
-      "!doc": "The Boolean object is an object wrapper for a boolean value."
+      "!doc": "布尔对象是布尔值的对象包装.",
     },
     "RegExp": {
       "!type": "fn(source: string, flags?: string)",
@@ -999,184 +999,184 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!stdProto": "RegExp",
         "exec": {
           "!type": "fn(input: string) -> [string]",
-          "!doc": "Executes a search for a match in a specified string. Returns a result array, or null."
+          "!doc": "搜索指定字符串中的匹配项.返回结果数组,或者为null.",
         },
         "test": {
           "!type": "fn(input: string) -> bool",
-          "!doc": "Executes the search for a match between a regular expression and a specified string. Returns true or false."
+          "!doc": "执行正则表达式和指定字符串之间的匹配搜索.返回true或false.",
         }
       },
-      "!doc": "Creates a regular expression object for matching text with a pattern."
+      "!doc": "创建正则表达式对象以将文本与模式匹配.",
     },
     "parseInt": {
       "!type": "fn(string: string, radix?: number) -> number",
-      "!doc": "Parses a string argument and returns an integer of the specified radix or base."
+      "!doc": "解析字符串参数并返回指定基数或基数的整数."
     },
     "parseFloat": {
       "!type": "fn(string: string) -> number",
-      "!doc": "Parses a string argument and returns a floating point number."
+      "!doc": "解析字符串参数并返回浮点数."
     },
     "isNaN": {
       "!type": "fn(value: number) -> bool",
-      "!doc": "Determines whether a value is NaN or not. Be careful, this function is broken. You may be interested in ECMAScript 6 Number.isNaN."
+      "!doc": "确定值是否为NaN.请注意,此函数已损坏.您可能对ECMAScript 6 Number.isNaN感兴趣.",
     },
     "isFinite": {
       "!type": "fn(value: number) -> bool",
-      "!doc": "Determines whether the passed value is a finite number."
+      "!doc": "确定传递的值是否为有限数字."
     },
     "eval": {
       "!type": "fn(code: string) -> ?",
-      "!doc": "Evaluates JavaScript code represented as a string."
+      "!doc": "评估以字符串形式表示的JavaScript代码."
     },
     "encodeURI": {
       "!type": "fn(uri: string) -> string",
-      "!doc": "Encodes a Uniform Resource Identifier (URI) by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character (will only be four escape sequences for characters composed of two \"surrogate\" characters)."
+      "!doc": "通过用表示字符的UTF-8编码的一个,两个,三个或四个转义序列替换某些字符的每个实例来编码统一资源标识符(URI)(对于字符而言将仅是四个转义序列由两个\"代理\"字符组成).",
     },
     "encodeURIComponent": {
       "!type": "fn(uri: string) -> string",
-      "!doc": "Encodes a Uniform Resource Identifier (URI) component by replacing each instance of certain characters by one, two, three, or four escape sequences representing the UTF-8 encoding of the character (will only be four escape sequences for characters composed of two \"surrogate\" characters)."
+      "!doc": "通过用表示字符的UTF-8编码的一个,两个,三个或四个转义序列替换某些字符的每个实例来编码统一资源标识符(URI)组件(对于由两个\"代理\"字符组成的字符).",
     },
     "decodeURI": {
       "!type": "fn(uri: string) -> string",
-      "!doc": "Decodes a Uniform Resource Identifier (URI) previously created by encodeURI or by a similar routine."
+      "!doc": "解码以前由encodeURI或类似例程创建的统一资源标识符(URI).",
     },
     "decodeURIComponent": {
       "!type": "fn(uri: string) -> string",
-      "!doc": "Decodes a Uniform Resource Identifier (URI) component previously created by encodeURIComponent or by a similar routine."
+      "!doc": "解码以前由encodeURIComponent或类似例程创建的统一资源标识符(URI)组件.",
     },
     "Math": {
       "E": {
         "!type": "number",
-        "!doc": "The base of natural logarithms, e, approximately 2.718."
+        "!doc": "自然对数的底数,e约为2.718."
       },
       "LN2": {
         "!type": "number",
-        "!doc": "The natural logarithm of 2, approximately 0.693."
+        "!doc": " 2的自然对数,大约为0.693."
       },
       "LN10": {
         "!type": "number",
-        "!doc": "The natural logarithm of 10, approximately 2.302."
+        "!doc": " 10的自然对数,大约为2.302."
       },
       "LOG2E": {
         "!type": "number",
-        "!doc": "The base 2 logarithm of E (approximately 1.442)."
+        "!doc": " E的以2为底的对数(大约1.442).",
       },
       "LOG10E": {
         "!type": "number",
-        "!doc": "The base 10 logarithm of E (approximately 0.434)."
+        "!doc": " E的以10为底的对数(约0.434)."
       },
       "SQRT1_2": {
         "!type": "number",
-        "!doc": "The square root of 1/2; equivalently, 1 over the square root of 2, approximately 0.707."
+        "!doc": " 1/2的平方根；等效于2的平方根上的1,大约为0.707."
       },
       "SQRT2": {
         "!type": "number",
-        "!doc": "The square root of 2, approximately 1.414."
+        "!doc": " 2的平方根,大约为1.414."
       },
       "PI": {
         "!type": "number",
-        "!doc": "The ratio of the circumference of a circle to its diameter, approximately 3.14159."
+        "!doc": "圆的周长与其直径之比,大约为3.14159."
       },
       "abs": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the absolute value of a number."
+        "!doc": "返回数字的绝对值."
       },
       "cos": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the cosine of a number."
+        "!doc": "返回数字的余弦."
       },
       "sin": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the sine of a number."
+        "!doc": "返回数字的正弦."
       },
       "tan": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the tangent of a number."
+        "!doc": "返回数字的正切值."
       },
       "acos": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the arccosine (in radians) of a number."
+        "!doc": "返回数字的反余弦(以弧度为单位)."
       },
       "asin": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the arcsine (in radians) of a number."
+        "!doc": "返回数字的反正弦(以弧度为单位)."
       },
       "atan": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the arctangent (in radians) of a number."
+        "!doc": "返回数字的反正切(以弧度为单位)."
       },
       "atan2": {
         "!type": "fn(y: number, x: number) -> number",
-        "!doc": "Returns the arctangent of the quotient of its arguments."
+        "!doc": "返回其参数商的反正切值."
       },
       "ceil": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the smallest integer greater than or equal to a number."
+        "!doc": "返回大于或等于数字的最小整数."
       },
       "floor": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the largest integer less than or equal to a number."
+        "!doc": "返回小于或等于数字的最大整数."
       },
       "round": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the value of a number rounded to the nearest integer."
+        "!doc": "返回四舍五入到最接近整数的数字的值."
       },
       "exp": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns E^x, where x is the argument, and E is Euler's constant, the base of the natural logarithms."
+        "!doc": "返回E ^ x,其中x是自变量,E是欧拉常数,自然对数的底."
       },
       "log": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the natural logarithm (base E) of a number."
+        "!doc": "返回数字的自然对数(以E为底).",
       },
       "sqrt": {
         "!type": "fn(number) -> number",
-        "!doc": "Returns the square root of a number."
+        "!doc": "返回数字的平方根."
       },
       "pow": {
         "!type": "fn(number, number) -> number",
-        "!doc": "Returns base to the exponent power, that is, baseexponent."
+        "!doc": "将基数返回指数幂,即baseexponent."
       },
       "max": {
         "!type": "fn(number, number) -> number",
-        "!doc": "Returns the largest of zero or more numbers."
+        "!doc": "返回零个或多个数字中的最大值."
       },
       "min": {
         "!type": "fn(number, number) -> number",
-        "!doc": "Returns the smallest of zero or more numbers."
+        "!doc": "返回零个或多个数字中的最小值."
       },
       "random": {
         "!type": "fn() -> number",
-        "!doc": "Returns a floating-point, pseudo-random number in the range [0, 1) that is, from 0 (inclusive) up to but not including 1 (exclusive), which you can then scale to your desired range."
+        "!doc": "返回一个浮点伪随机数,范围为[0,1),即从0(包括)到不包括1(排除),然后您可以缩放到所需的值范围."
       },
       "log10": {
         "!type": "fn(x: number) -> number",
-        "!doc": "The Math.log10() function returns the base 10 logarithm of a number.",
+        "!doc": " Math.log10()函数返回数字的以10为底的对数." ,
       },
       "log2": {
         "!type": "fn(x: number) -> number",
-        "!doc": "The Math.log2() function returns the base 2 logarithm of a number.",
+        "!doc": " Math.log2()函数返回数字的以2为底的对数." ,
       },
       "sign": {
         "!type": "fn(x: number) -> number",
-        "!doc": "The Math.sign() function returns the sign of a number, indicating whether the number is positive, negative or zero.",
+        "!doc": " Math.sign()函数返回数字的符号,指示数字是正数,负数还是零.,",
       },
       "trunc": {
         "!type": "fn(x: number) -> number",
-        "!doc": "The Math.trunc() function returns the integral part of a number by removing any fractional digits. It does not round any numbers. The function can be expressed with the floor() and ceil() function:",
+        "!doc": " Math.trunc()函数通过删除任何小数位来返回数字的整数部分.它不舍入任何数字.该函数可以用floor()和ceil()函数表示: ,",
       },
-      "!doc": "A built-in object that has properties and methods for mathematical constants and functions."
+      "!doc": "一个内置对象,具有用于数学常数和函数的属性和方法.",
     },
     "JSON": {
       "parse": {
         "!type": "fn(json: string, reviver?: fn(key: string, value: ?) -> ?) -> ?",
-        "!doc": "Parse a string as JSON, optionally transforming the value produced by parsing."
+        "!doc": "将字符串解析为JSON,可以选择转换解析产生的值.",
       },
       "stringify": {
         "!type": "fn(value: ?, replacer?: fn(key: string, value: ?) -> ?, space?: string|number) -> string",
-        "!doc": "Convert a value to JSON, optionally replacing values if a replacer function is specified, or optionally including only the specified properties if a replacer array is specified."
+        "!doc": "将值转换为JSON,如果指定了replacer函数,则可以选择替换值,如果指定了replacer数组,则可以选择仅包括指定的属性.",
       },
-      "!doc": "JSON (JavaScript Object Notation) is a data-interchange format.  It closely resembles a subset of JavaScript syntax, although it is not a strict subset. (See JSON in the JavaScript Reference for full details.)  It is useful when writing any kind of JavaScript-based application, including websites and browser extensions.  For example, you might store user information in JSON format in a cookie, or you might store extension preferences in JSON in a string-valued browser preference."
+      "!doc": " JSON(JavaScript对象表示法)是一种数据交换格式.尽管它不是严格的子集,但它非常类似于JavaScript语法的子集.(有关详细信息,请参见JavaScript参考中的JSON.)在编写任何类型的基于JavaScript的应用程序(包括网站和浏览器扩展程序)时非常有用.例如,您可以将JSON格式的用户信息存储在cookie中,或者可以将扩展名首选项以JSON形式存储在字符串值的浏览器首选项中."
     }
   },
   {

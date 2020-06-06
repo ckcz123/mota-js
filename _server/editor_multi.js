@@ -4,6 +4,17 @@ editor_multi = function () {
 
     var editor_multi = {};
 
+    var extraKeys = {
+        "Ctrl-/": function (cm) { cm.toggleComment(); },
+        "Ctrl-B": function (cm) { ternServer.jumpToDef(cm); },
+        "Ctrl-Q": function(cm) { ternServer.rename(cm); },
+        "Ctrl-F": CodeMirror.commands.find,
+        "Ctrl-R": CodeMirror.commands.replaceAll,
+        "Ctrl-D": function(cm){ cm.foldCode(cm.getCursor()); },
+        "Ctrl-O": function () { editor_multi.openUrl('/_docs/#/api'); },
+        "Ctrl-P": function () { editor_multi.openUrl('https://h5mota.com/plugins/'); }
+    };
+
     var codeEditor = CodeMirror.fromTextArea(document.getElementById("multiLineCode"), {
         lineNumbers: true,
         matchBrackets: true,
@@ -14,13 +25,32 @@ editor_multi = function () {
         mode: { name: "javascript", globalVars: true, localVars: true },
         lineWrapping: true,
         continueComments: "Enter",
-        gutters: ["CodeMirror-lint-markers"],
+        gutters: ["CodeMirror-lint-markers", "CodeMirror-linenumbers", "CodeMirror-foldgutter"],
         lint: true,
         autocomplete: true,
         autoCloseBrackets: true,
         styleActiveLine: true,
+        extraKeys: extraKeys,
+        foldGutter: true,
         highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
     });
+
+    var commandsName = {
+        'Ctrl+/': '注释当前行（Ctrl+/）',
+        'Ctrl-B': '跳转到定义（Ctrl+B）',
+        'Ctrl-Q': '重命名变量（Ctrl+Q）',
+        'Ctrl-F': '查找（Ctrl+F）',
+        'Ctrl-R': '全部替换（Ctrl+R）',
+        'Ctrl-D': '折叠块（Ctrl+D）',
+        'Ctrl-O': '打开API列表（Ctrl+O）',
+        'Ctrl-P': '打开在线插件列表（Ctrl+P）'
+    };
+
+    document.getElementById('codemirrorCommands').innerHTML = 
+        "<option value='' selected>执行操作...</option>" + 
+        Object.keys(commandsName).map(function (name) {
+            return "<option value='" + name + "'>" + commandsName[name] + "</option>"
+        }).join('');
 
     var coredef = terndefs_f6783a0a_522d_417e_8407_94c67b692e50[2];
     Object.keys(core.material.enemys).forEach(function (name){
@@ -259,7 +289,6 @@ editor_multi = function () {
             }
             _setValue(tstr || '');
         }
-        document.getElementById('showPlugins').style.display = editor_mode.mode == 'plugins' ? 'block': 'none';
         editor_multi.show();
         return true;
     }
@@ -325,9 +354,17 @@ editor_multi = function () {
         setvalue(codeEditor.getValue() || '');
     }
 
-    editor_multi.showPlugins = function () {
-        if (editor.isMobile && !confirm("你确定要跳转到云端插件列表吗？")) return;
-        window.open("https://h5mota.com/plugins/", "_blank");
+    editor_multi.doCommand = function (select) {
+        var value = select.value;
+        select.selectedIndex = 0;
+        if (extraKeys[value]) {
+            extraKeys[value](codeEditor);
+        }
+    }
+
+    editor_multi.openUrl = function (url) {
+        if (editor.isMobile && !confirm('你确定要离开本页面么？')) return;
+        window.open(url, '_blank');
     }
 
     var multiLineArgs = [null, null, null];

@@ -1093,6 +1093,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type[loc] = type[loc] || {};
 
 		// 血网
+		// 如需调用当前楼层的ratio可使用  core.status.maps[floorId].ratio
 		if (id == 'lavaNet' && !core.hasItem('amulet')) {
 			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
 			type[loc]["血网伤害"] = true;

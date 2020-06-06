@@ -676,7 +676,7 @@ loc为可选的，表示要更改地图块的坐标。如果忽略此项，则�
 name是可选的，代表目标行走图的文件名。
 <br>!> **目标行走图必须在全塔属性的 `images` 中被定义过，且宽度至少是128像素（高度不限）。**<br>如果不加name，则恢复默认的角色行走图 `hero.png` 。<br>
 如果要修改勇士的名称，可以使用`setValue`事件来修改`status:name`，但请注意value必须加单引号，不然会报错。<br>
-如果你需要获取当前的行走图文件名，可以使用 `flags.heroIcon` ，但不要直接修改它。
+如果你需要获取当前的行走图文件名，可以使用 `core.status.hero.image` ，但不要直接修改它。
 ### update：立刻更新状态栏和地图显伤
 如果你需要刷新状态栏和地图显伤，只需要简单地调用 `{"type": "update", "doNotCheckAutoEvents": true}` 。
 ### showStatusBar / hideStatusBar：显隐状态栏

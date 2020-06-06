@@ -3023,6 +3023,7 @@ events.prototype.setHeroIcon = function (name, noDraw) {
         console.error("找不到图片: "+img);
         return;
     }
+    if (core.material.images.hero == img) return;
     core.status.hero.image = name;
     core.material.images.hero = img;
     core.material.icons.hero.width = img.width / 4;

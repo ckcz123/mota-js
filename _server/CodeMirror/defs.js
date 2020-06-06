@@ -1182,6 +1182,102 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
   {
     "!name": "core",
     "!define": {
+      "flag": {
+        "!doc": "当前变量",
+        "hard": {
+          "!type": "number",
+          "!doc": "当前难度编号"
+        },
+        "hatred":{
+          "!type": "number",
+          "!doc": "当前仇恨值"
+        },
+        "poison":{
+          "!type": "bool",
+          "!doc": "是否处于中毒状态"
+        },
+        "weak":{
+          "!type": "number",
+          "!doc": "是否处于衰弱状态"
+        },
+        "curse":{
+          "!type": "number",
+          "!doc": "是否处于诅咒状态"
+        },
+        "no_zone": {
+          "!type": "bool",
+          "!doc": "无视领域伤害"
+        },
+        "no_repulse": {
+          "!type": "bool",
+          "!doc": "无视阻击伤害"
+        },
+        "no_lasel": {
+          "!type": "bool",
+          "!doc": "无视激光伤害"
+        },
+        "no_ambush": {
+          "!type": "bool",
+          "!doc": "无视捕捉"
+        },
+        "__bgm__": {
+          "!type": "string",
+          "!doc": "背景音乐"
+        },
+        "__weather__": {
+          "!doc": "天气"
+        },
+        "__color__": {
+          "!doc": "色调"
+        },
+        "__volume__": {
+          "!type": "number",
+          "!doc": "音量"
+        },
+        "skill": {
+          "!type": "number",
+          "!doc": "当前开启的技能编号"
+        },
+        "skillName": {
+          "!type": "string",
+          "!doc": "当前开启的技能名"
+        },
+        "input": {
+          "!type": "string|number",
+          "!doc": "等待用户输入后的存放值"
+        },
+        "type": {
+          "!type": "number",
+          "!doc": "等待用户操作后获得的操作类型"
+        },
+        "keycode": {
+          "!type": "number",
+          "!doc": "等待用户操作后用户按键的键值"
+        },
+        "x": {
+          "!type": "number",
+          "!doc": "等待用户操作后用户点击的网格横坐标"
+        },
+        "y": {
+          "!type": "number",
+          "!doc": "等待用户操作后用户点击的网格纵坐标"
+        },
+        "px": {
+          "!type": "number",
+          "!doc": "等待用户操作后用户点击的像素横坐标"
+        },
+        "py": {
+          "!type": "number",
+          "!doc": "等待用户操作后用户点击的像素纵坐标"
+        },
+        "__visited__": {
+          "!doc": "当前访问过的楼层"
+        },
+        "cannotMoveDirectly": {
+          "!type": "bool",
+          "!doc": "当前是否全局不可瞬移"
+        },
+      },
       "hero": {
         "!doc": "勇士当前属性",
         "image": {
@@ -1246,7 +1342,27 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
             "!doc": "永久道具"
           },
           "tools": {
-            "!doc": "消耗道具"
+            "!doc": "消耗道具",
+            "yellowKey": {
+              "!type": "number",
+              "!doc": "黄钥匙个数"
+            },
+            "blueKey": {
+              "!type": "number",
+              "!doc": "蓝钥匙个数"
+            },
+            "redKey": {
+              "!type": "number",
+              "!doc": "红钥匙个数"
+            },
+            "greenKey": {
+              "!type": "number",
+              "!doc": "绿钥匙个数"
+            },
+            "steelKey": {
+              "!type": "number",
+              "!doc": "铁门钥匙个数"
+            },
           },
           "equips": {
             "!doc": "未装备上的装备"
@@ -1268,7 +1384,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           },
         },
         "flags": {
-          "!doc": "当前变量"
+          "!type": "flag",
+          "!doc": "当前游戏中用到的变量"
         },
         "followers": {
           "!type": "[?]",
@@ -1748,7 +1865,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "全局动画的帧状态"
         },
         "globalAttribute": {
-          "!type": "Object",
           "!doc": "全局css属性"
         },
         "hard": {
@@ -1861,5 +1977,54 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "_doc": "返回地图上某个点的图块信息"
       }
     },
+    "hero": {
+      "!type": "heroStatus",
+      "!doc": "勇士信息，为 core.status.hero 的简写",
+    },
+    "flags": {
+      "!doc": "游戏中用到的变量，为 core.status.hero.flags 的简写",
+      "hatred":{
+        "!type": "number",
+        "!doc": "当前仇恨值"
+      },
+      "poison":{
+        "!type": "bool",
+        "!doc": "是否处于中毒状态"
+      },
+      "weak":{
+        "!type": "number",
+        "!doc": "是否处于衰弱状态"
+      },
+      "curse":{
+        "!type": "number",
+        "!doc": "是否处于诅咒状态"
+      },
+      "no_zone": {
+        "!type": "bool",
+        "!doc": "无视领域伤害"
+      },
+      "no_repulse": {
+        "!type": "bool",
+        "!doc": "无视阻击伤害"
+      },
+      "no_lasel": {
+        "!type": "bool",
+        "!doc": "无视激光伤害"
+      },
+      "no_ambush": {
+        "!type": "bool",
+        "!doc": "无视捕捉"
+      },
+      "__bgm__": {
+        "!type": "string",
+        "!doc": "背景音乐"
+      },
+      "__weather__": {
+        "!doc": "天气"
+      },
+      "__color__": {
+        "!doc": "色调"
+      },
+    }
   }
 ];

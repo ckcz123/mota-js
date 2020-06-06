@@ -502,7 +502,6 @@ declare class control {
     
     /**
      * 读取一个flag变量
-     * @example core.getFlag('heroIcon', 'hero.png'); // 读取主角当前的行走图文件名，默认为'hero.png'
      * @param name 变量名，支持中文
      * @param defaultValue 当变量不存在时的返回值，可选（事件流中默认填0）。
      * @returns flags[name] ?? defaultValue
@@ -989,8 +988,8 @@ declare class events {
     
     /**
      * 更改主角行走图
-     * @example core.setHeroIcon('npc48.png'); // 把主角从阳光变成样板0层左下角的小姐姐，但不立即刷新
-     * @param name 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入flags.heroIcon
+     * @example core.setHeroIcon('npc48.png', true); // 把主角从阳光变成样板0层左下角的小姐姐，但不立即刷新
+     * @param name 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入core.status.hero.image
      * @param noDraw true表示不立即刷新（刷新会导致大地图下视野重置到以主角为中心）
      */
     setHeroIcon(name: string, noDraw?: boolean): void

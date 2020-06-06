@@ -1250,7 +1250,7 @@ return code;
 */;
 
 showFloorImg_s
-    :   '显示贴图' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    :   '显示贴图' '像素坐标' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
 
 /* showFloorImg_s
@@ -1282,7 +1282,7 @@ return code;
 */;
 
 hideFloorImg_s
-    :   '隐藏贴图' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    :   '隐藏贴图' '像素坐标' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
 
 /* hideFloorImg_s

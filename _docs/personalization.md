@@ -423,7 +423,6 @@ if (core.flags.statusBarItems.indexOf('enableSkill')>=0) {
 - **`flag:input`**: 接受用户输入的事件后，存放用户输入的结果。
 - **`flag:type`**, **`flag:keycode`**, **`flag:x`**, **`flag:y`**, **`flag:px`**, **`flag:py`**: 等待用户操作后，用户的操作类型，按键keycode或点击/像素坐标。
 - **`flag:skill`**, **`flag:skillName`**: 开启的技能编号和技能名。
-- **`flag:heroIcon`**: 当前的勇士行走图名称。
 - **`flag:saveEquips`**: 快速换装时保存的套装。
 - **`flag:__visited__`**: 当前访问过的楼层。
 - **`flag:__atk_buff__`**, **`flag:__def_buff__`**, **`flag:__mdef_buff__`**: 当前攻防护盾的实际计算比例加成。

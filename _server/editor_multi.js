@@ -18,17 +18,150 @@ editor_multi = function () {
         lint: true,
         autocomplete: true,
         autoCloseBrackets: true,
+        styleActiveLine: true,
         highlightSelectionMatches: { showToken: /\w/, annotateScrollbar: true }
     });
 
+    var coredef = terndefs_f6783a0a_522d_417e_8407_94c67b692e50[2];
+    Object.keys(core.material.enemys).forEach(function (name){
+        coredef.core.material.enemys[name] = {
+            "!type": "enemy",
+            "!doc": core.material.enemys[name].name || "怪物"
+        }
+    });
+    Object.keys(core.material.bgms).forEach(function (name) {
+        coredef.core.material.bgms[name] = {
+            "!type": "audio",
+            "!doc": "背景音乐"
+        }
+    });
+    Object.keys(core.material.sounds).forEach(function (name) {
+        coredef.core.material.sounds[name] = {
+            "!type": "audio",
+            "!doc": "音效"
+        }
+    });
+    Object.keys(core.material.animates).forEach(function (name) {
+        coredef.core.material.animates[name] = {
+            "!type": "animate",
+            "!doc": "动画"
+        }
+    });
+    Object.keys(core.material.images).forEach(function (name) {
+        if (core.material.images[name] instanceof Image) {
+            coredef.core.material.images[name] = {
+                "!type": "image",
+                "!doc": "系统图片"
+            }
+        } else {
+            coredef.core.material.images[name] = {
+                "!doc": name == 'autotile' ? '自动元件' : name == 'tilesets' ? '额外素材' : name == 'images' ? '自定义图片' : '系统图片'
+            }
+            for (var v in core.material.images[name]) {
+                coredef.core.material.images[name][v] = {
+                    "!type": "image",
+                }
+            }
+        }
+
+    })
+    Object.keys(core.material.items).forEach(function (name) {
+        coredef.core.material.items[name] = {
+            "!type": "item",
+            "!doc": core.material.items[name].name || "道具"
+        }
+    });
+    functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys.getSpecials().forEach(function (one) {
+        var name = one[1];
+        if (name instanceof Function) name = name({});
+        coredef.core.enemys.hasSpecial["!doc"] += name + "(" + one[0] + "); ";
+    });
+    Object.keys(core.canvas).forEach(function (name) {
+        coredef.core.canvas[name] = {
+            "!type": "CanvasRenderingContext2D",
+            "!doc": "系统画布"
+        }
+    });
+    Object.keys(core.status.maps).forEach(function (name) {
+        coredef.core.status.maps[name] = {
+            "!type": "floor",
+            "!doc": core.status.maps[name].title || ''
+        }
+        coredef.core.status.bgmaps[name] = {
+            "!type": "[[number]]",
+            "!doc": core.status.maps[name].title || ''
+        }
+        coredef.core.status.fgmaps[name] = {
+            "!type": "[[number]]",
+            "!doc": core.status.maps[name].title || ''
+        }
+    });
+    Object.keys(core.status.shops).forEach(function (id) {
+        coredef.core.status.shops[id] = {
+            "!doc": core.status.shops[id].textInList || "全局商店"
+        }
+    });
+    Object.keys(core.status.textAttribute).forEach(function (id) {
+        coredef.core.status.textAttribute[id] = {};
+    });
+    // --- 转发函数
+    for (var name in coredef.core) {
+        if (typeof coredef.core[name] === 'object') {
+            for (var funcname in coredef.core[name]) {
+                var one = coredef.core[name][funcname] || {};
+                var type = one["!type"] || "";
+                if (type.startsWith("fn(")) {
+                    coredef.core[funcname] = {
+                        "!type": one["!type"],
+                        "!doc": one["!doc"] + "<br/>（转发到 " + name + " 中）"
+                    };
+                    if (one["!url"]) coredef.core[funcname]["!url"] = one["!url"];
+                }
+            }
+        }
+    }
+
+    Object.keys(core.values).forEach(function (id) {
+        var one = data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc._data.values._data[id];
+        if (!one) return;
+        coredef.core.values[id] = {
+            "!type": "number",
+            "!doc": one._data,
+        }
+    });
+    Object.keys(core.flags).forEach(function (id) {
+        var one = data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc._data.flags._data[id];
+        if (!one) return;
+        coredef.core.flags[id] = {
+            "!type": id == 'statusBarItems' ? '[string]' : 'bool',
+            "!doc": one._data,
+        }
+    });
+
+    var ternServer = new CodeMirror.TernServer({
+        defs: terndefs_f6783a0a_522d_417e_8407_94c67b692e50,
+        plugins: {
+            doc_comments: true,
+            complete_strings: true,
+        },
+        useWorker: false
+    });
+
     editor_multi.codeEditor = codeEditor;
+
+    codeEditor.on("cursorActivity", function (cm) {
+        if (codeEditor.getOption("autocomplete")) {
+            ternServer.updateArgHints(cm);
+            ternServer.showDocs(cm);
+        }
+    });
 
     codeEditor.on("keyup", function (cm, event) {
         if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
             (event.keyCode >= 65 && event.keyCode <= 90) ||
             (!event.shiftKey && event.keyCode == 190) || (event.shiftKey && event.keyCode == 189))) {
             try {
-                CodeMirror.commands.autocomplete(cm, null, { completeSingle: false });
+                ternServer.complete(cm);
             } catch (e) {
             }
         }
@@ -66,11 +199,17 @@ editor_multi = function () {
 
     var _format = function () {
         if (!editor_multi.lintAutocomplete) return;
-        codeEditor.setValue(js_beautify(codeEditor.getValue(), {
+        _setValue(js_beautify(codeEditor.getValue(), {
             brace_style: "collapse-preserve-inline",
             indent_with_tabs: true,
             jslint_happy: true
         }));
+    }
+
+    var _setValue = function (val) {
+        codeEditor.setValue(val || '');
+        ternServer.delDoc('doc');
+        ternServer.addDoc('doc', new CodeMirror.Doc(val || '', 'javascript'));
     }
 
     editor_multi.format = function () {
@@ -103,7 +242,7 @@ editor_multi = function () {
             input.value = '"function () {\\n\\t// 在此增加新插件\\n\\t\\n}"';
         if (input.value.slice(0, 1) === '"' || args.string) {
             editor_multi.isString = true;
-            codeEditor.setValue(JSON.parse(input.value) || '');
+            _setValue(JSON.parse(input.value) || '');
         } else {
             var num = editor_multi.indent(field);
             eval('var tobj=' + (input.value || 'null'));
@@ -118,7 +257,7 @@ editor_multi = function () {
             for (var id_ in tmap) {
                 tstr = tstr.replace('"' + id_ + '"', tmap[id_])
             }
-            codeEditor.setValue(tstr || '');
+            _setValue(tstr || '');
         }
         document.getElementById('showPlugins').style.display = editor_mode.mode == 'plugins' ? 'block': 'none';
         editor_multi.show();
@@ -194,7 +333,7 @@ editor_multi = function () {
     var multiLineArgs = [null, null, null];
     editor_multi.multiLineEdit = function (value, b, f, args, callback) {
         editor_multi.id = 'callFromBlockly';
-        codeEditor.setValue(value.split('\\n').join('\n') || '');
+        _setValue(value.split('\\n').join('\n') || '');
         multiLineArgs[0] = b;
         multiLineArgs[1] = f;
         multiLineArgs[2] = callback;
@@ -212,16 +351,16 @@ editor_multi = function () {
     editor_multi.importFile = function (filename) {
         editor_multi.id = 'importFile'
         _fileValues[0] = filename
-        codeEditor.setValue('loading')
+        _setValue('loading')
         editor_multi.show();
         fs.readFile(filename, 'base64', function (e, d) {
             if (e) {
-                codeEditor.setValue('加载文件失败:\n' + e)
+                _setValue('加载文件失败:\n' + e)
                 editor_multi.id = ''
                 return;
             }
             var str = editor.util.decode64(d)
-            codeEditor.setValue(str)
+            _setValue(str)
             _fileValues[1] = str
         })
     }

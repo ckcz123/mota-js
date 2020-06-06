@@ -163,10 +163,10 @@ editor.prototype.init = function (callback) {
         if (str.length != 3) window.onerror("index.html格式不正确");
         editor.dom.gameInject.innerHTML = str[1];
         
-        var cvs = ['bg', 'fg', 'event', 'event2'].map(function(e) {
+        var cvs = ['bg', 'event', 'event2', 'fg'].map(function(e) {
             return document.getElementById(e);
         });
-        ['bg', 'fg', 'ev', 'ev2'].forEach(function(e, i) {
+        ['bg', 'ev', 'ev2', 'fg'].forEach(function(e, i) {
             editor.dom[e+'c'] = cvs[i];
             editor.dom[e+'Ctx'] = cvs[i].getContext('2d');
             

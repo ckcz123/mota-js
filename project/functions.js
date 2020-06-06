@@ -515,7 +515,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 光环和支援检查
 	if (!core.status.checkBlock) core.status.checkBlock = {};
 
-	if (core.status.checkBlock.needCache || floorId != core.status.floorId) {
+	if (core.status.checkBlock.needCache) {
 		// 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
 		var hp_buff = 0,
 			atk_buff = 0,
@@ -1187,6 +1187,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 检查地图范围类技能
 		var specialFlag = core.getSpecialFlag(enemy);
 		if (specialFlag & 1) needCache = true;
+		if (core.status.event.id == 'viewMaps') needCache = true;
+		if ((core.status.event.id == 'book' || core.status.event.id == 'bool-detail') && core.status.event.ui) needCache = true;
 	}
 
 	// 更新夹击伤害

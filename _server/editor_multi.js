@@ -8,7 +8,7 @@ editor_multi = function () {
         "Ctrl-/": function (cm) { cm.toggleComment(); },
         "Ctrl-B": function (cm) { ternServer.jumpToDef(cm); },
         "Ctrl-Q": function(cm) { ternServer.rename(cm); },
-        "Ctrl-F": CodeMirror.commands.find,
+        "Ctrl-F": CodeMirror.commands.findPersistent,
         "Ctrl-R": CodeMirror.commands.replaceAll,
         "Ctrl-D": function(cm){ cm.foldCode(cm.getCursor()); },
         "Ctrl-O": function () { editor_multi.openUrl('/_docs/#/api'); },
@@ -37,12 +37,12 @@ editor_multi = function () {
     });
 
     var commandsName = {
-        'Ctrl+/': '注释当前行（Ctrl+/）',
+        'Ctrl-/': '注释当前选中行（Ctrl+/）',
         'Ctrl-B': '跳转到定义（Ctrl+B）',
         'Ctrl-Q': '重命名变量（Ctrl+Q）',
         'Ctrl-F': '查找（Ctrl+F）',
         'Ctrl-R': '全部替换（Ctrl+R）',
-        'Ctrl-D': '折叠块（Ctrl+D）',
+        'Ctrl-D': '折叠或展开块（Ctrl+D）',
         'Ctrl-O': '打开API列表（Ctrl+O）',
         'Ctrl-P': '打开在线插件列表（Ctrl+P）'
     };

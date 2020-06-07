@@ -1976,7 +1976,6 @@ maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
     var block = blockArr[0], blockInfo = blockArr[1];
     var canvases = this._initDetachedBlock(blockInfo, sx, sy, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * sx, 32 * sy, 1, canvases);
-    core.playSound('jump.mp3');
     var jumpInfo = this.__generateJumpInfo(sx, sy, ex, ey, time);
     jumpInfo.keep = keep;
 
@@ -2164,7 +2163,7 @@ maps.prototype.drawBoxAnimate = function () {
         core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
         core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
         core.drawImage('ui', obj.image, core.status.globalAnimateStatus % obj.animate * 32, obj.pos,
-            32, obj.height, obj.x, obj.y, 32, obj.height);
+            32, obj.height, obj.x, obj.y, obj.dw || 32, obj.dh || obj.height);
     });
 }
 
@@ -2228,32 +2227,34 @@ maps.prototype.drawHeroAnimate = function (name, callback) {
 }
 
 ////// 绘制动画的某一帧 //////
-maps.prototype._drawAnimateFrame = function (animate, centerX, centerY, index) {
-    var frame = animate.frames[index];
+maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, index) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return;
+    var frame = animate.frames[index % animate.frame];
     var ratio = animate.ratio;
     frame.forEach(function (t) {
         var image = animate.images[t.index];
         if (!image) return;
         var realWidth = image.width * ratio * t.zoom / 100;
         var realHeight = image.height * ratio * t.zoom / 100;
-        core.setAlpha('animate', t.opacity / 255);
+        core.setAlpha(ctx, t.opacity / 255);
 
         var cx = centerX + t.x, cy = centerY + t.y;
 
         if (!t.mirror && !t.angle) {
-            core.drawImage('animate', image, cx - realWidth / 2 - core.bigmap.offsetX, cy - realHeight / 2 - core.bigmap.offsetY, realWidth, realHeight);
+            core.drawImage(ctx, image, cx - realWidth / 2 - core.bigmap.offsetX, cy - realHeight / 2 - core.bigmap.offsetY, realWidth, realHeight);
         }
         else {
-            core.saveCanvas('animate');
-            core.canvas.animate.translate(cx, cy);
+            core.saveCanvas(ctx);
+            ctx.translate(cx, cy);
             if (t.angle)
-                core.canvas.animate.rotate(-t.angle * Math.PI / 180);
+                ctx.rotate(-t.angle * Math.PI / 180);
             if (t.mirror)
-                core.canvas.animate.scale(-1, 1);
-            core.drawImage('animate', image, -realWidth / 2 - core.bigmap.offsetX, -realHeight / 2 - core.bigmap.offsetY, realWidth, realHeight);
-            core.loadCanvas('animate');
+                ctx.scale(-1, 1);
+            core.drawImage(ctx, image, -realWidth / 2 - core.bigmap.offsetX, -realHeight / 2 - core.bigmap.offsetY, realWidth, realHeight);
+            core.loadCanvas(ctx);
         }
-        core.setAlpha('animate', 1);
+        core.setAlpha(ctx, 1);
     })
 }
 

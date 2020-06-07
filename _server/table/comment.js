@@ -449,6 +449,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_type": "textarea",
 							"_string": true,
 							"_lint": true,
+							"_template": "(function (timestamp) {\\n\\t// 在这里写楼层并行脚本，大约每16.6ms执行一次\\n\\t// timestamp: 从游戏开始到当前所经过的毫秒数。\\n\\t\\n})(timestamp);",
 							"_docs": "并行处理脚本",
 							"_data": "在该层楼时执行的并行脚本处理。\n可以在这里写上任意需要自动执行的脚本，比如打怪自动开门等。\n详见文档-事件-并行事件处理。"
 						},
@@ -509,7 +510,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"ratio": {
 							"_leaf": true,
 							"_type": "textarea",
-							"_range": "(thiseval==~~thiseval && thiseval>=0)||thiseval==null",
+							"_range": "thiseval==~~thiseval && thiseval>=0",
 							"_docs": "宝石血瓶效果",
 							"_data": "每一层的宝石/血瓶效果，即获得宝石和血瓶时框内\"ratio\"的值。"
 						}

@@ -123,7 +123,7 @@ ActionParser.prototype.parse = function (obj,type) {
         }
         var info = parser.getTitleAndPosition(obj.text || '');
         return MotaActionBlocks['shopsub'].xmlText([
-          obj.id,obj[0],info[1],info[3],obj.textInList,obj.mustEnable,obj.disablePreview,text_choices,next
+          obj.id,info[0],info[1],info[3],obj.textInList,obj.mustEnable,obj.disablePreview,text_choices,next
         ]);
       }
       var buildcommentevent = function(obj,parser,next){
@@ -385,7 +385,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setHeroIcon": // 改变勇士
       this.next = MotaActionBlocks['setHeroIcon_s'].xmlText([
-        data.name||"",this.next]);
+        data.name||"", data.noDraw || false, this.next]);
       break;
     case "move": // 移动事件
       data.loc=data.loc||['',''];
@@ -1201,6 +1201,8 @@ MotaActionFunctions.IdString_pre = function(IdString){
 MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
   //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
+  var comma = PosString.indexOf(',');
+  if (comma >= 0 && PosString.substring(0, comma).indexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
 }
 

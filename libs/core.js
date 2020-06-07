@@ -249,6 +249,8 @@ core.prototype._init_flags = function () {
     // 让你总是拼错！
     window.on = true;
     window.off = false;
+    window.ture = true;
+    window.flase = false;
 
     core.dom.versionLabel.innerText = core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;

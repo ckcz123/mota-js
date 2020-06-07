@@ -1051,11 +1051,33 @@
         }
         if (hiding) hiding.style.opacity = 1
         findNext(cm, event.shiftKey, function(_, to) {
-          var dialog
-          if (to.line < 3 && document.querySelector &&
-              (dialog = cm.display.wrapper.querySelector(".CodeMirror-dialog")) &&
-              dialog.getBoundingClientRect().bottom - 4 > cm.cursorCoords(to, "window").top)
-            (hiding = dialog).style.opacity = .4
+          // --- Add count
+          var text = document.getElementById('CodeMirror-search-count');
+          if (text) {
+            if (to) {
+              var query = state.query;
+              if (typeof query === 'string') {
+                query = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), queryCaseInsensitive(query) ? "gi": "g");
+              } else if (query instanceof RegExp) {
+                query = new RegExp(query.source, query.flags + "g");
+              } else { query = null; }
+              if (query) {
+                text.innerText = (cm.getRange({line: 0, ch: 0}, to).match(query) || []).length
+                  + "/" + (cm.getValue().match(query) || []).length;
+              } else {
+                text.innerText = '0/0';
+              }
+            } else {
+              text.innerText = '0/0';
+            }
+          }
+          if (to) {
+            var dialog
+            if (to.line < 3 && document.querySelector &&
+                (dialog = cm.display.wrapper.querySelector(".CodeMirror-dialog")) &&
+                dialog.getBoundingClientRect().bottom - 4 > cm.cursorCoords(to, "window").top)
+              (hiding = dialog).style.opacity = .4
+          }
         })
       };
       persistentDialog(cm, getQueryDialog(cm), q, searchNext, function(event, query) {
@@ -1091,7 +1113,7 @@
     var cursor = getSearchCursor(cm, state.query, rev ? state.posFrom : state.posTo);
     if (!cursor.find(rev)) {
       cursor = getSearchCursor(cm, state.query, rev ? CodeMirror.Pos(cm.lastLine()) : CodeMirror.Pos(cm.firstLine(), 0));
-      if (!cursor.find(rev)) return;
+      if (!cursor.find(rev)) return callback && callback(null, null);
     }
     cm.setSelection(cursor.from(), cursor.to());
     cm.scrollIntoView({from: cursor.from(), to: cursor.to()}, 20);
@@ -1100,6 +1122,8 @@
   });}
 
   function clearSearch(cm) {cm.operation(function() {
+    var text = document.getElementById('CodeMirror-search-count');
+    if (text) text.innerText = '';
     var state = getSearchState(cm);
     state.lastQuery = state.query;
     if (!state.query) return;
@@ -1110,16 +1134,16 @@
 
 
   function getQueryDialog(cm)  {
-    return '<span class="CodeMirror-search-label">' + "搜索: " + '</span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span style="color: #888" class="CodeMirror-search-hint">' + "使用/re/语法正则搜索" + '</span>';
+    return '<span class="CodeMirror-search-label">搜索: </span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span class="CodeMirror-search-label" id="CodeMirror-search-count">0/0</span> <span style="color: #888" class="CodeMirror-search-hint">使用/re/语法正则搜索</span>';
   }
   function getReplaceQueryDialog(cm) {
-    return ' <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span style="color: #888" class="CodeMirror-search-hint">' + "使用/re/语法正则搜索" + '</span>';
+    return ' <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span style="color: #888" class="CodeMirror-search-hint">使用/re/语法正则搜索</span>';
   }
   function getReplacementQueryDialog(cm) {
-    return '<span class="CodeMirror-search-label">' + "替换为: " + '</span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/>';
+    return '<span class="CodeMirror-search-label">替换为: </span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/>';
   }
   function getDoReplaceConfirm(cm) {
-    return '<span class="CodeMirror-search-label">' + "确认替换？" + '</span> <button>' + "确定" + '</button> <button>' + "取消" + '</button> <button>' + "全部替换" + '</button> <button>' + "停止搜索" + '</button> ';
+    return '<span class="CodeMirror-search-label">确认替换？</span> <button>确定</button> <button>取消</button> <button>全部替换</button> <button>停止搜索</button> ';
   }
 
   function replaceAll(cm, query, text) {

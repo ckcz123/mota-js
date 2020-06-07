@@ -1145,6 +1145,12 @@ declare class events {
     /** 飞往某一层 */
     flyTo(toId?: string, callback?: () => boolean): void
 
+    /** 点击存档按钮时的打开操作 */
+    save(fromUserAction?: boolean): void
+
+    /** 点击读档按钮时的打开操作 */
+    load(fromUserAction?: boolean): void
+
     /** 点击装备栏时的打开操作 */
     openEquipbox(fromUserAction?: boolean): void
 
@@ -1352,7 +1358,7 @@ declare class enemys {
      */
     hasEnemyLeft(enemyId?: string, floorId?: string | string[]): boolean
 
-    /** 获得所有怪物 */
+    /** 获得所有怪物原始数据的一个副本 */
     getEnemys(): any
 
     /** 获得所有特殊属性定义 */
@@ -1668,6 +1674,21 @@ declare class maps {
      * @returns 一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
      */
     drawAnimate(name: string, x: number, y: number, alignWindow: boolean, callback?: () => void): number
+
+    /**
+     * 播放跟随勇士的动画
+     * @param name 动画名
+     * @param callback 动画停止后的回调函数，可选
+     * @returns 一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
+     */
+    drawHeroAnimate(name: string, callback?: () => void): number
+
+    /**
+     * 立刻停止一个动画播放
+     * @param id 播放动画的编号，即drawAnimate或drawHeroAnimate返回值
+     * @param doCallback 是否执行该动画的回调函数
+     */
+    stopAnimate(id: number, doCallback?: boolean): void 
 
     /** 加载某个楼层（从剧本或存档中） */
     loadFloor(floorId?: string, map?: any): any
@@ -2109,6 +2130,9 @@ declare class ui {
 
     /** 地图中间绘制一段文字 */
     drawText(contents: string, callback?: () => any): void
+
+    /** 绘制一个确认框 */
+    drawConfirmBox(text: string, yesCallback?: () => void, noCallback?: () => void): void
 
     /** 绘制选择光标 */
     drawWindowSelector(background: any, x: number, y: number, w: number, h: number): void

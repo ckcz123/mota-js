@@ -2626,11 +2626,6 @@ events.prototype._setValue_setGlobal = function (name, value) {
     core.setGlobal(name.substring(7), value);
 }
 
-////// 数值增减 //////
-events.prototype.addValue = function (name, value, prefix) {
-    this.setValue(name, '+=', value, prefix);
-}
-
 ////// 设置一个怪物属性 //////
 events.prototype.setEnemy = function (id, name, value, prefix) {
     if (!core.hasFlag('enemyInfo')) {

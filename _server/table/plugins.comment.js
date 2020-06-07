@@ -57,6 +57,7 @@ var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"_leaf": true,
 			"_type": "textarea",
 			"_range": "typeof(thiseval)=='string' || thiseval==null",
+			"_template": "function () {\\n\\t// 在此增加新插件\\n\\t\\n}",
 			"_data": "自定义插件"
 		}
 	}

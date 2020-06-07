@@ -8,6 +8,7 @@ editor_multi = function () {
         "Ctrl-/": function (cm) { cm.toggleComment(); },
         "Ctrl-B": function (cm) { ternServer.jumpToDef(cm); },
         "Ctrl-Q": function(cm) { ternServer.rename(cm); },
+        "Cmd-F": CodeMirror.commands.findPersistent,
         "Ctrl-F": CodeMirror.commands.findPersistent,
         "Ctrl-R": CodeMirror.commands.replaceAll,
         "Ctrl-D": function(cm){ cm.foldCode(cm.getCursor()); },
@@ -271,8 +272,11 @@ editor_multi = function () {
         editor_multi.isString = false;
         editor_multi.lintAutocomplete = false;
         if (args.lint === true) editor_multi.lintAutocomplete = true;
+        if ((!input.value || input.value == 'null') && args.template)
+            input.value = '"' + args.template + '"';
         if ((!input.value || input.value == 'null') && editor_mode.mode == 'plugins')
             input.value = '"function () {\\n\\t// 在此增加新插件\\n\\t\\n}"';
+        // if ((!input.value || input.value == 'null') && args)
         if (input.value.slice(0, 1) === '"' || args.string) {
             editor_multi.isString = true;
             _setValue(JSON.parse(input.value) || '');

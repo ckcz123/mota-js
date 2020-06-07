@@ -1334,16 +1334,13 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "__visited__": {
           "!doc": "当前访问过的楼层"
         },
+        "__leaveLoc__": {
+          "!doc": "每个楼层的离开位置，用于楼传平面塔模式"
+        },
         "cannotMoveDirectly": {
           "!type": "bool",
           "!doc": "当前是否全局不可瞬移"
         },
-      },
-      "loc": {
-        "!doc": "勇士坐标",
-        "x": "number",
-        "y": "number",
-        "direction": "string"
       },
       "hero": {
         "!doc": "勇士当前属性",
@@ -1432,12 +1429,17 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
             },
           },
           "equips": {
-            "!doc": "未装备上的装备"
+            "!doc": "在背包中未装备上的装备"
           },
         },
         "loc": {
           "!doc": "勇士当前坐标和朝向",
-          "!type": "loc",
+          "x": "number",
+          "y": "number",
+          "direction": {
+            "!doc": "朝向，只能为 up,down,left,right 之一",
+            "!type": "string"
+          },
         },
         "flags": {
           "!type": "flag",
@@ -2070,6 +2072,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "当前地图信息"
         }
       },
+      "init": {
+        "!doc": "初始化core",
+        "!type": "fn(coreData: ?, callback: fn())"
+      },
+      "doFunc": {
+        "!doc": "执行一个函数；如果函数名是字符串则转发到插件中",
+        "!type": "fn(func: name|fn(), _this?: ?)"
+      },
       "control": {
         "!doc": "游戏控制",
         "showStatusBar": {
@@ -2170,7 +2180,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "setAutomaticRoute": {
           "!doc": "半自动寻路，用于鼠标或手指拖动<br/>例如：core.setAutomaticRoute(0, 0, [{direction: \"right\", x: 4, y: 9}, {direction: \"right\", x: 5, y: 9}]);<br/>destX: 鼠标或手指的起拖点横坐标<br/>destY: 鼠标或手指的起拖点纵坐标<br/>stepPostfix: 拖动轨迹的数组表示，每项为一步的方向和目标点。", 
-          "!type": "fn(destX: number, destY: number, stepPostfix: [loc])"
+          "!type": "fn(destX: number, destY: number, stepPostfix: [{x: number, y: number, direction: string}])"
         }, 
         "triggerHero": {
           "!doc": "改变勇士的显隐状态", 
@@ -2265,7 +2275,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "setAutoHeroMove": {
-          "!doc": "连续行走<br/>例如：core.setAutoHeroMove([{direction: \"up\", step: 1}, {direction: \"left\", step: 3}, {direction: \"right\", step: 3}, {direction: \"up\", step: 9}]); // 上左左左右右右上9<br/>steps: 压缩的步伐数组，每项表示朝某方向走多少步", 
+          "!doc": "连续行走<br/>例如：core.setAutoHeroMove([{direction: \"up\", step: 1}, {direction: \"left\", step: 3}]); // 上左左左<br/>steps: 压缩的步伐数组，每项表示朝某方向走多少步", 
           "!type": "fn(steps: [?])"
         },
         "fillPosWithPoint": {
@@ -2646,7 +2656,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "right": {
             "x": "number",
             "y": "number"
-          },
+          }
         },
         "clamp": {
           "!doc": "将x限定在[a,b]区间内，注意a和b可交换<br/>例如：core.clamp(1200, 1, 1000); // 1000<br/>x: 原始值，!x为true时x一律视为0<br/>a: 下限值，大于b将导致与b交换<br/>b: 上限值，小于a将导致与a交换", 
@@ -2757,7 +2767,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(turn: string, direction?: string) -> string"
         }, 
         "myconfirm": {
-          "!doc": "显示确认框，类似core.drawConfirmBox()<br/>例如：core.myconfirm('重启游戏？', core.restart); // 弹窗询问玩家是否重启游戏<br/>hint: 弹窗的内容<br/>yesCallback: 确定后的回调函数<br/>noCallback: 取消后的回调函数，可选", 
+          "!doc": "显示确认框，类似core.drawConfirmBox()，但不打断事件流<br/>例如：core.myconfirm('重启游戏？', core.restart); // 弹窗询问玩家是否重启游戏<br/>hint: 弹窗的内容，支持 ${} 语法<br/>yesCallback: 确定后的回调函数<br/>noCallback: 取消后的回调函数，可选", 
           "!type": "fn(hint: string, yesCallback?: fn(), noCallback?: fn())"
         }, 
         "calValue": {
@@ -2961,6 +2971,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "播放动画，注意即使指定了主角的坐标也不会跟随主角移动，如有需要请使用core.drawHeroAnimate(name, callback)函数<br/>例如：core.drawAnimate('attack', core.nextX(), core.nextY(), false, core.vibrate); // 在主角面前一格播放普攻动画，动画停止后视野左右抖动1秒<br/>name: 动画文件名，不含后缀<br/>x: 横坐标<br/>y: 纵坐标<br/>alignWindow: 是否是相对窗口的坐标<br/>callback: 动画停止后的回调函数，可选<br/>返回值：一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）", 
           "!type": "fn(name: string, x: number, y: number, alignWindow: bool, callback?: fn()) -> number"
         }, 
+        "drawHeroAnimate": {
+          "!doc": "播放跟随勇士的动画<br/>name: 动画名<br/>callback: 动画停止后的回调函数，可选<br/>返回值：一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）",
+          "!type": "fn(name: string, callback?: fn()) -> number"
+        },
+        "stopAnimate": {
+          "!doc": "立刻停止一个动画播放<br/>id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值<br/>doCallback: 是否执行该动画的回调函数",
+          "!type": "fn(id: number, doCallback?: bool)"
+        },
         "getBlockCls": {
           "!doc": "判定某个点的图块类型<br/>例如：if(core.getBlockCls(x1, y1) != 'enemys' && core.getBlockCls(x2, y2) != 'enemy48') core.openDoor(x3, y3); // 另一个简单的机关门事件，打败或炸掉这一对不同身高的敌人就开门<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块类型，即“地形、四帧动画、矮敌人、高敌人、道具、矮npc、高npc、自动元件、额外地形”之一", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string"
@@ -3043,7 +3061,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "automaticRoute": {
           "!doc": "自动寻路<br/>例如：core.automaticRoute(0, 0); // 自动寻路到地图左上角<br/>destX: 目标点的横坐标<br/>destY: 目标点的纵坐标<br/>返回值：每步走完后主角的loc属性组成的一维数组", 
-          "!type": "fn(destX: number, destY: number) -> [loc]"
+          "!type": "fn(destX: number, destY: number) -> [{x: number, y: number, direction: string}]"
         }, 
         "resizeMap": {
           "!doc": "更改地图画布的尺寸", 
@@ -3067,7 +3085,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "searchBlock": {
           "!doc": "搜索图块, 支持通配符和正则表达式<br/>例如：core.searchBlock('*Door'); // 搜索当前地图的所有门<br/>id: 图块id，支持星号表示任意多个（0个起）字符<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否计入，true表示计入<br/>返回值：一个详尽的数组，一般只用到其长度", 
-          "!type": "fn(id: string, floorId?: string, showDisable?: bool) -> Array<{ floorId -> string, index -> number, x -> number, y -> number, block -> Block }>"
+          "!type": "fn(id: string, floorId?: string, showDisable?: bool) -> [{floorId: string, index: number, x: number, y: number, block: block}]"
         },
         "hideBgFgMap": {
           "!doc": "隐藏前景/背景地图", 
@@ -3151,7 +3169,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getBlock": {
           "!doc": "获得某个点的block", 
-          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> block"
+          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}"
         }, 
         "initBlock": {
           "!doc": "初始化一个图块", 
@@ -3327,6 +3345,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "地图中间绘制一段文字", 
           "!type": "fn(contents: string, callback?: fn())"
         }, 
+        "drawConfirmBox":{
+          "!doc": "绘制一个确认框<br/>此项会打断事件流，如需不打断版本的请使用core.myconfirm()<br/>text: 要绘制的内容，支持 ${} 语法<br/>yesCallback: 点击确认后的回调<br/>noCallback: 点击取消后的回调",
+          "!type": "fn(text: string, yesCallback?: fn(), noCallback?: fn())"
+        },
         "fillPolygon": {
           "!doc": "在某个canvas上绘制一个多边形", 
           "!type": "fn(name: string|CanvasRenderingContext2D, nodes?: [[number]], style?: string)"
@@ -3448,7 +3470,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, maxWidth: number, font?: ?) -> string"
         }, 
         "clearMap": {
-          "!doc": "清空某个画布图层<br/>name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。（下同）<br/>如果name也可以是'all'，若为all则为清空所有系统画布。", 
+          "!doc": "清空某个画布图层<br/>name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。<br/>如果name也可以是'all'，若为all则为清空所有系统画布。", 
           "!url": "https://www.w3school.com.cn/tags/canvas_clearrect.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, x?: number, y?: number, width?: number, height?: number)"
         }, 
@@ -3549,6 +3571,22 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
       }, 
       "enemys": {
         "!doc": "怪物处理的相关函数",
+        "getEnemys": {
+          "!doc": "获得所有怪物原始数据的一个副本。<br/>请使用core.material.enemys获得当前各项怪物属性。",
+          "!type": "fn()"
+        },
+        "getSpecials": {
+          "!doc": "获得所有特殊属性的定义",
+          "!type": "fn() -> [[?]]"
+        },
+        "getSpecialColor": {
+          "!doc": "获得某个怪物所有特殊属性的颜色",
+          "!type": "fn(enemy: string|enemy) -> [string]"
+        },
+        "getSpecialFlag": {
+          "!doc": "获得某个怪物所有特殊属性的额外标记。<br/><br/>例如，1为全图性技能，需要进行遍历全图（光环/支援等)",
+          "!type": "fn(enemy: string|enemy) -> number"
+        },
         "getSpecialHint": {
           "!doc": "获得某种敌人的某种特殊属性的介绍<br/>例如：core.getSpecialHint('bat', 1) // '先攻：怪物首先攻击'<br/>enemy: 敌人id或敌人对象，用于确定属性的具体数值，否则可选<br/>special: 属性编号，可以是该敌人没有的属性<br/>返回值：属性的介绍，以属性名加中文冒号开头", 
           "!type": "fn(enemy: string|enemy, special: number) -> string"
@@ -3561,10 +3599,26 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "判定某种特殊属性的有无<br/>例如：core.hasSpecial('greenSlime', 1) // 判定绿头怪有无先攻属性<br/>special: 敌人id或敌人对象或正整数数组或自然数<br/>test: 待检查的属性编号<br/>", 
           "!type": "fn(special: number|[number]|string|number, test: number) -> bool"
         }, 
+        "nextCriticals": {
+          "!doc": "获得某只敌人接下来的若干个临界及其减伤，算法基于useLoop开关选择回合法或二分法<br/>例如：core.nextCriticals('greenSlime', 9, 0, 0, 'MT0') // 绿头怪接下来的9个临界<br/>enemy: 敌人id或敌人对象<br/>number: 要计算的临界数量，可选，默认为1<br/>x: 敌人的横坐标，可选<br/>y: 敌人的纵坐标，可选<br/>floorId: 敌人所在的地图，可选<br/>返回：两列的二维数组，每行表示一个临界及其减伤",
+          "!type": "fn(enemy: string|enemy, number?: number, x?: number, y?: number, floorId?: string) -> [[number]]"
+        },
+        "getDefDamage": {
+          "!doc": "计算再加若干点防御能使某只敌人对主角的总伤害降低多少<br/>例如：core.getDefDamage('greenSlime', 10, 0, 0, 'MT0') // 再加10点防御能使绿头怪的伤害降低多少<br/>enemy: 敌人id或敌人对象<br/>k: 假设主角增加的防御力，可选，默认为1<br/>x: 敌人的横坐标，可选<br/>y: 敌人的纵坐标，可选<br/>floorId: 敌人所在的地图，可选",
+          "!type": "fn(enemy: string|enemy, k?: number, x?: number, y?: number, floorId?: string) -> number"
+        },
         "canBattle": {
           "!doc": "判定主角当前能否打败某只敌人<br/>例如：core.canBattle('greenSlime',0,0,'MT0') // 能否打败主塔0层左上角的绿头怪（假设有）<br/>enemy: 敌人id或敌人对象<br/>x: 敌人的横坐标，可选<br/>y: 敌人的纵坐标，可选<br/>floorId: 敌人所在的地图，可选<br/>返回值：true表示可以打败，false表示无法打败", 
           "!type": "fn(enemy: string|enemy, x?: number, y?: number, floorId?: string) -> bool"
         }, 
+        "getEnemyInfo": {
+          "!doc": "获得怪物真实属性<br/>hero: 可选，此时的勇士属性<br/>此函数将会计算包括坚固、模仿、光环等若干效果，将同时被怪物手册和伤害计算调用",
+          "!type": "fn(enemy: string|enemy, hero?: ?, x?: number, y?: number, floorId?: string) -> {hp: number, atk: number, def: number, money: number, exp: number, special: [number], point: number, guards: [?]}"
+        },
+        "getDamageInfo": {
+          "!doc": "获得战斗伤害信息<br/>例如：core.getDamage('greenSlime',0,0,'MT0') // 绿头怪的总伤害<br/>enemy: 敌人id或敌人对象<br/>hero: 可选，此时的勇士属性<br/>x: 敌人的横坐标，可选<br/>y: 敌人的纵坐标，可选<br/>floorId: 敌人所在的地图，可选<br/>返回值：伤害计算信息，如果因为没有破防或无敌怪等其他原因无法战斗，则返回null",
+          "!type": "fn(enemy: string|enemy, hero?: ?, x?: number, y?: number, floorId?: string) -> {damage: number, per_damage: number, hero_per_damage: number, init_damage: number, mon_hp: number, mon_atk: number, mon_def: number, turn: number}"
+        },
         "getDamage": {
           "!doc": "获得某只敌人对主角的总伤害<br/>例如：core.getDamage('greenSlime',0,0,'MT0') // 绿头怪的总伤害<br/>enemy: 敌人id或敌人对象<br/>x: 敌人的横坐标，可选<br/>y: 敌人的纵坐标，可选<br/>floorId: 敌人所在的地图，可选<br/>返回值：总伤害，如果因为没有破防或无敌怪等其他原因无法战斗，则返回null", 
           "!type": "fn(enemy: string|enemy, x?: number, y?: number, floorId?: string) -> number"
@@ -3572,6 +3626,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "getDamageString": {
           "!doc": "获得某只敌人的地图显伤，包括颜色<br/>例如：core.getDamageString('greenSlime', 0, 0, 'MT0') // 绿头怪的地图显伤<br/>enemy: 敌人id或敌人对象<br/>x: 敌人的横坐标，可选<br/>y: 敌人的纵坐标，可选<br/>floorId: 敌人所在的地图，可选<br/>返回值：damage: 表示伤害值或为'???'，color: 形如'#RrGgBb'", 
           "!type": "fn(enemy: string|enemy, x?: number, y?: number, floorId?: string) -> {color: string, damage: string}"
+        },
+        "getCurrentEnemys": {
+          "!doc": "获得某张地图的敌人集合，用于手册绘制<br/>例如：core.getCurrentEnemys('MT0') // 主塔0层的敌人集合<br/>floorId: 地图id，可选<br/>返回值：敌人集合，按伤害升序排列，支持多朝向怪合并",
+          "!type": "fn(floorId?: string) -> [enemy]"
+        },
+        "hasEnemyLeft": {
+          "!doc": "检查某些楼层是否还有漏打的（某种）敌人<br/>例如：core.hasEnemyLeft('greenSlime', ['sample0', 'sample1']) // 样板0层和1层是否有漏打的绿头怪<br/>enemyId: 敌人id，可选，null表示任意敌人<br/>floorId: 地图id或其数组，可选，不填为当前地图<br/>返回值：地图中是否还存在该种敌人",
+          "!type": "fn(enemyId?: string, floorId?: string|[string]) -> bool"
         }
       }, 
       "events": {
@@ -3668,6 +3730,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "点击怪物手册时的打开操作", 
           "!type": "fn(fromUserAction?: bool)"
         }, 
+        "save": {
+          "!doc": "点击存档按钮时的打开操作",
+          "!type": "fn(fromUserAction?: bool)"
+        },
+        "load": {
+          "!doc": "点击读档按钮时的打开操作",
+          "!type": "fn(fromUserAction?: bool)"
+        },
         "getNextItem": {
           "!doc": "轻按获得面前的物品或周围唯一物品<br/>noRoute: 若为true则不计入录像", 
           "!type": "fn(noRoute?: bool)"
@@ -3860,56 +3930,68 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "尝试使用一个道具<br/>例如：core.tryUseItem('pickaxe'); // 尝试使用破墙镐<br/>itemId: 道具id，其中敌人手册、传送器和飞行器会被特殊处理", 
           "!type": "fn(itemId: string)"
         }
+      },
+      "plugin": {
+        "!doc": "插件编写",
+        "drawLight": {
+          "!doc": "绘制一段灯光效果<br/>name：必填，要绘制到的画布名；可以是一个系统画布，或者是个自定义画布；如果不存在则创建<br/>color：可选，只能是一个0~1之间的数，为不透明度的值。不填则默认为0.9。<br/>lights：可选，一个数组，定义了每个独立的灯光。其中每一项是三元组 [x,y,r] x和y分别为该灯光的横纵坐标，r为该灯光的半径。<br/>lightDec：可选，0到1之间，光从多少百分比才开始衰减（在此范围内保持全亮），不设置默认为0。比如lightDec为0.5代表，每个灯光部分内圈50%的范围全亮，50%以后才开始快速衰减。<br/>例如：core.plugin.drawLight('test', 0.2, [[25,11,46,0.1]]); // 创建一个test图层，不透明度0.2，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。<br/>core.plugin.drawLight('test2', 0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 创建test2图层，且存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。",
+          "!type": "fn(name: string|CanvasRenderingContext2D, color?: number, lights?: [[number]], lightDec?: number)"
+        },
+        "openShop": {
+          "!doc": "打开一个全局商店<br/>shopId: 要开启的商店ID<br/>noRoute: 打开行为是否不计入录像",
+          "!type": "fn(shopId: string, noRoute?: bool)"
+        },
+        "isShopVisited": {
+          "!doc": "某个全局商店是否被访问过",
+          "!type": "fn(id: string) -> bool"
+        },
+        "listShopIds": {
+          "!doc": "列出所有应当显示的快捷商店列表",
+          "!type": "fn() -> [string]"
+        },
+        "canOpenShop": {
+          "!doc": "当前能否打开某个商店",
+          "!type": "fn(id: string) -> bool"
+        },
+        "setShopVisited": {
+          "!doc": "设置某个商店的访问状态",
+          "!type": "fn(id: string, visited?: bool)"
+        },
+        "canUseQuickShop": {
+          "!doc": "当前能否使用某个快捷商店<br/>如果返回一个字符串，则代表不能，返回的字符串作为不能的提示；返回null表示可以使用",
+          "!type": "fn(id: string) -> string"
+        },
+        "removeMaps": {
+          "!doc": "删除某一些楼层；删除后不会存入存档，不可浏览地图也不可飞到。<br/>fromId: 开始删除的楼层ID<br/>toId: 删除到的楼层编号；可选，不填则视为fromId<br/>例如：core.removeMaps(\"MT1\", \"MT300\") 删除MT1~MT300之间的全部层<br/>core.removeMaps(\"MT10\") 只删除MT10层",
+          "!type": "fn(fromId: string, toId?: string)"
+        },
+        "resumeMaps": {
+          "!doc": "恢复某一些被删除楼层。<br/>fromId: 开始恢复的楼层ID<br/>toId: 恢复到的楼层编号；可选，不填则视为fromId<br/>例如：core.resumeMaps(\"MT1\", \"MT300\") 恢复MT1~MT300之间的全部层<br/>core.resumeMaps(\"MT10\") 只删恢复MT10层",
+          "!type": "fn(fromId: string, toId?: string)"
+        },
+        "openItemShop": {
+          "!doc": "打开一个道具商店",
+          "!type": "fn(itemShopId: string)"
+        }
       }
+    },
+    "lzw_encode": {
+      "!doc": "LZW压缩算法",
+      "!url": "https://gist.github.com/revolunet/843889",
+      "!type": "fn(s: string) -> string"
+    },
+    "lzw_decode": {
+      "!doc": "LZW解压缩算法",
+      "!url": "https://gist.github.com/revolunet/843889",
+      "!type": "fn(s: string) -> string"
     },
     "hero": {
       "!type": "heroStatus",
       "!doc": "勇士信息，为 core.status.hero 的简写",
     },
     "flags": {
+      "!type": "flag",
       "!doc": "游戏中用到的变量，为 core.status.hero.flags 的简写",
-      "hatred":{
-        "!type": "number",
-        "!doc": "当前仇恨值"
-      },
-      "poison":{
-        "!type": "bool",
-        "!doc": "是否处于中毒状态"
-      },
-      "weak":{
-        "!type": "number",
-        "!doc": "是否处于衰弱状态"
-      },
-      "curse":{
-        "!type": "number",
-        "!doc": "是否处于诅咒状态"
-      },
-      "no_zone": {
-        "!type": "bool",
-        "!doc": "无视领域伤害"
-      },
-      "no_repulse": {
-        "!type": "bool",
-        "!doc": "无视阻击伤害"
-      },
-      "no_lasel": {
-        "!type": "bool",
-        "!doc": "无视激光伤害"
-      },
-      "no_ambush": {
-        "!type": "bool",
-        "!doc": "无视捕捉"
-      },
-      "__bgm__": {
-        "!type": "string",
-        "!doc": "背景音乐"
-      },
-      "__weather__": {
-        "!doc": "天气"
-      },
-      "__color__": {
-        "!doc": "色调"
-      },
     }
   }
 ];

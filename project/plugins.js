@@ -565,7 +565,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	var bigFont = core.ui._buildFont(20, false),
 		middleFont = core.ui._buildFont(18, false);
 
-	this.drawItemShop = function () {
+	this._drawItemShop = function () {
 		// 绘制道具商店
 
 		// Step 1: 背景和固定的几个文字
@@ -820,7 +820,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 	}
 
-	this.performItemShopAction = function () {
+	this._performItemShopAction = function () {
 		if (flags.type == 0) return this._performItemShopKeyBoard(flags.keycode);
 		else return this._performItemShopClick(flags.px, flags.py);
 	}
@@ -839,9 +839,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				"type": "while",
 				"condition": "true",
 				"data": [
-					{ "type": "function", "function": "function () { core.drawItemShop(); }" },
+					{ "type": "function", "function": "function () { core.plugin._drawItemShop(); }" },
 					{ "type": "wait" },
-					{ "type": "function", "function": "function() { core.performItemShopAction(); }" }
+					{ "type": "function", "function": "function() { core.plugin._performItemShopAction(); }" }
 				]
 			},
 			{

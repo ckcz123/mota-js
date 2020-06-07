@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 "use strict";
 
 function events() {
@@ -42,7 +44,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
     core.resetGame(core.firstData.hero, hard, null, core.clone(core.initStatus.maps));
-    var nowLoc = core.clone(core.getHeroLoc());
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 
@@ -51,7 +52,6 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.setFlag('__rand__', seed);
     }
     else core.utils.__init_seed();
-    this.setInitData();
     core.clearStatusBar();
 
     var todo = [];
@@ -60,19 +60,35 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
         core.dom.musicBtn.style.display = 'block';
         core.push(todo, core.firstData.startCanvas);
     }
+    core.push(todo, {"type": "function", "function": "function() { core.events._startGame_setHard(); }"})
     core.push(todo, core.firstData.startText);
     this.insertAction(todo, null, null, function () {
-        core.events._startGame_afterStart(nowLoc, callback);
+        core.events._startGame_afterStart(callback);
     });
 
     if (route != null) core.startReplay(route);
 }
 
-events.prototype._startGame_afterStart = function (nowLoc, callback) {
+events.prototype._startGame_setHard = function () {
+    // 根据难度设置flag:hard
+    // 这一段应当在startCanvas之后，startText之前做
+    var hardValue = 0;
+    var hardColor = 'red';
+    main.levelChoose.forEach(function (one) {
+        if (one.name == core.status.hard) {
+            hardValue = one.hard;
+            hardColor = core.arrayToRGBA(one.color || [255,0,0,1]);
+            core.insertAction(one.action);
+        }
+    });
+    core.setFlag('hard', hardValue || 0);
+    core.setFlag('__hardColor__', hardColor);
+}
+
+events.prototype._startGame_afterStart = function (callback) {
     core.ui.closePanel();
     this._startGame_statusBar();
-    core.dom.musicBtn.style.display = 'none';
-    core.changeFloor(core.firstData.floorId, null, nowLoc, null, function () {
+    core.changeFloor(core.firstData.floorId, null, core.firstData.hero.loc, null, function () {
         // 插入一个空事件避免直接回放录像出错
         core.insertAction([]);
         if (callback) callback();
@@ -100,11 +116,6 @@ events.prototype._startGame_upload = function () {
     formData.append('base64', 1);
 
     core.utils.http("POST", "/games/upload.php", formData);
-}
-
-////// 不同难度分别设置初始属性 //////
-events.prototype.setInitData = function () {
-    return this.eventdata.setInitData();
 }
 
 ////// 游戏获胜事件 //////
@@ -137,7 +148,6 @@ events.prototype.gameOver = function (ending, fromReplay, norank) {
     var reason = null;
     if (fromReplay) reason = "录像回放完毕！";
     else if (core.hasFlag("debug")) reason = "\t[系统提示]调试模式下无法上传成绩";
-    else if (core.hasFlag("__consoleOpened__")) reason = "\t[系统提示]本存档开启过控制台，无法上传成绩";
 
     if (reason != null)
         core.drawText(reason, core.restart);
@@ -188,7 +198,7 @@ events.prototype._gameOver_doUpload = function (username, ending, norank) {
     formData.append('def', core.status.hero.def);
     formData.append('mdef', core.status.hero.mdef);
     formData.append('money', core.status.hero.money);
-    formData.append('experience', core.status.hero.experience);
+    formData.append('experience', core.status.hero.exp);
     formData.append('steps', core.status.hero.steps);
     formData.append('norank', norank ? 1 : 0);
     formData.append('seed', core.getFlag('__seed__'));
@@ -305,16 +315,25 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 }
 
 ////// 触发(x,y)点的事件 //////
-events.prototype._trigger = function (x, y) {
-    if (core.status.gameOver) return;
-    if (core.status.event.id == 'action') {
-        core.insertAction({"type": "trigger", "loc": [x, y]}, x, y, null, true);
+events.prototype.trigger = function (x, y, callback) {
+    var _executeCallback = function () {
+        // 因为trigger之后还有可能触发其他同步脚本（比如阻激夹域检测）
+        // 所以这里强制callback被异步触发
+        if (callback) {
+            setTimeout(callback, 1); // +1是为了录像检测系统 
+        }
         return;
     }
-    if (core.status.event.id) return;
+    if (core.status.gameOver) return _executeCallback();
+    if (core.status.event.id == 'action') {
+        core.insertAction({"type": "function", "function": "function () { core.events._trigger_inAction("+x+","+y+"); }", "async": true},
+            null, null, null, true);
+        return _executeCallback();
+    }
+    if (core.status.event.id) return _executeCallback();
 
     var block = core.getBlock(x, y);
-    if (block == null) return;
+    if (block == null) return _executeCallback();
     block = block.block;
 
     // 执行该点的脚本
@@ -322,7 +341,7 @@ events.prototype._trigger = function (x, y) {
         eval(block.event.script);
     } catch (e) { main.log(e); }
 
-    if (block.event.trigger) {
+    if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
 
@@ -332,6 +351,32 @@ events.prototype._trigger = function (x, y) {
         core.status.automaticRoute.moveDirectly = false;
         this.doSystemEvent(trigger, block);
     }
+    return _executeCallback();
+}
+
+events.prototype._trigger_inAction = function (x, y) {
+    if (core.status.gameOver || core.status.event.id != 'action') return;
+    
+    var block = core.getBlock(x, y);
+    if (block == null) return core.doAction();
+    block = block.block;
+
+    // 执行该点的脚本
+    try {
+        eval(block.event.script);
+    } catch (e) { main.log(e); }
+
+    if (block.event.trigger && block.event.trigger != 'null') {
+        this.setEvents(null, x, y);
+        if (block.event.trigger == 'action') {
+            this.insertAction(block.event.data);
+        }
+        else {
+            this.doSystemEvent(block.event.trigger, block, core.doAction);
+            return;
+        }
+    }
+    return core.doAction();
 }
 
 events.prototype._trigger_ignoreChangeFloor = function (block) {
@@ -366,7 +411,7 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!id) return core.clearContinueAutomaticRoute(callback);
     // 非强制战斗
     if (!core.enemys.canBattle(id, x, y) && !force && !core.status.event.id) {
-        core.drawTip("你打不过此怪物！", null, true);
+        core.drawTip("你打不过此怪物！");
         return core.clearContinueAutomaticRoute(callback);
     }
     // 自动存档
@@ -375,7 +420,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!this.beforeBattle(id, x, y))
         return core.clearContinueAutomaticRoute(callback);
     // 战后事件
-    this.afterBattle(id, x, y, callback);
+    this.afterBattle(id, x, y);
+    if (callback) callback();
 }
 
 ////// 战斗前触发的事件 //////
@@ -384,8 +430,8 @@ events.prototype.beforeBattle = function (enemyId, x, y) {
 }
 
 ////// 战斗结束后触发的事件 //////
-events.prototype.afterBattle = function (enemyId, x, y, callback) {
-    return this.eventdata.afterBattle(enemyId, x, y, callback);
+events.prototype.afterBattle = function (enemyId, x, y) {
+    return this.eventdata.afterBattle(enemyId, x, y);
 }
 
 events.prototype._sys_openDoor = function (data, callback) {
@@ -402,83 +448,118 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
     if (!this._openDoor_check(id, x, y, needKey)) {
         var locked = core.status.lockControl;
         core.waitHeroToStop(function () {
-            if (!locked) core.unLockControl();
+            if (!locked) core.unlockControl();
             if (callback) callback();
         });
         return;
     }
-    core.playSound("door.mp3");
-    this._openDoor_animate(id, x, y, callback);
+    if (core.status.replay.speed == 24) {
+        core.status.replay.animate = true;
+        core.removeBlock(x, y);
+        setTimeout(function () {
+            core.status.replay.animate = false;
+            core.events.afterOpenDoor(id, x, y);
+            if (callback) callback();
+        }, 1); // +1是为了录像检测系统
+    } else {
+        this._openDoor_animate(id, x, y, callback);
+    }
 }
 
 events.prototype._openDoor_check = function (id, x, y, needKey) {
-    // 是否存在门或暗墙
-    if (!core.terrainExists(x, y, id) || !(id.endsWith("Door") || id.endsWith("Wall"))
-        || core.material.icons.animates[id] == null) {
+    var clearAndReturn = function () {
         core.clearContinueAutomaticRoute();
         return false;
     }
 
+    // 是否存在门或暗墙
+    if (core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null) {
+        return clearAndReturn();
+    }
+
     if (id == 'steelDoor' && core.flags.steelDoorWithoutKey)
         needKey = false;
+    var doorInfo = core.getBlockById(id).event;
+    if (doorInfo == null || doorInfo.doorInfo == null)
+        return clearAndReturn();
+    doorInfo = doorInfo.doorInfo;
+    // Check all keys
+    var keyInfo = doorInfo.keys || {};
+    if (needKey) {
+        for (var keyName in keyInfo) {
+            var keyValue = keyInfo[keyName];
+            if (keyName.endsWith(':o')) keyName = keyName.substring(0, keyName.length - 2);            
 
-    if (needKey && id.endsWith("Door")) {
-        var key = id.replace("Door", "Key");
-        if (!core.hasItem(key)) {
-            if (key != "specialKey")
-                core.drawTip("你没有" + ((core.material.items[key] || {}).name || "钥匙"), null, true);
-            else core.drawTip("无法开启此门", null, true);
-            core.clearContinueAutomaticRoute();
-            return false;
+            // --- 如果是一个不存在的道具，则直接认为无法开启
+            if (!core.material.items[keyName]) {
+                core.drawTip("无法开启此门");
+                return clearAndReturn();
+            }
+            if (core.itemCount(keyName) < keyValue) {
+                core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", null, true);
+                return false;
+            }
         }
         if (!core.status.event.id) core.autosave(true);
-        core.removeItem(key);
+        for (var keyName in keyInfo) {  
+            if (!keyName.endsWith(':o')) core.removeItem(keyName, keyInfo[keyName]);
+        }
     }
+    core.playSound(doorInfo.openSound);
     return true;
 }
 
 events.prototype._openDoor_animate = function (id, x, y, callback) {
-    var door = core.material.icons.animates[id];
-    var speed = id.endsWith("Door") ? 30 : 70;
+    var blockInfo = core.getBlockInfo(id);
+    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
+
+    var speed = (core.getBlockById(id).event.doorInfo.time || 160) / 4;
 
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
     core.removeBlock(x, y);
-    core.drawImage('event', core.material.images.animates, 0, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+    core.drawImage('event', image, 0, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+    if (height > 32)
+        core.drawImage('event2', image, 0, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     var state = 0;
     var animate = window.setInterval(function () {
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        if (height > 32) 
+            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32)
         state++;
         if (state == 4) {
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
-            if (!locked) core.unLockControl();
+            if (!locked) core.unlockControl();
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(id, x, y, callback);
+            core.events.afterOpenDoor(id, x, y);
+            if (callback) callback();
             return;
         }
-        core.drawImage('event', core.material.images.animates, 32 * state, 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', image, 32 * state, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        if (height > 32)
+            core.drawImage('event2', image, 32 * state, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 开一个门后触发的事件 //////
-events.prototype.afterOpenDoor = function (doorId, x, y, callback) {
-    return this.eventdata.afterOpenDoor(doorId, x, y, callback);
+events.prototype.afterOpenDoor = function (doorId, x, y) {
+    return this.eventdata.afterOpenDoor(doorId, x, y);
 }
 
 events.prototype._sys_getItem = function (data, callback) {
-    this.getItem(data.event.id, 1, data.x, data.y, callback);
+    this.getItem(data.event.id, 1, data.x, data.y, false, callback);
 }
 
 ////// 获得某个物品 //////
-events.prototype.getItem = function (id, num, x, y, callback) {
+events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
     if (num == null) num = 1;
     num = num || 1;
     var itemCls = core.material.items[id].cls;
-    core.items.getItemEffect(id, num);
     core.removeBlock(x, y);
+    core.items.getItemEffect(id, num);
     var text = '获得 ' + core.material.items[id].name;
     if (num > 1) text += "x" + num;
     if (itemCls === 'items' && num == 1) text += core.items.getItemEffectTip(id);
@@ -494,7 +575,7 @@ events.prototype.getItem = function (id, num, x, y, callback) {
         } catch (e) {}
         if (!core.status.event.id || core.status.event.id=='action') {
             core.insertAction("\t["+core.material.items[id].name+","+id+"]" + hint + "\n"
-                + (itemCls == 'keys' || id == 'greenKey' || id == 'steelKey' ? "（钥匙类道具，遇到对应的门时自动打开）"
+                + (id.endsWith('Key') ? "（钥匙类道具，遇到对应的门时自动打开）"
                     : itemCls == 'tools' ? "（消耗类道具，请按T在道具栏使用）"
                     : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
                     : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""));
@@ -502,14 +583,12 @@ events.prototype.getItem = function (id, num, x, y, callback) {
         itemHint.push(id);
     }
 
-
-    core.updateStatusBar();
-
-    this.afterGetItem(id, x, y, callback);
+    this.afterGetItem(id, x, y, isGentleClick);
+    if (callback) callback();
 }
 
-events.prototype.afterGetItem = function (id, x, y, callback) {
-    this.eventdata.afterGetItem(id, x, y, callback);
+events.prototype.afterGetItem = function (id, x, y, isGentleClick) {
+    this.eventdata.afterGetItem(id, x, y, isGentleClick);
 }
 
 ////// 获得面前的物品（轻按） //////
@@ -537,7 +616,7 @@ events.prototype._getNextItem = function (direction, noRoute) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     if (!noRoute) core.status.route.push("getNext");
-    this.getItem(core.getBlockId(nx, ny), 1, nx, ny);
+    this.getItem(core.getBlockId(nx, ny), 1, nx, ny, true);
     return true;
 }
 
@@ -554,13 +633,12 @@ events.prototype._sys_changeFloor = function (data, callback) {
 }
 
 ////// 楼层切换 //////
-events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback, fromLoad) {
+events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
     var info = this._changeFloor_getInfo(floorId, stair, heroLoc, time);
     if (info == null) {
         if (callback) callback();
         return;
     }
-    info.fromLoad = fromLoad;
     floorId = info.floorId;
     info.locked = core.status.lockControl;
 
@@ -586,6 +664,8 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
         var index = core.floorIds.indexOf(core.status.floorId);
         if (index < core.floorIds.length - 1) floorId = core.floorIds[index + 1];
         else floorId = core.status.floorId;
+    } else if (floorId == ':now') {
+        floorId = core.status.floorId;
     }
     if (!core.status.maps[floorId]) {
         main.log("不存在的楼层：" + floorId);
@@ -594,8 +674,6 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
 
     if (main.mode != 'play' || core.isReplaying()) time = 0;
     if (time == null) time = core.values.floorChangeTime;
-    if (time == null) time = 800;
-    if (time < 100) time = 0;
     time /= 20;
 
     return {
@@ -626,6 +704,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
             heroLoc.y = core.status.maps[floorId][stair][1];
         }
         else {
+            core.extractBlocks(floorId);
             var blocks = core.status.maps[floorId].blocks;
             for (var i in blocks) {
                 if (!blocks[i].disable && blocks[i].event.id === stair) {
@@ -657,7 +736,7 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
 }
 
 events.prototype._changeFloor_changing = function (info, callback) {
-    this.changingFloor(info.floorId, info.heroLoc, info.fromLoad);
+    this.changingFloor(info.floorId, info.heroLoc);
 
     if (info.time == 0)
         this._changeFloor_afterChange(info, callback);
@@ -668,58 +747,33 @@ events.prototype._changeFloor_changing = function (info, callback) {
 }
 
 events.prototype._changeFloor_afterChange = function (info, callback) {
-    if (!info.locked) core.unLockControl();
+    if (!info.locked) core.unlockControl();
     core.status.replay.animate = false;
-    core.events.afterChangeFloor(info.floorId, info.fromLoad);
+    core.events.afterChangeFloor(info.floorId);
 
     if (callback) callback();
 }
 
-events.prototype.changingFloor = function (floorId, heroLoc, fromLoad) {
-    this.eventdata.changingFloor(floorId, heroLoc, fromLoad);
+events.prototype.changingFloor = function (floorId, heroLoc) {
+    this.eventdata.changingFloor(floorId, heroLoc);
 }
 
 ////// 转换楼层结束的事件 //////
-events.prototype.afterChangeFloor = function (floorId, fromLoad) {
+events.prototype.afterChangeFloor = function (floorId) {
     if (main.mode != 'play') return;
-    return this.eventdata.afterChangeFloor(floorId, fromLoad);
+    return this.eventdata.afterChangeFloor(floorId);
 }
 
 ////// 是否到达过某个楼层 //////
 events.prototype.hasVisitedFloor = function (floorId) {
+    if (!core.hasFlag("__visited__")) core.setFlag("__visited__", {});
     return core.getFlag("__visited__")[floorId] || false;
 }
 
 ////// 到达某楼层 //////
 events.prototype.visitFloor = function (floorId) {
+    if (!core.hasFlag("__visited__")) core.setFlag("__visited__", {});
     core.getFlag("__visited__")[floorId] = true;
-}
-
-events.prototype._sys_passNet = function (data, callback) {
-    this.passNet(data);
-    if (callback) callback();
-}
-
-////// 经过一个路障 //////
-events.prototype.passNet = function (data) {
-    if (!core.hasItem('shoes')) {
-        // 血网 lavaNet 移动到 checkBlock 中处理
-        if (data.event.id == 'poisonNet') { // 毒网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[0]});
-        }
-        else if (data.event.id == 'weakNet') { // 衰网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[1]});
-        }
-        else if (data.event.id == 'curseNet') { // 咒网
-            core.insertAction({"type":"insert","name":"毒衰咒处理","args":[2]});
-        }
-    }
-    this.afterPassNet(data.x, data.y, data.event.id);
-    core.updateStatusBar();
-}
-
-events.prototype.afterPassNet = function (x, y, id) {
-    if (this.eventdata.afterPassNet) this.eventdata.afterPassNet(x, y, id);
 }
 
 events.prototype._sys_pushBox = function (data, callback) {
@@ -736,36 +790,29 @@ events.prototype.pushBox = function (data) {
         nx = data.x + core.utils.scan[direction].x, ny = data.y + core.utils.scan[direction].y;
 
     // 检测能否推上去
-    if (!core.canMoveHero() || !core.canMoveHero(data.x, data.y, direction)) return;
+    if (!core.canMoveHero()) return;
+    var canGoDeadZone = core.flags.canGoDeadZone;
+    core.flags.canGoDeadZone = true;
+    if (!core.canMoveHero(data.x, data.y, direction)) {
+        core.flags.canGoDeadZone = canGoDeadZone;
+        return;
+    }
+    core.flags.canGoDeadZone = canGoDeadZone;
+
     var nextId = core.getBlockId(nx, ny);
     if (nextId != null && nextId != 'flower') return;
 
-    core.setBlock(nextId == null ? 169 : 170, nx, ny);
+    core.setBlock(nextId == null ? 'box' : 'boxed', nx, ny);
 
     if (data.event.id == 'box')
         core.removeBlock(data.x, data.y);
     else
-        core.setBlock(168, data.x, data.y);
-
-    core.updateStatusBar();
-    this._pushBox_moveHero(direction);
-}
-
-events.prototype._pushBox_moveHero = function (direction) {
-    core.status.replay.animate = true;
-    core.lockControl();
-    setTimeout(function () {
-        core.moveHero(direction, function () {
-            core.status.replay.animate = false;
-            core.status.route.pop();
-            core.events.afterPushBox();
-            // 可能有阻击...
-            if (core.status.event.id == null) {
-                core.unLockControl();
-                core.replay();
-            }
-        });
-    });
+        core.setBlock('flower', data.x, data.y);
+    // 勇士前进一格，然后触发推箱子后事件
+    core.insertAction([
+        {"type": "moveAction"},
+        {"type": "function", "function": "function() { core.afterPushBox(); }"}
+    ]);
 }
 
 ////// 推箱子后的事件 //////
@@ -773,27 +820,23 @@ events.prototype.afterPushBox = function () {
     return this.eventdata.afterPushBox();
 }
 
-events.prototype._sys_changeLight = function (data, callback) {
-    core.events.changeLight(data.event.id, data.x, data.y);
+events.prototype._sys_ski = function (data, callback) {
+    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y);
     if (callback) callback();
 }
 
-////// 改变亮灯（感叹号）的事件 //////
-events.prototype.changeLight = function (id, x, y) {
-    if (id != null && id != 'light') return;
-    core.setBlock(core.getNumberById('darkLight'), x, y);
-    return this.eventdata.afterChangeLight(x, y);
-}
-
-events.prototype._sys_ski = function (data, callback) {
-    core.insertAction(["V2.6后，请将滑冰放在背景层！"], data.x, data.y, callback);
+/// 当前是否在冰上
+events.prototype.onSki = function (number) {
+    if (number == null) number = core.getBgNumber();
+    var block = core.getBlockByNumber(number);
+    return block && block.event && block.event.trigger == 'ski';
 }
 
 events.prototype._sys_action = function (data, callback) {
     var ev = core.clone(data.event.data), ex = data.x, ey = data.y;
     // 检查是否需要改变朝向
     if (ex == core.nextX() && ey == core.nextY()) {
-        var dir = core.reverseDirection();
+        var dir = core.turnDirection(":back");
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
             var number = core.getNumberById(toId);
@@ -806,7 +849,8 @@ events.prototype._sys_action = function (data, callback) {
 
 events.prototype._sys_custom = function (data, callback) {
     core.insertAction(["请使用\r[yellow]core.registerSystemEvent('custom', func)\r来处理自己添加的系统触发器！"],
-        data.x, data.y, callback);
+        data.x, data.y);
+    if (callback) callback();
 }
 
 // ------ 自定义事件的处理 ------ //
@@ -843,7 +887,10 @@ events.prototype.doEvent = function (data, x, y, prefix) {
 events.prototype.setEvents = function (list, x, y, callback) {
     var data = core.status.event.data || {};
     if (list) {
-        data.list = [{todo: core.clone(list), total: core.clone(list), condition: "false"}];
+        var l = core.clone(list);
+        if (!(l instanceof Array)) l = [l];
+        l.push({"type": "_label"});
+        data.list = [{todo: l, total: core.clone(l), condition: "false"}];
         // 结束所有正在执行的自动事件
         if (list.length == 0) {
             core.status.autoEvents.forEach(function (autoEvent) {
@@ -880,6 +927,7 @@ events.prototype.doAction = function (keepUI) {
         // 清空boxAnimate和UI层
         core.clearUI();
         clearInterval(core.status.event.interval);
+        clearTimeout(core.status.event.interval);
         core.status.event.interval = null;
     }
     // 判定是否执行完毕
@@ -902,6 +950,8 @@ events.prototype.doAction = function (keepUI) {
 }
 
 events.prototype._doAction_finishEvents = function () {
+    if (core.status.gameOver) return true;
+
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
         // 检测并执行延迟自动事件
@@ -936,13 +986,6 @@ events.prototype._popEvents = function (current, prefix) {
 events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
-
-    // ------ 判定commonEvent
-    var commonEvent = this.getCommonEvent(action);
-    if (commonEvent instanceof Array) {
-        // 将公共事件视为一个do-while事件插入执行，可被break跳出
-        action = [{"type": "dowhile", "condition": "false", "data": commonEvent}];
-    }
     if (!action) return;
 
     action = this.precompile(action);
@@ -951,12 +994,41 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
         this.startEvents(action, x, y, callback);
     }
     else {
-        if (addToLast)
-            core.push(core.status.event.data.list[0].todo, action)
-        else
-            core.unshift(core.status.event.data.list[0].todo, action);
+        if (addToLast) {
+            var list = core.status.event.data.list[0].todo;
+            var index = 0;
+            for (var index = 0; index < list.length; index++) {
+                if (list[index].type == '_label') {
+                    list.splice(index, 0, action);
+                    break;
+                }
+            } 
+        }
+        else core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
     }
+}
+
+////// 往当前事件列表之前或之后添加一个公共事件 //////
+events.prototype.insertCommonEvent = function (name, args, x, y, callback, addToLast) {
+    var commonEvent = this.getCommonEvent(name);
+    if (!commonEvent) {
+        if (callback) callback();
+        return;
+    }
+
+    // 设置参数
+    core.setFlag('arg0', name);
+    if (args instanceof Array) {
+        for (var i = 0; i < args.length; ++i) {
+            try {
+                if (args[i] != null)
+                    core.setFlag('arg'+(i+1), args[i]);
+            } catch (e) { main.log(e); }
+        }
+    }
+
+    this.insertAction({"type": "dowhile", "condition": "false", "data": commonEvent}, x, y, callback, addToLast);
 }
 
 ////// 获得一个公共事件 //////
@@ -1115,17 +1187,22 @@ events.prototype.__precompile_getArray = function () {
         "closeDoor", "battle", "trigger", "insert"
     ];
     var values = [
-        "setValue", "setValue2", "addValue", "setEnemy", "setFloor", "setGlobalValue",
+        "setValue", "setEnemy", "setFloor", "setGlobalValue",
     ];
     var uievents = [
-        "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "strokeCircle",
-        "drawIcon", "drawSelector", "drawBackground",
+        "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "fillEllipse", "strokeEllipse",
+        "fillArc", "strokeArc", "drawIcon", "drawSelector", "drawBackground",
     ];
     var others = {
-        "strokeCircle": ["r"],
+        "fillEllipse": ["a", "b", "angle"],
+        "strokeEllipse": ["a", "b", "angle"],
+        "fillRect": ["radius", "angle"],
+        "strokeRect": ["radius", "angle"],
+        "fillArc": ["r", "start", "end"],
+        "strokeArc": ["r", "start", "end"],
         "drawLine": ["x1", "y1", "x2", "y2"],
         "drawArrow": ["x1", "y1", "x2", "y2"],
-        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1"],
+        "drawImage": ["x", "y", "w", "h", "x1", "y1", "w1", "h1", "angle"],
         "drawTextContent": ["left", "top"],
     };
     return {
@@ -1198,17 +1275,20 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
+    data.text = core.replaceText(data.text, prefix);
     core.ui.drawTextBox(data.text, data.showAll);
 }
 
 events.prototype._action_autoText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
+    data.text = core.replaceText(data.text, prefix);
     core.ui.drawTextBox(data.text);
     setTimeout(core.doAction, data.time || 3000);
 }
 
 events.prototype._action_scrollText = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doAsyncFunc(data.async, core.drawScrollText, data.text, data.time || 5000, data.lineHeight || 1.4);
 }
 
@@ -1216,8 +1296,12 @@ events.prototype._action_comment = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action__label = function (data, x, y, prefix) {
+    core.doAction();
+}
+
 events.prototype._action_setText = function (data, x, y, prefix) {
-    ["position", "offset", "align", "bold", "titlefont", "textfont", "time", "interval"].forEach(function (t) {
+    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "interval"].forEach(function (t) {
         if (data[t] != null) core.status.textAttribute[t] = data[t];
     });
     ["background", "title", "text"].forEach(function (t) {
@@ -1238,7 +1322,7 @@ events.prototype._action_setText = function (data, x, y, prefix) {
 }
 
 events.prototype._action_tip = function (data, x, y, prefix) {
-    core.drawTip(core.replaceText(data.text), data.icon);
+    core.drawTip(core.replaceText(data.text, prefix), data.icon);
     core.doAction();
 }
 
@@ -1258,14 +1342,12 @@ events.prototype._action_show = function (data, x, y, prefix) {
 events.prototype._action_hide = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     if (data.time > 0 && data.floorId == core.status.floorId) {
-        data.loc.forEach(function (t) {
-            core.hideBlock(t[0], t[1], data.floorId);
-        });
-        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'hide', data.time);
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, data.remove ? 'remove' : 'hide', data.time);
     }
     else {
         data.loc.forEach(function (t) {
-            core.removeBlock(t[0], t[1], data.floorId)
+            if (data.remove) core.removeBlock(t[0], t[1], data.floorId);
+            else core.hideBlock(t[0], t[1], data.floorId);
         });
         core.doAction();
     }
@@ -1273,8 +1355,22 @@ events.prototype._action_hide = function (data, x, y, prefix) {
 
 events.prototype._action_setBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.time = data.time || 0;
+    data.floorId = data.floorId || core.status.floorId;
+    if (data.time > 0 && data.floorId == core.status.floorId) {
+        this.__action_doAsyncFunc(data.async, core.animateSetBlocks, data.number, data.loc, data.floorId, data.time);
+    } else {
+        data.loc.forEach(function (loc) {
+            core.setBlock(data.number, loc[0], loc[1], data.floorId);
+        });
+        core.doAction();
+    }
+}
+
+events.prototype._action_turnBlock = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
-        core.setBlock(data.number, t[0], t[1], data.floorId);
+        core.turnBlock(data.number, t[0], t[1], data.floorId);
     });
     core.doAction();
 }
@@ -1318,7 +1414,7 @@ events.prototype._action_animate = function (data, x, y, prefix) {
         this.__action_doAsyncFunc(data.async, core.drawHeroAnimate, data.name);
     } else {
         data.loc = this.__action_getLoc(data.loc, x, y, prefix);
-        this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1]);
+        this.__action_doAsyncFunc(data.async, core.drawAnimate, data.name, data.loc[0], data.loc[1], data.alignWindow);
     }
 }
 
@@ -1340,6 +1436,27 @@ events.prototype._action_moveViewport = function (data, x, y, prefix) {
 events.prototype._action_move = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     this.__action_doAsyncFunc(data.async, core.moveBlock, loc[0], loc[1], data.steps, data.time, data.keep);
+}
+
+events.prototype._action_moveAction = function (data, x, y, prefix) {
+    // 检查下一个点是否可通行
+    if (core.canMoveHero()) {
+        var nx = core.nextX(), ny = core.nextY();
+        // 检查noPass决定是撞击还是移动
+        if (core.noPass(nx, ny)) {
+            core.insertAction([
+                {"type": "trigger", "loc": [nx, ny]}
+            ]);
+        } else {
+            // 先移动一格，然后尝试触发事件
+            core.insertAction([
+                {"type": "moveHero", "steps": ["forward"]},
+                {"type": "function", "function": "function() { core.moveOneStep(core.doAction); }", "async": true},
+                {"type": "_label"},
+            ]);
+        }
+    }
+    core.doAction();
 }
 
 events.prototype._action_moveHero = function (data, x, y, prefix) {
@@ -1371,10 +1488,16 @@ events.prototype._action_changeFloor = function (data, x, y, prefix) {
 
 events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
+    if (data.x == null && data.y == null && data.direction) {
+        core.setHeroLoc('direction', core.turnDirection(data.direction), true);
+        core.drawHero();
+        return core.doAction();
+    }
+
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     core.setHeroLoc('x', loc[0]);
     core.setHeroLoc('y', loc[1]);
-    if (data.direction) core.setHeroLoc('direction', data.direction);
+    if (data.direction) core.setHeroLoc('direction', core.turnDirection(data.direction));
     core.drawHero();
     core.doAction();
 }
@@ -1382,7 +1505,7 @@ events.prototype._action_changePos = function (data, x, y, prefix) {
 events.prototype._action_showImage = function (data, x, y, prefix) {
     if (core.isReplaying()) data.time = 0;
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, data.image, data.sloc, data.loc, data.opacity, data.time);
+        data.code, data.image + (data.reverse || ''), data.sloc, data.loc, data.opacity, data.time);
 }
 
 events.prototype._precompile_showImage = function (data) {
@@ -1394,8 +1517,12 @@ events.prototype._precompile_showImage = function (data) {
 events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
+    data.text = core.replaceText(data.text, prefix);
+    var __tmpName = (Math.random()+"_"+Math.random()).replace(/\./g, "") + ".png";
+    core.material.images.images[__tmpName] = core.ui.textImage(data.text);
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
-        data.code, core.ui.textImage(data.text), null, loc, data.opacity, data.time);
+        data.code, __tmpName + (data.reverse || ""), null, loc, data.opacity, data.time);
+    delete core.material.images.images[__tmpName];
 }
 
 events.prototype._action_hideImage = function (data, x, y, prefix) {
@@ -1419,19 +1546,15 @@ events.prototype._precompile_moveImage = function (data) {
     return data;
 }
 
-events.prototype._action_setFg = function (data, x, y, prefix) {
-    return this._action_setCurtain(data, x, y, prefix);
-}
-
 events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
         core.setCurtain(data.color, data.time);
-        core.setFlag('__color__', data.color || null);
+        if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
         core.doAction();
     }
     else {
         core.setCurtain(data.color, data.time, function () {
-            core.setFlag('__color__', data.color || null);
+            if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
             core.doAction();
         });
     }
@@ -1443,7 +1566,7 @@ events.prototype._action_screenFlash = function (data, x, y, prefix) {
 
 events.prototype._action_setWeather = function (data, x, y, prefix) {
     core.setWeather(data.name, data.level);
-    if (data.name == 'rain' || data.name == 'snow' || data.name == 'fog')
+    if ((data.name == 'rain' || data.name == 'snow' || data.name == 'fog') && data.keep)
         core.setFlag('__weather__', [data.name, data.level]);
     else core.removeFlag('__weather__');
     core.doAction();
@@ -1488,16 +1611,13 @@ events.prototype._action_unloadEquip = function (data, x, y, prefix) {
 }
 
 events.prototype._action_openShop = function (data, x, y, prefix) {
-    core.status.shops[data.id].visited = true;
-    this.setEvents([]);
-    if (!core.isReplaying())
-        this.openShop(data.id);
-    if (core.status.event.id == 'action')
-        core.doAction();
+    core.setShopVisited(data.id, true);
+    if (data.open) core.openShop(data.id, true);
+    core.doAction();
 }
 
 events.prototype._action_disableShop = function (data, x, y, prefix) {
-    this.disableQuickShop(data.id);
+    core.setShopVisited(data.id, false);
     core.doAction();
 }
 
@@ -1517,35 +1637,23 @@ events.prototype._action_battle = function (data, x, y, prefix) {
 
 events.prototype._action_trigger = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    var block = core.getBlock(loc[0], loc[1]);
-    if (block != null && block.block.event.trigger) {
-        block = block.block;
-        this.setEvents(data.keep ? null : [], block.x, block.y);
-        if (block.event.trigger == 'action')
-            this.insertAction(block.event.data);
-        else {
-            core.doSystemEvent(block.event.trigger, block, core.doAction);
-            return;
-        }
-    }
-    core.doAction();
+    this._trigger_inAction(loc[0], loc[1]);
 }
 
 events.prototype._action_insert = function (data, x, y, prefix) {
-    // 设置参数
-    if (data.args instanceof Array) {
-       for (var i = 0; i < data.args.length; ++i) {
-           try {
-               if (data.args[i] != null)
-                   core.setFlag('arg'+(i+1), data.args[i]);
-           } catch (e) { main.log(e); }
-       }
-    }
     if (data.name) { // 公共事件
-        core.setFlag('arg0', data.name);
-        core.insertAction(data.name);
+        core.insertCommonEvent(data.name, data.args);
     }
     else {
+        // 设置参数
+        if (data.args instanceof Array) {
+           for (var i = 0; i < data.args.length; ++i) {
+               try {
+                   if (data.args[i] != null)
+                       core.setFlag('arg'+(i+1), data.args[i]);
+               } catch (e) { main.log(e); }
+           }
+        }
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         core.setFlag('arg0', loc);
         var floorId = data.floorId;
@@ -1557,7 +1665,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
 }
 
 events.prototype._action_playBgm = function (data, x, y, prefix) {
-    core.playBgm(data.name);
+    core.playBgm(data.name, data.startTime || 0);
     core.setFlag("__bgm__", data.keep ? data.name : null);
     core.doAction();
 }
@@ -1568,7 +1676,7 @@ events.prototype._action_pauseBgm = function (data, x, y, prefix) {
 }
 
 events.prototype._action_resumeBgm = function (data, x, y, prefix) {
-    core.resumeBgm();
+    core.resumeBgm(data.resume);
     core.doAction();
 }
 
@@ -1600,7 +1708,7 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
-    this.setValue(data.name, data.value, prefix);
+    this.setValue(data.name, data.operator, data.value, prefix);
     if (!data.norefresh) {
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp = 0;
@@ -1611,24 +1719,11 @@ events.prototype._action_setValue = function (data, x, y, prefix) {
         }
     }
     core.doAction();
-}
-
-events.prototype._action_setValue2 = function (data, x, y, prefix) {
-    this._action_addValue(data, x, y, prefix);
 }
 
 events.prototype._action_addValue = function (data, x, y, prefix) {
-    this.addValue(data.name, data.value, prefix);
-    if (!data.norefresh) {
-        if (core.status.hero.hp <= 0) {
-            core.status.hero.hp = 0;
-            core.updateStatusBar();
-            core.events.lose();
-        } else {
-            core.updateStatusBar();
-        }
-    }
-    core.doAction();
+    data.operator = '+=';
+    this._action_setValue(data, x, y, prefix);
 }
 
 events.prototype._action_setEnemy = function (data, x, y, prefix) {
@@ -1657,12 +1752,12 @@ events.prototype._action_setGlobalFlag = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
-    this.setHeroIcon(data.name);
+    this.setHeroIcon(data.name, data.noDraw);
     core.doAction();
 }
 
 events.prototype._action_input = function (data, x, y, prefix) {
-    this.__action_getInput(data.text, false, function (value) {
+    this.__action_getInput(core.replaceText(data.text, prefix), false, function (value) {
         value = Math.abs(parseInt(value) || 0);
         core.status.route.push("input:" + value);
         core.setFlag("input", value);
@@ -1671,7 +1766,7 @@ events.prototype._action_input = function (data, x, y, prefix) {
 }
 
 events.prototype._action_input2 = function (data, x, y, prefix) {
-    this.__action_getInput(data.text, true, function (value) {
+    this.__action_getInput(core.replaceText(data.text, prefix), true, function (value) {
         value = value || "";
         core.status.route.push("input2:" + core.encodeBase64(value));
         core.setFlag("input", value);
@@ -1720,7 +1815,7 @@ events.prototype._action_switch = function (data, x, y, prefix) {
     var list = [];
     for (var i = 0; i < data.caseList.length; i++) {
         var condition = data.caseList[i]["case"];
-        if (condition == "default" || core.calValue(condition, prefix) == key) {
+        if (condition == "default" || core.calValue(condition, prefix) === key) {
             core.push(list, data.caseList[i].action);
             if (!data.caseList[i].nobreak)
                 break;
@@ -1746,23 +1841,31 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     })
     if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
-        var action = core.status.replay.toReplay.shift(), index;
+        var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
-        if (action.indexOf("choices:") == 0 && ((index = parseInt(action.substring(8))) >= 0) && index < data.choices.length) {
-            core.status.event.selection = index;
-            setTimeout(function () {
-                core.status.route.push("choices:" + index);
-                core.insertAction(data.choices[index].action);
-                core.doAction();
-            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
+        if (core.hasFlag('@temp@shop') && action.startsWith('shop:')) action = core.status.replay.toReplay.shift();
+        if (action.indexOf('choices:') == 0) {
+            var index = action.substring(8);
+            if (index == "-1") index = data.choices.length - 1;
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
+                core.status.event.selection = index;
+                setTimeout(function () {
+                    core.status.route.push("choices:"+index);
+                    if (index != 'none') {
+                        core.insertAction(data.choices[index].action);
+                    }
+                    core.doAction();
+                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+            }
         }
-        else {
-            core.control._replay_error(action);
-            return;
-        }
+    } else if (data.timeout) {
+        core.status.event.interval = setTimeout(function () {
+            core.status.route.push("choices:none");
+            core.doAction();
+        }, data.timeout);
     }
-    core.ui.drawChoices(data.text, data.choices);
+    core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices);
 }
 
 events.prototype._precompile_choices = function (data) {
@@ -1776,27 +1879,37 @@ events.prototype._precompile_choices = function (data) {
 }
 
 events.prototype._action_confirm = function (data, x, y, prefix) {
-    core.status.event.ui = {"text": data.text, "yes": data.yes, "no": data.no};
+    core.status.event.ui = {"text": core.replaceText(data.text, prefix), "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
-        var action = core.status.replay.toReplay.shift(), index;
+        var action = core.status.replay.toReplay.shift();
         // --- 忽略可能的turn事件
         if (action == 'turn') action = core.status.replay.toReplay.shift();
-        if (action.indexOf("choices:") == 0 && ((index = parseInt(action.substring(8))) >= 0) && index < 2) {
-            core.status.event.selection = index;
-            setTimeout(function () {
-                core.status.route.push("choices:" + index);
-                if (index == 0) core.insertAction(data.yes);
-                else core.insertAction(data.no);
-                core.doAction();
-            }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed))
-        }
-        else {
+        if (action.indexOf('choices:') == 0) {
+            var index = action.substring(8);
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < 2) {
+                core.status.event.selection = index;
+                setTimeout(function () {
+                    core.status.route.push("choices:"+index);
+                    if (index != 'none') {
+                        if (index == 0) core.insertAction(data.yes);
+                        else core.insertAction(data.no);
+                    }
+                    core.doAction();
+                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+            }
+        } else {
             core.control._replay_error(action);
             return;
         }
     }
     else {
         core.status.event.selection = data["default"] ? 0 : 1;
+        if (data.timeout) {
+            core.status.event.interval = setTimeout(function () {
+                core.status.route.push("choices:none");
+                core.doAction();
+            }, data.timeout);
+        }
     }
     core.ui.drawConfirmBox(data.text);
 }
@@ -1807,10 +1920,82 @@ events.prototype._precompile_confirm = function (data) {
     return data;
 }
 
+events.prototype._action_for = function (data, x, y, prefix) {
+    // Only support temp:A
+    if (!/^temp:[A-Z]$/.test(data.name)) {
+        core.insertAction('循环遍历事件只支持临时变量！');
+        return core.doAction();
+    }
+    var from = core.calValue(data.from);
+    var to = core.calValue(data.to);
+    var step = core.calValue(data.step);
+    if (typeof from != 'number' || typeof to !='number' || typeof step != 'number') {
+        core.insertAction('循环遍历事件要求【起始点】【终止点】【每步】仅能是数字！');
+        return core.doAction();
+    }
+    // 首次判定
+    if ((step > 0 && from > to) || (step < 0 && from < to)) {
+        core.doAction();
+        return;
+    }
+
+    var letter = data.name.substring(5);
+    core.setFlag('@temp@' + letter, from);
+    var toName = '@temp@for-to@' + letter;
+    var stepName = '@temp@for-step@' + letter;
+    core.setFlag(toName, data.to);
+    core.setFlag(stepName, data.step);
+    var condition = "(function () {"+
+        "var to = core.calValue(core.getFlag('" + toName + "'));"+
+        "var step = core.calValue(core.getFlag('" + stepName + "'));"+
+        "if (typeof step != 'number' || typeof to != 'number') return false;"+
+        "if (step == 0) return true;"+
+        "var currentValue = core.getFlag('@temp@" + letter + "');"+
+        "currentValue += step;"+
+        "core.setFlag('@temp@" + letter + "', currentValue);"+
+        "if (step > 0) { return currentValue <= to; }"+
+        "else { return currentValue >= to; }"+
+        "})()";
+    return this._action_dowhile({"condition": condition, "data": data.data}, x, y, prefix);
+}
+
+events.prototype._precompile_for = function (data) {
+    data.from = core.replaceValue(data.from);
+    data.to = core.replaceValue(data.to);
+    data.step = core.replaceValue(data.step);
+    data.data = this.precompile(data.data);
+    return data;
+}
+
+events.prototype._action_forEach = function (data, x, y, prefix) {
+    // Only support temp:A
+    if (!/^temp:[A-Z]$/.test(data.name)) {
+        core.insertAction(['循环遍历事件只支持临时变量！']);
+        return core.doAction();
+    }
+    var listName = '@temp@forEach@' + data.name.substring(5);
+    core.setFlag(listName, core.clone(data.list));
+    var condition = "(function () {" +
+        "var list = core.getFlag('"+listName+"', []);"+
+        "if (list.length == 0) return false;"+
+        "core.setFlag('@temp@'+'" + data.name.substring(5) + "', list.shift());"+
+        "return true;"+
+        "})()";
+    return this._action_while({"condition": condition, "data": data.data}, x, y, prefix);
+}
+
+events.prototype._precompile_forEach = function (data) {
+    data.data = this.precompile(data.data);
+    return data;
+}
+
 events.prototype._action_while = function (data, x, y, prefix) {
     if (core.calValue(data.condition, prefix)) {
+        var list = core.clone(data.data);
+        if (!(list instanceof Array)) list = [list];
+        list.push({"type": "_label"});
         core.unshift(core.status.event.data.list,
-            {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+            {"todo": list, "total": core.clone(list), "condition": data.condition}
         );
     }
     core.doAction();
@@ -1823,8 +2008,11 @@ events.prototype._precompile_while = function (data) {
 }
 
 events.prototype._action_dowhile = function (data, x, y, prefix) {
+    var list = core.clone(data.data);
+    if (!(list instanceof Array)) list = [list];
+    list.push({"type": "_label"});
     core.unshift(core.status.event.data.list,
-        {"todo": core.clone(data.data), "total": core.clone(data.data), "condition": data.condition}
+        {"todo": list, "total": core.clone(list), "condition": data.condition}
     );
     core.doAction();
 }
@@ -1836,26 +2024,29 @@ events.prototype._precompile_dowhile = function (data) {
 }
 
 events.prototype._action_break = function (data, x, y, prefix) {
-    core.status.event.data.list.shift();
+    if (core.status.event.data.list.length > 1)
+        core.status.event.data.list.shift();
     core.doAction();
 }
 
 events.prototype._action_continue = function (data, x, y, prefix) {
-    if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
-        core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
-    }
-    else {
-        core.status.event.data.list.shift();
+    if (core.status.event.data.list.length > 1) {
+        if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
+            core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
+        }
+        else {
+            core.status.event.data.list.shift();
+        }
     }
     core.doAction();
 }
 
 events.prototype._action_win = function (data, x, y, prefix) {
-    this.win(core.replaceText(data.reason), data.norank, data.noexit);
+    this.win(core.replaceText(data.reason, prefix), data.norank, data.noexit);
 }
 
 events.prototype._action_lose = function (data, x, y, prefix) {
-    this.lose(core.replaceText(data.reason));
+    this.lose(core.replaceText(data.reason, prefix));
 }
 
 events.prototype._action_restart = function (data, x, y, prefix) {
@@ -1876,7 +2067,7 @@ events.prototype._action_function = function (data, x, y, prefix) {
 }
 
 events.prototype._action_update = function (data, x, y, prefix) {
-    core.updateStatusBar();
+    core.updateStatusBar(data.doNotCheckAutoEvents);
     core.doAction();
 }
 
@@ -1891,15 +2082,25 @@ events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
 }
 
 events.prototype._action_showHero = function (data, x, y, prefix) {
-    core.removeFlag('hideHero');
-    core.drawHero();
-    core.doAction();
+    data.time = data.time || 0;
+    if (data.time > 0) {
+        this.__action_doAsyncFunc(data.async, core.triggerHero, 'show', data.time);
+    } else {
+        core.removeFlag('hideHero');
+        core.drawHero();
+        core.doAction();
+    }
 }
 
 events.prototype._action_hideHero = function (data, x, y, prefix) {
-    core.setFlag('hideHero', true);
-    core.drawHero();
-    core.doAction();
+    data.time = data.time || 0;
+    if (data.time > 0) {
+        this.__action_doAsyncFunc(data.async, core.triggerHero, 'hide', data.time);
+    } else {
+        core.setFlag('hideHero', true);
+        core.drawHero();
+        core.doAction();
+    }
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {
@@ -1917,10 +2118,15 @@ events.prototype._action_wait = function (data, x, y, prefix) {
     if (core.isReplaying()) {
         var code = core.status.replay.toReplay.shift();
         if (code.indexOf("input:") == 0) {
-            var value = parseInt(code.substring(6));
-            core.status.route.push("input:" + value);
-            this.__action_wait_getValue(value);
-            this.__action_wait_afterGet(data);
+            if (code == "input:none") {
+                core.status.route.push("input:none");
+                core.removeFlag("type");
+            } else {
+                var value = parseInt(code.substring(6));
+                core.status.route.push("input:" + value);
+                this.__action_wait_getValue(value);
+                this.__action_wait_afterGet(data);
+            }
         }
         else {
             main.log("录像文件出错！当前需要一个 input: 项，实际为 " + code);
@@ -1929,6 +2135,12 @@ events.prototype._action_wait = function (data, x, y, prefix) {
         }
         core.doAction();
         return;
+    } else if (data.timeout) {
+        core.status.event.interval = setTimeout(function() {
+            core.status.route.push("input:none");
+            core.setFlag("type", -1);
+            core.doAction();
+        }, data.timeout);
     }
 }
 
@@ -1960,9 +2172,11 @@ events.prototype.__action_wait_afterGet = function (data) {
     var todo = [];
     data.data.forEach(function (one) {
         if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
-            if (one["keycode"] == core.getFlag("keycode", 0)) {
-                core.push(todo, one.action);
-            }
+            (one.keycode + "").split(",").forEach(function (keycode) {
+                if (core.getFlag("keycode", 0) == keycode) {
+                    core.push(todo, one.action);
+                }
+            });
         }
         if (one["case"] == "mouse" && one.px instanceof Array
             && one.py instanceof Array && core.getFlag("type") == 1) {
@@ -1998,13 +2212,6 @@ events.prototype._action_waitAsync = function (data, x, y, prefix) {
             core.doAction();
         }
     }, 50);
-}
-
-events.prototype._action_revisit = function (data, x, y, prefix) {
-    var block = core.getBlock(x, y);
-    if (block != null && block.block.event.trigger == 'action')
-        this.setEvents(block.block.event.data);
-    core.doAction();
 }
 
 events.prototype._action_callBook = function (data, x, y, prefix) {
@@ -2086,10 +2293,12 @@ events.prototype._action_clearMap = function (data, x, y, prefix) {
 }
 
 events.prototype._action_fillText = function (data, x, y, prefix) {
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doUIEvent(data);
 }
 
 events.prototype._action_fillBoldText = function (data, x, y, prefix) {
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doUIEvent(data);
 }
 
@@ -2119,11 +2328,19 @@ events.prototype._precompile_strokePolygon = function (data) {
     return data;
 }
 
-events.prototype._action_fillCircle = function (data, x, y, prefix) {
+events.prototype._action_fillEllipse = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
-events.prototype._action_strokeCircle = function (data, x, y, prefix) {
+events.prototype._action_strokeEllipse = function (data, x, y, prefix) {
+    this.__action_doUIEvent(data);
+}
+
+events.prototype._action_fillArc = function (data, x, y, prefix) {
+    this.__action_doUIEvent(data);
+}
+
+events.prototype._action_strokeArc = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
@@ -2156,6 +2373,7 @@ events.prototype._action_drawBackground = function (data, x, y, prefix) {
 }
 
 events.prototype._action_drawTextContent = function (data, x, y, prefix) {
+    data.text = core.replaceText(data.text, prefix);
     this.__action_doUIEvent(data);
 }
 
@@ -2207,15 +2425,15 @@ events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
-        core.drawTip("只有在楼梯边才能使用传送器");
-        core.unLockControl();
+        core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name);
+        core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
     if (!core.canUseItem('fly')) {
-        core.drawTip("楼层传送器好像失效了");
-        core.unLockControl();
+        core.drawTip(core.material.items['fly'].name + "好像失效了");
+        core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
@@ -2254,13 +2472,17 @@ events.prototype.openQuickShop = function (fromUserAction) {
     // --- 如果只有一个商店，则直接打开之
     if (Object.keys(core.status.shops).length == 1) {
         var shopId = Object.keys(core.status.shops)[0];
-        if (core.status.event.id != null || !this._checkStatus('shop', false)) return;
-        var reason = core.events.canUseQuickShop(shopId);
-        if (!core.flags.enableDisabledShop && reason) {
-            core.drawText(reason);
+        if (core.status.event.id != null) return;
+        if (!core.canOpenShop(shopId)) {
+            core.drawTip("当前无法打开快捷商店！");
             return;
         }
-        core.events.openShop(shopId, true);
+        var message = core.canUseQuickShop(shopId);
+        if (message != null) {
+            core.drawTip(message);
+            return;
+        }
+        core.openShop(shopId, false);
         return;
     }
 
@@ -2322,7 +2544,6 @@ events.prototype.hasAsync = function () {
 
 ////// 跟随 //////
 events.prototype.follow = function (name) {
-    core.status.hero.followers = core.status.hero.followers || [];
     name = core.getMappedName(name);
     if (core.material.images.images[name]) {
         core.status.hero.followers.push({"name": name});
@@ -2334,7 +2555,6 @@ events.prototype.follow = function (name) {
 
 ////// 取消跟随 //////
 events.prototype.unfollow = function (name) {
-    core.status.hero.followers = core.status.hero.followers || [];
     if (!name) {
         core.status.hero.followers = [];
     }
@@ -2353,13 +2573,24 @@ events.prototype.unfollow = function (name) {
 }
 
 ////// 数值操作 //////
-events.prototype.setValue = function (name, value, prefix, add) {
-    var value = core.calValue(value, prefix);
-    if (add) value += core.calValue(name, prefix);
+events.prototype.setValue = function (name, operator, value, prefix) {
+    value = core.calValue(value, prefix);
+    var originValue = core.calValue(name, prefix);
+    switch (operator) {
+        case '+=': value = originValue + value; break;
+        case '-=': value = originValue - value; break;
+        case '*=': value = originValue * value; break;
+        case '/=': value = originValue / value; break;
+        case '**=': value = Math.pow(originValue, value); break;
+        case '//=': value = Math.trunc(originValue / value); break;
+        case '%=': value = originValue % value; break;
+        default: break;
+    }
     this._setValue_setStatus(name, value);
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
+    this._setValue_setTemp(name, value, prefix);
     this._setValue_setGlobal(name, value);
 }
 
@@ -2385,24 +2616,14 @@ events.prototype._setValue_setSwitch = function (name, value, prefix) {
     core.setFlag((prefix || ":f@x@y") + "@" + name.substring(7), value);
 }
 
+events.prototype._setValue_setTemp = function (name, value) {
+    if (name.indexOf("temp:") !== 0) return;
+    core.setFlag("@temp@" + name.substring(5), value);
+}
+
 events.prototype._setValue_setGlobal = function (name, value) {
     if (name.indexOf("global:") !== 0) return;
     core.setGlobal(name.substring(7), value);
-}
-
-////// 数值增减 //////
-events.prototype.addValue = function (name, value, prefix) {
-    this.setValue(name, value, prefix, true);
-}
-
-////// 执行一个表达式的effect操作 //////
-events.prototype.doEffect = function (effect, need, times) {
-    effect.split(";").forEach(function (expression) {
-        var arr = expression.split("+=");
-        if (arr.length != 2) return;
-        var name=arr[0], value=core.calValue(arr[1], null, need, times);
-        core.addValue(name, value);
-    });
 }
 
 ////// 设置一个怪物属性 //////
@@ -2421,7 +2642,7 @@ events.prototype.setEnemy = function (id, name, value, prefix) {
 ////// 设置楼层属性 //////
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
     floorId = floorId || core.status.floorId;
-    core.status.maps[floorId][name] = core.calValue(value, prefix);
+    core.status.maps[floorId][name] = value;
     core.updateStatusBar();
 }
 
@@ -2434,17 +2655,28 @@ events.prototype.setGlobalAttribute = function (name, value) {
         // --- 检查 []
         if (value.charAt(0) == '[' && value.charAt(value.length - 1) == ']')
             value = eval(value);
+        // --- 检查颜色
+        if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)) {
+            value = 'rgba(' + value + ')';
+        }
     }
     core.status.globalAttribute[name] = value;
-    core.updateGlobalAttribute(name);
     core.setFlag('globalAttribute', core.status.globalAttribute);
+    core.resize();
 }
 
 ////// 设置全局开关 //////
 events.prototype.setGlobalFlag = function (name, value) {
     var flags = core.getFlag("globalFlags", {});
-    flags[name] = value;
-    core.flags[name] = value;
+    if (name.startsWith('s:')) {
+        name = name.substring(2);
+        var statusBarItems = core.flags.statusBarItems.filter(function (v) {return v!=name;});
+        if (value) statusBarItems.push(name);
+        core.flags.statusBarItems = statusBarItems;
+        flags.statusBarItems = core.clone(statusBarItems);
+    } else {
+        flags[name] = core.flags.name = value;
+    }
     core.setFlag("globalFlags", flags);
     core.resize();
     if (name == 'blurFg')
@@ -2453,33 +2685,48 @@ events.prototype.setGlobalFlag = function (name, value) {
 
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
-    if (!(id.endsWith("Door") || id.endsWith("Wall"))
-        || core.material.icons.animates[id] == null || core.getBlock(x, y) != null) {
+    if ((core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null)
+         || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }
+    var doorInfo = (core.getBlockById(id).event || {}).doorInfo;
+    if (doorInfo == null) {
+        if (callback) callback();
+        return;
+    }
+
     // 关门动画
-    core.playSound('door.mp3');
-    var door = core.material.icons.animates[id];
-    var speed = id.endsWith("Door") ? 30 : 70, state = 0;
+    core.playSound(doorInfo.closeSound);
+    var blockInfo = core.getBlockInfo(id);
+    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
+
+    var speed = (doorInfo.time || 160) / 4, state = 0;
     var animate = window.setInterval(function () {
         state++;
         if (state == 4) {
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
-            core.setBlock(core.getNumberById(id), x, y);
+            core.setBlock(id, x, y);
             if (callback) callback();
             return;
         }
         core.clearMap('event', 32 * x, 32 * y, 32, 32);
-        core.drawImage('event', core.material.images.animates, 32 * (4-state), 32 * door, 32, 32, 32 * x, 32 * y, 32, 32);
+        core.drawImage('event', image, 32 * (4-state), posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        if (height > 32)
+        core.drawImage('event2', image, 32 * (4-state), posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 显示图片 //////
 events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time, callback) {
+    var imageName = null;
     if (typeof image == 'string') {
+        imageName = image;
+        if (image.endsWith(':x') || image.endsWith(':y') || image.endsWith(':o')) {
+            image = image.substring(0, image.length - 2);
+        }
         image = core.getMappedName(image);
         image = core.material.images.images[image];
     }
@@ -2501,7 +2748,7 @@ events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time,
     time = time || 0;
     var name = "image" + zIndex;
     var ctx = core.createCanvas(name, x, y, w, h, zIndex);
-    ctx.drawImage(image, sx, sy, sw, sh, 0, 0, w, h);
+    core.drawImage(ctx, imageName == null ? image : imageName, sx, sy, sw, sh, 0, 0, w, h);
     if (time == 0) {
         core.setOpacity(name, opacityVal);
         if (callback) callback();
@@ -2668,14 +2915,16 @@ events.prototype._vibrate_update = function (shakeInfo) {
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 events.prototype.eventMoveHero = function(steps, time, callback) {
-    time = time || core.values.moveSpeed || 100;
+    time = time || core.values.moveSpeed;
     var step = 0, moveSteps = (steps||[]).filter(function (t) {
         return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
     });
+    core.status.heroMoving = -1;
     var animate=window.setInterval(function() {
         if (moveSteps.length==0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
+            core.status.heroMoving = 0;
             core.drawHero();
             if (callback) callback();
         }
@@ -2718,7 +2967,6 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
     if (!core.isset(ex)) ex=sx;
     if (!core.isset(ey)) ey=sy;
-    core.playSound('jump.mp3');
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];
     jumpInfo.width = core.material.icons.hero.width || 32;
@@ -2728,6 +2976,7 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
 }
 
 events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
+    core.status.heroMoving = -1;
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0)
             core.events._jumpHero_jumping(jumpInfo)
@@ -2756,96 +3005,21 @@ events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
     clearInterval(animate);
     core.setHeroLoc('x', ex);
     core.setHeroLoc('y', ey);
+    core.status.heroMoving = 0;
     core.drawHero();
     if (callback) callback();
-}
-
-////// 打开一个全局商店 //////
-events.prototype.openShop = function (shopId, needVisited) {
-    var shop = core.status.shops[shopId];
-    shop.times = shop.times || 0;
-    if (shop.commonTimes) shop.times = core.getFlag('commonTimes', 0);
-    if (needVisited && !shop.visited) {
-        if (!core.flags.enableDisabledShop || shop.commonEvent || shop.item) {
-            if (shop.times == 0) core.drawTip("该项尚未开启");
-            else core.drawTip("该项已失效");
-            core.ui.closePanel();
-            return;
-        }
-        else {
-            core.drawTip("该商店尚未开启，只能浏览不可使用");
-        }
-    }
-    else shop.visited = true;
-
-    if (shop.item) {
-        core.status.route.push("shop:" + shopId + ":0");
-        if (core.openItemShop) {
-            core.openItemShop(shopId);
-        } else {
-            core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
-        }
-        return;
-    } else if (shop.commonEvent) {
-        core.status.route.push("shop:"+shopId+":0");
-        core.insertAction({"type": "insert", "name": shop.commonEvent, "args": shop.args});
-        return;
-    }
-    core.ui.drawShop(shopId);
-}
-
-events.prototype._useShop = function (shop, index) {
-    var reason = core.events.canUseQuickShop(shop.id);
-    if (!reason && !shop.visited) reason = shop.times ? "该商店已失效" : "该商店尚未开启";
-    if (reason) {
-        core.drawTip(reason);
-        return false;
-    }
-    var use = shop.use, choice = shop.choices[index];
-    var times = shop.times, need = core.calValue(choice.need || shop.need, null, null, times);
-    if (need > core.getStatus(use)) {
-        core.drawTip("你的" + (use == 'money' ? "金币" : "经验") + "不足");
-        return false;
-    }
-    core.status.event.selection = index;
-    core.status.event.data.actions.push(index);
-    core.setStatus(use, core.getStatus(use) - need);
-    core.doEffect(choice.effect, need, times);
-    core.updateStatusBar();
-    shop.times++;
-    if (shop.commonTimes) core.setFlag('commonTimes', shop.times);
-    this.openShop(shop.id);
-    return true;
-}
-
-events.prototype._exitShop = function () {
-    if (core.status.event.data.actions.length > 0) {
-        core.status.route.push("shop:" + core.status.event.data.id + ":" + core.status.event.data.actions.join(""));
-    }
-    core.status.event.data.actions = [];
-    core.status.boxAnimateObjs = [];
-    if (core.status.event.data.fromList)
-        core.ui.drawQuickShop();
-    else
-        core.ui.closePanel();
-}
-
-////// 禁用一个全局商店 //////
-events.prototype.disableQuickShop = function (shopId) {
-    core.status.shops[shopId].visited = false;
-}
-
-////// 能否使用快捷商店 //////
-events.prototype.canUseQuickShop = function (shopId) {
-    return this.eventdata.canUseQuickShop(shopId);
 }
 
 ////// 设置角色行走图 //////
 events.prototype.setHeroIcon = function (name, noDraw) {
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
-    if (!img) return;
-    core.setFlag("heroIcon", name);
+    if (!img) {
+        console.error("找不到图片: "+img);
+        return;
+    }
+    if (core.material.images.hero == img) return;
+    core.status.hero.image = name;
     core.material.images.hero = img;
     core.material.icons.hero.width = img.width / 4;
     core.material.icons.hero.height = img.height / 4;
@@ -2865,16 +3039,16 @@ events.prototype.checkLvUp = function () {
 }
 
 events.prototype._checkLvUp_check = function () {
-    if (!core.flags.enableLevelUp || !core.firstData.levelUp
+    if (core.flags.statusBarItems.indexOf('enableLevelUp')<0 || !core.firstData.levelUp
         || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});
     var need = core.calValue(next.need);
     if (need == null) return null;
-    if (core.status.hero.experience >= need) {
+    if (core.status.hero.exp >= need) {
         // 升级
         core.status.hero.lv++;
-        if (next.clear) core.status.hero.experience -= need;
+        if (next.clear) core.status.hero.exp -= need;
         return next.action || [];
     }
     return null;
@@ -2890,36 +3064,4 @@ events.prototype.tryUseItem = function (itemId) {
 
     if (core.canUseItem(itemId)) core.useItem(itemId);
     else core.drawTip("当前无法使用" + core.material.items[itemId].name);
-}
-
-////// 使用炸弹/圣锤后的事件 //////
-events.prototype.afterUseBomb = function () {
-    return this.eventdata.afterUseBomb();
-}
-
-////// 上传当前数据 //////
-events.prototype._uploadCurrent = function (username) {
-    var formData = new FormData();
-
-    formData.append('type', 'score');
-    formData.append('name', core.firstData.name);
-    formData.append('version', core.firstData.version);
-    formData.append('platform', core.platform.string);
-    formData.append('hard', core.encodeBase64(core.status.hard));
-    formData.append('username', core.encodeBase64(username || "current"));
-    formData.append('lv', core.status.hero.lv);
-    formData.append('hp', Math.min(core.status.hero.hp, Math.pow(2, 63)));
-    formData.append('atk', core.status.hero.atk);
-    formData.append('def', core.status.hero.def);
-    formData.append('mdef', core.status.hero.mdef);
-    formData.append('money', core.status.hero.money);
-    formData.append('experience', core.status.hero.experience);
-    formData.append('steps', core.status.hero.steps);
-    formData.append('seed', core.getFlag('__seed__'));
-    formData.append('totalTime', Math.floor(core.status.hero.statistics.totalTime / 1000));
-    formData.append('route', core.encodeRoute(core.status.route));
-    formData.append('deler', 'current');
-    formData.append('base64', 1);
-
-    core.http("POST", "/games/upload.php", formData);
 }

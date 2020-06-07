@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /**
  * 初始化 start
  */
@@ -45,12 +47,7 @@ function core() {
             'data': null,
             'fog': null,
         },
-        "tips": {
-            'time': 0,
-            'offset': 0,
-            'list': [],
-            'lastSize': 0,
-        },
+        "tip": null,
         "asyncId": {}
     }
     this.musicStatus = {
@@ -58,6 +55,7 @@ function core() {
         'bgmStatus': false, // 是否播放BGM
         'soundStatus': true, // 是否播放SE
         'playingBgm': null, // 正在播放的BGM
+        'pauseTime': 0, // 上次暂停的时间
         'lastBgm': null, // 上次播放的bgm
         'gainNode': null,
         'playingSounds': {}, // 正在播放的SE
@@ -86,6 +84,7 @@ function core() {
     // 样式
     this.domStyle = {
         scale: 1.0,
+        availableScale: [],
         isVertical: false,
         showStatusBar: true,
         toolbarBtn: false,
@@ -98,7 +97,6 @@ function core() {
         height: this.__SIZE__,
         tempCanvas: null, // A temp canvas for drawing
     }
-    this.paint = {};
     this.saves = {
         "saveIndex": null,
         "ids": {},
@@ -107,7 +105,8 @@ function core() {
             "time": 0,
             "updated": false,
             "storage": true, // 是否把自动存档写入文件a
-            "max": 10, // 自动存档最大回退数
+            "max": 20, // 自动存档最大回退数
+            "now": 0,
         },
         "favorite": [],
         "favoriteName": {}
@@ -192,15 +191,13 @@ function core() {
         },
         "globalAttribute": {
             'equipName': main.equipName || [],
-            "statusLeftBackground": main.statusLeftBackground || "url(project/images/ground.png) repeat",
-            "statusTopBackground": main.statusTopBackground || "url(project/images/ground.png) repeat",
-            "toolsBackground": main.toolsBackground || "url(project/images/ground.png) repeat",
-            "borderColor": main.borderColor || "white",
-            "statusBarColor": main.statusBarColor || "white",
-            "hardLabelColor": main.hardLabelColor || "red",
-            "floorChangingBackground": main.floorChangingBackground || "black",
-            "floorChangingTextColor": main.floorChangingTextColor || "white",
-            "font": main.font || "Verdana"
+            "statusLeftBackground": main.styles.statusLeftBackground || "url(project/materials/ground.png) repeat",
+            "statusTopBackground": main.styles.statusTopBackground || "url(project/materials/ground.png) repeat",
+            "toolsBackground": main.styles.toolsBackground || "url(project/materials/ground.png) repeat",
+            "borderColor": main.styles.borderColor || [204,204,204,1],
+            "statusBarColor": main.styles.statusBarColor || [255,255,255,1],
+            "floorChangingStyle": main.styles.floorChangingStyle || "background-color: black; color: white",
+            "font": main.styles.font || "Verdana"
         },
         'curtainColor': null,
         'openingDoor': null,
@@ -229,11 +226,18 @@ core.prototype.init = function (coreData, callback) {
     this._init_others();
     this._initPlugins();
 
+    // 初始化画布
+    for (var name in core.canvas) {
+        core.canvas[name].canvas.width = core.canvas[name].canvas.height = core.__PIXELS__;
+    }
+
     core.loader._load(function () {
         core.extensions._load(function () {
             core._afterLoadResources(callback);
         });
-    });
+    });    
+    core.dom.musicBtn.style.display = 'block';
+    core.setMusicBtn();
 }
 
 core.prototype._init_flags = function () {
@@ -241,6 +245,12 @@ core.prototype._init_flags = function () {
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
+    
+    // 让你总是拼错！
+    window.on = true;
+    window.off = false;
+    window.ture = true;
+    window.flase = false;
 
     core.dom.versionLabel.innerText = core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;
@@ -279,19 +289,23 @@ core.prototype._init_flags = function () {
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();
-    core.items._resetItems();
     core.material.icons = core.icons.getIcons();
 }
 
 core.prototype._init_sys_flags = function () {
-    if (!core.flags.enableExperience) core.flags.enableLevelUp = false;
-    if (!core.flags.enableLevelUp) core.flags.levelUpLeftMode = false;
     if (core.flags.equipboxButton) core.flags.equipment = true;
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
     // 行走速度
-    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed);
+    core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
+    core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', 500);
+    if (main.mode != 'editor') {
+        core.domStyle.scale = core.getLocalStorage('scale', 1);
+        if (core.domStyle.scale != 1) {
+            core.resize();
+        }
+    }
 }
 
 core.prototype._init_platform = function () {
@@ -374,8 +388,8 @@ core.prototype._init_others = function () {
     core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
-    core.loadImage('fog', function (name, img) { core.animateFrame.weather.fog = img; });
-    core.loadImage('keyboard', function (name, img) {core.material.images.keyboard = img; });
+    core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
+    core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
     core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });

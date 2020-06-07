@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 utils.js 工具类
 
@@ -60,9 +62,10 @@ utils.prototype._init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text, need, times) {
+utils.prototype.replaceText = function (text, prefix) {
+    if (typeof text != 'string') return text;
     return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value, null, need, times);
+        return core.calValue(value, prefix);
     });
 }
 
@@ -79,19 +82,21 @@ utils.prototype.replaceValue = function (value) {
         if (value.indexOf('global:') >= 0)
             value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
         if (value.indexOf('enemy:')>=0)
-            value = value.replace(/enemy:([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
+            value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
             value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
         if (value.indexOf('blockCls:')>=0)
             value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
         if (value.indexOf('equip:')>=0)
             value = value.replace(/equip:(\d)/g, "core.getEquip($1)");
+        if (value.indexOf('temp:')>=0)
+            value = value.replace(/temp:([a-zA-Z0-9_]+)/g, "core.getFlag('@temp@$1', 0)");
     }
     return value;
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value, prefix, need, times) {
+utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
         if (value.indexOf(':') >= 0) {
@@ -347,13 +352,13 @@ utils.prototype.splitImage = function (image, width, height) {
     width = width || 32;
     height = height || width;
     var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
     var ans = [];
     for (var j = 0; j < image.height; j += height) {
         for (var i = 0; i < image.width; i += width) {
             var w = Math.min(width, image.width - i), h = Math.min(height, image.height - j);
             canvas.width = w; canvas.height = h;
-            context.drawImage(image, i, j, w, h, 0, 0, w, h);
+            core.drawImage(ctx, image, i, j, w, h, 0, 0, w, h);
             var img = new Image();
             img.src = canvas.toDataURL("image/png");
             ans.push(img);
@@ -387,9 +392,16 @@ utils.prototype.setTwoDigits = function (x) {
     return parseInt(x) < 10 ? "0" + x : x;
 }
 
+utils.prototype.formatSize = function (size) {
+    if (size < 1024) return size + 'B';
+    else if (size < 1024 * 1024) return (size/1024).toFixed(2) + "KB";
+    else return (size/1024/1024).toFixed(2) + "MB";
+}
+
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
     if (!core.isset(x)) return '???';
+    if (x > 1e24 || x < -1e24) return x.toExponential(2);
 
     var c = x < 0 ? "-" : "";
     x = Math.abs(x);
@@ -425,12 +437,14 @@ utils.prototype.formatBigNumber = function (x, onMap) {
 
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
+    if (!(color instanceof Array)) return color;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255);
     return "#" + ((1 << 24) + (nowR << 16) + (nowG << 8) + nowB).toString(16).slice(1);
 }
 
 utils.prototype.arrayToRGBA = function (color) {
+    if (!(color instanceof Array)) return color;
     if (color[3] == null) color[3] = 1;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255), nowA = this.clamp(parseFloat(color[3]), 0, 1);
@@ -484,7 +498,7 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
     else if (t.indexOf('choices:') == 0)
         return "C" + t.substring(8);
     else if (t.indexOf('shop:') == 0)
-        return "S" + t.substring(5);
+        return "S" + t.substring(5) + ":";
     else if (t == 'turn')
         return 'T';
     else if (t.indexOf('turn:') == 0)
@@ -591,7 +605,20 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             decodeObj.ans.push("choices:" + nxt);
             break;
         case "S":
-            decodeObj.ans.push("shop:" + nxt + ":" + this._decodeRoute_getNumber(decodeObj, true));
+            decodeObj.ans.push("shop:" + nxt);
+            // V266->V2.7商店录像兼容性
+            if (core.initStatus.shops[nxt]) {
+                if (!isNaN(decodeObj.route.charAt(decodeObj.index))) {
+                    var selections = this._decodeRoute_getNumber(decodeObj, true);
+                    // 只接普通商店
+                    if (!core.initStatus.shops[nxt].item && !core.initStatus.shops[nxt].commonEvent) {
+                        decodeObj.ans = decodeObj.ans.concat(selections.split("").map(function (one) {
+                            return 'choices:' + one;
+                        }));
+                        decodeObj.ans.push("choices:-1");
+                    }   
+                }
+            }
             break;
         case "T":
             decodeObj.ans.push("turn");
@@ -686,15 +713,39 @@ utils.prototype.strlen = function (str) {
     return count;
 };
 
-utils.prototype.reverseDirection = function (direction) {
+utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
-    return {"left":"right","right":"left","down":"up","up":"down"}[direction] || direction;
+    var directionList = ["left", "up", "right", "down"];
+    if (directionList.indexOf(turn) >= 0) return turn;
+    switch (turn) {
+        case ':left': turn = 3; break; // turn left
+        case ':right': turn = 1; break; // turn right
+        case ':back': turn = 2; break; // turn back
+        default: turn = 0; break;
+    }
+    var index = directionList.indexOf(direction);
+    if (index < 0) return direction;
+    return directionList[(index + (turn || 0)) % 4];
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {
-    return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
-        return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-    }).join('.*') + '$').test(string);
+    try {
+        return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
+            return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+        }).join('.*') + '$').test(string);
+    } catch (e) {
+        return false;
+    }
+}
+
+utils.prototype.matchRegex = function (pattern, string) {
+    try {
+        if (pattern.startsWith("^")) pattern = pattern.substring(1);
+        if (pattern.endsWith("$")) pattern = pattern.substring(0, pattern.length - 1);
+        return new RegExp("^" + pattern + "$").test(string);
+    } catch (e) {
+        return false;
+    }
 }
 
 ////// Base64加密 //////
@@ -709,26 +760,6 @@ utils.prototype.decodeBase64 = function (str) {
     return decodeURIComponent(atob(str).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
-}
-
-////// 任意进制转换 //////
-utils.prototype.convertBase = function (str, fromBase, toBase) {
-    var map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={}[]\\|:;<>,.?/";
-    if (fromBase == toBase) return str;
-    var len = str.length, ans = "";
-    var t = [];
-    for (var i = 0; i < len; i++) t[i] = map.indexOf(str.charAt(i));
-    t[len] = 0;
-    while (len > 0) {
-        for (var i = len; i >= 1; i--) {
-            t[i - 1] += t[i] % toBase * fromBase;
-            t[i] = parseInt(t[i] / toBase);
-        }
-        ans += map.charAt(t[0] % toBase);
-        t[0] = parseInt(t[0] / toBase);
-        while (len > 0 && t[len - 1] == 0) len--;
-    }
-    return ans;
 }
 
 utils.prototype.rand = function (num) {
@@ -1073,31 +1104,6 @@ utils.prototype._decodeCanvas = function (arr, width, height) {
     tempCanvas.putImageData(imgData, 0, 0);
 }
 
-utils.prototype.consoleOpened = function () {
-    if (!core.flags.checkConsole) return false;
-    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
-        return true;
-    if (!core.platform.isPC) return false;
-    var threshold = 160;
-    var zoom = Math.min(window.outerWidth / window.innerWidth, window.outerHeight / window.innerHeight);
-    return window.outerWidth - zoom * window.innerWidth > threshold
-        || window.outerHeight - zoom * window.innerHeight > threshold;
-}
-
-utils.prototype.hashCode = function (obj) {
-    if (typeof obj == 'string') {
-        var hash = 0, i, chr;
-        if (obj.length === 0) return hash;
-        for (i = 0; i < obj.length; i++) {
-            chr = obj.charCodeAt(i);
-            hash = ((hash << 5) - hash) + chr;
-            hash |= 0;
-        }
-        return hash;
-    }
-    return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
-}
-
 utils.prototype.same = function (a, b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;
@@ -1121,51 +1127,6 @@ utils.prototype.same = function (a, b) {
     return false;
 }
 
-utils.prototype._export = function (floorIds) {
-    if (!floorIds) floorIds = [core.status.floorId];
-    else if (floorIds == 'all') floorIds = core.clone(core.floorIds);
-    else if (typeof floorIds == 'string') floorIds = [floorIds];
-
-    var monsterMap = {};
-
-    // map
-    var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
-    floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
-        content += arr.map(function (x) {
-            // check monster
-            x.forEach(function (t) {
-                var block = core.maps.getBlockByNumber(t);
-                if (block.event.cls.indexOf("enemy") == 0) {
-                    monsterMap[t] = block.event.id;
-                }
-            })
-            return x.join("\t");
-        }).join("\n") + "\n\n";
-    })
-
-    // values
-    content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
-        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x] || 0;
-    }).join(" ") + "\n\n";
-
-    // monster
-    content += Object.keys(monsterMap).length + "\n";
-    for (var t in monsterMap) {
-        var id = monsterMap[t], monster = core.material.enemys[id];
-        content += t + " " + monster.hp + " " + monster.atk + " " +
-            monster.def + " " + monster.money + " " + monster.special + "\n";
-    }
-    content += "\n0 0 0 0 0 0\n\n";
-    content += core.status.hero.hp + " " + core.status.hero.atk + " "
-        + core.status.hero.def + " " + core.status.hero.mdef + " " + core.status.hero.money + " "
-        + core.itemCount('yellowKey') + " " + core.itemCount("blueKey") + " " + core.itemCount("redKey") + " 0 "
-        + core.status.hero.loc.x + " " + core.status.hero.loc.y + "\n";
-
-    console.log(content);
-}
-
 utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
     var _error = function (msg) {
         main.log(msg);
@@ -1179,7 +1140,7 @@ utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onpr
     if (typeof blobOrUrl == 'string') {
         return core.http('GET', blobOrUrl, null, function (data) {
             core.unzip(data, success, error, convertToText);
-        }, _error, 'application/zip', 'blob', onprogress);
+        }, _error, null, 'blob', onprogress);
     }
 
     if (!(blobOrUrl instanceof Blob)) {
@@ -1229,7 +1190,7 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     };
     xhr.onprogress = function (e) {
         if (e.lengthComputable) {
-            if (onprogress) onprogress(e.loaded / e.total);
+            if (onprogress) onprogress(e.loaded, e.total);
         }
     }
     xhr.onabort = function () {
@@ -1244,12 +1205,6 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
     if (formData)
         xhr.send(formData);
     else xhr.send();
-}
-
-utils.prototype.httpAndZip = function (url, success, error) {
-    this.http('GET', url, null, function (data) {
-
-    }, error, null, 'blob');
 }
 
 // LZW-compress

@@ -8,29 +8,56 @@ editor_table_wrapper = function (editor) {
     // HTML模板
 
     editor_table.prototype.select = function (value, values) {
-        let content = editor.table.option(value) +
-            values.map(function (v) {
-                return editor.table.option(v)
+        if (values.indexOf(value) < 0) values = [value].concat(values);
+        var content = values.map(function (v) {
+                return editor.table.option(v, v == value)
             }).join('')
         return /* html */`<select>\n${content}</select>\n`
     }
-    editor_table.prototype.option = function (value) {
-        return /* html */`<option value='${JSON.stringify(value)}'>${JSON.stringify(value)}</option>\n`
+    editor_table.prototype.option = function (value, selected) {
+        return /* html */`<option value='${JSON.stringify(value)}' ${selected ? 'selected' : ''}>${JSON.stringify(value)}</option>\n`
     }
     editor_table.prototype.text = function (value) {
         return /* html */`<input type='text' spellcheck='false' value='${JSON.stringify(value)}'/>\n`
     }
     editor_table.prototype.checkbox = function (value) {
-        return /* html */`<input type='checkbox' ${(value ? 'checked ' : '')}/>\n`
+        return /* html */`<input type='checkbox' class='checkbox' ${(value ? 'checked ' : '')}/>\n`
     }
-    editor_table.prototype.textarea = function (value, indent) {
-        return /* html */`<textarea spellcheck='false'>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
+    editor_table.prototype.textarea = function (value, indent, disable) {
+        return /* html */`<textarea spellcheck='false' ${disable ? 'disabled readonly' : ''}>${JSON.stringify(value, null, indent || 0)}</textarea>\n`
     }
-    editor_table.prototype.editGrid = function (showComment) {
-        var html = "";
-        if (showComment) html += "<button onclick='editor.table.onCommentBtnClick(this)'>显示完整注释</button><br/>";
-        html += "<button onclick='editor.table.onEditBtnClick(this)'>编辑表格内容</button>";
-        return html;
+    editor_table.prototype.checkboxSet = function (value, keys, prefixStrings) {
+        if (value == null) value = [];
+        if (!(value instanceof Array)) {
+            if (value == 0) value = [];
+            else value = [value];
+        }
+        keys=Array.from(keys)
+        prefixStrings=Array.from(prefixStrings)
+        for (var index = 0; index < value.length; index++) {
+            if (keys.indexOf(value[index])==-1) {
+                keys.push(value[index])
+                prefixStrings.push('<br>'+value[index]+': ')
+            }
+        }
+        var content=[]
+        for (var index = 0; index < keys.length; index++) {
+            content.push(editor.table.checkboxSetMember(value.indexOf(keys[index])!=-1,keys[index],prefixStrings[index]))
+        }
+        return /* html */`<div class='checkboxSet'>${content.join('')}</div>\n`;
+    }
+    editor_table.prototype.checkboxSetMember = function (value,key,prefixString) {
+        return /* html */`${prefixString}<input key='${key}' ctype='${typeof key}' type='checkbox' class='checkboxSetMember' onchange='editor.table.checkboxSetMemberOnchange(this)' ${(value ? 'checked ' : '')}/>\n`;
+    }
+    editor_table.prototype.editGrid = function (showComment, type) {
+        var list = [];
+        if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
+        if (type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'popCheckboxSet' && type != 'disable')
+            list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>编辑</button>");
+        if (type == 'popCheckboxSet')
+        list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>多选框编辑</button>");
+        if (type == 'disable') list.push("<button onclick='editor.table.onCopyBtnClick(this)'>复制</button>");
+        return list.join(' ');
     }
 
     editor_table.prototype.title = function () {
@@ -38,16 +65,51 @@ editor_table_wrapper = function (editor) {
     }
 
     editor_table.prototype.gap = function (field) {
-        return /* html */`<tr><td>----</td><td>----</td><td>${field}</td><td>----</td></tr>\n`
+        var tokenlist = field.slice(2, -2).split("']['");
+        var rule = tokenlist.join("-");
+        tokenlist.pop();
+        var self = tokenlist.join("-");
+        var status = !!tokenPool[rule];
+        return /* html */`<tr data-gap="${rule}" data-field="${self}">
+            <td>----</td>
+            <td>----</td>
+            <td>${field}</td>
+            <td><button style="background: #fff4bb" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
+        </tr>\n`
     }
 
-    editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr) {
-        return /* html */`<tr id="${guid}">
+    editor_table.prototype.tr = function (guid, field, shortField, commentHTMLescape, cobjstr, shortComment, tdstr, type) {
+        return /* html */`<tr id="${guid}" data-field="${field.slice(2, -2).split("']['").join("-")}">
         <td title="${field}">${shortField}</td>
-        <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortCommentHTMLescape}</td>
-        <td><div class="etableInputDiv">${tdstr}</div></td>
-        <td>${editor.table.editGrid(commentHTMLescape != shortCommentHTMLescape)}</td>
+        <td title="${commentHTMLescape}" cobj="${cobjstr}">${shortComment || commentHTMLescape}</td>
+        <td><div class="etableInputDiv ${type}">${tdstr}</div></td>
+        <td>${editor.table.editGrid(shortComment, type)}</td>
         </tr>\n`
+    }
+
+
+    /**
+     * checkboxset中checkbox的onchange
+     * 这个函数本质是模板editor_table.prototype.checkboxSetMember的一部分
+     * 故放在HTML模板分类下
+     */
+    editor_table.prototype.checkboxSetMemberOnchange = function (onemember) {
+        var thisset=onemember.parentNode
+        var inputs=thisset.children
+        var value=[]
+        for (var i in inputs) {
+            if (inputs[i].nodeName == 'INPUT') {
+                if (inputs[i].checked) {
+                    var one = inputs[i].getAttribute('key');
+                    if (inputs[i].getAttribute('ctype') == 'number') one = parseFloat(one);
+                    value.push(one);
+                }
+            }
+        }
+        thiseval = value;
+        // if (value.length == 0) thiseval = null;
+        thisset.value=JSON.stringify(thiseval)
+        thisset.onchange()
     }
 
 
@@ -172,8 +234,10 @@ editor_table_wrapper = function (editor) {
 
         var listen = function (guids) {
             // 每个叶节点的事件绑定
+            var tableid = editor.util.guid();
+            editor.mode.currentTable=tableid;
             guids.forEach(function (guid) {
-                editor.table.guidListen(guid, obj, commentObj)
+                editor.table.guidListen(guid, tableid, obj, commentObj)
             });
         }
         return { "HTML": outstr.join(''), "guids": guids, "listen": listen };
@@ -197,16 +261,16 @@ editor_table_wrapper = function (editor) {
         var thiseval = vobj;
         var comment = String(cobj._data);
 
-        var charlength = 10;
+        var charlength = 15;
         // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        // shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
+        shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.util.HTMLescape(comment);
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.util.HTMLescape(comment.slice(0, charlength)) + '...');
+        // var shortCommentHTMLescape = (comment.length < charlength ? commentHTMLescape : editor.util.HTMLescape(comment.slice(0, charlength)) + '...');
 
         var cobjstr = Object.assign({}, cobj);
         delete cobjstr._data;
@@ -214,22 +278,21 @@ editor_table_wrapper = function (editor) {
         cobjstr = editor.util.HTMLescape(JSON.stringify(cobjstr));
 
         var tdstr = editor.table.objToTd(obj, commentObj, field, cfield, vobj, cobj)
-        var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, shortCommentHTMLescape, tdstr)
+        var outstr = editor.table.tr(guid, field, shortField, commentHTMLescape, cobjstr, cobj._docs, tdstr, cobj._type)
         return [outstr, guid];
     }
 
     editor_table.prototype.objToTd = function (obj, commentObj, field, cfield, vobj, cobj) {
         var thiseval = vobj;
-        if (cobj._select) {
-            var values = cobj._select.values;
-            return editor.table.select(thiseval, values);
-        } else if (cobj._input) {
-            return editor.table.text(thiseval);
-        } else if (cobj._bool) {
-            return editor.table.checkbox(thiseval);
-        } else {
-            var indent = 0;
-            return editor.table.textarea(thiseval, indent);
+        switch (cobj._type) {
+            case 'select':
+                return editor.table.select(thiseval, cobj._select.values);
+            case 'checkbox':
+                return editor.table.checkbox(thiseval);
+            case 'checkboxSet':
+                return editor.table.checkboxSet(thiseval, cobj._checkboxSet.key, cobj._checkboxSet.prefix);
+            default: 
+                return editor.table.textarea(thiseval, cobj.indent || 0, cobj._type == 'disable');
         }
     }
 
@@ -258,7 +321,7 @@ editor_table_wrapper = function (editor) {
      * 监听一个guid对应的表格项
      * @param {String} guid 
      */
-    editor_table.prototype.guidListen = function (guid, obj, commentObj) {
+    editor_table.prototype.guidListen = function (guid, tableid, obj, commentObj) {
         // tr>td[title=field]
         //   >td[title=comment,cobj=cobj:json]
         //   >td>div>input[value=thiseval]
@@ -267,6 +330,7 @@ editor_table_wrapper = function (editor) {
         var field = thisTr.children[0].getAttribute('title');
         var cobj = JSON.parse(thisTr.children[1].getAttribute('cobj'));
         var modeNode = thisTr.parentNode;
+        thisTr.setAttribute('tableid',tableid)
         while (!editor_mode._ids.hasOwnProperty(modeNode.getAttribute('id'))) {
             modeNode = modeNode.parentNode;
         }
@@ -290,6 +354,7 @@ editor_table_wrapper = function (editor) {
      */
     editor_table.prototype.onchange = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+        if (editor.mode.currentTable!=thisTr.getAttribute('tableid')) return;
         var thiseval = null;
         if (input.checked != null) input.value = input.checked;
         try {
@@ -304,6 +369,36 @@ editor_table_wrapper = function (editor) {
             editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
         } else {
             printe(field + ' : 输入的值不合要求,请鼠标放置在注释上查看说明');
+        }
+    }
+
+    var tokenPool = {};
+    var tokenstyle = document.createElement("style");
+    document.body.appendChild(tokenstyle);
+
+    var tokenPoolRender = function() {
+        var content = "";
+        Object.keys(tokenPool).forEach(function(k) {
+            content += /* CSS */`[data-field|=${k}]{ display: none }`;
+        })
+        tokenstyle.innerHTML = content;
+    }
+
+    /**
+     * 当"折叠"被按下时
+     */
+    editor_table.prototype.onFoldBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        if (button.dataset.fold == "true") {
+            delete tokenPool[tr.dataset.gap];
+            tokenPoolRender();
+            button.dataset.fold = "false";
+            button.innerText = "折叠";
+        } else {
+            tokenPool[tr.dataset.gap] = true;
+            tokenPoolRender();
+            button.dataset.fold = "true";
+            button.innerText = "展开";
         }
     }
 
@@ -322,8 +417,28 @@ editor_table_wrapper = function (editor) {
         var tr = button.parentNode.parentNode;
         var guid = tr.getAttribute('id');
         var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
+        var input = tr.children[2].children[0].children[0];
         if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
-        if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+        if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string, template: cobj._template });
+        if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
+        if (cobj._type === 'color') editor.table.selectColor(input);
+        if (cobj._type === 'point') editor.table.selectPoint(input);
+        if (cobj._type === 'popCheckboxSet') editor.table.popCheckboxSet(input, cobj);
+    }
+
+    editor_table.prototype.onCopyBtnClick = function (button) {
+        var tr = button.parentNode.parentNode;
+        var input = tr.children[2].children[0].children[0];
+        var value = JSON.parse(input.value);
+        if (value == null) {
+            printe('没有赋值的内容');
+            return;
+        }
+        if (core.copy(value.toString())) {
+            printf('复制成功！');
+        } else {
+            printe('无法复制此内容，请手动选择复制');
+        }
     }
 
     /**
@@ -336,7 +451,11 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.dblclickfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         if (editor_mode.doubleClickMode === 'change') {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
-            if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string });
+            if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string, template: cobj._template });
+            if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
+            if (cobj._type === 'color') editor.table.selectColor(input);
+            if (cobj._type === 'point') editor.table.selectPoint(input);
+            if (cobj._type === 'popCheckboxSet') editor.table.popCheckboxSet(input, cobj);
         } else if (editor_mode.doubleClickMode === 'add') {
             editor_mode.doubleClickMode = 'change';
             editor.table.addfunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
@@ -344,6 +463,56 @@ editor_table_wrapper = function (editor) {
             editor_mode.doubleClickMode = 'change';
             editor.table.deletefunc(guid, obj, commentObj, thisTr, input, field, cobj, modeNode)
         }
+    }
+
+    editor_table.prototype.selectMaterial = function (input, cobj) {
+        editor.uievent.selectMaterial(input.value, cobj._docs || cobj._data || '请选择素材', cobj._directory, function (one) {
+            if (!/^[-A-Za-z0-9_.]+$/.test(one)) return null;
+            if (cobj._transform) return eval("("+cobj._transform+")(one)");
+            return one;
+        }, function (data) {
+            input.value = JSON.stringify(cobj._onconfirm ? eval("("+cobj._onconfirm+")(JSON.parse(input.value), data)") : data);
+            input.onchange();
+        })
+    }
+
+    editor_table.prototype.selectColor = function (input) {
+        if (input.value != null) {
+            var str = input.value.toString().replace(/[^\d.,]/g, '');
+            if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(str)) {            
+                document.getElementById('colorPicker').value = str;
+            }
+        }
+        var boundingBox = input.getBoundingClientRect();
+        openColorPicker(boundingBox.x, boundingBox.y + boundingBox.height, function (value) {
+            value = value.replace(/[^\d.,]/g, '');
+            input.value = '[' + value +']';
+            input.onchange();
+        })
+    }
+
+    editor_table.prototype.selectPoint = function (input) {
+        var x = 0, y = 0, value = input.value;
+        if (value != null) {
+            try {
+                var loc = JSON.parse(value);
+                if (loc instanceof Array && loc.length == 2) {
+                    x = loc[0];
+                    y = loc[1];
+                }
+            } catch (e) {}
+        }
+        editor.uievent.selectPoint(editor.currentFloorId, x, y, false, function (floorId, x, y) {
+            input.value = '['+x+','+y+']';
+            input.onchange();
+        })
+    }
+
+    editor_table.prototype.popCheckboxSet = function (input, cobj) {
+        editor.uievent.popCheckboxSet(JSON.parse(input.value), cobj._checkboxSet, cobj._docs || cobj._data || '请选择多选项', function (value) {
+            input.value = JSON.stringify(value);
+            input.onchange();
+        })
     }
 
     /**

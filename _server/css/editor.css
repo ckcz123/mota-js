@@ -154,7 +154,8 @@ body {
     height: auto;
     bottom: 0;
     margin-top: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #mid .tools {
@@ -170,7 +171,7 @@ body {
 
 #tip {
     float: right;
-    width: 50%;
+    width: 48%;
     height: 95%;
     padding: 5px 10px 10px 10px;
     margin-right: 0;
@@ -178,7 +179,12 @@ body {
     border: 1px solid #ccc;
     border-radius: 2px;
     font-size: 15px;
-    line-height: 14px;
+    line-height: 18px;
+}
+
+#tip p {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .files {
@@ -457,9 +463,8 @@ table.row td {
     font: normal 13px Arial, sans-serif;
 }
 
-/* for vue dom */
-[v-cloak] {
-    display: none !important;
+textarea[disabled] {
+    color: #999999;
 }
 
 #searchBlock {

@@ -20,42 +20,41 @@ function editor() {
         chooseThis : document.getElementById('chooseThis'),
         chooseInRight : document.getElementById('chooseInRight'),
         copyLoc : document.getElementById('copyLoc'),
-        moveLoc : document.getElementById('moveLoc'),
+        pasteLoc : document.getElementById('pasteLoc'),
         clearEvent : document.getElementById('clearEvent'),
         clearLoc : document.getElementById('clearLoc'),
         brushMod:document.getElementById('brushMod'),
         brushMod2:document.getElementById('brushMod2'),
         brushMod3:document.getElementById('brushMod3'),
-        bgc : document.getElementById('bg'),
-        bgCtx : document.getElementById('bg').getContext('2d'),
-        fgc : document.getElementById('fg'),
-        fgCtx : document.getElementById('fg').getContext('2d'),
-        evc : document.getElementById('event'),
-        evCtx : document.getElementById('event').getContext('2d'),
-        ev2c : document.getElementById('event2'),
-        ev2Ctx : document.getElementById('event2').getContext('2d'),
+        brushMod4:document.getElementById('brushMod4'),
         layerMod:document.getElementById('layerMod'),
         layerMod2:document.getElementById('layerMod2'),
         layerMod3:document.getElementById('layerMod3'),
         viewportButtons:document.getElementById('viewportButtons'),
         appendPicCanvas : document.getElementById('appendPicCanvas'),
-        bg : document.getElementById('appendPicCanvas').children[0],
-        source : document.getElementById('appendPicCanvas').children[1],
-        picClick : document.getElementById('appendPicCanvas').children[2],
-        sprite : document.getElementById('appendPicCanvas').children[3],
-        sourceCtx:document.getElementById('appendPicCanvas').children[1].getContext('2d'),
-        spriteCtx:document.getElementById('appendPicCanvas').children[3].getContext('2d'),
+        appendBgCtx : document.getElementById('appendPicCanvas').children[0].getContext('2d'),
+        appendSource : document.getElementById('appendPicCanvas').children[1],
+        appendPicClick : document.getElementById('appendPicCanvas').children[2],
+        appendSprite : document.getElementById('appendPicCanvas').children[3],
+        appendSourceCtx:document.getElementById('appendPicCanvas').children[1].getContext('2d'),
+        appendSpriteCtx:document.getElementById('appendPicCanvas').children[3].getContext('2d'),
         appendPicSelection : document.getElementById('appendPicSelection'),
         selectAppend : document.getElementById('selectAppend'),
         selectFileBtn :document.getElementById('selectFileBtn'),
         changeFloorId :document.getElementById('changeFloorId'),
+        changeFloorSize: document.getElementById('changeFloorSize'),
         left1 : document.getElementById('left1'),
         editModeSelect :document.getElementById('editModeSelect'),
         mid2 : document.getElementById('mid2'),
+        clearLastUsedBtn: document.getElementById('clearLastUsedBtn'),
+        lastUsedTitle: document.getElementById('lastUsedTitle'),
         lastUsedDiv: document.getElementById('lastUsedDiv'),
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
         lockMode: document.getElementById('lockMode'),
+        gameInject: document.getElementById('gameInject'),
+        maps: ['bgmap', 'fgmap', 'map'],
+        canvas: ['bg', 'fg'],
     };
 
     this.uivalues={
@@ -65,6 +64,12 @@ function editor() {
         mouseOutCheck : 2,
         startPos:null,
         endPos:null,
+        lastMoveE:{buttons:0,clientX:0,clientY:0},
+        selectedArea: null,
+        // 材料区拖动有关
+        lastMoveMaterE:null,
+        tileSize: [1,1],
+        startLoc: null,
         // 撤销/恢复
         preMapData : [],
         preMapMax: 10,
@@ -76,13 +81,12 @@ function editor() {
         scrollBarHeight :0,
         folded:false,
         foldPerCol: 50,
-        // 画图区菜单
-        lastRightButtonPos:[{x:0,y:0},{x:0,y:0}],
-        lastCopyedInfo : [null, null],
         //
         ratio : 1,
         // blockly转义
         disableBlocklyReplace: false,
+        // blockly展开比较
+        disableBlocklyExpandCompare: false,
 
         // 绑定机关门事件相关
         bindSpecialDoor: {
@@ -98,10 +102,10 @@ function editor() {
         },
 
         // tile
-        tileSize: [1,1],
         lockMode: false,
 
         // 最近使用的图块
+        lastUsedType: null,
         lastUsed: [],
     };
 
@@ -144,85 +148,134 @@ editor.info
 /////////// 数据相关 ///////////
 
 editor.prototype.init = function (callback) {
-    
-    var useCompress = main.useCompress;
-    main.useCompress = false;
+
     editor.airwallImg = new Image();
-    editor.airwallImg.src = './project/images/airwall.png';
+    editor.airwallImg.src = './project/materials/airwall.png';
 
-    main.init('editor', function () {
-        editor_util_wrapper(editor);
-        editor_game_wrapper(editor, main, core);
-        editor_file_wrapper(editor);
-        editor_table_wrapper(editor);
-        editor_ui_wrapper(editor);
-        editor_mappanel_wrapper(editor);
-        editor_datapanel_wrapper(editor);
-        editor_materialpanel_wrapper(editor);
-        editor_listen_wrapper(editor);
-        editor.printe=printe;
-        afterMainInit();
-    });
-
-    var afterMainInit = function () {
-        editor.game.fixFunctionInGameData();
-        editor.main = main;
-        editor.core = core;
-        editor.fs = fs;
-        editor_file = editor_file(editor, function () {
-            editor.file = editor_file;
-            editor_mode = editor_mode(editor);
-            editor.mode = editor_mode;
-            core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-            var lastFloorId = core.getLocalStorage('editorLastFloorId', core.status.floorId);
-            if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
-            core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
-                afterCoreReset();
-            }, true);
-            core.events.setInitData(null);
-        });
-    }
-
-    var afterCoreReset = function () {
-        
-        editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
-        editor.drawInitData(core.icons.icons); // 初始化绘图
-
-        editor.game.fetchMapFromCore();
-        editor.updateMap();
-        editor.buildMark();
-        editor.drawEventBlock();
-        
-        editor.pos = {x: 0, y: 0};
-        editor.mode.loc();
-        editor.info = editor.ids[editor.indexs[201]];
-        editor.mode.enemyitem();
-        editor.mode.floor();
-        editor.mode.tower();
-        editor.mode.functions();
-        editor.mode.commonevent();
-        editor.mode.showMode('tower');
-        
-        editor_multi = editor_multi();
-        editor_blockly = editor_blockly();
-
-        // --- 所有用到的flags
-        editor.used_flags = {};
-        for (var floorId in editor.main.floors) {
-            editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'index.html', true);
+    xhr.onload = function () {
+        if (xhr.status != 200) {
+            alert("HTTP " + xhr.status);
+            return;
         }
-        if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-            for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-                editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
+        var str = xhr.response.split('<!-- injection -->');
+        if (str.length != 3) window.onerror("index.html格式不正确");
+        editor.dom.gameInject.innerHTML = str[1];
+        
+        var cvs = ['bg', 'event', 'event2', 'fg'].map(function(e) {
+            return document.getElementById(e);
+        });
+        ['bg', 'ev', 'ev2', 'fg'].forEach(function(e, i) {
+            editor.dom[e+'c'] = cvs[i];
+            editor.dom[e+'Ctx'] = cvs[i].getContext('2d');
+            
+            editor.dom.mapEdit.insertBefore(cvs[i], document.getElementById('efg'));
+        });
+
+        var mainScript = document.createElement('script');
+
+        mainScript.onload = function() {
+    
+            var useCompress = main.useCompress;
+            main.useCompress = false;
+        
+            main.init('editor', function () {
+                editor.config = new editor_config();
+                editor.config.load(function() {
+                    editor_util_wrapper(editor);
+                    editor_game_wrapper(editor, main, core);
+                    editor_file_wrapper(editor);
+                    editor_table_wrapper(editor);
+                    editor_ui_wrapper(editor);
+                    editor_mappanel_wrapper(editor);
+                    editor_datapanel_wrapper(editor);
+                    editor_materialpanel_wrapper(editor);
+                    editor_listen_wrapper(editor);
+                    editor.printe=printe;
+                    afterMainInit();
+                })
+            });
+        
+            var afterMainInit = function () {
+                editor.game.fixFunctionInGameData();
+                editor.main = main;
+                editor.core = core;
+                editor.fs = fs;
+                editor_file = editor_file(editor, function () {
+                    editor.file = editor_file;
+                    editor_mode = editor_mode(editor);
+                    editor.mode = editor_mode;
+                    var canvases = document.getElementsByClassName('gameCanvas');
+                    for (var one in canvases) {
+                        canvases[one].width = canvases[one].height = core.__PIXELS__;
+                    }
+
+                    core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
+                    var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
+                    if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
+                    core.changeFloor(lastFloorId, null, {x: 0, y: 0, direction:"up"}, null, function () {
+                        afterCoreReset();
+                    }, true);
+                });
+            }
+        
+            var afterCoreReset = function () {
+                
+                editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
+                editor.drawInitData(core.icons.icons); // 初始化绘图
+        
+                editor.game.fetchMapFromCore();
+                editor.updateMap();
+                editor.buildMark();
+                editor.drawEventBlock();
+                
+                editor.pos = {x: 0, y: 0};
+                editor.mode.loc();
+                editor.info = editor.ids[editor.indexs[201]];
+                editor.mode.enemyitem();
+                editor.mode.floor();
+                editor.mode.tower();
+                editor.mode.functions();
+                editor.mode.commonevent();
+                editor.mode.showMode('tower');
+                
+                editor_multi = editor_multi();
+                editor_blockly = editor_blockly();
+        
+                // --- 所有用到的flags
+                editor.used_flags = {};
+                // 楼层属性
+                for (var floorId in editor.main.floors) {
+                    editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
+                }
+                // 公共事件
+                if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                    for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                        editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
+                    }
+                }
+                // 道具效果
+                for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+                    editor.addUsedFlags(JSON.stringify(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id]));
+                }
+                // 全局商店
+                editor.addUsedFlags(JSON.stringify(editor.main.core.firstData.shops));
+        
+                if (editor.useCompress == null) editor.useCompress = useCompress;
+                if (Boolean(callback)) callback();
+        
             }
         }
 
-        if (editor.useCompress == null) editor.useCompress = useCompress;
-        if (Boolean(callback)) callback();
-
+        mainScript.id = "mainScript";
+        mainScript.src = "main.js";
+        editor.dom.gameInject.appendChild(mainScript);
+    };
+    xhr.onabort = xhr.ontimeout = xhr.onerror = function () {
+        alert("无法访问index.html");
     }
-
-    
+    xhr.send();
 }
 
 editor.prototype.mapInit = function () {
@@ -237,11 +290,9 @@ editor.prototype.mapInit = function () {
             editor.map[y][x] = 0;
         }
     }
-    editor.fgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.bgmap=JSON.parse(JSON.stringify(editor.map));
-    editor.currentFloorData.map = editor.map;
-    editor.currentFloorData.fgmap = editor.fgmap;
-    editor.currentFloorData.bgmap = editor.bgmap;
+    editor.dom.maps.forEach(function (one) {
+        editor.currentFloorData[one] = editor[one] = JSON.parse(JSON.stringify(editor.map));
+    });
     editor.currentFloorData.firstArrive = [];
     editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
@@ -253,7 +304,7 @@ editor.prototype.mapInit = function () {
 }
 
 editor.prototype.changeFloor = function (floorId, callback) {
-    for(var ii=0,name;name=['map','bgmap','fgmap'][ii];ii++){
+    for(var ii=0,name;name=editor.dom.maps[ii];ii++){
         var mapArray=editor[name].map(function (v) {
             return v.map(function (v) {
                 return v.idnum || v || 0
@@ -273,9 +324,11 @@ editor.prototype.changeFloor = function (floorId, callback) {
         editor.viewportLoc = editor.viewportLoc || {};
         var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
         editor.setViewport(x, y);
+        editor.uifunctions.unhighlightSaveFloorButton();
 
-        core.setLocalStorage('editorLastFloorId', floorId);
-        if (callback) callback();
+        editor.config.set('editorLastFloorId', floorId, function() {
+            if (callback) callback();
+        });  
     });
 }
 
@@ -294,7 +347,7 @@ editor.prototype.drawEventBlock = function () {
                 && loc == firstData.hero.loc.x + "," + firstData.hero.loc.y) {
                 fg.textAlign = 'center';
                 editor.game.doCoreFunc('fillBoldText', fg, 'S',
-                    32 * i + 16, 32 * j + 28, '#FFFFFF', 'bold 30px Verdana');
+                    32 * i + 16, 32 * j + 28, '#FFFFFF', null, 'bold 30px Verdana');
             }
             if (editor.currentFloorData.events[loc])
                 color.push('#FF0000');
@@ -313,7 +366,7 @@ editor.prototype.drawEventBlock = function () {
                 color.push('#00FF00');
             if (editor.currentFloorData.afterGetItem[loc])
                 color.push('#00FFFF');
-            if (editor.currentFloorData.cannotMove[loc])
+            if (editor.currentFloorData.cannotMove[loc] && editor.currentFloorData.cannotMove[loc].length > 0)
                 color.push('#0000FF');
             if (editor.currentFloorData.afterOpenDoor[loc])
                 color.push('#FF00FF');
@@ -325,7 +378,7 @@ editor.prototype.drawEventBlock = function () {
             if (index >= 0) {
                 fg.textAlign = 'right';
                 editor.game.doCoreFunc("fillBoldText", fg, index + 1,
-                    32 * i + 28, 32 * j + 15, '#FF7F00', '14px Verdana');
+                    32 * i + 28, 32 * j + 15, '#FF7F00', null, '14px Verdana');
             }
         }
     }
@@ -355,10 +408,11 @@ editor.prototype.updateMap = function () {
 
     var updateMap = function () {
         core.removeGlobalAnimate();
-        core.clearMap('bg');
+        editor.dom.canvas.forEach(function (one) {
+            core.clearMap(one);
+        });
         core.clearMap('event');
         core.clearMap('event2');
-        core.clearMap('fg');
         core.maps._drawMap_drawAll();
     }
     updateMap();
@@ -387,29 +441,48 @@ editor.prototype.updateMap = function () {
     // 绘制地图 start
     for (var y = 0; y < editor.map.length; y++) {
         for (var x = 0; x < editor.map[0].length; x++) {
-            var tileInfo = editor.map[y][x];
-            drawTile(editor.dom.evCtx, x, y, tileInfo);
-            tileInfo = editor.fgmap[y][x];
-            drawTile(editor.dom.fgCtx, x, y, tileInfo);
-            tileInfo = editor.bgmap[y][x];
-            drawTile(editor.dom.bgCtx, x, y, tileInfo);
+            drawTile(editor.dom.evCtx, x, y, editor.map[y][x]);
+            editor.dom.canvas.forEach(function (one) {
+                drawTile(editor.dom[one + 'Ctx'], x, y, editor[one+'map'][y][x]);
+            });
         }
     }
     // 绘制地图 end
 
+    editor.drawEventBlock();
     this.updateLastUsedMap();
 }
 
+editor.prototype.setLastUsedType = function (type) {
+    if (type == editor.uivalues.lastUsedType) return;
+    editor.uivalues.lastUsedType = type;
+    var _buildHtml = function (type, text) {
+        if (type == null) return "<b>" + text + "</b>";
+        else return `<a href="javascript:editor.setLastUsedType('${type}')">${text}</a>`;
+    }
+    editor.dom.lastUsedTitle.innerHTML
+        = type == 'frequent' ? (_buildHtml('recent', '最近使用') + " | " + _buildHtml(null, '最常使用'))
+        : (_buildHtml(null, '最近使用') + " | " + _buildHtml('frequent', '最常使用'));
+    this.updateLastUsedMap();
+    editor.dom.lastUsedDiv.scroll(0,0);
+}
+
 editor.prototype.updateLastUsedMap = function () {
+    var lastUsed = editor.uivalues.lastUsed.sort(function (a, b) {
+        if ((a.istop || 0) != (b.istop || 0)) return (b.istop || 0) - (a.istop || 0);
+        return (b[editor.uivalues.lastUsedType] || 0) - (a[editor.uivalues.lastUsedType] || 0);
+    });
+
     // 绘制最近使用事件
     var ctx = editor.dom.lastUsedCtx;
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.strokeStyle = 'rgba(255,128,0,0.85)';
+    ctx.fillStyle = 'rgba(255,0,0,0.85)';
     ctx.lineWidth = 4;
-    for (var i = 0; i < editor.uivalues.lastUsed.length; ++i) {
+    for (var i = 0; i < lastUsed.length; ++i) {
         try {
             var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
-            var info = editor.uivalues.lastUsed[i];
+            var info = lastUsed[i];
             if (!info || !info.images) continue;
             if (info.isTile && core.material.images.tilesets[info.images]) {
                 ctx.drawImage(core.material.images.tilesets[info.images], 32 * info.x, 32 * info.y, 32, 32, x*32, y*32, 32, 32);
@@ -418,6 +491,9 @@ editor.prototype.updateLastUsedMap = function () {
             } else {
                 var per_height = info.images.endsWith('48') ? 48 : 32;
                 ctx.drawImage(core.material.images[info.images], 0, info.y * per_height, 32, per_height, x * 32, y * 32, 32, 32);
+            }
+            if (info.istop) {
+                ctx.fillRect(32 * x, 32 * y + 24, 8, 8);
             }
             if (selectBox.isSelected() && editor.info.id == info.id) {
                 ctx.strokeRect(32 * x + 2, 32 * y + 2, 28, 28);
@@ -448,11 +524,12 @@ editor.prototype.drawInitData = function (icons) {
     var maxHeight = 700;
     var sumWidth = 0;
     editor.widthsX = {};
-    editor.uivalues.folded = core.getLocalStorage('folded', false);
+    editor.uivalues.folded = editor.config.get('folded', false);
     // editor.uivalues.folded = true;
-    editor.uivalues.foldPerCol = core.getLocalStorage('foldPerCol', 50);
+    editor.uivalues.foldPerCol = editor.config.get('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
-    editor.uivalues.lastUsed = core.getLocalStorage("lastUsed", []);
+    editor.setLastUsedType(editor.config.get('lastUsedType', 'recent'));
+    editor.uivalues.lastUsed = editor.config.get("lastUsed", []);
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
     for (var ii = 0; ii < imgNames.length; ii++) {
@@ -625,7 +702,7 @@ editor.prototype.buildMark = function(){
     }
 }
 
-editor.prototype.setSelectBoxFromInfo=function(thisevent){
+editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
     var pos={x: 0, y: 0, images: "terrains"};
     var ysize = 32;
     if(thisevent==0){
@@ -642,18 +719,23 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent){
         }
         if(pos.x == 0) pos.y+=2;
     }
+    if (!editor.isMobile && scrollTo) {
+        editor.dom.iconLib.scrollLeft = pos.x * 32 - editor.dom.iconLib.offsetWidth / 2;
+        editor.dom.iconLib.scrollTop = pos.y * ysize - editor.dom.iconLib.offsetHeight / 2;
+    }
     editor.dom.dataSelection.style.left = pos.x * 32 + 'px';
     editor.dom.dataSelection.style.top = pos.y * ysize + 'px';
     editor.dom.dataSelection.style.height = ysize - 6 + 'px';
+    editor.dom.dataSelection.style.width = 32 - 6 + 'px';
     setTimeout(function(){
         selectBox.isSelected(true);
         editor.updateLastUsedMap();
     });
     editor.info = JSON.parse(JSON.stringify(thisevent));
-    tip.infos(JSON.parse(JSON.stringify(thisevent)));
     editor.pos=pos;
     editor_mode.onmode('nextChange');
     editor_mode.onmode('enemyitem');
+    editor.uifunctions.showBlockInfo(JSON.parse(JSON.stringify(thisevent)));
 }
 
 editor.prototype.addUsedFlags = function (s) {

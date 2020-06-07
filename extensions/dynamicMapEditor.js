@@ -8,7 +8,7 @@ function dynamicMapEditor() {
 	// 所有显示的ID
 	this.displayIds = [
 		'none', 'yellowWall', 'blueWall', 'whiteWall', 'yellowDoor', 'blueDoor', 'redDoor', 'star', 'lava', 'lavaNet',
-		'yellowKey', 'blueKey', 'redKey', 'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+		'yellowKey', 'blueKey', 'redKey', 'redGem', 'blueGem', 'greenGem', 'yellowGem',
 		'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'pickaxe', 'bomb', 'centerFly',
 		'cls:autotile', 'cls:enemys', 'cls:enemy48'
 	];
@@ -359,7 +359,7 @@ dynamicMapEditor.prototype.refreshToolBox = function() {
 		core.formatBigNumber(core.getRealStatus("mdef"), true);
 	core.fillText(this.canvas, text1, this.offsetX + 60, 380, '#FF7F00', 120);
 	var text2 = core.formatBigNumber(core.getRealStatus('money', true)) + "/" +
-		core.formatBigNumber(core.getRealStatus('experience'), true) + "/" +
+		core.formatBigNumber(core.getRealStatus('exp'), true) + "/" +
 		core.itemCount('yellowKey') + '/' + core.itemCount('blueKey') + '/' +
 		core.itemCount('redKey');
 	core.fillText(this.canvas, text2, this.offsetX + 60, 395, '#FF7F00', 120);
@@ -396,7 +396,7 @@ dynamicMapEditor.prototype.showHelp = function (fromButton) {
 	text += " - [ 键将开关此模式；\n - ] 键将会把改动保存到文件；\n - \\ 键将撤销上步操作。\n";
 	text +=	" - Alt+0~9 保存当前图块 \n - 0~9 读取当前图块\n";
 	text += "最下面三行数据分别是：\n"
-	text += "血攻防魔防；金经黄蓝红；破炸飞和debuff。";
+	text += "血攻防护盾；金经黄蓝红；破炸飞和debuff。";
 	if (!fromButton) text += "\n\n点取消将不再提示本页面。";
 	core.myconfirm(text, null, function () {
 		if (!fromButton) core.setLocalStorage("_dynamicMapEditor_help", true);

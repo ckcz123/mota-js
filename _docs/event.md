@@ -4,7 +4,7 @@
 
 ## 事件编辑（地图选点，快捷键X）
 
-![image](img/eventsX.jpg)
+![image](img/eventsx.jpg)
 
 样板所有的事件都是依靠“触发器”完成的。例如，勇士碰到（绑定好的）楼梯可以触发changeFloor，碰到门可以触发openDoor，碰到怪物可以触发battle，碰到道具可以触发getItem，碰到箱子可以触发pushBox，走上冰面（背景层）可以触发ski.
 
@@ -40,7 +40,7 @@
 
 ### 楼梯、传送门事件
 
-![image](img/changeFloor.jpg)
+![image](img/changefloor.jpg)
 
 当您在地图上绘制楼梯、或绘制四种三帧箭头并右击绑定后，就创建了一个“楼层转换”事件，您可以在事件编辑器右侧看到一行代码（json），请注意对照。
 

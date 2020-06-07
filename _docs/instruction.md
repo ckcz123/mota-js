@@ -34,7 +34,7 @@ data为整个指令对象，x和y为当前点坐标，prefix为独立开关的�
 
 ## 显示文字类（黄色）
 
-![image](img/images_textY.jpg)
+![image](img/images_texty.jpg)
 
 这个类别的指令会负责UI层图文的处理，如图片的移动和淡入淡出，游戏的胜败和重启等。
 
@@ -153,7 +153,7 @@ QTE，即快速反应事件。一般表现为需要玩家在收到某信号后�
 
 为了方便地做出这种效果，样板提供了“全局商店”。
 
-![image](img/quickShops.jpg)
+![image](img/quickshops.jpg)
 
 在“全塔属性——全局商店”中可以编辑各个商店，商店一共有三种：
 
@@ -189,7 +189,7 @@ QTE，即快速反应事件。一般表现为需要玩家在收到某信号后�
 
 ## 数据相关类（绿色）
 
-![image](img/control_itemsG.jpg)
+![image](img/control_itemsg.jpg)
 
 这类的指令会设置各种数据（如怪物属性、楼层属性、全塔属性、六大可读写块），处理弹窗输入和开关全局商店，以及控制玩家最最关心的勇士的各种行为。
 
@@ -402,7 +402,7 @@ core.insertAction({"type": "changeFloor", "floorId": "MT" + core.rand2(20)})
 
 ## 事件控制类（深蓝）
 
-![image](img/flowCtrl.jpg)
+![image](img/flowctrl.jpg)
 
 在三个QTE指令中，我们已经初见了流程控制的端倪。只不过，它们的流程走向是由玩家的选择直接左右的。能否通过对值块的比较等操作自动走向不同的流程分支呢？答案是肯定的。
 

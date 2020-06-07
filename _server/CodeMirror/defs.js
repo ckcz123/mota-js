@@ -2219,7 +2219,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "moveOneStep": {
-          "!doc": "每移动一格后执行的事件", 
+          "!doc": "每移动一格后执行的事件<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(callback?: fn())"
         }, 
         "clearStatus": {
@@ -2315,7 +2315,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "moveHero": {
-          "!doc": "连续前进，不撞南墙不回头<br/>例如：core.moveHero(); // 连续前进<br/>direction: 可选，如果设置了就会先转身到该方向<br/>callback: 可选，如果设置了就只走一步", 
+          "!doc": "连续前进，不撞南墙不回头<br/>例如：core.moveHero(); // 连续前进<br/>direction: 可选，如果设置了就会先转身到该方向<br/>callback: 可选，如果设置了就只走一步<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(direction?: string, callback?: fn())"
         }, 
         "getRealStatusOrDefault": {
@@ -2355,7 +2355,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "moveAction": {
-          "!doc": "尝试前进一步，如果面前不可被踏入就会直接触发该点事件<br/>请勿直接使用此函数，如有需要请使用「勇士前进一步或撞击」事件", 
+          "!doc": "尝试前进一步，如果面前不可被踏入就会直接触发该点事件<br/>请勿直接使用此函数，如有需要请使用「勇士前进一步或撞击」事件<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(callback?: fn())"
         }, 
         "hasFlag": {
@@ -3775,7 +3775,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(type: string)"
         }, 
         "trigger": {
-          "!doc": "触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等<br/>callback: 执行完毕的回调函数", 
+          "!doc": "触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等<br/>callback: 执行完毕的回调函数<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(x?: number, y?: number, callback?: fn())"
         }, 
         "restart": {
@@ -3871,7 +3871,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, values: ?, floorId?: string, prefix?: string)"
         }, 
         "openDoor": {
-          "!doc": "开门（包括三种基础墙）<br/>例如：core.openDoor(0, 0, true, core.jumpHero); // 打开左上角的门，需要钥匙，然后主角原地跳跃半秒<br/>x: 门的横坐标<br/>y: 门的纵坐标<br/>needKey: true表示需要钥匙，会导致机关门打不开<br/>callback: 门完全打开后或打不开时的回调函数，可选", 
+          "!doc": "开门（包括三种基础墙）<br/>例如：core.openDoor(0, 0, true, core.jumpHero); // 打开左上角的门，需要钥匙，然后主角原地跳跃半秒<br/>x: 门的横坐标<br/>y: 门的纵坐标<br/>needKey: true表示需要钥匙，会导致机关门打不开<br/>callback: 门完全打开后或打不开时的回调函数，可选<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(x: number, y: number, needKey?: bool, callback?: fn())"
         }, 
         "setEnemy": {
@@ -3895,19 +3895,19 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(type: string)"
         }, 
         "jumpHero": {
-          "!doc": "主角跳跃，跳跃勇士。ex和ey为目标点的坐标，可以为null表示原地跳跃。time为总跳跃时间。<br/>例如：core.jumpHero(); // 主角原地跳跃半秒<br/>ex: 跳跃后的横坐标<br/>ey: 跳跃后的纵坐标<br/>time: 跳跃时长，单位为毫秒。不填视为半秒<br/>callback: 跳跃完毕后的回调函数，可选", 
+          "!doc": "主角跳跃，跳跃勇士。ex和ey为目标点的坐标，可以为null表示原地跳跃。time为总跳跃时间。<br/>例如：core.jumpHero(); // 主角原地跳跃半秒<br/>ex: 跳跃后的横坐标<br/>ey: 跳跃后的纵坐标<br/>time: 跳跃时长，单位为毫秒。不填视为半秒<br/>callback: 跳跃完毕后的回调函数，可选<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(ex?: number, ey?: number, time?: number, callback?: fn())"
         }, 
         "closeDoor": {
-          "!doc": "关门，目标点必须为空地<br/>例如：core.closeDoor(0, 0, 'yellowWall', core.jumpHero); // 在左上角关掉一堵黄墙，然后主角原地跳跃半秒<br/>x: 横坐标<br/>y: 纵坐标<br/>id: 门的id，也可以用三种基础墙<br/>callback: 门完全关上后的回调函数，可选", 
+          "!doc": "关门，目标点必须为空地<br/>例如：core.closeDoor(0, 0, 'yellowWall', core.jumpHero); // 在左上角关掉一堵黄墙，然后主角原地跳跃半秒<br/>x: 横坐标<br/>y: 纵坐标<br/>id: 门的id，也可以用三种基础墙<br/>callback: 门完全关上后的回调函数，可选<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(x: number, y: number, id: string, callback?: fn())"
         }, 
         "eventMoveHero": {
-          "!doc": "强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了<br/>例如：core.eventMoveHero(['forward'], 125, core.jumpHero); // 主角强制前进一步，用时1/8秒，然后主角原地跳跃半秒<br/>steps: 步伐数组，注意后退时跟随者的行为会很难看<br/>time: 每步的用时，单位为毫秒。0或不填则取主角的移速，如果后者也不存在就取0.1秒<br/>callback: 移动完毕后的回调函数，可选", 
+          "!doc": "强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了<br/>例如：core.eventMoveHero(['forward'], 125, core.jumpHero); // 主角强制前进一步，用时1/8秒，然后主角原地跳跃半秒<br/>steps: 步伐数组，注意后退时跟随者的行为会很难看<br/>time: 每步的用时，单位为毫秒。0或不填则取主角的移速，如果后者也不存在就取0.1秒<br/>callback: 移动完毕后的回调函数，可选<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(steps: [step], time?: number, callback?: fn())"
         }, 
         "changeFloor": {
-          "!doc": "场景切换<br/>例如：core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取用户定义的值<br/>floorId: 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上<br/>stair: 传送的位置<br/>heroLoc: 传送的坐标；会覆盖stair<br/>time: 传送的黑屏时间，单位为毫秒；不填为用户设置值<br/>callback: 传送的回调函数", 
+          "!doc": "场景切换<br/>例如：core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取用户定义的值<br/>floorId: 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上<br/>stair: 传送的位置<br/>heroLoc: 传送的坐标；会覆盖stair<br/>time: 传送的黑屏时间，单位为毫秒；不填为用户设置值<br/>callback: 传送的回调函数<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(floorId: string, stair?: string, heroLoc?: {x?: number, y?: number, direction?: string}, time?: number, callback?: fn())"
         }, 
         "getCommonEvent": {

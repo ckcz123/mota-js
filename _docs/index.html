@@ -13,6 +13,8 @@
   <link href="https://cdn.bootcss.com/docsify/4.5.5/themes/vue.css" rel="stylesheet">
   <script>
     //先下载着
+
+    /*
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'https://cdn.bootcss.com/docsify/4.5.5/docsify.min.js', true);
     xhr.send(null);
@@ -75,6 +77,7 @@
         return id;
       }
     })()
+    */
   </script>
 </head>
 <body>
@@ -110,6 +113,7 @@
       mergeNavbar: true,
       formatUpdated: '{YYYY}-{MM}-{DD} {HH}:{mm}:{ss}',
       plugins: [
+        /*
         function(hook){
 
           var renderScriptNode=function(str){
@@ -140,11 +144,14 @@
             node.innerHTML=str
           })
         }
+        */
       ]
     }
   </script>
-  <!-- 为了保证时序用脚本加载 <script src="https://cdn.bootcss.com/docsify/4.5.5/docsify.min.js"></script>
-  <script src="https://cdn.bootcss.com/docsify/4.5.5/plugins/search.min.js"></script> -->
+  <!-- 为了保证时序用脚本加载这两个 --> 
+  <script src="https://cdn.bootcss.com/docsify/4.5.5/docsify.min.js"></script>
+  <script src="https://cdn.bootcss.com/docsify/4.5.5/plugins/search.min.js"></script> 
+  <!--
   <script src="../_server/blockly/Converter.bundle.min.js"></script>
   <script src="../_server/blockly/blockly_compressed.js"></script>
   <script src="../_server/blockly/blocks_compressed.js"></script>
@@ -185,6 +192,6 @@
     }
     xhr.open('GET', '../_server/MotaAction.g4', true);
     xhr.send(null);
-  </script>
+  </script> -->
 </body>
 </html>

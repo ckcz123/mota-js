@@ -27,7 +27,7 @@
 
 ## 图块属性（快捷键C）
 
-![image](img/mapsC.jpg)
+![image](img/mapsc.jpg)
 
 如上图，除怪物和道具外，所有素材的图块属性都定义在`project\maps.js`中。道具和怪物属性也支持清空和批量复制，下面逐一讲解各条目的含义和用法：
 
@@ -138,7 +138,7 @@
 
 ## 楼层属性（快捷键V）
 
-![image](img/floorsV.jpg)
+![image](img/floorsv.jpg)
 
 1. **楼层ID：**`project/floors`中的文件名，不允许使用中文也不能直接修改。修改方法见上图底部，修改后必须立即刷新浏览器页面。
 2. **楼层名：**楼层在楼传、上下楼黑屏和浏览地图界面的名称。
@@ -199,7 +199,7 @@
 
 全塔属性共分为四部分：文件注册、初始勇士、全局数值、系统开关，您可以随时折叠其中任何一个部分。
 
-![image](img/firstDataB.jpg)
+![image](img/firstdatab.jpg)
 
 ### 文件注册
 
@@ -281,7 +281,7 @@
 
 ### 全局数值
 
-![image](img/values_flagsB.jpg)
+![image](img/values_flagsb.jpg)
 
 这个类型的数值会保存在core.values中，可以直接在游戏中修改。
 

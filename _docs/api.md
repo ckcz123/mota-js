@@ -395,6 +395,7 @@ debug: fn()
 
 moveOneStep: fn(callback?: fn())
 每移动一格后执行的事件
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 clearStatus: fn()
 清除游戏状态和数据
@@ -483,6 +484,7 @@ moveHero: fn(direction?: string, callback?: fn())
 例如：core.moveHero(); // 连续前进
 direction: 可选，如果设置了就会先转身到该方向
 callback: 可选，如果设置了就只走一步
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 getRealStatusOrDefault: fn(status?: ?, name?: string)
 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取
@@ -523,7 +525,8 @@ clearStatusBar: fn()
 
 moveAction: fn(callback?: fn())
 尝试前进一步，如果面前不可被踏入就会直接触发该点事件
-请勿直接使用此函数，如有需要请使用「勇士前进一步或撞击」事件
+与「勇士前进一步或撞击」事件等价
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 hasFlag: fn(name: string) -> bool
 判定一个flag变量是否存在且不为false、0、''、null、undefined和NaN
@@ -954,6 +957,7 @@ unregisterSystemEvent: fn(type: string)
 trigger: fn(x?: number, y?: number, callback?: fn())
 触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等
 callback: 执行完毕的回调函数
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 restart: fn()
 重新开始游戏；此函数将回到标题页面
@@ -1072,6 +1076,7 @@ x: 门的横坐标
 y: 门的纵坐标
 needKey: true表示需要钥匙，会导致机关门打不开
 callback: 门完全打开后或打不开时的回调函数，可选
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 setEnemy: fn(id: string, name: string, value: ?, prefix?: string)
 设置一项敌人属性并计入存档
@@ -1104,6 +1109,7 @@ ex: 跳跃后的横坐标
 ey: 跳跃后的纵坐标
 time: 跳跃时长，单位为毫秒。不填视为半秒
 callback: 跳跃完毕后的回调函数，可选
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 closeDoor: fn(x: number, y: number, id: string, callback?: fn())
 关门，目标点必须为空地
@@ -1112,6 +1118,7 @@ x: 横坐标
 y: 纵坐标
 id: 门的id，也可以用三种基础墙
 callback: 门完全关上后的回调函数，可选
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 eventMoveHero: fn(steps: [step], time?: number, callback?: fn())
 强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了
@@ -1119,6 +1126,7 @@ eventMoveHero: fn(steps: [step], time?: number, callback?: fn())
 steps: 步伐数组，注意后退时跟随者的行为会很难看
 time: 每步的用时，单位为毫秒。0或不填则取主角的移速，如果后者也不存在就取0.1秒
 callback: 移动完毕后的回调函数，可选
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 changeFloor: fn(floorId: string, stair?: string, heroLoc?: {x?: number, y?: number, direction?: string}, time?: number, callback?: fn())
 场景切换
@@ -1128,6 +1136,7 @@ stair: 传送的位置
 heroLoc: 传送的坐标；会覆盖stair
 time: 传送的黑屏时间，单位为毫秒；不填为用户设置值
 callback: 传送的回调函数
+【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
 getCommonEvent: fn(name: string) -> [?]
 获得一个公共事件

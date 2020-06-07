@@ -848,8 +848,8 @@ editor_mappanel_wrapper = function (editor) {
 
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
-        var px = scrollLeft + e.clientX - editor.dom.mid2.offsetLeft - editor.dom.lastUsedDiv.offsetLeft,
-            py = scrollTop + e.clientY - editor.dom.mid2.offsetTop - editor.dom.lastUsedDiv.offsetTop;
+        var px = scrollLeft + e.clientX - editor.dom.mid2.offsetLeft - editor.dom.lastUsedDiv.offsetLeft + editor.dom.lastUsedDiv.scrollLeft,
+            py = scrollTop + e.clientY - editor.dom.mid2.offsetTop - editor.dom.lastUsedDiv.offsetTop + editor.dom.lastUsedDiv.scrollTop;
         var x = parseInt(px / 32), y = parseInt(py / 32);
         var index = x + core.__SIZE__ * y;
         if (index >= editor.uivalues.lastUsed.length) return;
@@ -880,6 +880,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.lastUsed = [];
             editor.config.set('lastUsed', []);
             editor.updateLastUsedMap();
+            editor.dom.lastUsedDiv.scroll(0,0);
         }
     }
 

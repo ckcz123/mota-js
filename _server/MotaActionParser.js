@@ -123,7 +123,7 @@ ActionParser.prototype.parse = function (obj,type) {
         }
         var info = parser.getTitleAndPosition(obj.text || '');
         return MotaActionBlocks['shopsub'].xmlText([
-          obj.id,obj[0],info[1],info[3],obj.textInList,obj.mustEnable,obj.disablePreview,text_choices,next
+          obj.id,info[0],info[1],info[3],obj.textInList,obj.mustEnable,obj.disablePreview,text_choices,next
         ]);
       }
       var buildcommentevent = function(obj,parser,next){

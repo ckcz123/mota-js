@@ -154,7 +154,8 @@ body {
     height: auto;
     bottom: 0;
     margin-top: 20px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #mid .tools {

@@ -206,20 +206,21 @@ editor.prototype.init = function (callback) {
                     editor.file = editor_file;
                     editor_mode = editor_mode(editor);
                     editor.mode = editor_mode;
+                    var canvases = document.getElementsByClassName('gameCanvas');
+                    for (var one in canvases) {
+                        canvases[one].width = canvases[one].height = core.__PIXELS__;
+                    }
+
                     core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
                     var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
                     if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
-                    core.changeFloor(lastFloorId, null, core.firstData.hero.loc, null, function () {
+                    core.changeFloor(lastFloorId, null, {x: 0, y: 0, direction:"up"}, null, function () {
                         afterCoreReset();
                     }, true);
                 });
             }
         
             var afterCoreReset = function () {
-                var canvases = document.getElementsByClassName('gameCanvas');
-                for (var one in canvases) {
-                    canvases[one].width = canvases[one].height = core.__PIXELS__;
-                }
                 
                 editor.game.idsInit(core.maps, core.icons.icons); // 初始化图片素材信息
                 editor.drawInitData(core.icons.icons); // 初始化绘图
@@ -463,6 +464,7 @@ editor.prototype.setLastUsedType = function (type) {
         = type == 'frequent' ? (_buildHtml('recent', '最近使用') + " | " + _buildHtml(null, '最常使用'))
         : (_buildHtml(null, '最近使用') + " | " + _buildHtml('frequent', '最常使用'));
     this.updateLastUsedMap();
+    editor.dom.lastUsedDiv.scroll(0,0);
 }
 
 editor.prototype.updateLastUsedMap = function () {

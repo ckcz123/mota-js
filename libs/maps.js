@@ -245,19 +245,44 @@ maps.prototype.compressMap = function (mapArr, floorId) {
     return mapArr;
 }
 
+maps.prototype._processInvalidMap = function (mapArr, width, height) {
+    if (mapArr.length == height && mapArr[0].length == width) return mapArr;
+
+    var allZeros = [];
+    for (var i = 0; i < width; ++i) {
+        allZeros.push(0);
+    }
+    var map = [];
+    for (var i = 0; i < height; ++i) {
+        map.push(core.clone(allZeros));
+    }
+    for (var j = 0; j < height; ++j) {
+        for (var i = 0; i < width; ++i) {
+            if (j < mapArr.length && i < mapArr[j].length) 
+                map[j][i] = mapArr[j][i];
+        }
+    }
+    return map;
+}
+
 ////// 解压缩地图
 maps.prototype.decompressMap = function (mapArr, floorId) {
-    var floorMap = core.floors[floorId].map;
-    if (!mapArr) return core.clone(floorMap);
-
     var mw = core.floors[floorId].width;
     var mh = core.floors[floorId].height;
+    var floorMap = this._processInvalidMap(core.floors[floorId].map, mw, mh);
+
+    if (!mapArr) return core.clone(floorMap);
+
     for (var x = 0; x < mh; x++) {
+        if (x >= mapArr.length) {
+            mapArr.push(0);
+        }
         if (mapArr[x] === 0) {
             mapArr[x] = core.clone(floorMap[x]);
         }
         else {
             for (var y = 0; y < mw; y++) {
+                if (y >= mapArr[x].length) mapArr[x].push(-1);
                 if (mapArr[x][y] === -1) {
                     mapArr[x][y] = floorMap[x][y];
                 }

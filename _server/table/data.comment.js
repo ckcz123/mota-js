@@ -44,12 +44,15 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_onconfirm": (function (previous, current) {
 						// 额外素材是有序的，因此根据之前的内容进行排序，然后在之后追加新的
 						previous = previous || [];
-						return current.sort(function (a, b) {
+						current = current.sort(function (a, b) {
 							var i = previous.indexOf(a);
 							var j = previous.indexOf(b);
 							if (i >= 0 && j >= 0) return i - j;
 							return j >= 0 ? 1 : -1;
 						});
+						return core.subarray(current, previous) == null &&
+							!confirm("您修改了现有额外素材的内容或顺序，这可能导致已经使用的额外素材无法正确显示。确定要修改么？") ?
+							previous : current;
 					}).toString(),
 					"_docs": "额外素材",
 					"_data": "在此存放额外素材的图片名, \n可以自定导入任意张素材图片，无需PS，无需注册，即可直接在游戏中使用 \n 形式如[\"1.png\", \"2.png\"] ,将需要的素材图片放在images目录下 \n 素材的宽高必须都是32的倍数，且图片上的总图块数不超过1000（即最多有1000个32*32的图块在该图片上）"
@@ -461,7 +464,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "select",
 					"_select": {
-						"values": [1,2,3,4]
+						"values": [1, 2, 3, 4]
 					},
 					"_docs": "竖状态栏自绘行数",
 					"_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于4。\n仅在statusCanvas开启时才有效"

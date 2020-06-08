@@ -1042,7 +1042,10 @@ ActionParser.prototype.matchId = function(args) {
   var Id_List = MotaActionBlocks['Id_List'].options; // [["变量", "flag"], ...]
   match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
   if(match){
-    args=[match[1],MotaActionFunctions.replaceToName_token(match[2])]
+    if (match[1] == 'status' || match[1] == 'item') {
+      match[2] = MotaActionFunctions.replaceToName_token(match[2]);
+    }
+    args=[match[1],match[2]]
     return rt(MotaActionBlocks['idIdList_e'].xmlText, args);
   }
   return {ret:false}

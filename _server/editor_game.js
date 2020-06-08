@@ -158,6 +158,7 @@ editor_game_wrapper = function (editor, main, core) {
                 //与editor.map同形的全0
                 mapArray = eval('[' + Array(editor.map.length + 1).join('[' + Array(editor.map[0].length + 1).join('0,') + '],') + ']');
             }
+            mapArray = core.maps._processInvalidMap(mapArray, editor.map[0].length, editor.map.length);
             editor[name] = mapArray.map(function (v) {
                 return v.map(function (v) {
                     var x = parseInt(v), y = editor.indexs[x];

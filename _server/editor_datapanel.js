@@ -379,7 +379,7 @@ editor_datapanel_wrapper = function (editor) {
             } else if (cls == 'items') {
                 if (confirm("你确定要覆盖此道具的全部属性么？这是个不可逆操作！")) {
                     var name = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].name;
-                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id] = core.clone(editor.uivalues.copyEnemyItem.data[x]);
+                    items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id] = core.clone(editor.uivalues.copyEnemyItem.data);
                     items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].id = id;
                     items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id].name = name;
                     editor.file.saveSetting('items', [], function (err) {

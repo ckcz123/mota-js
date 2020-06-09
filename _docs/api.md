@@ -1160,6 +1160,365 @@ tryUseItem: fn(itemId: string)
 itemId: 道具id，其中敌人手册、传送器和飞行器会被特殊处理
 ```
 
+## map.js
+
+maps.js负责一切和地图相关的处理内容，包括如下几个方面：	插件编写中内置了一些常用的插件。
+- 地图的初始化，保存和读取，地图数组的生成	
+- 是否可移动或瞬间移动的判定	
+- 地图的绘制	
+- 获得某个点的图块信息	
+- 启用和禁用图块，改变图块	
+- 移动/跳跃图块，淡入淡出图块	
+- 全局动画控制，动画的绘制
+
+```text
+noPass: fn(x: number, y: number, floorId?: string) -> bool
+判定某个点是否不可被踏入（不基于主角生命值和图块cannotIn属性）
+例如：core.noPass(0, 0); // 判断地图左上角能否被踏入
+x: 目标点的横坐标
+y: 目标点的纵坐标
+floorId: 目标点所在的地图id，不填视为当前地图
+返回值：true表示可踏入
+
+drawAnimate: fn(name: string, x: number, y: number, alignWindow: bool, callback?: fn()) -> number
+播放动画，注意即使指定了主角的坐标也不会跟随主角移动，如有需要请使用core.drawHeroAnimate(name, callback)函数
+例如：core.drawAnimate('attack', core.nextX(), core.nextY(), false, core.vibrate); // 在主角面前一格播放普攻动画，动画停止后视野左右抖动1秒
+name: 动画文件名，不含后缀
+x: 横坐标
+y: 纵坐标
+alignWindow: 是否是相对窗口的坐标
+callback: 动画停止后的回调函数，可选
+返回值：一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
+
+drawHeroAnimate: fn(name: string, callback?: fn()) -> number
+播放跟随勇士的动画
+name: 动画名
+callback: 动画停止后的回调函数，可选
+返回值：一个数字，可作为core.stopAnimate()的参数来立即停止播放（届时还可选择是否执行此次播放的回调函数）
+
+stopAnimate: fn(id: number, doCallback?: bool)
+立刻停止一个动画播放
+id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值
+doCallback: 是否执行该动画的回调函数
+
+getBlockCls: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string
+判定某个点的图块类型
+例如：if(core.getBlockCls(x1, y1) != 'enemys' && core.getBlockCls(x2, y2) != 'enemy48') core.openDoor(x3, y3); // 另一个简单的机关门事件，打败或炸掉这一对不同身高的敌人就开门
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+showDisable: 隐藏点是否不返回null，true表示不返回null
+返回值：图块类型，即“地形、四帧动画、矮敌人、高敌人、道具、矮npc、高npc、自动元件、额外地形”之一
+
+drawMap: fn(floorId?: string)
+地图重绘
+例如：core.drawMap(); // 重绘当前地图，常用于更改贴图或改变自动元件后的刷新
+floorId: 地图id，可省略表示当前楼层
+callback: 重绘完毕后的回调函数，可选
+
+nearStair: fn() -> bool
+当前位置是否在楼梯边；在楼传平面塔模式下对箭头也有效
+
+turnBlock: fn(direction?: string, x?: number, y?: number, floorId?: string)
+事件转向
+
+getMapArray: fn(floorId?: string) -> [[number]]
+生成事件层矩阵
+例如：core.getMapArray('MT0'); // 生成主塔0层的事件层矩阵，隐藏的图块视为0
+floorId: 地图id，不填视为当前地图
+showDisable: 可选，true表示隐藏的图块也会被表示出来
+返回值：事件层矩阵，注意对其阵元的访问是[y][x]
+
+jumpBlock: fn(sx: number, sy: number, ex: number, ey: number, time?: number, keep?: bool, callback?: fn())
+跳跃图块；从V2.7开始不再有音效
+例如：core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出
+sx: 起点的横坐标
+sy: 起点的纵坐标
+ex: 终点的横坐标
+ey: 终点的纵坐标
+time: 单步和淡出用时，单位为毫秒。不填视为半秒
+keep: 是否不淡出，true表示不淡出
+callback: 落地或淡出后的回调函数，可选
+
+replaceBlock: fn(fromNumber: number, toNumber: number, floorId?: string|[string])
+批量替换图块
+例如：core.replaceBlock(21, 22, core.floorIds); // 把游戏中地上当前所有的黄钥匙都变成蓝钥匙
+fromNumber: 旧图块的数字
+toNumber: 新图块的数字
+floorId: 地图id或其数组，不填视为当前地图
+
+drawBlock: fn(block?: block, animate?: number)
+绘制一个图块
+
+resetMap: fn(floorId?: string|[string])
+重置地图
+
+animateSetBlock: fn(number: number|string, x: number, y: number, floorId?: string, time?: number, callback?: fn())
+动画形式转变某点图块
+
+animateSetBlocks: fn(number: number|string, locs: [?], floorId?: string, time?: number, callback?: fn())
+动画形式同时转变若干点图块
+
+compressMap: fn(mapArr: [[number]], floorId?: string) -> [[number]]
+压缩地图
+
+enemyExists: fn(x: number, y: number, id?: string, floorId?: string) -> bool
+某个点是否存在（指定的）怪物
+
+npcExists: fn(x: number, y: number, floorId?: string) -> bool
+某个点是否存在NPC
+
+getBlockByNumber: fn(number: number) -> block
+根据数字获得图块
+
+removeBlock: fn(x: number, y: number, floorId?: string)
+删除一个图块，对应于「隐藏事件」并同时删除
+例如：core.removeBlock(0, 0); // 尝试删除地图左上角的图块
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+
+hideBlock: fn(x: number, y: number, floorId?: string)
+隐藏一个图块，对应于「隐藏事件」且不删除
+例如：core.hideBlock(0, 0); // 隐藏地图左上角的图块
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+
+removeBlockByIndex: fn(index: number, floorId?: string)
+根据block的索引删除该块
+
+stairExists: fn(x: number, y: number, floorId?: string) -> bool
+某个点是否存在楼梯
+
+isMapBlockDisabled: fn(floorId?: string, x?: number, y?: number, flags?: ?) -> bool
+某个点图块是否被强制启用或禁用
+
+setMapBlockDisabled: fn(floorId?: string, x?: number, y?: number, disabled?: bool)
+设置某个点图块的强制启用或禁用状态
+
+decompressMap: fn(mapArr: [[number]], floorId?: string) -> [[number]]
+解压缩地图
+
+automaticRoute: fn(destX: number, destY: number) -> [{x: number, y: number, direction: string}]
+自动寻路
+例如：core.automaticRoute(0, 0); // 自动寻路到地图左上角
+destX: 目标点的横坐标
+destY: 目标点的纵坐标
+返回值：每步走完后主角的loc属性组成的一维数组
+
+resizeMap: fn(floorId?: string)
+更改地图画布的尺寸
+
+getFgNumber: fn(x: number, y: number, floorId?: string, noCache?: bool) -> number
+判定某点的前景层的数字
+例如：core.getFgNumber(); // 判断主角脚下的前景层图块的数字
+x: 横坐标，不填为勇士坐标
+y: 纵坐标，不填为勇士坐标floorId: 地图id，不填视为当前地图
+noCache: 可选，true表示不使用缓存而强制重算
+
+moveBlock: fn(x: number, y: number, steps: [string], time?: number, keep?: bool, callback?: fn())
+移动图块
+例如：core.moveBlock(0, 0, ['down']); // 令地图左上角的图块下移一格
+x: 起点的横坐标
+y: 起点的纵坐标
+steps: 步伐数组
+time: 单步和淡出用时，单位为毫秒。不填视为半秒
+keep: 是否不淡出，true表示不淡出
+callback: 移动或淡出后的回调函数，可选
+
+getBgNumber: fn(x?: number, y?: number, floorId?: string, noCache?: bool) -> number
+判定某点的背景层的数字
+例如：core.getBgNumber(); // 判断主角脚下的背景层图块的数字
+x: 横坐标，不填为勇士坐标
+y: 纵坐标，不填为勇士坐标
+floorId: 地图id，不填视为当前地图
+noCache: 可选，true表示不使用缓存而强制重算
+
+getIdOfThis: fn(id?: string) -> string
+获得当前事件点的ID
+
+searchBlock: fn(id: string, floorId?: string, showDisable?: bool) -> [{floorId: string, index: number, x: number, y: number, block: block}]
+搜索图块, 支持通配符和正则表达式
+例如：core.searchBlock('*Door'); // 搜索当前地图的所有门
+id: 图块id，支持星号表示任意多个（0个起）字符
+floorId: 地图id，不填视为当前地图
+showDisable: 隐藏点是否计入，true表示计入
+返回值：一个详尽的数组，一般只用到其长度
+
+hideBgFgMap: fn(name?: string, loc?: [number]|[[number]], floorId?: string, callback?: fn())
+隐藏前景/背景地图
+
+getBlockInfo: fn(block?: number|string|block) -> blockInfo
+获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等
+
+canMoveDirectlyArray: fn(locs?: [[number]])
+获得某些点可否通行的信息
+
+hideFloorImage: fn(loc?: [number]|[[number]], floorId?: string, callback?: fn())
+隐藏一个楼层贴图
+
+extractBlocks: fn(map?: [[number]], flags?: flags)
+根据需求解析出blocks
+
+getBlockId: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string
+判定某个点的图块id
+例如：if(core.getBlockId(x1, y1) != 'greenSlime' && core.getBlockId(x2, y2) != 'redSlime') core.openDoor(x3, y3); // 一个简单的机关门事件，打败或炸掉这一对绿头怪和红头怪就开门
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+showDisable: 隐藏点是否不返回null，true表示不返回null
+返回值：图块id，该点无图块则返回null
+
+loadFloor: fn(floorId?: string, map?: ?)
+从文件或存档中加载某个楼层
+
+generateMovableArray: fn(floorId?: string, x?: number, y?: number, direction?: string)
+可通行性判定
+例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动
+floorId: 地图id，不填视为当前地图
+x: 起点横坐标，不填视为挨个判定
+y: 起点纵坐标，不填视为挨个判定
+direction: 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值
+返回值：不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值
+
+terrainExists: fn(x: number, y: number, id?: string, floorId?: string) -> bool
+某个点是否存在（指定的）地形
+
+getBlockById: fn(id: string) -> block
+根据ID获得图块
+
+drawBg: fn(floorId?: string, ctx?: CanvasRenderingContext2D)
+绘制背景层（含贴图，其与背景层矩阵的绘制顺序可通过复写此函数来改变）
+例如：core.drawBg(); // 绘制当前地图的背景层
+floorId: 地图id，不填视为当前地图
+ctx: 某画布的ctx，用于绘制缩略图，一般不需要
+
+showBlock: fn(x: number, y: number, floorId?: string)
+显示（隐藏或显示的）图块，此函数将被“显示事件”指令和勾选了“不消失”的“移动/跳跃事件”指令（如阻击怪）的终点调用
+例如：core.showBlock(0, 0); // 显示地图左上角的图块
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+
+getMapBlocksObj: fn(floorId?: string, showDisable?: bool)
+以x,y的形式返回每个点的事件
+
+removeGlobalAnimate: fn(x?: number, y?: number, name?: string)
+删除一个或所有全局动画
+
+drawEvents: fn(floorId?: string, blocks?: [block], ctx?: CanvasRenderingContext2D)
+绘制事件层
+例如：core.drawEvents(); // 绘制当前地图的事件层
+floorId: 地图id，不填视为当前地图
+blocks: 一般不需要
+ctx: 某画布的ctx，用于绘制缩略图，一般不需要
+
+canMoveDirectly: fn(destX: number, destY: number) -> number
+能否瞬移到某点，并求出节约的步数。
+例如：core.canMoveDirectly(0, 0); // 能否瞬移到地图左上角
+destX: 目标点的横坐标
+destY: 目标点的纵坐标
+返回值：正数表示节约的步数，-1表示不可瞬移
+
+saveMap: fn(floorId?: string)
+将当前地图重新变成数字，以便于存档
+
+drawBoxAnimate: fn()
+绘制UI层的box动画
+
+setBgFgBlock: fn(name: string, number: number|string, x: number, y: number, floorId?: string)
+转变图层块
+例如：core.setBgFgBlock('bg', 167, 6, 6); // 把当前地图背景层的中心块改为滑冰
+name: 背景还是前景
+number: 新图层块的数字（也支持纯数字字符串如'1'）或id
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+
+drawFg: fn(floorId?: string, ctx?: CanvasRenderingContext2D)
+绘制前景层（含贴图，其与前景层矩阵的绘制顺序可通过复写此函数来改变）
+例如：core.drawFg(); // 绘制当前地图的前景层
+floorId: 地图id，不填视为当前地图
+ctx: 某画布的ctx，用于绘制缩略图，一般不需要
+
+getBlock: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}
+获得某个点的block
+
+initBlock: fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?, flags?: ?) -> block
+初始化一个图块
+
+addGlobalAnimate: fn(block?: block)
+添加一个全局动画
+
+animateBlock: fn(loc?: [number]|[[number]], type?: string, time?: number, callback?: fn())
+显示/隐藏某个块时的动画效果
+
+loadMap: fn(data?: ?, floorId?: string)
+将存档中的地图信息重新读取出来
+
+setBlock: fn(number: number|string, x: number, y: number, floorId?: string)
+转变图块
+例如：core.setBlock(1, 0, 0); // 把地图左上角变成黄墙
+number: 新图块的数字（也支持纯数字字符串如'1'）或id
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+
+getFgMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
+生成前景层矩阵
+例如：core.getFgMapArray('MT0'); // 生成主塔0层的前景层矩阵，使用缓存
+floorId: 地图id，不填视为当前地图
+noCache: 可选，true表示不使用缓存
+返回值：前景层矩阵，注意对其阵元的访问是[y][x]
+
+getBgMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
+生成背景层矩阵
+例如：core.getBgMapArray('MT0'); // 生成主塔0层的背景层矩阵，使用缓存
+floorId: 地图id，不填视为当前地图
+noCache: 可选，true表示不使用缓存
+返回值：背景层矩阵，注意对其阵元的访问是[y][x]
+
+canMoveHero: fn(x?: number, y?: number, direction?: string, floorId?: string) -> bool
+单点单朝向的可通行性判定；受各图层cannotInOut、起点cannotMove和canGoDeadZone影响，不受canPass和noPass影响
+x: 起点横坐标，不填视为主角当前的
+y: 起点纵坐标，不填视为主角当前的
+direction: 移动的方向，不填视为主角面对的方向
+floorId: 地图id，不填视为当前地图
+
+drawThumbnail: fn(floorId?: string, blocks?: [block], options?: ?, toDraw?: string|CanvasRenderingContext2D|?)
+绘制缩略图
+例如：core.drawThumbnail(); // 绘制当前地图的缩略图
+floorId: 地图id，不填视为当前地图
+blocks: 一般不需要
+options: 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
+toDraw: 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心
+
+hideBlockByIndex: fn(index?: number, floorId?: string)
+根据图块的索引来隐藏图块
+
+getNumberById: fn(id: string) -> number
+根据图块id得到数字（地图矩阵中的值）
+例如：core.getNumberById('yellowWall'); // 1
+id: 图块id
+返回值：图块的数字，定义在project\maps.js（请注意和project\icons.js中的“图块索引”相区分！）
+
+removeBlockByIndexes: fn(indexes?: [number], floorId?: string)
+一次性删除多个block
+
+hideBlockByIndexes: fn(indexes?: [number], floorId?: string)
+一次性隐藏多个block
+
+generateGroundPattern: fn(floorId?: string)
+生成groundPattern
+
+showBgFgMap: fn(name?: string, loc?: [number]|[[number]], floorId?: string, callback?: fn())
+显示前景/背景地图
+
+showFloorImage: fn(loc?: [number]|[[number]], floorId?: string, callback?: fn())
+显示一个楼层贴图
+```
+
 ## ui.js
 
 ui.js负责一切UI界面的绘制。主要包括三个部分：

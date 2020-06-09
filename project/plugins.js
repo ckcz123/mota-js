@@ -253,10 +253,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			toIndex = core.floorIds.indexOf(toId);
 		if (toIndex < 0) toIndex = core.floorIds.length - 1;
 		flags.__removed__ = flags.__removed__ || [];
+		flags.__disabled__ = flags.__disabled__ || [];
 		for (var i = fromIndex; i <= toIndex; ++i) {
 			var floorId = core.floorIds[i];
 			delete flags.__visited__[floorId];
 			flags.__removed__.push(floorId);
+			delete flags.__disabled__[floorId];
 			core.status.maps[floorId].deleted = true;
 			core.status.maps[floorId].canFlyTo = false;
 			core.status.maps[floorId].cannotViewMap = true;

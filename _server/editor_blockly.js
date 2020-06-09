@@ -147,7 +147,8 @@ editor_blockly = function () {
     editor_blockly.highlightParse = function (shouldHighLight) {
       if (shouldNotifyParse == shouldHighLight) return;
       shouldNotifyParse = shouldHighLight;
-      blocklyParseBtn.style.background = shouldNotifyParse ? '#ffd700' : 'unset';
+      if (shouldHighLight) blocklyParseBtn.classList.add('highlight');
+      else blocklyParseBtn.classList.remove('highlight');
     }
 
     editor_blockly.cancel = function () {
@@ -687,6 +688,77 @@ editor_blockly = function () {
     }
 
     editor_blockly.completeItems = [];
+
+
+    editor_blockly.setDarkScale=function (globalScale) {
+        if (globalScale > 0) {
+            Blockly.BlockSvg.prototype.updateColour = function() {
+                if (this.disabled) {
+                    // Disabled blocks don't have colour.
+                    return;
+                }
+                var hexColour = this.getColour();
+                var colourSecondary = this.getColourSecondary();
+                var colourTertiary = this.getColourTertiary();
+                var rgb = goog.color.darken(goog.color.hexToRgb(hexColour),globalScale);
+                hexColour = goog.color.rgbArrayToHex(rgb);
+    
+                if (this.isShadow()) {
+                    hexColour = this.setShadowColour_(rgb, colourSecondary);
+                } else {
+                    this.setBorderColour_(rgb, colourTertiary);
+                }
+                this.svgPath_.setAttribute('fill', hexColour);
+    
+                var icons = this.getIcons();
+                for (var i = 0; i < icons.length; i++) {
+                    icons[i].updateColour();
+                }
+    
+                // Bump every dropdown to change its colour.
+                // TODO (#1456)
+                for (var x = 0, input; input = this.inputList[x]; x++) {
+                    for (var y = 0, field; field = input.fieldRow[y]; y++) {
+                        field.forceRerender();
+                    }
+                }
+            }
+    
+            Blockly.BlockSvg.prototype.setShadowColour_ = function(a, b) {
+                if (b) {
+                    this.svgPathLight_.style.display = "none";
+                    this.svgPathDark_.style.display = "none";
+                    this.svgPath_.setAttribute("fill", b);
+                    var c = b
+                } else
+                    a = goog.color.darken(a, .4),
+                    c = goog.color.rgbArrayToHex(a),
+                    this.svgPathLight_.style.display = "none",
+                    this.svgPathDark_.setAttribute("fill", c);
+                return c
+            }
+    
+            Blockly.BlockSvg.prototype.setBorderColour_ = function(a, b) {
+                if (b)
+                    this.svgPathLight_.setAttribute("stroke", "none"),
+                    this.svgPathDark_.setAttribute("fill", "none"),
+                    this.svgPath_.setAttribute("stroke", b);
+                else {
+                    this.svgPathLight_.style.display = "";
+                    var c = goog.color.rgbArrayToHex(goog.color.darken(a, .2))
+                    , d = goog.color.rgbArrayToHex(goog.color.lighten(a, .3));
+                    this.svgPathLight_.setAttribute("stroke", c);
+                    this.svgPathDark_.setAttribute("fill", d);
+                    this.svgPath_.setAttribute("stroke", "none")
+                }
+                
+            }
+        }
+    }
+
+    var computedStyle = window.getComputedStyle(document.getElementById('blocklyDarkScale')) || {};
+    editor_blockly.setDarkScale(parseFloat(computedStyle.opacity) || 0);
+
     return editor_blockly;
 }
 

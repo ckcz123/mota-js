@@ -4,7 +4,6 @@
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
   height: 300px;
-  color: black;
   direction: ltr;
 }
 
@@ -18,54 +17,29 @@
   padding: 0 4px; /* Horizontal padding of content */
 }
 
-.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
-  background-color: white; /* The little square between H and V scrollbars */
-}
-
 /* GUTTER */
 
 .CodeMirror-gutters {
-  border-right: 1px solid #ddd;
-  background-color: #f7f7f7;
   white-space: nowrap;
-}
-
-.CodeMirror-linenumbers {
 }
 
 .CodeMirror-linenumber {
   padding: 0 3px 0 5px;
   min-width: 20px;
   text-align: right;
-  color: #999;
   white-space: nowrap;
-}
-
-.CodeMirror-guttermarker {
-  color: black;
-}
-
-.CodeMirror-guttermarker-subtle {
-  color: #999;
 }
 
 /* CURSOR */
 
 .CodeMirror-cursor {
-  border-left: 1px solid black;
   border-right: none;
   width: 0;
-}
-
-/* Shown when moving in bi-directional text */
-.CodeMirror div.CodeMirror-secondarycursor {
-  border-left: 1px solid silver;
 }
 
 .cm-fat-cursor .CodeMirror-cursor {
   width: auto;
   border: 0 !important;
-  background: #7e7;
 }
 
 .cm-fat-cursor div.CodeMirror-cursors {
@@ -73,7 +47,6 @@
 }
 
 .cm-fat-cursor-mark {
-  background-color: rgba(20, 255, 20, 0.5);
   -webkit-animation: blink 1.06s steps(1) infinite;
   -moz-animation: blink 1.06s steps(1) infinite;
   animation: blink 1.06s steps(1) infinite;
@@ -85,7 +58,6 @@
   -webkit-animation: blink 1.06s steps(1) infinite;
   -moz-animation: blink 1.06s steps(1) infinite;
   animation: blink 1.06s steps(1) infinite;
-  background-color: #7e7;
 }
 
 @-moz-keyframes blink {
@@ -119,8 +91,6 @@
 }
 
 /* Can style cursor different in overwrite (non-insert) mode */
-.CodeMirror-overwrite .CodeMirror-cursor {
-}
 
 .cm-tab {
   display: inline-block;
@@ -137,29 +107,12 @@
 }
 
 .CodeMirror-ruler {
-  border-left: 1px solid #ccc;
   top: 0;
   bottom: 0;
   position: absolute;
 }
 
 /* DEFAULT THEME */
-
-.cm-s-default .cm-header {
-  color: blue;
-}
-
-.cm-s-default .cm-quote {
-  color: #090;
-}
-
-.cm-negative {
-  color: #d44;
-}
-
-.cm-positive {
-  color: #292;
-}
 
 .cm-header, .cm-strong {
   font-weight: bold;
@@ -177,108 +130,14 @@
   text-decoration: line-through;
 }
 
-.cm-s-default .cm-keyword {
-  color: #708;
-}
-
-.cm-s-default .cm-atom {
-  color: #219;
-}
-
-.cm-s-default .cm-number {
-  color: #164;
-}
-
-.cm-s-default .cm-def {
-  color: #00f;
-}
-
 .cm-s-default .cm-variable,
 .cm-s-default .cm-punctuation,
 .cm-s-default .cm-property,
 .cm-s-default .cm-operator {
 }
 
-.cm-s-default .cm-variable-2 {
-  color: #05a;
-}
-
-.cm-s-default .cm-variable-3, .cm-s-default .cm-type {
-  color: #085;
-}
-
-.cm-s-default .cm-comment {
-  color: #a50;
-}
-
-.cm-s-default .cm-string {
-  color: #a11;
-}
-
-.cm-s-default .cm-string-2 {
-  color: #f50;
-}
-
-.cm-s-default .cm-meta {
-  color: #555;
-}
-
-.cm-s-default .cm-qualifier {
-  color: #555;
-}
-
-.cm-s-default .cm-builtin {
-  color: #30a;
-}
-
-.cm-s-default .cm-bracket {
-  color: #997;
-}
-
-.cm-s-default .cm-tag {
-  color: #170;
-}
-
-.cm-s-default .cm-attribute {
-  color: #00c;
-}
-
-.cm-s-default .cm-hr {
-  color: #999;
-}
-
-.cm-s-default .cm-link {
-  color: #00c;
-}
-
-.cm-s-default .cm-error {
-  color: #f00;
-}
-
-.cm-invalidchar {
-  color: #f00;
-}
-
 .CodeMirror-composing {
   border-bottom: 2px solid;
-}
-
-/* Default styles for common addons */
-
-div.CodeMirror span.CodeMirror-matchingbracket {
-  color: #0b0;
-}
-
-div.CodeMirror span.CodeMirror-nonmatchingbracket {
-  color: #a22;
-}
-
-.CodeMirror-matchingtag {
-  background: rgba(255, 150, 0, .3);
-}
-
-.CodeMirror-activeline-background {
-  background: #e8f2ff;
 }
 
 /* STOP */
@@ -289,7 +148,6 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 .CodeMirror {
   position: relative;
   overflow: hidden;
-  background: white;
 }
 
 .CodeMirror-scroll {
@@ -486,29 +344,8 @@ div.CodeMirror-dragcursors {
   visibility: visible;
 }
 
-.CodeMirror-selected {
-  background: #d9d9d9;
-}
-
-.CodeMirror-focused .CodeMirror-selected {
-  background: #d7d4f0;
-}
-
 .CodeMirror-crosshair {
   cursor: crosshair;
-}
-
-.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection {
-  background: #d7d4f0;
-}
-
-.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection {
-  background: #d7d4f0;
-}
-
-.cm-searching {
-  background-color: #ffa;
-  background-color: rgba(255, 255, 0, .4);
 }
 
 /* Used to force a border model for a node */
@@ -535,8 +372,6 @@ span.CodeMirror-selectedtext {
 
 /* ========= show-hint.css ========= */
 
-.cm-matchhighlight {background-color: #dedede}
-
 .CodeMirror-hints {
   position: absolute;
   z-index: 340;
@@ -546,13 +381,7 @@ span.CodeMirror-selectedtext {
   margin: 0;
   padding: 2px;
 
-  -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
-  -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
-  box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
   border-radius: 3px;
-  border: 1px solid silver;
-
-  background: white;
   font-size: 90%;
   font-family: monospace;
 
@@ -565,13 +394,7 @@ span.CodeMirror-selectedtext {
   padding: 0 4px;
   border-radius: 2px;
   white-space: pre;
-  color: black;
   cursor: pointer;
-}
-
-li.CodeMirror-hint-active {
-  background: #08f;
-  color: white;
 }
 
 /* ========= lint.css ========= */
@@ -582,10 +405,7 @@ li.CodeMirror-hint-active {
 }
 
 .CodeMirror-lint-tooltip {
-  background-color: #ffd;
-  border: 1px solid black;
   border-radius: 4px 4px 4px 4px;
-  color: black;
   font-family: monospace;
   font-size: 10pt;
   overflow: hidden;
@@ -607,15 +427,6 @@ li.CodeMirror-hint-active {
   background-position: left bottom;
   background-repeat: repeat-x;
 }
-
-.CodeMirror-lint-mark-error {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDw4cOCW1/KIAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAHElEQVQI12NggIL/DAz/GdA5/xkY/qPKMDAwAADLZwf5rvm+LQAAAABJRU5ErkJggg==");
-}
-
-.CodeMirror-lint-mark-warning {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII=");
-}
-
 .CodeMirror-lint-marker-error, .CodeMirror-lint-marker-warning {
   background-position: center center;
   background-repeat: no-repeat;
@@ -633,16 +444,7 @@ li.CodeMirror-hint-active {
   background-repeat: no-repeat;
 }
 
-.CodeMirror-lint-marker-error, .CodeMirror-lint-message-error {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAHlBMVEW7AAC7AACxAAC7AAC7AAAAAAC4AAC5AAD///+7AAAUdclpAAAABnRSTlMXnORSiwCK0ZKSAAAATUlEQVR42mWPOQ7AQAgDuQLx/z8csYRmPRIFIwRGnosRrpamvkKi0FTIiMASR3hhKW+hAN6/tIWhu9PDWiTGNEkTtIOucA5Oyr9ckPgAWm0GPBog6v4AAAAASUVORK5CYII=");
-}
-
-.CodeMirror-lint-marker-warning, .CodeMirror-lint-message-warning {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAANlBMVEX/uwDvrwD/uwD/uwD/uwD/uwD/uwD/uwD/uwD6twD/uwAAAADurwD2tQD7uAD+ugAAAAD/uwDhmeTRAAAADHRSTlMJ8mN1EYcbmiixgACm7WbuAAAAVklEQVR42n3PUQqAIBBFUU1LLc3u/jdbOJoW1P08DA9Gba8+YWJ6gNJoNYIBzAA2chBth5kLmG9YUoG0NHAUwFXwO9LuBQL1giCQb8gC9Oro2vp5rncCIY8L8uEx5ZkAAAAASUVORK5CYII=");
-}
-
 .CodeMirror-lint-marker-multiple {
-  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAMAAADzjKfhAAAACVBMVEUAAAAAAAC/v7914kyHAAAAAXRSTlMAQObYZgAAACNJREFUeNo1ioEJAAAIwmz/H90iFFSGJgFMe3gaLZ0od+9/AQZ0ADosbYraAAAAAElFTkSuQmCC");
   background-repeat: no-repeat;
   background-position: right bottom;
   width: 100%;
@@ -662,47 +464,10 @@ li.CodeMirror-hint-active {
 }
 
 .CodeMirror-dialog-top {
-  border-bottom: 1px solid #eee;
   top: 0;
 }
 
 .CodeMirror-dialog-bottom {
-  border-top: 1px solid #eee;
-  bottom: 0;
-}
-
-.CodeMirror-dialog input {
-  border: none;
-  outline: none;
-  background: transparent;
-  width: 20em;
-  color: inherit;
-  font-family: monospace;
-}
-
-.CodeMirror-dialog button {
-  font-size: 70%;
-}
-
-/* ========= dialog.css ========= */
-
-.CodeMirror-dialog {
-  position: absolute;
-  left: 0; right: 0;
-  background: inherit;
-  z-index: 15;
-  padding: .1em .8em;
-  overflow: hidden;
-  color: inherit;
-}
-
-.CodeMirror-dialog-top {
-  border-bottom: 1px solid #eee;
-  top: 0;
-}
-
-.CodeMirror-dialog-bottom {
-  border-top: 1px solid #eee;
   bottom: 0;
 }
 
@@ -719,7 +484,6 @@ li.CodeMirror-hint-active {
   font-size: 70%;
 }
   
-
 /* ========= tern.css ========= */
 
 .CodeMirror-Tern-completion {
@@ -738,59 +502,20 @@ li.CodeMirror-hint-active {
   width: 15px;
   line-height: 16px;
   text-align: center;
-  color: white;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
-.CodeMirror-Tern-completion-unknown:before {
-  content: "?";
-  background: #4bb;
-}
-.CodeMirror-Tern-completion-object:before {
-  content: "O";
-  background: #77c;
-}
-.CodeMirror-Tern-completion-fn:before {
-  content: "F";
-  background: #7c7;
-}
-.CodeMirror-Tern-completion-array:before {
-  content: "A";
-  background: #c66;
-}
-.CodeMirror-Tern-completion-number:before {
-  content: "1";
-  background: #999;
-}
-.CodeMirror-Tern-completion-string:before {
-  content: "S";
-  background: #999;
-}
-.CodeMirror-Tern-completion-bool:before {
-  content: "B";
-  background: #999;
-}
-
-.CodeMirror-Tern-completion-guess {
-  color: #999;
-}
 
 .CodeMirror-Tern-tooltip {
-  border: 1px solid silver;
   border-radius: 3px;
-  color: #444;
   padding: 2px 5px;
   font-size: 90%;
   font-family: monospace;
-  background-color: white;
   white-space: pre-wrap;
 
   max-width: 40em;
   position: absolute;
   z-index: 320;
-  -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
-  -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
-  box-shadow: 2px 3px 5px rgba(0,0,0,.2);
 
   transition: opacity 1s;
   -moz-transition: opacity 1s;
@@ -804,15 +529,10 @@ li.CodeMirror-hint-active {
   margin-top: -3px;
 }
 
-.CodeMirror-Tern-fname { color: black; }
-.CodeMirror-Tern-farg { color: #70a; }
 .CodeMirror-Tern-farg-current { text-decoration: underline; }
-.CodeMirror-Tern-type { color: #07c; }
 .CodeMirror-Tern-fhint-guess { opacity: .7; }
 
 .CodeMirror-foldmarker {
-  color: blue;
-  text-shadow: #b9f 1px 1px 2px, #b9f -1px -1px 2px, #b9f 1px -1px 2px, #b9f -1px 1px 2px;
   font-family: arial;
   line-height: .3;
   cursor: pointer;
@@ -830,11 +550,3 @@ li.CodeMirror-hint-active {
 .CodeMirror-foldgutter-folded:after {
   content: "\25B8";
 }
-
-.CodeMirror-focused .cm-matchhighlight {
-  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
-  background-position: bottom;
-  background-repeat: repeat-x;
-}
-.cm-matchhighlight {background-color: lightgreen}
-.CodeMirror-selection-highlight-scrollbar {background-color: yellowgreen}

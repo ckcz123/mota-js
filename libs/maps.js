@@ -133,7 +133,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor, flags) {
     var disable = null;
     if (eventFloor != null) {
         if (flags == null) flags = (core.status.hero || {}).flags || {};
-        disable = flags[[eventFloor.floorId, x, y, 'md'].join('@')];
+        disable = this.isMapBlockDisabled(eventFloor.floorId, x, y, flags);
     }
     var block = {'x': x, 'y': y, 'id': id};
     if (disable != null) block.disable = disable;
@@ -263,6 +263,37 @@ maps.prototype._processInvalidMap = function (mapArr, width, height) {
         }
     }
     return map;
+}
+
+////// 某个点图块是否被强制启用或禁用
+maps.prototype.isMapBlockDisabled = function (floorId, x, y, flags) {
+    if (flags == null) flags = (core.status.hero || {}).flags;
+    if (flags == null) return null;
+    var __disabled__ = flags.__disabled__ || {};
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return null;
+    if ((flags.__removed__ || []).indexOf(floorId) >= 0) return null;
+    var index = x + y * core.floors[floorId].width;
+    if (!__disabled__[floorId]) return null;
+    if (__disabled__[floorId][0].indexOf(index) >= 0) return true;
+    if (__disabled__[floorId][1].indexOf(index) >= 0) return false;
+}
+
+////// 设置某个点的图块强制启用/禁用状态
+maps.prototype.setMapBlockDisabled = function (floorId, x, y, disabled) {
+    if (window.flags == null) return;
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return null;
+    if (!window.flags.__disabled__) window.flags.__disabled__ = {};
+    if ((window.flags.__removed__ || []).indexOf(floorId) >= 0) return;
+    var __disabled__ = window.flags.__disabled__ || {};
+    if (!__disabled__[floorId]) __disabled__[floorId] = [[],[]];
+    var index = x + y * core.floors[floorId].width;
+    __disabled__[floorId][0] = __disabled__[floorId][0].filter(function (x) {return x != index});
+    __disabled__[floorId][1] = __disabled__[floorId][1].filter(function (x) {return x != index});
+    if (disabled == null) return;
+    if (disabled) __disabled__[floorId][0].push(index);
+    else __disabled__[floorId][1].push(index);
 }
 
 ////// 解压缩地图
@@ -1433,7 +1464,7 @@ maps.prototype.showBlock = function (x, y, floorId) {
     // 本身是禁用事件，启用之
     if (block.disable) {
         block.disable = false;
-        core.setFlag([floorId, x, y, 'md'].join('@'), false);
+        core.setMapBlockDisabled(floorId, x, y, false);
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
             if (block.event.cls == 'autotile') {
@@ -1468,7 +1499,7 @@ maps.prototype.hideBlockByIndex = function (index, floorId) {
     core.extractBlocks(floorId);
     var blocks = core.status.maps[floorId].blocks, block = blocks[index];
     block.disable = true;
-    core.setFlag([floorId, block.x, block.y, 'md'].join('@'), true);
+    core.setMapBlockDisabled(floorId, block.x, block.y, true);
 }
 
 ////// 一次性隐藏多个block //////
@@ -1517,7 +1548,7 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
     core.extractBlocks(floorId);
     var blocks = core.status.maps[floorId].blocks, block = blocks[index];
     blocks.splice(index, 1);
-    core.setFlag([floorId, block.x, block.y, 'md'].join('@'), true);
+    core.setMapBlockDisabled(floorId, block.x, block.y, true);
 }
 
 ////// 一次性删除多个block //////
@@ -1619,7 +1650,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     var originEvent = originBlock == null ? null : originBlock.block.event;
     if (originBlock == null) {
         core.status.maps[floorId].blocks.push(block);
-        core.setFlag([floorId, x, y, 'md'].join('@'), false);
+        core.setMapBlockDisabled(floorId, block.x, block.y, false);
         delete block.disable;
     }
     else {

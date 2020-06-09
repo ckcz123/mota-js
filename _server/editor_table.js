@@ -53,9 +53,9 @@ editor_table_wrapper = function (editor) {
         var list = [];
         if (showComment) list.push("<button onclick='editor.table.onCommentBtnClick(this)'>注释</button>");
         if (type != 'select' && type != 'checkbox' && type != 'checkboxSet' && type != 'popCheckboxSet' && type != 'disable')
-            list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>编辑</button>");
+            list.push("<button onclick='editor.table.onEditBtnClick(this)' class='editorTableEditBtn'>编辑</button>");
         if (type == 'popCheckboxSet')
-        list.push("<button onclick='editor.table.onEditBtnClick(this)' style='background-color: #ddf8ff'>多选框编辑</button>");
+        list.push("<button onclick='editor.table.onEditBtnClick(this)' class='editorTableEditBtn'>多选框编辑</button>");
         if (type == 'disable') list.push("<button onclick='editor.table.onCopyBtnClick(this)'>复制</button>");
         return list.join(' ');
     }
@@ -74,7 +74,7 @@ editor_table_wrapper = function (editor) {
             <td>----</td>
             <td>----</td>
             <td>${field}</td>
-            <td><button style="background: #fff4bb" onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
+            <td><button class='editorTableFoldBtn' onclick='editor.table.onFoldBtnClick(this)' data-fold="${ status ? "true" : "false" }">${ status ? "展开" : "折叠" }</button></td>
         </tr>\n`
     }
 

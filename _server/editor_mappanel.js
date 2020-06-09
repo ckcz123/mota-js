@@ -816,12 +816,12 @@ editor_mappanel_wrapper = function (editor) {
 
     editor.uifunctions.highlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='#ffd700';
+        saveFloor.classList.add('highlight');
     }
 
     editor.uifunctions.unhighlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='';
+        saveFloor.classList.remove('highlight');
     }
 
     editor.uifunctions.saveFloor_func = function () {

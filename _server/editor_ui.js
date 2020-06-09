@@ -930,7 +930,7 @@ editor_ui_wrapper = function (editor) {
             if (index % 3 == 0) {
                 table += '<tr>';
             }
-            table += `<td style='color:black'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0? 'checked' : ''}/></td>`;
+            table += `<td class='popCheckboxItem'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0? 'checked' : ''}/></td>`;
             if (index % 3 == 2) {
                 table += '</tr>';
             }

@@ -147,7 +147,8 @@ editor_blockly = function () {
     editor_blockly.highlightParse = function (shouldHighLight) {
       if (shouldNotifyParse == shouldHighLight) return;
       shouldNotifyParse = shouldHighLight;
-      blocklyParseBtn.style.background = shouldNotifyParse ? '#ffd700' : 'unset';
+      if (shouldHighLight) blocklyParseBtn.classList.add('highlight');
+      else blocklyParseBtn.classList.remove('highlight');
     }
 
     editor_blockly.cancel = function () {
@@ -689,51 +690,8 @@ editor_blockly = function () {
     editor_blockly.completeItems = [];
 
 
-    editor_blockly.setTheme=function (theme) {
-        var blocklyAddtionStyleNode;
-        blocklyAddtionStyleNode=document.getElementById('blocklyAddtionStyleNode_jxzdiv2v376fvcw7v')
-        if (blocklyAddtionStyleNode==null) {
-            blocklyAddtionStyleNode=document.createElement('style')
-            blocklyAddtionStyleNode.setAttribute('id','blocklyAddtionStyleNode_jxzdiv2v376fvcw7v')
-            document.head.appendChild(blocklyAddtionStyleNode)
-            var updateColour = Blockly.BlockSvg.prototype.updateColour
-            var setShadowColour_ = Blockly.BlockSvg.prototype.setShadowColour_
-            var setBorderColour_ = Blockly.BlockSvg.prototype.setBorderColour_
-        }
-        
-        if (theme==='light') {
-            blocklyAddtionStyleNode.innerHTML=``
-            Blockly.BlockSvg.prototype.updateColour=updateColour
-            Blockly.BlockSvg.prototype.setShadowColour_=setShadowColour_
-            Blockly.BlockSvg.prototype.setBorderColour_=setBorderColour_
-        }
-        if (theme=='dark') {
-
-            // 改这个调整方块黑的程度 0~1, 越大越黑
-            var globalScale=0.1
-
-            blocklyAddtionStyleNode.innerHTML=`
-
-            .blocklySvg {
-                background-color: #000;
-            }
-
-            .blocklyNonEditableText>rect, .blocklyEditableText>rect {
-                fill: #000;
-                fill-opacity: .4;
-            }
-
-            .blocklyNonEditableText>text, .blocklyEditableText>text {
-                fill: #fff;
-            }
-
-            input.blocklyHtmlInput {
-                color: white;
-                background-color: black;
-            }
-            `
-
-
+    editor_blockly.setDarkScale=function (globalScale) {
+        if (globalScale > 0) {
             Blockly.BlockSvg.prototype.updateColour = function() {
                 if (this.disabled) {
                     // Disabled blocks don't have colour.
@@ -744,19 +702,19 @@ editor_blockly = function () {
                 var colourTertiary = this.getColourTertiary();
                 var rgb = goog.color.darken(goog.color.hexToRgb(hexColour),globalScale);
                 hexColour = goog.color.rgbArrayToHex(rgb);
-
+    
                 if (this.isShadow()) {
                     hexColour = this.setShadowColour_(rgb, colourSecondary);
                 } else {
                     this.setBorderColour_(rgb, colourTertiary);
                 }
                 this.svgPath_.setAttribute('fill', hexColour);
-
+    
                 var icons = this.getIcons();
                 for (var i = 0; i < icons.length; i++) {
                     icons[i].updateColour();
                 }
-
+    
                 // Bump every dropdown to change its colour.
                 // TODO (#1456)
                 for (var x = 0, input; input = this.inputList[x]; x++) {
@@ -765,8 +723,7 @@ editor_blockly = function () {
                     }
                 }
             }
-            ;
-
+    
             Blockly.BlockSvg.prototype.setShadowColour_ = function(a, b) {
                 if (b) {
                     this.svgPathLight_.style.display = "none";
@@ -780,8 +737,7 @@ editor_blockly = function () {
                     this.svgPathDark_.setAttribute("fill", c);
                 return c
             }
-            ;
-
+    
             Blockly.BlockSvg.prototype.setBorderColour_ = function(a, b) {
                 if (b)
                     this.svgPathLight_.setAttribute("stroke", "none"),
@@ -795,11 +751,13 @@ editor_blockly = function () {
                     this.svgPathDark_.setAttribute("fill", d);
                     this.svgPath_.setAttribute("stroke", "none")
                 }
+                
             }
-            ;
-
         }
     }
+
+    var computedStyle = window.getComputedStyle(document.getElementById('blocklyDarkScale')) || {};
+    editor_blockly.setDarkScale(parseFloat(computedStyle.opacity) || 0);
 
     return editor_blockly;
 }

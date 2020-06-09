@@ -991,16 +991,25 @@ editor_datapanel_wrapper = function (editor) {
             if (value != 'items' && value != 'enemys' && value != 'enemy48' && value != 'npcs' && value != 'npc48')
                 return printe("只有怪物或NPC才能快速导入！");
             var ysize = value.endsWith('48') ? 48 : 32;
-            if (editor.dom.appendSourceCtx.canvas.width != 128 || editor.dom.appendSourceCtx.canvas.height != 4 * ysize)
-                return printe("只有 4*4 的素材图片才可以快速导入！");
+            var sw = editor.dom.appendSourceCtx.canvas.width, sh = editor.dom.appendSourceCtx.canvas.height;
+            if (value == 'items') {
+                if ((sw != 96 && sw != 128) || sh != 4 * ysize) {
+                    return printe("只有 3*4 或 4*4 的道具才可以快速导入！");
+                }
+            } else {
+                if (sw != 128 || sh != 4 * ysize) {
+                    return printe("只有 4*4 的素材图片才可以快速导入！");
+                }
+            }
+            sw = sw / 32;
 
             var dt = editor.dom.appendSpriteCtx.getImageData(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
-            var appendSize = value == 'items' ? 15 : 3;
+            var appendSize = value == 'items' ? (4 * sw - 1) : 3;
             editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = (editor.dom.appendSprite.height + appendSize * ysize)) + "px";
             editor.dom.appendSpriteCtx.putImageData(dt, 0, 0);
             if (editor.dom.appendSprite.width == 32) { // 1帧：道具
-                for (var i = 0; i < 16; ++i) {
-                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32 * (i % 4), 32 * parseInt(i / 4), 32, 32, 0, editor.dom.appendSprite.height - (16 - i) * ysize, 32, 32);
+                for (var i = 0; i < 4 * sw; ++i) {
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32 * (i % sw), 32 * parseInt(i / sw), 32, 32, 0, editor.dom.appendSprite.height - (sw * 4 - i) * ysize, 32, 32);
                 }
             } else if (editor.dom.appendSprite.width == 64) { // 两帧
                 editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32, 0, 64, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 64, 4 * ysize);

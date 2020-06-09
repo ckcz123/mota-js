@@ -481,7 +481,8 @@ editor.prototype.updateLastUsedMap = function () {
     ctx.lineWidth = 4;
     for (var i = 0; i < lastUsed.length; ++i) {
         try {
-            var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
+            var per_row = core.__SIZE__ - 1;
+            var x = i % per_row, y = parseInt(i / per_row);
             var info = lastUsed[i];
             if (!info || !info.images) continue;
             if (info.isTile && core.material.images.tilesets[info.images]) {

@@ -852,7 +852,8 @@ editor_mappanel_wrapper = function (editor) {
         var px = scrollLeft + e.clientX - editor.dom.mid2.offsetLeft - editor.dom.lastUsedDiv.offsetLeft + editor.dom.lastUsedDiv.scrollLeft,
             py = scrollTop + e.clientY - editor.dom.mid2.offsetTop - editor.dom.lastUsedDiv.offsetTop + editor.dom.lastUsedDiv.scrollTop;
         var x = parseInt(px / 32), y = parseInt(py / 32);
-        var index = x + core.__SIZE__ * y;
+        if (x == core.__SIZE__ - 1) return false;
+        var index = x + (core.__SIZE__ - 1) * y;
         if (index >= editor.uivalues.lastUsed.length) return;
         var lastUsed = editor.uivalues.lastUsed.sort(function (a, b) {
             if ((a.istop || 0) != (b.istop || 0)) return (b.istop || 0) - (a.istop || 0);

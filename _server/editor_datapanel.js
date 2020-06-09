@@ -628,17 +628,16 @@ editor_datapanel_wrapper = function (editor) {
 
 
 
-    editor.uifunctions.fixCtx_func = function () {
+    editor.uifunctions.appendPic_func = function () {
+        // --- fix ctx
         [editor.dom.appendSourceCtx, editor.dom.appendSpriteCtx].forEach(function (ctx) {
             ctx.mozImageSmoothingEnabled = false;
             ctx.webkitImageSmoothingEnabled = false;
             ctx.msImageSmoothingEnabled = false;
             ctx.imageSmoothingEnabled = false;
         })
-    }
 
-    editor.uifunctions.selectAppend_func = function () {
-
+        // --- selectAppend
         var selectAppend_str = [];
         ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"].forEach(function (image) {
             selectAppend_str.push(["<option value='", image, "'>", image, '</option>\n'].join(''));
@@ -681,10 +680,8 @@ editor_datapanel_wrapper = function (editor) {
             editor.dom.appendSpriteCtx.drawImage(img, 0, 0);
         }
         editor.dom.selectAppend.onchange();
-    }
 
-    editor.uifunctions.selectFileBtn_func = function () {
-
+        // --- selectFileBtn
         var autoAdjust = function (image, callback) {
             var changed = false;
 
@@ -769,74 +766,75 @@ editor_datapanel_wrapper = function (editor) {
             }
         }
 
-        editor.dom.selectFileBtn.onclick = function () {
-            var loadImage = function (content, callback) {
-                var image = new Image();
-                try {
-                    image.onload = function () {
-                        callback(image);
-                    }
-                    image.src = content;
+        var loadImage = function (content, callback) {
+            var image = new Image();
+            try {
+                image.onload = function () {
+                    callback(image);
                 }
-                catch (e) {
-                    printe(e);
-                }
+                image.src = content;
             }
-            core.readFile(function (content) {
-                loadImage(content, function (image) {
-                    autoAdjust(image, function (image) {
-                        editor_mode.appendPic.img = image;
-                        editor_mode.appendPic.width = image.width;
-                        editor_mode.appendPic.height = image.height;
-
-                        if (editor.dom.selectAppend.value == 'autotile') {
-                            for (var ii = 0; ii < 3; ii++) {
-                                var newsprite = editor.dom.appendPicCanvas.children[ii];
-                                newsprite.style.width = (newsprite.width = image.width) / editor.uivalues.ratio + 'px';
-                                newsprite.style.height = (newsprite.height = image.height) / editor.uivalues.ratio + 'px';
-                            }
-                            editor.dom.appendSpriteCtx.clearRect(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
-                            editor.dom.appendSpriteCtx.drawImage(image, 0, 0);
-                        }
-                        else {
-                            var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
-                            for (var ii = 0; ii < 3; ii++) {
-                                var newsprite = editor.dom.appendPicCanvas.children[ii];
-                                newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / editor.uivalues.ratio + 'px';
-                                newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / editor.uivalues.ratio + 'px';
-                            }
-                        }
-
-                        //画灰白相间的格子
-                        var bgc = editor.dom.appendBgCtx;
-                        var colorA = ["#f8f8f8", "#cccccc"];
-                        var colorIndex;
-                        var sratio = 4;
-                        for (var ii = 0; ii < image.width / 32 * sratio; ii++) {
-                            colorIndex = 1 - ii % 2;
-                            for (var jj = 0; jj < image.height / 32 * sratio; jj++) {
-                                bgc.fillStyle = colorA[colorIndex];
-                                colorIndex = 1 - colorIndex;
-                                bgc.fillRect(ii * 32 / sratio, jj * 32 / sratio, 32 / sratio, 32 / sratio);
-                            }
-                        }
-
-                        //把导入的图片画出
-                        editor.dom.appendSourceCtx.drawImage(image, 0, 0);
-                        editor_mode.appendPic.sourceImageData = editor.dom.appendSourceCtx.getImageData(0, 0, image.width, image.height);
-
-                        //重置临时变量
-                        editor.dom.selectAppend.onchange();
-                    });
-                });
-            }, null, 'image/*', 'img');
-
-            return;
+            catch (e) {
+                printe(e);
+            }
         }
-    }
 
+        var afterReadFile = function (content, callback) {
+            loadImage(content, function (image) {
+                autoAdjust(image, function (image) {
+                    editor_mode.appendPic.img = image;
+                    editor_mode.appendPic.width = image.width;
+                    editor_mode.appendPic.height = image.height;
 
-    editor.uifunctions.changeColorInput_func = function () {
+                    if (editor.dom.selectAppend.value == 'autotile') {
+                        for (var ii = 0; ii < 3; ii++) {
+                            var newsprite = editor.dom.appendPicCanvas.children[ii];
+                            newsprite.style.width = (newsprite.width = image.width) / editor.uivalues.ratio + 'px';
+                            newsprite.style.height = (newsprite.height = image.height) / editor.uivalues.ratio + 'px';
+                        }
+                        editor.dom.appendSpriteCtx.clearRect(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
+                        editor.dom.appendSpriteCtx.drawImage(image, 0, 0);
+                    }
+                    else {
+                        var ysize = editor.dom.selectAppend.value.endsWith('48') ? 48 : 32;
+                        for (var ii = 0; ii < 3; ii++) {
+                            var newsprite = editor.dom.appendPicCanvas.children[ii];
+                            newsprite.style.width = (newsprite.width = Math.floor(image.width / 32) * 32) / editor.uivalues.ratio + 'px';
+                            newsprite.style.height = (newsprite.height = Math.floor(image.height / ysize) * ysize) / editor.uivalues.ratio + 'px';
+                        }
+                    }
+
+                    //画灰白相间的格子
+                    var bgc = editor.dom.appendBgCtx;
+                    var colorA = ["#f8f8f8", "#cccccc"];
+                    var colorIndex;
+                    var sratio = 4;
+                    for (var ii = 0; ii < image.width / 32 * sratio; ii++) {
+                        colorIndex = 1 - ii % 2;
+                        for (var jj = 0; jj < image.height / 32 * sratio; jj++) {
+                            bgc.fillStyle = colorA[colorIndex];
+                            colorIndex = 1 - colorIndex;
+                            bgc.fillRect(ii * 32 / sratio, jj * 32 / sratio, 32 / sratio, 32 / sratio);
+                        }
+                    }
+
+                    //把导入的图片画出
+                    editor.dom.appendSourceCtx.drawImage(image, 0, 0);
+                    editor_mode.appendPic.sourceImageData = editor.dom.appendSourceCtx.getImageData(0, 0, image.width, image.height);
+
+                    //重置临时变量
+                    editor.dom.selectAppend.onchange();
+
+                    if (callback) callback();
+                });
+            });
+        }
+
+        editor.dom.selectFileBtn.onclick = function () {
+            core.readFile(afterReadFile, null, 'image/*', 'img');
+        }
+
+        // --- changeColorInput
         var changeColorInput = document.getElementById('changeColorInput')
         changeColorInput.oninput = function () {
             var delta = (~~changeColorInput.value) * 30;
@@ -862,12 +860,8 @@ editor_datapanel_wrapper = function (editor) {
             editor.dom.appendSourceCtx.clearRect(0, 0, imgData.width, imgData.height);
             editor.dom.appendSourceCtx.putImageData(nimgData, 0, 0);
         }
-    }
 
-
-    editor.uifunctions.picClick_func = function () {
-
-
+        // --- picClick
         var eToLoc = function (e) {
             var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
             var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
@@ -900,12 +894,9 @@ editor_datapanel_wrapper = function (editor) {
                 'height:', pos.ysize - 6, 'px;'
             ].join('');
         }
-    }
 
-    editor.uifunctions.appendConfirm_func = function () {
-
+        // appendConfirm
         var appendRegister = document.getElementById('appendRegister');
-
         var appendConfirm = document.getElementById('appendConfirm');
         appendConfirm.onclick = function () {
 
@@ -997,16 +988,21 @@ editor_datapanel_wrapper = function (editor) {
         var quickAppendConfirm = document.getElementById('quickAppendConfirm');
         quickAppendConfirm.onclick = function () {
             var value = editor.dom.selectAppend.value;
-            if (value != 'enemys' && value != 'enemy48' && value != 'npcs' && value != 'npc48')
+            if (value != 'items' && value != 'enemys' && value != 'enemy48' && value != 'npcs' && value != 'npc48')
                 return printe("只有怪物或NPC才能快速导入！");
             var ysize = value.endsWith('48') ? 48 : 32;
             if (editor.dom.appendSourceCtx.canvas.width != 128 || editor.dom.appendSourceCtx.canvas.height != 4 * ysize)
                 return printe("只有 4*4 的素材图片才可以快速导入！");
 
             var dt = editor.dom.appendSpriteCtx.getImageData(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
-            editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = (editor.dom.appendSprite.height + 3 * ysize)) + "px";
+            var appendSize = value == 'items' ? 15 : 3;
+            editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = (editor.dom.appendSprite.height + appendSize * ysize)) + "px";
             editor.dom.appendSpriteCtx.putImageData(dt, 0, 0);
-            if (editor.dom.appendSprite.width == 64) { // 两帧
+            if (editor.dom.appendSprite.width == 32) { // 1帧：道具
+                for (var i = 0; i < 16; ++i) {
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32 * (i % 4), 32 * parseInt(i / 4), 32, 32, 0, editor.dom.appendSprite.height - (16 - i) * ysize, 32, 32);
+                }
+            } else if (editor.dom.appendSprite.width == 64) { // 两帧
                 editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32, 0, 64, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 64, 4 * ysize);
             } else { // 四帧
                 editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 0, 0, 128, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 128, 4 * ysize);
@@ -1038,6 +1034,27 @@ editor_datapanel_wrapper = function (editor) {
                 }
             });
 
+        }
+
+        editor.uifunctions.dragImageToAppend = function (file, cls) {
+            editor.mode.change('appendpic');
+            editor.dom.selectAppend.value = cls;
+            editor.dom.selectAppend.onchange();
+
+            var reader = new FileReader();
+            reader.onload = function () {
+                afterReadFile(reader.result, function() {
+                    if (cls == 'terrains') return;
+                    if (confirm('你确定要快速追加么？')) {
+                        if (cls == 'autotile') {
+                            appendConfirm.onclick();
+                        } else {
+                            quickAppendConfirm.onclick();
+                        }
+                    }
+                });
+            }
+            reader.readAsDataURL(file);
         }
     }
 

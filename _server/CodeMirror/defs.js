@@ -3055,6 +3055,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "某个点是否存在楼梯", 
           "!type": "fn(x: number, y: number, floorId?: string) -> bool"
         }, 
+        "isMapBlockDisabled": {
+          "!doc": "某个点图块是否被强制启用或禁用",
+          "!type": "fn(floorId?: string, x?: number, y?: number, flags?: ?) -> bool"
+        },
+        "setMapBlockDisabled": {
+          "!doc": "设置某个点图块的强制启用或禁用状态",
+          "!type": "fn(floorId?: string, x?: number, y?: number, disabled?: bool)"
+        },
         "decompressMap": {
           "!doc": "解压缩地图", 
           "!type": "fn(mapArr: [[number]], floorId?: string) -> [[number]]"

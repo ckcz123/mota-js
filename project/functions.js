@@ -120,7 +120,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.status.maps[floorId].blocks.forEach(function (block) {
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
-				core.setFlag([floorId, block.x, block.y, 'md'].join('@'), false);
+				core.setMapBlockDisabled(floorId, block.x, block.y, false);
 			}
 		});
 		core.control.gatherFollowers();

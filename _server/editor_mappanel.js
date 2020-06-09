@@ -845,13 +845,15 @@ editor_mappanel_wrapper = function (editor) {
         e.stopImmediatePropagation();
         e.stopPropagation();
         if (editor.isMobile) return false;
+        editor.uivalues.tileSize = [1,1];
 
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
         var px = scrollLeft + e.clientX - editor.dom.mid2.offsetLeft - editor.dom.lastUsedDiv.offsetLeft + editor.dom.lastUsedDiv.scrollLeft,
             py = scrollTop + e.clientY - editor.dom.mid2.offsetTop - editor.dom.lastUsedDiv.offsetTop + editor.dom.lastUsedDiv.scrollTop;
         var x = parseInt(px / 32), y = parseInt(py / 32);
-        var index = x + core.__SIZE__ * y;
+        if (x == core.__SIZE__ - 1) return false;
+        var index = x + (core.__SIZE__ - 1) * y;
         if (index >= editor.uivalues.lastUsed.length) return;
         var lastUsed = editor.uivalues.lastUsed.sort(function (a, b) {
             if ((a.istop || 0) != (b.istop || 0)) return (b.istop || 0) - (a.istop || 0);
@@ -888,6 +890,7 @@ editor_mappanel_wrapper = function (editor) {
 
 
     editor.constructor.prototype.copyFromPos = function (pos) {
+        editor.uivalues.tileSize = [1,1];
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
         var x0 = pos.x, y0 = pos.y, x1 = pos.x1, y1 = pos.y1;
@@ -910,6 +913,7 @@ editor_mappanel_wrapper = function (editor) {
     }
     
     editor.constructor.prototype.pasteToPos = function (info, pos) {
+        editor.uivalues.tileSize = [1,1];
         if (info == null) return;
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
@@ -931,6 +935,7 @@ editor_mappanel_wrapper = function (editor) {
     }
     
     editor.constructor.prototype.movePos = function (startPos, endPos, callback) {
+        editor.uivalues.tileSize = [1,1];
         if (!startPos || !endPos) return;
         if (startPos.x == endPos.x && startPos.y == endPos.y) return;
         var copyed = editor.copyFromPos(startPos);
@@ -949,6 +954,7 @@ editor_mappanel_wrapper = function (editor) {
     }
     
     editor.constructor.prototype.exchangePos = function (startPos, endPos, callback) {
+        editor.uivalues.tileSize = [1,1];
         if (!startPos || !endPos) return;
         if (startPos.x == endPos.x && startPos.y == endPos.y) return;
         var startInfo = editor.copyFromPos(startPos);

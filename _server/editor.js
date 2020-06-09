@@ -481,7 +481,8 @@ editor.prototype.updateLastUsedMap = function () {
     ctx.lineWidth = 4;
     for (var i = 0; i < lastUsed.length; ++i) {
         try {
-            var x = i % core.__SIZE__, y = parseInt(i / core.__SIZE__);
+            var per_row = core.__SIZE__ - 1;
+            var x = i % per_row, y = parseInt(i / per_row);
             var info = lastUsed[i];
             if (!info || !info.images) continue;
             if (info.isTile && core.material.images.tilesets[info.images]) {
@@ -573,9 +574,42 @@ editor.prototype.drawInitData = function (icons) {
     var iconImages = document.getElementById('iconImages');
     iconImages.style.width = (iconImages.width = fullWidth) / ratio + 'px';
     iconImages.style.height = (iconImages.height = fullHeight) / ratio + 'px';
-    var drawImage = function (image, x, y) {
+    document.body.ondrop = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+    }
+    document.body.ondragover = function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+    }
+    var drawImage = function (image, x, y, cls) {
         image.style.left = x + 'px';
         image.style.top = y + 'px';
+        image.ondrop = (function (cls) { return function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            if (!cls) return false;
+            var files = e.dataTransfer.files;
+            if (files.length >= 1) {
+                var file = files[0];
+                if (file.type == 'image/png') {
+                   editor.uifunctions.dragImageToAppend(file, cls);
+                } else {
+                    printe('只支持png图片的快速追加！');
+                }
+            }
+            return false;
+        }; })(cls);
+        image.ondragover = function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+            return false;
+        }
         iconImages.appendChild(image);
     }
 
@@ -600,12 +634,12 @@ editor.prototype.drawInitData = function (icons) {
                 var subimgs = core.splitImage(images[img], 32, editor.uivalues.foldPerCol * 32);
                 var frames = images[img].width / 32;
                 for (var i = 0; i < subimgs.length; i+=frames) {
-                    drawImage(subimgs[i], nowx, i==0?2*32:0);
+                    drawImage(subimgs[i], nowx, i==0?2*32:0, img);
                     nowx += 32;
                 }
             }
             else {
-                drawImage(images[img], nowx, 32*2);
+                drawImage(images[img], nowx, 32*2, img);
                 nowx += images[img].width;
             }
             continue;
@@ -615,7 +649,7 @@ editor.prototype.drawInitData = function (icons) {
             var tempx = editor.uivalues.folded ? 32 : 96;
             for (var im in autotiles) {
                 var subimgs = core.splitImage(autotiles[im], tempx, autotiles[im].height);
-                drawImage(subimgs[0], nowx, nowy);
+                drawImage(subimgs[0], nowx, nowy, img);
                 nowy += autotiles[im].height;
             }
             nowx += tempx;
@@ -627,12 +661,12 @@ editor.prototype.drawInitData = function (icons) {
             var subimgs = core.splitImage(images[img], 32, editor.uivalues.foldPerCol * per_height);
             var frames = images[img].width / 32;
             for (var i = 0; i < subimgs.length; i+=frames) {
-                drawImage(subimgs[i], nowx, 0);
+                drawImage(subimgs[i], nowx, 0, img);
                 nowx += 32;
             }
         }
         else {
-            drawImage(images[img], nowx, 0);
+            drawImage(images[img], nowx, 0, img);
             nowx += images[img].width;
         }
     }

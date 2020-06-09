@@ -162,13 +162,15 @@ editor_listen_wrapper = function (editor) {
         editor.uifunctions.changeFloorId_func()
         editor.uifunctions.changeFloorSize_func()
 
-        editor.uifunctions.fixCtx_func()
-
+        // editor.uifunctions.fixCtx_func()
+        editor.uifunctions.appendPic_func();
+        /*
         editor.uifunctions.selectAppend_func()
         editor.uifunctions.selectFileBtn_func()
         editor.uifunctions.changeColorInput_func()
         editor.uifunctions.picClick_func()
         editor.uifunctions.appendConfirm_func()
+        */
 
         editor.dom.editModeSelect.onchange = editor.mode.editModeSelect_onchange
 

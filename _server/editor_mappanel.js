@@ -845,6 +845,7 @@ editor_mappanel_wrapper = function (editor) {
         e.stopImmediatePropagation();
         e.stopPropagation();
         if (editor.isMobile) return false;
+        editor.uivalues.tileSize = [1,1];
 
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft
         var scrollTop = document.documentElement.scrollTop || document.body.scrollTop
@@ -888,6 +889,7 @@ editor_mappanel_wrapper = function (editor) {
 
 
     editor.constructor.prototype.copyFromPos = function (pos) {
+        editor.uivalues.tileSize = [1,1];
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
         var x0 = pos.x, y0 = pos.y, x1 = pos.x1, y1 = pos.y1;
@@ -910,6 +912,7 @@ editor_mappanel_wrapper = function (editor) {
     }
     
     editor.constructor.prototype.pasteToPos = function (info, pos) {
+        editor.uivalues.tileSize = [1,1];
         if (info == null) return;
         var fields = Object.keys(editor.file.comment._data.floors._data.loc._data);
         pos = pos || editor.pos;
@@ -931,6 +934,7 @@ editor_mappanel_wrapper = function (editor) {
     }
     
     editor.constructor.prototype.movePos = function (startPos, endPos, callback) {
+        editor.uivalues.tileSize = [1,1];
         if (!startPos || !endPos) return;
         if (startPos.x == endPos.x && startPos.y == endPos.y) return;
         var copyed = editor.copyFromPos(startPos);
@@ -949,6 +953,7 @@ editor_mappanel_wrapper = function (editor) {
     }
     
     editor.constructor.prototype.exchangePos = function (startPos, endPos, callback) {
+        editor.uivalues.tileSize = [1,1];
         if (!startPos || !endPos) return;
         if (startPos.x == endPos.x && startPos.y == endPos.y) return;
         var startInfo = editor.copyFromPos(startPos);

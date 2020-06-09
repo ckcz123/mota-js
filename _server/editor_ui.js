@@ -134,6 +134,7 @@ editor_ui_wrapper = function (editor) {
      * 绑定快捷键
      */
     editor.uifunctions.body_shortcut = function (e) {
+        editor.uivalues.tileSize = [1,1];
 
         // UI预览 & 地图选点
         if (editor.uievent && editor.uievent.isOpen) {

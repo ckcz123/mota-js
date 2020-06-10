@@ -51,6 +51,14 @@ editor_listen_wrapper = function (editor) {
         if (editor.dom.layerMod3) editor.dom.layerMod3.onchange = editor.uifunctions.layerMod3_onchange;
 
         editor.uifunctions.viewportButtons_func()
+
+        window.onbeforeunload = function () {
+            var saveFloor = document.getElementById('saveFloor');
+            if (saveFloor && saveFloor.classList.contains('highlight')) {
+                return '你尚未保存地图，确定退出么？';
+            }
+            return null;
+        }
     }
 
     editor.constructor.prototype.mobile_listen = function () {

@@ -7,14 +7,6 @@ body {
     background-color: #F5F5F5;
 }
 
-input {
-    color: inherit;
-}
-
-button {
-    color: inherit;
-}
-
 /** 可自行仿照添加更多的全局属性...... */
 
 /** 颜色选择器 */ 
@@ -195,17 +187,11 @@ textarea[disabled] {
 }
 
 /** 保存地图的按钮颜色 */
-#saveFloor {
-    background-color: inherit;
-}
 #saveFloor.highlight {
     background-color: #ffd700;
 }
 
 /** 解析按钮颜色 */
-#blocklyParse {
-    background-color: inherit;
-}
 #blocklyParse.highlight {
     background-color: #ffd700;
 }

@@ -563,6 +563,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	var list = [];
 	var shopInfo = null; // 商店信息
 	var choices = []; // 商店选项
+	var use = 'money';
+	var useText = '金币';
 
 	var bigFont = core.ui._buildFont(20, false),
 		middleFont = core.ui._buildFont(18, false);
@@ -587,9 +589,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.fillText("uievent", "购买", 32, 74, 'white', bigFont);
 		core.fillText("uievent", "卖出", 132, 74);
 		core.fillText("uievent", "离开", 232, 74);
-		core.fillText("uievent", "当前金币", 324, 66, null, middleFont);
+		core.fillText("uievent", "当前" + useText, 324, 66, null, middleFont);
 		core.setTextAlign("uievent", "right");
-		core.fillText("uievent", core.formatBigNumber(core.status.hero.money), 405, 89);
+		core.fillText("uievent", core.formatBigNumber(core.status.hero[use]), 405, 89);
 		core.setTextAlign("uievent", "left");
 		core.ui._uievent_drawSelector({
 			"type": "drawSelector",
@@ -638,7 +640,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.setTextAlign('uievent', 'left');
 			core.fillText('uievent', core.material.items[item.id].name, 50, 132 + i * 40, null, bigFont);
 			core.setTextAlign('uievent', 'right');
-			core.fillText('uievent', (type == 0 ? core.calValue(item.money) : core.calValue(item.sell)) + "金币/个", 300, 133 + i * 40, null, middleFont);
+			core.fillText('uievent', (type == 0 ? core.calValue(item.money) : core.calValue(item.sell)) + useText + "/个", 300, 133 + i * 40, null, middleFont);
 			core.setTextAlign("uievent", "left");
 			if (curr == selectItem) {
 				// 绘制描述，文字自动放缩
@@ -664,7 +666,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					core.fillText("uievent", core.itemCount(item.id), 406, 132, null, null, 40);
 				}
 				core.setTextAlign("uievent", "left");
-				core.fillText("uievent", "预计金额", 324, 250);
+				core.fillText("uievent", "预计" + useText, 324, 250);
 				core.setTextAlign("uievent", "right");
 				totalMoney = selectCount * (type == 0 ? core.calValue(item.money) : core.calValue(item.sell));
 				core.fillText("uievent", core.formatBigNumber(totalMoney), 405, 280);
@@ -684,7 +686,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (item == null) return;
 		selectCount = core.clamp(
 			selectCount + delta, 0,
-			Math.min(type == 0 ? Math.floor(core.status.hero.money / core.calValue(item.money)) : core.itemCount(item.id),
+			Math.min(type == 0 ? Math.floor(core.status.hero[use] / core.calValue(item.money)) : core.itemCount(item.id),
 				type == 0 && item.number != null ? item.number : Number.MAX_SAFE_INTEGER)
 		);
 	}
@@ -692,12 +694,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	var _confirm = function (item) {
 		if (item == null || selectCount == 0) return;
 		if (type == 0) {
-			core.status.hero.money -= totalMoney;
+			core.status.hero[use] -= totalMoney;
 			core.getItem(item.id, selectCount);
 			if (item.number != null) item.number -= selectCount;
 			item.money_count = (item.money_count || 0) + selectCount;
 		} else {
-			core.status.hero.money += totalMoney;
+			core.status.hero[use] += totalMoney;
 			core.removeItem(item.id, selectCount);
 			core.drawTip("成功卖出" + selectCount + "个" + core.material.items[item.id].name, item.id);
 			if (item.number != null) item.number += selectCount;
@@ -836,6 +838,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		shopInfo = flags.__shops__[shopId];
 		if (shopInfo.choices == null) shopInfo.choices = core.clone(core.status.shops[shopId].choices);
 		choices = shopInfo.choices;
+		use = core.status.shops[shopId].use;
+		if (use != 'exp') use = 'money';
+		useText = use == 'money' ? '金币' : '经验';
 
 		core.insertAction([{
 				"type": "while",

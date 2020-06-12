@@ -144,7 +144,7 @@ ActionParser.prototype.parse = function (obj,type) {
           ]);
         }
         return MotaActionBlocks['shopitem'].xmlText([
-          obj.id,obj.textInList,obj.mustEnable,text_choices,next
+          obj.id,obj.textInList,obj.use||'money',obj.mustEnable,text_choices,next
         ]);
       }
       var next=null;

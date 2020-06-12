@@ -173,7 +173,7 @@ return code;
 */;
 
 shopitem
-    :   '道具商店 id' IdString '快捷名称' EvalString '未开启不显示' Bool BGNL? Newline shopItemChoices+ BEND
+    :   '道具商店 id' IdString '快捷名称' EvalString '使用' ShopUse_List '未开启不显示' Bool BGNL? Newline shopItemChoices+ BEND
 
 
 /* shopitem
@@ -184,6 +184,7 @@ var code = {
     'id': IdString_0,
     'item': true,
     'textInList': EvalString_0,
+    'use': ShopUse_List_0 || 'money',
     'mustEnable': Bool_0,
     'choices': 'choices_aqwedsa'
 }

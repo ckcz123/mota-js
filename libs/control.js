@@ -1262,6 +1262,7 @@ control.prototype.rewindReplay = function () {
         return core.drawTip("无法再回到上一个节点");
     var save = core.status.replay.save, data = save.pop();
     core.loadData(data.data, function () {
+        core.removeFlag('__fromLoad__');
         core.status.replay = {
             "replaying": true,
             "pausing": true,
@@ -1760,6 +1761,7 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
         return core.drawTip("无法从此存档回放录像");
     core.loadData(data, function () {
+        core.removeFlag('__fromLoad__');
         core.startReplay(route);
         core.drawTip("回退到存档节点");
     });

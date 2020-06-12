@@ -53,6 +53,7 @@ function editor() {
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
         lockMode: document.getElementById('lockMode'),
         gameInject: document.getElementById('gameInject'),
+        undoFloor: document.getElementById('undoFloor'),
         maps: ['bgmap', 'fgmap', 'map'],
         canvas: ['bg', 'fg'],
     };
@@ -107,6 +108,9 @@ function editor() {
         // 最近使用的图块
         lastUsedType: null,
         lastUsed: [],
+
+        // 最近访问的楼层
+        recentFloors: []
     };
 
     window.onerror = function (msg, url, lineNo, columnNo, error) {

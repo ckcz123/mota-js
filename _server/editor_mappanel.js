@@ -366,6 +366,7 @@ editor_mappanel_wrapper = function (editor) {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('floor');
             editor.dom.selectFloor.value = toId;
+            editor.uivalues.recentFloors.push(editor.currentFloorId);
             editor.changeFloor(toId);
         }
 
@@ -379,6 +380,16 @@ editor_mappanel_wrapper = function (editor) {
             console.log(ee);
         }
         return false;
+    }
+
+    editor.uifunctions.undoFloor_click = function () {
+        var toId = editor.uivalues.recentFloors.pop();
+        if (toId == null || toId == editor.currentFloorId) return;
+
+        editor_mode.onmode('nextChange');
+        editor_mode.onmode('floor');
+        editor.dom.selectFloor.value = toId;
+        editor.changeFloor(toId);
     }
 
     /**
@@ -809,6 +820,7 @@ editor_mappanel_wrapper = function (editor) {
             selectFloor.onchange = function () {
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
+                editor.uivalues.recentFloors.push(editor.currentFloorId);
                 editor.changeFloor(selectFloor.value);
             }
         });

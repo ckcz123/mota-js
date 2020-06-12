@@ -171,6 +171,7 @@ editor_ui_wrapper = function (editor) {
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
                 document.getElementById('selectFloor').value = toId;
+                editor.uivalues.recentFloors.push(editor.currentFloorId);
                 editor.changeFloor(toId);
             }
             return;

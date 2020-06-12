@@ -1370,7 +1370,7 @@ events.prototype._action_setBlock = function (data, x, y, prefix) {
 events.prototype._action_turnBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
-        core.turnBlock(data.number, t[0], t[1], data.floorId);
+        core.turnBlock(data.direction, t[0], t[1], data.floorId);
     });
     core.doAction();
 }

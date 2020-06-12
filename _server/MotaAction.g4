@@ -664,7 +664,9 @@ action
     |   moveAction_s
     |   moveHero_s
     |   jump_s
+    |   jump_1_s
     |   jumpHero_s
+    |   jumpHero_1_s
     |   playBgm_s
     |   pauseBgm_s
     |   resumeBgm_s
@@ -2069,6 +2071,31 @@ var code = '{"type": "jump"'+floorstr+''+IntString_0+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
+jump_1_s
+    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '增量 dx' PosString? ',' 'dy' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool Newline
+
+
+/* jump_1_s
+tooltip : jump: 让某个NPC/怪物跳跃，给定增量
+helpUrl : /_docs/#/instruction
+default : ["","","0","0",500,true,false]
+selectPoint : ["PosString_0", "PosString_1"]
+colour : this.mapColor
+
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr += ', "from": ['+PosString_0+','+PosString_1+']';
+}
+if (PosString_2 && PosString_3) {
+    floorstr += ', "dxy": ['+PosString_2+','+PosString_3+']';
+}
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+Bool_0 = Bool_0?', "keep": true':'';
+Bool_1 = Bool_1?', "async": true':'';
+var code = '{"type": "jump"'+floorstr+''+IntString_0+Bool_0+Bool_1+'},\n';
+return code;
+*/;
+
 jumpHero_s
     :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不等待执行完毕' Bool Newline
 
@@ -2082,6 +2109,25 @@ colour : this.dataColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "jumpHero"'+floorstr+IntString_0+Bool_0+'},\n';
+return code;
+*/;
+
+jumpHero_1_s
+    :   '跳跃勇士' '增量 dx' PosString? ',' 'dy' PosString? '动画时间' IntString? '不等待执行完毕' Bool Newline
+
+
+/* jumpHero_1_s
+tooltip : jumpHero: 跳跃勇士，给定增量
+helpUrl : /_docs/#/instruction
+default : ["0","0",500,false]
+colour : this.dataColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "dxy": ['+PosString_0+','+PosString_1+']';
 }
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';

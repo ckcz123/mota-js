@@ -1464,19 +1464,29 @@ events.prototype._action_moveHero = function (data, x, y, prefix) {
 }
 
 events.prototype._action_jump = function (data, x, y, prefix) {
-    var from = this.__action_getLoc(data.from, x, y, prefix),
+    var from = this.__action_getLoc(data.from, x, y, prefix), to;
+    if (data.dxy) {
+        to = [from[0] + (core.calValue(data.dxy[0], prefix) || 0), from[1] + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else {
         to = this.__action_getLoc(data.to, x, y, prefix);
+    }
     this.__action_doAsyncFunc(data.async, core.jumpBlock, from[0], from[1], to[0], to[1], data.time, data.keep);
 }
 
 events.prototype._precompile_jump = function (data) {
     data.from = this.__precompile_array(data.from);
     data.to = this.__precompile_array(data.to);
+    data.dxy = this.__precompile_array(data.dxy);
     return data;
 }
 
 events.prototype._action_jumpHero = function (data, x, y, prefix) {
-    var loc = this.__action_getHeroLoc(data.loc, prefix);
+    var loc;
+    if (data.dxy) {
+        loc = [core.getHeroLoc('x') + (core.calValue(data.dxy[0], prefix) || 0), core.getHeroLoc('y') + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else {
+        loc = this.__action_getHeroLoc(data.loc, prefix);
+    }
     this.__action_doAsyncFunc(data.async, core.jumpHero, loc[0], loc[1], data.time);
 }
 

@@ -401,14 +401,24 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "jump": // 跳跃事件
       data.from=data.from||['',''];
-      data.to=data.to||['',''];
-      this.next = MotaActionBlocks['jump_s'].xmlText([
-        data.from[0],data.from[1],data.to[0],data.to[1],data.time,data.keep||false,data.async||false,this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['jump_1_s'].xmlText([
+          data.from[0],data.from[1],data.dxy[0],data.dxy[1],data.time,data.keep||false,data.async||false,this.next]);
+      } else {
+        data.to=data.to||['',''];
+        this.next = MotaActionBlocks['jump_s'].xmlText([
+          data.from[0],data.from[1],data.to[0],data.to[1],data.time,data.keep||false,data.async||false,this.next]);
+      }
       break;
     case "jumpHero": // 跳跃勇士
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['jumpHero_s'].xmlText([
-        data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['jumpHero_1_s'].xmlText([
+          data.dxy[0],data.dxy[1],data.time,data.async||false,this.next]);
+      } else {
+        data.loc=data.loc||['','']
+        this.next = MotaActionBlocks['jumpHero_s'].xmlText([
+          data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
+      }
       break;
     case "changeFloor": // 楼层转换
       if (!data.loc) {

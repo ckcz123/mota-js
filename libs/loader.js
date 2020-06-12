@@ -60,7 +60,7 @@ loader.prototype._load_async = function (callback) {
             }
             if (allTotal > 0) {
                 if (allLoaded == allTotal) {
-                    core.loader._setStartLoadTipText("正在处理资源文件... 请稍后...");
+                    core.loader._setStartLoadTipText("正在处理资源文件... 请稍候...");
                 } else {
                     core.loader._setStartLoadTipText('正在加载资源文件... ' + 
                         core.formatSize(allLoaded) + " / " + core.formatSize(allTotal) + 

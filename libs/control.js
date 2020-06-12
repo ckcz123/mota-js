@@ -1801,7 +1801,7 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
 
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
-    core.ui.drawWaiting("正在同步，请稍后...");
+    core.ui.drawWaiting("正在同步，请稍候...");
     var callback = function (saves) {
         core.control._syncSave_http(type, saves);
     }
@@ -1839,7 +1839,7 @@ control.prototype.syncLoad = function () {
             core.drawText("不合法的存档编号+密码；应当为6位数字+4位数字字母的组合，如\r[yellow]123456abcd\r。");
             return;
         }
-        core.ui.drawWaiting("正在同步，请稍后...");
+        core.ui.drawWaiting("正在同步，请稍候...");
         core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
     });
 }

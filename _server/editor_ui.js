@@ -423,9 +423,15 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.body.style.overflow = "hidden";
         uievent.elements.yes.onclick = function () {
             var floorId = uievent.values.floorId, x = uievent.values.x, y = uievent.values.y;
+            var multipoints = uievent.values.multipoints || [];
             uievent.close();
             if (callback) {
-                callback(floorId, x, y);
+                if (multipoints.length > 0) {
+                    callback(floorId, multipoints.map(function (one) { return one.split(',')[0]}).join(','),
+                    multipoints.map(function (one) { return one.split(',')[1]}).join(','));
+                } else {
+                    callback(floorId, x, y);
+                }
             }
         }
 
@@ -435,21 +441,21 @@ editor_ui_wrapper = function (editor) {
             floors += "<option value=" + f + ">" + f + "</option>";
         })
         uievent.elements.selectFloor.innerHTML = floors;
-
+        // 检查多选点
+        if (/^\d+(,\d+)+$/.test(x) && /^\d+(,\d+)+$/.test(y)) {
+            var xx = x.split(','), yy = y.split(',');
+            uievent.values.multipoints = [];
+            for (var i = 0; i < xx.length; ++i) {
+                uievent.values.multipoints.push(xx[i] + "," + yy[i]);
+            }
+            x = xx[xx.length - 1];
+            y = yy[yy.length - 1];
+        }
         this.setPoint(floorId || editor.currentFloorId, core.calValue(x) || 0, core.calValue(y) || 0);
     }
 
     uievent.updateSelectPoint = function (redraw) {
         uievent.elements.title.innerText = '地图选点 (' + uievent.values.x + "," + uievent.values.y + ')';
-        if (redraw) {
-            core.setAlpha('uievent', 1);
-            core.clearMap('uievent');
-            core.drawThumbnail(uievent.values.floorId, null, null,
-                {
-                    ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
-                    centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
-                });
-        }
         // 计算size
         uievent.values.boxSize = uievent.values.size * 
             (uievent.values.bigmap ? (core.__SIZE__ / Math.max(uievent.values.width, uievent.values.height)) : 1);
@@ -467,6 +473,24 @@ editor_ui_wrapper = function (editor) {
         }
         uievent.elements.selectPointBox.style.width = uievent.values.boxSize - 6 + "px";
         uievent.elements.selectPointBox.style.height = uievent.values.boxSize - 6 + "px";
+
+        if (redraw) {
+            core.setAlpha('uievent', 1);
+            core.clearMap('uievent');
+            core.drawThumbnail(uievent.values.floorId, null, null,
+                {
+                    ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
+                    centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
+                });
+            uievent.values.multipoints = uievent.values.multipoints || [];
+            core.setTextAlign('uievent', 'right');
+            for (var i = 0; i < uievent.values.multipoints.length; ++i) {
+                var xy = uievent.values.multipoints[i].split(","), x = parseInt(xy[0]), y = parseInt(xy[1]);
+                core.fillBoldText('uievent', i + 1,
+                    32 * (x - uievent.values.left) + 28 , 32 * (y - uievent.values.top) + 26, '#FF7F00', null, '14px Verdana');
+            }
+            core.setTextAlign('uievent', 'left');
+        }
     }
 
     uievent.setPoint = function (floorId, x, y) {
@@ -483,11 +507,14 @@ editor_ui_wrapper = function (editor) {
     }
 
     uievent.elements.selectFloor.onchange = function () {
+        uievent.values.multipoints = [];
         uievent.setPoint(uievent.elements.selectFloor.value);
     }
 
     uievent.elements.selectPointBox.onclick = function (e) {
+        e.preventDefault();
         e.stopPropagation();
+        return false;
     }
 
     uievent.elements.body.onclick = function (e) {
@@ -502,6 +529,24 @@ editor_ui_wrapper = function (editor) {
         uievent.updateSelectPoint(false);
     }
 
+    uievent.elements.body.oncontextmenu = function (e) { 
+        e.preventDefault();
+        e.stopPropagation();
+        if (uievent.mode != 'selectPoint' || uievent.values.bigmap) return;
+        var x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
+        var y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
+        uievent.values.multipoints = uievent.values.multipoints || [];
+        if (uievent.values.multipoints.indexOf(x+","+y) >= 0) {
+            uievent.values.multipoints = uievent.values.multipoints.filter(function (o) { return o != x+","+y;})
+        } else {
+            uievent.values.multipoints.push(x+","+y);
+        }
+        uievent.values.x = x;
+        uievent.values.y = y;
+        uievent.updateSelectPoint(true);
+        return false;
+    }
+
     uievent.move = function (dx, dy) {
         if (uievent.mode != 'selectPoint') return;
         if (uievent.values.bigmap) return;
@@ -513,6 +558,7 @@ editor_ui_wrapper = function (editor) {
     uievent.triggerBigmap = function () {
         if (uievent.mode != 'selectPoint') return;
         uievent.values.bigmap = !uievent.values.bigmap;
+        uievent.values.multipoints = [];
         uievent.setPoint(uievent.values.floorId);
     };
 
@@ -568,6 +614,7 @@ editor_ui_wrapper = function (editor) {
                 index += Math.sign(e.detail);
         } catch (ee) { main.log(ee); }
         index = core.clamp(index, 0, core.floorIds.length - 1);
+        uievent.values.multipoints = [];
         uievent.setPoint(core.floorIds[index]);
     }
 

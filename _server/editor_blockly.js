@@ -457,13 +457,13 @@ editor_blockly = function () {
 
         var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
 
-        var xv = parseInt(block.getFieldValue(arr[0])), yv = parseInt(block.getFieldValue(arr[1]));
+        var xv = block.getFieldValue(arr[0]), yv = block.getFieldValue(arr[1]);
         if (arr[0] === arr[1]) {
             var v = block.getFieldValue(arr[0]).split(",");
             xv = parseInt(v[0]); yv = parseInt(v[1]);
         }
-        if (!isNaN(xv)) x = xv;
-        if (!isNaN(yv)) y = yv;
+        if (xv != null) x = xv;
+        if (yv != null) y = yv;
         if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
 
         editor.uievent.selectPoint(floorId, x, y, false, function (fv, xv, yv) {

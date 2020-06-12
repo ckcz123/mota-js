@@ -1588,7 +1588,8 @@ control.prototype._replayAction_moveDirectly = function (action) {
     var pos=action.substring(5).split(":");
     var x=parseInt(pos[0]), y=parseInt(pos[1]);
     var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
-    if (!core.moveDirectly(x, y)) return false;
+    var ignoreSteps = core.canMoveDirectly(x, y);
+    if (!core.moveDirectly(x, y, ignoreSteps)) return false;
     if (core.status.replay.speed == 24) {
         core.replay();
         return true;
@@ -1596,10 +1597,12 @@ control.prototype._replayAction_moveDirectly = function (action) {
 
     core.ui.drawArrow('ui', 32*nowx+16-core.bigmap.offsetX, 32*nowy+16-core.bigmap.offsetY,
         32*x+16-core.bigmap.offsetX, 32*y+16-core.bigmap.offsetY, '#FF0000', 3);
+    var timeout = this.__replay_getTimeout();
+    if (ignoreSteps < 10) timeout = timeout * ignoreSteps / 10;
     setTimeout(function () {
         core.clearMap('ui');
         core.replay();
-    }, core.control.__replay_getTimeout());
+    }, timeout);
     return true;
 }
 

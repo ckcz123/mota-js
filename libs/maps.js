@@ -638,7 +638,12 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans) {
             // if (nx == ex && ny == ey) return visited[nindex];
             for (var i in ans) {
                 if (locs[i][0] == nx && locs[i][1] == ny && ans[i] == null) {
-                    ans[i] = visited[nindex];
+                    // 不可以绿点为终点
+                    if (blocksObj[nx + "," + ny] && blocksObj[nx + "," + ny].event.trigger) {
+                        ans[i] = -1;
+                    } else {
+                        ans[i] = visited[nindex];
+                    }
                     number--;
                     if (number == 0) return ans;
                 }
@@ -655,9 +660,17 @@ maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans) {
 
 maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     var index = x + "," + y;
-    // 该点是否有事件
-    if (blocksObj[index] && (blocksObj[index].event.trigger || blocksObj[index].event.noPass
-        || blocksObj[index].event.script)) return false;
+    // 该点是否不可通行或有脚本
+    if (blocksObj[index] && (blocksObj[index].event.noPass || blocksObj[index].event.script))
+        return false;
+    // 该点是否是绿点可触发
+    if (blocksObj[index] && blocksObj[index].event.trigger) {
+        if (blocksObj[index].event.trigger != 'changeFloor') return false;
+        var ignore = core.flags.ignoreChangeFloor;
+        if (blocksObj[index].event.data && blocksObj[index].event.data.ignoreChangeFloor != null)
+            ignore = blocksObj[index].event.data.ignoreChangeFloor;
+        if (!ignore) return false;
+    }
     // 是否存在阻激夹域伤害
     if (core.status.checkBlock.damage[index]) return false;
     // 是否存在捕捉

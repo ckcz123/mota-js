@@ -829,6 +829,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	case 72: // H：打开帮助页面
 		core.ui.drawHelp();
 		break;
+	case 77: // M：打开存档笔记
+		core.actions._clickNotes_show();
+		break;
 	case 78: // N：重新开始
 		core.confirmRestart();
 		break;

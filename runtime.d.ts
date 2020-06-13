@@ -2178,6 +2178,9 @@ declare class ui {
     /** 绘制系统菜单栏 */
     drawSettings(): void
 
+    /** 绘制存档笔记 */
+    drawNotes(): void
+
     /** 绘制快捷商店选择栏 */
     drawQuickShop(): void
 

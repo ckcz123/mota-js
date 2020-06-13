@@ -262,6 +262,7 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
             break;
         case 'selectShop':
         case 'switchs':
+        case 'notes':
         case 'settings':
         case 'syncSave':
         case 'syncSelect':
@@ -366,6 +367,9 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
             break;
         case 'settings':
             this._keyUpSettings(keyCode);
+            break;
+        case 'notes':
+            this._keyUpNotes(keyCode);
             break;
         case 'syncSave':
             this._keyUpSyncSave(keyCode);
@@ -472,6 +476,7 @@ actions.prototype._sys_onmove_choices = function (x, y) {
             if (core.status.event.data.type != 'choices') break;
         case 'selectShop':
         case 'switchs':
+        case 'notes':
         case 'settings':
         case 'syncSave':
         case 'syncSelect':
@@ -636,6 +641,9 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
             break;
         case 'text':
             core.drawText();
+            break;
+        case 'notes':
+            this._clickNotes(x, y);
             break;
         case 'syncSave':
             this._clickSyncSave(x, y);
@@ -2106,15 +2114,19 @@ actions.prototype._clickSettings = function (x, y) {
                 break;
             case 3:
                 core.status.event.selection = 0;
-                core.ui.drawSyncSave();
+                core.ui.drawNotes();
                 break;
             case 4:
                 core.status.event.selection = 0;
-                core.ui.drawGameInfo();
+                core.ui.drawSyncSave();
                 break;
             case 5:
-                return core.confirmRestart();
+                core.status.event.selection = 0;
+                core.ui.drawGameInfo();
+                break;
             case 6:
+                return core.confirmRestart();
+            case 7:
                 core.ui.closePanel();
                 break;
         }
@@ -2129,6 +2141,138 @@ actions.prototype._keyUpSettings = function (keycode) {
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSettings);
+}
+
+////// 存档笔记页面时的点击操作 //////
+actions.prototype._clickNotes = function (x, y) {
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
+    var choices = core.status.event.ui.choices;
+
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    if (y >= topIndex && y < topIndex + choices.length) {
+        var selection = y - topIndex;
+        core.status.event.selection = selection;
+        switch (selection) {
+            case 0:
+                this._clickNotes_new();
+                break;
+            case 1:
+                this._clickNotes_show();
+                break;
+            case 2:
+                this._clickNotes_edit();
+                break;
+            case 3:
+                this._clickNotes_delete();
+                break;
+            case 4:
+                core.status.event.selection = 3;
+                core.ui.drawSettings();
+                break;
+        }
+    }
+}
+
+actions.prototype.__clickNotes_replaceText = function (data) {
+    data = (data || "").replace(/[\${}]/g, "_")
+        .replace(/(\t|\\t)\[.*?\]/g, "")
+        .replace("\b", "\\b")
+        .replace(/\\b\[.*?\]/g, "")
+        .replace(/\n|\\n/g, " ");
+    if (data.length > 45) data = data.substring(0, 43) + "...";
+    return data;
+}
+
+actions.prototype._clickNotes_new = function () {
+    core.status.hero.notes = core.status.hero.notes || [];
+    core.myprompt("请输入一段笔记，不超过45字", null, function (data) {
+        data = core.actions.__clickNotes_replaceText(data);
+        if (data) {
+            core.status.hero.notes.push(data);
+            core.drawText("存档笔记新增成功！");
+        } else {
+            core.ui.closePanel();
+        }
+    });
+}
+
+actions.prototype._clickNotes_show = function () {
+    core.status.hero.notes = core.status.hero.notes || [];
+    var result = [];
+    for (var i = 0; i < core.status.hero.notes.length; i+=5) {
+        var v = [];
+        for (var j = i; j < i + 5 && j < core.status.hero.notes.length; ++j) {
+            v.push(j + 1 + ". " + this.__clickNotes_replaceText(core.status.hero.notes[j]));
+        }
+        result.push("\t[存档笔记]" + v.join("\n"));
+    }
+    if (result.length == 0) result.push("当前没有存档笔记，试着新增一个吧！");
+    core.drawText(result);
+}
+
+actions.prototype._clickNotes_edit = function () {
+    core.status.hero.notes = core.status.hero.notes || [];
+    if (core.status.hero.notes.length == 0) {
+        core.drawText("当前没有存档笔记，试着新增一个吧！");
+    } else {
+        core.myprompt("请输入要编辑的存档笔记编号（1 - " + core.status.hero.notes.length + "）", "1", function (data) {
+            if (!data) core.ui.closePanel();
+            var value = parseInt(data) || 0;
+            if (!value || value<=0 || value > core.status.hero.notes.length) {
+                core.drawText("不合法的输入！");
+            } else {
+                core.myprompt("请输入新内容，不超过45字", core.status.hero.notes[value - 1], function (data) {
+                    data = core.actions.__clickNotes_replaceText(data);
+                    if (data) {
+                        core.status.hero.notes[value - 1] = data;
+                        core.drawText("存档笔记编辑成功！");
+                    } else {
+                        core.ui.closePanel();
+                    }
+                });
+            }
+        })
+    }
+}
+
+actions.prototype._clickNotes_delete = function () {
+    core.status.hero.notes = core.status.hero.notes || [];
+    if (core.status.hero.notes.length == 0) {
+        core.drawText("当前没有存档笔记，无法删除！");
+    } else {
+        core.myprompt("请输入要删除的所有存档笔记编号，以逗号分隔。不填则代表删除全部笔记。", null, function (data) {
+            if (data == null) {
+                core.ui.closePanel();
+                return;
+            }
+            else if (!data) {
+                core.status.hero.notes = [];
+                core.drawText("所有存档笔记删除成功！");
+            } else {
+                data = data.split(",").map(function (one) { return parseInt(one); })
+                    .filter(function (one) { return one && one > 0 && one <= core.status.hero.notes.length});
+                if (data.length == 0) {
+                    core.drawText("没有要删除的笔记！");
+                } else {
+                    data.sort(function (a, b) { return b - a;})
+                        .forEach(function (index) {
+                            core.status.hero.notes.splice(index - 1, 1);
+                        });
+                    core.drawText("已删除 " + data.sort().join(",") + " 号笔记");
+                }
+            }
+        })
+    }
+}
+
+////// 存档笔记页面时，放开某个键的操作 //////
+actions.prototype._keyUpNotes = function (keycode) {
+    if (keycode == 27 || keycode == 88) {
+        core.status.event.selection = 3;
+        core.ui.drawSettings();
+        return;
+    }
+    this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickNotes);
 }
 
 ////// 同步存档界面时的点击操作 //////

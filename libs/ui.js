@@ -1744,7 +1744,17 @@ ui.prototype.drawSwitchs = function() {
 ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
     this.drawChoices(null, [
-        "系统设置", "虚拟键盘", "浏览地图", "同步存档", "游戏信息", "返回标题", "返回游戏"
+        "系统设置", "虚拟键盘", "浏览地图", "存档笔记", "同步存档", "游戏信息", "返回标题", "返回游戏"
+    ]);
+}
+
+////// 绘制存档笔记 //////
+ui.prototype.drawNotes = function () {
+    core.status.event.id = 'notes';
+    core.status.hero.notes = core.status.hero.notes || [];
+    core.lockControl();
+    this.drawChoices(null, [
+        "新增存档笔记", "查看存档笔记", "编辑存档笔记", "删除存档笔记", "返回上一页"
     ]);
 }
 
@@ -2724,6 +2734,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17, true));
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
+        core.setTextAlign('ui', "center");
         var map = core.maps.loadMap(data.maps, data.floorId);
         core.extractBlocks(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
@@ -2735,6 +2746,22 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
             core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4]);
             core.fillText('ui', data.hard, x, parseInt(y+22+size/2), data.hero.flags.__hardColor__ || 'red', this._buildFont(30,true));
         }
+        // 绘制存档笔记
+        if (data.hero.notes && data.hero.notes.length > 0) {
+            core.setTextAlign('ui', 'left');
+            if (data.hero.notes.length >= 2) {
+                core.fillRect('ui', x-size/2, y + 15, size, 28, [0,0,0,0.3]);
+                core.fillBoldText('ui', data.hero.notes.length - 1 + ". " + data.hero.notes[data.hero.notes.length - 2].substring(0, 10), 
+                    x - size / 2 + 2, y + 15 + 12, '#FFFFFF', null, this._buildFont(10, false));
+                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10), 
+                    x - size / 2 + 2, y + 15 + 24);
+            } else {
+                core.fillRect('ui', x-size/2, y + 15, size, 16, [0,0,0,0.3]);
+                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10), 
+                    x - size / 2 + 2, y + 15 + 12, '#FFFFFF', null, this._buildFont(10, false));
+            }
+        }
+        core.setTextAlign('ui', "center");
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;

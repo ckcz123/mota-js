@@ -3526,6 +3526,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "绘制帮助页面", 
           "!type": "fn()"
         }, 
+        "drawNotes": {
+          "!doc": "绘制存档笔记",
+          "!type": "fn()"
+        },
         "drawQuickShop": {
           "!doc": "绘制快捷商店选择栏", 
           "!type": "fn()"

@@ -2206,7 +2206,7 @@ actions.prototype._clickNotes_show = function () {
         }
         result.push("\t[存档笔记]" + v.join("\n"));
     }
-    if (result.length == 0) result.push("当前没有存档笔记，试着新增一个吧！");
+    if (result.length == 0) result.push("当前没有存档笔记，试着新增一个吧！\n（菜单栏 -> 存档笔记 -> 新增存档笔记）");
     core.drawText(result);
 }
 

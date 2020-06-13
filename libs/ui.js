@@ -1753,7 +1753,7 @@ ui.prototype.drawNotes = function () {
     core.status.event.id = 'notes';
     core.status.hero.notes = core.status.hero.notes || [];
     core.lockControl();
-    this.drawChoices(null, [
+    this.drawChoices("存档笔记允许你写入和查看任何笔记（快捷键M），你可以用做任何标记，比如Boss前的属性、开门和路线选择等。", [
         "新增存档笔记", "查看存档笔记", "编辑存档笔记", "删除存档笔记", "返回上一页"
     ]);
 }

@@ -1488,7 +1488,7 @@ events.prototype._action_changeFloor = function (data, x, y, prefix) {
 
 events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
-    if (data.x == null && data.y == null && data.direction) {
+    if (!data.loc && data.direction) {
         core.setHeroLoc('direction', core.turnDirection(data.direction), true);
         core.drawHero();
         return core.doAction();

@@ -648,6 +648,7 @@ control.prototype._moveAction_moving = function (callback) {
         core.status.route.push(direction);
         
         core.moveOneStep();
+        core.checkRouteFolding();
         if (callback) callback();
     });
 }
@@ -741,6 +742,7 @@ control.prototype.turnHero = function(direction) {
     core.setHeroLoc('direction', core.turnDirection(':right'));
     core.drawHero();
     core.status.route.push("turn");
+    core.checkRouteFolding();
 }
 
 ////// 瞬间移动 //////
@@ -2170,6 +2172,45 @@ control.prototype.debug = function() {
     core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
 }
 
+control.prototype._bindRoutePush = function () {
+    core.status.route.push = function (element) {
+        // 忽视移动、转向、瞬移
+        if (["up", "down", "left", "right", "turn"].indexOf(element) < 0 && !element.startsWith("move:")) {
+            core.clearRouteFolding();
+        }
+        Array.prototype.push.call(core.status.route, element);
+    }
+}
+
+////// 清除录像折叠信息 //////
+control.prototype.clearRouteFolding = function () {
+    core.status.routeFolding = {};
+}
+
+////// 检查录像折叠 //////
+control.prototype.checkRouteFolding = function () {
+    // 未开启、未开始游戏、正在录像播放中、正在事件中：不执行
+    if (!core.flags.enableRouteFolding || !core.isPlaying() || core.isReplaying() || core.status.event.id) {
+        return this.clearRouteFolding();
+    }
+    var hero = core.clone(core.status.hero, function (name, value) {
+        return name != 'steps' && typeof value == 'number';
+    });
+    var index = [core.getHeroLoc('x'),core.getHeroLoc('y'),core.getHeroLoc('direction').charAt(0)].join(',');
+    core.status.routeFolding = core.status.routeFolding || {};
+    if (core.status.routeFolding[index]) {
+        var one = core.status.routeFolding[index];
+        if (core.same(one.hero, hero) && one.length < core.status.route.length) {
+            Object.keys(core.status.routeFolding).forEach(function (v) {
+                if (core.status.routeFolding[v].length >= one.length) delete core.status.routeFolding[v];
+            });
+            core.status.route = core.status.route.slice(0, one.length);
+            this._bindRoutePush();
+        }
+    }
+    core.status.routeFolding[index] = {hero: hero, length: core.status.route.length};
+}
+
 // ------ 天气，色调，BGM ------ //
 
 control.prototype.getMappedName = function (name) {
@@ -2462,6 +2503,7 @@ control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
     this.controldata.updateStatusBar();
     if (!doNotCheckAutoEvents) core.checkAutoEvents();
     this._updateStatusBar_setToolboxIcon();
+    core.clearRouteFolding();
 }
 
 control.prototype._updateStatusBar_setToolboxIcon = function () {

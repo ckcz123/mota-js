@@ -741,6 +741,12 @@ declare class control {
     /** 解锁用户控制 */
     unlockControl(): void
 
+    /** 清空录像折叠信息 */
+    clearRouteFolding(): void
+
+    /** 检查录像折叠信息 */
+    checkRouteFolding(): void
+
     /** 获得映射文件名 */
     getMappedName(name?: string): string
 

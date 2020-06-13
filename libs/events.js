@@ -300,6 +300,7 @@ events.prototype.unregisterSystemEvent = function (type) {
 
 ////// 执行一个系统事件 //////
 events.prototype.doSystemEvent = function (type, data, callback) {
+    core.clearRouteFolding();
     if (this.systemEvents[type]) {
         try {
             return core.doFunc(this.systemEvents[type], this, data, callback);
@@ -337,9 +338,12 @@ events.prototype.trigger = function (x, y, callback) {
     block = block.block;
 
     // 执行该点的脚本
-    try {
-        eval(block.event.script);
-    } catch (e) { main.log(e); }
+    if (block.event.script) {
+        core.clearRouteFolding();
+        try {
+            eval(block.event.script);
+        } catch (e) { main.log(e); }
+    }
 
     if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
@@ -987,6 +991,7 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
     if (!action) return;
+    core.clearRouteFolding();
 
     action = this.precompile(action);
 
@@ -2561,6 +2566,7 @@ events.prototype.follow = function (name) {
         core.clearMap('hero');
         core.drawHero();
     }
+    core.clearRouteFolding();
 }
 
 ////// 取消跟随 //////
@@ -2580,6 +2586,7 @@ events.prototype.unfollow = function (name) {
     core.gatherFollowers();
     core.clearMap('hero');
     core.drawHero();
+    core.clearRouteFolding();
 }
 
 ////// 数值操作 //////

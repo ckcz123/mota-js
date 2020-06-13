@@ -167,6 +167,8 @@ function core() {
             'steps': 0,
             'save': [],
         },
+        // 录像折叠
+        'routeFolding': {},
 
         // event事件
         'shops': {},

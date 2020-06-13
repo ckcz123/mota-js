@@ -2533,6 +2533,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "moveDirectly": {
           "!doc": "瞬间移动", 
           "!type": "fn(destX?: number, destY?: number, ignoreSteps?: number)"
+        },
+        "clearRouteFolding": {
+          "!doc": "清空录像折叠信息",
+          "!type": "fn()"
+        },
+        "checkRouteFolding": {
+          "!doc": "检查录像折叠信息",
+          "!type": "fn()"
         }
       }, 
       "icons": {

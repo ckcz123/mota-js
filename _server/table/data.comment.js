@@ -629,6 +629,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "允许瞬移",
 					"_data": "是否允许瞬间移动"
 				},
+				"enableRouteFolding": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "录像折叠",
+					"_data": "是否开启录像折叠功能。\n此功能将尽可能的通过优化无损耗反复走的方式来缩短录像，但在某些情况下（尤其是创新向塔中）可能会存在副作用影响录像的正确性。"
+				},
 				"disableShopOnDamage": {
 					"_leaf": true,
 					"_type": "checkbox",

@@ -12,6 +12,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status = core.clone(core.initStatus, function (name) {
 		return name != 'hero' && name != 'maps';
 	});
+	core.control._bindRoutePush();
 	core.status.played = true;
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
@@ -956,6 +957,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 重置游戏和路线
 	core.resetGame(data.hero, data.hard, data.floorId, core.maps.loadMap(data.maps, null, data.hero.flags), data.values);
 	core.status.route = core.decodeRoute(data.route);
+	core.control._bindRoutePush();
 	// 文字属性，全局属性
 	core.status.textAttribute = core.getFlag('textAttribute', core.status.textAttribute);
 	var toAttribute = core.getFlag('globalAttribute', core.status.globalAttribute);
@@ -1348,6 +1350,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (core.hasFlag('poison')) {
 			core.updateStatusBar();
 		}
+		core.checkRouteFolding();
 		return true;
 	}
 	return false;

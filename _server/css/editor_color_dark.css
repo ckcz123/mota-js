@@ -5,7 +5,8 @@
 /** 全局属性 **/
 body {
     background-color: #242424;
-	color: #bbb;
+    color: #bbb;
+    filter: brightness(0.8);
 }
 
 input {

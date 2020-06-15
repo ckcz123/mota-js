@@ -73,6 +73,7 @@
 
         // Default textarea styles
         style.whiteSpace = 'nowrap';
+        style.zIndex = 2000;
         if (!isInput)
             style.wordWrap = 'break-word';  // only for textarea-s
 
@@ -107,6 +108,8 @@
                 style[prop] = computed[prop];
             }
         });
+        if (!isInput)
+            style.whiteSpace = 'pre';
 
         if (isFirefox) {
             // Firefox lies about the overflow property for textareas: https://bugzilla.mozilla.org/show_bug.cgi?id=984275

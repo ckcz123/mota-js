@@ -424,7 +424,7 @@ input.blocklyHtmlInput {
     color: #999;
 }
 .CodeMirror-cursor {
-    border-left: 1px solid black;
+    border-left: 1px solid #f8f8f0;
 }
 /* Shown when moving in bi-directional text */
 .CodeMirror div.CodeMirror-secondarycursor {
@@ -664,19 +664,19 @@ li.CodeMirror-hint-active {
 }
 /* 额外提示框（如文档） */
 .CodeMirror-Tern-tooltip {
-    border: 1px solid silver;
-    color: #33333c;
-    background-color: white;
+    border: 1px solid #aaa;
+    color: #ccc;
+    background-color: #33333c;
     -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
     -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
     box-shadow: 2px 3px 5px rgba(0,0,0,.2);
 }
 
-.CodeMirror-Tern-fname { color: black; }
-.CodeMirror-Tern-farg { color: #70a; }
-.CodeMirror-Tern-type { color: #07c; }
+.CodeMirror-Tern-fname { color: #ddd; }
+.CodeMirror-Tern-farg { color: #d7a; }
+.CodeMirror-Tern-type { color: #db7; }
 .CodeMirror-foldmarker {
-    color: blue;
+    color: #ddd;
     text-shadow: #b9f 1px 1px 2px, #b9f -1px -1px 2px, #b9f 1px -1px 2px, #b9f -1px 1px 2px;
 }  
 

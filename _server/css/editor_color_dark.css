@@ -4,14 +4,26 @@
 
 /** 全局属性 **/
 body {
-    background-color: #F5F5F5;
+    background-color: #242424;
+	color: #bbb;
+}
+
+input {
+    background-color: #404048;
+    color: #c0c0c0;
+}
+
+button {
+    background-color: #404048;
+	border-color: #aaa;
+    color: #c0c0c0;
 }
 
 /** 可自行仿照添加更多的全局属性...... */
 
 /** 颜色选择器 */ 
 #colorPanel {
-    background-color: #F5F5F5;
+    background-color: #333;
 }
 
 /** 所有的阴影效果（颜色选择器、数据区、地图区、素材区等） */
@@ -32,172 +44,251 @@ body {
 /** 选中素材区时的方框 */
 #dataSelection, .appendSelection, #selectPointBox {
     background-color: rgba(255, 255, 255, 0.0);
-    border: 1px solid #000;
-    box-shadow: 0 0 0 2px #fff, 0 0 0 3px #000;
+    border: 1px solid #aaa;
+    box-shadow: 0 0 0 2px #ddd, 0 0 0 3px #aaa;
 }
 
 /** 错误消息（如保存失败） */
 .warnText {
-    color: #D00;
+    color: #e44;
 }
 
 /** 提示消息（如告知当前图块信息） */
 .infoText {
-    color: #39F;
+    color: #7bd;
 }
 
 /** 成功消息（如保存成功） */
 .successText {
-    color: #098;
+    color: #8ca;
 }
 
 /** 数据库的表格相关 */
 table, td {
-    border: 1px solid #fff;
-    color: #fff;
+    border: 1px solid #777;
+    color: #777;
 }
 
 .coltd, .rowtd {
-    border: 0.230vw solid #fff;
-    color: #fff;
+    border: 0.230vw solid #777;
+    color: #777;
 }
 
 /** 横向标尺背景色 */
 table.col td, div.col .coltd {
-    background-color: #398;
+    background-color: #287;
+	border-color: #ccc;
+	color: #ccc;
 }
 
 /** 横向标尺选中时的背景色 */
 #mapColMark td:hover .colBlock, #mapColMark .coltd:hover .colBlock {
-    background-color: rgba(85, 204, 187, 0.5);
+    background-color: rgba(68, 187, 170, 0.33);
 }
 
 /** 纵向标尺背景色 */
 table.row td, div.row .rowtd .rowtext {
-    background-color: #379;
+    background-color: #268;
+	border-color: #ccc;
+	color: #ccc;
 }
 
 /** 纵向标尺选中时的背景色 */
 #mapRowMark td:hover .rowBlock, #mapRowMark .rowtd:hover .rowBlock {
-    background-color: rgba(102, 170, 204, 0.5);
+    background-color: rgba(85, 153, 187, 0.33);
 }
 
 /** 右键菜单栏 */
 #midMenu{
-    color: #000;
-    background-color: #fff;
-    border-color: #ccc #666 #666 #ccc;
+    color: #bbb;/*文字颜色*/
+    background-color: #33333c;
+    border-color: #888 #666 #666 #888;
 }
 
 #mid .tools {
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #555;
 }
 
 /** 右键菜单栏的当前选中项 */
 #midMenu .menuitem:hover{
-    background-color: #cef;
-    border-color: #bde;
+    background-color: #247;
+    border-color: #469;
+    color: #fff;
 }
+
+/*===============================自己加的东西======================================*/
+select {
+	background-color: #33333c;
+}
+
+option {
+	background-color: #33333c;
+}
+
+a {
+   color: #7bd;
+}
+
+textarea {
+   color: #bbb;
+}
+
+::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 8px;
+	background-color: #242424;
+}
+
+::-webkit-scrollbar
+{
+	width: 8px;
+	background-color: #242424;
+}
+
+::-webkit-scrollbar-thumb
+{
+	border-radius: 8px;
+    -webkit-box-shadow: inset 0 0 3px rgba(0,0,0,.3);
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color: #bbb;
+}
+
 
 /** 禁用的输入方框（如ID）的背景色 */
 textarea[disabled] {
-    color: #999999;
+    color: #888;
+}
+
+select {
+   color: #ccc;
+   background-color: #33333c;
+}
+
+.gameCanvas, img {
+    filter: brightness(0.75);
 }
 
 /** 搜索事件块的输入框 */
 #searchBlock {
-    background-color: #eeeef4;
+    background-color: #bbb;
+	color: #444;
 }
 
 /** 打开浮层（变量搜索等）时页面背景 */
 #uieventDiv {
-    background: rgba(128,128,128,0.6);
+    background: rgba(85,85,85,0.67);
 }
 
 /** 浮层的对话框 */
 #uieventDialog {
-    background: white;
+    background: #101010;
+	color: #ccc;
 }
 
 /** 追加素材时的编号标记 */
 #appendPicSelection span {
-    -webkit-text-stroke: 1px red;
+    -webkit-text-stroke: 1px gold;
     text-shadow: black 1px 0, black 0 1px, black -1px 0, black 0 -1px;
 }
 
 .leftTab {
-    background-color: #F5F5F5;
+    background-color: #242424;
 }
 
 /** 整个事件编辑器 */
 #left6 {
-    background-color: rgb(245, 245, 245);
+    background-color: rgb(36, 36, 36);
 }
 
 /** 事件编辑器右边的文本框 */
 #left6 .CodeMirror {
-    border: 1px solid #eee;
+    /*border: 1px solid #eee;*/
+	border: 1px solid #666;
+	background-color: #242424;
+	/*color: #ccc;*/
 }
 
 /** 脚本编辑器 */
 #left7 {
-    background-color: rgb(245, 245, 245);
+    background-color: rgb(36, 36, 36);
 }
 
 #left7 .CodeMirror {
-    border: 1px solid #eee;
+	border: 1px solid #666;
+	
 }
 
 /** 数据区的表格 */
 .etable table, .etable table td {
-    color: #000;
+    color: #bbb;
 }
 
 /** 数据区每行效果；2n代表偶数行，以此类推 */
 .etable table tr {
-    background-color: #fff;
+    background-color: #3c3c3c;
     border-top: 1px solid #ccccd4;
 }
 .etable table tr:nth-child(2n) {
-    background-color: #fafafa;
+    background-color: #343434;
 }
 
 /** 数据区表格每列效果 */
 .etable table th, .etable table td {
-    border: 1px solid #ddd;
+    border: 1px solid #777;
 }
 
 /** 鼠标悬停在数据区表格上的边框效果 */
 .etable tr:not(:first-child) > :nth-child(3):hover {
-    border: 1px solid rgb(87, 198, 232);
-    box-shadow: 0px 0px 3px rgb(87, 198, 232);
+    border: 1px solid #468;
+    box-shadow: 0px 0px 3px #468;
 }
 .etable tr:not(:first-child) > :nth-child(2):hover,
 .etable tr:not(:first-child) > :nth-child(1):hover {
-    border: 1px solid rgb(87, 232, 198);
-    box-shadow: 0px 0px 3px rgb(87, 232, 198);
+    border: 1px solid #375;
+    box-shadow: 0px 0px 3px #375;
 }
 
 /** 表格编辑的按钮颜色 */
 .editorTableEditBtn {
-    background-color: #ddf8ff;
+    background-color: #389;
+	border-color: #bde;/*8cf和fd8*/
+	color: #cef;
 }
 .editorTableFoldBtn {
-    background-color: #fff4bb;
-}
+    background-color: #a83;
+	border-color: #edb;	
+	color: #fec;
+	}
 
 /** 保存地图的按钮颜色 */
+#saveFloor {
+    background-color: #234;/*33333c*/
+	border-color: #abc;
+	color: #cdf;
+}
 #saveFloor.highlight {
-    background-color: #ffd700;
+    background-color: #871;
+	border-color: #eda;
+	color: #fff4d0;
 }
 
 /** 解析按钮颜色 */
+#blocklyParse {
+    background-color: #404048;
+	/*background-color: #234;
+	border-color: #abc;*/
+	color: #c0c0c0;
+}
 #blocklyParse.highlight {
-    background-color: #ffd700;
+    background-color: #871;
+	border-color: #eda;
+	color: #fff4d0;
 }
 
 .popCheckboxItem {
-    color: black;
+    color: #bbbbbb;
 }
 
 /** ======== blockly 相关 ======== */
@@ -206,49 +297,70 @@ textarea[disabled] {
 blockly图块的的黑暗程度，用opacity表示，0到1之间；
 0表示表示纯亮色，1表示纯黑色 
 */
-#blocklyDarkScale {
-    opacity: 0;
-}
-/*魔改*/
 
-.blocklyTreeLabel {
-    color: #0f0f0f !important;
+
+#blocklyDarkScale {
+    opacity: 0.3;
 }
+
+/** 如果需要blockly深色模式，请有选择性视情况取消注释下面几条；具体功能自行研究 */
+
+/*somethingSOMETHING*/
+/*.blocklyTreeLabel {
+    color: #ccc;
+}*/
 
 .blocklyTreeLabel:hover {
     /*background-color: #888 !important;*/
-    color: #0f0f0f !important;
-}
-
-.blocklyTreeSelected {
-    background-color: #5bf !important;
     color: #fff !important;
 }
 
-.blocklyTreeRow {
-    color: #0f0f0f !important;
+.blocklyTreeSelected {
+    background-color: #358 !important;
+    color: #fff !important;
+}
+
+/*.blocklyTreeSelected .blocklyTreeLabel {
+    background-color: #358 !important;
+    background: #358 !important;
+    color: #fff !important;
+ }*/
+
+ .blocklyTreeRow {
+    /*background-color: #888 !important;*/
+    color: #ccc !important;
 }
 
 .blocklyTreeRow:hover {
-    background-color: #eee !important;
-    color: #0f0f0f !important;
+    background-color: #888 !important;
+    color: #fff !important;
 }
-/*魔改*/
 
-/** 如果需要blockly深色模式，请有选择性视情况取消注释下面几条；具体功能自行研究 */
 /*
+.blocklyFlyout {
+     background-color: rgba(0,0,0,1);
+}
+*/
+.blocklyFlyoutBackground {
+    fill: #666;
+    fill-opacity: 0.67;
+}
+/*somethingSOMETHING*/
+
+
 .blocklyToolboxDiv {
-    background-color: #ddd !important;
+    background-color: #2a2a2a !important;
+	border: 1px solid #666;
     color: black;
 }
 
 .blocklySvg {
-    background-color: #000;
+    background-color: #242424;
 }
 
 .blocklyNonEditableText>rect, .blocklyEditableText>rect {
     fill: #000;
-    fill-opacity: .4;
+    fill-opacity: .3;
 }
 
 .blocklyNonEditableText>text, .blocklyEditableText>text {
@@ -259,36 +371,38 @@ input.blocklyHtmlInput {
     color: white;
     background-color: black;
 }
-*/
+
 
 /** ======== Blockly中自动补全相关 ======== */
 .awesomplete > ul {
-    background: #fff;
-    background: hsla(0,0%,100%,.9);
-    background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.8));
+    background: #33333c;
+    /*background: hsla(0,0%,100%,.9);
+    background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.8));*/
     border: 1px solid rgba(0,0,0,.3);
+	border-color: #666;
     box-shadow: .05em .2em .6em rgba(0,0,0,.2);
 }
 .awesomplete > ul:before {
     background: white;
 }
 .awesomplete > ul > li:hover {
-    background: #cef/*hsl(200, 40%, 80%)*/;
-    color: black;
+    background: #247/*hsl(200, 40%, 80%)*/;
+    color: #fff;
 }
 .awesomplete > ul > li[aria-selected="true"] {
-    background: #39f/*hsl(205, 40%, 40%)*/;
+    background: hsl(205, 40%, 40%);
     color: white;
 }
 .awesomplete mark {
-    background: #cef;
+    background: /*hsl(65, 100%, 50%);*/#278;
+	color: #cef;
 }
 .awesomplete li:hover mark {
-    background: #39f;
-    color: white;
+    background: /*hsl(68, 100%, 41%)*/#1a9;
+	color: #fff;
 }
 .awesomplete li[aria-selected="true"] mark {
-    background: #06c;
+    background: /*hsl(86, 100%, 21%)*/#468;
     color: inherit;
 }
 
@@ -296,15 +410,15 @@ input.blocklyHtmlInput {
 /* 很多我也不知道是干嘛的，自行根据名字猜每一项作用吧 */
 
 .CodeMirror {
-    color: black;
-    background: white;
+    color: #ddd;/*杨子默：我也不知道他是干啥用的*/
+    background: #242424;
 }
 .CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
-    background-color: white; 
+    background-color: #242424; 
 }
 .CodeMirror-gutters {
-    border-right: 1px solid #ddd;
-    background-color: #f7f7f7;
+    border-right: 1px solid #666;
+    background-color: #2a2a2a;
 }
 .CodeMirror-linenumber {
     color: #999;
@@ -336,101 +450,108 @@ input.blocklyHtmlInput {
 }
 /* DEFAULT THEME */
 .cm-s-default .cm-header {
-    color: blue;
+    color: #a8f;
 }  
 .cm-s-default .cm-quote {
-    color: #090;
+    color: #695;
 } 
 .cm-negative {
-    color: #d44;
+    color: #f55;
 } 
 .cm-positive {
-    color: #292;
+    color: #5f5;
 }
 .cm-s-default .cm-keyword {
-    color: #819;
+    color: #d7a;
 }
 .cm-s-default .cm-atom {
-    color: #219;
+    color: #db7;
 }
 .cm-s-default .cm-number {
-    color: #275;
+    color: #9db;
 }
 .cm-s-default .cm-def {
-    color: #00f;
+    color: #db7; 
 }
 .cm-s-default .cm-variable-2 {
-    color: #05a;
+    color: #8cd;
 }
 .cm-s-default .cm-variable-3, .cm-s-default .cm-type {
-    color: #085;
+    color: #8cd;
 }
 .cm-s-default .cm-comment {
-    color: #960;
+    color: #7a6;
 }
 .cm-s-default .cm-string {
-    color: #a11;
+    color: #db7;
 }
 .cm-s-default .cm-string-2 {
-    color: #f50;
+    color: #db7/*something?*/;
 }
 .cm-s-default .cm-meta {
-    color: #555;
+    color: #33333c;
 }
 .cm-s-default .cm-qualifier {
-    color: #555;
+    color: #33333c;
 }
 .cm-s-default .cm-builtin {
-    color: #30a;
+    color: #66d9ef;
 }
 .cm-s-default .cm-bracket {
-    color: #997;
+    color: #f8f8f2;
 }
 .cm-s-default .cm-tag {
-    color: #170;
+    color: #f55;
 }
 .cm-s-default .cm-attribute {
-    color: #00c;
+    color: #ab6;
 }
 .cm-s-default .cm-hr {
     color: #999;
 }
 .cm-s-default .cm-link {
-    color: #00c;
+    color: #a8f;
 }
 .cm-s-default .cm-error {
-    color: #f00;
+	background: #f55;
+	color: #fff;
 }
+/*somethingsomething*/
+.cm-s-default .cm-matchhighlight {
+    background: #57a;
+    color: #eef8ff;
+}
+/*somethingsomething*/
 .cm-invalidchar {
-    color: #f00;
+    color: #f55;
 }
 
 /* Default styles for common addons */
 
 div.CodeMirror span.CodeMirror-matchingbracket {
-    color: #0b0;
+    color: #5f5;
 }
 div.CodeMirror span.CodeMirror-nonmatchingbracket {
-    color: #a22;
+    color: #f55;
 }
 .CodeMirror-matchingtag {
     background: rgba(255, 150, 0, .3);
 }
 .CodeMirror-activeline-background {
-    background: #e8f2ff;
+    background: #247;
 }
 
 .CodeMirror-selected {
-    background: #d9d9d9;
+    background: #358;
 }
 .CodeMirror-focused .CodeMirror-selected {
-    background: #d7d4f0;
+    background: #358;
 }
 .CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection {
-    background: #d7d4f0;
+    background: #247;
 }
 .CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection {
-    background: #d7d4f0;
+    background: #247;
 }
 .cm-searching {
     background-color: #ffa;
@@ -440,29 +561,29 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {
 /* 代码补全提示相关 */
 
 .cm-matchhighlight {
-    background-color: #dedede
+    background-color: #247;
 }
 .CodeMirror-hints {
-    border: 1px solid silver;
-    background: white;
+    border: 1px solid #888;
+    background: #33333c;
     -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
     -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
     box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
 }
 .CodeMirror-hint {
-    color: black;
+    color: #ccc;
 }
 li.CodeMirror-hint-active {
-    background: #08f;
-    color: white;
+    background: #247;
+    color: #fff;
 }
 
 /* 代码语法检查相关相关 */
 
 .CodeMirror-lint-tooltip {
-    background-color: #ffd;
-    border: 1px solid black;
-    color: black;
+    background-color: #247;
+    border: 1px solid #135;
+    color: #fff;
 }
 
 .CodeMirror-lint-mark-error {
@@ -550,7 +671,7 @@ li.CodeMirror-hint-active {
 /* 额外提示框（如文档） */
 .CodeMirror-Tern-tooltip {
     border: 1px solid silver;
-    color: #444;
+    color: #33333c;
     background-color: white;
     -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
     -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);

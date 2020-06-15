@@ -54,6 +54,7 @@ function editor() {
         lockMode: document.getElementById('lockMode'),
         gameInject: document.getElementById('gameInject'),
         undoFloor: document.getElementById('undoFloor'),
+        editorTheme: document.getElementById('editorTheme'),
         maps: ['bgmap', 'fgmap', 'map'],
         canvas: ['bg', 'fg'],
     };
@@ -185,20 +186,17 @@ editor.prototype.init = function (callback) {
             main.useCompress = false;
         
             main.init('editor', function () {
-                editor.config = new editor_config();
-                editor.config.load(function() {
-                    editor_util_wrapper(editor);
-                    editor_game_wrapper(editor, main, core);
-                    editor_file_wrapper(editor);
-                    editor_table_wrapper(editor);
-                    editor_ui_wrapper(editor);
-                    editor_mappanel_wrapper(editor);
-                    editor_datapanel_wrapper(editor);
-                    editor_materialpanel_wrapper(editor);
-                    editor_listen_wrapper(editor);
-                    editor.printe=printe;
-                    afterMainInit();
-                })
+                editor_util_wrapper(editor);
+                editor_game_wrapper(editor, main, core);
+                editor_file_wrapper(editor);
+                editor_table_wrapper(editor);
+                editor_ui_wrapper(editor);
+                editor_mappanel_wrapper(editor);
+                editor_datapanel_wrapper(editor);
+                editor_materialpanel_wrapper(editor);
+                editor_listen_wrapper(editor);
+                editor.printe=printe;
+                afterMainInit();
             });
         
             var afterMainInit = function () {
@@ -279,7 +277,14 @@ editor.prototype.init = function (callback) {
     xhr.onabort = xhr.ontimeout = xhr.onerror = function () {
         alert("无法访问index.html");
     }
-    xhr.send();
+
+    editor.config = new editor_config();
+    editor.config.load(function() {
+        var theme = editor.config.get('theme', 'editor_color');
+        document.getElementById('color_css').href = '_server/css/' + theme + '.css';
+        editor.dom.editorTheme.value = theme;
+        xhr.send();
+    });
 }
 
 editor.prototype.mapInit = function () {

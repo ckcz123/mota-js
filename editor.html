@@ -5,7 +5,7 @@
     <link href="_server/css/editor.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
-    <link href="_server/css/editor_color.css" rel="stylesheet">
+    <link id="color_css" rel="stylesheet">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body>
@@ -314,7 +314,11 @@
                 <option value="commonevent">公共事件</option>
                 <option value="plugins">插件编写</option>
             </select>
-            <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定模式</span>
+            <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定</span>
+            <select id="editorTheme" style="margin-left: 3px;">
+                <option value="editor_color">默认白</option>
+                <option value="editor_color_dark">夜间黑</option>
+            </select>
             <br/>
             <span style="font-size: 12px;">
             <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />线

@@ -392,6 +392,16 @@ editor_mappanel_wrapper = function (editor) {
         editor.changeFloor(toId);
     }
 
+    editor.uifunctions.editorTheme_onchange = function () {
+        var theme = editor.dom.editorTheme.value;
+        editor.config.set('theme', theme);
+        document.getElementById('color_css').href = '_server/css/' + theme + '.css';
+        // 等新的css加载完毕再设置blockly亮度
+        setTimeout(function () {
+            editor_blockly.setDarkScale();
+        }, 1500);
+    }
+
     /**
      * 显示右键菜单
      */

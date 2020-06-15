@@ -689,8 +689,14 @@ editor_blockly = function () {
 
     editor_blockly.completeItems = [];
 
+    Blockly.BlockSvg.prototype.updateColour_origin = Blockly.BlockSvg.prototype.updateColour;
+    Blockly.BlockSvg.prototype.setShadowColour__origin = Blockly.BlockSvg.prototype.setShadowColour_;
+    Blockly.BlockSvg.prototype.setBorderColour__origin = Blockly.BlockSvg.prototype.setBorderColour_;
 
-    editor_blockly.setDarkScale=function (globalScale) {
+    editor_blockly.setDarkScale=function () {
+        var computedStyle = window.getComputedStyle(document.getElementById('blocklyDarkScale')) || {};
+        var globalScale = parseFloat(computedStyle.opacity) || 0;
+
         if (globalScale > 0) {
             Blockly.BlockSvg.prototype.updateColour = function() {
                 if (this.disabled) {
@@ -753,11 +759,14 @@ editor_blockly = function () {
                 }
                 
             }
+        } else {
+            Blockly.BlockSvg.prototype.updateColour = Blockly.BlockSvg.prototype.updateColour_origin;
+            Blockly.BlockSvg.prototype.setShadowColour_ = Blockly.BlockSvg.prototype.setShadowColour__origin;
+            Blockly.BlockSvg.prototype.setBorderColour_ = Blockly.BlockSvg.prototype.setBorderColour__origin;
         }
     }
 
-    var computedStyle = window.getComputedStyle(document.getElementById('blocklyDarkScale')) || {};
-    editor_blockly.setDarkScale(parseFloat(computedStyle.opacity) || 0);
+    editor_blockly.setDarkScale();
 
     return editor_blockly;
 }

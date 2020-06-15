@@ -6,7 +6,7 @@
 body {
     background-color: #242424;
     color: #bbb;
-    filter: brightness(0.8);
+    filter: brightness(0.825);
 }
 
 input {
@@ -144,7 +144,8 @@ textarea {
 
 ::-webkit-scrollbar
 {
-	width: 8px;
+    width: 8px;
+    height: 10px;
 	background-color: #242424;
 }
 
@@ -167,8 +168,21 @@ select {
    background-color: #33333c;
 }
 
-.gameCanvas, img, svg {
-    filter: brightness(0.65);
+option {
+    filter: brightness(0.8); 
+    background-color: #292930; 
+    color: #9a9a9a;
+
+}
+
+option:checked {
+    filter: brightness(0.8);
+    background-color: #555/*#358*/;
+    color: #ddd;
+}
+
+.gameCanvas, img {
+    filter: brightness(0.85);
 }
 
 /** 搜索事件块的输入框 */
@@ -260,7 +274,8 @@ select {
 .editorTableFoldBtn {
     background-color: #a83;
 	border-color: #edb;	
-	color: #fec;
+    color: #fec;
+    filter: brightness(0.95);
 	}
 
 /** 保存地图的按钮颜色 */
@@ -278,8 +293,6 @@ select {
 /** 解析按钮颜色 */
 #blocklyParse {
     background-color: #404048;
-	/*background-color: #234;
-	border-color: #abc;*/
 	color: #c0c0c0;
 }
 #blocklyParse.highlight {
@@ -328,7 +341,7 @@ blockly图块的的黑暗程度，用opacity表示，0到1之间；
 }
 
 .blocklyTreeRow:hover {
-    background-color: #888 !important;
+    background-color: #666 !important;
     color: #fff !important;
 }
 
@@ -366,6 +379,42 @@ blockly图块的的黑暗程度，用opacity表示，0到1之间；
 input.blocklyHtmlInput {
     color: white;
     background-color: black;
+}
+
+.blocklyFieldRect {
+    fill: #242424 !important;
+}
+
+.blocklyEditableText > .blocklyText {
+    fill: #eee !important;
+}
+
+.blocklyHtmlInput {
+    background: rgba(36,36,36,0.6);
+    color: #eee;
+}
+
+.blocklyDropDownDiv {
+    background-color: #33333c;
+    border: 1px solid rgba(0,0,0,.3);
+	border-color: #666;
+    box-shadow: .05em .2em .6em rgba(0,0,0,.2);
+}
+
+.blocklyDropDownDiv .goog-menuitem-content {
+    color: #eee;
+}
+
+.blocklyDropDownDiv .goog-menuitem-highlight {
+    background: #247/*hsl(200, 40%, 80%)*/;
+    color: #eee;
+}
+
+.blocklyWidgetDiv .goog-option-selected .goog-menuitem-checkbox, 
+.blocklyWidgetDiv .goog-option-selected .goog-menuitem-icon, 
+.blocklyDropDownDiv .goog-option-selected .goog-menuitem-checkbox, 
+.blocklyDropDownDiv .goog-option-selected .goog-menuitem-icon {
+    background: url(../blockly/media/sprites_white.png) no-repeat -48px -16px;
 }
 
 /** ======== Blockly中自动补全相关 ======== */
@@ -460,10 +509,10 @@ input.blocklyHtmlInput {
     color: #d7a;
 }
 .cm-s-default .cm-atom {
-    color: #db7;
+    color: #80c0ff;
 }
 .cm-s-default .cm-number {
-    color: #9db;
+    color: #a0e0c0;
 }
 .cm-s-default .cm-def {
     color: #db7; 

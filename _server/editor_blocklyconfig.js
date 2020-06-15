@@ -481,8 +481,13 @@ function omitedcheckUpdateFunction(event) {
       var input = inputs[ii];
       var _input = '';
       var noinput = (input===null || input===undefined);
-      if(noinput && inputType==='field') continue;
+      if(noinput && inputType==='field' && MotaActionBlocks[rule.argsGrammarName[ii]].type!=='field_dropdown') continue;
+      if(noinput && inputType==='field') {
+        noinput = false;
+        input = rule.fieldDefault(rule.args[ii])
+      }
       if(noinput) input = '';
+      if(inputType==='field' && MotaActionBlocks[rule.argsGrammarName[ii]].type==='field_checkbox')input=input?'TRUE':'FALSE';
       if(inputType!=='field') {
         var subList = false;
         var subrulename = rule.argsGrammarName[ii];

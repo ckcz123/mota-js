@@ -422,7 +422,7 @@ function omitedcheckUpdateFunction(event) {
   if(event.type==='create'){
     editor_blockly.addIntoLastUsedType(event.blockId);
   }
-  if(event.type==='ui'){
+  if(event.type==='ui' && event.element == 'click'){
     var newClick = [new Date().getTime(),event.blockId];
     var lastClick = doubleClickCheck.shift();
     doubleClickCheck.push(newClick);
@@ -432,6 +432,8 @@ function omitedcheckUpdateFunction(event) {
       }
     }
   }
+  // Only handle these events
+  if (["create", "move", "change", "delete"].indexOf(event.type) < 0) return;
   if(editor_blockly.workspace.topBlocks_.length>=2){
     editor_blockly.setValue('入口方块只能有一个');
     return;

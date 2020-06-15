@@ -202,13 +202,6 @@ textarea[disabled] {
 
 /** ======== blockly 相关 ======== */
 
-/** 
-blockly图块的的黑暗程度，用opacity表示，0到1之间；
-0表示表示纯亮色，1表示纯黑色 
-*/
-#blocklyDarkScale {
-    opacity: 0;
-}
 /*魔改*/
 
 .blocklyTreeLabel {

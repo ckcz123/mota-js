@@ -166,8 +166,8 @@ select {
    background-color: #33333c;
 }
 
-.gameCanvas, img {
-    filter: brightness(0.75);
+.gameCanvas, img, svg {
+    filter: brightness(0.65);
 }
 
 /** 搜索事件块的输入框 */
@@ -298,11 +298,6 @@ blockly图块的的黑暗程度，用opacity表示，0到1之间；
 0表示表示纯亮色，1表示纯黑色 
 */
 
-
-#blocklyDarkScale {
-    opacity: 0.3;
-}
-
 /** 如果需要blockly深色模式，请有选择性视情况取消注释下面几条；具体功能自行研究 */
 
 /*somethingSOMETHING*/
@@ -371,7 +366,6 @@ input.blocklyHtmlInput {
     color: white;
     background-color: black;
 }
-
 
 /** ======== Blockly中自动补全相关 ======== */
 .awesomplete > ul {

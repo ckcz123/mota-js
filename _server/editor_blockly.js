@@ -698,6 +698,8 @@ editor_blockly = function () {
         var globalScale = parseFloat(computedStyle.opacity) || 0;
 
         if (globalScale > 0) {
+            // todo: fix to suit the new blockly version
+            // ref https://github.com/google/blockly/tree/52b818ed67c5bfa7fd73edf2b067649b8b1f447b
             Blockly.BlockSvg.prototype.updateColour = function() {
                 if (this.disabled) {
                     // Disabled blocks don't have colour.
@@ -730,6 +732,8 @@ editor_blockly = function () {
                 }
             }
     
+            // todo: fix to suit the new blockly version
+            // ref https://github.com/google/blockly/tree/52b818ed67c5bfa7fd73edf2b067649b8b1f447b
             Blockly.BlockSvg.prototype.setShadowColour_ = function(a, b) {
                 if (b) {
                     this.svgPathLight_.style.display = "none";
@@ -744,6 +748,8 @@ editor_blockly = function () {
                 return c
             }
     
+            // todo: fix to suit the new blockly version
+            // ref https://github.com/google/blockly/tree/52b818ed67c5bfa7fd73edf2b067649b8b1f447b
             Blockly.BlockSvg.prototype.setBorderColour_ = function(a, b) {
                 if (b)
                     this.svgPathLight_.setAttribute("stroke", "none"),
@@ -773,6 +779,8 @@ editor_blockly = function () {
 
 // --- modify Blockly
 
+// todo: fix to suit the new blockly version
+// ref https://github.com/google/blockly/tree/52b818ed67c5bfa7fd73edf2b067649b8b1f447b
 Blockly.FieldColour.prototype.createWidget_ = function() {
     Blockly.WidgetDiv.hide();
 
@@ -809,6 +817,8 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
     return document.createElement('table');
 };
 
+// todo: fix to suit the new blockly version
+// ref https://github.com/google/blockly/tree/52b818ed67c5bfa7fd73edf2b067649b8b1f447b
 Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
     Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL, this.widgetDispose_());
     var div = Blockly.WidgetDiv.DIV;
@@ -943,3 +953,38 @@ Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
 
     this.bindEvents_(htmlInput);
 };
+
+Blockly.copy_ = function(toCopy) {
+    if (toCopy.isComment) {
+      var xml = toCopy.toXmlWithXY();
+    } else {
+      var xml = Blockly.Xml.blockToDom(toCopy, true);
+      // Copy only the selected block and internal blocks.
+      Blockly.Xml.deleteNext(xml);
+      // Encode start position in XML.
+      var xy = toCopy.getRelativeToSurfaceXY();
+      xml.setAttribute('x', toCopy.RTL ? -xy.x : xy.x);
+      xml.setAttribute('y', xy.y);
+    }
+    Blockly.clipboardXml_ = xml;
+    Blockly.clipboardSource_ = toCopy.workspace;
+    Blockly.clipboardTypeCounts_ = toCopy.isComment ? null :
+        Blockly.utils.getBlockTypeCounts(toCopy, true);
+    setTimeout(function(){Blockly.clipboardSource_.paste(Blockly.clipboardXml_)});
+  };
+  
+  Blockly.duplicate = function(toDuplicate) {
+    // Save the clipboard.
+    var clipboardXml = Blockly.clipboardXml_;
+    var clipboardSource = Blockly.clipboardSource_;
+  
+    // Create a duplicate via a copy/paste operation.
+    Blockly.copy_(toDuplicate);
+    
+  
+    // Restore the clipboard.
+    Blockly.clipboardXml_ = clipboardXml;
+    Blockly.clipboardSource_ = clipboardSource;
+  };
+  
+  Blockly.utils.KeyCodes.V=99999

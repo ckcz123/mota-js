@@ -1224,7 +1224,7 @@ helpUrl : /_docs/#/instruction
 colour : this.mapColor
 allFloorIds : ['IdString_0']
 default : [null,"","",""]
-selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = MotaActionFunctions.pattern.id;

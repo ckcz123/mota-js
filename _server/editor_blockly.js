@@ -343,9 +343,10 @@ editor_blockly = function () {
         var value = b.getFieldValue(f);
         //多行编辑
         editor_multi.multiLineEdit(value, b, f, {'lint': f === 'RawEvalString_0'}, function (newvalue, b, f) {
-            if (MotaActionBlocks[b.type].doubleclicktext !== 'RawEvalString_0') {
+            if (!f.startsWith('EvalString_Multi')) {
+                newvalue = newvalue.split('\n').join('\\n');
             }
-            b.setFieldValue(newvalue.split('\n').join('\\n'), f);
+            b.setFieldValue(newvalue, f);
         });
     }
 
@@ -787,8 +788,10 @@ editor_blockly = function () {
                 var list = editor_blockly.getAutoCompletions(value, pb.type, self.name);
 
                 awesomplete.list = list;
-                awesomplete.ul.style.marginLeft = getCaretCoordinates(htmlInput, htmlInput.selectionStart).left -
-                    htmlInput.scrollLeft - 20 + "px";
+                var caretPosition = getCaretCoordinates(htmlInput, htmlInput.selectionStart);
+                awesomplete.ul.style.marginLeft = caretPosition.left - htmlInput.scrollLeft - 20 + "px";
+                var totalHeight = parseFloat(Blockly.WidgetDiv.DIV.style.height.replace('px', ''));
+                awesomplete.ul.style.marginTop = caretPosition.top + caretPosition.height - totalHeight + 10 + 'px';
                 awesomplete.evaluate();
             }
 
@@ -869,6 +872,18 @@ Blockly.FieldTextInput.prototype.onHtmlInputKeyDown_ = function(e) {
         this.sourceBlock_.tab(this, !e.shiftKey);
         e.preventDefault();
     }
+};
+
+Blockly.FieldMultilineInput.prototype.showInlineEditor_ = function(quietInput) {
+    Blockly.FieldMultilineInput.superClass_.showInlineEditor_.call(this, quietInput);
+    // force to resize the input
+    this.htmlInput_.style.height = Blockly.WidgetDiv.DIV.style.height;
+};
+
+Blockly.FieldMultilineInput.prototype.onHtmlInputChange_ = function(e) {
+    Blockly.FieldMultilineInput.superClass_.onHtmlInputChange_.call(this, e);
+    // force to resize the input
+    this.htmlInput_.style.height = Blockly.WidgetDiv.DIV.style.height;
 };
 
 Blockly.copy_ = function(toCopy) {

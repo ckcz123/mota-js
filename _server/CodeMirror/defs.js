@@ -2015,9 +2015,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "number2Block": {
           "!doc": "数字到图块对象的对应关系"
         },
-        "openingDoor": {
-          "!doc": "正在开关的门"
-        },
         "played": {
           "!type": "bool",
           "!doc": "当前是否游戏中（不包括标题画面和录像回放）"

@@ -225,7 +225,6 @@ type gameStatus = {
         font: string
     }
     curtainColor: null
-    openingDoor: null
 
     // 动画
     globalAnimateObjs: []

@@ -1199,6 +1199,12 @@ actions.prototype._clickViewMaps = function (x, y) {
         core.ui.drawMaps(index, cx, cy);
         return;
     }
+    if (x <= per - 2 && y >= this.SIZE + 1 - per) {
+        if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
+        else core.markedFloorIds[floorId] = true;
+        core.ui.drawMaps(index, cx, cy);
+        return;
+    }
     if (x >= this.SIZE + 1 - per && y <= per - 2) {
         core.status.event.data.all = !core.status.event.data.all;
         core.ui.drawMaps(index, cx, cy);
@@ -1266,6 +1272,7 @@ actions.prototype._keyUpViewMaps = function (keycode) {
         core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
         return;
     }
+    var floorId = core.floorIds[core.status.event.data.index];
 
     if (keycode == 27 || keycode == 13 || keycode == 32 || (!core.isReplaying() && keycode == 67)) {
         core.clearMap('data');
@@ -1279,6 +1286,12 @@ actions.prototype._keyUpViewMaps = function (keycode) {
     }
     if (keycode == 90) {
         core.status.event.data.all = !core.status.event.data.all;
+        core.ui.drawMaps(core.status.event.data);
+        return;
+    }
+    if (keycode == 66) {
+        if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
+        else core.markedFloorIds[floorId] = true;
         core.ui.drawMaps(core.status.event.data);
         return;
     }

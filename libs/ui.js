@@ -2282,6 +2282,8 @@ ui.prototype.drawMaps = function (index, x, y) {
     var text = core.status.maps[data.floorId].title;
     if (!data.all && (data.mw>this.SIZE || data.mh>this.SIZE))
         text+=" ["+(data.x-this.HSIZE)+","+(data.y-this.HSIZE)+"]";
+    if (core.markedFloorIds[data.floorId])
+        text+=" （已标记）";
     var textX = 16, textY = 18, width = textX + core.calWidth('data', text) + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
@@ -2302,13 +2304,14 @@ ui.prototype._drawMaps_drawHint = function () {
     stroke(per, this.SIZE - per - 3, 9, 3); // next
     stroke(0, 0, per-1, per-1); // left top
     stroke(this.SIZE-(per - 1), 0, per-1, per-1); // right top
-    // stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
+    stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
 
     core.setTextBaseline('ui', 'middle');
     core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, '#FFD700', '20px Arial');
     core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
     core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
     core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
+    core.fillText('ui', 'B', (per-1)*16, this.PIXEL - (per-1)*16);
 
     var top = this.HPIXEL - 66, left = per * 16, right = this.PIXEL - left;
     var lt = ["左", "移", "地", "图", "[A]"], rt = ["右", "移", "地", "图", "[D]"];
@@ -2863,6 +2866,7 @@ ui.prototype.drawStatistics = function (floorIds) {
     core.drawText([
         this._drawStatistics_generateText(obj, "全塔", obj.total),
         this._drawStatistics_generateText(obj, "当前", obj.current),
+        this._drawStatistics_generateText(obj, "标记（浏览地图时B键或左下角）", obj.marked),
         "当前总步数："+core.status.hero.steps+"，当前游戏时长："+core.formatTime(statistics.currTime)
         +"，总游戏时长"+core.formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
@@ -2913,13 +2917,15 @@ ui.prototype._drawStatistics_buildObj = function () {
             'hp': 0, 'atk': 0, 'def': 0, 'mdef': 0
         }
     };
-    return {ids: ids, cls: cls, ext: ext, total: core.clone(obj), current: core.clone(obj)};
+    return {ids: ids, cls: cls, ext: ext, total: core.clone(obj), current: core.clone(obj), marked: core.clone(obj)};
 }
 
 ui.prototype._drawStatistics_add = function (floorId, obj, x1, x2, value) {
     obj.total[x1][x2] += value || 0;
     if (floorId == core.status.floorId)
         obj.current[x1][x2] += value || 0;
+    if (core.markedFloorIds[floorId])
+        obj.marked[x1][x2] += value || 0;
 }
 
 ui.prototype._drawStatistics_floorId = function (floorId, obj) {

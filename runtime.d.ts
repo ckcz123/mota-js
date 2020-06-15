@@ -455,6 +455,13 @@ declare class control {
      * @param name 属性的英文名
      */
     getBuff(name: string): number
+
+    /**
+     * 获得或移除毒衰咒效果
+     * @param action 获得还是移除，'get'为获得，'remove'为移除
+     * @param type 要获得或移除的毒衰咒效果
+     */
+    triggerDebuff(action: string, type: string|string[]): void
     
     /**
      * 设置勇士位置
@@ -1108,7 +1115,7 @@ declare class events {
 
     /**
      * 插入一个公共事件
-     * @example core.insertCommonEvent('毒衰咒处理', [0]);
+     * @example core.insertCommonEvent('加点事件', [3]);
      * @param name 公共事件名；如果公共事件不存在则直接忽略 
      * @param args 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...
      * @param x 新的当前点横坐标，可选

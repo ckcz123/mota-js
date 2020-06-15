@@ -2100,6 +2100,11 @@ control.prototype.getBuff = function (name) {
     return core.getFlag('__'+name+'_buff__', 1);
 }
 
+////// 获得或移除毒衰咒效果 //////
+control.prototype.triggerDebuff = function (action, type) {
+    return this.controldata.triggerDebuff(action, type);
+}
+
 ////// 设置勇士的位置 //////
 control.prototype.setHeroLoc = function (name, value, noGather) {
     if (!core.status.hero) return;

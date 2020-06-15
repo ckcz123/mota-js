@@ -2242,6 +2242,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "读取主角某个属性的百分比修正倍率，初始值为1<br/>例如：core.getBuff('atk'); // 主角当前能发挥出多大比例的攻击力<br/>name: 属性的英文名", 
           "!type": "fn(name: string) -> number"
         }, 
+        "triggerDebuff": {
+          "!doc": "获得或移除毒衰咒效果<br/>action: 要获得还是移除，'get'为获得，'remove'为移除<br/>type: 获得或移除的内容（poison/weak/curse），可以为字符串或数组",
+          "!type": "fn(action: string, type: string|[string])"
+        },
         "setToolbarButton": {
           "!doc": "改变工具栏为按钮1-8", 
           "!type": "fn(useButton?: bool)"
@@ -3831,7 +3835,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(fromUserAction?: bool)"
         }, 
         "insertCommonEvent": {
-          "!doc": "插入一个公共事件<br/>例如：core.insertCommonEvent('毒衰咒处理', [0]);<br/>name: 公共事件名；如果公共事件不存在则直接忽略<br/>args: 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...<br/>x: 新的当前点横坐标，可选<br/>y: 新的当前点纵坐标，可选<br/>callback： 新的回调函数，可选<br/>addToLast: 插入的位置，true表示插入到末尾，否则插入到开头", 
+          "!doc": "插入一个公共事件<br/>例如：core.insertCommonEvent('加点事件', [3]);<br/>name: 公共事件名；如果公共事件不存在则直接忽略<br/>args: 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...<br/>x: 新的当前点横坐标，可选<br/>y: 新的当前点纵坐标，可选<br/>callback： 新的回调函数，可选<br/>addToLast: 插入的位置，true表示插入到末尾，否则插入到开头", 
           "!type": "fn(name?: string, args?: [?], x?: number, y?: number, callback?: fn(), addToLast?: bool)"
         }, 
         "hideImage": {

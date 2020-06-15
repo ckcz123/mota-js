@@ -80,14 +80,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		})
 	});
 },
-        "lose": function(reason) {
+        "lose": function (reason) {
 	// 游戏失败事件
 	core.ui.closePanel();
 	var replaying = core.isReplaying();
 	core.stopReplay();
-	core.waitHeroToStop(function() {
+	core.waitHeroToStop(function () {
 		core.drawText([
-			"\t["+(reason||"结局1")+"]你死了。\n如题。"
+			"\t[" + (reason || "结局1") + "]你死了。\n如题。"
 		], function () {
 			core.events.gameOver(null, replaying);
 		});
@@ -117,7 +117,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hero.loc = heroLoc;
 	// 检查重生怪并重置
 	if (!fromLoad) {
-        core.extractBlocks(floorId);
+		core.extractBlocks(floorId);
 		core.status.maps[floorId].blocks.forEach(function (block) {
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
@@ -196,7 +196,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		loc = core.getFlag("__leaveLoc__", {})[toId] || null;
 	}
 	if (core.status.maps[toId].flyPoint != null && core.status.maps[toId].flyPoint.length == 2) {
-		loc = {x: core.status.maps[toId].flyPoint[0], y: core.status.maps[toId].flyPoint[1]};
+		loc = { x: core.status.maps[toId].flyPoint[0], y: core.status.maps[toId].flyPoint[1] };
 	}
 	if (loc == null) {
 		// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
@@ -311,8 +311,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hero.statistics.exp += exp;
 
 	var hint = "打败 " + enemy.name;
-	if (core.flags.statusBarItems.indexOf('enableMoney')>=0) hint += "，金币+" + money;
-	if (core.flags.statusBarItems.indexOf('enableExp')>=0) hint += "，经验+" + exp;
+	if (core.flags.statusBarItems.indexOf('enableMoney') >= 0) hint += "，金币+" + money;
+	if (core.flags.statusBarItems.indexOf('enableExp') >= 0) hint += "，经验+" + exp;
 	core.drawTip(hint, enemy.id);
 
 	// 事件的处理
@@ -321,15 +321,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var special = enemy.special;
 	// 中毒
 	if (core.enemys.hasSpecial(special, 12)) {
-		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理", "args": [0] }]);
+		core.triggerDebuff('get', 'poison');
 	}
 	// 衰弱
 	if (core.enemys.hasSpecial(special, 13)) {
-		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理", "args": [1] }]);
+		core.triggerDebuff('get', 'weak');
 	}
 	// 诅咒
 	if (core.enemys.hasSpecial(special, 14)) {
-		core.push(todo, [{ "type": "insert", "name": "毒衰咒处理", "args": [2] }]);
+		core.triggerDebuff('get', 'curse');
 	}
 	// 仇恨属性
 	if (core.enemys.hasSpecial(special, 17)) {
@@ -351,7 +351,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.setFlag('hatred', core.getFlag('hatred', 0) + core.values.hatred);
 
 	// 战后的技能处理，比如扣除魔力值
-	if (core.flags.statusBarItems.indexOf('enableSkill') >=0 ) {
+	if (core.flags.statusBarItems.indexOf('enableSkill') >= 0) {
 		// 检测当前开启的技能类型
 		var skill = core.getFlag('skill', 0);
 		if (skill == 1) { // 技能1：二倍斩
@@ -363,7 +363,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 	// 如果有加点
-	var point =  guards.reduce(function (curr, g) {
+	var point = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].point;
 	}, enemy.point) || 0;
 	if (core.flags.enableAddPoint && point > 0) {
@@ -891,20 +891,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.useItem('skill1', true);
 		}
 		break;
-	// 在这里可以任意新增或编辑已有的快捷键内容
-	/*
-	case 0: // 使用该按键的keyCode
-		// 还可以再判定altKey是否被按下，即 if (altKey) { ...
+		// 在这里可以任意新增或编辑已有的快捷键内容
+		/*
+		case 0: // 使用该按键的keyCode
+			// 还可以再判定altKey是否被按下，即 if (altKey) { ...
 
-		// ... 在这里写你要执行脚本
-		// **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
-		if (core.hasItem('...')) {
-			core.status.route.push("key:0");
-			core.useItem('...', true); // 增加true代表该使用道具不计入录像
-		}
+			// ... 在这里写你要执行脚本
+			// **强烈建议所有新增的自定义快捷键均能给个对应的道具可点击，以方便手机端的行为**
+			if (core.hasItem('...')) {
+				core.status.route.push("key:0");
+				core.useItem('...', true); // 增加true代表该使用道具不计入录像
+			}
 
-		break;
-	*/
+			break;
+		*/
 	}
 
 },
@@ -986,9 +986,61 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.playBgm(core.getFlag("__bgm__"));
 		}
 
-        core.removeFlag('__fromLoad__');
+		core.removeFlag('__fromLoad__');
 		if (callback) callback();
 	});
+},
+        "triggerDebuff": function (action, type) {
+	// 毒衰咒效果的获得与解除
+	// action：获得还是解除；'get'表示获得，'remove'表示解除
+	// type：一个数组表示获得了哪些毒衰咒效果；poison, weak，curse
+	if (!(type instanceof Array)) type = [type];
+
+	if (action == 'get') {
+		if (core.inArray(type, 'poison') && !core.hasFlag("poison")) {
+			// 获得毒效果
+			core.setFlag('poison', true);
+		}
+		if (core.inArray(type, 'weak') && !core.hasFlag('weak')) {
+			// 获得衰效果
+			core.setFlag('weak', true);
+			if (core.values.weakValue >= 1) {
+				// >=1，直接扣数值
+				core.addStatus('atk', -core.values.weakValue);
+				core.addStatus('def', -core.values.weakValue);
+			} else {
+				// <1，扣比例
+				core.addBuff('atk', -core.values.weakValue);
+				core.addBuff('def', -core.values.weakValue);
+			}
+		}
+		if (core.inArray(type, 'curse') && !core.hasFlag('curse')) {
+			// 获得咒效果
+			core.setFlag('curse', true);
+		}
+	} else if (action == 'remove') {
+		if (core.inArray(type, "poison") && core.hasFlag("poison")) {
+			// 移除毒效果
+			core.setFlag("poison", false);
+		}
+		if (core.inArray(type, "weak") && core.hasFlag("weak")) {
+			// 移除衰效果
+			core.setFlag("weak", false);
+			if (core.values.weakValue >= 1) {
+				// >=1，直接扣数值
+				core.addStatus('atk', core.values.weakValue);
+				core.addStatus('def', core.values.weakValue);
+			} else {
+				// <1，扣比例
+				core.addBuff('atk', core.values.weakValue);
+				core.addBuff('def', core.values.weakValue);
+			}
+		}
+		if (core.inArray(type, "curse") && core.hasFlag("curse")) {
+			// 移除咒效果
+			core.setFlag("curse", false);
+		}
+	}
 },
         "updateStatusBar": function () {
 	// 更新状态栏
@@ -1024,8 +1076,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.status.hero.manamax != null && core.getRealStatus('manamax') >= 0) {
 		core.status.hero.mana = Math.min(core.status.hero.mana, core.getRealStatus('manamax'));
 		core.setStatusBarInnerHTML('mana', core.status.hero.mana + "/" + core.getRealStatus('manamax'));
-	}
-	else {
+	} else {
 		core.setStatusBarInnerHTML("mana", core.status.hero.mana);
 	}
 	// 设置技能栏
@@ -1038,9 +1089,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
 	// 进阶
-	if (core.flags.statusBarItems.indexOf('enableLevelUp')>=0 && core.status.hero.lv < core.firstData.levelUp.length) {
+	if (core.flags.statusBarItems.indexOf('enableLevelUp') >= 0 && core.status.hero.lv < core.firstData.levelUp.length) {
 		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
-		if (core.flags.statusBarItems.indexOf('levelUpLeftMode')>=0)
+		if (core.flags.statusBarItems.indexOf('levelUpLeftMode') >= 0)
 			core.setStatusBarInnerHTML('up', core.formatBigNumber(need - core.getStatus('exp')) || "");
 		else
 			core.setStatusBarInnerHTML('up', core.formatBigNumber(need) || "");
@@ -1144,7 +1195,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 				var rdir = core.turnDirection(":back", dir);
 				// 检查下一个点是否存在事件（从而判定是否移动）
-				var rnx = x + core.utils.scan[rdir].x,	
+				var rnx = x + core.utils.scan[rdir].x,
 					rny = y + core.utils.scan[rdir].y;
 				if (core.canMoveHero(x, y, rdir, floorId) && core.getBlock(rnx, rny, floorId) == null) {
 					repulse[currloc] = (repulse[currloc] || []).concat([
@@ -1286,32 +1337,33 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 从v2.7开始，每一步行走不会再刷新状态栏。
 	// 如果有特殊要求（如每走一步都加buff之类），可手动取消注释下面这一句：
 	// core.updateStatusBar(true);
-	
+
 	// 检查自动事件
 	core.checkAutoEvents();
 
 	// ------ 检查目标点事件 ------ //
 	// 无事件的道具（如血瓶）需要优先于阻激夹域判定
-    var nowx = core.getHeroLoc('x'), nowy = core.getHeroLoc('y');
-    var block = core.getBlock(nowx, nowy);
-    var hasTrigger = false;
-    if (block!=null && block.block.event.trigger=='getItem' &&
-        !core.floors[core.status.floorId].afterGetItem[nowx+","+nowy]) {
-        hasTrigger = true;
-        core.trigger(nowx, nowy, callback);
-    }
-    // 执行目标点的阻激夹域事件
-    core.checkBlock();
+	var nowx = core.getHeroLoc('x'),
+		nowy = core.getHeroLoc('y');
+	var block = core.getBlock(nowx, nowy);
+	var hasTrigger = false;
+	if (block != null && block.block.event.trigger == 'getItem' &&
+		!core.floors[core.status.floorId].afterGetItem[nowx + "," + nowy]) {
+		hasTrigger = true;
+		core.trigger(nowx, nowy, callback);
+	}
+	// 执行目标点的阻激夹域事件
+	core.checkBlock();
 
-    // 执行目标点的script和事件
-    if (!hasTrigger)
-        core.trigger(nowx, nowy, callback);
+	// 执行目标点的script和事件
+	if (!hasTrigger)
+		core.trigger(nowx, nowy, callback);
 
-    // 检查该点是否是滑冰
-    if (core.onSki()) {
+	// 检查该点是否是滑冰
+	if (core.onSki()) {
 		// 延迟到事件最后执行，因为这之前可能有阻激夹域动画
-		core.insertAction({"type": "moveAction"}, null, null, null, true);
-    }
+		core.insertAction({ "type": "moveAction" }, null, null, null, true);
+	}
 
 	// ------ 检查目标点事件 END ------ //
 
@@ -1443,7 +1495,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 },
         "drawStatistics": function () {
 	// 浏览地图时参与的统计项目
-	
+
 	return [
 		'yellowDoor', 'blueDoor', 'redDoor', 'greenDoor', 'steelDoor',
 		'yellowKey', 'blueKey', 'redKey', 'greenKey', 'steelKey',
@@ -1457,13 +1509,16 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 在这里可以增加新的ID来进行统计个数，只能增加道具ID
 	];
 },
-        "drawAbout": function() {
+        "drawAbout": function () {
 	// 绘制“关于”界面
 	core.ui.closePanel();
 	core.lockControl();
 	core.status.event.id = 'about';
 
-	var left = 48, top = 36, right = core.__PIXELS__ - 2 * left, bottom = core.__PIXELS__ - 2 * top;
+	var left = 48,
+		top = 36,
+		right = core.__PIXELS__ - 2 * left,
+		bottom = core.__PIXELS__ - 2 * top;
 
 	core.setAlpha('ui', 0.85);
 	core.fillRect('ui', left, top, right, bottom, '#000000');
@@ -1474,11 +1529,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 名称
 	core.setTextAlign('ui', 'left');
-	var globalFont = (core.status.globalAttribute||core.initStatus.globalAttribute).font;
-	core.fillText('ui', "HTML5 魔塔样板", text_start, top+35, "#FFD700", "bold 22px "+globalFont);
-	core.fillText('ui', "版本： "+main.__VERSION__, text_start, top + 80, "#FFFFFF", "bold 17px "+globalFont);
+	var globalFont = (core.status.globalAttribute || core.initStatus.globalAttribute).font;
+	core.fillText('ui', "HTML5 魔塔样板", text_start, top + 35, "#FFD700", "bold 22px " + globalFont);
+	core.fillText('ui', "版本： " + main.__VERSION__, text_start, top + 80, "#FFFFFF", "bold 17px " + globalFont);
 	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
-	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top+112+32);
+	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top + 112 + 32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
 }
     }

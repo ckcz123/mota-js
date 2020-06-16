@@ -10,7 +10,7 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 * [Docs / 使用文档说明](https://ckcz123.github.io/mota-js/)
 * [Video / 视频教程](https://www.bilibili.com/video/av32781473/)
 
-![样板](./_docs/img/sample0.jpg)
+![样板](./docs/sample0.png)
 
 ## 目录结构
 

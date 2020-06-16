@@ -1748,6 +1748,17 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!type": "number",
         "!doc": "窗口宽度的一半，为6或7"
       },
+      "floorIds": {
+        "!type": "[string]",
+        "!doc": "全部楼层ID列表"
+      },
+      "floors": {
+        "!doc": "全部楼层信息"
+      },
+      "floorPartitions": {
+        "!type": "[[string]]",
+        "!doc": "楼层分区信息"
+      },
       "material": {
         "!doc": "游戏所用到的资源",
         "animates": {
@@ -3989,6 +4000,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "resumeMaps": {
           "!doc": "恢复某一些被删除楼层。<br/>fromId: 开始恢复的楼层ID<br/>toId: 恢复到的楼层编号；可选，不填则视为fromId<br/>例如：core.resumeMaps(\"MT1\", \"MT300\") 恢复MT1~MT300之间的全部层<br/>core.resumeMaps(\"MT10\") 只删恢复MT10层",
           "!type": "fn(fromId: string, toId?: string)"
+        },
+        "autoRemoveMaps": {
+          "!doc": "根据楼层分区信息自动砍层与恢复",
+          "!type": "fn(floorId: string)"
         },
         "openItemShop": {
           "!doc": "打开一个道具商店",

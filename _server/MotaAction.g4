@@ -387,6 +387,42 @@ var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+
 return code;
 */;
 
+floorPartition_m
+    :   '高层塔分区管理' BGNL? floorPartitionList+ BEND
+
+
+/* floorPartition_m
+tooltip : 高层塔分区管理
+helpUrl : /_docs/#/instruction
+var code = '[\n'+floorPartitionList_0+']\n';
+return code;
+*/;
+
+floorPartitionList
+    : floorPartitionItem
+    | floorPartitionEmpty;
+
+floorPartitionEmpty
+    :   Newline
+    
+/* floorPartitionEmpty
+var code = ' \n';
+return code;
+*/;
+
+floorPartitionItem
+   :    '分区项' '起始楼层ID' IdString '终止楼层ID（不填代表到最后一层）' IdString? BEND
+
+/* floorPartitionItem
+tooltip : 难度分歧项
+helpUrl : /_docs/#/instruction
+default : ['MTx','']
+IdString_1 = IdString_1 ? (', "'+IdString_1+'"') : '';
+var code = '["'+IdString_0+'"'+IdString_1+'],\n';
+return code;
+*/;
+
+
 // equip 事件编辑器入口之一
 equip_m 
     :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ BEND

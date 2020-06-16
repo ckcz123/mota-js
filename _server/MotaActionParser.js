@@ -58,6 +58,14 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       return MotaActionBlocks['levelChoose_m'].xmlText([text_choices]);
 
+    case 'floorPartition':
+      if(!obj) obj=[];
+      var text_choices = null;
+      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+        text_choices=MotaActionBlocks['floorPartitionItem'].xmlText([obj[0], obj[1]||"", text_choices]);
+      }
+      return MotaActionBlocks['floorPartition_m'].xmlText([text_choices]);
+
     case 'equip':
       if(!obj) obj={};
       var buildEquip = function (obj) {

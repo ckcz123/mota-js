@@ -236,7 +236,7 @@ main.prototype.init = function (mode, callback) {
             main.loadFloors(function() {
                 var coreData = {};
                 ["dom", "statusBar", "canvas", "images", "tilesets", "materials",
-                    "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
+                    "animates", "bgms", "sounds", "floorIds", "floors", "floorPartitions"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
                 main.core.init(coreData, callback);

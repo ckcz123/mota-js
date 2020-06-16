@@ -65,6 +65,9 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['firstArrive_m'].xmlText(),
       MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
+      MotaActionFunctions.actionParser.parse([
+        ['MTx', '']
+      ], 'floorPartition'),
       MotaActionBlocks['commonEvent_m'].xmlText(),
       MotaActionBlocks['item_m'].xmlText(),
       MotaActionFunctions.actionParser.parse([

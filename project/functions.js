@@ -110,6 +110,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	//     core.deleteAllCanvas();
 	// }
 
+	// 根据分区信息自动砍层与恢复
+	if (core.autoRemoveMaps) core.autoRemoveMaps(floorId);
+
 	// 重置画布尺寸
 	core.maps.resizeMap(floorId);
 	// 设置勇士的位置

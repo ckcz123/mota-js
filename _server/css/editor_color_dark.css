@@ -381,7 +381,7 @@ input.blocklyHtmlInput {
     background-color: black;
 }
 
-.blocklyFieldRect {
+.blocklyFieldRect:not(.blocklyColourFieldRect) {
     fill: #242424 !important;
 }
 

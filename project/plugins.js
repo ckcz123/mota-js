@@ -252,10 +252,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var fromIndex = core.floorIds.indexOf(fromId),
 			toIndex = core.floorIds.indexOf(toId);
 		if (toIndex < 0) toIndex = core.floorIds.length - 1;
+		flags.__visited__ = flags.__visited__ || {};
 		flags.__removed__ = flags.__removed__ || [];
-		flags.__disabled__ = flags.__disabled__ || [];
+		flags.__disabled__ = flags.__disabled__ || {};
 		for (var i = fromIndex; i <= toIndex; ++i) {
 			var floorId = core.floorIds[i];
+			if (core.status.maps[floorId].deleted) continue;
 			delete flags.__visited__[floorId];
 			flags.__removed__.push(floorId);
 			delete flags.__disabled__[floorId];
@@ -276,11 +278,42 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		flags.__removed__ = flags.__removed__ || [];
 		for (var i = fromIndex; i <= toIndex; ++i) {
 			var floorId = core.floorIds[i];
+			if (!core.status.maps[floorId].deleted) continue;
 			flags.__removed__ = flags.__removed__.filter(function (f) { return f != floorId; });
-			if (core.status.maps[floorId].deleted) {
-				core.status.maps[floorId] = core.loadFloor(floorId);
-			}
+			core.status.maps[floorId] = core.loadFloor(floorId);
 		}
+	}
+
+	// 分区砍层相关
+	var inAnyPartition = function (floorId) {
+		var inPartition = false;
+		(core.floorPartitions || []).forEach(function (floor) {
+			var fromIndex = core.floorIds.indexOf(floor[0]);
+			var toIndex = core.floorIds.indexOf(floor[1]);
+			var index = core.floorIds.indexOf(floorId);
+			if (fromIndex < 0 || index < 0) return;
+			if (toIndex < 0) toIndex = core.floorIds.length - 1;
+			if (index >= fromIndex && index <= toIndex) inPartition = true;
+		});
+		return inPartition;
+	}
+
+	// 分区砍层
+	this.autoRemoveMaps = function (floorId) {
+		if (main.mode != 'play' || !inAnyPartition(floorId)) return;
+		// 根据分区信息自动砍层与恢复
+		(core.floorPartitions || []).forEach(function (floor) {
+			var fromIndex = core.floorIds.indexOf(floor[0]);
+			var toIndex = core.floorIds.indexOf(floor[1]);
+			var index = core.floorIds.indexOf(floorId);
+			if (fromIndex < 0 || index < 0) return;
+			if (toIndex < 0) toIndex = core.floorIds.length - 1;
+			if (index >= fromIndex && index <= toIndex) {
+				core.resumeMaps(core.floorIds[fromIndex], core.floorIds[toIndex]);
+			} else {
+				core.removeMaps(core.floorIds[fromIndex], core.floorIds[toIndex]);
+			}
+		});
 	}
 },
     "fiveLayers": function () {

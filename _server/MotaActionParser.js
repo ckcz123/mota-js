@@ -62,7 +62,7 @@ ActionParser.prototype.parse = function (obj,type) {
       if(!obj) obj=[];
       var text_choices = null;
       for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
-        text_choices=MotaActionBlocks['floorPartitionItem'].xmlText([obj[0], obj[1]||"", text_choices]);
+        text_choices=MotaActionBlocks['floorPartitionItem'].xmlText([choice[0], choice[1]||"", text_choices]);
       }
       return MotaActionBlocks['floorPartition_m'].xmlText([text_choices]);
 

@@ -2195,7 +2195,7 @@ control.prototype.clearRouteFolding = function () {
 ////// 检查录像折叠 //////
 control.prototype.checkRouteFolding = function () {
     // 未开启、未开始游戏、正在录像播放中、正在事件中：不执行
-    if (!core.flags.enableRouteFolding || !core.isPlaying() || core.isReplaying() || core.status.event.id) {
+    if (!core.flags.enableRouteFolding || !core.isPlaying() || core.status.event.id) {
         return this.clearRouteFolding();
     }
     var hero = core.clone(core.status.hero, function (name, value) {

@@ -196,6 +196,11 @@ textarea[disabled] {
     background-color: #ffd700;
 }
 
+/** 大地图按钮颜色 */
+#bigmapBtn.highlight {
+    background-color: #ffd700;
+}
+
 .popCheckboxItem {
     color: black;
 }

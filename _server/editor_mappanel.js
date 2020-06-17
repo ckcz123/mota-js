@@ -31,6 +31,16 @@ editor_mappanel_wrapper = function (editor) {
      * @param {Boolean} addViewportOffset 是否加上大地图的偏置
      */
     editor.uifunctions.locToPos = function (loc, addViewportOffset) {
+        if (editor.uivalues.bigmap) {
+            var info = editor.uivalues.bigmapInfo;
+            var size = loc.size / 32 * info.size;
+            editor.pos = {
+                x: core.clamp(Math.floor((loc.x - info.left) / size), 0, editor.currentFloorData.width - 1),
+                y: core.clamp(Math.floor((loc.y - info.top) / size), 0, editor.currentFloorData.height - 1),
+            }
+            return editor.pos;
+        }
+
         var offsetX = 0, offsetY = 0;
         if (addViewportOffset) {
             offsetX = core.bigmap.offsetX / 32;
@@ -79,6 +89,16 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
+        if (editor.uivalues.bigmap) {
+            if (!selectBox.isSelected()) {
+                editor_mode.onmode('nextChange');
+                editor_mode.onmode('loc');
+                printi("大地图模式（F键）下可以很方便的切换到地图任意位置，但是不可对地图进行直接编辑。");
+                editor.uivalues.startPos = pos;
+            }
+            return false;
+        }
+
         if (editor.uivalues.bindSpecialDoor.loc != null) {
             var x = editor.pos.x, y = editor.pos.y, id = (editor.map[y][x] || {}).id;
             // 检测是否是怪物
@@ -124,6 +144,7 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.map_onmove = function (e) {
         editor.uivalues.lastMoveE=e;
+        if (editor.uivalues.bigmap) return false;
         if (!selectBox.isSelected()) {
             if (editor.uivalues.startPos == null) return;
             var loc = editor.uifunctions.eToLoc(e);
@@ -211,6 +232,7 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.selectedArea = null;
         ee.preventDefault();
         ee.stopPropagation();
+        if (editor.uivalues.bigmap) return false;
         var e=editor.uivalues.lastMoveE;
         if (e.buttons == 2 && (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y))) {
             editor.uifunctions.showMidMenu(e.clientX, e.clientY);
@@ -773,6 +795,22 @@ editor_mappanel_wrapper = function (editor) {
         editor.uifunctions.setLayerMod('fgmap');
     }
 
+    editor.uifunctions.triggerBigmap = function () {
+        editor.uivalues.bigmap = !editor.uivalues.bigmap;
+        if (editor.uivalues.bigmap) {
+            editor.dom.bigmapBtn.classList.add('highlight');
+            printi("大地图模式（F键）下可以很方便的切换到地图任意位置，但是不可对地图进行直接编辑。");
+        } else {
+            editor.dom.bigmapBtn.classList.remove('highlight');
+            editor.setViewport(32 * (editor.pos.x - core.__HALF_SIZE__), 32 * (editor.pos.y - core.__HALF_SIZE__));
+            printf("已退出大地图模式");
+        }
+        editor.dom.ebmCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+        editor.uivalues.startPos = editor.uivalues.endPos = null;
+        editor.updateMap();
+        editor.drawPosSelection();
+    }
+
     /**
      * 移动大地图可视窗口的绑定
      */
@@ -782,7 +820,7 @@ editor_mappanel_wrapper = function (editor) {
             if (ii == 4) {
                 // 大地图
                 node.onclick = function () {
-                    editor.uievent.selectPoint(null, editor.pos.x, editor.pos.y, true);
+                    editor.uifunctions.triggerBigmap();
                 }
                 continue;
             }

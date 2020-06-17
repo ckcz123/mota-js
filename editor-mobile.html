@@ -301,6 +301,7 @@
         <div class="col" id='mapColMark'></div>
         <div class="row" id='mapRowMark'></div>
         <div class="map" id="mapEdit">
+            <canvas class='gameCanvas' id='ebm'></canvas>
             <canvas class='gameCanvas' id='efg'></canvas>
             <canvas class='gameCanvas' id='eui' style='z-index:100'></canvas>
         </div>
@@ -375,7 +376,7 @@
                     <input type="button" style="padding:1px 6px" value="↑"/>
                     <input type="button" style="padding:1px 6px" value="↓"/>
                     <input type="button" style="padding:1px 1px" value="→"/>
-                    <input type="button" value="大地图" style="margin-left: 5px"/>
+                    <input type="button" id="bigmapBtn" value="大地图" style="margin-left: 5px"/>
                 </div>
                 <select id="selectFloor" style="clear:left"></select>
                 <input type="button" value="保存地图" id='saveFloor'/>

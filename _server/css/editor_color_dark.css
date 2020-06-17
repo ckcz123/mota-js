@@ -301,6 +301,17 @@ option:checked {
 	color: #fff4d0;
 }
 
+#bigmapBtn {
+    background-color: #234;/*33333c*/
+	border-color: #abc;
+	color: #cdf;
+}
+#bigmapBtn.highlight {
+    background-color: #871;
+	border-color: #eda;
+	color: #fff4d0;
+}
+
 .popCheckboxItem {
     color: #bbbbbb;
 }

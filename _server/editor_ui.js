@@ -291,6 +291,8 @@ editor_ui_wrapper = function (editor) {
                 case 65: editor.moveViewport(-1, 0); break;
                 case 83: editor.moveViewport(0, 1); break;
                 case 68: editor.moveViewport(1, 0); break;
+                // F
+                case 70: editor.uifunctions.triggerBigmap(); break;
                 // Z~.
                 case 90: editor_mode.change('map'); break; // Z
                 case 88: editor_mode.change('loc'); break; // X
@@ -311,7 +313,8 @@ editor_ui_wrapper = function (editor) {
     editor.uifunctions.showHelp = function () {
         alert(
             "快捷操作帮助：\n" +
-            "ESC / 点击空白处：自动保存当前修改" +
+            "ESC / 点击空白处：自动保存当前修改\n" +
+            "F：切换大地图\n",
             "WASD / 长按箭头：平移大地图\n" +
             "PgUp, PgDn / 鼠标滚轮：上下切换楼层\n" +
             "Z~.（键盘的第三排）：快捷切换标签\n" +

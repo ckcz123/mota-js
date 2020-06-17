@@ -7,8 +7,11 @@ function editor() {
     this.dom={
         body:document.body,
         eui:document.getElementById('eui'),
+        efg:document.getElementById('efg'),
+        ebm:document.getElementById('ebm'),
         euiCtx:document.getElementById('eui').getContext('2d'),
         efgCtx:document.getElementById('efg').getContext('2d'),
+        ebmCtx:document.getElementById('ebm').getContext('2d'),
         mid:document.getElementById('mid'),
         mapEdit:document.getElementById('mapEdit'),
         selectFloor:document.getElementById('selectFloor'),
@@ -55,6 +58,7 @@ function editor() {
         gameInject: document.getElementById('gameInject'),
         undoFloor: document.getElementById('undoFloor'),
         editorTheme: document.getElementById('editorTheme'),
+        bigmapBtn : document.getElementById('bigmapBtn'),
         maps: ['bgmap', 'fgmap', 'map'],
         canvas: ['bg', 'fg'],
     };
@@ -85,6 +89,13 @@ function editor() {
         foldPerCol: 50,
         //
         ratio : 1,
+        // 是否是大地图模式
+        bigmap : false,
+        bigmapInfo: {
+            top: 0,
+            left: 0,
+            size: 32,
+        },
         // blockly转义
         disableBlocklyReplace: false,
         // blockly展开比较
@@ -175,7 +186,7 @@ editor.prototype.init = function (callback) {
             editor.dom[e+'c'] = cvs[i];
             editor.dom[e+'Ctx'] = cvs[i].getContext('2d');
             
-            editor.dom.mapEdit.insertBefore(cvs[i], document.getElementById('efg'));
+            editor.dom.mapEdit.insertBefore(cvs[i], editor.dom.ebm);
         });
 
         var mainScript = document.createElement('script');
@@ -347,10 +358,11 @@ editor.prototype.drawEventBlock = function () {
     var fg=editor.dom.efgCtx;
 
     fg.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+    if (editor.uivalues.bigmap) return this._drawEventBlock_bigmap();
+
     var firstData = editor.game.getFirstData();
     for (var i=0;i<core.__SIZE__;i++) {
         for (var j=0;j<core.__SIZE__;j++) {
-            var color=[];
             var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
             if (editor.currentFloorId == firstData.floorId
                 && loc == firstData.hero.loc.x + "," + firstData.hero.loc.y) {
@@ -358,27 +370,7 @@ editor.prototype.drawEventBlock = function () {
                 editor.game.doCoreFunc('fillBoldText', fg, 'S',
                     32 * i + 16, 32 * j + 28, '#FFFFFF', null, 'bold 30px Verdana');
             }
-            if (editor.currentFloorData.events[loc])
-                color.push('#FF0000');
-            if (editor.currentFloorData.autoEvent[loc]) {
-                var x = editor.currentFloorData.autoEvent[loc];
-                for (var index in x) {
-                    if (x[index] && x[index].data) {
-                        color.push('#FFA500');
-                        break;
-                    }
-                }
-            }
-            if (editor.currentFloorData.afterBattle[loc])
-                color.push('#FFFF00');
-            if (editor.currentFloorData.changeFloor[loc])
-                color.push('#00FF00');
-            if (editor.currentFloorData.afterGetItem[loc])
-                color.push('#00FFFF');
-            if (editor.currentFloorData.cannotMove[loc] && editor.currentFloorData.cannotMove[loc].length > 0)
-                color.push('#0000FF');
-            if (editor.currentFloorData.afterOpenDoor[loc])
-                color.push('#FF00FF');
+            var color = this._drawEventBlock_getColor(loc);
             for(var kk=0,cc;cc=color[kk];kk++){
                 fg.fillStyle = cc;
                 fg.fillRect(32*i+8*kk, 32*j+32-8, 8, 8);
@@ -393,12 +385,72 @@ editor.prototype.drawEventBlock = function () {
     }
 }
 
+editor.prototype._drawEventBlock_bigmap = function () {
+    var fg=editor.dom.efgCtx;
+    var info = editor.uivalues.bigmapInfo, size = info.size, psize = size / 4;
+
+    for (var i = 0; i < editor.currentFloorData.width; ++i) {
+        for (var j = 0; j < editor.currentFloorData.height; ++j) {
+            var color = this._drawEventBlock_getColor(i+","+j);
+            for(var kk=0,cc;cc=color[kk];kk++){
+                fg.fillStyle = cc;
+                fg.fillRect(info.left + size * i + psize * kk, info.top + size * (j + 1) - psize, psize, psize);
+            }
+        }
+    }
+}
+
+editor.prototype._drawEventBlock_getColor = function (loc) {
+    var color = [];
+    if (editor.currentFloorData.events[loc])
+        color.push('#FF0000');
+    if (editor.currentFloorData.autoEvent[loc]) {
+        var x = editor.currentFloorData.autoEvent[loc];
+        for (var index in x) {
+            if (x[index] && x[index].data) {
+                color.push('#FFA500');
+                break;
+            }
+        }
+    }
+    if (editor.currentFloorData.afterBattle[loc])
+        color.push('#FFFF00');
+    if (editor.currentFloorData.changeFloor[loc])
+        color.push('#00FF00');
+    if (editor.currentFloorData.afterGetItem[loc])
+        color.push('#00FFFF');
+    if (editor.currentFloorData.cannotMove[loc] && editor.currentFloorData.cannotMove[loc].length > 0)
+        color.push('#0000FF');
+    if (editor.currentFloorData.afterOpenDoor[loc])
+        color.push('#FF00FF');
+    return color;
+}
+
 editor.prototype.drawPosSelection = function () {
     this.drawEventBlock();
     var fg=editor.dom.efgCtx;
     fg.strokeStyle = 'rgba(255,255,255,0.7)';
-    fg.lineWidth = 4;
-    fg.strokeRect(32*editor.pos.x - core.bigmap.offsetX + 4, 32*editor.pos.y - core.bigmap.offsetY + 4, 24, 24);
+    if (editor.uivalues.bigmap) {
+        var info = editor.uivalues.bigmapInfo, size = info.size, psize = size / 8;
+        fg.lineWidth = psize;
+        fg.strokeRect(info.left + editor.pos.x * size + psize, info.top + editor.pos.y * size + psize, size - 2*psize, size - 2*psize);
+    } else {
+        fg.lineWidth = 4;
+        fg.strokeRect(32*editor.pos.x - core.bigmap.offsetX + 4, 32*editor.pos.y - core.bigmap.offsetY + 4, 24, 24);
+    }
+}
+
+editor.prototype._updateMap_bigmap = function () {
+    var bm=editor.dom.ebmCtx;
+    bm.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+    core.drawThumbnail(editor.currentFloorId, core.status.thisMap.blocks, null, 
+        {ctx: bm, all: true});
+    var width = editor.currentFloorData.width;
+    var height = editor.currentFloorData.height;
+    editor.uivalues.bigmapInfo.top = core.__PIXELS__ * Math.max(0, (1 - height / width) / 2);
+    editor.uivalues.bigmapInfo.left = core.__PIXELS__ * Math.max(0, (1 - width / height) / 2);
+    editor.uivalues.bigmapInfo.size = core.__PIXELS__ / Math.max(width, height);
+    this.drawEventBlock();
 }
 
 editor.prototype.updateMap = function () {
@@ -414,6 +466,7 @@ editor.prototype.updateMap = function () {
         });
     }), {'events': editor.currentFloorData.events}, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
+    if (editor.uivalues.bigmap) return this._updateMap_bigmap();
 
     var updateMap = function () {
         core.removeGlobalAnimate();
@@ -524,6 +577,7 @@ editor.prototype.setViewport=function (x, y) {
 
 editor.prototype.moveViewport=function(x,y){
     editor.setViewport(core.bigmap.offsetX+32*x, core.bigmap.offsetY+32*y);
+    printi("你可以按【大地图】（或F键）快捷切换大地图模式");
 }
 
 /////////// 界面交互相关 ///////////

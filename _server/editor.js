@@ -526,7 +526,7 @@ editor.prototype.setLastUsedType = function (type) {
         = type == 'frequent' ? (_buildHtml('recent', '最近使用') + " | " + _buildHtml(null, '最常使用'))
         : (_buildHtml(null, '最近使用') + " | " + _buildHtml('frequent', '最常使用'));
     this.updateLastUsedMap();
-    editor.dom.lastUsedDiv.scroll(0,0);
+    editor.dom.lastUsedDiv.scrollTop = 0;
 }
 
 editor.prototype.updateLastUsedMap = function () {

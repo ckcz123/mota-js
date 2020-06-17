@@ -417,7 +417,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
   var mousewheelOffsetValue=20/380*workspace.scrollbar[hvScroll].handleLength_*3;
   workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?mousewheelOffsetValue:-mousewheelOffsetValue);
   workspace.scrollbar[hvScroll].onScroll_();
-  workspace.setScale(workspace.scale);
+  // workspace.setScale(workspace.scale);
 }
 
 var doubleClickCheck=[[0,'abc']];

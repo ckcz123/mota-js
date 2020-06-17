@@ -80,16 +80,37 @@ HTML5项目都是可以进行控制台调试的，下面以edge浏览器为例�
 1.  **元素：**您可以在这里对游戏和编辑器的各HTML和css元素进行查看和临时的修改，譬如您想观察游戏在竖屏的表现，只需将窗口拉到瘦高。
 2.  **性能：**您可以在这里对游戏的任何一段脚本进行性能分析，观察其中各行的执行频率和耗时，从而确定优化的方向。
 3.  **调试程序：**您可以在这里查看游戏的源码，包括project文件夹的functions.js和plugin.js（脚本编辑和插件编写）以及整个libs文件夹，并进行断点调试。
-4.  **控制台：**最常使用的部分，当编辑器或游戏打不开、卡死、或者不按您的预想运作时您就需要查看这里的报错信息。这里也是各种API输入的地方，譬如上图中您可以看到全部的插件函数。这里介绍几个最基本的命令，更多通用命令请前往[菜鸟教程](http://www.runoob.com/js)或[w3school](http://w3school.com.cn/js/index.asp)学习，更多样板API请查阅runtime.d.ts（这是个文本文件，不是音频。手机打不开的话请将后缀名改为txt）。
-``` js
-    alert('Hello world!'); // 弹窗警告，请勿放在正常游戏流程中可以触发的地方
-    console.log('Hello world'); // 在控制台打印一条信息，可用于游戏流程的任何部分
-    Math.floor(3.2); // 执行一个数学函数计算，计算不大于某数的最大整数
-    // 以上是所有网页通用的命令，下面介绍HTML5魔塔样板特有的API. 样板API都是以core.xxx开头的，比如：
-    core.material; // 查看游戏的所有元件（只读），如动画、音频、图片、道具和怪物等
-    core.status; // 查看游戏的所有状态，其中又以core.status.hero为核心
-    core.getItem('yellowKey', 3); // 获得3把黄钥匙，有获得提示并播放音效
-```
+4.  **控制台：**最常使用的部分，当编辑器或游戏打不开、卡死、或者不按您的预想运作时您就需要查看这里的报错信息。这里也是各种API输入的地方，譬如上图中您可以看到全部的插件函数。
+
+在控制台中，我们可以输入一些命令对游戏进行调试，常见的命令有：
+
+- `core.status.floorId` 获得当前层的floorId。
+- `core.status.thisMap` 获得当前地图信息。例如`core.status.thisMap.blocks`可以获得当前层所有图块。
+- `core.floors` 获得所有剧本的信息。例如`core.floors[core.status.floorId].events`可以获得当前层所有事件。
+- `core.status.hero` 获得当前勇士状态信息。例如`core.status.hero.atk`就是当前勇士的攻击力数值。
+- `core.material.enemys` 获得所有怪物信息。例如`core.material.enemys.greenSlime`就是获得绿色史莱姆的属性数据。
+- `core.material.items` 获得所有道具的信息。例如`core.material.items.pickaxe`就是获得破墙镐的信息。
+- `core.debug()` 开启调试模式；此模式下可以按住Ctrl键进行穿墙。
+- `core.updateStatusBar()` 立刻更新状态栏和地图显伤。
+- `core.setStatus('atk', 1000)` 直接设置勇士的某项属性。本句等价于 `core.status.hero.atk = 1000`。
+- `core.getStatus('atk')` 返回勇士当前某项属性数值。本句等价于 `core.status.hero.atk`。
+- `core.setItem('pickaxe', 10)` 直接设置勇士某个道具的个数。这里可以需要写道具的ID。
+- `core.getItem('pickaxe', 2)` 令勇士获得两个破墙镐。
+- `core.itemCount('pickaxe')` 返回勇士某个道具的个数。
+- `core.hasItem('pickaxe')` 返回勇士是否拥有某个道具。等价于`core.itemCount('pickaxe')!=0`。
+- `core.getEquip(0)` 返回0号装备类型（武器）的当前装备的itemId，不存在则返回null
+- `core.hasEquip('sword1')` 返回某个装备当前是否处于被装备状态
+- `core.setFlag('xxx', 1)` 设置某个flag/自定义变量的值。
+- `core.getFlag('xxx', 10)` 获得某个flag/自定义变量的值；如果该项不存在（未被定义），则返回第二个参数的值。
+- `core.hasFlag('xxx')` 返回是否存在某个变量且不为0。等价于`core.getFlag('xxx', 0)!=0`。
+- `core.removeFlag('xxx')` 删除某个flag/自定义变量
+- `core.insertAction(list)` 执行一段自定义事件。比如 `core.insertAction(["剧情文本"])` 将执行一个剧情文本显示事件。
+- `core.changeFloor('MT2', 'downFloor')` 立刻执行楼层切换到MT2层的下楼点位置。
+- `core.changeFloor('MT5', null, {'x': 4, 'y': 7})` 立刻切换楼层到MT5层的(4,7)点。
+- `core.getBlock(3, 5, 'MT1')` 获得当前地图上某一个块的信息。第三个参数为floorId，可省略表示当前楼层。
+- `core.getBlockId(3, 5, 'MT1')` 获得当前地图上某一个点的图块ID。第三个参数为floorId，可省略表示当前楼层。
+- `core.resetMap()` 重置当前层地图。
+- ……
 
 更多关于控制台调试和脚本的信息可参见[脚本](script)和[API列表](api)。
 

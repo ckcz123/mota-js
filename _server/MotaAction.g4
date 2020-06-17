@@ -126,13 +126,13 @@ return code;
 */;
 
 shopsub
-    :   '商店 id' IdString '标题' EvalString? '图像' IdString? BGNL? Newline '文字' EvalString? BGNL? Newline '快捷名称' EvalString '未开启不显示' Bool '不可预览' Bool BGNL? Newline shopChoices+ BEND
+    :   '商店 id' IdString '标题' EvalString? '图像' IdString? BGNL? Newline '文字' EvalString_Multi? BGNL? Newline '快捷名称' EvalString '未开启不显示' Bool '不可预览' Bool BGNL? Newline shopChoices+ BEND
     
 
 /* shopsub
 tooltip : 全局商店
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_1
+doubleclicktext : EvalString_Multi_0
 allIds : ['IdString_1']
 default : ["shop1","贪婪之神","moneyShop","勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：","金币商店",false,false]
 var title='';
@@ -145,8 +145,8 @@ if (EvalString_0==''){
 }
 var code = {
     'id': IdString_0,
-    'text': title+EvalString_1,
-    'textInList': EvalString_2,
+    'text': title+EvalString_Multi_0,
+    'textInList': EvalString_1,
     'mustEnable': Bool_0,
     'disablePreview': Bool_1,
     'choices': 'choices_asdfefw'
@@ -173,7 +173,7 @@ return code;
 */;
 
 shopitem
-    :   '道具商店 id' IdString '快捷名称' EvalString '未开启不显示' Bool BGNL? Newline shopItemChoices+ BEND
+    :   '道具商店 id' IdString '快捷名称' EvalString '使用' ShopUse_List '未开启不显示' Bool BGNL? Newline shopItemChoices+ BEND
 
 
 /* shopitem
@@ -184,6 +184,7 @@ var code = {
     'id': IdString_0,
     'item': true,
     'textInList': EvalString_0,
+    'use': ShopUse_List_0 || 'money',
     'mustEnable': Bool_0,
     'choices': 'choices_aqwedsa'
 }
@@ -375,16 +376,52 @@ return code;
 */;
 
 levelChooseChoice
-   :    '难度分歧项' '名称' EvalString '简写' EvalString '变量:hard值' Int '颜色' ColorString? Colour BGNL Newline action+ BEND
+   :    '难度分歧项' '名称' EvalString '简写' EvalString '变量:hard值' NInt '颜色' ColorString? Colour BGNL Newline action+ BEND
 
 /* levelChooseChoice
 tooltip : 难度分歧项
 helpUrl : /_docs/#/instruction
 default : ['简单','Easy',1,'']
 ColorString_0 = ColorString_0 ? (', "color": [' + ColorString_0 + ']') : '';
-var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+Int_0+ColorString_0+', "action": [\n'+action_0+']},\n';
+var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+NInt_0+ColorString_0+', "action": [\n'+action_0+']},\n';
 return code;
 */;
+
+floorPartition_m
+    :   '高层塔分区管理' BGNL? floorPartitionList+ BEND
+
+
+/* floorPartition_m
+tooltip : 高层塔分区管理
+helpUrl : /_docs/#/instruction
+var code = '[\n'+floorPartitionList_0+']\n';
+return code;
+*/;
+
+floorPartitionList
+    : floorPartitionItem
+    | floorPartitionEmpty;
+
+floorPartitionEmpty
+    :   Newline
+    
+/* floorPartitionEmpty
+var code = ' \n';
+return code;
+*/;
+
+floorPartitionItem
+   :    '分区项' '起始楼层ID' IdString '终止楼层ID（不填代表到最后一层）' IdString? BEND
+
+/* floorPartitionItem
+tooltip : 难度分歧项
+helpUrl : /_docs/#/instruction
+default : ['MTx','']
+IdString_1 = IdString_1 ? (', "'+IdString_1+'"') : '';
+var code = '["'+IdString_0+'"'+IdString_1+'],\n';
+return code;
+*/;
+
 
 // equip 事件编辑器入口之一
 equip_m 
@@ -663,7 +700,9 @@ action
     |   moveAction_s
     |   moveHero_s
     |   jump_s
+    |   jump_1_s
     |   jumpHero_s
+    |   jumpHero_1_s
     |   playBgm_s
     |   pauseBgm_s
     |   resumeBgm_s
@@ -720,28 +759,28 @@ action
     ;
 
 text_0_s
-    :   '显示文章' ':' EvalString Newline
+    :   '显示文章' ':' EvalString_Multi Newline
     
 
 /* text_0_s
 tooltip : text：显示一段文字（剧情）
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_0
-default : ["欢迎使用事件编辑器(双击方块进入多行编辑)"]
-var code = '"'+EvalString_0+'",\n';
+doubleclicktext : EvalString_Multi_0
+default : ["欢迎使用事件编辑器(回车直接多行编辑)"]
+var code = '"'+EvalString_Multi_0+'",\n';
 return code;
 */;
 
 text_1_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? ':' EvalString Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? BGNL? Newline EvalString_Multi Newline
     
 
 /* text_1_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_3
+doubleclicktext : EvalString_Multi_0
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","欢迎使用事件编辑器(双击方块进入多行编辑)"]
+default : ["小妖精","fairy","","欢迎使用事件编辑器(回车直接多行编辑)"]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -754,20 +793,20 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+EvalString_3+'",\n';
+var code =  '"'+title+EvalString_2+EvalString_Multi_0+'",\n';
 return code;
 */;
 
 text_2_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? ':' EvalString BGNL? Newline textDrawingList* Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
     
 
 /* text_2_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_3
+doubleclicktext : EvalString_Multi_0
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","欢迎使用事件编辑器(双击方块进入多行编辑)",null]
+default : ["小妖精","fairy","","欢迎使用事件编辑器(回车直接多行编辑)",null]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -780,7 +819,7 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_3+'",\n';
+var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'",\n';
 return code;
 */;
 
@@ -838,27 +877,27 @@ return code;
 */;
 
 comment_s
-    :   '添加注释' ':' EvalString Newline
+    :   '添加注释' ':' EvalString_Multi Newline
 
 
 /* comment_s
 tooltip : comment：添加一段会被游戏跳过的注释内容
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_0
+doubleclicktext : EvalString_Multi_0
 default : ["可以在这里写添加任何注释内容"]
 colour : this.commentColor
-var code = '{"type": "comment", "text": "'+EvalString_0+'"},\n';
+var code = '{"type": "comment", "text": "'+EvalString_Multi_0+'"},\n';
 return code;
 */;
 
 autoText_s
-    :   '自动剧情文本: 标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '时间' Int BGNL? EvalString Newline
+    :   '自动剧情文本: 标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '时间' Int BGNL? EvalString_Multi Newline
     
 
 /* autoText_s
 tooltip : autoText：自动剧情文本,用户无法跳过自动剧情文本,大段剧情文本请添加“是否跳过剧情”的提示
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_2
+doubleclicktext : EvalString_Multi_0
 allIds : ['EvalString_1']
 default : ["小妖精","fairy","",3000,"用户无法跳过自动剧情文本，大段剧情文本请添加“是否跳过剧情”的提示"]
 var title='';
@@ -873,21 +912,21 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '{"type": "autoText", "text": "'+title+EvalString_2+EvalString_3+'", "time": '+Int_0+'},\n';
+var code =  '{"type": "autoText", "text": "'+title+EvalString_2+EvalString_Multi_0+'", "time": '+Int_0+'},\n';
 return code;
 */;
 
 scrollText_s
-    :   '滚动剧情文本:' '时间' Int '行距' Number '不等待执行完毕' Bool? BGNL? EvalString Newline
+    :   '滚动剧情文本:' '时间' Int '行距' Number '不等待执行完毕' Bool? BGNL? EvalString_Multi Newline
 
 
 /* scrollText_s
 tooltip : scrollText：滚动剧情文本，将从下到上进行滚动显示。
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_0
+doubleclicktext : EvalString_Multi_0
 default : [5000,1.4,false,"时间是总时间，可以使用setText事件来控制字体、颜色、大小、偏移量等"]
 Bool_0 = Bool_0?', "async": true':'';
-var code =  '{"type": "scrollText", "text": "'+EvalString_0+'"'+Bool_0+', "time" :'+Int_0+', "lineHeight": '+Number_0+'},\n';
+var code =  '{"type": "scrollText", "text": "'+EvalString_Multi_0+'"'+Bool_0+', "time" :'+Int_0+', "lineHeight": '+Number_0+'},\n';
 return code;
 */;
 
@@ -1224,7 +1263,7 @@ helpUrl : /_docs/#/instruction
 colour : this.mapColor
 allFloorIds : ['IdString_0']
 default : [null,"","",""]
-selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
   var pattern1 = MotaActionFunctions.pattern.id;
@@ -1859,14 +1898,14 @@ return code;
 */;
 
 showTextImage_s
-    :   '显示图片化文本' '文本内容' EvalString BGNL?
+    :   '显示图片化文本' EvalString_Multi BGNL?
         '图片编号' Int '起点像素' 'x' PosString 'y' PosString '行距' Number '翻转' Reverse_List '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showTextImage_s
 tooltip : showTextImage：显示图片化文本
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_0
+doubleclicktext : EvalString_Multi_0
 colour : this.printColor
 default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1.4,"null",1,0,false]
 if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
@@ -1874,7 +1913,7 @@ if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_0+'", "loc": ['+PosString_0+','+PosString_1+'], "lineHeight": '+Number_0+Reverse_List_0+', "opacity": '+Number_1+', "time": '+Int_1+async+'},\n';
+var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_Multi_0+'", "loc": ['+PosString_0+','+PosString_1+'], "lineHeight": '+Number_0+Reverse_List_0+', "opacity": '+Number_1+', "time": '+Int_1+async+'},\n';
 return code;
 */;
 
@@ -2068,6 +2107,31 @@ var code = '{"type": "jump"'+floorstr+''+IntString_0+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
+jump_1_s
+    :   '跳跃事件' '起始 x' PosString? ',' 'y' PosString? '增量 dx' PosString? ',' 'dy' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool Newline
+
+
+/* jump_1_s
+tooltip : jump: 让某个NPC/怪物跳跃，给定增量
+helpUrl : /_docs/#/instruction
+default : ["","","0","0",500,true,false]
+selectPoint : ["PosString_0", "PosString_1"]
+colour : this.mapColor
+
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr += ', "from": ['+PosString_0+','+PosString_1+']';
+}
+if (PosString_2 && PosString_3) {
+    floorstr += ', "dxy": ['+PosString_2+','+PosString_3+']';
+}
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+Bool_0 = Bool_0?', "keep": true':'';
+Bool_1 = Bool_1?', "async": true':'';
+var code = '{"type": "jump"'+floorstr+''+IntString_0+Bool_0+Bool_1+'},\n';
+return code;
+*/;
+
 jumpHero_s
     :   '跳跃勇士' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不等待执行完毕' Bool Newline
 
@@ -2081,6 +2145,25 @@ colour : this.dataColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
+}
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "jumpHero"'+floorstr+IntString_0+Bool_0+'},\n';
+return code;
+*/;
+
+jumpHero_1_s
+    :   '跳跃勇士' '增量 dx' PosString? ',' 'dy' PosString? '动画时间' IntString? '不等待执行完毕' Bool Newline
+
+
+/* jumpHero_1_s
+tooltip : jumpHero: 跳跃勇士，给定增量
+helpUrl : /_docs/#/instruction
+default : ["0","0",500,false]
+colour : this.dataColor
+var floorstr = '';
+if (PosString_0 && PosString_1) {
+    floorstr = ', "dxy": ['+PosString_0+','+PosString_1+']';
 }
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
@@ -2324,27 +2407,27 @@ return code;
 */;
 
 choices_s
-    :   '选项' ':' EvalString? BGNL? '标题' EvalString? '图像' IdString? '超时毫秒数' Int BGNL? Newline choicesContext+ BEND Newline
+    :   '选项' ':' EvalString_Multi? BGNL? '标题' EvalString? '图像' IdString? '超时毫秒数' Int BGNL? Newline choicesContext+ BEND Newline
 
 
 /* choices_s
 tooltip : choices: 给用户提供选项
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_0
+doubleclicktext : EvalString_Multi_0
 default : ["","流浪者","trader",0]
 allIds : ['IdString_0']
 var title='';
-if (EvalString_1==''){
+if (EvalString_0==''){
     if (IdString_0=='')title='';
     else title='\\t['+IdString_0+']';
 } else {
-    if (IdString_0=='')title='\\t['+EvalString_1+']';
-    else title='\\t['+EvalString_1+','+IdString_0+']';
+    if (IdString_0=='')title='\\t['+EvalString_0+']';
+    else title='\\t['+EvalString_0+','+IdString_0+']';
 }
-EvalString_0 = title+EvalString_0;
-EvalString_0 = EvalString_0 ?(', "text": "'+EvalString_0+'"'):'';
+EvalString_Multi_0 = title+EvalString_Multi_0;
+EvalString_Multi_0 = EvalString_Multi_0 ?(', "text": "'+EvalString_Multi_0+'"'):'';
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "choices"',EvalString_0,Int_0,', "choices": [\n',
+var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,', "choices": [\n',
     choicesContext_0,
 ']},\n'].join('');
 return code;
@@ -2368,16 +2451,16 @@ return code;
 */;
 
 confirm_s
-    :   '显示确认框' ':' EvalString '超时毫秒数' Int BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
+    :   '显示确认框' ':' EvalString_Multi '超时毫秒数' Int BGNL? '确定的场合' ':' '（默认选中' Bool '）' BGNL? Newline action+ '取消的场合' ':' BGNL? Newline action+ BEND Newline
 
 /* confirm_s
 tooltip : 弹出确认框
 helpUrl : /_docs/#/instruction
 default : ["确认要xxx吗?",0,false]
-doubleclicktext : EvalString_0
+doubleclicktext : EvalString_Multi_0
 Bool_0 = Bool_0?', "default": true':''
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_0,'",\n',
+var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",\n',
     '"yes": [\n',action_0,'],\n',
     '"no": [\n',action_1,']\n',
 '},\n'].join('');
@@ -2676,12 +2759,12 @@ return code;
 */;
 
 drawTextContent_s
-    :   '绘制多行文本'  EvalString BGNL? '起点像素' 'x' PosString 'y' PosString '最大宽度' IntString? '颜色' ColorString? Colour BGNL? '对齐' TextAlign_List '字体大小' IntString? '行距' IntString? '粗体' Bool Newline
+    :   '绘制多行文本'  EvalString_Multi BGNL? '起点像素' 'x' PosString 'y' PosString '最大宽度' IntString? '颜色' ColorString? Colour BGNL? '对齐' TextAlign_List '字体大小' IntString? '行距' IntString? '粗体' Bool Newline
 
 /* drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_0
+doubleclicktext : EvalString_Multi_0
 colour : this.subColor
 default : ["绘制多行文本\\n可双击编辑","0","0","","",'rgba(255,255,255,1)',null,"","",false]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
@@ -2690,7 +2773,7 @@ IntString_0 = IntString_0 ? (', "maxWidth": '+IntString_0) : '';
 IntString_1 = IntString_1 ? (', "fontSize": '+IntString_1) : '';
 IntString_2 = IntString_2 ? (', "lineHeight": '+IntString_2) : '';
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
-var code = '{"type": "drawTextContent", "text": "'+EvalString_0+'", "left": '+PosString_0+', "top": '+PosString_1+TextAlign_List_0+IntString_0+IntString_1+IntString_2+ColorString_0+Bool_0+'},\n';
+var code = '{"type": "drawTextContent", "text": "'+EvalString_Multi_0+'", "left": '+PosString_0+', "top": '+PosString_1+TextAlign_List_0+IntString_0+IntString_1+IntString_2+ColorString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -3320,6 +3403,8 @@ Bool:   'TRUE'
 
 Int :   '0' | [1-9][0-9]* ; // no leading zeros
 
+NInt : '0' | '-'? [1-9][0-9]* ;
+
 Letter_List
     :  'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'
     /*Letter_List ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']*/;
@@ -3370,6 +3455,10 @@ Key_List
 
 //转blockly后不保留需要加"
 EvalString
+    :   Equote_double (ESC_double | ~["\\])* Equote_double
+    ;
+
+EvalString_Multi
     :   Equote_double (ESC_double | ~["\\])* Equote_double
     ;
 

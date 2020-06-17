@@ -167,6 +167,8 @@ function core() {
             'steps': 0,
             'save': [],
         },
+        // 录像折叠
+        'routeFolding': {},
 
         // event事件
         'shops': {},
@@ -200,7 +202,6 @@ function core() {
             "font": main.styles.font || "Verdana"
         },
         'curtainColor': null,
-        'openingDoor': null,
 
         // 动画
         'globalAnimateObjs': [],
@@ -210,6 +211,8 @@ function core() {
         "globalAnimateStatus": 0,
         'animateObjs': [],
     };
+    // 标记的楼层列表，用于数据统计
+    this.markedFloorIds = {};
     this.status = {};
     this.dymCanvas = {};
 }

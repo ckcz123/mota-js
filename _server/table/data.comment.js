@@ -18,6 +18,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "楼层列表",
 					"_data": "在这里按顺序放所有的楼层；其顺序直接影响到楼层传送器、浏览地图和上/下楼器的顺序"
 				},
+				"floorPartitions": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "floorPartition",
+					"_docs": "分区指定",
+					"_data": "可以在这里指定楼层分区；主要适用于不可返回的高层塔；进入新分区后将自动调用砍层插件以减少空间消耗；未在任何分区的楼层将被视为公共区域"
+				},
 				"images": {
 					"_leaf": true,
 					"_type": "material",
@@ -628,6 +635,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_docs": "允许瞬移",
 					"_data": "是否允许瞬间移动"
+				},
+				"enableRouteFolding": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "录像折叠",
+					"_data": "是否开启录像折叠功能。\n此功能将尽可能的通过优化无损耗反复走的方式来缩短录像，但在某些情况下（尤其是创新向塔中）可能会存在副作用影响录像的正确性。"
 				},
 				"disableShopOnDamage": {
 					"_leaf": true,

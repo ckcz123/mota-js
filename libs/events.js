@@ -300,6 +300,7 @@ events.prototype.unregisterSystemEvent = function (type) {
 
 ////// 执行一个系统事件 //////
 events.prototype.doSystemEvent = function (type, data, callback) {
+    core.clearRouteFolding();
     if (this.systemEvents[type]) {
         try {
             return core.doFunc(this.systemEvents[type], this, data, callback);
@@ -337,9 +338,12 @@ events.prototype.trigger = function (x, y, callback) {
     block = block.block;
 
     // 执行该点的脚本
-    try {
-        eval(block.event.script);
-    } catch (e) { main.log(e); }
+    if (block.event.script) {
+        core.clearRouteFolding();
+        try {
+            eval(block.event.script);
+        } catch (e) { main.log(e); }
+    }
 
     if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
@@ -987,6 +991,7 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
     if (!action) return;
+    core.clearRouteFolding();
 
     action = this.precompile(action);
 
@@ -1370,7 +1375,7 @@ events.prototype._action_setBlock = function (data, x, y, prefix) {
 events.prototype._action_turnBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
-        core.turnBlock(data.number, t[0], t[1], data.floorId);
+        core.turnBlock(data.direction, t[0], t[1], data.floorId);
     });
     core.doAction();
 }
@@ -1464,19 +1469,29 @@ events.prototype._action_moveHero = function (data, x, y, prefix) {
 }
 
 events.prototype._action_jump = function (data, x, y, prefix) {
-    var from = this.__action_getLoc(data.from, x, y, prefix),
+    var from = this.__action_getLoc(data.from, x, y, prefix), to;
+    if (data.dxy) {
+        to = [from[0] + (core.calValue(data.dxy[0], prefix) || 0), from[1] + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else {
         to = this.__action_getLoc(data.to, x, y, prefix);
+    }
     this.__action_doAsyncFunc(data.async, core.jumpBlock, from[0], from[1], to[0], to[1], data.time, data.keep);
 }
 
 events.prototype._precompile_jump = function (data) {
     data.from = this.__precompile_array(data.from);
     data.to = this.__precompile_array(data.to);
+    data.dxy = this.__precompile_array(data.dxy);
     return data;
 }
 
 events.prototype._action_jumpHero = function (data, x, y, prefix) {
-    var loc = this.__action_getHeroLoc(data.loc, prefix);
+    var loc;
+    if (data.dxy) {
+        loc = [core.getHeroLoc('x') + (core.calValue(data.dxy[0], prefix) || 0), core.getHeroLoc('y') + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else {
+        loc = this.__action_getHeroLoc(data.loc, prefix);
+    }
     this.__action_doAsyncFunc(data.async, core.jumpHero, loc[0], loc[1], data.time);
 }
 
@@ -1488,7 +1503,7 @@ events.prototype._action_changeFloor = function (data, x, y, prefix) {
 
 events.prototype._action_changePos = function (data, x, y, prefix) {
     core.clearMap('hero');
-    if (data.x == null && data.y == null && data.direction) {
+    if (!data.loc && data.direction) {
         core.setHeroLoc('direction', core.turnDirection(data.direction), true);
         core.drawHero();
         return core.doAction();
@@ -2551,6 +2566,7 @@ events.prototype.follow = function (name) {
         core.clearMap('hero');
         core.drawHero();
     }
+    core.clearRouteFolding();
 }
 
 ////// 取消跟随 //////
@@ -2570,6 +2586,7 @@ events.prototype.unfollow = function (name) {
     core.gatherFollowers();
     core.clearMap('hero');
     core.drawHero();
+    core.clearRouteFolding();
 }
 
 ////// 数值操作 //////

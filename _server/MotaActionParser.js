@@ -58,6 +58,14 @@ ActionParser.prototype.parse = function (obj,type) {
       }
       return MotaActionBlocks['levelChoose_m'].xmlText([text_choices]);
 
+    case 'floorPartition':
+      if(!obj) obj=[];
+      var text_choices = null;
+      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+        text_choices=MotaActionBlocks['floorPartitionItem'].xmlText([choice[0], choice[1]||"", text_choices]);
+      }
+      return MotaActionBlocks['floorPartition_m'].xmlText([text_choices]);
+
     case 'equip':
       if(!obj) obj={};
       var buildEquip = function (obj) {
@@ -144,7 +152,7 @@ ActionParser.prototype.parse = function (obj,type) {
           ]);
         }
         return MotaActionBlocks['shopitem'].xmlText([
-          obj.id,obj.textInList,obj.mustEnable,text_choices,next
+          obj.id,obj.textInList,obj.use||'money',obj.mustEnable,text_choices,next
         ]);
       }
       var next=null;
@@ -256,10 +264,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "scrollText":
       this.next = MotaActionBlocks['scrollText_s'].xmlText([
-        data.time, data.lineHeight||1.4, data.async||false, this.EvalString(data.text), this.next]);
+        data.time, data.lineHeight||1.4, data.async||false, this.EvalString_Multi(data.text), this.next]);
         break;
     case "comment": // 注释
-      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString(data.text),this.next],null,data.text);
+      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next],null,data.text);
       break;
     case "setText": // 设置剧情文本的属性
       data.title=this.Colour(data.title);
@@ -401,14 +409,24 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "jump": // 跳跃事件
       data.from=data.from||['',''];
-      data.to=data.to||['',''];
-      this.next = MotaActionBlocks['jump_s'].xmlText([
-        data.from[0],data.from[1],data.to[0],data.to[1],data.time,data.keep||false,data.async||false,this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['jump_1_s'].xmlText([
+          data.from[0],data.from[1],data.dxy[0],data.dxy[1],data.time,data.keep||false,data.async||false,this.next]);
+      } else {
+        data.to=data.to||['',''];
+        this.next = MotaActionBlocks['jump_s'].xmlText([
+          data.from[0],data.from[1],data.to[0],data.to[1],data.time,data.keep||false,data.async||false,this.next]);
+      }
       break;
     case "jumpHero": // 跳跃勇士
-      data.loc=data.loc||['','']
-      this.next = MotaActionBlocks['jumpHero_s'].xmlText([
-        data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['jumpHero_1_s'].xmlText([
+          data.dxy[0],data.dxy[1],data.time,data.async||false,this.next]);
+      } else {
+        data.loc=data.loc||['','']
+        this.next = MotaActionBlocks['jumpHero_s'].xmlText([
+          data.loc[0],data.loc[1],data.time,data.async||false,this.next]);
+      }
       break;
     case "changeFloor": // 楼层转换
       if (!data.loc) {
@@ -472,7 +490,7 @@ ActionParser.prototype.parseAction = function() {
     case "showTextImage": // 显示图片化文本
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showTextImage_s'].xmlText([
-        this.EvalString(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.reverse,data.opacity,data.time||0,data.async||false,this.next]);
+        this.EvalString_Multi(data.text),data.code,data.loc[0],data.loc[1],data.lineHeight||1.4,data.reverse,data.opacity,data.time||0,data.async||false,this.next]);
       break;
     case "moveImage": // 移动图片
       data.to=data.to||['','']
@@ -648,7 +666,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "confirm": // 显示确认框
       this.next = MotaActionBlocks['confirm_s'].xmlText([
-        this.EvalString(data.text), data.timeout||0, data["default"],
+        this.EvalString_Multi(data.text), data.timeout||0, data["default"],
         this.insertActionList(data["yes"]),
         this.insertActionList(data["no"]),
         this.next]);
@@ -826,7 +844,7 @@ ActionParser.prototype.parseAction = function() {
     case "drawTextContent": // 绘制多行文本
       data.color = this.Colour(data.color);
       this.next = MotaActionBlocks['drawTextContent_s'].xmlText([
-        this.EvalString(data.text), data.left, data.top, data.maxWidth, data.color, 'rgba('+data.color+')',
+        this.EvalString_Multi(data.text), data.left, data.top, data.maxWidth, data.color, 'rgba('+data.color+')',
         data.align, data.fontSize, data.lineHeight, data.bold, this.next
       ]);
       break;
@@ -995,8 +1013,12 @@ ActionParser.prototype.EvalString = function(EvalString) {
   return EvalString.split('\b').join('\\b').split('\t').join('\\t').split('\n').join('\\n');
 }
 
+ActionParser.prototype.EvalString_Multi = function(EvalString) {
+  return EvalString.split('\b').join('\\b').split('\t').join('\\t');
+}
+
 ActionParser.prototype.getTitleAndPosition = function (string) {
-  string = this.EvalString(string);
+  string = this.EvalString_Multi(string);
   var title = '', icon = '', position = '';
   string = string.replace(/\\t\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3) {
     if (s3) title = s3;
@@ -1175,6 +1197,12 @@ MotaActionFunctions.EvalString_pre = function(EvalString){
   if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
   EvalString = MotaActionFunctions.replaceFromName(EvalString);
   return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"');
+}
+
+MotaActionFunctions.EvalString_Multi_pre = function(EvalString){
+  if (EvalString.indexOf('__door__')!==-1) throw new Error('请修改开门变量__door__，如door1，door2，door3等依次向后。请勿存在两个门使用相同的开门变量。');
+  EvalString = MotaActionFunctions.replaceFromName(EvalString);
+  return EvalString.replace(/([^\\])"/g,'$1\\"').replace(/^"/g,'\\"').replace(/""/g,'"\\"').replace(/\n/g, '\\n');
 }
 
 MotaActionFunctions.JsonEvalString_pre = function (JsonEvalString) {

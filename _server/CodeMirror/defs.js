@@ -1748,6 +1748,17 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!type": "number",
         "!doc": "窗口宽度的一半，为6或7"
       },
+      "floorIds": {
+        "!type": "[string]",
+        "!doc": "全部楼层ID列表"
+      },
+      "floors": {
+        "!doc": "全部楼层信息"
+      },
+      "floorPartitions": {
+        "!type": "[[string]]",
+        "!doc": "楼层分区信息"
+      },
       "material": {
         "!doc": "游戏所用到的资源",
         "animates": {
@@ -2015,9 +2026,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "number2Block": {
           "!doc": "数字到图块对象的对应关系"
         },
-        "openingDoor": {
-          "!doc": "正在开关的门"
-        },
         "played": {
           "!type": "bool",
           "!doc": "当前是否游戏中（不包括标题画面和录像回放）"
@@ -2242,6 +2250,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "读取主角某个属性的百分比修正倍率，初始值为1<br/>例如：core.getBuff('atk'); // 主角当前能发挥出多大比例的攻击力<br/>name: 属性的英文名", 
           "!type": "fn(name: string) -> number"
         }, 
+        "triggerDebuff": {
+          "!doc": "获得或移除毒衰咒效果<br/>action: 要获得还是移除，'get'为获得，'remove'为移除<br/>type: 获得或移除的内容（poison/weak/curse），可以为字符串或数组",
+          "!type": "fn(action: string, type: string|[string])"
+        },
         "setToolbarButton": {
           "!doc": "改变工具栏为按钮1-8", 
           "!type": "fn(useButton?: bool)"
@@ -2533,6 +2545,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "moveDirectly": {
           "!doc": "瞬间移动", 
           "!type": "fn(destX?: number, destY?: number, ignoreSteps?: number)"
+        },
+        "clearRouteFolding": {
+          "!doc": "清空录像折叠信息",
+          "!type": "fn()"
+        },
+        "checkRouteFolding": {
+          "!doc": "检查录像折叠信息",
+          "!type": "fn()"
         }
       }, 
       "icons": {
@@ -3526,6 +3546,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "绘制帮助页面", 
           "!type": "fn()"
         }, 
+        "drawNotes": {
+          "!doc": "绘制存档笔记",
+          "!type": "fn()"
+        },
         "drawQuickShop": {
           "!doc": "绘制快捷商店选择栏", 
           "!type": "fn()"
@@ -3819,7 +3843,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(fromUserAction?: bool)"
         }, 
         "insertCommonEvent": {
-          "!doc": "插入一个公共事件<br/>例如：core.insertCommonEvent('毒衰咒处理', [0]);<br/>name: 公共事件名；如果公共事件不存在则直接忽略<br/>args: 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...<br/>x: 新的当前点横坐标，可选<br/>y: 新的当前点纵坐标，可选<br/>callback： 新的回调函数，可选<br/>addToLast: 插入的位置，true表示插入到末尾，否则插入到开头", 
+          "!doc": "插入一个公共事件<br/>例如：core.insertCommonEvent('加点事件', [3]);<br/>name: 公共事件名；如果公共事件不存在则直接忽略<br/>args: 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...<br/>x: 新的当前点横坐标，可选<br/>y: 新的当前点纵坐标，可选<br/>callback： 新的回调函数，可选<br/>addToLast: 插入的位置，true表示插入到末尾，否则插入到开头", 
           "!type": "fn(name?: string, args?: [?], x?: number, y?: number, callback?: fn(), addToLast?: bool)"
         }, 
         "hideImage": {
@@ -3976,6 +4000,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "resumeMaps": {
           "!doc": "恢复某一些被删除楼层。<br/>fromId: 开始恢复的楼层ID<br/>toId: 恢复到的楼层编号；可选，不填则视为fromId<br/>例如：core.resumeMaps(\"MT1\", \"MT300\") 恢复MT1~MT300之间的全部层<br/>core.resumeMaps(\"MT10\") 只删恢复MT10层",
           "!type": "fn(fromId: string, toId?: string)"
+        },
+        "autoRemoveMaps": {
+          "!doc": "根据楼层分区信息自动砍层与恢复",
+          "!type": "fn(floorId: string)"
         },
         "openItemShop": {
           "!doc": "打开一个道具商店",

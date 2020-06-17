@@ -2634,6 +2634,10 @@
     }
     if (!options.indent) // JSHint error.character actually is a column index, this fixes underlining on lines using tabs for indentation
       options.indent = 1; // JSHint default value is 4
+    options.asi = true; // Suppress "missing semicolon"
+    options.shadow = true; // Suppress "variable is already defined"
+    options.eqnull = true; // Suppress "compare with null"
+    options.maxerr = 1000;
     JSHINT(text, options, options.globals);
     var errors = JSHINT.data().errors, result = [];
     if (errors) parseErrors(errors, result);

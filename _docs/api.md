@@ -989,7 +989,7 @@ openKeyBoard: fn(fromUserAction?: bool)
 
 insertCommonEvent: fn(name?: string, args?: [?], x?: number, y?: number, callback?: fn(), addToLast?: bool)
 插入一个公共事件
-例如：core.insertCommonEvent('毒衰咒处理', [0]);
+例如：core.insertCommonEvent('加点事件', [3]);
 name: 公共事件名；如果公共事件不存在则直接忽略
 args: 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...
 x: 新的当前点横坐标，可选

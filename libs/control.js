@@ -648,6 +648,7 @@ control.prototype._moveAction_moving = function (callback) {
         core.status.route.push(direction);
         
         core.moveOneStep();
+        core.checkRouteFolding();
         if (callback) callback();
     });
 }
@@ -741,6 +742,7 @@ control.prototype.turnHero = function(direction) {
     core.setHeroLoc('direction', core.turnDirection(':right'));
     core.drawHero();
     core.status.route.push("turn");
+    core.checkRouteFolding();
 }
 
 ////// 瞬间移动 //////
@@ -1262,6 +1264,7 @@ control.prototype.rewindReplay = function () {
         return core.drawTip("无法再回到上一个节点");
     var save = core.status.replay.save, data = save.pop();
     core.loadData(data.data, function () {
+        core.removeFlag('__fromLoad__');
         core.status.replay = {
             "replaying": true,
             "pausing": true,
@@ -1587,7 +1590,8 @@ control.prototype._replayAction_moveDirectly = function (action) {
     var pos=action.substring(5).split(":");
     var x=parseInt(pos[0]), y=parseInt(pos[1]);
     var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
-    if (!core.moveDirectly(x, y)) return false;
+    var ignoreSteps = core.canMoveDirectly(x, y);
+    if (!core.moveDirectly(x, y, ignoreSteps)) return false;
     if (core.status.replay.speed == 24) {
         core.replay();
         return true;
@@ -1595,10 +1599,12 @@ control.prototype._replayAction_moveDirectly = function (action) {
 
     core.ui.drawArrow('ui', 32*nowx+16-core.bigmap.offsetX, 32*nowy+16-core.bigmap.offsetY,
         32*x+16-core.bigmap.offsetX, 32*y+16-core.bigmap.offsetY, '#FF0000', 3);
+    var timeout = this.__replay_getTimeout();
+    if (ignoreSteps < 10) timeout = timeout * ignoreSteps / 10;
     setTimeout(function () {
         core.clearMap('ui');
         core.replay();
-    }, core.control.__replay_getTimeout());
+    }, timeout);
     return true;
 }
 
@@ -1760,6 +1766,7 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
         return core.drawTip("无法从此存档回放录像");
     core.loadData(data, function () {
+        core.removeFlag('__fromLoad__');
         core.startReplay(route);
         core.drawTip("回退到存档节点");
     });
@@ -1796,7 +1803,7 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
 
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
-    core.ui.drawWaiting("正在同步，请稍后...");
+    core.ui.drawWaiting("正在同步，请稍候...");
     var callback = function (saves) {
         core.control._syncSave_http(type, saves);
     }
@@ -1834,7 +1841,7 @@ control.prototype.syncLoad = function () {
             core.drawText("不合法的存档编号+密码；应当为6位数字+4位数字字母的组合，如\r[yellow]123456abcd\r。");
             return;
         }
-        core.ui.drawWaiting("正在同步，请稍后...");
+        core.ui.drawWaiting("正在同步，请稍候...");
         core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
     });
 }
@@ -2093,6 +2100,11 @@ control.prototype.getBuff = function (name) {
     return core.getFlag('__'+name+'_buff__', 1);
 }
 
+////// 获得或移除毒衰咒效果 //////
+control.prototype.triggerDebuff = function (action, type) {
+    return this.controldata.triggerDebuff(action, type);
+}
+
 ////// 设置勇士的位置 //////
 control.prototype.setHeroLoc = function (name, value, noGather) {
     if (!core.status.hero) return;
@@ -2163,6 +2175,45 @@ control.prototype.unlockControl = function () {
 control.prototype.debug = function() {
     core.setFlag('debug', true);
     core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
+}
+
+control.prototype._bindRoutePush = function () {
+    core.status.route.push = function (element) {
+        // 忽视移动、转向、瞬移
+        if (["up", "down", "left", "right", "turn"].indexOf(element) < 0 && !element.startsWith("move:")) {
+            core.clearRouteFolding();
+        }
+        Array.prototype.push.call(core.status.route, element);
+    }
+}
+
+////// 清除录像折叠信息 //////
+control.prototype.clearRouteFolding = function () {
+    core.status.routeFolding = {};
+}
+
+////// 检查录像折叠 //////
+control.prototype.checkRouteFolding = function () {
+    // 未开启、未开始游戏、正在录像播放中、正在事件中：不执行
+    if (!core.flags.enableRouteFolding || !core.isPlaying() || core.status.event.id) {
+        return this.clearRouteFolding();
+    }
+    var hero = core.clone(core.status.hero, function (name, value) {
+        return name != 'steps' && typeof value == 'number';
+    });
+    var index = [core.getHeroLoc('x'),core.getHeroLoc('y'),core.getHeroLoc('direction').charAt(0)].join(',');
+    core.status.routeFolding = core.status.routeFolding || {};
+    if (core.status.routeFolding[index]) {
+        var one = core.status.routeFolding[index];
+        if (core.same(one.hero, hero) && one.length < core.status.route.length) {
+            Object.keys(core.status.routeFolding).forEach(function (v) {
+                if (core.status.routeFolding[v].length >= one.length) delete core.status.routeFolding[v];
+            });
+            core.status.route = core.status.route.slice(0, one.length);
+            this._bindRoutePush();
+        }
+    }
+    core.status.routeFolding[index] = {hero: hero, length: core.status.route.length};
 }
 
 // ------ 天气，色调，BGM ------ //
@@ -2457,6 +2508,7 @@ control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
     this.controldata.updateStatusBar();
     if (!doNotCheckAutoEvents) core.checkAutoEvents();
     this._updateStatusBar_setToolboxIcon();
+    core.clearRouteFolding();
 }
 
 control.prototype._updateStatusBar_setToolboxIcon = function () {

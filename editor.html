@@ -5,7 +5,7 @@
     <link href="_server/css/editor.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
-    <link href="_server/css/editor_color.css" rel="stylesheet">
+    <link id="color_css" rel="stylesheet">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body>
@@ -76,6 +76,7 @@
                 <input id="quickAppendConfirm" type="button" value="快速追加"/>
                 <span style="font-size: 13px">&nbsp;&nbsp;自动注册</span><input id="appendRegister" type="checkbox" checked/>
             </p>
+            <p><small>从V2.7.1开始，你可以直接将素材图片拖到对应的素材区，将自动追加并注册。同时，4x4的道具素材已支持快速追加一次16个。</small></p>
             <p>
                 色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
                 <datalist id="huelists" style="display: none">
@@ -220,7 +221,6 @@
                 </xml>
             </h3>
             <div style="position: relative;height: 100%">
-                <div id="blocklyDarkScale" style="display: none;"></div>
                 <div id="blocklyArea">
                     <div id="blocklyDiv"></div>
                 </div>
@@ -297,6 +297,7 @@
         <table class="col" id='mapColMark'></table>
         <table class="row" id='mapRowMark'></table>
         <div class="map" id="mapEdit">
+            <canvas class='gameCanvas' id='ebm'></canvas>
             <canvas class='gameCanvas' id='efg'></canvas>
             <canvas class='gameCanvas' id='eui' style='z-index:100'></canvas>
         </div>
@@ -313,12 +314,16 @@
                 <option value="commonevent">公共事件</option>
                 <option value="plugins">插件编写</option>
             </select>
-            <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定模式</span>
+            <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定</span>
+            <select id="editorTheme" style="margin-left: 3px;">
+                <option value="editor_color">默认白</option>
+                <option value="editor_color_dark">夜间黑</option>
+            </select>
             <br/>
             <span style="font-size: 12px;">
             <input type="radio" id="brushMod" name="brushMod" value="line" checked="checked" />线
             <input type="radio" id="brushMod2" name="brushMod" value="rectangle" />矩形
-            <input type="radio" id="brushMod3" name="brushMod" value="tileset" />tileset平铺
+            <input type="radio" id="brushMod3" name="brushMod" value="tileset" />tile平铺
             <input type="radio" id="brushMod4" name="brushMod" value="fill" />填充
 
             </span>
@@ -334,11 +339,12 @@
                 <input type="button" value="↑"/>
                 <input type="button" value="↓"/>
                 <input type="button" value="→"/>
-                <input type="button" value="大地图" style="margin-left: 5px"/>
+                <input type="button" id='bigmapBtn' value="大地图" style="margin-left: 5px"/>
             </div>
             <br>
             <select id="selectFloor"></select>
             <input type="button" value="保存地图" id='saveFloor'/>
+            <input type="button" value="后退" id="undoFloor" />
         </div>
     </div>
     <div id="mid2">

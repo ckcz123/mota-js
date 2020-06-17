@@ -781,6 +781,10 @@ utils.prototype.rand2 = function (num) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("random:") == 0) {
             value = parseInt(action.substring(7));
+            if (isNaN(value) || value >= num) {
+                core.control._replay_error(action);
+                return 0;
+            }
         }
         else {
             core.control._replay_error(action);

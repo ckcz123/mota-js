@@ -95,19 +95,20 @@ main.floors.sample3=
             "\t[杰克,thief]没错，我就是这一切的背后主谋。",
             {
                 "type": "move",
+                "time": 1000,
                 "steps": [
-                    {
-                        "direction": "up",
-                        "value": 3
-                    }
-                ],
-                "time": 1000
+                    "up",
+                    "up",
+                    "up"
+                ]
             },
             {
                 "type": "show",
                 "loc": [
-                    7,
-                    5
+                    [
+                        7,
+                        5
+                    ]
                 ],
                 "time": 1000
             },

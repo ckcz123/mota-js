@@ -376,14 +376,14 @@ return code;
 */;
 
 levelChooseChoice
-   :    '难度分歧项' '名称' EvalString '简写' EvalString '变量:hard值' Int '颜色' ColorString? Colour BGNL Newline action+ BEND
+   :    '难度分歧项' '名称' EvalString '简写' EvalString '变量:hard值' NInt '颜色' ColorString? Colour BGNL Newline action+ BEND
 
 /* levelChooseChoice
 tooltip : 难度分歧项
 helpUrl : /_docs/#/instruction
 default : ['简单','Easy',1,'']
 ColorString_0 = ColorString_0 ? (', "color": [' + ColorString_0 + ']') : '';
-var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+Int_0+ColorString_0+', "action": [\n'+action_0+']},\n';
+var code = '{"title": "'+EvalString_0+'", "name": "'+EvalString_1+'", "hard": '+NInt_0+ColorString_0+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -3402,6 +3402,8 @@ Bool:   'TRUE'
     ;
 
 Int :   '0' | [1-9][0-9]* ; // no leading zeros
+
+NInt : '0' | '-'? [1-9][0-9]* ;
 
 Letter_List
     :  'A'|'B'|'C'|'D'|'E'|'F'|'G'|'H'|'I'|'J'|'K'|'L'|'M'|'N'|'O'|'P'|'Q'|'R'|'S'|'T'|'U'|'V'|'W'|'X'|'Y'|'Z'

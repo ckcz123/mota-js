@@ -55,7 +55,7 @@ editor_mappanel_wrapper = function (editor) {
      * 双击地图可以选中素材
      */
     editor.uifunctions.map_doubleClick = function (e) {
-        if (editor.uivalues.bindSpecialDoor.loc != null) return;
+        if (editor.uivalues.bindSpecialDoor.loc != null || editor.uivalues.bigmap) return;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
         editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x], true);
@@ -93,8 +93,11 @@ editor_mappanel_wrapper = function (editor) {
             if (!selectBox.isSelected()) {
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('loc');
-                printi("大地图模式（F键）下可以很方便的切换到地图任意位置，但是不可对地图进行直接编辑。");
+                printi("大地图模式（F键）下，可以拖动、右键拉框与复制剪切粘贴；但不可进行绘图。");
                 editor.uivalues.startPos = pos;
+                editor.dom.euiCtx.strokeStyle = '#FF0000';
+                editor.dom.euiCtx.lineWidth = 2;
+                if (editor.isMobile) editor.uifunctions.showMidMenu(e.clientX, e.clientY);
             }
             return false;
         }
@@ -137,6 +140,15 @@ editor_mappanel_wrapper = function (editor) {
         return false;
     }
 
+    var _getGridByPos = function (pos) {
+        if (editor.uivalues.bigmap) {
+            var info = editor.uivalues.bigmapInfo;
+            return {x: info.left + info.size * pos.x, y: info.top + info.size * pos.y, size: info.size};
+        } else {
+            return {x: 32 * pos.x - core.bigmap.offsetX, y: 32 * pos.y - core.bigmap.offsetY, size: 32};
+        }
+    }
+
     /**
      * editor.dom.eui.onmousemove
      * + 非绘图模式时维护起止位置并画箭头
@@ -144,18 +156,20 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.map_onmove = function (e) {
         editor.uivalues.lastMoveE=e;
-        if (editor.uivalues.bigmap) return false;
         if (!selectBox.isSelected()) {
             if (editor.uivalues.startPos == null) return;
             var loc = editor.uifunctions.eToLoc(e);
             var pos = editor.uifunctions.locToPos(loc, true);
             if (editor.uivalues.endPos != null && editor.uivalues.endPos.x == pos.x && editor.uivalues.endPos.y == pos.y) return;
+            var startGrid = _getGridByPos(editor.uivalues.startPos), endGrid;
             if (editor.uivalues.endPos != null) {
-                editor.dom.euiCtx.clearRect(Math.min(32 * editor.uivalues.startPos.x - core.bigmap.offsetX, 32 * editor.uivalues.endPos.x - core.bigmap.offsetX),
-                    Math.min(32 * editor.uivalues.startPos.y - core.bigmap.offsetY, 32 * editor.uivalues.endPos.y - core.bigmap.offsetY),
-                    (Math.abs(editor.uivalues.startPos.x - editor.uivalues.endPos.x) + 1) * 32, (Math.abs(editor.uivalues.startPos.y - editor.uivalues.endPos.y) + 1) * 32)
+                endGrid = _getGridByPos(editor.uivalues.endPos);
+                editor.dom.euiCtx.clearRect(Math.min(startGrid.x, endGrid.x), Math.min(startGrid.y, endGrid.y),
+                    (Math.abs(editor.uivalues.startPos.x - editor.uivalues.endPos.x) + 1) * startGrid.size, 
+                    (Math.abs(editor.uivalues.startPos.y - editor.uivalues.endPos.y) + 1) * startGrid.size);
             }
             editor.uivalues.endPos = pos;
+            endGrid = _getGridByPos(editor.uivalues.endPos);
             if (editor.uivalues.startPos != null) {
                 if (editor.uivalues.startPos.x != editor.uivalues.endPos.x || editor.uivalues.startPos.y != editor.uivalues.endPos.y) {
                     if (e.buttons == 2) {
@@ -169,13 +183,11 @@ editor_mappanel_wrapper = function (editor) {
                         // draw rect
                         editor.dom.euiCtx.clearRect(0, 0, editor.dom.euiCtx.canvas.width, editor.dom.euiCtx.canvas.height);
                         editor.dom.euiCtx.fillStyle = 'rgba(0, 127, 255, 0.4)';
-                        editor.dom.euiCtx.fillRect(32 * x0 - core.bigmap.offsetX, 32 * y0 - core.bigmap.offsetY,
-                            32 * (x1 - x0) + 32, 32 * (y1 - y0) + 32);
+                        var grid = _getGridByPos({x: x0, y: y0});
+                        editor.dom.euiCtx.fillRect(grid.x, grid.y, grid.size * (x1 - x0 + 1), grid.size * (y1 - y0 + 1));
                     }else{
                         // 左键拖拽: 画箭头
-                        core.drawArrow('eui',
-                            32 * editor.uivalues.startPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.startPos.y + 16 - core.bigmap.offsetY,
-                            32 * editor.uivalues.endPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.endPos.y + 16 - core.bigmap.offsetY);
+                        core.drawArrow('eui', startGrid.x + startGrid.size / 2, startGrid.y + startGrid.size / 2, endGrid.x + endGrid.size / 2, endGrid.y + endGrid.size / 2);
                     }
                 }
             }
@@ -184,6 +196,7 @@ editor_mappanel_wrapper = function (editor) {
             //editor_mode.loc();
             return false;
         }
+        if (editor.uivalues.bigmap) return false;
 
         if (editor.uivalues.holdingPath == 0) {
             return false;
@@ -232,7 +245,6 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.selectedArea = null;
         ee.preventDefault();
         ee.stopPropagation();
-        if (editor.uivalues.bigmap) return false;
         var e=editor.uivalues.lastMoveE;
         if (e.buttons == 2 && (editor.uivalues.endPos==null || (editor.uivalues.startPos.x == editor.uivalues.endPos.x && editor.uivalues.startPos.y == editor.uivalues.endPos.y))) {
             editor.uifunctions.showMidMenu(e.clientX, e.clientY);
@@ -258,6 +270,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             return false;
         }
+        if (editor.uivalues.bigmap) return false;
         editor.uivalues.holdingPath = 0;
         if (editor.uivalues.stepPostfix && editor.uivalues.stepPostfix.length) {
             editor.savePreMap();
@@ -796,10 +809,15 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.uifunctions.triggerBigmap = function () {
+        if (selectBox.isSelected()) {
+            printe("请先点击【保存地图】以退出绘图模式");
+            return;
+        }
+
         editor.uivalues.bigmap = !editor.uivalues.bigmap;
         if (editor.uivalues.bigmap) {
             editor.dom.bigmapBtn.classList.add('highlight');
-            printi("大地图模式（F键）下可以很方便的切换到地图任意位置，但是不可对地图进行直接编辑。");
+            printi("大地图模式（F键）下，可以拖动与复制剪切粘贴；但不可拉框、绘图或呼出右键菜单。");
         } else {
             editor.dom.bigmapBtn.classList.remove('highlight');
             editor.setViewport(32 * (editor.pos.x - core.__HALF_SIZE__), 32 * (editor.pos.y - core.__HALF_SIZE__));

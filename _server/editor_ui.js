@@ -179,7 +179,8 @@ editor_ui_wrapper = function (editor) {
 
         var focusElement = document.activeElement;
         if (!focusElement || focusElement.tagName.toLowerCase() == 'body'
-            || focusElement.id == 'selectFloor') {
+            || focusElement.id == 'selectFloor' || focusElement.id == 'bigmapBtn'
+            || focusElement.id.startsWith('layerMod')) {
 
             //Ctrl+z 撤销上一步undo
             if (e.keyCode == 90 && e.ctrlKey) {

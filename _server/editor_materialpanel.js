@@ -66,6 +66,7 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_ondown = function (e) {
         e.stopPropagation();
         e.preventDefault();
+        if (editor.uivalues.bigmap) return;
         editor.uivalues.lastMoveMaterE=e;
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -86,6 +87,7 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_onmove = function (e) {
         e.stopPropagation();
         e.preventDefault();
+        if (editor.uivalues.bigmap) return;
         editor.uivalues.lastMoveMaterE=e;
         if (!editor.uivalues.startLoc) return;
         var pos0 = editor.uifunctions.locToPos(editor.uivalues.startLoc);
@@ -104,6 +106,7 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_onup = function (ee) {
         var startLoc = editor.uivalues.startLoc;
         editor.uivalues.startLoc = null;
+        if (editor.uivalues.bigmap) return;
 
         var e=editor.uivalues.lastMoveMaterE;
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;

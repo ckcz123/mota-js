@@ -392,6 +392,7 @@ core.prototype._init_others = function () {
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
     core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
+    core.loadImage("materials", "cloud", function (name, img) { core.animateFrame.weather.cloud = img; })
     core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);

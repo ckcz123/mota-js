@@ -487,7 +487,7 @@ editor_blockly = function () {
         });
     }
 
-    editor_blockly.getAutoCompletions = function (content, type, name) {
+    editor_blockly.getAutoCompletions = function (content, type, name, pb) {
         // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
 
         // console.log(type, name);
@@ -595,6 +595,35 @@ editor_blockly = function () {
             var token = content.substring(index+6);
             return Object.keys(core.status.hero).filter(function (one) {
                 return one != token && one.startsWith(token);
+            }).sort();
+        }
+
+        // 提供 IdText_0 的补全
+        if (type == 'idIdList_e' && name == 'IdText_0') {
+            var list = [];
+            switch (pb.getFieldValue('Id_List_0')) {
+                case 'status':
+                    list = Object.keys(core.status.hero);
+                    if (MotaActionFunctions && replaceCheckbox.checked) {
+                        list = MotaActionFunctions.pattern.replaceStatusList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    break;
+                case 'item':
+                    list = Object.keys(core.material.items);
+                    if (MotaActionFunctions && replaceCheckbox.checked) {
+                        list = MotaActionFunctions.pattern.replaceItemList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    break;
+                case 'flag':
+                    list = Object.keys(editor.used_flags || {});
+                    break;
+            }
+            return list.filter(function (one) {
+                return one != content && one.startsWith(content);
             }).sort();
         }
 
@@ -785,7 +814,7 @@ editor_blockly = function () {
                     }
                 }
 
-                var list = editor_blockly.getAutoCompletions(value, pb.type, self.name);
+                var list = editor_blockly.getAutoCompletions(value, pb.type, self.name, pb);
 
                 awesomplete.list = list;
                 var caretPosition = getCaretCoordinates(htmlInput, htmlInput.selectionStart);

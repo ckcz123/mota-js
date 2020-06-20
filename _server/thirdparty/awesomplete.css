@@ -24,7 +24,6 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    background: #fff;
 }
 
 .awesomplete > ul:empty {
@@ -34,10 +33,6 @@
 .awesomplete > ul {
     border-radius: .3em;
     margin: .8em 0 0;
-    background: hsla(0,0%,100%,.9);
-    background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.8));
-    border: 1px solid rgba(0,0,0,.3);
-    box-shadow: .05em .2em .6em rgba(0,0,0,.2);
     text-shadow: none;
 }
 
@@ -64,7 +59,6 @@
     left: 1em;
     width: 0; height: 0;
     padding: .4em;
-    background: white;
     border: inherit;
     border-right: 0;
     border-bottom: 0;
@@ -77,27 +71,4 @@
     padding: .2em .5em;
     cursor: pointer;
     word-break: keep-all;
-}
-
-.awesomplete > ul > li:hover {
-    background: hsl(200, 40%, 80%);
-    color: black;
-}
-
-.awesomplete > ul > li[aria-selected="true"] {
-    background: hsl(205, 40%, 40%);
-    color: white;
-}
-
-.awesomplete mark {
-    background: hsl(65, 100%, 50%);
-}
-
-.awesomplete li:hover mark {
-    background: hsl(68, 100%, 41%);
-}
-
-.awesomplete li[aria-selected="true"] mark {
-    background: hsl(86, 100%, 21%);
-    color: inherit;
 }

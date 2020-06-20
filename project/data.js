@@ -8,10 +8,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"sample3",
 			"MT0"
 		],
+		"floorPartitions": [],
 		"images": [
 			"bg.jpg",
-			"winskin.png",
-			"hero.png"
+			"hero.png",
+			"winskin.png"
 		],
 		"tilesets": [
 			"magictower.png"
@@ -79,8 +80,18 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"statusLeftBackground": "url(project/materials/ground.png) repeat",
 			"statusTopBackground": "url(project/materials/ground.png) repeat",
 			"toolsBackground": "url(project/materials/ground.png) repeat",
-			"borderColor": [204,204,204,1],
-			"statusBarColor": [255,255,255,1],
+			"borderColor": [
+				204,
+				204,
+				204,
+				1
+			],
+			"statusBarColor": [
+				255,
+				255,
+				255,
+				1
+			],
 			"floorChangingStyle": "background-color: black; color: white",
 			"font": "Verdana"
 		}
@@ -88,7 +99,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.7",
+		"version": "Ver 2.7.1",
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",
@@ -462,6 +473,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"ignoreChangeFloor": true,
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
+		"enableRouteFolding": true,
 		"disableShopOnDamage": false,
 		"blurFg": false
 	}

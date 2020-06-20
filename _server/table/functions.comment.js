@@ -135,6 +135,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "读档操作"
 				},
+				"triggerDebuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "毒衰咒处理"
+				},
 				"updateStatusBar": {
 					"_leaf": true,
 					"_type": "textarea",

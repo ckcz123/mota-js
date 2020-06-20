@@ -171,6 +171,7 @@ editor_ui_wrapper = function (editor) {
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
                 document.getElementById('selectFloor').value = toId;
+                editor.uivalues.recentFloors.push(editor.currentFloorId);
                 editor.changeFloor(toId);
             }
             return;
@@ -178,7 +179,8 @@ editor_ui_wrapper = function (editor) {
 
         var focusElement = document.activeElement;
         if (!focusElement || focusElement.tagName.toLowerCase() == 'body'
-            || focusElement.id == 'selectFloor') {
+            || focusElement.id == 'selectFloor' || focusElement.id == 'bigmapBtn'
+            || focusElement.id.startsWith('layerMod')) {
 
             //Ctrl+z 撤销上一步undo
             if (e.keyCode == 90 && e.ctrlKey) {
@@ -290,6 +292,8 @@ editor_ui_wrapper = function (editor) {
                 case 65: editor.moveViewport(-1, 0); break;
                 case 83: editor.moveViewport(0, 1); break;
                 case 68: editor.moveViewport(1, 0); break;
+                // F
+                case 70: editor.uifunctions.triggerBigmap(); break;
                 // Z~.
                 case 90: editor_mode.change('map'); break; // Z
                 case 88: editor_mode.change('loc'); break; // X
@@ -310,7 +314,8 @@ editor_ui_wrapper = function (editor) {
     editor.uifunctions.showHelp = function () {
         alert(
             "快捷操作帮助：\n" +
-            "ESC / 点击空白处：自动保存当前修改" +
+            "ESC / 点击空白处：自动保存当前修改\n" +
+            "F：切换大地图\n" + 
             "WASD / 长按箭头：平移大地图\n" +
             "PgUp, PgDn / 鼠标滚轮：上下切换楼层\n" +
             "Z~.（键盘的第三排）：快捷切换标签\n" +
@@ -423,9 +428,15 @@ editor_ui_wrapper = function (editor) {
         uievent.elements.body.style.overflow = "hidden";
         uievent.elements.yes.onclick = function () {
             var floorId = uievent.values.floorId, x = uievent.values.x, y = uievent.values.y;
+            var multipoints = uievent.values.multipoints || [];
             uievent.close();
             if (callback) {
-                callback(floorId, x, y);
+                if (multipoints.length > 0) {
+                    callback(floorId, multipoints.map(function (one) { return one.split(',')[0]}).join(','),
+                    multipoints.map(function (one) { return one.split(',')[1]}).join(','));
+                } else {
+                    callback(floorId, x, y);
+                }
             }
         }
 
@@ -435,21 +446,21 @@ editor_ui_wrapper = function (editor) {
             floors += "<option value=" + f + ">" + f + "</option>";
         })
         uievent.elements.selectFloor.innerHTML = floors;
-
+        // 检查多选点
+        if (/^\d+(,\d+)+$/.test(x) && /^\d+(,\d+)+$/.test(y)) {
+            var xx = x.split(','), yy = y.split(',');
+            uievent.values.multipoints = [];
+            for (var i = 0; i < xx.length; ++i) {
+                uievent.values.multipoints.push(xx[i] + "," + yy[i]);
+            }
+            x = xx[xx.length - 1];
+            y = yy[yy.length - 1];
+        }
         this.setPoint(floorId || editor.currentFloorId, core.calValue(x) || 0, core.calValue(y) || 0);
     }
 
     uievent.updateSelectPoint = function (redraw) {
         uievent.elements.title.innerText = '地图选点 (' + uievent.values.x + "," + uievent.values.y + ')';
-        if (redraw) {
-            core.setAlpha('uievent', 1);
-            core.clearMap('uievent');
-            core.drawThumbnail(uievent.values.floorId, null, null,
-                {
-                    ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
-                    centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
-                });
-        }
         // 计算size
         uievent.values.boxSize = uievent.values.size * 
             (uievent.values.bigmap ? (core.__SIZE__ / Math.max(uievent.values.width, uievent.values.height)) : 1);
@@ -467,6 +478,24 @@ editor_ui_wrapper = function (editor) {
         }
         uievent.elements.selectPointBox.style.width = uievent.values.boxSize - 6 + "px";
         uievent.elements.selectPointBox.style.height = uievent.values.boxSize - 6 + "px";
+
+        if (redraw) {
+            core.setAlpha('uievent', 1);
+            core.clearMap('uievent');
+            core.drawThumbnail(uievent.values.floorId, null, null,
+                {
+                    ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
+                    centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
+                });
+            uievent.values.multipoints = uievent.values.multipoints || [];
+            core.setTextAlign('uievent', 'right');
+            for (var i = 0; i < uievent.values.multipoints.length; ++i) {
+                var xy = uievent.values.multipoints[i].split(","), x = parseInt(xy[0]), y = parseInt(xy[1]);
+                core.fillBoldText('uievent', i + 1,
+                    32 * (x - uievent.values.left) + 28 , 32 * (y - uievent.values.top) + 26, '#FF7F00', null, '14px Verdana');
+            }
+            core.setTextAlign('uievent', 'left');
+        }
     }
 
     uievent.setPoint = function (floorId, x, y) {
@@ -483,11 +512,14 @@ editor_ui_wrapper = function (editor) {
     }
 
     uievent.elements.selectFloor.onchange = function () {
+        uievent.values.multipoints = [];
         uievent.setPoint(uievent.elements.selectFloor.value);
     }
 
     uievent.elements.selectPointBox.onclick = function (e) {
+        e.preventDefault();
         e.stopPropagation();
+        return false;
     }
 
     uievent.elements.body.onclick = function (e) {
@@ -502,6 +534,24 @@ editor_ui_wrapper = function (editor) {
         uievent.updateSelectPoint(false);
     }
 
+    uievent.elements.body.oncontextmenu = function (e) { 
+        e.preventDefault();
+        e.stopPropagation();
+        if (uievent.mode != 'selectPoint' || uievent.values.bigmap) return;
+        var x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
+        var y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
+        uievent.values.multipoints = uievent.values.multipoints || [];
+        if (uievent.values.multipoints.indexOf(x+","+y) >= 0) {
+            uievent.values.multipoints = uievent.values.multipoints.filter(function (o) { return o != x+","+y;})
+        } else {
+            uievent.values.multipoints.push(x+","+y);
+        }
+        uievent.values.x = x;
+        uievent.values.y = y;
+        uievent.updateSelectPoint(true);
+        return false;
+    }
+
     uievent.move = function (dx, dy) {
         if (uievent.mode != 'selectPoint') return;
         if (uievent.values.bigmap) return;
@@ -513,6 +563,7 @@ editor_ui_wrapper = function (editor) {
     uievent.triggerBigmap = function () {
         if (uievent.mode != 'selectPoint') return;
         uievent.values.bigmap = !uievent.values.bigmap;
+        uievent.values.multipoints = [];
         uievent.setPoint(uievent.values.floorId);
     };
 
@@ -568,6 +619,7 @@ editor_ui_wrapper = function (editor) {
                 index += Math.sign(e.detail);
         } catch (ee) { main.log(ee); }
         index = core.clamp(index, 0, core.floorIds.length - 1);
+        uievent.values.multipoints = [];
         uievent.setPoint(core.floorIds[index]);
     }
 
@@ -931,7 +983,7 @@ editor_ui_wrapper = function (editor) {
             if (index % 3 == 0) {
                 table += '<tr>';
             }
-            table += `<td style='color:black'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0? 'checked' : ''}/></td>`;
+            table += `<td class='popCheckboxItem'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0? 'checked' : ''}/></td>`;
             if (index % 3 == 2) {
                 table += '</tr>';
             }

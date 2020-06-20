@@ -1134,10 +1134,10 @@
 
 
   function getQueryDialog(cm)  {
-    return '<span class="CodeMirror-search-label">搜索: </span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span class="CodeMirror-search-label" id="CodeMirror-search-count">0/0</span> <span style="color: #888" class="CodeMirror-search-hint">使用/re/语法正则搜索</span>';
+    return '<span class="CodeMirror-search-label">搜索: </span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span class="CodeMirror-search-label" id="CodeMirror-search-count">0/0</span> <span class="CodeMirror-search-hint">使用/re/语法正则搜索</span>';
   }
   function getReplaceQueryDialog(cm) {
-    return ' <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span style="color: #888" class="CodeMirror-search-hint">使用/re/语法正则搜索</span>';
+    return ' <input type="text" style="width: 10em" class="CodeMirror-search-field"/> <span class="CodeMirror-search-hint">使用/re/语法正则搜索</span>';
   }
   function getReplacementQueryDialog(cm) {
     return '<span class="CodeMirror-search-label">替换为: </span> <input type="text" style="width: 10em" class="CodeMirror-search-field"/>';
@@ -2634,6 +2634,10 @@
     }
     if (!options.indent) // JSHint error.character actually is a column index, this fixes underlining on lines using tabs for indentation
       options.indent = 1; // JSHint default value is 4
+    options.asi = true; // Suppress "missing semicolon"
+    options.shadow = true; // Suppress "variable is already defined"
+    options.eqnull = true; // Suppress "compare with null"
+    options.maxerr = 1000;
     JSHINT(text, options, options.globals);
     var errors = JSHINT.data().errors, result = [];
     if (errors) parseErrors(errors, result);

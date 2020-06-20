@@ -1744,7 +1744,17 @@ ui.prototype.drawSwitchs = function() {
 ui.prototype.drawSettings = function () {
     core.status.event.id = 'settings';
     this.drawChoices(null, [
-        "系统设置", "虚拟键盘", "浏览地图", "同步存档", "游戏信息", "返回标题", "返回游戏"
+        "系统设置", "虚拟键盘", "浏览地图", "存档笔记", "同步存档", "游戏信息", "返回标题", "返回游戏"
+    ]);
+}
+
+////// 绘制存档笔记 //////
+ui.prototype.drawNotes = function () {
+    core.status.event.id = 'notes';
+    core.status.hero.notes = core.status.hero.notes || [];
+    core.lockControl();
+    this.drawChoices("存档笔记允许你写入和查看任何笔记（快捷键M），你可以用做任何标记，比如Boss前的属性、开门和路线选择等。", [
+        "新增存档笔记", "查看存档笔记", "编辑存档笔记", "删除存档笔记", "返回上一页"
     ]);
 }
 
@@ -2272,6 +2282,8 @@ ui.prototype.drawMaps = function (index, x, y) {
     var text = core.status.maps[data.floorId].title;
     if (!data.all && (data.mw>this.SIZE || data.mh>this.SIZE))
         text+=" ["+(data.x-this.HSIZE)+","+(data.y-this.HSIZE)+"]";
+    if (core.markedFloorIds[data.floorId])
+        text+=" （已标记）";
     var textX = 16, textY = 18, width = textX + core.calWidth('data', text) + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
@@ -2292,13 +2304,14 @@ ui.prototype._drawMaps_drawHint = function () {
     stroke(per, this.SIZE - per - 3, 9, 3); // next
     stroke(0, 0, per-1, per-1); // left top
     stroke(this.SIZE-(per - 1), 0, per-1, per-1); // right top
-    // stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
+    stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
 
     core.setTextBaseline('ui', 'middle');
     core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, '#FFD700', '20px Arial');
     core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
     core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
     core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
+    core.fillText('ui', 'B', (per-1)*16, this.PIXEL - (per-1)*16);
 
     var top = this.HPIXEL - 66, left = per * 16, right = this.PIXEL - left;
     var lt = ["左", "移", "地", "图", "[A]"], rt = ["右", "移", "地", "图", "[D]"];
@@ -2724,6 +2737,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17, true));
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
+        core.setTextAlign('ui', "center");
         var map = core.maps.loadMap(data.maps, data.floorId);
         core.extractBlocks(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
@@ -2735,6 +2749,22 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
             core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4]);
             core.fillText('ui', data.hard, x, parseInt(y+22+size/2), data.hero.flags.__hardColor__ || 'red', this._buildFont(30,true));
         }
+        // 绘制存档笔记
+        if (data.hero.notes && data.hero.notes.length > 0) {
+            core.setTextAlign('ui', 'left');
+            if (data.hero.notes.length >= 2) {
+                core.fillRect('ui', x-size/2, y + 15, size, 28, [0,0,0,0.3]);
+                core.fillBoldText('ui', data.hero.notes.length - 1 + ". " + data.hero.notes[data.hero.notes.length - 2].substring(0, 10), 
+                    x - size / 2 + 2, y + 15 + 12, '#FFFFFF', null, this._buildFont(10, false));
+                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10), 
+                    x - size / 2 + 2, y + 15 + 24);
+            } else {
+                core.fillRect('ui', x-size/2, y + 15, size, 16, [0,0,0,0.3]);
+                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10), 
+                    x - size / 2 + 2, y + 15 + 12, '#FFFFFF', null, this._buildFont(10, false));
+            }
+        }
+        core.setTextAlign('ui', "center");
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
@@ -2836,6 +2866,7 @@ ui.prototype.drawStatistics = function (floorIds) {
     core.drawText([
         this._drawStatistics_generateText(obj, "全塔", obj.total),
         this._drawStatistics_generateText(obj, "当前", obj.current),
+        this._drawStatistics_generateText(obj, "标记（浏览地图时B键或左下角）", obj.marked),
         "当前总步数："+core.status.hero.steps+"，当前游戏时长："+core.formatTime(statistics.currTime)
         +"，总游戏时长"+core.formatTime(statistics.totalTime)
         +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
@@ -2886,13 +2917,15 @@ ui.prototype._drawStatistics_buildObj = function () {
             'hp': 0, 'atk': 0, 'def': 0, 'mdef': 0
         }
     };
-    return {ids: ids, cls: cls, ext: ext, total: core.clone(obj), current: core.clone(obj)};
+    return {ids: ids, cls: cls, ext: ext, total: core.clone(obj), current: core.clone(obj), marked: core.clone(obj)};
 }
 
 ui.prototype._drawStatistics_add = function (floorId, obj, x1, x2, value) {
     obj.total[x1][x2] += value || 0;
     if (floorId == core.status.floorId)
         obj.current[x1][x2] += value || 0;
+    if (core.markedFloorIds[floorId])
+        obj.marked[x1][x2] += value || 0;
 }
 
 ui.prototype._drawStatistics_floorId = function (floorId, obj) {

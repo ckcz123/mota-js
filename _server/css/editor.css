@@ -1,12 +1,18 @@
+/** editor **/
 
 html, body, div, img {
     margin: 0;
     padding: 0;
 }
 
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     font-family: Roboto, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;;
-    background-color: #F5F5F5;
 }
 
 /* ::-webkit-scrollbar {
@@ -29,9 +35,7 @@ body {
     z-index: 240;
     padding: 4px 6px;
     margin-top: 6px;
-    background-color: #F5F5F5;
     box-sizing: border-box;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
 }
 
 #colorPicker {
@@ -43,7 +47,6 @@ body {
 #left, #mid, #mid2, #right {
     border-radius: 2px;
     box-sizing: border-box;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
 }
 
 #left {
@@ -75,7 +78,6 @@ body {
     font-size: 12.3px;
     font-family: 'Lucida Console', Monaco, monospace;
     white-space: pre;
-    border: 1px solid #ddd;
     border-radius: 2px;
     overflow: auto;
 }
@@ -176,7 +178,6 @@ body {
     padding: 5px 10px 10px 10px;
     margin-right: 0;
     box-sizing: border-box;
-    border: 1px solid #ccc;
     border-radius: 2px;
     font-size: 15px;
     line-height: 18px;
@@ -194,20 +195,6 @@ body {
     margin-top: 15px;
 }
 
-.input {
-    display: block;
-    max-width: 150px;
-    height: 20px;
-    padding: 6px 12px;
-    font-size: 14px;
-    margin-top: 10px;
-    color: #555;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
-}
-
 #bgSelect {
     width: 50%;
     height: 100px;
@@ -223,37 +210,6 @@ body {
 #printOut {
     margin-top: 10px;
     height: 20px;
-
-}
-
-.btn {
-    width: 80px;
-    border-radius: 2px;
-    line-height: 30px;
-    margin: 0;
-    min-width: 50px;
-    padding: 0 5px;
-    display: inline-block;
-    margin-top: 5px;
-    font-size: 14px;
-    font-weight: 400;
-    /* text-transform: uppercase; */
-    letter-spacing: 0;
-    overflow: hidden;
-    cursor: pointer;
-    text-decoration: none;
-    text-align: center;
-    vertical-align: middle;
-    border: 0;
-    background: rgba(158, 158, 158, .2);
-    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .14), 0 2px 1px -1px rgba(0, 0, 0, .2), 0 1px 3px 0 rgba(0, 0, 0, .12);
-    color: #fff;
-    background-color: #26A69A;
-}
-
-.btn:hover {
-    background-color: #009688;
-    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
 }
 
 #right {
@@ -298,10 +254,6 @@ body {
     padding: 0;
     /* display: none; */
     box-sizing: border-box;
-    background-color: rgba(255, 255, 255, 0.0);
-    border: 1px solid #000;
-    box-shadow: 0 0 0 2px #fff,
-    0 0 0 3px #000;
 }
 
 #iconExpandBtn {
@@ -314,36 +266,23 @@ body {
 }
 
 .warnText {
-    color: #D50000;
     font-weight: 700;
     font-size: 14px;
     line-height: 1.2em;
 }
 
-.infoText {
-    color: #2196F3;
-}
-
 .successText {
-    color: #00897B;
     line-height: 1.2em;
 }
 
-table, td {
-    border: 1px solid #fff;
-    color: #fff;
+#mapColMark, #mapRowMark {
     cursor: crosshair;
 }
 
 table.col {
     position: relative;
-
     text-align: center;
     border-collapse: collapse;
-}
-
-table.col td {
-    background-color: #4DB6AC;
 }
 
 #arrColMark td {
@@ -376,7 +315,6 @@ table.col td {
     height: 416px;
     width: 32px;
     z-index: 100;
-    background-color: rgba(38, 166, 154, .5);
 }
 
 table.row {
@@ -384,10 +322,6 @@ table.row {
     text-align: right;
     vertical-align: middle;
     border-collapse: collapse;
-}
-
-table.row td {
-    background-color: #4C221B;
 }
 
 #arrRowMark {
@@ -416,13 +350,10 @@ table.row td {
     height: 32px;
     width: 416px;
     z-index: 100;
-    background-color: rgba(76, 34, 27, .5);
 }
 
 #menuDiv * { margin: 0; padding: 0; }
 #midMenu{
-    background: #fff;
-    border-color: #ccc #666 #666 #ccc;
     border-style: solid;
     border-width: 1px;
     cursor: default;
@@ -439,7 +370,6 @@ table.row td {
     border-radius: 4px;
 }
 #midMenu .menuitem{
-    color: #000;
     font: normal 13px Arial, sans-serif;
     list-style: none;
     margin: 0;
@@ -451,25 +381,17 @@ table.row td {
     /* padding-right: 20px; */
 }
 #midMenu .menuitem:hover{
-    background-color: #d6e9f8;
-    border-color: #d6e9f8;
     border-style: dotted;
     border-width: 1px 0;
     padding-bottom: 3px;
     padding-top: 3px;
 }
 #midMenu .menuitem-content{
-    color: #000;
     font: normal 13px Arial, sans-serif;
-}
-
-textarea[disabled] {
-    color: #999999;
 }
 
 #searchBlock {
     width: 100px;
-    background-color: #E9EBF2;
     border-radius: 10px;
     outline: none;
     padding-left: 20px;
@@ -492,7 +414,6 @@ textarea[disabled] {
     position: fixed;
     top: 0;
     left: 0;
-    background: rgba(127,127,127,0.6);
     z-index: 2000
 }
 
@@ -501,7 +422,6 @@ textarea[disabled] {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -60%);
-    background: white;
     width: 436px;
 }
 
@@ -563,8 +483,215 @@ textarea[disabled] {
     padding: 0;
     /* display: none; */
     box-sizing: border-box;
-    background-color: rgba(255, 255, 255, 0.0);
-    border: 1px solid #000;
-    box-shadow: 0 0 0 2px #fff,
-    0 0 0 3px #000;
+}
+
+/** editor_mode **/
+
+.leftTab {
+    border-radius: 2px;
+    box-sizing: border-box;
+    overflow: auto;
+    position: absolute;
+    bottom: 0;
+}
+
+.leftTab > * {
+    margin: 2.5px 5px;
+}
+
+.leftTab > :first-child {
+    margin-top: 5px;
+}
+
+.leftTab > :last-child {
+    margin-bottom: 5px;
+}
+
+.leftTab {
+    left: 5px;
+    top: 10px;
+    width: 435px;
+}
+
+.leftTab .leftTabHeader {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 20;
+}
+
+.leftTab .leftTabContent {
+    padding-top: 50px;
+}
+
+#appendPicSelection span {
+    position: absolute;
+    font-size: 11px;
+    }
+
+#left6 {
+    left: 5px;
+    top: 5px;
+    z-index: 200;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+#left6 #blocklyArea {
+    float: left;
+    width: 60%;
+    height: 95%;
+}
+
+#left6 #blocklyDiv {
+    position: relative;
+}
+
+#left6 .CodeMirror {
+    float: left;
+    height: 95%;
+    width: 35%;
+}
+
+#left6 #codeArea {
+    width: 99.5%;
+    height: 15.4em;
+    overflow: y; /* resize:none; */
+}
+
+#left7 {
+    /* height: 440px; width: 375px;float:left; */
+    left: 5px;
+    top: 5px;
+    z-index: 200;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+#left7 .CodeMirror {
+    /* border-top: 1px solid black;
+    border-bottom: 1px solid black; */
+    font-size: 14px;
+    height: 95%;
+    width: 95%;
+}
+
+.etable table, .etable table td {
+    cursor: auto;
+}
+
+/* copy from github-css https://github.com/sindresorhus/github-markdown-css  */
+.etable table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.etable table {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.etable table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    word-break: break-all;
+}
+
+.etable table th {
+    font-weight: 600;
+}
+
+.etable table th,
+.etable table td {
+    padding: 5px;
+}
+
+/* copy end ---------------------------------------------  */
+
+.etable tr {
+    width: 100%
+}
+
+.etable tr > :nth-child(1) {
+    width: 20%
+}
+
+.etable tr > :nth-child(2) {
+    width: 20%
+}
+
+.etable tr > :nth-child(3) {
+    width: 35%;
+}
+
+.etable tr > :nth-child(4) {
+    width: 25%;
+    padding: 0;
+}
+
+.etable table {
+    overflow: visible;
+}
+
+.etable tr:not(:first-child) > :nth-child(3) {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    position: relative;
+}
+
+.etable tr > :nth-child(4) {
+    text-align: center;
+}
+
+div.etableInputDiv {
+    position: absolute;
+    padding: 5px 0 0 5px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+div.checkboxSet {
+    position: relative !important;
+    max-height: 250px;
+    overflow: auto;
+}
+
+.etableInputDiv > * {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    border: none;
+    background: transparent;
+}
+
+.etableInputDiv .checkbox {
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+}
+
+.etableInputDiv .checkboxSetMember {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+.etableInputDiv textarea {
+    resize: none;
+}
+
+.etableInputDiv textarea:hover {
+    margin: -5px;
 }

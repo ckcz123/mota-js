@@ -65,6 +65,9 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['firstArrive_m'].xmlText(),
       MotaActionBlocks['eachArrive_m'].xmlText(),
       MotaActionBlocks['level_m'].xmlText(),
+      MotaActionFunctions.actionParser.parse([
+        ['MTx', '']
+      ], 'floorPartition'),
       MotaActionBlocks['commonEvent_m'].xmlText(),
       MotaActionBlocks['item_m'].xmlText(),
       MotaActionFunctions.actionParser.parse([
@@ -124,6 +127,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['moveAction_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['jumpHero_s'].xmlText(),
+      MotaActionBlocks['jumpHero_1_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),
       MotaActionBlocks['changePos_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
@@ -146,6 +150,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['turnBlock_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
+      MotaActionBlocks['jump_1_s'].xmlText(),
       MotaActionBlocks['showBgFgMap_s'].xmlText(),
       MotaActionBlocks['hideBgFgMap_s'].xmlText(),
       MotaActionBlocks['setBgFgBlock_s'].xmlText(),
@@ -412,7 +417,7 @@ document.getElementById('blocklyDiv').onmousewheel = function(e){
   var mousewheelOffsetValue=20/380*workspace.scrollbar[hvScroll].handleLength_*3;
   workspace.scrollbar[hvScroll].handlePosition_+=( ((e.deltaY||0)+(e.detail||0)) >0?mousewheelOffsetValue:-mousewheelOffsetValue);
   workspace.scrollbar[hvScroll].onScroll_();
-  workspace.setScale(workspace.scale);
+  // workspace.setScale(workspace.scale);
 }
 
 var doubleClickCheck=[[0,'abc']];
@@ -420,7 +425,7 @@ function omitedcheckUpdateFunction(event) {
   if(event.type==='create'){
     editor_blockly.addIntoLastUsedType(event.blockId);
   }
-  if(event.type==='ui'){
+  if(event.type==='ui' && event.element == 'click'){
     var newClick = [new Date().getTime(),event.blockId];
     var lastClick = doubleClickCheck.shift();
     doubleClickCheck.push(newClick);
@@ -430,6 +435,8 @@ function omitedcheckUpdateFunction(event) {
       }
     }
   }
+  // Only handle these events
+  if (["create", "move", "change", "delete"].indexOf(event.type) < 0) return;
   if(editor_blockly.workspace.topBlocks_.length>=2){
     editor_blockly.setValue('入口方块只能有一个');
     return;
@@ -477,8 +484,13 @@ function omitedcheckUpdateFunction(event) {
       var input = inputs[ii];
       var _input = '';
       var noinput = (input===null || input===undefined);
-      if(noinput && inputType==='field') continue;
+      if(noinput && inputType==='field' && MotaActionBlocks[rule.argsGrammarName[ii]].type!=='field_dropdown') continue;
+      if(noinput && inputType==='field') {
+        noinput = false;
+        input = rule.fieldDefault(rule.args[ii])
+      }
       if(noinput) input = '';
+      if(inputType==='field' && MotaActionBlocks[rule.argsGrammarName[ii]].type==='field_checkbox')input=input?'TRUE':'FALSE';
       if(inputType!=='field') {
         var subList = false;
         var subrulename = rule.argsGrammarName[ii];

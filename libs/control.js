@@ -258,35 +258,50 @@ control.prototype._animationFrame_weather_snow = function () {
     ctx.fill();
 }
 
-control.prototype._animationFrame_weather_fog = function () {
-    var ctx = core.dymCanvas.weather, ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
-    core.clearMap('weather');
-    if (core.animateFrame.weather.fog) {
-        var w = core.__PIXELS__, h = core.__PIXELS__;
-        core.setAlpha('weather', 0.5);
-        core.animateFrame.weather.nodes.forEach(function (p) {
-            core.drawImage(ctx, core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
-            p.x += p.xs;
-            p.y += p.ys;
-            if (p.x > core.bigmap.width*32 - w/2) {
-                p.x = core.bigmap.width*32 - w/2 - 1;
-                p.xs = -p.xs;
-            }
-            if (p.x < -w/2) {
-                p.x = -w/2+1;
-                p.xs = -p.xs;
-            }
-            if (p.y > core.bigmap.height*32 - h/2) {
-                p.y = core.bigmap.height*32 - h/2 - 1;
-                p.ys = -p.ys;
-            }
-            if (p.y < -h/2) {
-                p.y = -h/2+1;
-                p.ys = -p.ys;
-            }
-        });
-        core.setAlpha('weather',1);
+control.prototype.__animateFrame_weather_image = function (image) {
+    if (!image) return;
+    var node = core.animateFrame.weather.nodes[0];
+    core.setAlpha('weather', node.level / 500);
+    var wind = 1.5;
+    var width = image.width, height = image.height;
+    node.x += node.dx * wind;
+    node.y += (2 * node.dy - 1) * wind;
+    if (node.x + 3 * width <= core.__PIXELS__) {
+        node.x += 4 * width;
+        while (node.x > 0) node.x -= width;
     }
+    node.dy += node.delta;
+    if (node.dy >= 1) {
+        node.delta = -0.001;
+    } else if (node.dy <= 0) {
+        node.delta = 0.001;
+    }
+    if (node.y + 3 * height <= core.__PIXELS__) {
+        node.y += 4 * height;
+        while (node.y > 0) node.y -= height;
+    }
+    else if (node.y >= 0) {
+        node.y -= height;
+    }
+    for (var i = 0; i < 3; ++i) {
+        for (var j = 0; j < 3; ++j) {
+            if (node.x + (i + 1) * width <= 0 || node.x + i * width >= core.__PIXELS__
+                || node.y + (j + 1) * height <= 0 || node.y + j * height >= core.__PIXELS__)
+                continue;
+            core.drawImage('weather', image, node.x + i * width, node.y + j * height);
+        }
+    }
+    core.setAlpha('weather',1);
+}
+
+control.prototype._animationFrame_weather_fog = function () {
+    core.clearMap('weather');
+    this.__animateFrame_weather_image(core.animateFrame.weather.fog);
+}
+
+control.prototype._animationFrame_weather_cloud = function () {
+    core.clearMap('weather');
+    this.__animateFrame_weather_image(core.animateFrame.weather.cloud);
 }
 
 control.prototype._animateFrame_tip = function (timestamp) {
@@ -648,6 +663,7 @@ control.prototype._moveAction_moving = function (callback) {
         core.status.route.push(direction);
         
         core.moveOneStep();
+        core.checkRouteFolding();
         if (callback) callback();
     });
 }
@@ -741,6 +757,7 @@ control.prototype.turnHero = function(direction) {
     core.setHeroLoc('direction', core.turnDirection(':right'));
     core.drawHero();
     core.status.route.push("turn");
+    core.checkRouteFolding();
 }
 
 ////// 瞬间移动 //////
@@ -1588,7 +1605,8 @@ control.prototype._replayAction_moveDirectly = function (action) {
     var pos=action.substring(5).split(":");
     var x=parseInt(pos[0]), y=parseInt(pos[1]);
     var nowx=core.getHeroLoc('x'), nowy=core.getHeroLoc('y');
-    if (!core.moveDirectly(x, y)) return false;
+    var ignoreSteps = core.canMoveDirectly(x, y);
+    if (!core.moveDirectly(x, y, ignoreSteps)) return false;
     if (core.status.replay.speed == 24) {
         core.replay();
         return true;
@@ -1596,10 +1614,12 @@ control.prototype._replayAction_moveDirectly = function (action) {
 
     core.ui.drawArrow('ui', 32*nowx+16-core.bigmap.offsetX, 32*nowy+16-core.bigmap.offsetY,
         32*x+16-core.bigmap.offsetX, 32*y+16-core.bigmap.offsetY, '#FF0000', 3);
+    var timeout = this.__replay_getTimeout();
+    if (ignoreSteps < 10) timeout = timeout * ignoreSteps / 10;
     setTimeout(function () {
         core.clearMap('ui');
         core.replay();
-    }, core.control.__replay_getTimeout());
+    }, timeout);
     return true;
 }
 
@@ -1798,7 +1818,7 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
 
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
-    core.ui.drawWaiting("正在同步，请稍后...");
+    core.ui.drawWaiting("正在同步，请稍候...");
     var callback = function (saves) {
         core.control._syncSave_http(type, saves);
     }
@@ -1836,7 +1856,7 @@ control.prototype.syncLoad = function () {
             core.drawText("不合法的存档编号+密码；应当为6位数字+4位数字字母的组合，如\r[yellow]123456abcd\r。");
             return;
         }
-        core.ui.drawWaiting("正在同步，请稍后...");
+        core.ui.drawWaiting("正在同步，请稍候...");
         core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
     });
 }
@@ -2095,6 +2115,11 @@ control.prototype.getBuff = function (name) {
     return core.getFlag('__'+name+'_buff__', 1);
 }
 
+////// 获得或移除毒衰咒效果 //////
+control.prototype.triggerDebuff = function (action, type) {
+    return this.controldata.triggerDebuff(action, type);
+}
+
 ////// 设置勇士的位置 //////
 control.prototype.setHeroLoc = function (name, value, noGather) {
     if (!core.status.hero) return;
@@ -2167,6 +2192,45 @@ control.prototype.debug = function() {
     core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
 }
 
+control.prototype._bindRoutePush = function () {
+    core.status.route.push = function (element) {
+        // 忽视移动、转向、瞬移
+        if (["up", "down", "left", "right", "turn"].indexOf(element) < 0 && !element.startsWith("move:")) {
+            core.clearRouteFolding();
+        }
+        Array.prototype.push.call(core.status.route, element);
+    }
+}
+
+////// 清除录像折叠信息 //////
+control.prototype.clearRouteFolding = function () {
+    core.status.routeFolding = {};
+}
+
+////// 检查录像折叠 //////
+control.prototype.checkRouteFolding = function () {
+    // 未开启、未开始游戏、正在录像播放中、正在事件中：不执行
+    if (!core.flags.enableRouteFolding || !core.isPlaying() || core.status.event.id) {
+        return this.clearRouteFolding();
+    }
+    var hero = core.clone(core.status.hero, function (name, value) {
+        return name != 'steps' && typeof value == 'number';
+    });
+    var index = [core.getHeroLoc('x'),core.getHeroLoc('y'),core.getHeroLoc('direction').charAt(0)].join(',');
+    core.status.routeFolding = core.status.routeFolding || {};
+    if (core.status.routeFolding[index]) {
+        var one = core.status.routeFolding[index];
+        if (core.same(one.hero, hero) && one.length < core.status.route.length) {
+            Object.keys(core.status.routeFolding).forEach(function (v) {
+                if (core.status.routeFolding[v].length >= one.length) delete core.status.routeFolding[v];
+            });
+            core.status.route = core.status.route.slice(0, one.length);
+            this._bindRoutePush();
+        }
+    }
+    core.status.routeFolding[index] = {hero: hero, length: core.status.route.length};
+}
+
 // ------ 天气，色调，BGM ------ //
 
 control.prototype.getMappedName = function (name) {
@@ -2219,14 +2283,26 @@ control.prototype._setWeather_createNodes = function (type, level) {
             break;
         case 'fog':
             if (core.animateFrame.weather.fog) {
-                for (var a=0;a<level/10;a++) {
-                    core.animateFrame.weather.nodes.push({
-                        'x': Math.random()*core.bigmap.width*32 - 208,
-                        'y': Math.random()*core.bigmap.height*32 - 208,
-                        'xs': Math.random() * 4 - 2,
-                        'ys': Math.random() * 4 - 2
-                    })
-                }
+                core.animateFrame.weather.nodes = [{
+                    'level': level,
+                    'x': 0,
+                    'y': -core.__PIXELS__ / 2,
+                    'dx': -Math.random() * 1.5,
+                    'dy': Math.random(),
+                    'delta': 0.001,
+                }];
+            }
+            break;
+        case 'cloud':
+            if (core.animateFrame.weather.cloud) {
+                core.animateFrame.weather.nodes = [{
+                    'level': level,
+                    'x': 0,
+                    'y': -core.__PIXELS__ / 2,
+                    'dx': -Math.random() * 1.5,
+                    'dy': Math.random(),
+                    'delta': 0.001,
+                }];
             }
             break;
     }
@@ -2459,6 +2535,7 @@ control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
     this.controldata.updateStatusBar();
     if (!doNotCheckAutoEvents) core.checkAutoEvents();
     this._updateStatusBar_setToolboxIcon();
+    core.clearRouteFolding();
 }
 
 control.prototype._updateStatusBar_setToolboxIcon = function () {

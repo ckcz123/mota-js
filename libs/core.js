@@ -167,6 +167,8 @@ function core() {
             'steps': 0,
             'save': [],
         },
+        // 录像折叠
+        'routeFolding': {},
 
         // event事件
         'shops': {},
@@ -200,7 +202,6 @@ function core() {
             "font": main.styles.font || "Verdana"
         },
         'curtainColor': null,
-        'openingDoor': null,
 
         // 动画
         'globalAnimateObjs': [],
@@ -210,6 +211,8 @@ function core() {
         "globalAnimateStatus": 0,
         'animateObjs': [],
     };
+    // 标记的楼层列表，用于数据统计
+    this.markedFloorIds = {};
     this.status = {};
     this.dymCanvas = {};
 }
@@ -389,6 +392,7 @@ core.prototype._init_others = function () {
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
     core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
+    core.loadImage("materials", "cloud", function (name, img) { core.animateFrame.weather.cloud = img; })
     core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);

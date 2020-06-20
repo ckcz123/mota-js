@@ -6,7 +6,7 @@
     <link href="_server/css/editor_mobile.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
-    <link href="_server/css/editor_mode_mobile.css" rel="stylesheet">
+    <link id="color_css" rel="stylesheet">
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body>
@@ -301,6 +301,7 @@
         <div class="col" id='mapColMark'></div>
         <div class="row" id='mapRowMark'></div>
         <div class="map" id="mapEdit">
+            <canvas class='gameCanvas' id='ebm'></canvas>
             <canvas class='gameCanvas' id='efg'></canvas>
             <canvas class='gameCanvas' id='eui' style='z-index:100'></canvas>
         </div>
@@ -354,7 +355,11 @@
                     <option value="commonevent">公共事件</option>
                     <option value="plugins">插件编写</option>
                 </select>
-                <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定模式</span>
+                <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定</span>
+                <select id="editorTheme">
+                    <option value="editor_color">默认白</option>
+                    <option value="editor_color_dark">夜间黑</option>
+                </select>
                 <select id="brushMod" style="clear:right">
                     <option value="line">画线</option>
                     <option value="rectangle">画矩形</option>
@@ -371,10 +376,11 @@
                     <input type="button" style="padding:1px 6px" value="↑"/>
                     <input type="button" style="padding:1px 6px" value="↓"/>
                     <input type="button" style="padding:1px 1px" value="→"/>
-                    <input type="button" value="大地图" style="margin-left: 5px"/>
+                    <input type="button" id="bigmapBtn" value="大地图" style="margin-left: 5px"/>
                 </div>
                 <select id="selectFloor" style="clear:left"></select>
                 <input type="button" value="保存地图" id='saveFloor'/>
+                <input type="button" value="后退" id="undoFloor" />
                 <span id='mobileeditdata' style="display:none">
                     <input type="button" value="编辑"/>
                     <input type="button" value="显示完整名称" style="display: none;"/>

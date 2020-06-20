@@ -19,12 +19,11 @@ var events_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"_event": "commonEvent",
 						"_data": "加点事件"
 					},
-					"毒衰咒处理": {
+					"回收钥匙商店": {
 						"_leaf": true,
 						"_type": "event",
-						"_range": "thiseval instanceof Array",
 						"_event": "commonEvent",
-						"_data": "毒衰咒处理"
+						"_data": "回收钥匙商店"
 					},
 				}
 				if (obj[key]) return obj[key];

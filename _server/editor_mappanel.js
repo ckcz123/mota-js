@@ -31,6 +31,16 @@ editor_mappanel_wrapper = function (editor) {
      * @param {Boolean} addViewportOffset 是否加上大地图的偏置
      */
     editor.uifunctions.locToPos = function (loc, addViewportOffset) {
+        if (editor.uivalues.bigmap) {
+            var info = editor.uivalues.bigmapInfo;
+            var size = loc.size / 32 * info.size;
+            editor.pos = {
+                x: core.clamp(Math.floor((loc.x - info.left) / size), 0, editor.currentFloorData.width - 1),
+                y: core.clamp(Math.floor((loc.y - info.top) / size), 0, editor.currentFloorData.height - 1),
+            }
+            return editor.pos;
+        }
+
         var offsetX = 0, offsetY = 0;
         if (addViewportOffset) {
             offsetX = core.bigmap.offsetX / 32;
@@ -45,7 +55,7 @@ editor_mappanel_wrapper = function (editor) {
      * 双击地图可以选中素材
      */
     editor.uifunctions.map_doubleClick = function (e) {
-        if (editor.uivalues.bindSpecialDoor.loc != null) return;
+        if (editor.uivalues.bindSpecialDoor.loc != null || editor.uivalues.bigmap) return;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
         editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x], true);
@@ -79,6 +89,19 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
+        if (editor.uivalues.bigmap) {
+            if (!selectBox.isSelected()) {
+                editor_mode.onmode('nextChange');
+                editor_mode.onmode('loc');
+                printi("大地图模式（F键）下，可以拖动、右键拉框与复制剪切粘贴；但不可进行绘图。");
+                editor.uivalues.startPos = pos;
+                editor.dom.euiCtx.strokeStyle = '#FF0000';
+                editor.dom.euiCtx.lineWidth = 2;
+                if (editor.isMobile) editor.uifunctions.showMidMenu(e.clientX, e.clientY);
+            }
+            return false;
+        }
+
         if (editor.uivalues.bindSpecialDoor.loc != null) {
             var x = editor.pos.x, y = editor.pos.y, id = (editor.map[y][x] || {}).id;
             // 检测是否是怪物
@@ -117,6 +140,15 @@ editor_mappanel_wrapper = function (editor) {
         return false;
     }
 
+    var _getGridByPos = function (pos) {
+        if (editor.uivalues.bigmap) {
+            var info = editor.uivalues.bigmapInfo;
+            return {x: info.left + info.size * pos.x, y: info.top + info.size * pos.y, size: info.size};
+        } else {
+            return {x: 32 * pos.x - core.bigmap.offsetX, y: 32 * pos.y - core.bigmap.offsetY, size: 32};
+        }
+    }
+
     /**
      * editor.dom.eui.onmousemove
      * + 非绘图模式时维护起止位置并画箭头
@@ -129,12 +161,15 @@ editor_mappanel_wrapper = function (editor) {
             var loc = editor.uifunctions.eToLoc(e);
             var pos = editor.uifunctions.locToPos(loc, true);
             if (editor.uivalues.endPos != null && editor.uivalues.endPos.x == pos.x && editor.uivalues.endPos.y == pos.y) return;
+            var startGrid = _getGridByPos(editor.uivalues.startPos), endGrid;
             if (editor.uivalues.endPos != null) {
-                editor.dom.euiCtx.clearRect(Math.min(32 * editor.uivalues.startPos.x - core.bigmap.offsetX, 32 * editor.uivalues.endPos.x - core.bigmap.offsetX),
-                    Math.min(32 * editor.uivalues.startPos.y - core.bigmap.offsetY, 32 * editor.uivalues.endPos.y - core.bigmap.offsetY),
-                    (Math.abs(editor.uivalues.startPos.x - editor.uivalues.endPos.x) + 1) * 32, (Math.abs(editor.uivalues.startPos.y - editor.uivalues.endPos.y) + 1) * 32)
+                endGrid = _getGridByPos(editor.uivalues.endPos);
+                editor.dom.euiCtx.clearRect(Math.min(startGrid.x, endGrid.x), Math.min(startGrid.y, endGrid.y),
+                    (Math.abs(editor.uivalues.startPos.x - editor.uivalues.endPos.x) + 1) * startGrid.size, 
+                    (Math.abs(editor.uivalues.startPos.y - editor.uivalues.endPos.y) + 1) * startGrid.size);
             }
             editor.uivalues.endPos = pos;
+            endGrid = _getGridByPos(editor.uivalues.endPos);
             if (editor.uivalues.startPos != null) {
                 if (editor.uivalues.startPos.x != editor.uivalues.endPos.x || editor.uivalues.startPos.y != editor.uivalues.endPos.y) {
                     if (e.buttons == 2) {
@@ -148,13 +183,11 @@ editor_mappanel_wrapper = function (editor) {
                         // draw rect
                         editor.dom.euiCtx.clearRect(0, 0, editor.dom.euiCtx.canvas.width, editor.dom.euiCtx.canvas.height);
                         editor.dom.euiCtx.fillStyle = 'rgba(0, 127, 255, 0.4)';
-                        editor.dom.euiCtx.fillRect(32 * x0 - core.bigmap.offsetX, 32 * y0 - core.bigmap.offsetY,
-                            32 * (x1 - x0) + 32, 32 * (y1 - y0) + 32);
+                        var grid = _getGridByPos({x: x0, y: y0});
+                        editor.dom.euiCtx.fillRect(grid.x, grid.y, grid.size * (x1 - x0 + 1), grid.size * (y1 - y0 + 1));
                     }else{
                         // 左键拖拽: 画箭头
-                        core.drawArrow('eui',
-                            32 * editor.uivalues.startPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.startPos.y + 16 - core.bigmap.offsetY,
-                            32 * editor.uivalues.endPos.x + 16 - core.bigmap.offsetX, 32 * editor.uivalues.endPos.y + 16 - core.bigmap.offsetY);
+                        core.drawArrow('eui', startGrid.x + startGrid.size / 2, startGrid.y + startGrid.size / 2, endGrid.x + endGrid.size / 2, endGrid.y + endGrid.size / 2);
                     }
                 }
             }
@@ -163,6 +196,7 @@ editor_mappanel_wrapper = function (editor) {
             //editor_mode.loc();
             return false;
         }
+        if (editor.uivalues.bigmap) return false;
 
         if (editor.uivalues.holdingPath == 0) {
             return false;
@@ -236,6 +270,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             return false;
         }
+        if (editor.uivalues.bigmap) return false;
         editor.uivalues.holdingPath = 0;
         if (editor.uivalues.stepPostfix && editor.uivalues.stepPostfix.length) {
             editor.savePreMap();
@@ -366,6 +401,7 @@ editor_mappanel_wrapper = function (editor) {
             editor_mode.onmode('nextChange');
             editor_mode.onmode('floor');
             editor.dom.selectFloor.value = toId;
+            editor.uivalues.recentFloors.push(editor.currentFloorId);
             editor.changeFloor(toId);
         }
 
@@ -379,6 +415,22 @@ editor_mappanel_wrapper = function (editor) {
             console.log(ee);
         }
         return false;
+    }
+
+    editor.uifunctions.undoFloor_click = function () {
+        var toId = editor.uivalues.recentFloors.pop();
+        if (toId == null || toId == editor.currentFloorId) return;
+
+        editor_mode.onmode('nextChange');
+        editor_mode.onmode('floor');
+        editor.dom.selectFloor.value = toId;
+        editor.changeFloor(toId);
+    }
+
+    editor.uifunctions.editorTheme_onchange = function () {
+        var theme = editor.dom.editorTheme.value;
+        editor.config.set('theme', theme);
+        document.getElementById('color_css').href = '_server/css/' + theme + '.css';
     }
 
     /**
@@ -756,6 +808,27 @@ editor_mappanel_wrapper = function (editor) {
         editor.uifunctions.setLayerMod('fgmap');
     }
 
+    editor.uifunctions.triggerBigmap = function () {
+        if (selectBox.isSelected()) {
+            printe("请先点击【保存地图】以退出绘图模式");
+            return;
+        }
+
+        editor.uivalues.bigmap = !editor.uivalues.bigmap;
+        if (editor.uivalues.bigmap) {
+            editor.dom.bigmapBtn.classList.add('highlight');
+            printi("大地图模式（F键）下，可以拖动与复制剪切粘贴；但不可拉框、绘图或呼出右键菜单。");
+        } else {
+            editor.dom.bigmapBtn.classList.remove('highlight');
+            editor.setViewport(32 * (editor.pos.x - core.__HALF_SIZE__), 32 * (editor.pos.y - core.__HALF_SIZE__));
+            printf("已退出大地图模式");
+        }
+        editor.dom.ebmCtx.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+        editor.uivalues.startPos = editor.uivalues.endPos = null;
+        editor.updateMap();
+        editor.drawPosSelection();
+    }
+
     /**
      * 移动大地图可视窗口的绑定
      */
@@ -765,7 +838,7 @@ editor_mappanel_wrapper = function (editor) {
             if (ii == 4) {
                 // 大地图
                 node.onclick = function () {
-                    editor.uievent.selectPoint(null, editor.pos.x, editor.pos.y, true);
+                    editor.uifunctions.triggerBigmap();
                 }
                 continue;
             }
@@ -809,6 +882,7 @@ editor_mappanel_wrapper = function (editor) {
             selectFloor.onchange = function () {
                 editor_mode.onmode('nextChange');
                 editor_mode.onmode('floor');
+                editor.uivalues.recentFloors.push(editor.currentFloorId);
                 editor.changeFloor(selectFloor.value);
             }
         });
@@ -816,12 +890,12 @@ editor_mappanel_wrapper = function (editor) {
 
     editor.uifunctions.highlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='#ffd700';
+        saveFloor.classList.add('highlight');
     }
 
     editor.uifunctions.unhighlightSaveFloorButton=function(){
         var saveFloor = document.getElementById('saveFloor');
-        saveFloor.style.background='';
+        saveFloor.classList.remove('highlight');
     }
 
     editor.uifunctions.saveFloor_func = function () {

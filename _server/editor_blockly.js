@@ -147,7 +147,8 @@ editor_blockly = function () {
     editor_blockly.highlightParse = function (shouldHighLight) {
       if (shouldNotifyParse == shouldHighLight) return;
       shouldNotifyParse = shouldHighLight;
-      blocklyParseBtn.style.background = shouldNotifyParse ? '#ffd700' : 'unset';
+      if (shouldHighLight) blocklyParseBtn.classList.add('highlight');
+      else blocklyParseBtn.classList.remove('highlight');
     }
 
     editor_blockly.cancel = function () {
@@ -342,9 +343,10 @@ editor_blockly = function () {
         var value = b.getFieldValue(f);
         //多行编辑
         editor_multi.multiLineEdit(value, b, f, {'lint': f === 'RawEvalString_0'}, function (newvalue, b, f) {
-            if (MotaActionBlocks[b.type].doubleclicktext !== 'RawEvalString_0') {
+            if (!f.startsWith('EvalString_Multi')) {
+                newvalue = newvalue.split('\n').join('\\n');
             }
-            b.setFieldValue(newvalue.split('\n').join('\\n'), f);
+            b.setFieldValue(newvalue, f);
         });
     }
 
@@ -456,13 +458,13 @@ editor_blockly = function () {
 
         var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
 
-        var xv = parseInt(block.getFieldValue(arr[0])), yv = parseInt(block.getFieldValue(arr[1]));
+        var xv = block.getFieldValue(arr[0]), yv = block.getFieldValue(arr[1]);
         if (arr[0] === arr[1]) {
             var v = block.getFieldValue(arr[0]).split(",");
             xv = parseInt(v[0]); yv = parseInt(v[1]);
         }
-        if (!isNaN(xv)) x = xv;
-        if (!isNaN(yv)) y = yv;
+        if (xv != null) x = xv;
+        if (yv != null) y = yv;
         if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
 
         editor.uievent.selectPoint(floorId, x, y, false, function (fv, xv, yv) {
@@ -485,7 +487,7 @@ editor_blockly = function () {
         });
     }
 
-    editor_blockly.getAutoCompletions = function (content, type, name) {
+    editor_blockly.getAutoCompletions = function (content, type, name, pb) {
         // --- content为当前框中输入内容；将返回一个列表，为后续所有可补全内容
 
         // console.log(type, name);
@@ -596,6 +598,35 @@ editor_blockly = function () {
             }).sort();
         }
 
+        // 提供 IdText_0 的补全
+        if (type == 'idIdList_e' && name == 'IdText_0') {
+            var list = [];
+            switch (pb.getFieldValue('Id_List_0')) {
+                case 'status':
+                    list = Object.keys(core.status.hero);
+                    if (MotaActionFunctions && replaceCheckbox.checked) {
+                        list = MotaActionFunctions.pattern.replaceStatusList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    break;
+                case 'item':
+                    list = Object.keys(core.material.items);
+                    if (MotaActionFunctions && replaceCheckbox.checked) {
+                        list = MotaActionFunctions.pattern.replaceItemList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
+                    }
+                    break;
+                case 'flag':
+                    list = Object.keys(editor.used_flags || {});
+                    break;
+            }
+            return list.filter(function (one) {
+                return one != content && one.startsWith(content);
+            }).sort();
+        }
+
         var namesObj={};
 
         namesObj.allIds = ["this"].concat(core.getAllIconIds());
@@ -687,12 +718,124 @@ editor_blockly = function () {
     }
 
     editor_blockly.completeItems = [];
+
+    editor_blockly.onTextFieldCreate = function (self, htmlInput) {
+        var pb=self.sourceBlock_
+        var args = MotaActionBlocks[pb.type].args
+        var targetf=args[args.indexOf(self.name)+1]
+
+        // ------ colour
+
+        if(targetf && targetf.slice(0,7)==='Colour_'){
+            var inputDom = htmlInput;
+            // var getValue=function(){ // 获得自己的字符串
+            //     return pb.getFieldValue(self.name);
+            // }
+            var setValue = function(newValue){ // 设置右边颜色块的css颜色
+                pb.setFieldValue(newValue, targetf)
+            }
+            // 给inputDom绑事件
+            inputDom.oninput=function(){
+                var value=inputDom.value
+                if(/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)){
+                    setValue('rgba('+value+')')
+                }
+            }
+        }
+        else {
+
+            htmlInput.onkeydown = function (e) {
+                if (e.keyCode == 13 && awesomplete.opened && awesomplete.selected) {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    awesomplete.select();
+                    return false;
+                }
+            }
+
+            // --- awesomplete
+            var awesomplete = new Awesomplete(htmlInput, {
+                minChars: 1,
+                maxItems: 12,
+                autoFirst: true,
+                replace: function (text) {
+                    text = text.toString();
+                    var index = text.indexOf("（");
+                    if (index >= 0) text = text.substring(0, index);
+                    var value = this.input.value, index = this.input.selectionEnd;
+                    if (index == null) index = value.length;
+                    if (index < awesomplete.prefix.length) index = awesomplete.prefix.length;
+                    var str = value.substring(0, index - awesomplete.prefix.length) + text + value.substring(index);
+                    this.input.value = str;
+                    pb.setFieldValue(str, self.name);
+                    self.forceRerender();
+                    self.resizeEditor_();
+                    index += text.length - awesomplete.prefix.length;
+                    this.input.setSelectionRange(index, index);
+
+                    editor_blockly.completeItems = editor_blockly.completeItems.filter(function (x) {
+                        return x != text;
+                    });
+                    editor_blockly.completeItems.unshift(text);
+                },
+                filter: function () {return true;},
+                item: function (text, input) {
+                    var li = document.createElement("li");
+                    li.setAttribute("role", "option");
+                    li.setAttribute("aria-selected", "false");
+                    input = awesomplete.prefix.trim();
+                    if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
+                    li.innerHTML = text;
+                    return li;
+                },
+                sort: function (a, b) {
+                    a = a.toString(); b = b.toString();
+                    var ia = editor_blockly.completeItems.indexOf(a), ib = editor_blockly.completeItems.indexOf(b);
+                    if (ia < 0) ia = editor_blockly.completeItems.length;
+                    if (ib < 0) ib = editor_blockly.completeItems.length;
+                    if (ia != ib) return ia - ib;
+                    if (a.length != b.length) return a.length - b.length;
+                    return a < b ? -1 : 1;
+                }
+            });
+
+            htmlInput.oninput = function () {
+                var value = htmlInput.value, index = htmlInput.selectionEnd;
+                if (index == null) index = value.length;
+                value = value.substring(0, index);
+                // cal prefix
+                awesomplete.prefix = value;
+                for (var i = index - 1; i>=0; i--) {
+                    var c = value.charAt(i);
+                    if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
+                        awesomplete.prefix = value.substring(i+1);
+                        break;
+                    }
+                }
+
+                var list = editor_blockly.getAutoCompletions(value, pb.type, self.name, pb);
+
+                awesomplete.list = list;
+                var caretPosition = getCaretCoordinates(htmlInput, htmlInput.selectionStart);
+                awesomplete.ul.style.marginLeft = caretPosition.left - htmlInput.scrollLeft - 20 + "px";
+                var totalHeight = parseFloat(Blockly.WidgetDiv.DIV.style.height.replace('px', ''));
+                awesomplete.ul.style.marginTop = caretPosition.top + caretPosition.height - totalHeight + 10 + 'px';
+                awesomplete.evaluate();
+            }
+
+            awesomplete.container.style.width = "100%";
+
+            window.awesomplete = awesomplete;
+        }
+    }
+
     return editor_blockly;
 }
 
 // --- modify Blockly
 
-Blockly.FieldColour.prototype.createWidget_ = function() {
+Blockly.FieldColour.prototype.showEditor_ = function() {
     Blockly.WidgetDiv.hide();
 
     // console.log('here')
@@ -713,152 +856,115 @@ Blockly.FieldColour.prototype.createWidget_ = function() {
 
     var setValue=function(newValue){ // css颜色
         self.setValue(newValue)
-        var c=new Colors();
-        c.setColor(newValue)
-        var rgbatext = [c.colors.webSmart.r,c.colors.webSmart.g,c.colors.webSmart.b,c.colors.alpha].join(",");
-        pb.setFieldValue(rgbatext, targetf) // 放在颜色块左边的域中
+        pb.setFieldValue(newValue.replace("rgba(","").replace(")",""), targetf) // 放在颜色块左边的域中
     }
 
     setTimeout(function () {
         document.getElementById("colorPicker").value = getValue();
         // 设置位置
-        openColorPicker(Blockly.WidgetDiv.DIV.style.left.replace(/[^\d.]/g, ''), Blockly.WidgetDiv.DIV.style.top.replace(/[^\d.]/g, ''), setValue);
+        var scaledBBox = self.getScaledBBox();
+        openColorPicker(scaledBBox.left, scaledBBox.bottom, setValue);
     });
 
     return document.createElement('table');
 };
 
+Blockly.FieldColour.prototype.setValue = function (colour) {
+    this.doValueUpdate_(colour);
+}
+
+Blockly.FieldColour.prototype.initView = function() {
+    this.size_ = new Blockly.utils.Size(
+        this.getConstants().FIELD_COLOUR_DEFAULT_WIDTH,
+        this.getConstants().FIELD_COLOUR_DEFAULT_HEIGHT);
+    if (!this.getConstants().FIELD_COLOUR_FULL_BLOCK) {
+        this.createBorderRect_();
+        this.borderRect_.style['fillOpacity'] = '1';
+        this.borderRect_.classList.add('blocklyColourFieldRect');
+    } else {
+        this.clickTarget_ = this.sourceBlock_.getSvgRoot();
+    }
+};
+
 Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
-    Blockly.WidgetDiv.show(this, this.sourceBlock_.RTL, this.widgetDispose_());
-    var div = Blockly.WidgetDiv.DIV;
-    // Create the input.
-    var htmlInput =
-        goog.dom.createDom(goog.dom.TagName.INPUT, 'blocklyHtmlInput');
-    htmlInput.setAttribute('spellcheck', this.spellcheck_);
-    var fontSize =
-        (Blockly.FieldTextInput.FONTSIZE * this.workspace_.scale) + 'pt';
-    div.style.fontSize = fontSize;
-    htmlInput.style.fontSize = fontSize;
+    Blockly.WidgetDiv.show(
+        this, this.sourceBlock_.RTL, this.widgetDispose_.bind(this));
+    this.htmlInput_ = this.widgetCreate_();
+    this.isBeingEdited_ = true;
 
-    Blockly.FieldTextInput.htmlInput_ = htmlInput;
-    div.appendChild(htmlInput);
-
-    htmlInput.value = htmlInput.defaultValue = this.text_;
-    htmlInput.oldValue_ = null;
-
-    // console.log('here')
-    var self=this;
-    var pb=self.sourceBlock_
-    var args = MotaActionBlocks[pb.type].args
-    var targetf=args[args.indexOf(self.name)+1]
-
-    // ------ colour
-
-    if(targetf && targetf.slice(0,7)==='Colour_'){
-        var inputDom = htmlInput;
-        // var getValue=function(){ // 获得自己的字符串
-        //     return pb.getFieldValue(self.name);
-        // }
-        var setValue = function(newValue){ // 设置右边颜色块的css颜色
-            pb.setFieldValue(newValue, targetf)
-        }
-        // 给inputDom绑事件
-        inputDom.oninput=function(){
-            var value=inputDom.value
-            if(/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)){
-                setValue('rgba('+value+')')
-            }
-        }
-    }
-    else {
-
-        htmlInput.onkeydown = function (e) {
-            if (e.keyCode == 13 && awesomplete.opened && awesomplete.selected) {
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                e.preventDefault();
-                awesomplete.select();
-                return false;
-            }
-        }
-
-        // --- awesomplete
-        var awesomplete = new Awesomplete(htmlInput, {
-            minChars: 1,
-            maxItems: 12,
-            autoFirst: true,
-            replace: function (text) {
-                text = text.toString();
-                var index = text.indexOf("（");
-                if (index >= 0) text = text.substring(0, index);
-                var value = this.input.value, index = this.input.selectionEnd;
-                if (index == null) index = value.length;
-                if (index < awesomplete.prefix.length) index = awesomplete.prefix.length;
-                var str = value.substring(0, index - awesomplete.prefix.length) + text + value.substring(index);
-                this.input.value = str;
-                pb.setFieldValue(str, self.name);
-                index += text.length - awesomplete.prefix.length;
-                this.input.setSelectionRange(index, index);
-
-                editor_blockly.completeItems = editor_blockly.completeItems.filter(function (x) {
-                    return x != text;
-                });
-                editor_blockly.completeItems.unshift(text);
-            },
-            filter: function () {return true;},
-            item: function (text, input) {
-                var li = document.createElement("li");
-                li.setAttribute("role", "option");
-                li.setAttribute("aria-selected", "false");
-                input = awesomplete.prefix.trim();
-                if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
-                li.innerHTML = text;
-                return li;
-            },
-            sort: function (a, b) {
-                a = a.toString(); b = b.toString();
-                var ia = editor_blockly.completeItems.indexOf(a), ib = editor_blockly.completeItems.indexOf(b);
-                if (ia < 0) ia = editor_blockly.completeItems.length;
-                if (ib < 0) ib = editor_blockly.completeItems.length;
-                if (ia != ib) return ia - ib;
-                if (a.length != b.length) return a.length - b.length;
-                return a < b ? -1 : 1;
-            }
-        });
-
-        htmlInput.oninput = function () {
-            var value = htmlInput.value, index = htmlInput.selectionEnd;
-            if (index == null) index = value.length;
-            value = value.substring(0, index);
-            // cal prefix
-            awesomplete.prefix = value;
-            for (var i = index - 1; i>=0; i--) {
-                var c = value.charAt(i);
-                if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
-                    awesomplete.prefix = value.substring(i+1);
-                    break;
-                }
-            }
-
-            var list = editor_blockly.getAutoCompletions(value, pb.type, self.name);
-
-            awesomplete.list = list;
-            awesomplete.ul.style.marginLeft = getCaretCoordinates(htmlInput, htmlInput.selectionStart).left -
-                htmlInput.scrollLeft - 20 + "px";
-            awesomplete.evaluate();
-        }
-
-        awesomplete.container.style.width = "100%";
-
-        window.awesomplete = awesomplete;
-    }
-
+    editor_blockly.onTextFieldCreate(this, this.htmlInput_);
+  
     if (!quietInput) {
-        htmlInput.focus();
-        htmlInput.select();
+      this.htmlInput_.focus({preventScroll:true});
+      this.htmlInput_.select();
     }
-    this.validate_();
-    this.resizeEditor_();
+};
 
-    this.bindEvents_(htmlInput);
+Blockly.FieldTextInput.prototype.onHtmlInputKeyDown_ = function(e) {
+    if (e.keyCode == Blockly.utils.KeyCodes.ENTER && !(window.awesomplete && window.awesomplete.opened)) {
+        Blockly.WidgetDiv.hide();
+        Blockly.DropDownDiv.hideWithoutAnimation();
+    } else if (e.keyCode == Blockly.utils.KeyCodes.ESC) {
+        this.htmlInput_.value = this.htmlInput_.defaultValue;
+        Blockly.WidgetDiv.hide();
+        Blockly.DropDownDiv.hideWithoutAnimation();
+    } else if (e.keyCode == Blockly.utils.KeyCodes.TAB) {
+        Blockly.WidgetDiv.hide();
+        Blockly.DropDownDiv.hideWithoutAnimation();
+        this.sourceBlock_.tab(this, !e.shiftKey);
+        e.preventDefault();
+    }
+};
+
+Blockly.FieldMultilineInput.prototype.showInlineEditor_ = function(quietInput) {
+    Blockly.FieldMultilineInput.superClass_.showInlineEditor_.call(this, quietInput);
+    // force to resize the input
+    this.htmlInput_.style.height = Blockly.WidgetDiv.DIV.style.height;
+};
+
+Blockly.FieldMultilineInput.prototype.onHtmlInputChange_ = function(e) {
+    Blockly.FieldMultilineInput.superClass_.onHtmlInputChange_.call(this, e);
+    // force to resize the input
+    this.htmlInput_.style.height = Blockly.WidgetDiv.DIV.style.height;
+};
+
+Blockly.copy_ = function(toCopy) {
+    if (toCopy.isComment) {
+        var xml = toCopy.toXmlWithXY();
+    } else {
+        var xml = Blockly.Xml.blockToDom(toCopy, true);
+        // Copy only the selected block and internal blocks.
+        Blockly.Xml.deleteNext(xml);
+        // Encode start position in XML.
+        var xy = toCopy.getRelativeToSurfaceXY();
+        xml.setAttribute('x', toCopy.RTL ? -xy.x : xy.x);
+        xml.setAttribute('oy', xy.y);
+        xml.setAttribute('sy', toCopy.workspace.scrollY);
+    }
+    Blockly.clipboardXml_ = xml;
+    Blockly.clipboardSource_ = toCopy.workspace;
+    Blockly.clipboardTypeCounts_ = toCopy.isComment ? null :
+        Blockly.utils.getBlockTypeCounts(toCopy, true);
+};
+
+/**
+ * Paste the provided block onto the workspace.
+ * @param {!Element} xmlBlock XML block element.
+ */
+Blockly.WorkspaceSvg.prototype.paste = function(xmlBlock) {
+    if (!this.rendered || xmlBlock.getElementsByTagName('block').length >=
+        this.remainingCapacity()) {
+        return;
+    }
+    if (this.currentGesture_) {
+        this.currentGesture_.cancel();  // Dragging while pasting?  No.
+    }
+    if (xmlBlock.tagName.toLowerCase() == 'comment') {
+        this.pasteWorkspaceComment_(xmlBlock);
+    } else {
+        if (xmlBlock.hasAttribute('oy') && xmlBlock.hasAttribute('sy')) {
+            xmlBlock.setAttribute('y', parseFloat(xmlBlock.getAttribute('oy')) + parseFloat(xmlBlock.getAttribute('sy')) - this.scrollY);
+        }
+        this.pasteBlock_(xmlBlock);
+    }
 };

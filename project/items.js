@@ -423,28 +423,28 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "tools",
 		"name": "解毒药水",
 		"text": "可以解除中毒状态",
-		"useItemEffect": "core.removeFlag('poison');",
+		"useItemEffect": "core.triggerDebuff('remove', 'poison');",
 		"canUseItemEffect": "core.hasFlag('poison');"
 	},
 	"weakWine": {
 		"cls": "tools",
 		"name": "解衰药水",
 		"text": "可以解除衰弱状态",
-		"useItemEffect": "core.removeFlag('weak');\nif (core.values.weakValue>=1) { // >=1：直接扣数值\n\tcore.status.hero.atk += core.values.weakValue;\n\tcore.status.hero.def += core.values.weakValue;\n}\nelse { // <1：扣比例\n\tcore.addBuff(\"atk\", core.values.weakValue);\n\tcore.addBuff(\"def\", core.values.weakValue);\n}",
+		"useItemEffect": "core.triggerDebuff('remove', 'weak');",
 		"canUseItemEffect": "core.hasFlag('weak');"
 	},
 	"curseWine": {
 		"cls": "tools",
 		"name": "解咒药水",
 		"text": "可以解除诅咒状态",
-		"useItemEffect": "core.removeFlag('curse');",
+		"useItemEffect": "core.triggerDebuff('remove', 'curse');",
 		"canUseItemEffect": "core.hasFlag('curse');"
 	},
 	"superWine": {
 		"cls": "tools",
 		"name": "万能药水",
 		"text": "可以解除所有不良状态",
-		"useItemEffect": "core.removeFlag('poison');\nif (core.hasFlag('weak')) {\n\tcore.removeFlag('weak');\n\tif (core.values.weakValue>=1) { // >=1：直接扣数值\n\t\tcore.status.hero.atk += core.values.weakValue;\n\t\tcore.status.hero.def += core.values.weakValue;\n\t}\n\telse { // <1：扣比例\n\t\tcore.addBuff(\"atk\", core.values.weakValue);\n\t\tcore.addBuff(\"def\", core.values.weakValue);\n\t}\n}\ncore.removeFlag('curse');",
+		"useItemEffect": "core.triggerDebuff('remove', ['poison', 'weak', 'curse']);",
 		"canUseItemEffect": "(function() {\n\treturn core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse');\n})();"
 	},
 	"hammer": {

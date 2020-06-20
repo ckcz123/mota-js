@@ -45,6 +45,30 @@ var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"_range": "typeof(thiseval)=='string' || thiseval==null",
 				"_data": "道具商店"
 			},
+			"enemyLevel": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string' || thiseval==null",
+				"_data": "手册显示怪物境界"
+			},
+			"dynamicHp": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string' || thiseval==null",
+				"_data": "动态血量变化"
+			},
+			"multiHeros": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string' || thiseval==null",
+				"_data": "多角色"
+			},
+			"flyHideFloors": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string' || thiseval==null",
+				"_data": "楼传可以跳过楼层"
+			},
 			"smoothCamera": {
 				"_leaf": true,
 				"_type": "textarea",

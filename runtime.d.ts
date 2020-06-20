@@ -530,7 +530,7 @@ declare class control {
      * @param type 新天气的类型，不填视为晴天
      * @param level 新天气（晴天除外）的级别，必须为不大于10的正整数，不填视为5
      */
-    setWeather(type?: 'rain' | 'snow' | 'fog', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
+    setWeather(type?: 'rain' | 'snow' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
     
     /**
      * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
@@ -2687,7 +2687,8 @@ type core = {
             type: any
             nodes: [],
             data: any
-            fog: any
+            fog: any,
+            cloud: any,
         },
         tips: {
             time: number

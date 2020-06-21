@@ -344,6 +344,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	var fg2Canvas = createCanvas('fg2', 63);
 	// 大地图适配
 	core.bigmap.canvas = ["bg2", "fg2", "bg", "event", "event2", "fg", "damage"];
+	core.initStatus.bg2maps = {};
+	core.initStatus.fg2maps = {};
 
 	if (main.mode == 'editor') {
 		/*插入编辑器的图层 不做此步新增图层无法在编辑器显示*/

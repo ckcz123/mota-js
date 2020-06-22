@@ -3345,8 +3345,8 @@ AssignOperator_List
     /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=']*/;  
 
 Weather_List
-    :   '无'|'雨'|'雪'|'雾'
-    /*Weather_List ['null','rain','snow','fog']*/;
+    :   '无'|'雨'|'雪'|'雾'|'云'
+    /*Weather_List ['null','rain','snow','fog','cloud']*/;
 
 B_0_List
     :   '不改变'|'不可通行'|'可以通行'

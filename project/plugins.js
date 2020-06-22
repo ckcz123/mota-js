@@ -317,12 +317,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 },
     "fiveLayers": function () {
-	// 是否启用五图层（增加背景2层和前景2层） 将__enableFiveLayers置为true即会启用；启用后请保存后刷新编辑器
+	// 是否启用五图层（增加背景2层和前景2层） 将__enable置为true即会启用；启用后请保存后刷新编辑器
 	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
 	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
 	// 插件作者：ad
-	var __enableFiveLayers = false;
-	if (!__enableFiveLayers) return;
+	var __enable = false;
+	if (!__enable) return;
 
 	// 创建新图层
 	function createCanvas(name, zIndex) {
@@ -344,6 +344,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	var fg2Canvas = createCanvas('fg2', 63);
 	// 大地图适配
 	core.bigmap.canvas = ["bg2", "fg2", "bg", "event", "event2", "fg", "damage"];
+	core.initStatus.bg2maps = {};
+	core.initStatus.fg2maps = {};
 
 	if (main.mode == 'editor') {
 		/*插入编辑器的图层 不做此步新增图层无法在编辑器显示*/
@@ -892,13 +894,355 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 },
+    "enemyLevel": function () {
+	// 此插件将提供怪物手册中的怪物境界显示
+	// 使用此插件需要先给每个怪物定义境界，方法如下：
+	// 点击怪物的【配置表格】，找到“【怪物】相关的表格配置”，然后在【名称】仿照增加境界定义：
+	/*
+	 "level": {
+	 	"_leaf": true,
+	 	"_type": "textarea",
+	 	"_string": true,
+	 	"_data": "境界"
+	 },
+	 */
+	// 然后保存刷新，可以看到怪物的属性定义中出现了【境界】。再开启本插件即可。
+
+	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
+	var __enable = false;
+	if (!__enable) return;
+
+	// 这里定义每个境界的显示颜色；可以写'red', '#RRGGBB' 或者[r,g,b,a]四元数组
+	var levelToColors = {
+		"萌新一阶": "red",
+		"萌新二阶": "#FF0000",
+		"萌新三阶": [255, 0, 0, 1],
+	};
+
+	// 复写 _drawBook_drawName
+	var originDrawBook = core.ui._drawBook_drawName;
+	core.ui._drawBook_drawName = function (index, enemy, top, left, width) {
+		// 如果没有境界，则直接调用原始代码绘制
+		if (!enemy.level) return originDrawBook.call(core.ui, index, enemy, top, left, width);
+		// 存在境界，则额外进行绘制
+		core.setTextAlign('ui', 'center');
+		if (enemy.specialText.length == 0) {
+			core.fillText('ui', enemy.name, left + width / 2,
+				top + 27, '#DDDDDD', this._buildFont(17, true));
+			core.fillText('ui', enemy.level, left + width / 2,
+				top + 51, core.arrayToRGBA(levelToColors[enemy.level] || '#DDDDDD'), this._buildFont(14, true));
+		} else {
+			core.fillText('ui', enemy.name, left + width / 2,
+				top + 20, '#DDDDDD', this._buildFont(17, true), width);
+			switch (enemy.specialText.length) {
+			case 1:
+				core.fillText('ui', enemy.specialText[0], left + width / 2,
+					top + 38, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'),
+					this._buildFont(14, true), width);
+				break;
+			case 2:
+				// Step 1: 计算字体
+				var text = enemy.specialText[0] + "  " + enemy.specialText[1];
+				core.setFontForMaxWidth('ui', text, width, this._buildFont(14, true));
+				// Step 2: 计算总宽度
+				var totalWidth = core.calWidth('ui', text);
+				var leftWidth = core.calWidth('ui', enemy.specialText[0]);
+				var rightWidth = core.calWidth('ui', enemy.specialText[1]);
+				// Step 3: 绘制
+				core.fillText('ui', enemy.specialText[0], left + (width + leftWidth - totalWidth) / 2,
+					top + 38, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'));
+				core.fillText('ui', enemy.specialText[1], left + (width + totalWidth - rightWidth) / 2,
+					top + 38, core.arrayToRGBA((enemy.specialColor || [])[1] || '#FF6A6A'));
+				break;
+			default:
+				core.fillText('ui', '多属性...', left + width / 2,
+					top + 38, '#FF6A6A', this._buildFont(14, true), width);
+			}
+			core.fillText('ui', enemy.level, left + width / 2,
+				top + 56, core.arrayToRGBA(levelToColors[enemy.level] || '#DDDDDD'), this._buildFont(14, true));
+		}
+	}
+
+	// 也可以复写其他的属性颜色如怪物攻防等，具体参见下面的例子的注释部分
+	core.ui._drawBook_drawRow1 = function (index, enemy, top, left, width, position) {
+		// 绘制第一行
+		core.setTextAlign('ui', 'left');
+		var b13 = this._buildFont(13, true),
+			f13 = this._buildFont(13, false);
+		var col1 = left,
+			col2 = left + width * 9 / 25,
+			col3 = left + width * 17 / 25;
+		core.fillText('ui', '生命', col1, position, '#DDDDDD', f13);
+		core.fillText('ui', core.formatBigNumber(enemy.hp || 0), col1 + 30, position, /*'red' */ null, b13);
+		core.fillText('ui', '攻击', col2, position, null, f13);
+		core.fillText('ui', core.formatBigNumber(enemy.atk || 0), col2 + 30, position, /* '#FF0000' */ null, b13);
+		core.fillText('ui', '防御', col3, position, null, f13);
+		core.fillText('ui', core.formatBigNumber(enemy.def || 0), col3 + 30, position, /* [255, 0, 0, 1] */ null, b13);
+	}
+
+
+},
+    "dynamicHp": function () {
+	// 此插件允许人物血量动态进行变化
+	// 原作：Fux2（老黄鸡）
+
+	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
+	var __enable = false;
+	if (!__enable) return;
+
+	var speed = 0.05; // 动态血量变化速度，越大越快。
+
+	var _currentHp = null;
+	var _lastStatus = null;
+	var _check = function () {
+		if (_lastStatus != core.status.hero) {
+			_lastStatus = core.status.hero;
+			_currentHp = core.status.hero.hp;
+		}
+	}
+
+	core.registerAnimationFrame('dynamicHp', true, function () {
+		_check();
+		if (core.status.hero.hp != _currentHp) {
+			var dis = (_currentHp - core.status.hero.hp) * speed;
+			if (Math.abs(dis) < 2) {
+				_currentHp = core.status.hero.hp;
+			} else {
+				_currentHp -= dis;
+			}
+			core.setStatusBarInnerHTML('hp', _currentHp);
+		}
+	});
+},
+    "multiHeros": function () {
+	// 多角色插件
+	// Step 1: 启用本插件
+	// Step 2: 定义每个新的角色各项初始数据（参见下方注释）
+	// Step 3: 在游戏中的任何地方都可以调用 `core.changeHero()` 进行切换；也可以 `core.changeHero(1)` 来切换到某个具体的角色上
+
+	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
+	var __enable = false;
+	if (!__enable) return;
+
+	// 在这里定义全部的新角色属性
+	// 请注意，在这里定义的内容不会多角色共用，在切换时会进行恢复。
+	// 你也可以自行新增或删除，比如不共用金币则可以加上"money"的初始化，不共用道具则可以加上"items"的初始化，
+	// 多角色共用hp的话则删除hp，等等。总之，不共用的属性都在这里进行定义就好。
+	var hero1 = {
+		"floorId": "MT0", // 该角色初始楼层ID；如果共用楼层可以注释此项
+		"image": "brave.png", // 角色的行走图名称；此项必填不然会报错
+		"name": "1号角色",
+		"lv": 1,
+		"hp": 10000, // 如果HP共用可注释此项
+		"atk": 1000,
+		"def": 1000,
+		"mdef": 0,
+		// "money": 0, // 如果要不共用金币则取消此项注释
+		// "exp": 0, // 如果要不共用经验则取消此项注释
+		"loc": { "x": 0, "y": 0, "direction": "up" }, // 该角色初始位置；如果共用位置可注释此项
+		"items": {
+			"tools": {}, // 如果共用消耗道具（含钥匙）则可注释此项
+			// "constants": {}, // 如果不共用永久道具（如手册）可取消注释此项
+			"equips": {}, // 如果共用在背包的装备可注释此项
+		},
+		"equipment": [], // 如果共用装备可注释此项；此项和上面的「共用在背包的装备」需要拥有相同状态，不然可能出现问题
+	};
+	// 也可以类似新增其他角色
+	// 新增的角色，各项属性共用与不共用的选择必须和上面完全相同，否则可能出现问题。
+	// var hero2 = { ...
+
+	var heroCount = 2; // 包含默认角色在内总共多少个角色，该值需手动修改。
+
+	this.initHeros = function () {
+		core.setFlag("hero1", core.clone(hero1)); // 将属性值存到变量中
+		// core.setFlag("hero2", core.clone(hero2)); // 更多的角色也存入变量中；每个定义的角色都需要新增一行
+
+		// 检测是否存在装备
+		if (hero1.equipment) {
+			if (!hero1.items || !hero1.items.equips) {
+				alert('多角色插件的equipment和道具中的equips必须拥有相同状态！');
+			}
+			// 存99号套装为全空
+			var saveEquips = core.getFlag("saveEquips", []);
+			saveEquips[99] = [];
+			core.setFlag("saveEquips", saveEquips);
+		} else {
+			if (hero1.items && hero1.items.equips) {
+				alert('多角色插件的equipment和道具中的equips必须拥有相同状态！');
+			}
+		}
+	}
+
+	// 在游戏开始注入initHeros
+	var _startGame_setHard = core.events._startGame_setHard;
+	core.events._startGame_setHard = function () {
+		_startGame_setHard.call(core.events);
+		core.initHeros();
+	}
+
+	// 切换角色
+	// 可以使用 core.changeHero() 来切换到下一个角色
+	// 也可以 core.changeHero(1) 来切换到某个角色（默认角色为0）
+	this.changeHero = function (toHeroId) {
+		var currHeroId = core.getFlag("heroId", 0); // 获得当前角色ID
+		if (toHeroId == null) {
+			toHeroId = (currHeroId + 1) % heroCount;
+		}
+		if (currHeroId == toHeroId) return;
+
+		var saveList = Object.keys(hero1);
+
+		// 保存当前内容
+		var toSave = {};
+		// 暂时干掉 drawTip 和 音效，避免切装时的提示
+		var _drawTip = core.ui.drawTip;
+		core.ui.drawTip = function () {};
+		var _playSound = core.control.playSound;
+		core.control.playSound = function () {}
+		// 优先判定装备
+		if (hero1.equipment) {
+			core.items.quickSaveEquip(100 + currHeroId);
+			core.items.quickLoadEquip(99);
+		}
+
+		saveList.forEach(function (name) {
+			if (name == 'floorId') toSave[name] = core.status.floorId; // 楼层单独设置
+			else if (name == 'items') {
+				toSave.items = core.clone(core.status.hero.items);
+				Object.keys(toSave.items).forEach(function (one) {
+					if (!hero1.items[one]) delete toSave.items[one];
+				});
+			} else toSave[name] = core.clone(core.status.hero[name]); // 使用core.clone()来创建新对象
+		});
+
+		core.setFlag("hero" + currHeroId, toSave); // 将当前角色信息进行保存
+		var data = core.getFlag("hero" + toHeroId); // 获得要切换的角色保存内容
+
+		// 设置角色的属性值
+		saveList.forEach(function (name) {
+			if (name == "floorId");
+			else if (name == "items") {
+				Object.keys(core.status.hero.items).forEach(function (one) {
+					if (data.items[one]) core.status.hero.items[one] = core.clone(data.items[one]);
+				});
+			} else {
+				core.status.hero[name] = core.clone(data[name]);
+			}
+		});
+		// 最后装上装备
+		if (hero1.equipment) {
+			core.items.quickLoadEquip(100 + toHeroId);
+		}
+
+		core.ui.drawTip = _drawTip;
+		core.control.playSound = _playSound;
+
+		// 插入事件：改变角色行走图并进行楼层切换
+		var toFloorId = data.floorId || core.status.floorId;
+		var toLoc = data.loc || core.status.hero.loc;
+		core.insertAction([
+			{ "type": "setHeroIcon", "name": data.image || "hero.png" }, // 改变行走图
+			// 同层则用changePos，不同层则用changeFloor；这是为了避免共用楼层造成触发eachArrive
+			toFloorId != core.status.floorId ? {
+				"type": "changeFloor",
+				"floorId": toFloorId,
+				"loc": [toLoc.x, toLoc.y],
+				"direction": toLoc.direction,
+				"time": 0 // 可以在这里设置切换时间
+			} : { "type": "changePos", "loc": [toLoc.x, toLoc.y], "direction": toLoc.direction }
+			// 你还可以在这里执行其他事件，比如增加或取消跟随效果
+		]);
+		core.setFlag("heroId", toHeroId); // 保存切换到的角色ID
+	}
+},
+    "flyHideFloors": function () {
+	// 此插件可以让用户在楼传页面手动隐藏某些楼层	
+	// 原作：一桶天下
+
+	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
+	var __enable = false;
+	if (!__enable) return;
+
+	var _drawFly = core.ui.drawFly;
+	core.ui.drawFly = function (page) {
+		_drawFly.call(core.ui, page);
+		// 绘制「显示本层」和「显示全部」
+		var __hideFloors__ = core.getFlag('__hideFloors__', {});
+		var __showAllFloor__ = core.getFlag('__showAllFloor__', false);
+		var floorId = core.floorIds[page];
+		core.fillText('ui', '显示该层', this.HPIXEL - 120, 60, __hideFloors__[floorId] ? '#FFFFFF' : 'yellow', this._buildFont(20, false));
+		core.fillText('ui', '显示全部', this.HPIXEL + 120, 60, !__showAllFloor__ ? '#FFFFFF' : 'yellow', this._buildFont(20, false));
+	}
+
+	var _clickFly = core.actions._clickFly;
+	core.actions._clickFly = function (x, y) {
+		_clickFly.call(core.actions, x, y);
+
+		var __hideFloors__ = core.getFlag('__hideFloors__', {})
+		var __showAllFloor__ = core.getFlag('__showAllFloor__', false)
+		var _floorId = core.floorIds[core.status.event.data]
+
+		if (y == 1 && x >= this.HSIZE - 5 && x <= this.HSIZE - 2) {
+			__hideFloors__[_floorId] = !__hideFloors__[_floorId]
+			core.setFlag('__hideFloors__', __hideFloors__)
+			core.ui.drawFly(this._getNextFlyFloor(0))
+		}
+		if (y == 1 && x >= this.HSIZE + 2 && x <= this.HSIZE + 5) {
+			core.setFlag('__showAllFloor__', !__showAllFloor__)
+			core.ui.drawFly(this._getNextFlyFloor(0))
+		}
+	}
+
+	var _keyUpFly = core.actions._keyUpFly;
+	core.actions._keyUpFly = function (keycode) {
+		_keyUpFly.call(core.actions, keycode);
+
+		var __hideFloors__ = core.getFlag('__hideFloors__', {})
+		var __showAllFloor__ = core.getFlag('__showAllFloor__', false)
+		var _floorId = core.floorIds[core.status.event.data]
+
+		// Q
+		if (keycode == 81) {
+			__hideFloors__[_floorId] = !__hideFloors__[_floorId]
+			core.setFlag('__hideFloors__', __hideFloors__)
+			core.ui.drawFly(this._getNextFlyFloor(0));
+		} else if (keycode == 69) {
+			// E			
+			core.setFlag('__showAllFloor__', !__showAllFloor__)
+			core.ui.drawFly(this._getNextFlyFloor(0))
+		}
+	}
+
+	core.actions._getNextFlyFloor = function (delta, index) {
+		var __hideFloors__ = core.getFlag('__hideFloors__', {})
+		var __showAllFloor__ = core.getFlag('__showAllFloor__', false)
+		if (index == null) index = core.status.event.data;
+		if (delta == 0) return index;
+		var sign = Math.sign(delta);
+		delta = Math.abs(delta);
+		var ans = index;
+		while (true) {
+			index += sign;
+			if (index < 0 || index >= core.floorIds.length) break;
+			var floorId = core.floorIds[index];
+			if (core.status.maps[floorId].canFlyTo && core.hasVisitedFloor(floorId) && (__showAllFloor__ || !__hideFloors__[floorId])) {
+				delta--;
+				ans = index;
+			}
+			if (delta == 0) break;
+		}
+		return ans;
+	}
+
+
+},
     "smoothCamera": function () {
 	// 此插件开启后，大地图的瞬间移动将开启平滑镜头移动，避免突兀感
 	// 插件作者：老黄鸡
 
 	// 是否启用本插件，默认不启用
-	this.__enableSmoothCamera = false;
-	if (!this.__enableSmoothCamera) return;
+	var __enable = false;
+	if (!__enable) return;
 
 	this.Camera = function () {
 

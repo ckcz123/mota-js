@@ -258,35 +258,50 @@ control.prototype._animationFrame_weather_snow = function () {
     ctx.fill();
 }
 
-control.prototype._animationFrame_weather_fog = function () {
-    var ctx = core.dymCanvas.weather, ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
-    core.clearMap('weather');
-    if (core.animateFrame.weather.fog) {
-        var w = core.__PIXELS__, h = core.__PIXELS__;
-        core.setAlpha('weather', 0.5);
-        core.animateFrame.weather.nodes.forEach(function (p) {
-            core.drawImage(ctx, core.animateFrame.weather.fog, p.x - ox, p.y - oy, w, h);
-            p.x += p.xs;
-            p.y += p.ys;
-            if (p.x > core.bigmap.width*32 - w/2) {
-                p.x = core.bigmap.width*32 - w/2 - 1;
-                p.xs = -p.xs;
-            }
-            if (p.x < -w/2) {
-                p.x = -w/2+1;
-                p.xs = -p.xs;
-            }
-            if (p.y > core.bigmap.height*32 - h/2) {
-                p.y = core.bigmap.height*32 - h/2 - 1;
-                p.ys = -p.ys;
-            }
-            if (p.y < -h/2) {
-                p.y = -h/2+1;
-                p.ys = -p.ys;
-            }
-        });
-        core.setAlpha('weather',1);
+control.prototype.__animateFrame_weather_image = function (image) {
+    if (!image) return;
+    var node = core.animateFrame.weather.nodes[0];
+    core.setAlpha('weather', node.level / 500);
+    var wind = 1.5;
+    var width = image.width, height = image.height;
+    node.x += node.dx * wind;
+    node.y += (2 * node.dy - 1) * wind;
+    if (node.x + 3 * width <= core.__PIXELS__) {
+        node.x += 4 * width;
+        while (node.x > 0) node.x -= width;
     }
+    node.dy += node.delta;
+    if (node.dy >= 1) {
+        node.delta = -0.001;
+    } else if (node.dy <= 0) {
+        node.delta = 0.001;
+    }
+    if (node.y + 3 * height <= core.__PIXELS__) {
+        node.y += 4 * height;
+        while (node.y > 0) node.y -= height;
+    }
+    else if (node.y >= 0) {
+        node.y -= height;
+    }
+    for (var i = 0; i < 3; ++i) {
+        for (var j = 0; j < 3; ++j) {
+            if (node.x + (i + 1) * width <= 0 || node.x + i * width >= core.__PIXELS__
+                || node.y + (j + 1) * height <= 0 || node.y + j * height >= core.__PIXELS__)
+                continue;
+            core.drawImage('weather', image, node.x + i * width, node.y + j * height);
+        }
+    }
+    core.setAlpha('weather',1);
+}
+
+control.prototype._animationFrame_weather_fog = function () {
+    core.clearMap('weather');
+    this.__animateFrame_weather_image(core.animateFrame.weather.fog);
+}
+
+control.prototype._animationFrame_weather_cloud = function () {
+    core.clearMap('weather');
+    this.__animateFrame_weather_image(core.animateFrame.weather.cloud);
 }
 
 control.prototype._animateFrame_tip = function (timestamp) {
@@ -2279,14 +2294,26 @@ control.prototype._setWeather_createNodes = function (type, level) {
             break;
         case 'fog':
             if (core.animateFrame.weather.fog) {
-                for (var a=0;a<level/10;a++) {
-                    core.animateFrame.weather.nodes.push({
-                        'x': Math.random()*core.bigmap.width*32 - 208,
-                        'y': Math.random()*core.bigmap.height*32 - 208,
-                        'xs': Math.random() * 4 - 2,
-                        'ys': Math.random() * 4 - 2
-                    })
-                }
+                core.animateFrame.weather.nodes = [{
+                    'level': level,
+                    'x': 0,
+                    'y': -core.__PIXELS__ / 2,
+                    'dx': -Math.random() * 1.5,
+                    'dy': Math.random(),
+                    'delta': 0.001,
+                }];
+            }
+            break;
+        case 'cloud':
+            if (core.animateFrame.weather.cloud) {
+                core.animateFrame.weather.nodes = [{
+                    'level': level,
+                    'x': 0,
+                    'y': -core.__PIXELS__ / 2,
+                    'dx': -Math.random() * 1.5,
+                    'dy': Math.random(),
+                    'delta': 0.001,
+                }];
             }
             break;
     }

@@ -1581,7 +1581,7 @@ events.prototype._action_screenFlash = function (data, x, y, prefix) {
 
 events.prototype._action_setWeather = function (data, x, y, prefix) {
     core.setWeather(data.name, data.level);
-    if ((data.name == 'rain' || data.name == 'snow' || data.name == 'fog') && data.keep)
+    if (data.keep && ['rain', 'snow', 'fog', 'cloud'].indexOf(data.name) >= 0)
         core.setFlag('__weather__', [data.name, data.level]);
     else core.removeFlag('__weather__');
     core.doAction();

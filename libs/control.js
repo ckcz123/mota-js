@@ -2080,6 +2080,17 @@ control.prototype.getNakedStatus = function (name) {
     return value;
 }
 
+////// 获得某个属性的名字 //////
+control.prototype.getStatusLabel = function (name) {
+    if (this.controldata.getStatusLabel) {
+        return this.controldata.getStatusLabel(name) || name;
+    }
+    return {
+        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
+        atk: "攻击", def: "防御", mdef: "护盾", money: "金币", exp: "经验", point: "加点", steps: "步数"
+    }[name] || name;
+}
+
 ////// 设置某个属性的增幅值 //////
 control.prototype.setBuff = function (name, value) {
     // 仅保留三位有效buff值

@@ -1992,11 +1992,11 @@ ui.prototype._drawBook_drawRow1 = function (index, enemy, top, left, width, posi
     core.setTextAlign('ui', 'left');
     var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
-    core.fillText('ui', '生命', col1, position, '#DDDDDD', f13);
+    core.fillText('ui', core.getStatusLabel('hp'), col1, position, '#DDDDDD', f13);
     core.fillText('ui', core.formatBigNumber(enemy.hp||0), col1 + 30, position, null, b13);
-    core.fillText('ui', '攻击', col2, position, null, f13);
+    core.fillText('ui', core.getStatusLabel('atk'), col2, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.atk||0), col2 + 30, position, null, b13);
-    core.fillText('ui', '防御', col3, position, null, f13);
+    core.fillText('ui', core.getStatusLabel('def'), col3, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.def||0), col3 + 30, position, null, b13);
 }
 
@@ -2007,9 +2007,9 @@ ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, posi
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
     // 获得第二行绘制的内容
     var second_line = [];
-    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
-    if (core.flags.enableAddPoint) second_line.push(["加点", core.formatBigNumber(enemy.point || 0)]);
-    if (core.flags.statusBarItems.indexOf('enableExp')>=0) second_line.push(["经验", core.formatBigNumber(enemy.exp || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push([core.getStatusLabel('money'), core.formatBigNumber(enemy.money || 0)]);
+    if (core.flags.enableAddPoint) second_line.push([core.getStatusLabel('point'), core.formatBigNumber(enemy.point || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableExp')>=0) second_line.push([core.getStatusLabel('exp'), core.formatBigNumber(enemy.exp || 0)]);
 
     var damage_offset = col1 + (this.PIXEL - col1) / 2 - 12;
     // 第一列
@@ -2600,7 +2600,7 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         var newValue = Math.floor((core.getStatus(name) + (compare.value[name] || 0))
             * (core.getBuff(name) * 100 + (compare.percentage[name] || 0)) / 100);
         if (nowValue == newValue) continue;
-        var text = this._drawEquipbox_getStatusName(name);
+        var text = core.getStatusLabel(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
         var color = newValue>nowValue?'#00FF00':'#FF0000';
         nowValue = core.formatBigNumber(nowValue);
@@ -2609,14 +2609,6 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         this._drawEquipbox_drawStatusChanged_draw(newValue, color, obj);
         obj.drawOffset += 8;
     }
-}
-
-ui.prototype._drawEquipbox_getStatusName = function (name) {
-    var map = {
-        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
-        atk: "攻击", def: "防御", mdef: "护盾", money: "金币", exp: "经验", exp: "经验", steps: "步数"
-    };
-    return map[name] || name;
 }
 
 ui.prototype._drawEquipbox_drawStatusChanged_draw = function (text, color, obj) {
@@ -2978,9 +2970,9 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
     }
     if (id.indexOf('sword')==0 || id.indexOf('shield')==0 || obj.cls[id]=='equips') {
         var t = "";
-        if (atk > 0) t += atk + "攻";
-        if (def > 0) t += def + "防";
-        if (mdef > 0) t += mdef + "护盾";
+        if (atk > 0) t += atk + core.getStatusLabel('atk');
+        if (def > 0) t += def + core.getStatusLabel('def');
+        if (mdef > 0) t += mdef + core.getStatusLabel('mdef');
         if (t != "") obj.ext[id] = t;
     }
     this._drawStatistics_add(floorId, obj, 'count', id, 1);

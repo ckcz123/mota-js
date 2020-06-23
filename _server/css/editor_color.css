@@ -181,24 +181,33 @@ textarea[disabled] {
 /** 表格编辑的按钮颜色 */
 .editorTableEditBtn {
     background-color: #ddf8ff;
+    border-color: #bbc9cc;
+    color: #445560;
 }
 .editorTableFoldBtn {
     background-color: #fff4bb;
+    border-color: #d4ccbb;
+    color: #605544;
 }
-
 /** 保存地图的按钮颜色 */
 #saveFloor.highlight {
     background-color: #ffd700;
+    border-color: #aa9944;
+    color: #430;
 }
 
 /** 解析按钮颜色 */
 #blocklyParse.highlight {
     background-color: #ffd700;
+    border-color: #aa9944;
+    color: #430;
 }
 
 /** 大地图按钮颜色 */
 #bigmapBtn.highlight {
     background-color: #ffd700;
+    border-color: #aa9944;
+    color: #430;
 }
 
 .popCheckboxItem {

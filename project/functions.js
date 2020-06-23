@@ -993,6 +993,27 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (callback) callback();
 	});
 },
+        "getStatusLabel": function (name) {
+	// 返回某个状态英文名的对应中文标签，如atk -> 攻击，def -> 防御等。
+	// 请注意此项仅影响 libs/ 下的内容（如绘制怪物手册、数据统计等）
+	// 自行定义的（比如获得道具效果）中用到的“攻击+3”等需要自己去对应地方修改
+
+	return {
+		name: "名称",
+		lv: "等级",
+		hpmax: "生命上限",
+		hp: "生命",
+		manamax: "魔力上限",
+		mana: "魔力",
+		atk: "攻击",
+		def: "防御",
+		mdef: "护盾",
+		money: "金币",
+		exp: "经验",
+		point: "加点",
+		steps: "步数",
+	} [name] || name;
+},
         "triggerDebuff": function (action, type) {
 	// 毒衰咒效果的获得与解除
 	// action：获得还是解除；'get'表示获得，'remove'表示解除

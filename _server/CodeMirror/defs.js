@@ -2334,6 +2334,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取", 
           "!type": "fn(status?: ?, name?: string)"
         }, 
+        "getStatusLabel": {
+          "!doc": "获得某个状态的名字，如atk->攻击，def->防御等",
+          "!type": "fn(name: string) -> string"
+        },
         "removeSave": {
           "!doc": "删除某个存档", 
           "!type": "fn(index?: number, callback?: fn())"

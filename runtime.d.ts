@@ -430,6 +430,9 @@ declare class control {
      * @param name 属性的英文名，请注意只能用于数值类属性哦，否则乘法会得到NaN
      */
     getRealStatus(name: string): any
+
+    /** 获得某个状态的名字 */
+    getStatusLabel(name: string): string
     
     /**
      * 设置主角某个属性的百分比修正倍率，初始值为1，

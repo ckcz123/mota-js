@@ -2564,6 +2564,9 @@ declare class utils {
      */
     http(type: 'GET' | 'POST', url: string, formData: FormData, success: () => void, error: () => void): void
 
+    /** 获得浏览器唯一的guid */
+    getGuid(): string
+
     /** 解压缩一个数据 */
     decompress(value: any): any
 

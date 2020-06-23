@@ -1762,6 +1762,10 @@ control.prototype._doSL_load_afterGet = function (id, data) {
         core.myconfirm("存档版本不匹配！\n你想回放此存档的录像吗？\n可以随时停止录像播放以继续游戏。", _replay);
         return;
     }
+    if (data.hero.flags.__events__ && data.guid != core.getGuid()) {
+        core.myconfirm("此存档可能存在风险，你想要播放录像么？", _replay);
+        return;
+    }
     core.ui.closePanel();
     core.loadData(data, function() {
         core.removeFlag('__fromLoad__');
@@ -1776,7 +1780,9 @@ control.prototype._doSL_load_afterGet = function (id, data) {
 control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (!data) return core.drawTip("无效的存档");
     if (data.version != core.firstData.version) return core.drawTip("存档版本不匹配");
-    if (data.hard != core.status.hard) core.drawTip("游戏难度不匹配！");
+    if (data.hard != core.status.hard) return core.drawTip("游戏难度不匹配！");
+    if (data.hero.flags.__events__ && data.guid != core.getGuid())
+        return core.drawTip("此存档可能存在风险，无法读档");
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
     if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
         return core.drawTip("无法从此存档回放录像");
@@ -1832,6 +1838,7 @@ control.prototype._syncSave_http = function (type, saves) {
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);
     formData.append('data', JSON.stringify(saves));
+    formData.append('shorten', '1');
 
     core.http("POST", "/games/sync.php", formData, function (data) {
         var response = JSON.parse(data);
@@ -1852,12 +1859,16 @@ control.prototype._syncSave_http = function (type, saves) {
 control.prototype.syncLoad = function () {
     core.myprompt("请输入存档编号+密码", null, function (idpassword) {
         if (!idpassword) return core.ui.drawSyncSave();
-        if (!/^\d{6}\w{4}$/.test(idpassword)) {
-            core.drawText("不合法的存档编号+密码；应当为6位数字+4位数字字母的组合，如\r[yellow]123456abcd\r。");
+        if (!/^\d{6}\w{4}$/.test(idpassword) && !/^\d{4}\w{3}$/.test(idpassword)) {
+            core.drawText("不合法的存档编号+密码！");
             return;
         }
         core.ui.drawWaiting("正在同步，请稍候...");
-        core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
+        if (idpassword.length == 7) {
+            core.control._syncLoad_http(idpassword.substring(0, 4), idpassword.substring(3));
+        } else {
+            core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
+        }
     });
 }
 

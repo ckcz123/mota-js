@@ -231,7 +231,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var data = core.status.event.data.current;
 		var choices = data.choices;
 		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
-		if (keycode == 88) { // X
+		if (keycode == 88 || keycode == 27) { // X, ESC
 			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
 			return true;
 		}

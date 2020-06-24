@@ -2048,11 +2048,11 @@ ui.prototype._drawBook_drawDamage = function (index, enemy, offset, position) {
     var damage = enemy.damage, color = '#FFFF00';
     if (damage == null) {
         damage = '无法战斗';
-        color = '#FF0000';
+        color = '#FF2222';
     }
     else {
-        if (damage >= core.status.hero.hp) color = '#FF0000';
-        if (damage <= 0) color = '#00FF00';
+        if (damage >= core.status.hero.hp) color = '#FF2222';
+        if (damage <= 0) color = '#11FF11';
         damage = core.formatBigNumber(damage);
         if (core.enemys.hasSpecial(enemy, 19)) damage += "+";
         if (core.enemys.hasSpecial(enemy, 21)) damage += "-";

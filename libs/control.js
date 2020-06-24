@@ -1142,11 +1142,11 @@ control.prototype._updateDamage_extraDamage = function (floorId, ctx, refresh) {
                 var damage = core.status.checkBlock.damage[x+","+y]||0;
                 if (damage>0) { // 该点伤害
                     damage = core.formatBigNumber(damage, true);
-                    core.fillBoldText(ctx, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
+                    core.fillBoldText(ctx, damage, 32*x+16, 32*(y+1)-14, '#ffaa33');
                 }
                 else { // 检查捕捉
                     if (core.status.checkBlock.ambush[x+","+y]) {
-                        core.fillBoldText(ctx, '!', 32*x+16, 32*(y+1)-14, '#FF7F00');
+                        core.fillBoldText(ctx, '!', 32*x+16, 32*(y+1)-14, '#ffaa33');
                     }
                 }
             }

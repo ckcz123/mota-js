@@ -2840,7 +2840,7 @@ ui.prototype.drawKeyBoard = function () {
     if (isWindowSkin)
         this.drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
     else
-        core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, "#FFD700", 2);
+        core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
 }
 
 ////// 绘制状态栏 /////

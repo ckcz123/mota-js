@@ -1055,57 +1055,16 @@ utils.prototype.hideWithAnimate = function (obj, speed, callback) {
     }, speed);
 }
 
-utils.prototype._encodeCanvas = function (ctx) {
-    var list = [];
-    var width = ctx.canvas.width, height = ctx.canvas.height;
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.msImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-
-    var imgData = ctx.getImageData(0, 0, width, height);
-    for (var i = 0; i < imgData.data.length; i += 4) {
-        list.push(Math.sign(imgData.data[i + 3]));
-    }
-    // compress 01 to array
-    var prev = 0, cnt = 0, arr = [];
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] != prev) {
-            arr.push(cnt);
-            prev = list[i];
-            cnt = 0;
-        }
-        cnt++;
-    }
-    arr.push(cnt);
-    return arr;
-}
-
-////// 解析arr数组，并绘制到tempCanvas上 //////
-utils.prototype._decodeCanvas = function (arr, width, height) {
-    // 清空tempCanvas
-    var tempCanvas = core.bigmap.tempCanvas;
-    tempCanvas.canvas.width = width;
-    tempCanvas.canvas.height = height;
-    tempCanvas.clearRect(0, 0, width, height);
-
-    if (!arr) return null;
-    // to byte array
-    var curr = 0, list = [];
-    arr.forEach(function (x) {
-        for (var i = 0; i < x; i++) list.push(curr);
-        curr = 1 - curr;
-    })
-
-    var imgData = tempCanvas.getImageData(0, 0, width, height);
-    for (var i = 0; i < imgData.data.length; i += 4) {
-        var index = i / 4;
-        if (list[index]) {
-            imgData.data[i] = 255;
-            imgData.data[i + 3] = 255;
-        }
-    }
-    tempCanvas.putImageData(imgData, 0, 0);
+////// 生成浏览器唯一的 guid //////
+utils.prototype.getGuid = function () {
+    var guid = localStorage.getItem('guid');
+    if (guid != null) return guid;
+    guid = 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+    localStorage.setItem('guid', guid);
+    return guid;
 }
 
 utils.prototype.same = function (a, b) {

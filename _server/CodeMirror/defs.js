@@ -2334,6 +2334,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取", 
           "!type": "fn(status?: ?, name?: string)"
         }, 
+        "getStatusLabel": {
+          "!doc": "获得某个状态的名字，如atk->攻击，def->防御等",
+          "!type": "fn(name: string) -> string"
+        },
         "removeSave": {
           "!doc": "删除某个存档", 
           "!type": "fn(index?: number, callback?: fn())"
@@ -2806,6 +2810,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "发送一个HTTP请求 [异步]<br/>type: 请求类型，只能为GET或POST<br/>url: 目标地址<br/>formData: 如果是POST请求则为表单数据<br/>success: 成功后的回调<br/>error: 失败后的回调", 
           "!type": "fn(type: string, url: string, formData: ?, success?: fn(data: string), error?: fn(message: string), mimeType?: string, responseType?: string, onprogress?: fn(loaded: number, total: number))"
         }, 
+        "getGuid": {
+          "!doc": "获得或生成浏览器唯一的guid",
+          "!type": "fn() -> string"
+        },
         "getLocalStorage": {
           "!doc": "获得本地存储", 
           "!type": "fn(key: string, defaultValue?: ?)"

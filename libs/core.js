@@ -199,6 +199,7 @@ function core() {
             "borderColor": main.styles.borderColor || [204,204,204,1],
             "statusBarColor": main.styles.statusBarColor || [255,255,255,1],
             "floorChangingStyle": main.styles.floorChangingStyle || "background-color: black; color: white",
+            "selectColor": main.styles.selectColor || [255,215,0,1],
             "font": main.styles.font || "Verdana"
         },
         'curtainColor': null,

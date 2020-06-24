@@ -2052,7 +2052,7 @@ ui.prototype._drawBook_drawDamage = function (index, enemy, offset, position) {
     }
     else {
         if (damage >= core.status.hero.hp) color = '#FF2222';
-        else if (damage >= core.status.hero.hp * 2 / 3) color = '#FFAA33';
+        else if (damage >= core.status.hero.hp * 2 / 3) color = '#FF9933';
         else if (damage <= 0) color = '#11FF11';
         damage = core.formatBigNumber(damage);
         if (core.enemys.hasSpecial(enemy, 19)) damage += "+";

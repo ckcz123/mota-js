@@ -1654,7 +1654,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
                 this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
         else
             core.strokeRoundRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
-                len+10, 28, 6, "#FFD700", 2);
+                len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
@@ -1693,7 +1693,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         if (isWindowSkin)
             this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
         else
-            core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, "#FFD700", 2);
+            core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
@@ -1848,7 +1848,7 @@ ui.prototype.drawCursor = function () {
     core.clearUI();
     var width = 4;
     core.strokeRect('ui', 32*automaticRoute.cursorX+width/2, 32*automaticRoute.cursorY+width/2,
-        32-width, 32-width, '#FFD700', width);
+        32-width, 32-width, core.status.globalAttribute.selectColor, width);
 
 }
 
@@ -1916,7 +1916,7 @@ ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, sele
     this._drawBook_drawName(index, enemy, top, left, name_width);
     this._drawBook_drawContent(index, enemy, top, left + name_width);
     if (selected)
-        core.strokeRoundRect('ui', 10, top + 1, this.PIXEL - 10 * 2, pageinfo.per_height, 10, '#FFD700');
+        core.strokeRoundRect('ui', 10, top + 1, this.PIXEL - 10 * 2, pageinfo.per_height, 10, core.status.globalAttribute.selectColor);
 }
 
 ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
@@ -2201,7 +2201,7 @@ ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts)
 ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
     // 名称
     core.setTextAlign('data', 'left');
-    core.fillText('data', enemy.name, pos.content_left, pos.top + 30, '#FFD700', this._buildFont(22, true));
+    core.fillText('data', enemy.name, pos.content_left, pos.top + 30, core.status.globalAttribute.selectColor, this._buildFont(22, true));
     var content_top = pos.top + 44;
 
     this.drawTextContent('data', content, {left: pos.content_left, top: content_top, maxWidth: pos.validWidth,
@@ -2296,7 +2296,7 @@ ui.prototype._drawMaps_drawHint = function () {
         core.strokeRect('ui', left*32+2, top*32+2, width*32-4, height*32-4, fillStyle, lineWidth);
     }
     var per = this.HSIZE - 4;
-    stroke(per, 0, 9, per, '#FFD700', 4); // up
+    stroke(per, 0, 9, per, core.status.globalAttribute.selectColor, 4); // up
     stroke(0, per, per, 9); // left
     stroke(per, this.SIZE - per, 9, per); // down
     stroke(this.SIZE - per, per, per, 9); // right
@@ -2307,7 +2307,7 @@ ui.prototype._drawMaps_drawHint = function () {
     stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
 
     core.setTextBaseline('ui', 'middle');
-    core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, '#FFD700', '20px Arial');
+    core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, core.status.globalAttribute.selectColor, '20px Arial');
     core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
     core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
     core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
@@ -2440,7 +2440,7 @@ ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     core.setTextAlign('ui', 'left');
     if (!info.selectId) return;
     var item=core.material.items[info.selectId];
-    core.fillText('ui', item.name, 10, 32, '#FFD700', this._buildFont(20, true))
+    core.fillText('ui', item.name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     var text = item.text||"该道具暂无描述。";
     try {
         // 检查能否eval
@@ -2474,7 +2474,7 @@ ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawC
         if (drawCount)
             core.fillText('ui', core.itemCount(item), 64 * (i % this.HSIZE) + 56, yoffset + 33, '#FFFFFF', this._buildFont(14, true));
         if (info.selectId == item)
-            core.strokeRoundRect('ui', 64 * (i % this.HSIZE) + 17, yoffset - 4, 40, 40, 6, '#FFD700');
+            core.strokeRoundRect('ui', 64 * (i % this.HSIZE) + 17, yoffset - 4, 40, 40, 6, core.status.globalAttribute.selectColor);
     }
 }
 
@@ -2549,7 +2549,7 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
         equipType = core.items.getEquipTypeByName(equipType);
     }
     else equipString = info.allEquips[equipType] || "未知部位";
-    core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, '#FFD700', this._buildFont(20, true))
+    core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     // --- 描述
     var text = equip.text || "该装备暂无描述。";
     try {
@@ -2636,7 +2636,7 @@ ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
             core.drawImage('ui', core.material.images.items, 0, 32 * icon, 32, 32, offset_image, y, 32, 32);
         }
         core.fillText('ui', info.allEquips[i] || "未知", offset_text, y + 27, '#FFFFFF', this._buildFont(16, true))
-        core.strokeRoundRect('ui', offset_image - 4, y - 4, 40, 40, 6, info.index==i?'#FFD700':"#FFFFFF");
+        core.strokeRoundRect('ui', offset_image - 4, y - 4, 40, 40, 6, info.index==i?core.status.globalAttribute.selectColor:"#FFFFFF");
     }
 }
 
@@ -2722,11 +2722,12 @@ ui.prototype._drawSLPanel_loadSave = function(page, callback) {
 
 // 在以x为中心轴 y为顶坐标 的位置绘制一条宽为size的记录 cho表示是否被选中 选中会加粗 highlight表示高亮标题 ✐
 ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, highLight){
-    var strokeColor = '#FFD700';
+    var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
+    var strokeColor = globalAttribute.selectColor;
     if (core.status.event.selection) strokeColor = '#FF6A6A';
     if (!data || !data.floorId) highLight = false;
 
-    core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17, true));
+    core.fillText('ui', title, x, y, highLight?globalAttribute.selectColor:'#FFFFFF', this._buildFont(17, true));
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
         core.setTextAlign('ui', "center");
@@ -2760,7 +2761,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
-        core.fillText('ui', v, x, y+30+size, '#FFD700');
+        core.fillText('ui', v, x, y+30+size, globalAttribute.selectColor);
         core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
     }
     else {

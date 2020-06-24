@@ -42,6 +42,11 @@ button {
     border: 1px solid #ccc;
 }
 
+/** 素材区背景 */
+#iconLib {
+    background-color: #242424;
+}
+
 /** 选中素材区时的方框 */
 #dataSelection, .appendSelection, #selectPointBox {
     background-color: rgba(255, 255, 255, 0.0);

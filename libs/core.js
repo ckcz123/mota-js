@@ -228,7 +228,7 @@ core.prototype.init = function (coreData, callback) {
     this._init_flags();
     this._init_platform();
     this._init_others();
-    this._initPlugins();
+    this._init_plugins();
 
     // 初始化画布
     for (var name in core.canvas) {
@@ -410,7 +410,7 @@ core.prototype._afterLoadResources = function (callback) {
     if (callback) callback();
 }
 
-core.prototype._initPlugins = function () {
+core.prototype._init_plugins = function () {
     core.plugin = new function () {};
 
     for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {

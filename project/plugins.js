@@ -1236,6 +1236,144 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 
 },
+    "itemCategory": function () {
+	// 物品分类插件。此插件允许你对消耗道具和永久道具进行分类，比如标记「宝物类」「剧情道具」「药品」等等。
+	// 使用方法：
+	// 1. 启用本插件
+	// 2. 在下方数组中定义全部的物品分类类型
+	// 3. 点击道具的【配置表格】，找到“【道具】相关的表格配置”，然后在【道具描述】之后仿照增加道具的分类：
+	/*
+	 "category": {
+	 	"_leaf": true,
+	 	"_type": "textarea",
+	 	"_string": true,
+	 	"_data": "道具分类"
+	 },
+	 */
+	// （你也可以选择使用下拉框的方式定义每个道具的分类，写法参见上面的cls）
+	// 然后刷新编辑器，就可以对每个物品进行分类了
+
+	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
+	var __enable = false;
+	if (!__enable) return;
+
+	// 在这里定义所有的道具分类类型，一行一个
+	var categories = [
+		"宝物类",
+		"辅助类",
+		"技能类",
+		"剧情道具",
+		"增益道具",
+	];
+	// 当前选中的道具类别
+	var currentCategory = null;
+
+	// 重写 core.ui.drawToolbox 以绘制分类类别
+	var _drawToolbox = core.ui.drawToolbox;
+	core.ui.drawToolbox = function (index) {
+		_drawToolbox.call(this, index);
+		core.setTextAlign('ui', 'left');
+		core.fillText('ui', '类别[E]：' + (currentCategory || "全部"), 15, this.PIXEL - 13);
+	}
+
+	// 获得所有应该在道具栏显示的某个类型道具
+	core.items.getDisplayItemsInToolbox = function (cls) {
+		// 检查类别
+		return Object.keys(core.status.hero.items[cls])
+			.filter(function (id) {
+				return !core.material.items[id].hideInToolbox &&
+					(currentCategory == null || core.material.items[id].category == currentCategory);
+			}).sort();
+	}
+
+	// 注入道具栏的点击事件（点击类别）
+	var _clickToolbox = core.actions._clickToolbox;
+	core.actions._clickToolbox = function (x, y) {
+		if (x >= 0 && x <= this.HSIZE - 4 && y == this.LAST) {
+			drawToolboxCategory();
+			return;
+		}
+		return _clickToolbox.call(core.actions, x, y);
+	}
+
+	// 注入道具栏的按键事件（E键）
+	var _keyUpToolbox = core.actions._keyUpToolbox;
+	core.actions._keyUpToolbox = function (keyCode) {
+		if (keyCode == 69) {
+			// 按E键则打开分类类别选择
+			drawToolboxCategory();
+			return;
+		}
+		return _keyUpToolbox.call(core.actions, keyCode);
+	}
+
+	// ------ 以下为选择道具分类的相关代码 ------ //
+
+	// 关闭窗口时清除分类选择项
+	var _closePanel = core.ui.closePanel;
+	core.ui.closePanel = function () {
+		currentCategory = null;
+		_closePanel.call(core.ui);
+	}
+
+	// 弹出菜单以选择具体哪个分类
+	// 直接使用 core.drawChoices 进行绘制
+	var drawToolboxCategory = function () {
+		if (core.status.event.id != 'toolbox') return;
+		var selection = categories.indexOf(currentCategory) + 1;
+		core.ui.closePanel();
+		core.status.event.id = 'toolbox-category';
+		core.status.event.selection = selection;
+		core.lockControl();
+		// 给第一项插入「全部」
+		core.drawChoices('请选择道具类别', ["全部"].concat(categories));
+	}
+
+	// 选择某一项
+	var _selectCategory = function (index) {
+		core.ui.closePanel();
+		if (index <= 0 || index > categories.length) currentCategory = null;
+		else currentCategory = categories[index - 1];
+		core.openToolbox();
+	}
+
+	var _clickToolBoxCategory = function (x, y) {
+		if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
+
+		if (x < core.actions.CHOICES_LEFT || x > core.actions.CHOICES_RIGHT) return false;
+		var choices = core.status.event.ui.choices;
+		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		if (y >= topIndex && y < topIndex + choices.length) {
+			_selectCategory(y - topIndex);
+		}
+		return true;
+	}
+
+	// 注入点击事件
+	core.registerAction('onclick', 'toolbox-category', _clickToolBoxCategory, 100);
+
+	// 注入光标跟随事件
+	core.registerAction('onmove', 'toolbox-category', function (x, y) {
+		if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
+		core.actions._onMoveChoices(x, y);
+		return true;
+	}, 100);
+
+	// 注入键盘光标事件
+	core.registerAction('keyDown', 'toolbox-category', function (keyCode) {
+		if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
+		core.actions._keyDownChoices(keyCode);
+		return true;
+	}, 100);
+
+	// 注入键盘按键事件
+	core.registerAction('keyUp', 'toolbox-category', function (keyCode) {
+		if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
+		core.actions._selectChoices(core.status.event.ui.choices.length, keyCode, _clickToolBoxCategory);
+		return true;
+	}, 100);
+
+},
     "smoothCamera": function () {
 	// 此插件开启后，大地图的瞬间移动将开启平滑镜头移动，避免突兀感
 	// 插件作者：老黄鸡

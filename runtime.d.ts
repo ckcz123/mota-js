@@ -1928,6 +1928,9 @@ declare class items {
     */
     addItem(itemId: string, itemNum?: number): void
 
+    /** 获得所有应该在道具栏显示的某个类型道具 */
+    getDisplayItemsInToolbox(cls: string): string[]
+
     /**
      * 判定某件装备的类型
      * @example core.getEquipTypeById('shield5') // 1（盾牌）

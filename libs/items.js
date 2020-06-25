@@ -207,6 +207,12 @@ items.prototype.removeItem = function (itemId, itemNum) {
     return true;
 }
 
+////// 获得所有应该在道具栏显示的某个类型道具 //////
+items.prototype.getDisplayItemsInToolbox = function (cls) {
+    return Object.keys(core.status.hero.items[cls])
+            .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+}
+
 // ---------- 装备相关 ------------ //
 
 items.prototype.getEquipTypeByName = function (name) {

@@ -1346,10 +1346,8 @@ actions.prototype._keyUpQuickShop = function (keycode) {
 
 ////// 工具栏界面时的点击操作 //////
 actions.prototype._clickToolbox = function (x, y) {
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getDisplayItemsInToolbox('tools'), 
+        constants = core.getDisplayItemsInToolbox('constants');
 
     // 装备栏
     if (x >= this.LAST - 2 && y == 0) {
@@ -1402,10 +1400,8 @@ actions.prototype._clickToolbox = function (x, y) {
 
 ////// 选择工具栏界面中某个Index后的操作 //////
 actions.prototype._clickToolboxIndex = function (index) {
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getDisplayItemsInToolbox('tools'), 
+        constants = core.getDisplayItemsInToolbox('constants');
 
     var items = null;
     var select;
@@ -1435,10 +1431,8 @@ actions.prototype._keyDownToolbox = function (keycode) {
 
     var last_index = this.LAST - 1;
 
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getDisplayItemsInToolbox('tools'), 
+        constants = core.getDisplayItemsInToolbox('constants');
     var index = core.status.event.selection;
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;

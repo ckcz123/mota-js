@@ -2382,10 +2382,8 @@ ui.prototype._drawToolbox_getInfo = function (index) {
     if (!core.status.event.data || core.status.event.data.toolsPage == null)
         core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
     // 获取物品列表
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getDisplayItemsInToolbox('tools'), 
+        constants = core.getDisplayItemsInToolbox('constants');
     // 处理页数
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;

@@ -1486,10 +1486,8 @@ control.prototype._replayAction_item = function (action) {
         core.useItem(itemId, false, core.replay);
         return true;
     }
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getDisplayItemsInToolbox('tools'), 
+        constants = core.getDisplayItemsInToolbox('constants');
     var index, per = core.__SIZE__-1;
     if ((index=tools.indexOf(itemId))>=0) {
         core.status.event.data = {"toolsPage": Math.floor(index/per)+1, "constantsPage":1};

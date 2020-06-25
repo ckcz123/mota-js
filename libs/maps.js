@@ -732,7 +732,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
     var deepAdd = 1;
     var block = blocks[x+","+y];
     if (block != null){
-        var id = block.block.event.id;
+        var id = block.event.id;
         // 绕过亮灯
         if (id == "light") deepAdd += 100;
         // 绕过路障

@@ -1277,7 +1277,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	// 获得所有应该在道具栏显示的某个类型道具
-	core.items.getDisplayItemsInToolbox = function (cls) {
+	core.ui.getToolboxItems = function (cls) {
 		// 检查类别
 		return Object.keys(core.status.hero.items[cls])
 			.filter(function (id) {

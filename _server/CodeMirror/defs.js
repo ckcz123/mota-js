@@ -2607,10 +2607,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "addItem": {
           "!doc": "静默增减某种道具的持有量 不会更新游戏画面或是显示提示<br/>例如：core.addItem('yellowKey', -2) // 没收两把黄钥匙<br/>itemId: 道具id<br/>itemNum: 增加量，负数表示没收", 
           "!type": "fn(itemId: string, itemNum?: number)"
-        }, 
-        "getDisplayItemsInToolbox": {
-          "!doc": "获得所有应该在道具栏显示的某个类型道具",
-          "!type": "fn(cls: string) -> [string]"
         },
         "unloadEquip": {
           "!doc": "脱下某个类型的装备<br/>例如：core.unloadEquip(1) // 卸下盾牌，无回调<br/>equipType: 装备类型编号，自然数<br/>callback: 卸下装备后的回调函数", 
@@ -3550,6 +3546,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "绘制怪物属性的详细信息", 
           "!type": "fn(index?: ?)"
         }, 
+        "getToolboxItems": {
+          "!doc": "获得所有应该在道具栏显示的某个类型道具",
+          "!type": "fn(cls: string) -> [string]"
+        },
         "drawToolbox": {
           "!doc": "绘制道具栏", 
           "!type": "fn(index?: ?)"

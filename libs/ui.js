@@ -2281,6 +2281,8 @@ ui.prototype.drawCenterFly = function () {
     var fillstyle = 'rgba(255,0,0,0.5)';
     if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
+    this.clearUI();
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image},
         {ctx: 'ui', centerX: toX, centerY: toY});
     var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
@@ -2300,6 +2302,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.clearTip();
     core.status.checkBlock.cache = {};
     var data = this._drawMaps_buildData(index, x, y);
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.drawThumbnail(data.floorId, null, {damage: data.damage},
         {ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     core.clearMap('data');

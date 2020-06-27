@@ -1302,7 +1302,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas, tempWidth = 32 * width, tempHeight = 32 * height;
 
-    core.clearMap(ctx, x, y, size, size);
+    // core.clearMap(ctx, x, y, size, size);
     if (toDraw.all) {
         // 绘制全景图
         if (tempWidth <= tempHeight) {

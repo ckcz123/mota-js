@@ -83,14 +83,14 @@ editor_listen_wrapper = function (editor) {
             editor.showdataarea(true)
         }
         mobileview.children[1].onclick = function () {
-            mid.style = '';
+            mid.style = 'z-index:110';
             right.style = 'z-index:-1;opacity: 0;';
             // mobileeditdata.style = 'z-index:-1;opacity: 0;';
             editor.lastClickId = '';
         }
         mobileview.children[3].onclick = function () {
             mid.style = 'z-index:-1;opacity: 0;';
-            right.style = '';
+            right.style = 'z-index:110';
             // mobileeditdata.style = 'z-index:-1;opacity: 0;';
             editor.lastClickId = '';
         }

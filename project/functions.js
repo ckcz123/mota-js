@@ -1451,6 +1451,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 }
     },
     "ui": {
+        "getToolboxItems": function (cls) {
+	// 获得道具栏中当前某类型道具的显示项和显示顺序
+	// cls为道具类型，只可能是 tools, constants 和 equips
+	// 返回一个数组，代表当前某类型道具的显示内容和顺序
+
+	return Object.keys(core.status.hero.items[cls] || {})
+		.filter(function (id) { return !core.material.items[id].hideInToolbox; })
+		.sort();
+},
         "drawStatusBar": function () {
 	// 自定义绘制状态栏，需要开启状态栏canvas化
 

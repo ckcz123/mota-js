@@ -1346,10 +1346,8 @@ actions.prototype._keyUpQuickShop = function (keycode) {
 
 ////// 工具栏界面时的点击操作 //////
 actions.prototype._clickToolbox = function (x, y) {
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getToolboxItems('tools'), 
+        constants = core.getToolboxItems('constants');
 
     // 装备栏
     if (x >= this.LAST - 2 && y == 0) {
@@ -1402,10 +1400,8 @@ actions.prototype._clickToolbox = function (x, y) {
 
 ////// 选择工具栏界面中某个Index后的操作 //////
 actions.prototype._clickToolboxIndex = function (index) {
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getToolboxItems('tools'), 
+        constants = core.getToolboxItems('constants');
 
     var items = null;
     var select;
@@ -1435,10 +1431,8 @@ actions.prototype._keyDownToolbox = function (keycode) {
 
     var last_index = this.LAST - 1;
 
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getToolboxItems('tools'), 
+        constants = core.getToolboxItems('constants');
     var index = core.status.event.selection;
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
@@ -1571,7 +1565,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     }
     // 下一页
     if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
-        var lastPage = Math.ceil(Object.keys(core.status.hero.items.equips).length / this.LAST);
+        var lastPage = Math.ceil(core.getToolboxItems('equips').length / this.LAST);
         if (core.status.event.data.page < lastPage) {
             core.status.event.data.page++;
             core.ui.drawEquipbox(core.status.event.selection);
@@ -1607,7 +1601,7 @@ actions.prototype._clickEquipboxIndex = function (index) {
         }
     }
     else {
-        var equips = Object.keys(core.status.hero.items.equips || {}).sort();
+        var equips = core.getToolboxItems('equips');
         if (index == core.status.event.selection) {
             if (core.isReplaying()) return;
             var equipId = equips[index - this.LAST + (core.status.event.data.page - 1) * this.LAST];
@@ -1625,7 +1619,7 @@ actions.prototype._keyDownEquipbox = function (keycode) {
     var last_index = this.LAST - 1;
     var per_line = this.HSIZE - 3;
     var equipCapacity = core.status.globalAttribute.equipName.length;
-    var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
+    var ownEquipment = core.getToolboxItems('equips');
     var index = core.status.event.selection;
     var page = core.status.event.data.page;
     var totalPage = Math.ceil(ownEquipment.length / this.LAST);

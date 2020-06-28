@@ -182,6 +182,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 		"ui": {
 			"_type": "object",
 			"_data": {
+				"getToolboxItems": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "道具栏显示项"
+				},
 				"drawStatusBar": {
 					"_leaf": true,
 					"_type": "textarea",

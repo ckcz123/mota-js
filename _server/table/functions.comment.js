@@ -135,6 +135,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "读档操作"
 				},
+				"getStatusLabel": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "状态名定义"
+				},
 				"triggerDebuff": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -176,6 +182,12 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 		"ui": {
 			"_type": "object",
 			"_data": {
+				"getToolboxItems": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "道具栏显示项"
+				},
 				"drawStatusBar": {
 					"_leaf": true,
 					"_type": "textarea",

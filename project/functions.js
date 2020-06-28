@@ -949,6 +949,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		'route': core.encodeRoute(core.status.route),
 		'values': values,
 		'version': core.firstData.version,
+		'guid': core.getGuid(),
 		"time": new Date().getTime()
 	};
 
@@ -992,6 +993,27 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.removeFlag('__fromLoad__');
 		if (callback) callback();
 	});
+},
+        "getStatusLabel": function (name) {
+	// 返回某个状态英文名的对应中文标签，如atk -> 攻击，def -> 防御等。
+	// 请注意此项仅影响 libs/ 下的内容（如绘制怪物手册、数据统计等）
+	// 自行定义的（比如获得道具效果）中用到的“攻击+3”等需要自己去对应地方修改
+
+	return {
+		name: "名称",
+		lv: "等级",
+		hpmax: "生命上限",
+		hp: "生命",
+		manamax: "魔力上限",
+		mana: "魔力",
+		atk: "攻击",
+		def: "防御",
+		mdef: "护盾",
+		money: "金币",
+		exp: "经验",
+		point: "加点",
+		steps: "步数",
+	} [name] || name;
 },
         "triggerDebuff": function (action, type) {
 	// 毒衰咒效果的获得与解除
@@ -1429,6 +1451,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 }
     },
     "ui": {
+        "getToolboxItems": function (cls) {
+	// 获得道具栏中当前某类型道具的显示项和显示顺序
+	// cls为道具类型，只可能是 tools, constants 和 equips
+	// 返回一个数组，代表当前某类型道具的显示内容和顺序
+
+	return Object.keys(core.status.hero.items[cls] || {})
+		.filter(function (id) { return !core.material.items[id].hideInToolbox; })
+		.sort();
+},
         "drawStatusBar": function () {
 	// 自定义绘制状态栏，需要开启状态栏canvas化
 
@@ -1532,9 +1563,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 名称
 	core.setTextAlign('ui', 'left');
-	var globalFont = (core.status.globalAttribute || core.initStatus.globalAttribute).font;
-	core.fillText('ui', "HTML5 魔塔样板", text_start, top + 35, "#FFD700", "bold 22px " + globalFont);
-	core.fillText('ui', "版本： " + main.__VERSION__, text_start, top + 80, "#FFFFFF", "bold 17px " + globalFont);
+	var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
+	core.fillText('ui', "HTML5 魔塔样板", text_start, top + 35, globalAttribute.selectColor, "bold 22px " + globalAttribute.font);
+	core.fillText('ui', "版本： " + main.__VERSION__, text_start, top + 80, "#FFFFFF", "bold 17px " + globalAttribute.font);
 	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top + 112 + 32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可

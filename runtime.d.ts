@@ -430,6 +430,9 @@ declare class control {
      * @param name 属性的英文名，请注意只能用于数值类属性哦，否则乘法会得到NaN
      */
     getRealStatus(name: string): any
+
+    /** 获得某个状态的名字 */
+    getStatusLabel(name: string): string
     
     /**
      * 设置主角某个属性的百分比修正倍率，初始值为1，
@@ -2238,6 +2241,9 @@ declare class ui {
     /** 绘制道具栏 */
     drawToolbox(index?: any): void
 
+    /** 获得所有应该在道具栏显示的某个类型道具 */
+    getToolboxItems(cls: string): string[]
+
     /** 绘制装备界面 */
     drawEquipbox(index?: any): void
 
@@ -2560,6 +2566,9 @@ declare class utils {
      * @param error 失败后的回调
      */
     http(type: 'GET' | 'POST', url: string, formData: FormData, success: () => void, error: () => void): void
+
+    /** 获得浏览器唯一的guid */
+    getGuid(): string
 
     /** 解压缩一个数据 */
     decompress(value: any): any

@@ -748,7 +748,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "update":
       this.next = MotaActionBlocks['update_s'].xmlText([
-        this.next, this.doNotCheckAutoEvents||false]);
+        this.doNotCheckAutoEvents||false, this.next]);
       break;
     case "showStatusBar":
       this.next = MotaActionBlocks['showStatusBar_s'].xmlText([

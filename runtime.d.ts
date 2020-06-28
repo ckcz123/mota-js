@@ -2241,6 +2241,9 @@ declare class ui {
     /** 绘制道具栏 */
     drawToolbox(index?: any): void
 
+    /** 获得所有应该在道具栏显示的某个类型道具 */
+    getToolboxItems(cls: string): string[]
+
     /** 绘制装备界面 */
     drawEquipbox(index?: any): void
 

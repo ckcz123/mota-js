@@ -2226,7 +2226,7 @@ events.prototype._action_waitAsync = function (data, x, y, prefix) {
             clearInterval(test);
             core.doAction();
         }
-    }, 50);
+    }, 50 / core.status.replay.speed);
 }
 
 events.prototype._action_callBook = function (data, x, y, prefix) {

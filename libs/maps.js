@@ -704,6 +704,7 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
     var queue = new PriorityQueue({comparator: function (a,b) { return a.depth - b.depth; }});
     route[startX + "," + startY] = '';
     queue.queue({depth: 0, x: startX, y: startY});
+    var blocks = core.getMapBlocksObj();
     while (queue.length!=0) {
         var curr = queue.dequeue(), deep = curr.depth, nowX = curr.x, nowY = curr.y;
         for (var direction in core.utils.scan) {
@@ -719,19 +720,19 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
             // 不可通行
             if (core.noPass(nx, ny)) continue;
             route[nx+","+ny] = direction;
-            queue.queue({depth: deep + this._automaticRoute_deepAdd(nx, ny), x: nx, y: ny});
+            queue.queue({depth: deep + this._automaticRoute_deepAdd(nx, ny, blocks), x: nx, y: ny});
         }
         if (route[destX+","+destY] != null) break;
     }
     return route;
 }
 
-maps.prototype._automaticRoute_deepAdd = function (x, y) {
+maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
     // 判定每个可通行点的损耗值，越高越应该绕路
     var deepAdd = 1;
-    var block = core.getBlock(x,y);
+    var block = blocks[x+","+y];
     if (block != null){
-        var id = block.block.event.id;
+        var id = block.event.id;
         // 绕过亮灯
         if (id == "light") deepAdd += 100;
         // 绕过路障
@@ -1301,7 +1302,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas, tempWidth = 32 * width, tempHeight = 32 * height;
 
-    core.clearMap(ctx, x, y, size, size);
+    // core.clearMap(ctx, x, y, size, size);
     if (toDraw.all) {
         // 绘制全景图
         if (tempWidth <= tempHeight) {

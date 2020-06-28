@@ -1142,11 +1142,11 @@ control.prototype._updateDamage_extraDamage = function (floorId, ctx, refresh) {
                 var damage = core.status.checkBlock.damage[x+","+y]||0;
                 if (damage>0) { // 该点伤害
                     damage = core.formatBigNumber(damage, true);
-                    core.fillBoldText(ctx, damage, 32*x+16, 32*(y+1)-14, '#FF7F00');
+                    core.fillBoldText(ctx, damage, 32*x+16, 32*(y+1)-14, '#ffaa33');
                 }
                 else { // 检查捕捉
                     if (core.status.checkBlock.ambush[x+","+y]) {
-                        core.fillBoldText(ctx, '!', 32*x+16, 32*(y+1)-14, '#FF7F00');
+                        core.fillBoldText(ctx, '!', 32*x+16, 32*(y+1)-14, '#ffaa33');
                     }
                 }
             }
@@ -1486,10 +1486,8 @@ control.prototype._replayAction_item = function (action) {
         core.useItem(itemId, false, core.replay);
         return true;
     }
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getToolboxItems('tools'), 
+        constants = core.getToolboxItems('constants');
     var index, per = core.__SIZE__-1;
     if ((index=tools.indexOf(itemId))>=0) {
         core.status.event.data = {"toolsPage": Math.floor(index/per)+1, "constantsPage":1};
@@ -1511,7 +1509,7 @@ control.prototype._replayAction_item = function (action) {
 control.prototype._replayAction_equip = function (action) {
     if (action.indexOf("equip:")!=0) return false;
     var equipId = action.substring(6);
-    var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
+    var ownEquipment = core.getToolboxItems('equips');
     var index = ownEquipment.indexOf(equipId), per = core.__SIZE__-1;
     if (index<0) return false;
     core.status.route.push(action);

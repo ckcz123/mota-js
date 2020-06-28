@@ -414,7 +414,7 @@ editor_blockly = function () {
     editor_blockly.reopenToolbox = function(index) {
         if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
         editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
-        editor_blockly.workspace.getFlyout_().show(editor_blockly.workspace.toolbox_.tree_.children_[index].blocks);
+        editor_blockly.workspace.getFlyout().show(editor_blockly.workspace.toolbox_.tree_.children_[index].blocks);
     }
 
     editor_blockly.closeToolbox = function() {

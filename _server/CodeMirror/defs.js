@@ -2334,6 +2334,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取", 
           "!type": "fn(status?: ?, name?: string)"
         }, 
+        "getStatusLabel": {
+          "!doc": "获得某个状态的名字，如atk->攻击，def->防御等",
+          "!type": "fn(name: string) -> string"
+        },
         "removeSave": {
           "!doc": "删除某个存档", 
           "!type": "fn(index?: number, callback?: fn())"
@@ -2603,7 +2607,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "addItem": {
           "!doc": "静默增减某种道具的持有量 不会更新游戏画面或是显示提示<br/>例如：core.addItem('yellowKey', -2) // 没收两把黄钥匙<br/>itemId: 道具id<br/>itemNum: 增加量，负数表示没收", 
           "!type": "fn(itemId: string, itemNum?: number)"
-        }, 
+        },
         "unloadEquip": {
           "!doc": "脱下某个类型的装备<br/>例如：core.unloadEquip(1) // 卸下盾牌，无回调<br/>equipType: 装备类型编号，自然数<br/>callback: 卸下装备后的回调函数", 
           "!type": "fn(equipType: number, callback?: fn())"
@@ -2806,6 +2810,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "发送一个HTTP请求 [异步]<br/>type: 请求类型，只能为GET或POST<br/>url: 目标地址<br/>formData: 如果是POST请求则为表单数据<br/>success: 成功后的回调<br/>error: 失败后的回调", 
           "!type": "fn(type: string, url: string, formData: ?, success?: fn(data: string), error?: fn(message: string), mimeType?: string, responseType?: string, onprogress?: fn(loaded: number, total: number))"
         }, 
+        "getGuid": {
+          "!doc": "获得或生成浏览器唯一的guid",
+          "!type": "fn() -> string"
+        },
         "getLocalStorage": {
           "!doc": "获得本地存储", 
           "!type": "fn(key: string, defaultValue?: ?)"
@@ -3538,6 +3546,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "绘制怪物属性的详细信息", 
           "!type": "fn(index?: ?)"
         }, 
+        "getToolboxItems": {
+          "!doc": "获得所有应该在道具栏显示的某个类型道具",
+          "!type": "fn(cls: string) -> [string]"
+        },
         "drawToolbox": {
           "!doc": "绘制道具栏", 
           "!type": "fn(index?: ?)"

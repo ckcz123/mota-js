@@ -1654,7 +1654,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
                 this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
         else
             core.strokeRoundRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
-                len+10, 28, 6, "#FFD700", 2);
+                len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
@@ -1693,7 +1693,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         if (isWindowSkin)
             this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
         else
-            core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, "#FFD700", 2);
+            core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
@@ -1848,7 +1848,7 @@ ui.prototype.drawCursor = function () {
     core.clearUI();
     var width = 4;
     core.strokeRect('ui', 32*automaticRoute.cursorX+width/2, 32*automaticRoute.cursorY+width/2,
-        32-width, 32-width, '#FFD700', width);
+        32-width, 32-width, core.status.globalAttribute.selectColor, width);
 
 }
 
@@ -1916,7 +1916,19 @@ ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, sele
     this._drawBook_drawName(index, enemy, top, left, name_width);
     this._drawBook_drawContent(index, enemy, top, left + name_width);
     if (selected)
-        core.strokeRoundRect('ui', 10, top + 1, this.PIXEL - 10 * 2, pageinfo.per_height, 10, '#FFD700');
+        core.strokeRoundRect('ui', 10, top + 1, this.PIXEL - 10 * 2, pageinfo.per_height, 10, core.status.globalAttribute.selectColor);
+}
+
+ui.prototype._drawBook_is32x32 = function (blockInfo) {
+    // 判定48的怪物上半部分是否是全透明
+    var height = blockInfo.height - 32;
+    var canvas = document.createElement('canvas');
+    canvas.width = 32; canvas.height = height;
+    var ctx = canvas.getContext("2d");
+    core.drawImage(ctx, blockInfo.image, 0, blockInfo.posY * blockInfo.height, 32, height, 0, 0, 32, height);
+    var url = canvas.toDataURL();
+    core.clearMap(ctx);
+    return url == canvas.toDataURL();
 }
 
 ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
@@ -1926,13 +1938,26 @@ ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
     core.strokeRect('ui', 22, border_top, 42, 42, '#DDDDDD', 2);
     var blockInfo = core.getBlockInfo(enemy.id);
     if (blockInfo.height >= 42) {
-        var drawWidth = 42 * 32 / blockInfo.height;
-        core.status.boxAnimateObjs.push({
-            'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
-            'x': img_left - 5 + (42 - drawWidth) / 2, 'y': img_top - 5, 'dw': drawWidth, 'dh': 42,
-            'height': blockInfo.height, 'animate': blockInfo.animate,
-            'image': blockInfo.image, 'pos': blockInfo.posY * blockInfo.height
-        });
+        var originEnemy = core.material.enemys[enemy.id] || {};
+        // 检查上半部分是不是纯透明的；取用原始值避免重复计算
+        if (originEnemy.is32x32 == null) {
+            originEnemy.is32x32 = this._drawBook_is32x32(blockInfo);
+        }
+        if (originEnemy.is32x32) {
+            core.status.boxAnimateObjs.push({
+                'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
+                'x': img_left, 'y': img_top, 'height': 32, 'animate': blockInfo.animate,
+                'image': blockInfo.image, 'pos': blockInfo.posY * blockInfo.height + blockInfo.height - 32
+            });
+        } else {
+            var drawWidth = 42 * 32 / blockInfo.height;
+            core.status.boxAnimateObjs.push({
+                'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
+                'x': img_left - 5 + (42 - drawWidth) / 2, 'y': img_top - 5, 'dw': drawWidth, 'dh': 42,
+                'height': blockInfo.height, 'animate': blockInfo.animate,
+                'image': blockInfo.image, 'pos': blockInfo.posY * blockInfo.height
+            });
+        }
     } else {
         core.status.boxAnimateObjs.push({
             'bgx': border_left, 'bgy': border_top, 'bgWidth': 42, 'bgHeight': 42,
@@ -1992,11 +2017,11 @@ ui.prototype._drawBook_drawRow1 = function (index, enemy, top, left, width, posi
     core.setTextAlign('ui', 'left');
     var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
-    core.fillText('ui', '生命', col1, position, '#DDDDDD', f13);
+    core.fillText('ui', core.getStatusLabel('hp'), col1, position, '#DDDDDD', f13);
     core.fillText('ui', core.formatBigNumber(enemy.hp||0), col1 + 30, position, null, b13);
-    core.fillText('ui', '攻击', col2, position, null, f13);
+    core.fillText('ui', core.getStatusLabel('atk'), col2, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.atk||0), col2 + 30, position, null, b13);
-    core.fillText('ui', '防御', col3, position, null, f13);
+    core.fillText('ui', core.getStatusLabel('def'), col3, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.def||0), col3 + 30, position, null, b13);
 }
 
@@ -2007,9 +2032,9 @@ ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, posi
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
     // 获得第二行绘制的内容
     var second_line = [];
-    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push(["金币", core.formatBigNumber(enemy.money || 0)]);
-    if (core.flags.enableAddPoint) second_line.push(["加点", core.formatBigNumber(enemy.point || 0)]);
-    if (core.flags.statusBarItems.indexOf('enableExp')>=0) second_line.push(["经验", core.formatBigNumber(enemy.exp || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push([core.getStatusLabel('money'), core.formatBigNumber(enemy.money || 0)]);
+    if (core.flags.enableAddPoint) second_line.push([core.getStatusLabel('point'), core.formatBigNumber(enemy.point || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableExp')>=0) second_line.push([core.getStatusLabel('exp'), core.formatBigNumber(enemy.exp || 0)]);
 
     var damage_offset = col1 + (this.PIXEL - col1) / 2 - 12;
     // 第一列
@@ -2048,11 +2073,12 @@ ui.prototype._drawBook_drawDamage = function (index, enemy, offset, position) {
     var damage = enemy.damage, color = '#FFFF00';
     if (damage == null) {
         damage = '无法战斗';
-        color = '#FF0000';
+        color = '#FF2222';
     }
     else {
-        if (damage >= core.status.hero.hp) color = '#FF0000';
-        if (damage <= 0) color = '#00FF00';
+        if (damage >= core.status.hero.hp) color = '#FF2222';
+        else if (damage >= core.status.hero.hp * 2 / 3) color = '#FF9933';
+        else if (damage <= 0) color = '#11FF11';
         damage = core.formatBigNumber(damage);
         if (core.enemys.hasSpecial(enemy, 19)) damage += "+";
         if (core.enemys.hasSpecial(enemy, 21)) damage += "-";
@@ -2201,7 +2227,7 @@ ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts)
 ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
     // 名称
     core.setTextAlign('data', 'left');
-    core.fillText('data', enemy.name, pos.content_left, pos.top + 30, '#FFD700', this._buildFont(22, true));
+    core.fillText('data', enemy.name, pos.content_left, pos.top + 30, core.status.globalAttribute.selectColor, this._buildFont(22, true));
     var content_top = pos.top + 44;
 
     this.drawTextContent('data', content, {left: pos.content_left, top: content_top, maxWidth: pos.validWidth,
@@ -2255,6 +2281,8 @@ ui.prototype.drawCenterFly = function () {
     var fillstyle = 'rgba(255,0,0,0.5)';
     if (core.canUseItem('centerFly')) fillstyle = 'rgba(0,255,0,0.5)';
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
+    this.clearUI();
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image},
         {ctx: 'ui', centerX: toX, centerY: toY});
     var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
@@ -2274,6 +2302,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.clearTip();
     core.status.checkBlock.cache = {};
     var data = this._drawMaps_buildData(index, x, y);
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.drawThumbnail(data.floorId, null, {damage: data.damage},
         {ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     core.clearMap('data');
@@ -2296,7 +2325,7 @@ ui.prototype._drawMaps_drawHint = function () {
         core.strokeRect('ui', left*32+2, top*32+2, width*32-4, height*32-4, fillStyle, lineWidth);
     }
     var per = this.HSIZE - 4;
-    stroke(per, 0, 9, per, '#FFD700', 4); // up
+    stroke(per, 0, 9, per, core.status.globalAttribute.selectColor, 4); // up
     stroke(0, per, per, 9); // left
     stroke(per, this.SIZE - per, 9, per); // down
     stroke(this.SIZE - per, per, per, 9); // right
@@ -2307,7 +2336,7 @@ ui.prototype._drawMaps_drawHint = function () {
     stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
 
     core.setTextBaseline('ui', 'middle');
-    core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, '#FFD700', '20px Arial');
+    core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, core.status.globalAttribute.selectColor, '20px Arial');
     core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
     core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
     core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
@@ -2376,15 +2405,23 @@ ui.prototype.drawToolbox = function(index) {
     core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13);
 }
 
+////// 获得所有应该在道具栏显示的某个类型道具 //////
+ui.prototype.getToolboxItems = function (cls) {
+    if (this.uidata.getToolboxItems) {
+        return this.uidata.getToolboxItems(cls);
+    }
+    return Object.keys(core.status.hero.items[cls] || {})
+            .filter(function (id) { return !core.material.items[id].hideInToolbox; })
+            .sort();
+}
+
 ui.prototype._drawToolbox_getInfo = function (index) {
     // 设定eventdata
     if (!core.status.event.data || core.status.event.data.toolsPage == null)
         core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
     // 获取物品列表
-    var tools = Object.keys(core.status.hero.items.tools)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
-    var constants = Object.keys(core.status.hero.items.constants)
-        .filter(function (id) { return !core.material.items[id].hideInToolbox; }).sort();
+    var tools = core.getToolboxItems('tools'), 
+        constants = core.getToolboxItems('constants');
     // 处理页数
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
@@ -2440,7 +2477,7 @@ ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     core.setTextAlign('ui', 'left');
     if (!info.selectId) return;
     var item=core.material.items[info.selectId];
-    core.fillText('ui', item.name, 10, 32, '#FFD700', this._buildFont(20, true))
+    core.fillText('ui', item.name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     var text = item.text||"该道具暂无描述。";
     try {
         // 检查能否eval
@@ -2474,7 +2511,7 @@ ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawC
         if (drawCount)
             core.fillText('ui', core.itemCount(item), 64 * (i % this.HSIZE) + 56, yoffset + 33, '#FFFFFF', this._buildFont(14, true));
         if (info.selectId == item)
-            core.strokeRoundRect('ui', 64 * (i % this.HSIZE) + 17, yoffset - 4, 40, 40, 6, '#FFD700');
+            core.strokeRoundRect('ui', 64 * (i % this.HSIZE) + 17, yoffset - 4, 40, 40, 6, core.status.globalAttribute.selectColor);
     }
 }
 
@@ -2511,7 +2548,7 @@ ui.prototype._drawEquipbox_getInfo = function (index) {
     var equipLength = allEquips.length;
     if (!core.status.hero.equipment) core.status.hero.equipment = [];
     var equipEquipment = core.status.hero.equipment;
-    var ownEquipment = Object.keys(core.status.hero.items.equips).sort();
+    var ownEquipment = core.getToolboxItems('equips');
     var page = core.status.event.data.page;
     var totalPage = Math.ceil(ownEquipment.length / this.LAST);
     // 处理index
@@ -2549,7 +2586,7 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
         equipType = core.items.getEquipTypeByName(equipType);
     }
     else equipString = info.allEquips[equipType] || "未知部位";
-    core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, '#FFD700', this._buildFont(20, true))
+    core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     // --- 描述
     var text = equip.text || "该装备暂无描述。";
     try {
@@ -2600,7 +2637,7 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         var newValue = Math.floor((core.getStatus(name) + (compare.value[name] || 0))
             * (core.getBuff(name) * 100 + (compare.percentage[name] || 0)) / 100);
         if (nowValue == newValue) continue;
-        var text = this._drawEquipbox_getStatusName(name);
+        var text = core.getStatusLabel(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
         var color = newValue>nowValue?'#00FF00':'#FF0000';
         nowValue = core.formatBigNumber(nowValue);
@@ -2609,14 +2646,6 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         this._drawEquipbox_drawStatusChanged_draw(newValue, color, obj);
         obj.drawOffset += 8;
     }
-}
-
-ui.prototype._drawEquipbox_getStatusName = function (name) {
-    var map = {
-        name: "名称", lv: "等级", hpmax: "生命上限", hp: "生命", manamax: "魔力上限", mana: "魔力",
-        atk: "攻击", def: "防御", mdef: "护盾", money: "金币", exp: "经验", exp: "经验", steps: "步数"
-    };
-    return map[name] || name;
 }
 
 ui.prototype._drawEquipbox_drawStatusChanged_draw = function (text, color, obj) {
@@ -2644,7 +2673,7 @@ ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
             core.drawImage('ui', core.material.images.items, 0, 32 * icon, 32, 32, offset_image, y, 32, 32);
         }
         core.fillText('ui', info.allEquips[i] || "未知", offset_text, y + 27, '#FFFFFF', this._buildFont(16, true))
-        core.strokeRoundRect('ui', offset_image - 4, y - 4, 40, 40, 6, info.index==i?'#FFD700':"#FFFFFF");
+        core.strokeRoundRect('ui', offset_image - 4, y - 4, 40, 40, 6, info.index==i?core.status.globalAttribute.selectColor:"#FFFFFF");
     }
 }
 
@@ -2730,11 +2759,12 @@ ui.prototype._drawSLPanel_loadSave = function(page, callback) {
 
 // 在以x为中心轴 y为顶坐标 的位置绘制一条宽为size的记录 cho表示是否被选中 选中会加粗 highlight表示高亮标题 ✐
 ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, highLight){
-    var strokeColor = '#FFD700';
+    var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
+    var strokeColor = globalAttribute.selectColor;
     if (core.status.event.selection) strokeColor = '#FF6A6A';
     if (!data || !data.floorId) highLight = false;
 
-    core.fillText('ui', title, x, y, highLight?'#FFD700':'#FFFFFF', this._buildFont(17, true));
+    core.fillText('ui', title, x, y, highLight?globalAttribute.selectColor:'#FFFFFF', this._buildFont(17, true));
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
     if (data && data.floorId) {
         core.setTextAlign('ui', "center");
@@ -2768,7 +2798,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
         var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
         var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
-        core.fillText('ui', v, x, y+30+size, '#FFD700');
+        core.fillText('ui', v, x, y+30+size, globalAttribute.selectColor);
         core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
     }
     else {
@@ -2846,7 +2876,7 @@ ui.prototype.drawKeyBoard = function () {
     if (isWindowSkin)
         this.drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
     else
-        core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, "#FFD700", 2);
+        core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
 }
 
 ////// 绘制状态栏 /////
@@ -2978,9 +3008,9 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
     }
     if (id.indexOf('sword')==0 || id.indexOf('shield')==0 || obj.cls[id]=='equips') {
         var t = "";
-        if (atk > 0) t += atk + "攻";
-        if (def > 0) t += def + "防";
-        if (mdef > 0) t += mdef + "护盾";
+        if (atk > 0) t += atk + core.getStatusLabel('atk');
+        if (def > 0) t += def + core.getStatusLabel('def');
+        if (mdef > 0) t += mdef + core.getStatusLabel('mdef');
         if (t != "") obj.ext[id] = t;
     }
     this._drawStatistics_add(floorId, obj, 'count', id, 1);

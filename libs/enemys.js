@@ -159,14 +159,14 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
 
     if (damage == null) {
         damage = "???";
-        color = '#FF0000';
+        color = '#FF2222';
     }
     else {
-        if (damage <= 0) color = '#00FF00';
+        if (damage <= 0) color = '#11FF11';
         else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
         else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
-        else if (damage < core.status.hero.hp) color = '#FF7F00';
-        else color = '#FF0000';
+        else if (damage < core.status.hero.hp) color = '#FF9933';
+        else color = '#FF2222';
 
         damage = core.formatBigNumber(damage, true);
         if (core.enemys.hasSpecial(enemy, 19))

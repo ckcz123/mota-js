@@ -1864,10 +1864,7 @@ ui.prototype.drawBook = function (index) {
     core.setAlpha('ui', 1);
 
     if (enemys.length == 0) {
-        core.setTextAlign('ui', 'center');
-        core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
-        core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
-        return;
+        return this._drawBook_drawEmpty();
     }
 
     index = core.clamp(index, 0, enemys.length - 1);
@@ -1902,6 +1899,12 @@ ui.prototype._drawBook_drawBackground = function () {
     core.setAlpha('ui', 0.6);
     core.setFillStyle('ui', '#000000');
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL);
+}
+
+ui.prototype._drawBook_drawEmpty = function () {
+    core.setTextAlign('ui', 'center');
+    core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
 }
 
 ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, selected) {

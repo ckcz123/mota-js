@@ -351,7 +351,7 @@ events.prototype.trigger = function (x, y, callback) {
 
         // 转换楼层能否穿透
         if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
-            return;
+            return _executeCallback();
         core.status.automaticRoute.moveDirectly = false;
         this.doSystemEvent(trigger, block);
     }

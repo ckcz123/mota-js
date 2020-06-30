@@ -223,19 +223,6 @@ editor.prototype.init = function (callback) {
                     for (var one in canvases) {
                         canvases[one].width = canvases[one].height = core.__PIXELS__;
                     }
-                    var csize = core.__PIXELS__ + 64;
-                    core.bigmap.canvas.forEach(function (cn) {
-                        core.canvas[cn].canvas.setAttribute("width", csize);
-                        core.canvas[cn].canvas.setAttribute("height", csize);
-                        core.canvas[cn].canvas.style.width = csize * core.domStyle.scale + "px";
-                        core.canvas[cn].canvas.style.height = csize * core.domStyle.scale + "px";
-                        core.canvas[cn].translate(32, 32);
-                        if (main.mode === 'editor' && editor.isMobile) {
-                            core.canvas[cn].canvas.style.width = csize / core.__PIXELS__ * 96 + "vw";
-                            core.canvas[cn].canvas.style.height = csize / core.__PIXELS__ * 96 + "vw";
-                        }    
-                    });
-
                     core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
                     var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
                     if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;

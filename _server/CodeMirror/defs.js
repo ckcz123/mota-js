@@ -1875,6 +1875,18 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "number",
           "!doc": "大地图视角纵向基准格"
         },
+        "v2": {
+          "!type": "bool",
+          "!doc": "是否是新版大地图绘制方式"
+        },
+        "threshold": {
+          "!type": "number",
+          "!doc": "新版大地图绘制方式的界限"
+        },
+        "scale": {
+          "!type": "number",
+          "!doc": "缩略图的比例放缩"
+        },
         "tempCanvas": {
           "!type": "CanvasRenderingContext2D",
           "!doc": "临时画布"

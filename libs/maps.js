@@ -379,6 +379,23 @@ maps.prototype.resizeMap = function (floorId) {
     if (!floorId) return;
     core.bigmap.width = core.floors[floorId].width;
     core.bigmap.height = core.floors[floorId].height;
+    core.bigmap.posX = core.bigmap.posY = 0;
+
+    core.bigmap.v2 = core.bigmap.width * core.bigmap.height > core.bigmap.threshold;
+    var width = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.width * 32;
+    var height = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.width * 32;
+
+    core.bigmap.canvas.forEach(function (cn) {
+        core.canvas[cn].canvas.setAttribute("width", width);
+        core.canvas[cn].canvas.setAttribute("height", height);
+        core.canvas[cn].canvas.style.width = width * core.domStyle.scale + "px";
+        core.canvas[cn].canvas.style.height = height * core.domStyle.scale + "px";
+        core.canvas[cn].translate(core.bigmap.v2 ? 32 : 0, core.bigmap.v2 ? 32 : 0);
+        if (main.mode === 'editor' && editor.isMobile) {
+            core.canvas[cn].canvas.style.width = width / core.__PIXELS__ * 96 + "vw";
+            core.canvas[cn].canvas.style.height = height / core.__PIXELS__ * 96 + "vw";
+        }
+    });
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
@@ -748,9 +765,17 @@ maps.prototype.drawBlock = function (block, animate) {
     // --- 在界面外的动画不绘制
 
     // 判定是否绘制
-    var posX = core.bigmap.posX, posY = core.bigmap.posY;
-    if (x < posX - 1 || y < posY - 1 || x > posX + core.__SIZE__ || y > posY + core.__SIZE__ + 1) { // +1 for 48 height
-        return;
+    if (core.bigmap.v2) {
+        var posX = core.bigmap.posX, posY = core.bigmap.posY;
+        if (x < posX - 1 || y < posY - 1 || x > posX + core.__SIZE__ || y > posY + core.__SIZE__ + 1) { // +1 for 48 height
+            return;
+        }
+    } else {
+        if (redraw && block.event.animate > 1 &&
+            (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
+                || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16)) {
+            return;
+        }
     }
 
     var blockInfo = this.getBlockInfo(block);
@@ -841,7 +866,7 @@ maps.prototype._drawMap_drawAll = function (floorId) {
 
 maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, onMap) {
     if (blockInfo == null) return;
-    if (onMap) {
+    if (onMap && core.bigmap.v2) {
         // 判定是否绘制
         var posX = core.bigmap.posX, posY = core.bigmap.posY;
         if (block.x < posX - 1 || block.y < posY - 1 || block.x > posX + core.__SIZE__ || block.y > posY + core.__SIZE__ + 1) { // +1 for 48 height
@@ -850,7 +875,7 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
     }
 
     if (blockInfo.cls == 'autotile') { // Autotile单独处理
-        this._drawAutotile(ctx, arr, block, 32, 0, 0);
+        this._drawAutotile(ctx, arr, block, 32, 0, 0, 0, onMap);
         if (onMap) this.addGlobalAnimate(block);
         return;
     }
@@ -882,8 +907,11 @@ maps.prototype._drawBg_drawBackground = function (floorId, ctx, onMap) {
     var groundId = (core.status.maps || core.floors)[floorId].defaultGround || "ground";
     var groundInfo = core.getBlockInfo(groundId);
     if (groundInfo != null) {
-        for (var i = onMap ? -1 : 0; i < (onMap ? core.__SIZE__ + 1 : core.floors[floorId].width); i++) {
-            for (var j = onMap ? -1 : 0; j < (onMap ? core.__SIZE__ + 1 : core.floors[floorId].height); j++) {
+        var start = onMap && core.bigmap.v2 ? -1 : 0;
+        var endX = onMap && core.bigmap.v2 ? core.__SIZE__ + 1 : core.floors[floorId].width;
+        var endY = onMap && core.bigmap.v2 ? core.__SIZE__ + 1 : core.floors[floorId].height;
+        for (var i = start; i < endX; i++) {
+            for (var j = start; j < endY; j++) {
                 core.drawImage(ctx, groundInfo.image, 32 * groundInfo.posX, groundInfo.height * groundInfo.posY, 32, 32, i * 32, j * 32, 32, 32);
             }
         }
@@ -935,10 +963,10 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
         eventArr = this.getMapArray(floorId);
     }
 
-    var startX = onMap ? Math.max(0, core.bigmap.posX - 1) : 0;
-    var endX = onMap ? Math.min(width, core.bigmap.posX + core.__SIZE__ + 1) : width;
-    var startY = onMap ? Math.max(0, core.bigmap.posY - 1) : 0;
-    var endY = onMap ? Math.min(height, core.bigmap.posY + core.__SIZE__ + 2) : height; // +1 for 48 px
+    var startX = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posX - 1) : 0;
+    var endX = onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + 1) : width;
+    var startY = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posY - 1) : 0;
+    var endY = onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + 2) : height; // +1 for 48 px
 
     for (var x = startX; x < endX; x++) {
         for (var y = startY; y < endY; y++) {
@@ -1013,7 +1041,7 @@ maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus, on
     var sx = (one.sx || 0) + (currStatus || 0) % (one.frame || 1) * width;
     var sy = one.sy || 0;
     var x = one.x || 0, y = one.y || 0;
-    if (onMap) {
+    if (onMap && core.bigmap.v2) {
         if (x > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || x + width < 32 * core.bigmap.posX - 32 
             || y > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || y + height < 32 * core.bigmap.posY - 32) {
             return;
@@ -1040,7 +1068,7 @@ maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus, on
 ////// 绘制Autotile //////
 
 
-maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, status) {
+maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, status, onMap) {
     var xx = block.x, yy = block.y;
     var autotile = core.material.images['autotile'][block.event.id];
     status = status || 0;
@@ -1060,27 +1088,32 @@ maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, st
             iG[_x][_y] = isGrass(xx + _x, yy + _y);
         })});
     if(iG[-1][-1] + iG[0][-1] + iG[0][0] + iG[-1][0] == 3 && !iG[-1][-1]){
-        this._drawAutotile_render(ctx, xx * size + left, yy * size + top, size, autotile, status, 16);
+        this._drawAutotile_render(ctx, xx * size + left, yy * size + top, size, autotile, status, 16, null, onMap);
         done[0] = true;
     }
     if(iG[0][-1] + iG[1][-1] + iG[1][0] + iG[0][0] == 3 && !iG[1][-1]){
-        this._drawAutotile_render(ctx, xx * size + left + size/2, yy * size + top, size, autotile, status,  17);
+        this._drawAutotile_render(ctx, xx * size + left + size/2, yy * size + top, size, autotile, status,  17, null, onMap);
         done[1] = true;
     }
     if(iG[0][0] + iG[1][0] + iG[1][1] + iG[0][1] == 3 && !iG[1][1]){
-        this._drawAutotile_render(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, status, 18);
+        this._drawAutotile_render(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, status, 18, null, onMap);
         done[3] = true;
     }
     if(iG[0-1][0] + iG[0][0] + iG[0][1] + iG[-1][1] == 3 && !iG[-1][1]){
-        this._drawAutotile_render(ctx, xx * size + left, yy * size + top + size/2, size, autotile, status, 19);
+        this._drawAutotile_render(ctx, xx * size + left, yy * size + top + size/2, size, autotile, status, 19, null, onMap);
         done[2] = true;
     }
     var _id = iG[0][-1] + 2 * iG[-1][0] + 4 * iG[0][1] + 8 * iG[1][0];
-    this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status,  _id, done);
+
+    this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status,  _id, done, onMap);
 }
 
 
-maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, status, index, done) {
+maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, status, index, done, onMap) {
+    if (onMap) {
+        x -= 32 * core.bigmap.posX;
+        y -= 32 * core.bigmap.posY;
+    }
     var indexData = [[[96 * status, 0, 32, 32, x, y, size, size],],
         [[96 * status, 3 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size],],
         [[96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2],[96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
@@ -1193,20 +1226,27 @@ maps.prototype._drawAutotile_getAutotileIndexs = function (x, y, mapArr, indexAr
 maps.prototype._drawAutotileAnimate = function (block, animate) {
     var x = block.x, y = block.y;
     // ------ 界面外的动画不绘制
-    if (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
-        || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16) {
-        return;
+    if (core.bigmap.v2) {
+        var posX = core.bigmap.posX, posY = core.bigmap.posY;
+        if (x < posX - 1 || y < posY - 1 || x > posX + core.__SIZE__ || y > posY + core.__SIZE__) {
+            return;
+        }
+    } else {
+        if (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
+                || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16) {
+            return;
+        }
     }
 
     var cv = block.name?core.canvas[block.name]:core.canvas.event;
-    cv.clearRect(32 * x, 32 * y, 32, 32);
+    cv.clearRect(32 * x - 32 * core.bigmap.posX, 32 * y - 32 * core.bigmap.posY, 32, 32);
     if (block.name) {
         if (block.name == 'bg')
-            core.drawImage('bg', core.material.groundCanvas.canvas, 32 * x, 32 * y);
-        this._drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, animate);
+            core.drawImage('bg', core.material.groundCanvas.canvas, 32 * x - 32 * core.bigmap.posX, 32 * y - 32 * core.bigmap.posY);
+        this._drawAutotile(cv, core.status.autotileAnimateObjs[block.name+"map"], block, 32, 0, 0, animate, true);
     }
     else {
-        this._drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, animate);
+        this._drawAutotile(cv, core.status.autotileAnimateObjs.map, block, 32, 0, 0, animate, true);
     }
 }
 

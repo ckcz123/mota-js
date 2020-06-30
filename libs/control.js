@@ -915,8 +915,13 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
         if (id=='ui' || id=='data') continue; // UI层和data层不移动
         var offsetX = x, offsetY = y;
         if (core.bigmap.canvas.indexOf(id)>=0) {
-            offsetX -= core.bigmap.offsetX;
-            offsetY -= core.bigmap.offsetY;
+            if (core.bigmap.v2) {
+                offsetX -= (core.bigmap.offsetX - 32 * core.bigmap.posX) + 32;
+                offsetY -= (core.bigmap.offsetY - 32 * core.bigmap.posY) + 32;
+            } else {
+                offsetX -= core.bigmap.offsetX;
+                offsetY -= core.bigmap.offsetY;
+            }
         }
         core.control.setGameCanvasTranslate(id, offsetX, offsetY);
     }
@@ -925,18 +930,23 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
 ////// 更新视野范围 //////
 control.prototype.updateViewport = function() {
     // 当前是否应该重绘？
-    if (core.bigmap.offsetX >= core.bigmap.posX * 32 + 32
-        || core.bigmap.offsetX <= core.bigmap.posX * 32 - 32
-        || core.bigmap.offsetY >= core.bigmap.posY * 32 + 32
-        || core.bigmap.offsetY <= core.bigmap.posY * 32 - 32) {
-            core.bigmap.posX = parseInt(core.bigmap.offsetX / 32);
-            core.bigmap.posY = parseInt(core.bigmap.offsetY / 32);
-            // redraw
-            core.redrawMap();
-        }
+    if (core.bigmap.v2) {
+        if (core.bigmap.offsetX >= core.bigmap.posX * 32 + 32
+            || core.bigmap.offsetX <= core.bigmap.posX * 32 - 32
+            || core.bigmap.offsetY >= core.bigmap.posY * 32 + 32
+            || core.bigmap.offsetY <= core.bigmap.posY * 32 - 32) {
+                core.bigmap.posX = parseInt(core.bigmap.offsetX / 32);
+                core.bigmap.posY = parseInt(core.bigmap.offsetY / 32);
+                core.redrawMap();
+            }
+    } else {
+        core.bigmap.posX = core.bigmap.posY = 0;
+    }
+    var offsetX = core.bigmap.v2 ? -(core.bigmap.offsetX - 32 * core.bigmap.posX) - 32 : -core.bigmap.offsetX;
+    var offsetY = core.bigmap.v2 ? -(core.bigmap.offsetY - 32 * core.bigmap.posY) - 32 : -core.bigmap.offsetY;
 
     core.bigmap.canvas.forEach(function(cn){
-        core.control.setGameCanvasTranslate(cn, -(core.bigmap.offsetX - 32 * core.bigmap.posX) - 32, -(core.bigmap.offsetY - 32 * core.bigmap.posY) - 32);
+        core.control.setGameCanvasTranslate(cn, offsetX, offsetY);
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
@@ -2867,18 +2877,7 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gameDraw.style.right = 0;
     core.dom.gameDraw.style.border = obj.border;
     // resize bigmap
-    var csize = core.__PIXELS__ + 64;
-    core.bigmap.canvas.forEach(function (cn) {
-        core.canvas[cn].canvas.setAttribute("width", csize);
-        core.canvas[cn].canvas.setAttribute("height", csize);
-        core.canvas[cn].canvas.style.width = csize * core.domStyle.scale + "px";
-        core.canvas[cn].canvas.style.height = csize * core.domStyle.scale + "px";
-        core.canvas[cn].translate(32, 32);
-        if (main.mode === 'editor' && editor.isMobile) {
-            core.canvas[cn].canvas.style.width = csize / core.__PIXELS__ * 96 + "vw";
-            core.canvas[cn].canvas.style.height = csize / core.__PIXELS__ * 96 + "vw";
-        }    
-    });
+    core.resizeMap();
     // resize dynamic canvas
     for (var name in core.dymCanvas) {
         var ctx = core.dymCanvas[name], canvas = ctx.canvas;

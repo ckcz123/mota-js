@@ -2752,6 +2752,9 @@ type core = {
         posY: number
         width: number // map width and height
         height: number
+        v2: boolean
+        threshold: number
+        scale: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
     }
     saves: {

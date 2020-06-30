@@ -379,18 +379,6 @@ maps.prototype.resizeMap = function (floorId) {
     if (!floorId) return;
     core.bigmap.width = core.floors[floorId].width;
     core.bigmap.height = core.floors[floorId].height;
-    var cwidth = core.bigmap.width * 32;
-    var cheight = core.bigmap.height * 32;
-    core.bigmap.canvas.forEach(function (cn) {
-        core.canvas[cn].canvas.setAttribute("width", cwidth);
-        core.canvas[cn].canvas.setAttribute("height", cheight);
-        core.canvas[cn].canvas.style.width = cwidth * core.domStyle.scale + "px";
-        core.canvas[cn].canvas.style.height = cheight * core.domStyle.scale + "px";
-        if (main.mode === 'editor' && editor.isMobile) {
-            core.canvas[cn].canvas.style.width = core.bigmap.width * 32 / core.__PIXELS__ * 96 + "vw";
-            core.canvas[cn].canvas.style.height = core.bigmap.height * 32 / core.__PIXELS__ * 96 + "vw";
-        }
-    });
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
@@ -758,9 +746,10 @@ maps.prototype.drawBlock = function (block, animate) {
     if (!redraw) animate = 0;
     var x = block.x, y = block.y;
     // --- 在界面外的动画不绘制
-    if (redraw && block.event.animate > 1 &&
-        (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
-            || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16)) {
+
+    // 判定是否绘制
+    var posX = core.bigmap.posX, posY = core.bigmap.posY;
+    if (x < posX - 1 || y < posY - 1 || x > posX + core.__SIZE__ || y > posY + core.__SIZE__ + 1) { // +1 for 48 height
         return;
     }
 
@@ -775,27 +764,31 @@ maps.prototype.drawBlock = function (block, animate) {
 
 maps.prototype._drawBlockInfo = function (blockInfo, x, y) {
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
+    var px = 32 * x - 32 * core.bigmap.posX;
+    var py = 32 * y - 32 * core.bigmap.posY;
 
-    core.clearMap('event', x * 32, y * 32, 32, 32);
-    core.drawImage('event', image, posX * 32, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+    core.clearMap('event', px, py, 32, 32);
+    core.drawImage('event', image, posX * 32, posY * height + height - 32, 32, 32, px, py, 32, 32);
     if (height > 32) {
-        core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32)
-        core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
+        core.clearMap('event2', px, py + 32 - height, 32, height - 32)
+        core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, px, py + 32 - height, 32, height - 32);
     }
 }
 
 maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y) {
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
+    var px = 32 * x - 32 * core.bigmap.posX;
+    var py = 32 * y - 32 * core.bigmap.posY;
 
-    core.clearMap(name, x * 32, y * 32 + 32 - height, 32, height);
+    core.clearMap(name, px, py + 32 - height, 32, height);
     if (name == 'bg') {
         if (height > 32) {
-            core.clearMap('bg', x * 32, y * 32 - 32, 32, 32);
-            core.drawImage('bg', core.material.groundCanvas.canvas, x * 32, y * 32 - 32);
+            core.clearMap('bg', px, py - 32, 32, 32);
+            core.drawImage('bg', core.material.groundCanvas.canvas, px, py - 32);
         }
-        core.drawImage('bg', core.material.groundCanvas.canvas, x * 32, y * 32);
+        core.drawImage('bg', core.material.groundCanvas.canvas, px, py);
     }
-    core.drawImage(name, image, posX * 32, posY * height, 32, height, x * 32, y * 32 + 32 - height, 32, height);
+    core.drawImage(name, image, posX * 32, posY * height, 32, height, px, py + 32 - height, 32, height);
 }
 
 ////// 生成groundPattern //////
@@ -812,12 +805,9 @@ maps.prototype.generateGroundPattern = function (floorId) {
 }
 
 ////// 绘制某张地图 //////
-maps.prototype.drawMap = function (floorId, callback) {
+maps.prototype.drawMap = function (floorId) {
     floorId = floorId || core.status.floorId;
-    if (!floorId) {
-        if (callback) callback();
-        return;
-    }
+    if (!floorId) return;
     core.clearMap('all');
     this.generateGroundPattern(floorId);
     core.status.floorId = floorId;
@@ -831,7 +821,15 @@ maps.prototype.drawMap = function (floorId, callback) {
     }
     core.drawHero();
     core.updateStatusBar();
-    if (callback) callback();
+}
+
+////// 重绘某张地图 //////
+maps.prototype.redrawMap = function () {
+    core.bigmap.canvas.forEach(function (one) {
+        core.clearMap(one);
+    });
+    this._drawMap_drawAll();
+    // core.redrawDamage();
 }
 
 maps.prototype._drawMap_drawAll = function (floorId) {
@@ -843,6 +841,14 @@ maps.prototype._drawMap_drawAll = function (floorId) {
 
 maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, onMap) {
     if (blockInfo == null) return;
+    if (onMap) {
+        // 判定是否绘制
+        var posX = core.bigmap.posX, posY = core.bigmap.posY;
+        if (block.x < posX - 1 || block.y < posY - 1 || block.x > posX + core.__SIZE__ || block.y > posY + core.__SIZE__ + 1) { // +1 for 48 height
+            return;
+        }
+    }
+
     if (blockInfo.cls == 'autotile') { // Autotile单独处理
         this._drawAutotile(ctx, arr, block, 32, 0, 0);
         if (onMap) this.addGlobalAnimate(block);
@@ -866,19 +872,18 @@ maps.prototype.drawBg = function (floorId, ctx) {
         core.clearMap(ctx);
         core.status.floorAnimateObjs = this._getFloorImages(floorId);
     }
-    core.maps._drawBg_drawBackground(floorId, ctx);
+    core.maps._drawBg_drawBackground(floorId, ctx, onMap);
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
-    core.maps._drawFloorImages(floorId, ctx, 'bg');
+    core.maps._drawFloorImages(floorId, ctx, 'bg', null, null, onMap);
     core.maps._drawBgFgMap(floorId, ctx, 'bg', onMap);
 }
 
-maps.prototype._drawBg_drawBackground = function (floorId, ctx) {
-    var width = core.floors[floorId].width, height = core.floors[floorId].height;
+maps.prototype._drawBg_drawBackground = function (floorId, ctx, onMap) {
     var groundId = (core.status.maps || core.floors)[floorId].defaultGround || "ground";
     var groundInfo = core.getBlockInfo(groundId);
     if (groundInfo != null) {
-        for (var i = 0; i < width; i++) {
-            for (var j = 0; j < height; j++) {
+        for (var i = onMap ? -1 : 0; i < (onMap ? core.__SIZE__ + 1 : core.floors[floorId].width); i++) {
+            for (var j = onMap ? -1 : 0; j < (onMap ? core.__SIZE__ + 1 : core.floors[floorId].height); j++) {
                 core.drawImage(ctx, groundInfo.image, 32 * groundInfo.posX, groundInfo.height * groundInfo.posY, 32, 32, i * 32, j * 32, 32, 32);
             }
         }
@@ -910,7 +915,7 @@ maps.prototype.drawFg = function (floorId, ctx) {
         core.status.floorAnimateObjs = this._getFloorImages(floorId);
     }
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
-    this._drawFloorImages(floorId, ctx, 'fg');
+    this._drawFloorImages(floorId, ctx, 'fg', null, null, onMap);
     this._drawBgFgMap(floorId, ctx, 'fg', onMap);
 }
 
@@ -930,8 +935,13 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
         eventArr = this.getMapArray(floorId);
     }
 
-    for (var x = 0; x < width; x++) {
-        for (var y = 0; y < height; y++) {
+    var startX = onMap ? Math.max(0, core.bigmap.posX - 1) : 0;
+    var endX = onMap ? Math.min(width, core.bigmap.posX + core.__SIZE__ + 1) : width;
+    var startY = onMap ? Math.max(0, core.bigmap.posY - 1) : 0;
+    var endY = onMap ? Math.min(height, core.bigmap.posY + core.__SIZE__ + 2) : height; // +1 for 48 px
+
+    for (var x = startX; x < endX; x++) {
+        for (var y = startY; y < endY; y++) {
             var block = this.initBlock(x, y, arr[y][x], true);
             block.name = name;
             var blockInfo = this.getBlockInfo(block);
@@ -957,7 +967,7 @@ maps.prototype._drawBgFgMap_shouldBlurFg = function () {
 }
 
 ////// 绘制楼层贴图 //////
-maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStatus) {
+maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStatus, onMap) {
     floorId = floorId || core.status.floorId;
     if (!images) images = this._getFloorImages(floorId);
     var redraw = currStatus != null;
@@ -974,7 +984,7 @@ maps.prototype._drawFloorImages = function (floorId, ctx, name, images, currStat
             this._drawFloorImages_gif(image, one.x, one.y);
             return;
         }
-        this._drawFloorImage(ctx, name, one, image, currStatus);
+        this._drawFloorImage(ctx, name, one, image, currStatus, onMap);
     }, this);
 }
 
@@ -995,25 +1005,34 @@ maps.prototype._drawFloorImages_gif = function (image, dx, dy) {
     return;
 }
 
-maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus) {
+maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus, onMap) {
     var height = image.height;
     var imageName = one.name + (one.reverse||'');
     var width = parseInt((one.w == null ? image.width : one.w) / (one.frame || 1));
     var height = one.h == null ? image.height : one.h;
     var sx = (one.sx || 0) + (currStatus || 0) % (one.frame || 1) * width;
     var sy = one.sy || 0;
+    var x = one.x || 0, y = one.y || 0;
+    if (onMap) {
+        if (x > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || x + width < 32 * core.bigmap.posX - 32 
+            || y > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || y + height < 32 * core.bigmap.posY - 32) {
+            return;
+        }
+        x -= 32 * core.bigmap.posX;
+        y -= 32 * core.bigmap.posY;
+    }
 
     if (one.canvas != 'auto' && one.canvas != name) return;
     if (one.canvas != 'auto') {
-        if (currStatus != null) core.clearMap(ctx, one.x, one.y, width, height);
-        core.drawImage(ctx, imageName, sx, sy, width, height, one.x, one.y, width, height);
+        if (currStatus != null) core.clearMap(ctx, x, y, width, height);
+        core.drawImage(ctx, imageName, sx, sy, width, height, x, y, width, height);
     } else {
         if (name == 'bg') {
-            if (currStatus != null) core.clearMap(ctx, one.x, one.y + height - 32, width, 32);
-            core.drawImage(ctx, imageName, sx, sy + height - 32, width, 32, one.x, one.y+height - 32, width, 32);
+            if (currStatus != null) core.clearMap(ctx, x, y + height - 32, width, 32);
+            core.drawImage(ctx, imageName, sx, sy + height - 32, width, 32, x, y + height - 32, width, 32);
         } else if (name == 'fg') {
-            if (currStatus != null) core.clearMap(ctx, one.x, one.y, width, height - 32);
-            core.drawImage(ctx, imageName, sx, sy, width, height - 32, one.x, one.y, width, height - 32);
+            if (currStatus != null) core.clearMap(ctx, x, y, width, height - 32);
+            core.drawImage(ctx, imageName, sx, sy, width, height - 32, x, y, width, height - 32);
         }
     }
 }
@@ -1531,11 +1550,13 @@ maps.prototype._removeBlockFromMap = function (floorId, block) {
         core.drawMap();
     } else {
         var x = block.x, y = block.y;
+        var px = 32 * x - core.bigmap.posX * 32;
+        var py = 32 * y - core.bigmap.posY * 32;
         core.removeGlobalAnimate(x, y);
-        core.clearMap('event', x * 32, y * 32, 32, 32);
+        core.clearMap('event', px, py, 32, 32);
         var height = block.event.height || 32;
         if (height > 32)
-            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32);
+            core.clearMap('event2', px, py + 32 - height, 32, height - 32);
         core.updateStatusBar();
     }
 }
@@ -1603,11 +1624,9 @@ maps.prototype._triggerBgFgMap = function (type, name, loc, floorId, callback) {
     core.status[name + "maps"][floorId] = null;
 
     if (floorId == core.status.floorId) {
-        core.drawMap(floorId, callback);
+        core.drawMap(floorId);
     }
-    else {
-        if (callback) callback();
-    }
+    if (callback) callback();
 }
 
 ////// 显示一个楼层贴图 //////
@@ -1637,11 +1656,9 @@ maps.prototype._triggerFloorImage = function (type, loc, floorId, callback) {
     })
 
     if (floorId == core.status.floorId) {
-        core.drawMap(floorId, callback);
+        core.drawMap(floorId);
     }
-    else {
-        if (callback) callback();
-    }
+    if (callback) callback();
 }
 
 ////// 改变图块 //////

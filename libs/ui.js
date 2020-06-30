@@ -50,14 +50,20 @@ ui.prototype._createUIEvent = function () {
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
         for (var m in core.canvas) {
-            core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+            core.canvas[m].clearRect(-32, -32, core.canvas[m].width+32, core.canvas[m].height+32);
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();
     }
     else {
         var ctx = this.getContextByName(name);
-        if (ctx) ctx.clearRect(x||0, y||0, width||ctx.canvas.width, height||ctx.canvas.height);
+        if (ctx) {
+            if (x != null && y != null && width != null && height != null) {
+                ctx.clearRect(x, y, width, height);
+            } else {
+                ctx.clearRect(-32, -32, ctx.canvas.width + 32, ctx.canvas.height + 32);
+            }
+        }
     }
 }
 

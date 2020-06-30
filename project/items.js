@@ -416,7 +416,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "tools",
 		"name": "地震卷轴",
 		"text": "可以破坏当前层的所有墙",
-		"useItemEffect": "(function () {\n\tvar indexes = [];\n\tfor (var index in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[index];\n\t\tif (!block.disable && block.event.canBreak) {\n\t\t\tindexes.push(index);\n\t\t}\n\t}\n\tcore.removeBlockByIndexes(indexes);\n\tcore.drawMap(core.status.floorId, function () {\n\t\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n\t});\n})();",
+		"useItemEffect": "(function () {\n\tvar indexes = [];\n\tfor (var index in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[index];\n\t\tif (!block.disable && block.event.canBreak) {\n\t\t\tindexes.push(index);\n\t\t}\n\t}\n\tcore.removeBlockByIndexes(indexes);\n\tcore.drawMap();\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
 		"canUseItemEffect": "(function () {\n\treturn core.status.thisMap.blocks.filter(function (block) {\n\t\treturn !block.disable && block.event.canBreak;\n\t}).length > 0;\n})();"
 	},
 	"poisonWine": {

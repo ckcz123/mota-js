@@ -557,10 +557,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.status[name + "maps"][floorId] = null;
 
 		if (floorId == core.status.floorId) {
-			core.drawMap(floorId, callback);
-		} else {
-			if (callback) callback();
+			core.drawMap(floorId);
 		}
+		if (callback) callback();
 	};
 	// 改变背景层2与前景层2图块 例:core.setBgFgBlock('fg2',312,core.nextX(),core.nextY())
 	core.maps.setBgFgBlock = function (name, number, x, y, floorId) {

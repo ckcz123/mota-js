@@ -2748,6 +2748,8 @@ type core = {
         canvas: string[],
         offsetX: number // in pixel
         offsetY: number
+        posX: number
+        posY: number
         width: number // map width and height
         height: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing

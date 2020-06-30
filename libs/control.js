@@ -924,8 +924,19 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
 
 ////// 更新视野范围 //////
 control.prototype.updateViewport = function() {
+    // 当前是否应该重绘？
+    if (core.bigmap.offsetX >= core.bigmap.posX * 32 + 32
+        || core.bigmap.offsetX <= core.bigmap.posX * 32 - 32
+        || core.bigmap.offsetY >= core.bigmap.posY * 32 + 32
+        || core.bigmap.offsetY <= core.bigmap.posY * 32 - 32) {
+            core.bigmap.posX = parseInt(core.bigmap.offsetX / 32);
+            core.bigmap.posY = parseInt(core.bigmap.offsetY / 32);
+            // redraw
+            core.redrawMap();
+        }
+
     core.bigmap.canvas.forEach(function(cn){
-        core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
+        core.control.setGameCanvasTranslate(cn, -(core.bigmap.offsetX - 32 * core.bigmap.posX) - 32, -(core.bigmap.offsetY - 32 * core.bigmap.posY) - 32);
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
@@ -2856,9 +2867,17 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gameDraw.style.right = 0;
     core.dom.gameDraw.style.border = obj.border;
     // resize bigmap
-    core.bigmap.canvas.forEach(function(cn){
-        core.canvas[cn].canvas.style.width = core.bigmap.width * 32 * core.domStyle.scale + "px";
-        core.canvas[cn].canvas.style.height = core.bigmap.height * 32 * core.domStyle.scale + "px";
+    var csize = core.__PIXELS__ + 64;
+    core.bigmap.canvas.forEach(function (cn) {
+        core.canvas[cn].canvas.setAttribute("width", csize);
+        core.canvas[cn].canvas.setAttribute("height", csize);
+        core.canvas[cn].canvas.style.width = csize * core.domStyle.scale + "px";
+        core.canvas[cn].canvas.style.height = csize * core.domStyle.scale + "px";
+        core.canvas[cn].translate(32, 32);
+        if (main.mode === 'editor' && editor.isMobile) {
+            core.canvas[cn].canvas.style.width = csize / core.__PIXELS__ * 96 + "vw";
+            core.canvas[cn].canvas.style.height = csize / core.__PIXELS__ * 96 + "vw";
+        }    
     });
     // resize dynamic canvas
     for (var name in core.dymCanvas) {

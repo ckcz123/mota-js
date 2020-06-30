@@ -1867,6 +1867,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "number",
           "!doc": "大地图视角纵向偏移量"
         },
+        "posX": {
+          "!type": "number",
+          "!doc": "大地图视角横向基准格"
+        },
+        "posY": {
+          "!type": "number",
+          "!doc": "大地图视角纵向基准格"
+        },
         "tempCanvas": {
           "!type": "CanvasRenderingContext2D",
           "!doc": "临时画布"

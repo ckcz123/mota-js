@@ -93,6 +93,8 @@ function core() {
         canvas: ["bg", "event", "event2", "fg", "damage"],
         offsetX: 0, // in pixel
         offsetY: 0,
+        posX: 0, // 
+        posY: 0, 
         width: this.__SIZE__, // map width and height
         height: this.__SIZE__,
         tempCanvas: null, // A temp canvas for drawing

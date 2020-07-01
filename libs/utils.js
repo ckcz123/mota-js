@@ -58,6 +58,14 @@ utils.prototype._init = function () {
             return this.substring(0, search.length) === search;
         }
     }
+    if (typeof Array.prototype.fill != "function") {
+        Array.prototype.fill = function (value) {
+            for (var i = 0; i < this.length; ++i)
+                if (this[i] == null)
+                    this[i] = value;
+            return this;
+        }
+    }
 
 }
 

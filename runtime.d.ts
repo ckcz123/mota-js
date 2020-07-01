@@ -151,6 +151,7 @@ type gameStatus = {
     fgmaps: { [key: string]: number[][] }
     /** 显伤伤害 */
     checkBlock: {}
+    damage: {}
 
     lockControl: boolean
 
@@ -393,13 +394,16 @@ declare class control {
     nearHero(x: number, y: number, n?: number): boolean
     
     /**
-     * 更新地图显伤
+     * 重算并绘制地图显伤
      * @example core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）
      * @param floorId 地图id，不填视为当前地图。预览地图时填写
      * @param ctx 绘制到的画布，如果填写了就会画在该画布而不是显伤层
      */
     updateDamage(floorId?: string, ctx?: CanvasRenderingContext2D): void
     
+    /** 仅重绘地图显伤 */
+    drawDamage(ctx?: CanvasRenderingContext2D): void
+
     /**
      * 设置主角的某个属性
      * @example core.setStatus('loc', {x : 0, y : 0, direction : 'up'}); // 设置主角位置为地图左上角，脸朝上

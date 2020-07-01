@@ -130,7 +130,15 @@ function core() {
         'maps': null,
         'bgmaps': {},
         'fgmaps': {},
-        'checkBlock': {}, // 显伤伤害
+        'checkBlock': {}, // 每个点的阻激夹域信息
+        'damage': {  // 每个点的显伤绘制
+            'posX': 0,
+            'posY': 0,
+            'bigmapThreshold': 1024,
+            'bigmapLimit': 10,
+            'data': [],
+            'extraData': [],
+        },
 
         'lockControl': false,
 

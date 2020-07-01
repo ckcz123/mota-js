@@ -1116,63 +1116,129 @@ control.prototype._checkBlock_ambush = function (ambush) {
 ////// 更新全地图显伤 //////
 control.prototype.updateDamage = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
-    if (!core.isset(floorId) || core.status.gameOver) return;
-    if (core.status.gameOver) return;
-    var refreshCheckBlock = true;
-    if (!core.isset(ctx)) {
-        ctx = core.canvas.damage;
-        core.clearMap('damage');
-        refreshCheckBlock = false;
-    }
+    if (!floorId || core.status.gameOver) return;
+    var onMap = ctx == null;
 
     // 没有怪物手册
     if (!core.hasItem('book')) return;
-    core.setFont(ctx, "bold 11px Arial");
-    this._updateDamage_damage(floorId, ctx);
-    this._updateDamage_extraDamage(floorId, ctx, refreshCheckBlock);
+    core.status.damage.posX = core.bigmap.posX;
+    core.status.damage.posY = core.bigmap.posY;
+    if (!onMap) {
+        var width = core.floors[floorId].width, height = core.floors[floorId].height;
+        // 地图过大的缩略图不绘制显伤
+        if (width * height > core.status.damage.bigmapThreshold) return;
+    }
+    this._updateDamage_damage(floorId, onMap);
+    this._updateDamage_extraDamage(floorId, onMap);
+    this.drawDamage(ctx);
 }
 
-control.prototype._updateDamage_damage = function (floorId, ctx) {
-    core.setTextAlign(ctx, 'left');
+control.prototype._updateDamage_damage = function (floorId, onMap) {
+    core.status.damage.data = [];
+    if (!core.flags.displayEnemyDamage && !core.flags.displayExtraDamage) return;
+
     core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         var x = block.x, y = block.y;
+
+        // v2优化，只绘制范围内的部分
+        if (onMap && core.bigmap.v2) {
+            if (x < core.bigmap.posX - core.status.damage.bigmapLimit
+                || x > core.bigmap.posX + core.__SIZE__ + core.status.damage.bigmapLimit
+                || y < core.bigmap.posY - core.status.damage.bigmapLimit
+                || y > core.bigmap.posY + core.__SIZE__ + core.status.damage.bigmapLimit) {
+                    return;
+                }
+        }
+
         if (!block.disable && block.event.cls.indexOf('enemy') == 0 && block.event.displayDamage !== false) {
-           if (core.flags.displayEnemyDamage) {
+            if (core.flags.displayEnemyDamage) {
                var damageString = core.enemys.getDamageString(block.event.id, x, y, floorId);
-               var damage = damageString.damage, color = damageString.color;
-               core.fillBoldText(ctx, damage, 32*x+1, 32*(y+1)-1, color);
-           }
-           if (core.flags.displayCritical) {
+               core.status.damage.data.push({text: damageString.damage, px: 32*x+1, py: 32*(y+1)-1, color: damageString.color});
+            }
+            if (core.flags.displayCritical) {
                var critical = core.enemys.nextCriticals(block.event.id, 1, x, y, floorId);
                critical = core.formatBigNumber((critical[0]||[])[0], true);
                if (critical == '???') critical = '?';
-               core.fillBoldText(ctx, critical, 32*x+1, 32*(y+1)-11, '#FFFFFF');
-           }
+               core.status.damage.data.push({text: critical, px: 32*x+1, py: 32*(y+1)-11, color: '#FFFFFF'});
+            }
         }
     });
 }
 
-control.prototype._updateDamage_extraDamage = function (floorId, ctx, refresh) {
-    core.setTextAlign(ctx, 'center');
-    if (refresh) this.updateCheckBlock(floorId);
-    if (core.flags.displayExtraDamage) {
-        var width = core.floors[floorId].width, height = core.floors[floorId].height;
-        for (var x=0;x<width;x++) {
-            for (var y=0;y<height;y++) {
-                var damage = core.status.checkBlock.damage[x+","+y]||0;
-                if (damage>0) { // 该点伤害
-                    damage = core.formatBigNumber(damage, true);
-                    core.fillBoldText(ctx, damage, 32*x+16, 32*(y+1)-14, '#ffaa33');
-                }
-                else { // 检查捕捉
-                    if (core.status.checkBlock.ambush[x+","+y]) {
-                        core.fillBoldText(ctx, '!', 32*x+16, 32*(y+1)-14, '#ffaa33');
-                    }
+control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
+    core.status.damage.extraData = [];
+    if (!core.flags.displayExtraDamage) return;
+    
+    var width = core.floors[floorId].width, height = core.floors[floorId].height;
+    var startX = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posX - core.status.damage.bigmapLimit) : 0;
+    var endX = onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + core.status.damage.bigmapLimit + 1) : width;
+    var startY = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posY - core.status.damage.bigmapLimit) : 0;
+    var endY = onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + core.status.damage.bigmapLimit + 1) : height;
+
+    for (var x=startX;x<endX;x++) {
+        for (var y=startY;y<endY;y++) {
+            var damage = core.status.checkBlock.damage[x+","+y]||0;
+            if (damage>0) { // 该点伤害
+                damage = core.formatBigNumber(damage, true);
+                core.status.damage.extraData.push({text: damage, px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
+            }
+            else { // 检查捕捉
+                if (core.status.checkBlock.ambush[x+","+y]) {
+                    core.status.damage.extraData.push({text: '!', px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
                 }
             }
         }
     }
+}
+
+////// 重绘地图显伤 //////
+control.prototype.drawDamage = function (ctx) {
+    if (core.status.gameOver || !core.status.damage) return;
+    var onMap = false;
+    if (ctx == null) {
+        ctx = core.canvas.damage;
+        core.clearMap('damage');
+        onMap = true;
+    }
+
+    if (onMap && core.bigmap.v2) {
+        // 检查是否需要重算...
+        if (Math.abs(core.bigmap.posX - core.status.damage.posX) >= core.status.damage.bigmapLimit - 1
+            || Math.abs(core.bigmap.posY - core.status.damage.posY) >= core.status.damage.bigmapLimit - 1) {
+            return this.updateDamage();
+        }
+    }
+    return this._drawDamage_draw(ctx, onMap);
+}
+
+control.prototype._drawDamage_draw = function (ctx, onMap) {
+    if (!core.hasItem('book')) return;
+    core.setFont(ctx, "bold 11px Arial");
+
+    core.setTextAlign(ctx, 'left');
+    core.status.damage.data.forEach(function (one) {
+        var px = one.px, py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;
+            if (px < -32 * 2 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
+                return;
+        }
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+    });
+
+    core.setTextAlign(ctx, 'center');
+    core.status.damage.extraData.forEach(function (one) {
+        var px = one.px, py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;   
+            if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
+                return;         
+        }
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+    });
 }
 
 // ------ 录像相关 ------ //

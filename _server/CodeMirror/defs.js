@@ -1881,7 +1881,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "threshold": {
           "!type": "number",
-          "!doc": "新版大地图绘制方式的界限"
+          "!doc": "新版大地图绘制方式的分界线"
         },
         "scale": {
           "!type": "number",
@@ -1952,6 +1952,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "cache": {
             "!doc": "每个点的光环缓存"
           },
+        },
+        "damage": {
+          "!doc": "每个点的显伤信息",
         },
         "ctrlDown": {
           "!type": "bool",
@@ -2131,9 +2134,13 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(color?: [number], time?: number, callback?: fn())"
         }, 
         "updateDamage": {
-          "!doc": "更新地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
+          "!doc": "重算并绘制地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
           "!type": "fn(floorId?: string, ctx?: string|CanvasRenderingContext2D)"
         }, 
+        "drawDamage": {
+          "!doc": "仅绘制地图显伤",
+          "!type": "fn(string|CanvasRenderingContext2D)"
+        },
         "nextX": {
           "!doc": "获取主角面前第n格的横坐标<br/>例如：core.closeDoor(core.nextX(), core.nextY(), 'yellowDoor', core.turnHero); // 在主角面前关上一扇黄门，然后主角顺时针旋转90°<br/>n: 目标格与主角的距离，面前为正数，背后为负数，脚下为0，不填视为1", 
           "!type": "fn(n?: number) -> number"

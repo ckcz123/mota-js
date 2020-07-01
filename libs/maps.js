@@ -247,14 +247,9 @@ maps.prototype.compressMap = function (mapArr, floorId) {
 
 maps.prototype._processInvalidMap = function (mapArr, width, height) {
     if (mapArr.length == height && mapArr[0].length == width) return mapArr;
-
-    var allZeros = [];
-    for (var i = 0; i < width; ++i) {
-        allZeros.push(0);
-    }
     var map = [];
     for (var i = 0; i < height; ++i) {
-        map.push(core.clone(allZeros));
+        map.push(Array(width).fill(0));
     }
     for (var j = 0; j < height; ++j) {
         for (var i = 0; i < width; ++i) {
@@ -408,9 +403,7 @@ maps.prototype.getMapArray = function (floorId) {
 
 maps.prototype._getMapArrayFromBlocks = function (blockArray, width, height) {
     var blocks = [];
-    var allzero = [];
-    for (var y = 0; y < width; y++) allzero.push(0);
-    for (var x = 0; x < height; x++) blocks.push(core.clone(allzero));
+    for (var x = 0; x < height; x++) blocks.push(Array(width).fill(0));
 
     blockArray.forEach(function (block) {
         blocks[block.y][block.x] = block.id;
@@ -854,7 +847,7 @@ maps.prototype.redrawMap = function () {
         core.clearMap(one);
     });
     this._drawMap_drawAll();
-    // core.redrawDamage();
+    core.drawDamage();
 }
 
 maps.prototype._drawMap_drawAll = function (floorId) {
@@ -931,7 +924,7 @@ maps.prototype.drawEvents = function (floorId, blocks, ctx) {
     }).forEach(function (block) {
         core.maps._drawMap_drawBlockInfo(ctx, block, core.maps.getBlockInfo(block), arr, onMap);
     });
-    if (onMap) core.status.autotileAnimateObjs.map = core.clone(arr);
+    if (onMap) core.status.autotileAnimateObjs.map = arr;
 }
 
 ////// 绘制前景层 //////
@@ -986,7 +979,7 @@ maps.prototype._drawBgFgMap = function (floorId, ctx, name, onMap) {
         }
     }
     if (onMap)
-        core.status.autotileAnimateObjs[name + "map"] = core.clone(arr);
+        core.status.autotileAnimateObjs[name + "map"] = arr;
 }
 
 ////// 是否应当存在事件时虚化前景层 //////

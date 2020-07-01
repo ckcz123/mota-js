@@ -2943,7 +2943,10 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gameDraw.style.right = 0;
     core.dom.gameDraw.style.border = obj.border;
     // resize bigmap
-    core.resizeMap();
+    core.bigmap.canvas.forEach(function (cn) {
+        core.canvas[cn].canvas.style.width = core.canvas[cn].canvas.width * core.domStyle.scale + "px";
+        core.canvas[cn].canvas.style.height = core.canvas[cn].canvas.height * core.domStyle.scale + "px";
+    });
     // resize dynamic canvas
     for (var name in core.dymCanvas) {
         var ctx = core.dymCanvas[name], canvas = ctx.canvas;

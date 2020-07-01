@@ -535,53 +535,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		return true;
 	};
-	/* cannotIn/cannotOut适配 end*/
-	// 前景层2与背景层2的隐藏与显示适配
-	// 比如:可以用core.hideBgFgMap("bg2",[x, y], floorId)隐藏当前楼层的背景层2图块
-	core.maps._triggerBgFgMap = function (type, name, loc, floorId, callback) {
-		if (type != 'show') type = 'hide';
-		if (!name) name = 'bg';
-		if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
-			loc = [loc];
-		floorId = floorId || core.status.floorId;
-		if (!floorId) return;
-
-		if (loc.length == 0) return;
-		loc.forEach(function (t) {
-			var x = t[0],
-				y = t[1];
-			var flag = [floorId, x, y, name + '_disable'].join('@');
-			if (type == 'hide') core.setFlag(flag, true);
-			else core.removeFlag(flag);
-		});
-		core.status[name + "maps"][floorId] = null;
-
-		if (floorId == core.status.floorId) {
-			core.drawMap(floorId);
-		}
-		if (callback) callback();
-	};
-	// 改变背景层2与前景层2图块 例:core.setBgFgBlock('fg2',312,core.nextX(),core.nextY())
-	core.maps.setBgFgBlock = function (name, number, x, y, floorId) {
-		floorId = floorId || core.status.floorId;
-		if (!floorId || number == null || x == null || y == null) return;
-		if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
-		if (name != 'bg' && name != 'fg' && name != 'bg2' && name != 'fg2') return;
-		if (typeof number == 'string') {
-			if (/^\d+$/.test(number)) number = parseInt(number);
-			else number = core.getNumberById(number);
-		}
-
-		var vFlag = [floorId, x, y, name + "_value"].join('@');
-		core.setFlag(vFlag, number);
-		core.status[name + "maps"][floorId] = null;
-
-		if (floorId == core.status.floorId) {
-			core.clearMap(name);
-			if (name.startsWith('bg')) core.drawBg(floorId);
-			else core.drawFg(floorId);
-		}
-	};
 },
     "itemShop": function () {
 	// 道具商店相关的插件

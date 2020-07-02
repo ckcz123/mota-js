@@ -1458,12 +1458,9 @@ declare class maps {
      * 可通行性判定
      * @example core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动
      * @param floorId 地图id，不填视为当前地图
-     * @param x 起点横坐标，不填视为挨个判定
-     * @param y 起点纵坐标，不填视为挨个判定
-     * @param direction 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值
-     * @returns 不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值
+     * @returns 从各点可移动方向的三维数组
      */
-    generateMovableArray(floorId?: string, x?: number, y?: number, direction?: direction): boolean | Array<direction | Array<Array<direction>>>
+    generateMovableArray(floorId?: string): Array<Array<Array<direction>>>
     
     /**
      * 单点单朝向的可通行性判定
@@ -2758,6 +2755,7 @@ type core = {
         height: number
         v2: boolean
         threshold: number
+        extend: number
         scale: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
     }

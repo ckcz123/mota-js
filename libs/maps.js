@@ -484,36 +484,38 @@ maps.prototype.getFgNumber = function (x, y, floorId) {
 // ------ 当前能否朝某方向移动，能否瞬间移动 ------ //
 
 ////// 生成全图的当前可移动信息 //////
-maps.prototype.generateMovableArray = function (floorId, x, y, direction) {
+maps.prototype.generateMovableArray = function (floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return null;
+    var arrays = this._generateMovableArray_arrays(floorId);
+
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
-    var bgArray = this.getBgMapArray(floorId),
-        fgArray = this.getFgMapArray(floorId),
-        eventArray = this.getMapArray(floorId);
-
-    var generate = function (x, y, direction) {
-        if (direction != null) {
-            return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
-                bgArray: bgArray, fgArray: fgArray, eventArray: eventArray
-            });
-        }
-        return ["left", "down", "up", "right"].filter(function (direction) {
-            return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
-                bgArray: bgArray, fgArray: fgArray, eventArray: eventArray
-            });
-        });
-    }
-
-    if (x != null && y != null) return generate(x, y, direction);
     var array = [];
-    for (var x = 0; x < width; x++) {
-        array[x] = [];
-        for (var y = 0; y < height; y++) {
-            array[x][y] = generate(x, y, direction);
+    for (var x = 0; x < width; ++x) {
+        array[x] = Array(height).fill([]);
+    }
+    var v2 = floorId == core.status.floorId && core.bigmap.v2;
+    var startX = v2 ? Math.max(0, core.bigmap.posX - core.bigmap.extend) : 0;
+    var endX = v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + core.bigmap.extend + 1) : width;
+    var startY = v2 ? Math.max(0, core.bigmap.posY - core.bigmap.extend) : 0;
+    var endY = v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + core.bigmap.extend + 1) : height;
+
+    for (var x = startX; x < endX; x++) {
+        for (var y = startY; y < endY; y++) {
+            array[x][y] = ["left", "down", "up", "right"].filter(function (direction) {
+                return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, arrays);
+            });
         }
     }
     return array;
+}
+
+maps.prototype._generateMovableArray_arrays = function (floorId) {
+    return {
+        bgArray: this.getBgMapArray(floorId), 
+        fgArray: this.getFgMapArray(floorId),
+        eventArray: this.getMapArray(floorId)
+    };
 }
 
 ////// 勇士能否前往某方向 //////
@@ -521,10 +523,14 @@ maps.prototype.canMoveHero = function (x, y, direction, floorId) {
     if (x == null) x = core.getHeroLoc('x');
     if (y == null) y = core.getHeroLoc('y');
     direction = direction || core.getHeroLoc('direction');
-    return this.generateMovableArray(floorId, x, y, direction);
+    return this._canMoveHero_checkPoint(x, y, direction, floorId);
 }
 
-maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
+maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, arrays) {
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return false;
+    arrays = arrays || this._generateMovableArray_arrays(floorId);
+
     // 1. 检查该点 cannotMove
     if (core.inArray((core.floors[floorId].cannotMove || {})[x + "," + y], direction))
         return false;
@@ -534,13 +540,9 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, ext
         return false;
 
     // 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
-    if (this._canMoveHero_checkCannotInOut([
-            extraData.bgArray[y][x], extraData.fgArray[y][x], extraData.eventArray[y][x]
-        ], "cannotOut", direction))
+    if (this._canMoveHero_checkCannotInOut(Object.keys(arrays).map(function (name) { return arrays[name][y][x]; }), "cannotOut", direction))
         return false;
-    if (this._canMoveHero_checkCannotInOut([
-            extraData.bgArray[ny][nx], extraData.fgArray[ny][nx], extraData.eventArray[ny][nx]
-        ], "cannotIn", direction))
+    if (this._canMoveHero_checkCannotInOut(Object.keys(arrays).map(function (name) { return arrays[name][ny][nx]; }), "cannotIn", direction))
         return false;
 
     // 3. 检查是否能进将死的领域

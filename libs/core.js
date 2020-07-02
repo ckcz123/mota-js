@@ -99,6 +99,7 @@ function core() {
         height: this.__SIZE__,
         v2: false,
         threshold: 512,
+        extend: 10,
         scale: 1.0,
         tempCanvas: null, // A temp canvas for drawing
     }
@@ -134,8 +135,6 @@ function core() {
         'damage': {  // 每个点的显伤绘制
             'posX': 0,
             'posY': 0,
-            'bigmapThreshold': 1024,
-            'bigmapLimit': 10,
             'data': [],
             'extraData': [],
         },

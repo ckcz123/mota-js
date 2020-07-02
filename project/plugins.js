@@ -434,107 +434,60 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	}
 
 	////// 绘制背景层 //////
-	core.maps.drawBg = function (floorId, ctx) {
+	core.maps.drawBg = function (floorId, config) {
 		floorId = floorId || core.status.floorId;
-		var onMap = ctx == null;
-		if (onMap) {
-			ctx = core.canvas.bg;
-			core.clearMap(ctx);
+
+		config = config || {};
+		if (config.ctx == null) {
+			config.onMap = true;
+			config.ctx = 'bg';
+			core.clearMap('bg');
 			core.status.floorAnimateObjs = this._getFloorImages(floorId);
 		}
-		core.maps._drawBg_drawBackground(floorId, ctx);
+
+		core.maps._drawBg_drawBackground(floorId, config);
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
-		core.maps._drawFloorImages(floorId, ctx, 'bg');
-		core.maps._drawBgFgMap(floorId, ctx, 'bg', onMap);
+		core.maps._drawFloorImages(floorId, config.ctx, 'bg', null, null, config.onMap);
+		core.maps._drawBgFgMap(floorId, 'bg', config);
 		// 绘制背景层2
-		core.maps._drawBgFgMap(floorId, ctx, 'bg2', onMap);
-	};
+		if (config.onMap) {
+			config.ctx = 'bg2';
+			core.clearMap('bg2');
+		}
+		core.maps._drawBgFgMap(floorId, 'bg2', config);
+	}
 
 	////// 绘制前景层 //////
-	core.maps.drawFg = function (floorId, ctx) {
+	core.maps.drawFg = function (floorId, config) {
 		floorId = floorId || core.status.floorId;
-		var onMap = ctx == null;
-		if (onMap) {
-			ctx = core.canvas.fg;
+		config = config || {};
+		if (config.ctx == null) {
+			config.onMap = true;
+			config.ctx = 'fg';
+			core.clearMap('fg');
 			core.status.floorAnimateObjs = this._getFloorImages(floorId);
 		}
+
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
-		this._drawFloorImages(floorId, ctx, 'fg');
-		this._drawBgFgMap(floorId, ctx, 'fg', onMap);
+		core.maps._drawFloorImages(floorId, config.ctx, 'fg', null, null, config.onMap);
+		core.maps._drawBgFgMap(floorId, 'fg', config);
 		// 绘制前景层2
-		this._drawBgFgMap(floorId, ctx, 'fg2', onMap);
-	};
-	/* cannotIn/cannotOut适配 start*/
-	core.maps.generateMovableArray = function (floorId, x, y, direction) {
-		floorId = floorId || core.status.floorId;
-		if (!floorId) return null;
-		var width = core.floors[floorId].width,
-			height = core.floors[floorId].height;
-		var bgArray = this.getBgMapArray(floorId),
-			bg2Array = this._getBgFgMapArray('bg2', floorId),
-			fgArray = this.getFgMapArray(floorId),
-			fg2Array = this._getBgFgMapArray('fg2', floorId),
-			eventArray = this.getMapArray(floorId);
-
-		var generate = function (x, y, direction) {
-			if (direction != null) {
-				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
-					bgArray: bgArray,
-					fgArray: fgArray,
-					bg2Array: bg2Array,
-					fg2Array: fg2Array,
-					eventArray: eventArray
-				});
-			}
-			return ["left", "down", "up", "right"].filter(function (direction) {
-				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
-					bgArray: bgArray,
-					fgArray: fgArray,
-					bg2Array: bg2Array,
-					fg2Array: fg2Array,
-					eventArray: eventArray
-				});
-			});
-		};
-
-		if (x != null && y != null) return generate(x, y, direction);
-		var array = [];
-		for (var x = 0; x < width; x++) {
-			array[x] = [];
-			for (var y = 0; y < height; y++) {
-				array[x][y] = generate(x, y);
-			}
+		if (config.onMap) {
+			config.ctx = 'fg2';
+			core.clearMap('fg2');
 		}
-		return array;
-	};
-	core.maps._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
-		// 1. 检查该点 cannotMove
-		if (core.inArray((core.floors[floorId].cannotMove || {})[x + "," + y], direction))
-			return false;
-
-		var nx = x + core.utils.scan[direction].x,
-			ny = y + core.utils.scan[direction].y;
-		if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].height)
-			return false;
-
-		// 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
-		if (this._canMoveHero_checkCannotInOut([
-				extraData.bgArray[y][x], extraData.bg2Array[y][x], extraData.fgArray[y][x], extraData.fg2Array[y][x], extraData.eventArray[y][x]
-			], "cannotOut", direction))
-			return false;
-		if (this._canMoveHero_checkCannotInOut([
-				extraData.bgArray[ny][nx], extraData.bg2Array[ny][nx], extraData.fgArray[ny][nx], extraData.fg2Array[ny][nx], extraData.eventArray[ny][nx]
-			], "cannotIn", direction))
-			return false;
-
-		// 3. 检查是否能进将死的领域
-		if (floorId == core.status.floorId && !core.flags.canGoDeadZone &&
-			core.status.hero.hp <= (core.status.checkBlock.damage[nx + "," + ny] || 0) &&
-			extraData.eventArray[ny][nx] == 0)
-			return false;
-
-		return true;
-	};
+		core.maps._drawBgFgMap(floorId, 'fg2', config);
+	}
+	/* cannotIn/cannotOut适配 start*/
+	core.maps._generateMovableArray_arrays = function (floorId) {
+		return {
+			bgArray: this.getBgMapArray(floorId),
+			fgArray: this.getFgMapArray(floorId),
+			eventArray: this.getMapArray(floorId),
+			bg2Array: this._getBgFgMapArray('bg2', floorId),
+			fg2Array: this._getBgFgMapArray('fg2', floorId)
+		};
+	}
 },
     "itemShop": function () {
 	// 道具商店相关的插件

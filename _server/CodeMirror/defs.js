@@ -1883,6 +1883,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "number",
           "!doc": "新版大地图绘制方式的分界线"
         },
+        "extend": {
+          "!type": "number",
+          "!doc": "新版大地图模式下向每一侧额外计算的数量"
+        },
         "scale": {
           "!type": "number",
           "!doc": "缩略图的比例放缩"
@@ -3179,8 +3183,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(floorId?: string, map?: ?)"
         }, 
         "generateMovableArray": {
-          "!doc": "可通行性判定<br/>例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动<br/>floorId: 地图id，不填视为当前地图<br/>x: 起点横坐标，不填视为挨个判定<br/>y: 起点纵坐标，不填视为挨个判定<br/>direction: 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值<br/>返回值：不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值", 
-          "!type": "fn(floorId?: string, x?: number, y?: number, direction?: string)"
+          "!doc": "可通行性判定<br/>例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动<br/>floorId: 地图id，不填视为当前地图<br/>返回值：从各点可移动方向的三维数组", 
+          "!type": "fn(floorId?: string) -> [[[string]]]"
         }, 
         "terrainExists": {
           "!doc": "某个点是否存在（指定的）地形", 

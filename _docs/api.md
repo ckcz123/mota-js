@@ -1373,14 +1373,11 @@ showDisable: 隐藏点是否不返回null，true表示不返回null
 loadFloor: fn(floorId?: string, map?: ?)
 从文件或存档中加载某个楼层
 
-generateMovableArray: fn(floorId?: string, x?: number, y?: number, direction?: string)
+generateMovableArray: fn(floorId?: string)
 可通行性判定
 例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动
 floorId: 地图id，不填视为当前地图
-x: 起点横坐标，不填视为挨个判定
-y: 起点纵坐标，不填视为挨个判定
-direction: 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值
-返回值：不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值
+返回值：从各点可移动方向的三维数组
 
 terrainExists: fn(x: number, y: number, id?: string, floorId?: string) -> bool
 某个点是否存在（指定的）地形

@@ -1126,7 +1126,7 @@ control.prototype.updateDamage = function (floorId, ctx) {
     if (!onMap) {
         var width = core.floors[floorId].width, height = core.floors[floorId].height;
         // 地图过大的缩略图不绘制显伤
-        if (width * height > core.status.damage.bigmapThreshold) return;
+        if (width * height > (core.__SIZE__ + 2 * core.bigmap.extend) * (core.__SIZE__ + 2 * core.bigmap.extend)) return;
     }
     this._updateDamage_damage(floorId, onMap);
     this._updateDamage_extraDamage(floorId, onMap);
@@ -1143,12 +1143,10 @@ control.prototype._updateDamage_damage = function (floorId, onMap) {
 
         // v2优化，只绘制范围内的部分
         if (onMap && core.bigmap.v2) {
-            if (x < core.bigmap.posX - core.status.damage.bigmapLimit
-                || x > core.bigmap.posX + core.__SIZE__ + core.status.damage.bigmapLimit
-                || y < core.bigmap.posY - core.status.damage.bigmapLimit
-                || y > core.bigmap.posY + core.__SIZE__ + core.status.damage.bigmapLimit) {
-                    return;
-                }
+            if (x < core.bigmap.posX - core.bigmap.extend || x > core.bigmap.posX + core.__SIZE__ + core.bigmap.extend
+                || y < core.bigmap.posY - core.bigmap.extend || y > core.bigmap.posY + core.__SIZE__ + core.bigmap.extend) {
+                return;
+            }
         }
 
         if (!block.disable && block.event.cls.indexOf('enemy') == 0 && block.event.displayDamage !== false) {
@@ -1171,10 +1169,10 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
     if (!core.flags.displayExtraDamage) return;
     
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
-    var startX = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posX - core.status.damage.bigmapLimit) : 0;
-    var endX = onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + core.status.damage.bigmapLimit + 1) : width;
-    var startY = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posY - core.status.damage.bigmapLimit) : 0;
-    var endY = onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + core.status.damage.bigmapLimit + 1) : height;
+    var startX = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posX - core.bigmap.extend) : 0;
+    var endX = onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + core.bigmap.extend + 1) : width;
+    var startY = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posY - core.bigmap.extend) : 0;
+    var endY = onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + core.bigmap.extend + 1) : height;
 
     for (var x=startX;x<endX;x++) {
         for (var y=startY;y<endY;y++) {
@@ -1204,8 +1202,8 @@ control.prototype.drawDamage = function (ctx) {
 
     if (onMap && core.bigmap.v2) {
         // 检查是否需要重算...
-        if (Math.abs(core.bigmap.posX - core.status.damage.posX) >= core.status.damage.bigmapLimit - 1
-            || Math.abs(core.bigmap.posY - core.status.damage.posY) >= core.status.damage.bigmapLimit - 1) {
+        if (Math.abs(core.bigmap.posX - core.status.damage.posX) >= core.bigmap.extend - 1
+            || Math.abs(core.bigmap.posY - core.status.damage.posY) >= core.bigmap.extend - 1) {
             return this.updateDamage();
         }
     }

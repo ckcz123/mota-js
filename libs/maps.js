@@ -569,7 +569,7 @@ maps.prototype.canMoveDirectly = function (destX, destY) {
     return this.canMoveDirectlyArray([[destX,destY]])[0];
 }
 
-maps.prototype.canMoveDirectlyArray = function (locs) {
+maps.prototype.canMoveDirectlyArray = function (locs, canMoveArray) {
     var ans = [], number = locs.length;
 
     var fromX = core.getHeroLoc('x'), fromY = core.getHeroLoc('y');
@@ -598,7 +598,7 @@ maps.prototype.canMoveDirectlyArray = function (locs) {
         return ans;
     }
 
-    return this._canMoveDirectly_bfs(fromX, fromY, locs, number, ans);
+    return this._canMoveDirectly_bfs(fromX, fromY, locs, number, ans, canMoveArray);
 }
 
 maps.prototype._canMoveDirectly_checkGlobal = function () {
@@ -622,8 +622,8 @@ maps.prototype._canMoveDirectly_checkStartPoint = function (sx, sy) {
     return true;
 }
 
-maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans) {
-    var canMoveArray = this.generateMovableArray();
+maps.prototype._canMoveDirectly_bfs = function (sx, sy, locs, number, ans, canMoveArray) {
+    canMoveArray = canMoveArray || this.generateMovableArray();
     var blocksObj = this.getMapBlocksObj(core.status.floorId);
     // 滑冰
     var bgMap = this.getBgMapArray();

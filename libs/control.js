@@ -770,7 +770,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
     var dirs = [[destX,destY],[destX-1,destY,"right"],[destX,destY-1,"down"],[destX,destY+1,"up"],[destX+1,destY,"left"]];
-    var canMoveDirectlyArray = core.canMoveDirectlyArray(dirs);
+    var canMoveDirectlyArray = core.canMoveDirectlyArray(dirs, canMoveArray);
 
     for (var i = 0; i < dirs.length; ++i) {
         var d = dirs[i], dx = d[0], dy = d[1], dir = d[2];

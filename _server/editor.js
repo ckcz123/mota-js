@@ -442,6 +442,8 @@ editor.prototype.drawPosSelection = function () {
 editor.prototype._updateMap_bigmap = function () {
     var bm=editor.dom.ebmCtx;
     bm.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+    bm.fillStyle = '#000000';
+    bm.fillRect(0, 0, core.__PIXELS__, core.__PIXELS__);
     core.drawThumbnail(editor.currentFloorId, core.status.thisMap.blocks, null, 
         {ctx: bm, all: true});
     var width = editor.currentFloorData.width;

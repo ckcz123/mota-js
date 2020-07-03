@@ -1530,9 +1530,8 @@ declare class maps {
      * @param floorId 地图id，不填视为当前地图
      * @param blocks 一般不需要
      * @param options 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
-     * @param toDraw 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心
      */
-    drawThumbnail(floorId?: string, blocks?: Block[], options?: object, toDraw?: string | CanvasRenderingContext2D | object): void
+    drawThumbnail(floorId?: string, blocks?: Block[], options?: object): void
     
     /**
      * 判定某个点是否不可被踏入（不基于主角生命值和图块cannotIn属性）
@@ -2375,6 +2374,9 @@ declare class utils {
      * @returns 拷贝的结果，注意函数将原样返回
      */
     clone<T>(data?: T, filter?: (name: string, value: any) => boolean, recursion?: boolean): T
+
+    /** 深拷贝一个1D或2D的数组 */
+    cloneArray(data?: Array<number>|Array<Array<number>>): Array<number>|Array<Array<number>>
 
     /**
      * 等比例切分一张图片

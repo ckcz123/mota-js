@@ -1231,7 +1231,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
         core.fillBoldText(cacheCtx, one.text, px, py, one.color);
     });
 
-    core.setTextAlign(ctx, 'center');
+    core.setTextAlign(cacheCtx, 'center');
     core.status.damage.extraData.forEach(function (one) {
         var px = one.px, py = one.py;
         if (onMap && core.bigmap.v2) {
@@ -1270,7 +1270,7 @@ control.prototype.startReplay = function (list) {
     core.status.replay.replaying=true;
     core.status.replay.pausing=true;
     core.status.replay.speed=1.0;
-    core.status.replay.toReplay = core.clone(list);
+    core.status.replay.toReplay = core.cloneArray(list);
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
@@ -1525,8 +1525,8 @@ control.prototype._replay_save = function () {
         if (core.status.replay.save.length == 30)
             core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {
-            "totalList": core.clone(core.status.replay.totalList),
-            "toReplay": core.clone(core.status.replay.toReplay),
+            "totalList": core.cloneArray(core.status.replay.totalList),
+            "toReplay": core.cloneArray(core.status.replay.toReplay),
             "speed": core.status.replay.speed,
             "steps": core.status.replay.steps
         }});

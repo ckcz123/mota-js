@@ -1486,13 +1486,12 @@ y: 起点纵坐标，不填视为主角当前的
 direction: 移动的方向，不填视为主角面对的方向
 floorId: 地图id，不填视为当前地图
 
-drawThumbnail: fn(floorId?: string, blocks?: [block], options?: ?, toDraw?: string|CanvasRenderingContext2D|?)
+drawThumbnail: fn(floorId?: string, blocks?: [block], options?: ?)
 绘制缩略图
 例如：core.drawThumbnail(); // 绘制当前地图的缩略图
 floorId: 地图id，不填视为当前地图
 blocks: 一般不需要
 options: 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
-toDraw: 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心
 
 hideBlockByIndex: fn(index?: number, floorId?: string)
 根据图块的索引来隐藏图块
@@ -1845,6 +1844,10 @@ data: 待拷贝对象
 filter: 过滤器，可选，表示data为数组或对象时拷贝哪些项或属性，true表示拷贝
 recursion: 过滤器是否递归，可选。true表示过滤器也被递归
 返回值：拷贝的结果，注意函数将原样返回
+
+cloneArray: fn(data?: [number]|[[number]]) -> [number]|[[number]]
+深拷贝一个1D或2D数组对象
+例如：core.cloneArray(core.status.thisMap.map)
 
 setLocalForage: fn(key: string, value?: ?, successCallback?: fn(), errorCallback?: fn())
 往数据库写入一段数据

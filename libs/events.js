@@ -43,7 +43,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
-    core.resetGame(core.firstData.hero, hard, null, core.clone(core.initStatus.maps));
+    core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 

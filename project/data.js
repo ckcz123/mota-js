@@ -130,7 +130,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"loc": {
 				"direction": "up",
 				"x": 6,
-				"y": 10
+				"y": 12
 			},
 			"flags": {},
 			"followers": [],

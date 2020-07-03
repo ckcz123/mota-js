@@ -350,6 +350,16 @@ utils.prototype.clone = function (data, filter, recursion) {
     return data;
 }
 
+////// 深拷贝1D/2D数组优化 //////
+utils.prototype.cloneArray = function (data) {
+    if (!(data instanceof Array)) return this.clone(data);
+    if (data[0] instanceof Array) {
+        return data.map(function (one) { return one.slice(); });
+    } else {
+        return data.slice();
+    }
+}
+
 ////// 裁剪图片 //////
 utils.prototype.splitImage = function (image, width, height) {
     if (typeof image == "string") {
@@ -668,7 +678,7 @@ utils.prototype.isset = function (val) {
 utils.prototype.subarray = function (a, b) {
     if (!(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
-    var na = core.clone(a), nb = core.clone(b);
+    var na = core.cloneArray(a), nb = core.cloneArray(b);
     while (nb.length > 0) {
         if (na.shift() != nb.shift()) return null;
     }

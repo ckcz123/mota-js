@@ -2725,6 +2725,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "深拷贝一个对象(函数将原样返回)<br/>例如：core.clone(core.status.hero, (name, value) => (name == 'items' || typeof value == 'number'), false); // 深拷贝主角的属性和道具<br/>data: 待拷贝对象<br/>filter: 过滤器，可选，表示data为数组或对象时拷贝哪些项或属性，true表示拷贝<br/>recursion: 过滤器是否递归，可选。true表示过滤器也被递归<br/>返回值：拷贝的结果，注意函数将原样返回", 
           "!type": "fn(data?: ?, filter?: fn(name: string, value: ?) -> bool, recursion?: bool)"
         }, 
+        "cloneArray": {
+          "!doc": "深拷贝一个1D或2D数组对象<br/>例如：core.cloneArray(core.status.thisMap.map)", 
+          "!type": "fn(data?: [number]|[[number]]) -> [number]|[[number]]"
+        }, 
         "setLocalForage": {
           "!doc": "往数据库写入一段数据", 
           "!type": "fn(key: string, value?: ?, successCallback?: fn(), errorCallback?: fn())"
@@ -3275,8 +3279,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(x?: number, y?: number, direction?: string, floorId?: string) -> bool"
         }, 
         "drawThumbnail": {
-          "!doc": "绘制缩略图<br/>例如：core.drawThumbnail(); // 绘制当前地图的缩略图<br/>floorId: 地图id，不填视为当前地图<br/>blocks: 一般不需要<br/>options: 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档<br/>toDraw: 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心", 
-          "!type": "fn(floorId?: string, blocks?: [block], options?: ?, toDraw?: string|CanvasRenderingContext2D|?)"
+          "!doc": "绘制缩略图<br/>例如：core.drawThumbnail(); // 绘制当前地图的缩略图<br/>floorId: 地图id，不填视为当前地图<br/>blocks: 一般不需要<br/>options: 绘制信息，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档，同时包含要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心", 
+          "!type": "fn(floorId?: string, blocks?: [block], options?: ?)"
         }, 
         "hideBlockByIndex": {
           "!doc": "根据图块的索引来隐藏图块", 

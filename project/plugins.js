@@ -353,7 +353,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// 背景层2(bg2) 插入事件层(event)之前(即bg与event之间)
 		document.getElementById('mapEdit').insertBefore(bg2Canvas, document.getElementById('event'));
 		// 前景层2(fg2) 插入编辑器前景(efg)之前(即fg之后)
-		document.getElementById('mapEdit').insertBefore(fg2Canvas, document.getElementById('efg'));
+		document.getElementById('mapEdit').insertBefore(fg2Canvas, document.getElementById('ebm'));
 		// 原本有三个图层 从4开始添加
 		var num = 4;
 		// 新增图层存入editor.dom中
@@ -424,29 +424,31 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	////// 绘制背景和前景层 //////
 	core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
 		config.ctx = cacheCtx;
-		var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
 		core.maps._drawBg_drawBackground(floorId, config);
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
 		core.maps._drawFloorImages(floorId, config.ctx, 'bg', null, null, config.onMap);
 		core.maps._drawBgFgMap(floorId, 'bg', config);
-		core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
-		if (config.onMap) core.clearMap('bg2');
-		core.clearMap(cacheCtx);
+		if (config.onMap) {
+			core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
+			core.clearMap('bg2');
+			core.clearMap(cacheCtx);
+		}
 		core.maps._drawBgFgMap(floorId, 'bg2', config);
-		core.drawImage(config.onMap ? 'bg2' : toDrawCtx, cacheCtx.canvas, offset, offset);
+		if (config.onMap) core.drawImage('bg2', cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
 		config.ctx = toDrawCtx;
 	}
 	core.maps._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
 		config.ctx = cacheCtx;
-		var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
 		core.maps._drawFloorImages(floorId, config.ctx, 'fg', null, null, config.onMap);
 		core.maps._drawBgFgMap(floorId, 'fg', config);
-		core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
-		if (config.onMap) core.clearMap('fg2');
-		core.clearMap(cacheCtx);
+		if (config.onMap) {
+			core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
+			core.clearMap('fg2');
+			core.clearMap(cacheCtx);
+		}
 		core.maps._drawBgFgMap(floorId, 'fg2', config);
-		core.drawImage(config.onMap ? 'fg2' : toDrawCtx, cacheCtx.canvas, offset, offset);
+		if (config.onMap) core.drawImage('fg2', cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
 		config.ctx = toDrawCtx;
 	}
 

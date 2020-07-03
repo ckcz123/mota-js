@@ -313,14 +313,14 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
     var mh = core.floors[floorId].height;
     var floorMap = this._processInvalidMap(core.floors[floorId].map, mw, mh);
 
-    if (!mapArr) return core.clone(floorMap);
+    if (!mapArr) return core.cloneArray(floorMap);
 
     for (var x = 0; x < mh; x++) {
         if (x >= mapArr.length) {
             mapArr.push(0);
         }
         if (mapArr[x] === 0) {
-            mapArr[x] = core.clone(floorMap[x]);
+            mapArr[x] = core.cloneArray(floorMap[x]);
         }
         else {
             for (var y = 0; y < mw; y++) {
@@ -450,9 +450,9 @@ maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
         return core.status[name + "maps"][floorId];
 
     var arr = (main.mode == 'editor' && !(window.editor && editor.uievent && editor.uievent.isOpen))
-        ? core.clone(editor[name + 'map']) : null;
+        ? core.cloneArray(editor[name + 'map']) : null;
     if (arr == null)
-        arr = core.clone(core.floors[floorId][name + "map"] || []);
+        arr = core.cloneArray(core.floors[floorId][name + "map"] || []);
 
     for (var y = 0; y < height; ++y) {
         if (arr[y] == null) arr[y] = Array(width).fill(0);
@@ -926,22 +926,24 @@ maps.prototype.drawBg = function (floorId, config) {
     var toDrawCtx = core.getContextByName(config.ctx);
     if (!toDrawCtx) return;
 
-    var cacheCtx = core.bigmap.cacheCanvas;
-    cacheCtx.canvas.width = toDrawCtx.canvas.width;
-    cacheCtx.canvas.height = toDrawCtx.canvas.height;
-    if (config.onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
+    var cacheCtx = toDrawCtx;
+    if (config.onMap) {
+        cacheCtx = core.bigmap.cacheCanvas;
+        cacheCtx.canvas.width = toDrawCtx.canvas.width;
+        cacheCtx.canvas.height = toDrawCtx.canvas.height;
+        if (core.bigmap.v2) cacheCtx.translate(32, 32);
+    }
     this._drawBg_draw(floorId, toDrawCtx, cacheCtx, config);
-    cacheCtx.translate(0, 0);
+    if (config.onMap) cacheCtx.translate(0, 0);
 }
 
 maps.prototype._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
     config.ctx = cacheCtx;
-    var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
     core.maps._drawBg_drawBackground(floorId, config);
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
     core.maps._drawFloorImages(floorId, config.ctx, 'bg', null, null, config.onMap);
     core.maps._drawBgFgMap(floorId, 'bg', config);
-    core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
+    if (config.onMap) core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
     config.ctx = toDrawCtx;
 }
 
@@ -978,15 +980,18 @@ maps.prototype.drawEvents = function (floorId, blocks, config) {
     var toDrawCtx = core.getContextByName(config.ctx);
     if (!toDrawCtx) return;
 
-    var cacheCtx = core.bigmap.cacheCanvas;
-    cacheCtx.canvas.width = toDrawCtx.canvas.width;
-    cacheCtx.canvas.height = toDrawCtx.canvas.height;
-    if (config.onMap && core.bigmap.v2) {
-        cacheCtx.translate(32, 32);
+    var cacheCtx = toDrawCtx;
+    if (config.onMap) {
+        cacheCtx = core.bigmap.cacheCanvas;
+        cacheCtx.canvas.width = toDrawCtx.canvas.width;
+        cacheCtx.canvas.height = toDrawCtx.canvas.height;
+        if (core.bigmap.v2) cacheCtx.translate(32, 32);
     }
 
-    core.extractBlocks(floorId);
-    if (!blocks) blocks = core.status.maps[floorId].blocks;
+    if (!blocks) {
+        core.extractBlocks(floorId);
+        blocks = core.status.maps[floorId].blocks;
+    }
     var arr = this._getMapArrayFromBlocks(blocks, core.floors[floorId].width, core.floors[floorId].height);
 
     blocks.filter(function (block) {
@@ -995,10 +1000,11 @@ maps.prototype.drawEvents = function (floorId, blocks, config) {
         core.maps._drawMap_drawBlockInfo(cacheCtx, block, core.maps.getBlockInfo(block), arr, config.onMap);
     });
 
-    var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
-    core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
-    cacheCtx.translate(0, 0);
-    if (config.onMap) core.status.autotileAnimateObjs.map = arr;
+    if (config.onMap) {
+        core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
+        cacheCtx.translate(0, 0);
+        core.status.autotileAnimateObjs.map = arr;
+    }
 }
 
 ////// 绘制前景层 //////
@@ -1017,21 +1023,23 @@ maps.prototype.drawFg = function (floorId, config) {
     var toDrawCtx = core.getContextByName(config.ctx);
     if (!toDrawCtx) return;
 
-    var cacheCtx = core.bigmap.cacheCanvas;
-    cacheCtx.canvas.width = toDrawCtx.canvas.width;
-    cacheCtx.canvas.height = toDrawCtx.canvas.height;
-    if (config.onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
+    var cacheCtx = toDrawCtx;
+    if (config.onMap) {
+        cacheCtx = core.bigmap.cacheCanvas;
+        cacheCtx.canvas.width = toDrawCtx.canvas.width;
+        cacheCtx.canvas.height = toDrawCtx.canvas.height;
+        if (core.bigmap.v2) cacheCtx.translate(32, 32);
+    }
     this._drawFg_draw(floorId, toDrawCtx, cacheCtx, config);
-    cacheCtx.translate(0, 0);
+    if (config.onMap) cacheCtx.translate(0, 0);
 }
 
 maps.prototype._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
     config.ctx = cacheCtx;
-    var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
     core.maps._drawFloorImages(floorId, config.ctx, 'fg', null, null, config.onMap);
     core.maps._drawBgFgMap(floorId, 'fg', config);
-    core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
+    if (config.onMap) core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
     config.ctx = toDrawCtx;
 }
 
@@ -1067,11 +1075,11 @@ maps.prototype._drawBgFgMap = function (floorId, name, config) {
             var blur = false, alpha;
             if (eventArr != null && eventArr[y][x] != 0) {
                 blur = true;
-                alpha = ctx.globalAlpha;
-                ctx.globalAlpha = 0.6;
+                alpha = config.ctx.globalAlpha;
+                config.ctx.globalAlpha = 0.6;
             }
             this._drawMap_drawBlockInfo(config.ctx, block, blockInfo, arr, config.onMap);
-            if (blur) ctx.globalAlpha = alpha;
+            if (blur) config.ctx.globalAlpha = alpha;
         }
     }
     if (config.onMap)
@@ -1376,16 +1384,19 @@ maps.prototype._makeAutotileEdges = function () {
 // 此函数将绘制一个缩略图，floorId为目标floorId，blocks为地图的图块（可为null使用floorId对应默认的）
 // options为绘制选项（可为null），包括：
 //    heroLoc: 勇士位置；heroIcon：勇士图标（默认当前勇士）；damage：是否绘制显伤；flags：当前的flags（存读档时使用）
-// toDraw为要绘制到的信息（可为null，或为一个画布名），包括：
 //    ctx：要绘制到的画布（名）；x,y：起点横纵坐标（默认0）；size：大小（默认416/480）；
 //    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心）
-maps.prototype.drawThumbnail = function (floorId, blocks, options, toDraw) {
+maps.prototype.drawThumbnail = function (floorId, blocks, options) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
+    options = options || {};
+    if (typeof options == 'string' || options.canvas) options = {ctx: options};
+    var ctx = options.ctx;
     // Step1：绘制到tempCanvas上
     this._drawThumbnail_drawTempCanvas(floorId, blocks, options);
+    options.ctx = ctx;
     // Step2：从tempCanvas绘制到对应的画布上
-    this._drawThumbnail_drawToTarget(floorId, toDraw);
+    this._drawThumbnail_drawToTarget(floorId, options);
 }
 
 maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, options) {
@@ -1397,10 +1408,35 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     var height = core.floors[floorId].height;
     // 绘制到tempCanvas上面
     var tempCanvas = core.bigmap.tempCanvas;
-    var tempWidth = width * 32, tempHeight = height * 32;
-    tempCanvas.canvas.width = tempWidth;
-    tempCanvas.canvas.height = tempHeight;
-    tempCanvas.clearRect(0, 0, tempWidth, tempHeight);
+
+    // 如果是大地图模式？
+    if (options.all) {
+        // 计算比例
+        var scaleX = core.__SIZE__ / width;
+        var scaleY = core.__SIZE__ / height;
+        tempCanvas.canvas.width = width * 32 * scaleX;
+        tempCanvas.canvas.height = height * 32 * scaleY;
+        tempCanvas.scale(scaleX, scaleY);
+    } else if (width * height > core.bigmap.threshold) {
+        options.v2 = true;
+        tempCanvas.canvas.width = core.__PIXELS__;
+        tempCanvas.canvas.height = core.__PIXELS__;
+        var centerX = options.centerX, centerY = options.centerY;
+        if (centerX == null) centerX = Math.floor(width / 2);
+        if (centerY == null) centerY = Math.floor(height / 2);
+        var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
+            offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
+        tempCanvas.translate(-32 * offsetX, -32 * offsetY);
+    } else {
+        options.v2 = false;
+        tempCanvas.canvas.width = width * 32;
+        tempCanvas.canvas.height = height * 32;
+    }
+    options.ctx = tempCanvas;
+    
+    // 地图过大的缩略图不绘制显伤
+    if (width * height > (core.__SIZE__ + 2 * core.bigmap.extend) * (core.__SIZE__ + 2 * core.bigmap.extend))
+        options.damage = false;
 
     // --- 暂存 flags
     var hasHero = core.status.hero != null, flags = null;
@@ -1410,48 +1446,49 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         core.status.hero.flags = options.flags;
     }
 
-    this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options, tempCanvas);
+    this._drawThumbnail_realDrawTempCanvas(floorId, blocks, options);
 
     // --- 恢复 flags
     if (!hasHero) delete core.status.hero;
     else if (flags != null) core.status.hero.flags = flags;
+    tempCanvas.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options, tempCanvas) {
+maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, options) {
     // 缩略图：背景
-    this.drawBg(floorId, tempCanvas);
+    this.drawBg(floorId, options);
     // 缩略图：事件
-    this.drawEvents(floorId, blocks, tempCanvas);
+    this.drawEvents(floorId, blocks, options);
     // 缩略图：勇士
     if (options.heroLoc) {
         options.heroIcon = options.heroIcon || core.status.hero.image || 'hero.png';
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
-        core.drawImage(tempCanvas, core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
+        core.drawImage(options.ctx, core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
             32 * options.heroLoc.x, 32 * options.heroLoc.y + 32 - height, 32, height);
     }
     // 缩略图：前景
-    this.drawFg(floorId, tempCanvas);
+    this.drawFg(floorId, options);
     // 缩略图：显伤
-    if (options.damage)
-        core.control.updateDamage(floorId, tempCanvas);
+    if (options.damage && core.hasItem('book')) {
+        core.updateCheckBlock(floorId);
+        core.control.updateDamage(floorId, options.ctx);
+    }
 }
 
-maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
-    if (toDraw == null) return;
-    if (typeof toDraw == 'string' || toDraw.canvas) toDraw = {ctx: toDraw};
-    var ctx = core.getContextByName(toDraw.ctx);
+maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
+    var ctx = core.getContextByName(options.ctx);
     if (ctx == null) return;
-    var x = toDraw.x || 0, y = toDraw.y || 0, size = toDraw.size || core.__PIXELS__;
+    var x = options.x || 0, y = options.y || 0, size = options.size || core.__PIXELS__;
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
-    var centerX = toDraw.centerX, centerY = toDraw.centerY;
+    var centerX = options.centerX, centerY = options.centerY;
     if (centerX == null) centerX = Math.floor(width / 2);
     if (centerY == null) centerY = Math.floor(height / 2);
-    var tempCanvas = core.bigmap.tempCanvas, tempWidth = 32 * width, tempHeight = 32 * height;
+    var tempCanvas = core.bigmap.tempCanvas; 
 
-    // core.clearMap(ctx, x, y, size, size);
-    if (toDraw.all) {
+    if (options.all) {
+        var tempWidth = tempCanvas.canvas.width, tempHeight = tempCanvas.canvas.height;
         // 绘制全景图
         if (tempWidth <= tempHeight) {
             var realHeight = size, realWidth = realHeight * tempWidth / tempHeight;
@@ -1470,9 +1507,14 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, toDraw) {
     }
     else {
         // 只绘制可见窗口
-        var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
-            offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-        core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+        if (options.v2) {
+            core.drawImage(ctx, tempCanvas.canvas, 0, 0, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+        } else {
+            var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
+                offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
+            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+        }
+
     }
 }
 

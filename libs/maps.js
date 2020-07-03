@@ -1412,11 +1412,10 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     // 如果是大地图模式？
     if (options.all) {
         // 计算比例
-        var scaleX = core.__SIZE__ / width;
-        var scaleY = core.__SIZE__ / height;
-        tempCanvas.canvas.width = width * 32 * scaleX;
-        tempCanvas.canvas.height = height * 32 * scaleY;
-        tempCanvas.scale(scaleX, scaleY);
+        var scale = Math.max(core.__SIZE__ / width, core.__SIZE__ / height);
+        tempCanvas.canvas.width = width * 32 * scale;
+        tempCanvas.canvas.height = height * 32 * scale;
+        tempCanvas.scale(scale, scale);
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
         tempCanvas.canvas.width = core.__PIXELS__;

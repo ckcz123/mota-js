@@ -434,7 +434,7 @@ maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
         return core.status[name + "maps"][floorId];
 
     var arr = (main.mode == 'editor' && !(window.editor && editor.uievent && editor.uievent.isOpen))
-        ? core.clone(editor[name + 'Map']) : null;
+        ? core.clone(editor[name + 'map']) : null;
     if (arr == null)
         arr = core.clone(core.floors[floorId][name + "map"] || []);
 
@@ -760,7 +760,7 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
 // -------- 绘制地图，各层图块，楼层贴图，Autotile -------- //
 
 ////// 绘制一个图块 //////
-maps.prototype.drawBlock = function (block, animate) {
+maps.prototype.drawBlock = function (block, animate, ctx) {
     if (block.event.id == 'none') return;
     var redraw = animate != null;
     if (!redraw) animate = 0;
@@ -785,38 +785,40 @@ maps.prototype.drawBlock = function (block, animate) {
     if (blockInfo == null) return;
     if (blockInfo.cls != 'tileset') blockInfo.posX = animate % block.event.animate;
     if (!block.name)
-        this._drawBlockInfo(blockInfo, block.x, block.y);
+        this._drawBlockInfo(blockInfo, block.x, block.y, ctx);
     else
-        this._drawBlockInfo_bgfg(blockInfo, block.name, block.x, block.y);
+        this._drawBlockInfo_bgfg(blockInfo, block.name, block.x, block.y, ctx);
 }
 
-maps.prototype._drawBlockInfo = function (blockInfo, x, y) {
+maps.prototype._drawBlockInfo = function (blockInfo, x, y, ctx) {
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
     var px = 32 * x - 32 * core.bigmap.posX;
     var py = 32 * y - 32 * core.bigmap.posY;
+    if (ctx == null) ctx = 'event';
 
-    core.clearMap('event', px, py, 32, 32);
-    core.drawImage('event', image, posX * 32, posY * height + height - 32, 32, 32, px, py, 32, 32);
+    core.clearMap(ctx, px, py, 32, 32);
+    core.drawImage(ctx, image, posX * 32, posY * height + height - 32, 32, 32, px, py, 32, 32);
     if (height > 32) {
         core.clearMap('event2', px, py + 32 - height, 32, height - 32)
         core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, px, py + 32 - height, 32, height - 32);
     }
 }
 
-maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y) {
+maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y, ctx) {
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
     var px = 32 * x - 32 * core.bigmap.posX;
     var py = 32 * y - 32 * core.bigmap.posY;
+    if (ctx == null) ctx = name;
 
-    core.clearMap(name, px, py + 32 - height, 32, height);
+    core.clearMap(ctx, px, py + 32 - height, 32, height);
     if (name == 'bg') {
         if (height > 32) {
-            core.clearMap('bg', px, py - 32, 32, 32);
-            core.drawImage('bg', core.material.groundCanvas.canvas, px, py - 32);
+            core.clearMap(ctx, px, py - 32, 32, 32);
+            core.drawImage(ctx, core.material.groundCanvas.canvas, px, py - 32);
         }
-        core.drawImage('bg', core.material.groundCanvas.canvas, px, py);
+        core.drawImage(ctx, core.material.groundCanvas.canvas, px, py);
     }
-    core.drawImage(name, image, posX * 32, posY * height, 32, height, px, py + 32 - height, 32, height);
+    core.drawImage(ctx, image, posX * 32, posY * height, 32, height, px, py + 32 - height, 32, height);
 }
 
 ////// 生成groundPattern //////
@@ -887,7 +889,7 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
         core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
         return;
     }
-    this.drawBlock(block);
+    this.drawBlock(block, null, ctx);
     this.addGlobalAnimate(block);
 }
 
@@ -896,19 +898,35 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
 // redraw - 是否是重绘；ctx - 要绘制到的画布（仅限缩略图使用）；
 maps.prototype.drawBg = function (floorId, config) {
     floorId = floorId || core.status.floorId;
-
-    config = config || {};
+    if (config == null) config = {};
+    if (typeof config == 'string' || config.canvas) config = {ctx: config};
+    config = Object.assign({}, config);
     if (config.ctx == null) {
         config.onMap = true;
         config.ctx = 'bg';
         core.clearMap('bg');
         core.status.floorAnimateObjs = this._getFloorImages(floorId);
     }
+    var toDrawCtx = core.getContextByName(config.ctx);
+    if (!toDrawCtx) return;
 
+    var cacheCtx = core.bigmap.cacheCanvas;
+    cacheCtx.canvas.width = toDrawCtx.canvas.width;
+    cacheCtx.canvas.height = toDrawCtx.canvas.height;
+    if (config.onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
+    this._drawBg_draw(floorId, toDrawCtx, cacheCtx, config);
+    cacheCtx.translate(0, 0);
+}
+
+maps.prototype._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+    config.ctx = cacheCtx;
+    var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
     core.maps._drawBg_drawBackground(floorId, config);
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
     core.maps._drawFloorImages(floorId, config.ctx, 'bg', null, null, config.onMap);
     core.maps._drawBgFgMap(floorId, 'bg', config);
+    core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
+    config.ctx = toDrawCtx;
 }
 
 maps.prototype._drawBg_drawBackground = function (floorId, config) {
@@ -930,19 +948,41 @@ maps.prototype._drawBg_drawBackground = function (floorId, config) {
 }
 
 ////// 绘制事件层 //////
-maps.prototype.drawEvents = function (floorId, blocks, ctx) {
+maps.prototype.drawEvents = function (floorId, blocks, config) {
     floorId = floorId || core.status.floorId;
+    if (config == null) config = {};
+    if (typeof config == 'string' || config.canvas) config = {ctx: config};
+    config = Object.assign({}, config);
+    if (config.ctx == null) {
+        config.onMap = true;
+        config.ctx = 'event';
+        core.clearMap('event');
+        core.clearMap('event2');
+    }
+    var toDrawCtx = core.getContextByName(config.ctx);
+    if (!toDrawCtx) return;
+
+    var cacheCtx = core.bigmap.cacheCanvas;
+    cacheCtx.canvas.width = toDrawCtx.canvas.width;
+    cacheCtx.canvas.height = toDrawCtx.canvas.height;
+    if (config.onMap && core.bigmap.v2) {
+        cacheCtx.translate(32, 32);
+    }
+
     core.extractBlocks(floorId);
     if (!blocks) blocks = core.status.maps[floorId].blocks;
     var arr = this._getMapArrayFromBlocks(blocks, core.floors[floorId].width, core.floors[floorId].height);
-    var onMap = ctx == null;
-    if (onMap) ctx = core.canvas.event;
+
     blocks.filter(function (block) {
         return block.event && !block.disable;
     }).forEach(function (block) {
-        core.maps._drawMap_drawBlockInfo(ctx, block, core.maps.getBlockInfo(block), arr, onMap);
+        core.maps._drawMap_drawBlockInfo(cacheCtx, block, core.maps.getBlockInfo(block), arr, config.onMap);
     });
-    if (onMap) core.status.autotileAnimateObjs.map = arr;
+
+    var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
+    core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
+    cacheCtx.translate(0, 0);
+    if (config.onMap) core.status.autotileAnimateObjs.map = arr;
 }
 
 ////// 绘制前景层 //////
@@ -950,17 +990,33 @@ maps.prototype.drawEvents = function (floorId, blocks, ctx) {
 // redraw - 是否是重绘；ctx - 要绘制到的画布（仅限缩略图使用）；
 maps.prototype.drawFg = function (floorId, config) {
     floorId = floorId || core.status.floorId;
-    config = config || {};
+    if (config == null) config = {};
+    if (typeof config == 'string' || config.canvas) config = {ctx: config};
+    config = Object.assign({}, config);
     if (config.ctx == null) {
         config.onMap = true;
         config.ctx = 'fg';
         core.clearMap('fg');
-        core.status.floorAnimateObjs = this._getFloorImages(floorId);
     }
+    var toDrawCtx = core.getContextByName(config.ctx);
+    if (!toDrawCtx) return;
 
+    var cacheCtx = core.bigmap.cacheCanvas;
+    cacheCtx.canvas.width = toDrawCtx.canvas.width;
+    cacheCtx.canvas.height = toDrawCtx.canvas.height;
+    if (config.onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
+    this._drawFg_draw(floorId, toDrawCtx, cacheCtx, config);
+    cacheCtx.translate(0, 0);
+}
+
+maps.prototype._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+    config.ctx = cacheCtx;
+    var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
     // ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
     core.maps._drawFloorImages(floorId, config.ctx, 'fg', null, null, config.onMap);
     core.maps._drawBgFgMap(floorId, 'fg', config);
+    core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
+    config.ctx = toDrawCtx;
 }
 
 ////// 实际的背景/前景图块的绘制 //////
@@ -1210,7 +1266,7 @@ maps.prototype._drawAutotile_drawBlockByIndex = function (ctx, dx, dy, autotileI
 
 maps.prototype._drawAutotile_getAutotileAroundId = function (currId, x, y, mapArr) {
     if (x < 0 || y < 0 || x >= mapArr[0].length || y >= mapArr.length) return 1;
-    else return core.material.autotileEdges[currId].indexOf(mapArr[y][x]) >= 0;
+    else return (core.material.autotileEdges[currId] || []).indexOf(mapArr[y][x]) >= 0;
 }
 
 maps.prototype._drawAutotile_checkAround = function (x, y, mapArr) {
@@ -1927,7 +1983,7 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
 
     if (floorId == core.status.floorId){
         core.clearMap(name);
-        if (name=='bg') core.drawBg(floorId);
+        if (name.startsWith('bg')) core.drawBg(floorId);
         else core.drawFg(floorId);
     }
 }
@@ -2273,7 +2329,10 @@ maps.prototype._animateBlock_drawList = function (list, opacity) {
 
 ////// 添加一个全局动画 //////
 maps.prototype.addGlobalAnimate = function (block) {
-    if (!block.event || block.event.animate == null) return;
+    if (!block || !block.event) return;
+    this.removeGlobalAnimate(block.x, block.y, block.name);
+    if (!block.name && core.status.autotileAnimateObjs.map)
+        core.status.autotileAnimateObjs.map[block.y][block.x] = block.id;
     if (block.event.cls == 'autotile') {
         var id = block.event.id, img = core.material.images.autotile[id];
         if (!img || img.width == 96) return;
@@ -2301,13 +2360,11 @@ maps.prototype.removeGlobalAnimate = function (x, y, name) {
     });
 
     // 检查Autotile
-    if (core.status.autotileAnimateObjs.blocks) {
-        core.status.autotileAnimateObjs.blocks = core.status.autotileAnimateObjs.blocks.filter(function (block) {
-            return block.x != x || block.y != y || block.name != name;
-        });
+    core.status.autotileAnimateObjs.blocks = core.status.autotileAnimateObjs.blocks.filter(function (block) {
+        return block.x != x || block.y != y || block.name != name;
+    });
+    if (!name && core.status.autotileAnimateObjs.map)
         core.status.autotileAnimateObjs.map[y][x] = 0;
-    }
-
 }
 
 ////// 绘制UI层的box动画 //////

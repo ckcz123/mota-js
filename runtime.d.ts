@@ -2758,6 +2758,7 @@ type core = {
         extend: number
         scale: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
+        cacheCanvas: CanvasRenderingContext2D
     }
     saves: {
         saveIndex: number

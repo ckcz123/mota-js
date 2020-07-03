@@ -321,7 +321,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
 	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
 	// 插件作者：ad
-	var __enable = false;
+	var __enable = true;
 	if (!__enable) return;
 
 	// 创建新图层
@@ -364,16 +364,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		editor.dom.maps.push('bg2map', 'fg2map');
 		editor.dom.canvas.push('bg2', 'fg2');
 
-		// 默认全空
-		var defaultMap = [];
-		for (var i = 0; i < core.__SIZE__; ++i) {
-			var row = [];
-			for (var j = 0; j < core.__SIZE__; ++j) {
-				row.push(0);
-			}
-			defaultMap.push(row);
-		}
-
 		// 创建编辑器上的按钮
 		var createCanvasBtn = function (name) {
 			// 电脑端创建按钮
@@ -390,7 +380,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			input.onchange = function () {
 				editor.uifunctions.setLayerMod(value);
 			}
-			editor[value] = editor[value] || defaultMap;
 			return input;
 		};
 
@@ -402,7 +391,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			input.name = 'layerMod';
 			input.value = value;
 			editor.dom[id] = input;
-			editor[value] = editor[value] || defaultMap;
 			return input;
 		};
 		if (!editor.isMobile) {
@@ -433,51 +421,35 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 	}
 
-	////// 绘制背景层 //////
-	core.maps.drawBg = function (floorId, config) {
-		floorId = floorId || core.status.floorId;
-
-		config = config || {};
-		if (config.ctx == null) {
-			config.onMap = true;
-			config.ctx = 'bg';
-			core.clearMap('bg');
-			core.status.floorAnimateObjs = this._getFloorImages(floorId);
-		}
-
+	////// 绘制背景和前景层 //////
+	core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+		config.ctx = cacheCtx;
+		var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
 		core.maps._drawBg_drawBackground(floorId, config);
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
 		core.maps._drawFloorImages(floorId, config.ctx, 'bg', null, null, config.onMap);
 		core.maps._drawBgFgMap(floorId, 'bg', config);
-		// 绘制背景层2
-		if (config.onMap) {
-			config.ctx = 'bg2';
-			core.clearMap('bg2');
-		}
+		core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
+		if (config.onMap) core.clearMap('bg2');
+		core.clearMap(cacheCtx);
 		core.maps._drawBgFgMap(floorId, 'bg2', config);
+		core.drawImage(config.onMap ? 'bg2' : toDrawCtx, cacheCtx.canvas, offset, offset);
+		config.ctx = toDrawCtx;
 	}
-
-	////// 绘制前景层 //////
-	core.maps.drawFg = function (floorId, config) {
-		floorId = floorId || core.status.floorId;
-		config = config || {};
-		if (config.ctx == null) {
-			config.onMap = true;
-			config.ctx = 'fg';
-			core.clearMap('fg');
-			core.status.floorAnimateObjs = this._getFloorImages(floorId);
-		}
-
+	core.maps._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+		config.ctx = cacheCtx;
+		var offset = config.onMap && core.bigmap.v2 ? -32 : 0;
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
 		core.maps._drawFloorImages(floorId, config.ctx, 'fg', null, null, config.onMap);
 		core.maps._drawBgFgMap(floorId, 'fg', config);
-		// 绘制前景层2
-		if (config.onMap) {
-			config.ctx = 'fg2';
-			core.clearMap('fg2');
-		}
+		core.drawImage(toDrawCtx, cacheCtx.canvas, offset, offset);
+		if (config.onMap) core.clearMap('fg2');
+		core.clearMap(cacheCtx);
 		core.maps._drawBgFgMap(floorId, 'fg2', config);
+		core.drawImage(config.onMap ? 'fg2' : toDrawCtx, cacheCtx.canvas, offset, offset);
+		config.ctx = toDrawCtx;
 	}
+
 	/* cannotIn/cannotOut适配 start*/
 	core.maps._generateMovableArray_arrays = function (floorId) {
 		return {

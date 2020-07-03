@@ -1212,9 +1212,14 @@ control.prototype.drawDamage = function (ctx) {
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
     if (!core.hasItem('book')) return;
-    core.setFont(ctx, "bold 11px Arial");
+    // 双缓冲
+    var cacheCtx = core.bigmap.cacheCanvas;
+    cacheCtx.canvas.width = ctx.canvas.width;
+    cacheCtx.canvas.height = ctx.canvas.height;
+    cacheCtx.clearRect(0, 0, cacheCtx.canvas.width, cacheCtx.canvas.height);
 
-    core.setTextAlign(ctx, 'left');
+    core.setFont(cacheCtx, "bold 11px Arial");
+    core.setTextAlign(cacheCtx, 'left');
     core.status.damage.data.forEach(function (one) {
         var px = one.px, py = one.py;
         if (onMap && core.bigmap.v2) {
@@ -1223,7 +1228,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 * 2 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;
         }
-        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
     });
 
     core.setTextAlign(ctx, 'center');
@@ -1235,8 +1240,10 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;         
         }
-        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
     });
+
+    core.drawImage(ctx, cacheCtx.canvas, 0, 0);
 }
 
 // ------ 录像相关 ------ //

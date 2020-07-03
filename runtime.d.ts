@@ -1710,6 +1710,9 @@ declare class maps {
     loadFloor(floorId?: string, map?: any): any
 
     /** 根据需求解析出blocks */
+    extractBlocks(map?: any): void
+
+    /** 根据需求为UI解析出blocks */
     extractBlocks(map?: any, flags?: any): void
 
     /** 根据数字获得图块 */
@@ -1722,7 +1725,7 @@ declare class maps {
     getIdOfThis(id?: string): string
 
     /** 初始化一个图块 */
-    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any, flags?: any): any
+    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any): any
 
     /** 压缩地图 */
     compressMap(mapArr?: any, floorId?: string): any

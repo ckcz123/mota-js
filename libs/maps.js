@@ -61,7 +61,7 @@ maps.prototype.loadFloor = function (floorId, map) {
 }
 
 /// 根据需求解析出blocks
-maps.prototype.extractBlocks = function (map, flags) {
+maps.prototype.extractBlocks = function (map) {
     map = map || core.status.floorId;
     if (typeof map == 'string') map = (core.status.maps||{})[map];
     if (!map) return;
@@ -71,21 +71,38 @@ maps.prototype.extractBlocks = function (map, flags) {
         return;
     }
     var floorId = map.floorId;
-    map.blocks = this._mapIntoBlocks(this.decompressMap(map.map, floorId), core.floors[floorId], floorId, flags);
+    map.blocks = this._mapIntoBlocks(this.decompressMap(map.map, floorId), core.floors[floorId], floorId);
 }
 
-maps.prototype._mapIntoBlocks = function (map, floor, floorId, flags) {
+maps.prototype._mapIntoBlocks = function (map, floor, floorId) {
     var blocks = [];
     var mw = core.floors[floorId].width;
     var mh = core.floors[floorId].height;
     for (var i = 0; i < mh; i++) {
         for (var j = 0; j < mw; j++) {
-            var block = this.initBlock(j, i, (map[i] || [])[j], true, floor, flags);
+            var block = this.initBlock(j, i, (map[i] || [])[j], true, floor);
             if (block.id != 0 || block.event.trigger)
                 blocks.push(block);
         }
     }
     return blocks;
+}
+
+maps.prototype.extractBlocksForUI = function (map, flags) {
+    if (!map || map.blocks) return;
+    if (map.deleted) return map.blocks = [];
+    var floorId = map.floorId;
+    var decompressed = this.decompressMap(map.map, floorId);
+    map.blocks = [];
+    var mw = core.floors[floorId].width;
+    var mh = core.floors[floorId].height;
+    for (var i = 0; i < mh; i++) {
+        for (var j = 0; j < mw; j++) {
+            var number = (decompressed[i] || [])[j] || 0;
+            if (!number || number == 17 || this.isMapBlockDisabled(floorId, i, j, flags)) continue;
+            map.blocks.push(this.initBlock(j, i, number));
+        }
+    }
 }
 
 ////// 从ID获得数字 //////
@@ -129,11 +146,10 @@ maps.prototype.getIdOfThis = function (id) {
 }
 
 ////// 数字和ID的对应关系 //////
-maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor, flags) {
+maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable = null;
     if (eventFloor != null) {
-        if (flags == null) flags = (core.status.hero || {}).flags || {};
-        disable = this.isMapBlockDisabled(eventFloor.floorId, x, y, flags);
+        disable = this.isMapBlockDisabled(eventFloor.floorId, x, y);
     }
     var block = {'x': x, 'y': y, 'id': id};
     if (disable != null) block.disable = disable;
@@ -1373,10 +1389,10 @@ maps.prototype.drawThumbnail = function (floorId, blocks, options, toDraw) {
 }
 
 maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, options) {
-    core.extractBlocks(floorId);
-    blocks = blocks || core.status.maps[floorId].blocks;
-    options = options || {}
-
+    if (!blocks) {
+        core.extractBlocks(floorId);
+        blocks = core.status.maps[floorId].blocks;
+    }
     var width = core.floors[floorId].width;
     var height = core.floors[floorId].height;
     // 绘制到tempCanvas上面

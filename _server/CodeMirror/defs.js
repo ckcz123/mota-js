@@ -3172,7 +3172,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "extractBlocks": {
           "!doc": "根据需求解析出blocks", 
-          "!type": "fn(map?: [[number]], flags?: flags)"
+          "!type": "fn(map?: ?)"
+        }, 
+        "extractBlocksForUI": {
+          "!doc": "根据需求为UI解析出blocks", 
+          "!type": "fn(map?: ?, flags?: ?)"
         }, 
         "getBlockId": {
           "!doc": "判定某个点的图块id<br/>例如：if(core.getBlockId(x1, y1) != 'greenSlime' && core.getBlockId(x2, y2) != 'redSlime') core.openDoor(x3, y3); // 一个简单的机关门事件，打败或炸掉这一对绿头怪和红头怪就开门<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块id，该点无图块则返回null", 
@@ -3240,7 +3244,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "initBlock": {
           "!doc": "初始化一个图块", 
-          "!type": "fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?, flags?: ?) -> block"
+          "!type": "fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?) -> block"
         }, 
         "addGlobalAnimate": {
           "!doc": "添加一个全局动画", 

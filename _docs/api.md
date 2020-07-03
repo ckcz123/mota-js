@@ -1358,8 +1358,11 @@ canMoveDirectlyArray: fn(locs?: [[number]])
 hideFloorImage: fn(loc?: [number]|[[number]], floorId?: string, callback?: fn())
 隐藏一个楼层贴图
 
-extractBlocks: fn(map?: [[number]], flags?: flags)
+extractBlocks: fn(map?: ?)
 根据需求解析出blocks
+
+extractBlocksForUI: fn(map?: ?, flags?: flags)
+根据需求为UI解析出blocks
 
 getBlockId: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string
 判定某个点的图块id
@@ -1442,7 +1445,7 @@ ctx: 某画布的ctx，用于绘制缩略图，一般不需要
 getBlock: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}
 获得某个点的block
 
-initBlock: fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?, flags?: ?) -> block
+initBlock: fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?) -> block
 初始化一个图块
 
 addGlobalAnimate: fn(block?: block)

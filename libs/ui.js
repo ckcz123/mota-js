@@ -2778,7 +2778,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     if (data && data.floorId) {
         core.setTextAlign('ui', "center");
         var map = core.maps.loadMap(data.maps, data.floorId);
-        core.extractBlocks(map, data.hero.flags);
+        core.extractBlocksForUI(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
             heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags
         }, {

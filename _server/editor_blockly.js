@@ -631,7 +631,6 @@ editor_blockly = function () {
 
         namesObj.allIds = ["this"].concat(core.getAllIconIds());
         namesObj.allIconIds = namesObj.allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
-
           return core.statusBar.icons[x] instanceof Image;
         }));
         namesObj.allImages = Object.keys(core.material.images.images);

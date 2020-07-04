@@ -2633,8 +2633,12 @@ control.prototype.checkBgm = function() {
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
     Object.keys(core.statusBar).forEach(function (e) {
-        if (core.statusBar[e].innerHTML != null)
+        if (core.statusBar[e].innerHTML != null) {
             core.statusBar[e].innerHTML = "&nbsp;";
+            core.statusBar[e].removeAttribute('_isNumber');
+            core.statusBar[e].removeAttribute('_style');
+            core.statusBar[e].removeAttribute('_value');
+        }
     })
     core.statusBar.image.book.style.opacity = 0.3;
     if (!core.flags.equipboxButton)

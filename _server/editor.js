@@ -223,13 +223,17 @@ editor.prototype.init = function (callback) {
                     for (var one in canvases) {
                         canvases[one].width = canvases[one].height = core.__PIXELS__;
                     }
+                    core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.cloneArray(core.initStatus.maps));
+                    var floorId = editor.config.get('editorLastFloorId', core.status.floorId);
+                    if (core.floorIds.indexOf(floorId) < 0) floorId = core.status.floorId;
 
-                    core.resetGame(core.firstData.hero, null, core.firstData.floorId, core.clone(core.initStatus.maps));
-                    var lastFloorId = editor.config.get('editorLastFloorId', core.status.floorId);
-                    if (core.floorIds.indexOf(lastFloorId) < 0) lastFloorId = core.status.floorId;
-                    core.changeFloor(lastFloorId, null, {x: 0, y: 0, direction:"up"}, null, function () {
-                        afterCoreReset();
-                    }, true);
+                    core.status.floorId = floorId;
+                    core.resizeMap(floorId);
+                    core.clearMap('all');
+                    core.generateGroundPattern(floorId);
+                    core.extractBlocks(floorId);
+                    core.status.thisMap = core.status.maps[floorId];
+                    afterCoreReset();
                 });
             }
         
@@ -239,11 +243,13 @@ editor.prototype.init = function (callback) {
                 editor.drawInitData(core.icons.icons); // 初始化绘图
         
                 editor.game.fetchMapFromCore();
+                editor.pos = {x: 0, y: 0};
                 editor.updateMap();
                 editor.buildMark();
+                var viewportLoc = editor.config.get('viewportLoc', []);
+                editor.setViewport(viewportLoc[0] || 0, viewportLoc[1] || 0);
                 editor.drawEventBlock();
-                
-                editor.pos = {x: 0, y: 0};
+
                 editor.mode.loc();
                 editor.info = editor.ids[editor.indexs[201]];
                 editor.mode.enemyitem();
@@ -335,20 +341,26 @@ editor.prototype.changeFloor = function (floorId, callback) {
     editor.uivalues.preMapData = [];
     editor.uivalues.postMapData = [];
     editor.uifunctions._extraEvent_bindSpecialDoor_doAction(true);
-    core.changeFloor(floorId, null, {"x": 0, "y": 0, "direction": "up"}, null, function () {
-        editor.game.fetchMapFromCore();
-        editor.updateMap();
-        editor_mode.floor();
-        editor.drawEventBlock();
 
-        editor.viewportLoc = editor.viewportLoc || {};
-        var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
-        editor.setViewport(x, y);
-        editor.uifunctions.unhighlightSaveFloorButton();
+    core.status.floorId = floorId;
+    core.resizeMap(floorId);
+    core.clearMap('all');
+    core.generateGroundPattern(floorId);
+    core.extractBlocks(floorId);
+    core.status.thisMap = core.status.maps[floorId];
 
-        editor.config.set('editorLastFloorId', floorId, function() {
-            if (callback) callback();
-        });  
+    editor.game.fetchMapFromCore();
+    editor.updateMap();
+    editor_mode.floor();
+    editor.drawEventBlock();
+
+    editor.viewportLoc = editor.viewportLoc || {};
+    var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
+    editor.setViewport(x, y);
+    editor.uifunctions.unhighlightSaveFloorButton();
+
+    editor.config.set('editorLastFloorId', floorId, function() {
+        if (callback) callback();
     });
 }
 
@@ -445,8 +457,7 @@ editor.prototype._updateMap_bigmap = function () {
     bm.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
     bm.fillStyle = '#000000';
     bm.fillRect(0, 0, core.__PIXELS__, core.__PIXELS__);
-    core.drawThumbnail(editor.currentFloorId, core.status.thisMap.blocks, null, 
-        {ctx: bm, all: true});
+    core.drawThumbnail(editor.currentFloorId, null, {ctx: bm, all: true});
     var width = editor.currentFloorData.width;
     var height = editor.currentFloorData.height;
     editor.uivalues.bigmapInfo.top = core.__PIXELS__ * Math.max(0, (1 - height / width) / 2);
@@ -573,6 +584,7 @@ editor.prototype.setViewport=function (x, y) {
     editor.viewportLoc = editor.viewportLoc || {};
     editor.viewportLoc[editor.currentFloorId] = [core.bigmap.offsetX, core.bigmap.offsetY];
     core.control.updateViewport();
+    editor.config.set('viewportLoc', editor.viewportLoc[editor.currentFloorId]);
     editor.buildMark();
     editor.drawPosSelection();
 }

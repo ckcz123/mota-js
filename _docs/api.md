@@ -1222,12 +1222,15 @@ nearStair: fn() -> bool
 turnBlock: fn(direction?: string, x?: number, y?: number, floorId?: string)
 事件转向
 
-getMapArray: fn(floorId?: string) -> [[number]]
+getMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 生成事件层矩阵
 例如：core.getMapArray('MT0'); // 生成主塔0层的事件层矩阵，隐藏的图块视为0
 floorId: 地图id，不填视为当前地图
 showDisable: 可选，true表示隐藏的图块也会被表示出来
 返回值：事件层矩阵，注意对其阵元的访问是[y][x]
+
+getMapNumber: fn(x: number, y: number, floorId?: string, noCache?: bool) -> number
+获得事件层某个点的数字
 
 jumpBlock: fn(sx: number, sy: number, ex: number, ey: number, time?: number, keep?: bool, callback?: fn())
 跳跃图块；从V2.7开始不再有音效
@@ -1358,8 +1361,11 @@ canMoveDirectlyArray: fn(locs?: [[number]])
 hideFloorImage: fn(loc?: [number]|[[number]], floorId?: string, callback?: fn())
 隐藏一个楼层贴图
 
-extractBlocks: fn(map?: [[number]], flags?: flags)
+extractBlocks: fn(map?: ?)
 根据需求解析出blocks
+
+extractBlocksForUI: fn(map?: ?, flags?: flags)
+根据需求为UI解析出blocks
 
 getBlockId: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string
 判定某个点的图块id
@@ -1370,17 +1376,22 @@ floorId: 地图id，不填视为当前地图
 showDisable: 隐藏点是否不返回null，true表示不返回null
 返回值：图块id，该点无图块则返回null
 
+getBlockNumber: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number
+判定某个点的图块数字
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+showDisable: 隐藏点是否不返回null，true表示不返回null
+返回值：图块数字，该点无图块则返回null
+
 loadFloor: fn(floorId?: string, map?: ?)
 从文件或存档中加载某个楼层
 
-generateMovableArray: fn(floorId?: string, x?: number, y?: number, direction?: string)
+generateMovableArray: fn(floorId?: string)
 可通行性判定
 例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动
 floorId: 地图id，不填视为当前地图
-x: 起点横坐标，不填视为挨个判定
-y: 起点纵坐标，不填视为挨个判定
-direction: 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值
-返回值：不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值
+返回值：从各点可移动方向的三维数组
 
 terrainExists: fn(x: number, y: number, id?: string, floorId?: string) -> bool
 某个点是否存在（指定的）地形
@@ -1401,7 +1412,7 @@ x: 横坐标
 y: 纵坐标
 floorId: 地图id，不填视为当前地图
 
-getMapBlocksObj: fn(floorId?: string, showDisable?: bool)
+getMapBlocksObj: fn(floorId?: string, noCache?: bool)
 以x,y的形式返回每个点的事件
 
 removeGlobalAnimate: fn(x?: number, y?: number, name?: string)
@@ -1442,10 +1453,10 @@ drawFg: fn(floorId?: string, ctx?: CanvasRenderingContext2D)
 floorId: 地图id，不填视为当前地图
 ctx: 某画布的ctx，用于绘制缩略图，一般不需要
 
-getBlock: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}
+getBlock: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> block: block
 获得某个点的block
 
-initBlock: fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?, flags?: ?) -> block
+initBlock: fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?) -> block
 初始化一个图块
 
 addGlobalAnimate: fn(block?: block)
@@ -1486,13 +1497,12 @@ y: 起点纵坐标，不填视为主角当前的
 direction: 移动的方向，不填视为主角面对的方向
 floorId: 地图id，不填视为当前地图
 
-drawThumbnail: fn(floorId?: string, blocks?: [block], options?: ?, toDraw?: string|CanvasRenderingContext2D|?)
+drawThumbnail: fn(floorId?: string, blocks?: [block], options?: ?)
 绘制缩略图
 例如：core.drawThumbnail(); // 绘制当前地图的缩略图
 floorId: 地图id，不填视为当前地图
 blocks: 一般不需要
 options: 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
-toDraw: 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心
 
 hideBlockByIndex: fn(index?: number, floorId?: string)
 根据图块的索引来隐藏图块
@@ -1845,6 +1855,10 @@ data: 待拷贝对象
 filter: 过滤器，可选，表示data为数组或对象时拷贝哪些项或属性，true表示拷贝
 recursion: 过滤器是否递归，可选。true表示过滤器也被递归
 返回值：拷贝的结果，注意函数将原样返回
+
+cloneArray: fn(data?: [number]|[[number]]) -> [number]|[[number]]
+深拷贝一个1D或2D数组对象
+例如：core.cloneArray(core.status.thisMap.map)
 
 setLocalForage: fn(key: string, value?: ?, successCallback?: fn(), errorCallback?: fn())
 往数据库写入一段数据

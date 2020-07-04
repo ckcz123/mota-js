@@ -313,9 +313,9 @@ core.events.openShop = function (shopId, needVisited) {
 
 ```js
 var drawMap = core.maps.drawMap; // 先把原始函数用一个变量记录下来
-core.maps.drawMap = function (floorId, callback) {
+core.maps.drawMap = function (floorId) {
     console.log("drawMap..."); // 控制台打出一条信息
-    return drawMap.call(core.maps, floorId, callback); // 需要使用`call`来告知this是core.maps
+    return drawMap.call(core.maps, floorId); // 需要使用`call`来告知this是core.maps
 }
 ```
 

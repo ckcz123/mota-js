@@ -375,7 +375,7 @@ editor_ui_wrapper = function (editor) {
         // 绘制UI
         var background = uievent.elements.selectBackground.value;
         if (background == 'thumbnail') {
-            core.drawThumbnail(editor.currentFloorId, null, {}, 'uievent');
+            core.drawThumbnail(editor.currentFloorId, null, {ctx: 'uievent'});
         }
         else {
             core.fillRect('uievent', 0, 0, core.__PIXELS__, core.__PIXELS__, background);
@@ -482,11 +482,10 @@ editor_ui_wrapper = function (editor) {
         if (redraw) {
             core.setAlpha('uievent', 1);
             core.clearMap('uievent');
-            core.drawThumbnail(uievent.values.floorId, null, null,
-                {
-                    ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
-                    centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
-                });
+            core.drawThumbnail(uievent.values.floorId, null, {
+                ctx: 'uievent', centerX: uievent.values.left + core.__HALF_SIZE__,
+                centerY: uievent.values.top + core.__HALF_SIZE__, all: uievent.values.bigmap
+            });
             uievent.values.multipoints = uievent.values.multipoints || [];
             core.setTextAlign('uievent', 'right');
             for (var i = 0; i < uievent.values.multipoints.length; ++i) {
@@ -857,7 +856,7 @@ editor_ui_wrapper = function (editor) {
             var canvas = document.createElement('canvas');
             canvas.width = canvas.height = core.__PIXELS__;
             canvas.style.position = 'absolute';
-            core.drawThumbnail(editor.currentFloorId, null, {}, canvas.getContext('2d'));
+            core.drawThumbnail(editor.currentFloorId, null, {ctx: canvas.getContext('2d')});
             dom.appendChild(canvas);
             var canvas2 = document.createElement('canvas');
             canvas2.style.position = 'absolute';

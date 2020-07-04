@@ -125,6 +125,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
 				core.setMapBlockDisabled(floorId, block.x, block.y, false);
+				core.maps._updateMapArray(floorId, block.x, block.y);
 			}
 		});
 		core.control.gatherFollowers();
@@ -284,15 +285,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		return;
 	}
 
-	// 删除该块
 	var guards = []; // 支援
 	if (x != null && y != null) {
-		// 检查是否是重生怪物；如果是则仅隐藏不删除
-		if (core.hasSpecial(enemy.special, 23)) {
-			core.hideBlock(x, y);
-		} else {
-			core.removeBlock(x, y);
-		}
 		guards = core.getFlag("__guards__" + x + "_" + y, []);
 		core.removeFlag("__guards__" + x + "_" + y);
 	}
@@ -389,7 +383,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果事件不为空，将其插入
 	if (todo.length > 0) core.insertAction(todo, x, y);
-	core.updateStatusBar();
+	
+	// 因为removeBlock和hideBlock都会刷新状态栏，因此移动到这里并保证刷新只执行一次，以提升效率
+	if (core.getBlock(x, y) != null) {
+		// 检查是否是重生怪物；如果是则仅隐藏不删除
+		if (core.hasSpecial(enemy.special, 23)) {
+			core.hideBlock(x, y);
+		} else {
+			core.removeBlock(x, y);
+		}
+	} else {
+		core.updateStatusBar();
+	}
 
 	// 如果已有事件正在处理中
 	if (core.status.event.id == null)
@@ -1137,8 +1142,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.setStatusBarInnerHTML('fly', "飞" + core.itemCount('centerFly'));
 
 	// 难度
-	core.statusBar.hard.innerText = core.status.hard;
-	core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
+	if (core.statusBar.hard.innerText != core.status.hard) {
+		core.statusBar.hard.innerText = core.status.hard;
+		core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
+	}
 	// 自定义状态栏绘制
 	core.drawStatusBar();
 
@@ -1160,6 +1167,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type = {}, // 每个点的伤害类型
 		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
+	var betweenAttackLocs = {}; // 所有带夹击的怪物
 	var needCache = false;
 	var canGoDeadZone = core.flags.canGoDeadZone;
 	core.flags.canGoDeadZone = true;
@@ -1171,6 +1179,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			y = block.y,
 			id = block.event.id,
 			enemy = core.material.enemys[id];
+		if (block.disable) continue;
 
 		type[loc] = type[loc] || {};
 
@@ -1266,6 +1275,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 
+		// 夹击；在这里提前计算所有可能的夹击点，具体计算逻辑在下面
+		// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
+		if (enemy && core.enemys.hasSpecial(enemy.special, 16) && !core.hasFlag('no_betweenAttack')) {
+			for (var dir in core.utils.scan) {
+				var nx = x + core.utils.scan[dir].x,
+					ny = y + core.utils.scan[dir].y,
+					currloc = nx + "," + ny;
+				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+				betweenAttackLocs[currloc] = true;
+			}
+		}
+
 		// 检查地图范围类技能
 		var specialFlag = core.getSpecialFlag(enemy);
 		if (specialFlag & 1) needCache = true;
@@ -1275,48 +1296,46 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 更新夹击伤害
 	// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
-	if (!core.hasFlag('no_betweenAttack')) {
-		for (var x = 0; x < width; x++) {
-			for (var y = 0; y < height; y++) {
-				var loc = x + "," + y;
-				// 夹击怪物的ID
-				var enemyId1 = null,
-					enemyId2 = null;
-				// 检查左右夹击
-				var leftBlock = blocks[(x - 1) + "," + y],
-					rightBlock = blocks[(x + 1) + "," + y];
-				if (leftBlock && rightBlock && leftBlock.id == rightBlock.id) {
-					if (core.hasSpecial(leftBlock.event.id, 16))
-						enemyId1 = leftBlock.event.id;
-				}
-				// 检查上下夹击
-				var topBlock = blocks[x + "," + (y - 1)],
-					bottomBlock = blocks[x + "," + (y + 1)];
-				if (topBlock && bottomBlock && topBlock.id == bottomBlock.id) {
-					if (core.hasSpecial(topBlock.event.id, 16))
-						enemyId2 = topBlock.event.id;
-				}
+	for (var loc in betweenAttackLocs) {
+		var xy = loc.split(","),
+			x = parseInt(xy[0]),
+			y = parseInt(xy[1]);
+		// 夹击怪物的ID
+		var enemyId1 = null,
+			enemyId2 = null;
+		// 检查左右夹击
+		var leftBlock = blocks[(x - 1) + "," + y],
+			rightBlock = blocks[(x + 1) + "," + y];
+		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable &&  leftBlock.id == rightBlock.id) {
+			if (core.hasSpecial(leftBlock.event.id, 16))
+				enemyId1 = leftBlock.event.id;
+		}
+		// 检查上下夹击
+		var topBlock = blocks[x + "," + (y - 1)],
+			bottomBlock = blocks[x + "," + (y + 1)];
+		if (topBlock && !topBlock.disable &&  bottomBlock && !bottomBlock.disable && topBlock.id == bottomBlock.id) {
+			if (core.hasSpecial(topBlock.event.id, 16))
+				enemyId2 = topBlock.event.id;
+		}
 
-				if (enemyId1 != null || enemyId2 != null) {
-					var leftHp = core.status.hero.hp - (damage[loc] || 0);
-					if (leftHp > 1) {
-						// 夹击伤害值
-						var value = Math.floor(leftHp / 2);
-						// 是否不超过怪物伤害值
-						if (core.flags.betweenAttackMax) {
-							var enemyDamage1 = core.getDamage(enemyId1, x, y, floorId);
-							if (enemyDamage1 != null && enemyDamage1 < value)
-								value = enemyDamage1;
-							var enemyDamage2 = core.getDamage(enemyId2, x, y, floorId);
-							if (enemyDamage2 != null && enemyDamage2 < value)
-								value = enemyDamage2;
-						}
-						if (value > 0) {
-							damage[loc] = (damage[loc] || 0) + value;
-							type[loc] = type[loc] || {};
-							type[loc]["夹击伤害"] = true;
-						}
-					}
+		if (enemyId1 != null || enemyId2 != null) {
+			var leftHp = core.status.hero.hp - (damage[loc] || 0);
+			if (leftHp > 1) {
+				// 夹击伤害值
+				var value = Math.floor(leftHp / 2);
+				// 是否不超过怪物伤害值
+				if (core.flags.betweenAttackMax) {
+					var enemyDamage1 = core.getDamage(enemyId1, x, y, floorId);
+					if (enemyDamage1 != null && enemyDamage1 < value)
+						value = enemyDamage1;
+					var enemyDamage2 = core.getDamage(enemyId2, x, y, floorId);
+					if (enemyDamage2 != null && enemyDamage2 < value)
+						value = enemyDamage2;
+				}
+				if (value > 0) {
+					damage[loc] = (damage[loc] || 0) + value;
+					type[loc] = type[loc] || {};
+					type[loc]["夹击伤害"] = true;
 				}
 			}
 		}
@@ -1372,7 +1391,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		nowy = core.getHeroLoc('y');
 	var block = core.getBlock(nowx, nowy);
 	var hasTrigger = false;
-	if (block != null && block.block.event.trigger == 'getItem' &&
+	if (block != null && block.event.trigger == 'getItem' &&
 		!core.floors[core.status.floorId].afterGetItem[nowx + "," + nowy]) {
 		hasTrigger = true;
 		core.trigger(nowx, nowy, callback);

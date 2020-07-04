@@ -149,8 +149,10 @@ type gameStatus = {
     thisMap: ResolvedMap
     bgmaps: { [key: string]: number[][] }
     fgmaps: { [key: string]: number[][] }
+    mapBlockObjs: { [key: string]: any }
     /** 显伤伤害 */
     checkBlock: {}
+    damage: {}
 
     lockControl: boolean
 
@@ -230,12 +232,7 @@ type gameStatus = {
     globalAnimateObjs: []
     floorAnimateObjs: []
     boxAnimateObjs: []
-    autotileAnimateObjs: {
-        blocks: [],
-        map: any
-        bgmap: any
-        fgmap: null
-    }
+    autotileAnimateObjs: []
     globalAnimateStatus: number
     animateObjs: []
 }
@@ -393,13 +390,16 @@ declare class control {
     nearHero(x: number, y: number, n?: number): boolean
     
     /**
-     * 更新地图显伤
+     * 重算并绘制地图显伤
      * @example core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）
      * @param floorId 地图id，不填视为当前地图。预览地图时填写
      * @param ctx 绘制到的画布，如果填写了就会画在该画布而不是显伤层
      */
     updateDamage(floorId?: string, ctx?: CanvasRenderingContext2D): void
     
+    /** 仅重绘地图显伤 */
+    drawDamage(ctx?: CanvasRenderingContext2D): void
+
     /**
      * 设置主角的某个属性
      * @example core.setStatus('loc', {x : 0, y : 0, direction : 'up'}); // 设置主角位置为地图左上角，脸朝上
@@ -1410,7 +1410,10 @@ declare class maps {
      * @param showDisable 可选，true表示隐藏的图块也会被表示出来
      * @returns 事件层矩阵，注意对其阵元的访问是[y][x]
      */
-    getMapArray(floorId?: string): number[][]
+    getMapArray(floorId?: string, noCache?: boolean): number[][]
+
+    /** 判定图块的事件层数字；不存在为0 */
+    getMapNumber(floorId?: string, noCache?: boolean): number
     
     /**
      * 生成背景层矩阵
@@ -1454,12 +1457,9 @@ declare class maps {
      * 可通行性判定
      * @example core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动
      * @param floorId 地图id，不填视为当前地图
-     * @param x 起点横坐标，不填视为挨个判定
-     * @param y 起点纵坐标，不填视为挨个判定
-     * @param direction 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值
-     * @returns 不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值
+     * @returns 从各点可移动方向的三维数组
      */
-    generateMovableArray(floorId?: string, x?: number, y?: number, direction?: direction): boolean | Array<direction | Array<Array<direction>>>
+    generateMovableArray(floorId?: string): Array<Array<Array<direction>>>
     
     /**
      * 单点单朝向的可通行性判定
@@ -1529,9 +1529,8 @@ declare class maps {
      * @param floorId 地图id，不填视为当前地图
      * @param blocks 一般不需要
      * @param options 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
-     * @param toDraw 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心
      */
-    drawThumbnail(floorId?: string, blocks?: Block[], options?: object, toDraw?: string | CanvasRenderingContext2D | object): void
+    drawThumbnail(floorId?: string, blocks?: Block[], options?: object): void
     
     /**
      * 判定某个点是否不可被踏入（不基于主角生命值和图块cannotIn属性）
@@ -1554,6 +1553,9 @@ declare class maps {
      */
     getBlockId(x: number, y: number, floorId?: string, showDisable?: boolean): string | null
     
+    /** 判定某个点的图块数字；空图块为0 */
+    getBlockNumber(x: number, y: number, floorId?: string, showDisable?: boolean): number
+
     /**
      * 判定某个点的图块类型
      * @example if(core.getBlockCls(x1, y1) != 'enemys' && core.getBlockCls(x2, y2) != 'enemy48') core.openDoor(x3, y3); // 另一个简单的机关门事件，打败或炸掉这一对不同身高的敌人就开门
@@ -1709,6 +1711,9 @@ declare class maps {
     loadFloor(floorId?: string, map?: any): any
 
     /** 根据需求解析出blocks */
+    extractBlocks(map?: any): void
+
+    /** 根据需求为UI解析出blocks */
     extractBlocks(map?: any, flags?: any): void
 
     /** 根据数字获得图块 */
@@ -1721,7 +1726,7 @@ declare class maps {
     getIdOfThis(id?: string): string
 
     /** 初始化一个图块 */
-    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any, flags?: any): any
+    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any): any
 
     /** 压缩地图 */
     compressMap(mapArr?: any, floorId?: string): any
@@ -1739,7 +1744,7 @@ declare class maps {
     resizeMap(floorId?: string): void
 
     /** 以x,y的形式返回每个点的事件 */
-    getMapBlocksObj(floorId?: string, showDisable?: any): any
+    getMapBlocksObj(floorId?: string, noCache?: boolean): any
 
     /** 获得某些点可否通行的信息 */
     canMoveDirectlyArray(locs?: any): any
@@ -1766,7 +1771,7 @@ declare class maps {
     enemyExists(x?: number, y?: number, id?: string, floorId?: string): boolean
 
     /** 获得某个点的block */
-    getBlock(x?: number, y?: number, floorId?: string, showDisable?: boolean): any
+    getBlock(x?: number, y?: number, floorId?: string, showDisable?: boolean): Block
 
     /** 获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等 */
     getBlockInfo(block?: any): any
@@ -2372,6 +2377,9 @@ declare class utils {
      */
     clone<T>(data?: T, filter?: (name: string, value: any) => boolean, recursion?: boolean): T
 
+    /** 深拷贝一个1D或2D的数组 */
+    cloneArray(data?: Array<number>|Array<Array<number>>): Array<number>|Array<Array<number>>
+
     /**
      * 等比例切分一张图片
      * @example core.splitImage(core.material.images.images['npc48.png'], 32, 48); // 把npc48.png切分成若干32×48px的小人
@@ -2748,9 +2756,16 @@ type core = {
         canvas: string[],
         offsetX: number // in pixel
         offsetY: number
+        posX: number
+        posY: number
         width: number // map width and height
         height: number
+        v2: boolean
+        threshold: number
+        extend: number
+        scale: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
+        cacheCanvas: CanvasRenderingContext2D
     }
     saves: {
         saveIndex: number

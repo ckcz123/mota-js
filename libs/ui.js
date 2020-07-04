@@ -50,14 +50,20 @@ ui.prototype._createUIEvent = function () {
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
         for (var m in core.canvas) {
-            core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+            core.canvas[m].clearRect(-32, -32, core.canvas[m].width+32, core.canvas[m].height+32);
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();
     }
     else {
         var ctx = this.getContextByName(name);
-        if (ctx) ctx.clearRect(x||0, y||0, width||ctx.canvas.width, height||ctx.canvas.height);
+        if (ctx) {
+            if (x != null && y != null && width != null && height != null) {
+                ctx.clearRect(x, y, width, height);
+            } else {
+                ctx.clearRect(-32, -32, ctx.canvas.width + 32, ctx.canvas.height + 32);
+            }
+        }
     }
 }
 
@@ -1864,10 +1870,7 @@ ui.prototype.drawBook = function (index) {
     core.setAlpha('ui', 1);
 
     if (enemys.length == 0) {
-        core.setTextAlign('ui', 'center');
-        core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
-        core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
-        return;
+        return this._drawBook_drawEmpty();
     }
 
     index = core.clamp(index, 0, enemys.length - 1);
@@ -1902,6 +1905,12 @@ ui.prototype._drawBook_drawBackground = function () {
     core.setAlpha('ui', 0.6);
     core.setFillStyle('ui', '#000000');
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL);
+}
+
+ui.prototype._drawBook_drawEmpty = function () {
+    core.setTextAlign('ui', 'center');
+    core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
 }
 
 ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, selected) {
@@ -2271,7 +2280,7 @@ ui.prototype.drawFly = function(page) {
     }
     var size = this.PIXEL - 143;
     core.strokeRect('ui', 20, 100, size, size, '#FFFFFF', 2);
-    core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: size});
+    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size});
 }
 
 ////// 绘制中心对称飞行器
@@ -2283,8 +2292,7 @@ ui.prototype.drawCenterFly = function () {
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
     this.clearUI();
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
-    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image},
-        {ctx: 'ui', centerX: toX, centerY: toY});
+    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image, ctx: 'ui', centerX: toX, centerY: toY});
     var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
@@ -2303,8 +2311,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.status.checkBlock.cache = {};
     var data = this._drawMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
-    core.drawThumbnail(data.floorId, null, {damage: data.damage},
-        {ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
+    core.drawThumbnail(data.floorId, null, {damage: data.damage, ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     core.clearMap('data');
     core.setTextAlign('data', 'left');
     core.setFont('data', '16px Arial');
@@ -2769,10 +2776,9 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     if (data && data.floorId) {
         core.setTextAlign('ui', "center");
         var map = core.maps.loadMap(data.maps, data.floorId);
-        core.extractBlocks(map, data.hero.flags);
+        core.extractBlocksForUI(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
-            heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags
-        }, {
+            heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags,
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });
         if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {

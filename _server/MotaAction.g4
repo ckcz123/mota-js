@@ -143,15 +143,8 @@ if (EvalString_0==''){
     if (IdString_1=='')title='\t['+EvalString_0+']';
     else title='\t['+EvalString_0+','+IdString_1+']';
 }
-var code = {
-    'id': IdString_0,
-    'text': title+EvalString_Multi_0,
-    'textInList': EvalString_1,
-    'mustEnable': Bool_0,
-    'disablePreview': Bool_1,
-    'choices': 'choices_asdfefw'
-}
-code=JSON.stringify(code,null,2).split('"choices_asdfefw"').join('[\n'+shopChoices_0+']')+',\n';
+title += EvalString_Multi_0;
+var code = '{\n"id": "'+IdString_0+'",\n"text": "'+title+'",\n"textInList": "'+EvalString_1+'",\n"mustEnable": '+Bool_0+',\n"disablePreview": '+Bool_1+',\n"choices":[\n'+shopChoices_0+']},\n';
 return code;
 */;
 
@@ -3339,7 +3332,7 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'弱等于'|'弱不等于'
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'弱相等'|'弱不相等'
     /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','==','!=']*/;
 
 AssignOperator_List

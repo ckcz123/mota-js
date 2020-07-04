@@ -321,7 +321,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
 	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
 	// 插件作者：ad
-	var __enable = false;
+	var __enable = true;
 	if (!__enable) return;
 
 	// 创建新图层
@@ -353,7 +353,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// 背景层2(bg2) 插入事件层(event)之前(即bg与event之间)
 		document.getElementById('mapEdit').insertBefore(bg2Canvas, document.getElementById('event'));
 		// 前景层2(fg2) 插入编辑器前景(efg)之前(即fg之后)
-		document.getElementById('mapEdit').insertBefore(fg2Canvas, document.getElementById('efg'));
+		document.getElementById('mapEdit').insertBefore(fg2Canvas, document.getElementById('ebm'));
 		// 原本有三个图层 从4开始添加
 		var num = 4;
 		// 新增图层存入editor.dom中
@@ -363,16 +363,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		editor.dom.fg2Ctx = core.canvas.fg2;
 		editor.dom.maps.push('bg2map', 'fg2map');
 		editor.dom.canvas.push('bg2', 'fg2');
-
-		// 默认全空
-		var defaultMap = [];
-		for (var i = 0; i < core.__SIZE__; ++i) {
-			var row = [];
-			for (var j = 0; j < core.__SIZE__; ++j) {
-				row.push(0);
-			}
-			defaultMap.push(row);
-		}
 
 		// 创建编辑器上的按钮
 		var createCanvasBtn = function (name) {
@@ -390,7 +380,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			input.onchange = function () {
 				editor.uifunctions.setLayerMod(value);
 			}
-			editor[value] = editor[value] || defaultMap;
 			return input;
 		};
 
@@ -402,7 +391,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			input.name = 'layerMod';
 			input.value = value;
 			editor.dom[id] = input;
-			editor[value] = editor[value] || defaultMap;
 			return input;
 		};
 		if (!editor.isMobile) {
@@ -432,157 +420,52 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			parent.appendChild(input2);
 		}
 	}
-
-	////// 绘制背景层 //////
-	core.maps.drawBg = function (floorId, ctx) {
-		floorId = floorId || core.status.floorId;
-		var onMap = ctx == null;
-		if (onMap) {
-			ctx = core.canvas.bg;
-			core.clearMap(ctx);
-			core.status.floorAnimateObjs = this._getFloorImages(floorId);
-		}
-		core.maps._drawBg_drawBackground(floorId, ctx);
+	core.maps._loadFloor_doNotCopy = function () {
+		return [
+			"firstArrive", "eachArrive", "blocks", "parallelDo", "map", "bgmap", "fgmap", "bg2map", "fg2map",
+			"events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
+		];
+	}
+	////// 绘制背景和前景层 //////
+	core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+		config.ctx = cacheCtx;
+		core.maps._drawBg_drawBackground(floorId, config);
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制背景图块；后绘制的覆盖先绘制的。
-		core.maps._drawFloorImages(floorId, ctx, 'bg');
-		core.maps._drawBgFgMap(floorId, ctx, 'bg', onMap);
-		// 绘制背景层2
-		core.maps._drawBgFgMap(floorId, ctx, 'bg2', onMap);
-	};
-
-	////// 绘制前景层 //////
-	core.maps.drawFg = function (floorId, ctx) {
-		floorId = floorId || core.status.floorId;
-		var onMap = ctx == null;
-		if (onMap) {
-			ctx = core.canvas.fg;
-			core.status.floorAnimateObjs = this._getFloorImages(floorId);
+		core.maps._drawFloorImages(floorId, config.ctx, 'bg', null, null, config.onMap);
+		core.maps._drawBgFgMap(floorId, 'bg', config);
+		if (config.onMap) {
+			core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
+			core.clearMap('bg2');
+			core.clearMap(cacheCtx);
 		}
+		core.maps._drawBgFgMap(floorId, 'bg2', config);
+		if (config.onMap) core.drawImage('bg2', cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
+		config.ctx = toDrawCtx;
+	}
+	core.maps._drawFg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
+		config.ctx = cacheCtx;
 		// ------ 调整这两行的顺序来控制是先绘制贴图还是先绘制前景图块；后绘制的覆盖先绘制的。
-		this._drawFloorImages(floorId, ctx, 'fg');
-		this._drawBgFgMap(floorId, ctx, 'fg', onMap);
-		// 绘制前景层2
-		this._drawBgFgMap(floorId, ctx, 'fg2', onMap);
-	};
-	/* cannotIn/cannotOut适配 start*/
-	core.maps.generateMovableArray = function (floorId, x, y, direction) {
-		floorId = floorId || core.status.floorId;
-		if (!floorId) return null;
-		var width = core.floors[floorId].width,
-			height = core.floors[floorId].height;
-		var bgArray = this.getBgMapArray(floorId),
-			bg2Array = this._getBgFgMapArray('bg2', floorId),
-			fgArray = this.getFgMapArray(floorId),
-			fg2Array = this._getBgFgMapArray('fg2', floorId),
-			eventArray = this.getMapArray(floorId);
-
-		var generate = function (x, y, direction) {
-			if (direction != null) {
-				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
-					bgArray: bgArray,
-					fgArray: fgArray,
-					bg2Array: bg2Array,
-					fg2Array: fg2Array,
-					eventArray: eventArray
-				});
-			}
-			return ["left", "down", "up", "right"].filter(function (direction) {
-				return core.maps._canMoveHero_checkPoint(x, y, direction, floorId, {
-					bgArray: bgArray,
-					fgArray: fgArray,
-					bg2Array: bg2Array,
-					fg2Array: fg2Array,
-					eventArray: eventArray
-				});
-			});
+		core.maps._drawFloorImages(floorId, config.ctx, 'fg', null, null, config.onMap);
+		core.maps._drawBgFgMap(floorId, 'fg', config);
+		if (config.onMap) {
+			core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
+			core.clearMap('fg2');
+			core.clearMap(cacheCtx);
+		}
+		core.maps._drawBgFgMap(floorId, 'fg2', config);
+		if (config.onMap) core.drawImage('fg2', cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
+		config.ctx = toDrawCtx;
+	}
+	////// 移动判定 //////
+	core.maps._generateMovableArray_arrays = function (floorId) {
+		return {
+			bgArray: this.getBgMapArray(floorId),
+			fgArray: this.getFgMapArray(floorId),
+			eventArray: this.getMapArray(floorId),
+			bg2Array: this._getBgFgMapArray('bg2', floorId),
+			fg2Array: this._getBgFgMapArray('fg2', floorId)
 		};
-
-		if (x != null && y != null) return generate(x, y, direction);
-		var array = [];
-		for (var x = 0; x < width; x++) {
-			array[x] = [];
-			for (var y = 0; y < height; y++) {
-				array[x][y] = generate(x, y);
-			}
-		}
-		return array;
-	};
-	core.maps._canMoveHero_checkPoint = function (x, y, direction, floorId, extraData) {
-		// 1. 检查该点 cannotMove
-		if (core.inArray((core.floors[floorId].cannotMove || {})[x + "," + y], direction))
-			return false;
-
-		var nx = x + core.utils.scan[direction].x,
-			ny = y + core.utils.scan[direction].y;
-		if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].height)
-			return false;
-
-		// 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
-		if (this._canMoveHero_checkCannotInOut([
-				extraData.bgArray[y][x], extraData.bg2Array[y][x], extraData.fgArray[y][x], extraData.fg2Array[y][x], extraData.eventArray[y][x]
-			], "cannotOut", direction))
-			return false;
-		if (this._canMoveHero_checkCannotInOut([
-				extraData.bgArray[ny][nx], extraData.bg2Array[ny][nx], extraData.fgArray[ny][nx], extraData.fg2Array[ny][nx], extraData.eventArray[ny][nx]
-			], "cannotIn", direction))
-			return false;
-
-		// 3. 检查是否能进将死的领域
-		if (floorId == core.status.floorId && !core.flags.canGoDeadZone &&
-			core.status.hero.hp <= (core.status.checkBlock.damage[nx + "," + ny] || 0) &&
-			extraData.eventArray[ny][nx] == 0)
-			return false;
-
-		return true;
-	};
-	/* cannotIn/cannotOut适配 end*/
-	// 前景层2与背景层2的隐藏与显示适配
-	// 比如:可以用core.hideBgFgMap("bg2",[x, y], floorId)隐藏当前楼层的背景层2图块
-	core.maps._triggerBgFgMap = function (type, name, loc, floorId, callback) {
-		if (type != 'show') type = 'hide';
-		if (!name) name = 'bg';
-		if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
-			loc = [loc];
-		floorId = floorId || core.status.floorId;
-		if (!floorId) return;
-
-		if (loc.length == 0) return;
-		loc.forEach(function (t) {
-			var x = t[0],
-				y = t[1];
-			var flag = [floorId, x, y, name + '_disable'].join('@');
-			if (type == 'hide') core.setFlag(flag, true);
-			else core.removeFlag(flag);
-		});
-		core.status[name + "maps"][floorId] = null;
-
-		if (floorId == core.status.floorId) {
-			core.drawMap(floorId, callback);
-		} else {
-			if (callback) callback();
-		}
-	};
-	// 改变背景层2与前景层2图块 例:core.setBgFgBlock('fg2',312,core.nextX(),core.nextY())
-	core.maps.setBgFgBlock = function (name, number, x, y, floorId) {
-		floorId = floorId || core.status.floorId;
-		if (!floorId || number == null || x == null || y == null) return;
-		if (x < 0 || x >= core.floors[floorId].width || y < 0 || y >= core.floors[floorId].height) return;
-		if (name != 'bg' && name != 'fg' && name != 'bg2' && name != 'fg2') return;
-		if (typeof number == 'string') {
-			if (/^\d+$/.test(number)) number = parseInt(number);
-			else number = core.getNumberById(number);
-		}
-
-		var vFlag = [floorId, x, y, name + "_value"].join('@');
-		core.setFlag(vFlag, number);
-		core.status[name + "maps"][floorId] = null;
-
-		if (floorId == core.status.floorId) {
-			core.clearMap(name);
-			if (name.startsWith('bg')) core.drawBg(floorId);
-			else core.drawFg(floorId);
-		}
-	};
+	}
 },
     "itemShop": function () {
 	// 道具商店相关的插件
@@ -1373,125 +1256,5 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return true;
 	}, 100);
 
-},
-    "smoothCamera": function () {
-	// 此插件开启后，大地图的瞬间移动将开启平滑镜头移动，避免突兀感
-	// 插件作者：老黄鸡
-
-	// 是否启用本插件，默认不启用
-	var __enable = false;
-	if (!__enable) return;
-
-	this.Camera = function () {
-
-		// 下面这个变量决定本插件的开关
-		// 你可以在游戏中使用core.setFlag('smoothCamera',false)来关闭本插件的功能
-		// 同时也可以core.setFlag('smoothCamera',true)重新开启
-		// 此项默认为true
-		// 
-		this.__switchName = 'smoothCamera';
-
-		// 初始化成员变量
-		this._cameraNeedRefresh = true;
-		this._nowOffsetX = 0;
-		this._nowOffsetY = 0;
-		this._targetOffsetX = 0;
-		this._targetOffsetY = 0;
-		this._currentFloorId = null;
-
-		// 重置镜头，在楼层变更时使用
-		this.resetCamera = function () {
-			this._targetOffsetX = core.bigmap.offsetX;
-			this._targetOffsetY = core.bigmap.offsetY;
-			this._nowOffsetX = this._targetOffsetX;
-			this._nowOffsetY = this._targetOffsetY;
-			this._cameraNeedRefresh = true;
-		};
-
-		// 设置焦点坐标，目前没有用
-		this.setTarget = function (x, y) {
-			this._targetOffsetX = x;
-			this._targetOffsetY = y;
-		};
-
-		// 请求镜头更新
-		this.requestCameraUpdate = function () {
-			this._cameraNeedRefresh = true;
-		};
-
-		// 更新焦点坐标，目前仅根据大地图偏移决定
-		this.updateTargetPosition = function () {
-			this._targetOffsetX = core.bigmap.offsetX;
-			this._targetOffsetY = core.bigmap.offsetY;
-		};
-
-		// 更新额外的刷新条件，即镜头未指向焦点时
-		this.updateRefreshFlag = function () {
-			if (this._nowOffsetX != this._targetOffsetX || this._nowOffsetY != this._targetOffsetY) {
-				this._cameraNeedRefresh = true;
-			}
-		};
-
-		// 判断是否禁止了弹性滚动
-		this.canDirectMove = function () {
-			return !core.getFlag(this.__switchName, true);
-		};
-
-		// 更新镜头坐标
-		this.updateCameraPosition = function () {
-			if (this._cameraNeedRefresh) {
-				this._cameraNeedRefresh = false;
-				var disX = this._targetOffsetX - this._nowOffsetX;
-				var disY = this._targetOffsetY - this._nowOffsetY;
-				if (Math.abs(disX) <= 2 && Math.abs(disY) <= 2 || this.canDirectMove()) {
-					this._nowOffsetX = this._targetOffsetX;
-					this._nowOffsetY = this._targetOffsetY;
-				} else {
-					this._nowOffsetX += disX / 10;
-					this._nowOffsetY += disY / 10;
-				}
-				var x = -Math.floor(this._nowOffsetX);
-				var y = -Math.floor(this._nowOffsetY);
-				core.bigmap.canvas.forEach(function (cn) {
-					core.control.setGameCanvasTranslate(cn, x, y);
-				});
-				core.relocateCanvas('route', core.status.automaticRoute.offsetX + x, core.status.automaticRoute.offsetY + y);
-				core.setGameCanvasTranslate('hero', x + this._targetOffsetX, y + this._targetOffsetY);
-			}
-		};
-
-		// 更新逻辑主体
-		this.update = function () {
-			this.updateTargetPosition();
-			this.updateRefreshFlag();
-			this.updateCameraPosition();
-		};
-	};
-
-	// 创建摄像机对象
-	this.camera = new this.Camera();
-
-	// 帧事件 更新摄像机
-	this.updateCameraEx = function () {
-		this.camera.update();
-	};
-
-	core.control._drawHero_updateViewport = function () {
-		core.control.updateViewport();
-	}
-
-	// 代理原本的镜头事件
-	core.control.updateViewport = function () {
-		core.plugin.camera.requestCameraUpdate();
-	};
-
-	// 更变楼层的行为追加，重置镜头
-	core.events.changingFloor = function (floorId, heroLoc) {
-		this.eventdata.changingFloor(floorId, heroLoc);
-		core.plugin.camera.resetCamera();
-	};
-
-	// 注册帧事件
-	core.registerAnimationFrame('smoothCameraFlash', true, this.updateCameraEx.bind(this));
 }
 }

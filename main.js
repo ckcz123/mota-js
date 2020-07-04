@@ -386,7 +386,7 @@ main.prototype.importFonts = function (fonts) {
     style.type = 'text/css';
     var html = '';
     fonts.forEach(function (font) {
-        html += '@font-face { font-family: "'+font+'"; src: url("project/fonts/'+font+'.ttf") format("truetype")';
+        html += '@font-face { font-family: "'+font+'"; src: url("project/fonts/'+font+'.ttf") format("truetype"); }';
     });
     style.innerHTML = html;
     document.body.appendChild(style);

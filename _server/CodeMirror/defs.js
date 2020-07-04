@@ -1867,6 +1867,30 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "number",
           "!doc": "大地图视角纵向偏移量"
         },
+        "posX": {
+          "!type": "number",
+          "!doc": "大地图视角横向基准格"
+        },
+        "posY": {
+          "!type": "number",
+          "!doc": "大地图视角纵向基准格"
+        },
+        "v2": {
+          "!type": "bool",
+          "!doc": "是否是新版大地图绘制方式"
+        },
+        "threshold": {
+          "!type": "number",
+          "!doc": "新版大地图绘制方式的分界线"
+        },
+        "extend": {
+          "!type": "number",
+          "!doc": "新版大地图模式下向每一侧额外计算的数量"
+        },
+        "scale": {
+          "!type": "number",
+          "!doc": "缩略图的比例放缩"
+        },
         "tempCanvas": {
           "!type": "CanvasRenderingContext2D",
           "!doc": "临时画布"
@@ -1908,6 +1932,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "fgmaps": {
           "!doc": "各地图前景层"
         },
+        "mapBlockObjs": {
+          "!doc": "以<位置,block>存放的各地图图块信息"
+        },
         "boxAnimateObjs": {
           "!doc": "（手册和剧情文本的）帧动画对象"
         },
@@ -1932,6 +1959,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "cache": {
             "!doc": "每个点的光环缓存"
           },
+        },
+        "damage": {
+          "!doc": "每个点的显伤信息",
         },
         "ctrlDown": {
           "!type": "bool",
@@ -2111,9 +2141,13 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(color?: [number], time?: number, callback?: fn())"
         }, 
         "updateDamage": {
-          "!doc": "更新地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
+          "!doc": "重算并绘制地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
           "!type": "fn(floorId?: string, ctx?: string|CanvasRenderingContext2D)"
         }, 
+        "drawDamage": {
+          "!doc": "仅绘制地图显伤",
+          "!type": "fn(string|CanvasRenderingContext2D)"
+        },
         "nextX": {
           "!doc": "获取主角面前第n格的横坐标<br/>例如：core.closeDoor(core.nextX(), core.nextY(), 'yellowDoor', core.turnHero); // 在主角面前关上一扇黄门，然后主角顺时针旋转90°<br/>n: 目标格与主角的距离，面前为正数，背后为负数，脚下为0，不填视为1", 
           "!type": "fn(n?: number) -> number"
@@ -2694,6 +2728,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "深拷贝一个对象(函数将原样返回)<br/>例如：core.clone(core.status.hero, (name, value) => (name == 'items' || typeof value == 'number'), false); // 深拷贝主角的属性和道具<br/>data: 待拷贝对象<br/>filter: 过滤器，可选，表示data为数组或对象时拷贝哪些项或属性，true表示拷贝<br/>recursion: 过滤器是否递归，可选。true表示过滤器也被递归<br/>返回值：拷贝的结果，注意函数将原样返回", 
           "!type": "fn(data?: ?, filter?: fn(name: string, value: ?) -> bool, recursion?: bool)"
         }, 
+        "cloneArray": {
+          "!doc": "深拷贝一个1D或2D数组对象<br/>例如：core.cloneArray(core.status.thisMap.map)", 
+          "!type": "fn(data?: [number]|[[number]]) -> [number]|[[number]]"
+        }, 
         "setLocalForage": {
           "!doc": "往数据库写入一段数据", 
           "!type": "fn(key: string, value?: ?, successCallback?: fn(), errorCallback?: fn())"
@@ -3025,8 +3063,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getMapArray": {
           "!doc": "生成事件层矩阵<br/>例如：core.getMapArray('MT0'); // 生成主塔0层的事件层矩阵，隐藏的图块视为0<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 可选，true表示隐藏的图块也会被表示出来<br/>返回值：事件层矩阵，注意对其阵元的访问是[y][x]", 
-          "!type": "fn(floorId?: string) -> [[number]]"
+          "!type": "fn(floorId?: string, noCache?: bool) -> [[number]]"
         }, 
+        "getMapNumber": {
+          "!doc": "获得事件层某个点的数字",
+          "!type": "fn(x: number, y: number, floorId?: string, noCache?: bool) -> number"
+        },
         "jumpBlock": {
           "!doc": "跳跃图块；从V2.7开始不再有音效<br/>例如：core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出<br/>sx: 起点的横坐标<br/>sy: 起点的纵坐标<br/>ex: 终点的横坐标<br/>ey: 终点的纵坐标<br/>time: 单步和淡出用时，单位为毫秒。不填视为半秒<br/>keep: 是否不淡出，true表示不淡出<br/>callback: 落地或淡出后的回调函数，可选", 
           "!type": "fn(sx: number, sy: number, ex: number, ey: number, time?: number, keep?: bool, callback?: fn())"
@@ -3141,19 +3183,27 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "extractBlocks": {
           "!doc": "根据需求解析出blocks", 
-          "!type": "fn(map?: [[number]], flags?: flags)"
+          "!type": "fn(map?: ?)"
+        }, 
+        "extractBlocksForUI": {
+          "!doc": "根据需求为UI解析出blocks", 
+          "!type": "fn(map?: ?, flags?: ?)"
         }, 
         "getBlockId": {
           "!doc": "判定某个点的图块id<br/>例如：if(core.getBlockId(x1, y1) != 'greenSlime' && core.getBlockId(x2, y2) != 'redSlime') core.openDoor(x3, y3); // 一个简单的机关门事件，打败或炸掉这一对绿头怪和红头怪就开门<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块id，该点无图块则返回null", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string"
+        }, 
+        "getBlockNumber": {
+          "!doc": "判定某个点的图块数字<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块数字，该点无图块则返回null", 
+          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number"
         }, 
         "loadFloor": {
           "!doc": "从文件或存档中加载某个楼层", 
           "!type": "fn(floorId?: string, map?: ?)"
         }, 
         "generateMovableArray": {
-          "!doc": "可通行性判定<br/>例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动<br/>floorId: 地图id，不填视为当前地图<br/>x: 起点横坐标，不填视为挨个判定<br/>y: 起点纵坐标，不填视为挨个判定<br/>direction: 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值<br/>返回值：不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值", 
-          "!type": "fn(floorId?: string, x?: number, y?: number, direction?: string)"
+          "!doc": "可通行性判定<br/>例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动<br/>floorId: 地图id，不填视为当前地图<br/>返回值：从各点可移动方向的三维数组", 
+          "!type": "fn(floorId?: string) -> [[[string]]]"
         }, 
         "terrainExists": {
           "!doc": "某个点是否存在（指定的）地形", 
@@ -3173,7 +3223,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getMapBlocksObj": {
           "!doc": "以x,y的形式返回每个点的事件", 
-          "!type": "fn(floorId?: string, showDisable?: bool)"
+          "!type": "fn(floorId?: string, noCache?: bool)"
         }, 
         "removeGlobalAnimate": {
           "!doc": "删除一个或所有全局动画", 
@@ -3205,11 +3255,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getBlock": {
           "!doc": "获得某个点的block", 
-          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}"
+          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> block"
         }, 
         "initBlock": {
           "!doc": "初始化一个图块", 
-          "!type": "fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?, flags?: ?) -> block"
+          "!type": "fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?) -> block"
         }, 
         "addGlobalAnimate": {
           "!doc": "添加一个全局动画", 
@@ -3240,8 +3290,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(x?: number, y?: number, direction?: string, floorId?: string) -> bool"
         }, 
         "drawThumbnail": {
-          "!doc": "绘制缩略图<br/>例如：core.drawThumbnail(); // 绘制当前地图的缩略图<br/>floorId: 地图id，不填视为当前地图<br/>blocks: 一般不需要<br/>options: 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档<br/>toDraw: 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心", 
-          "!type": "fn(floorId?: string, blocks?: [block], options?: ?, toDraw?: string|CanvasRenderingContext2D|?)"
+          "!doc": "绘制缩略图<br/>例如：core.drawThumbnail(); // 绘制当前地图的缩略图<br/>floorId: 地图id，不填视为当前地图<br/>blocks: 一般不需要<br/>options: 绘制信息，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档，同时包含要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心", 
+          "!type": "fn(floorId?: string, blocks?: [block], options?: ?)"
         }, 
         "hideBlockByIndex": {
           "!doc": "根据图块的索引来隐藏图块", 

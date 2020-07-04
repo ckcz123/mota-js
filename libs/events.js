@@ -43,7 +43,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 
 events.prototype._startGame_start = function (hard, seed, route, callback) {
     console.log('开始游戏');
-    core.resetGame(core.firstData.hero, hard, null, core.clone(core.initStatus.maps));
+    core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 
@@ -335,7 +335,6 @@ events.prototype.trigger = function (x, y, callback) {
 
     var block = core.getBlock(x, y);
     if (block == null) return _executeCallback();
-    block = block.block;
 
     // 执行该点的脚本
     if (block.event.script) {
@@ -351,7 +350,7 @@ events.prototype.trigger = function (x, y, callback) {
 
         // 转换楼层能否穿透
         if (trigger == 'changeFloor' && !noPass && this._trigger_ignoreChangeFloor(block))
-            return;
+            return _executeCallback();
         core.status.automaticRoute.moveDirectly = false;
         this.doSystemEvent(trigger, block);
     }
@@ -363,7 +362,6 @@ events.prototype._trigger_inAction = function (x, y) {
     
     var block = core.getBlock(x, y);
     if (block == null) return core.doAction();
-    block = block.block;
 
     // 执行该点的脚本
     try {
@@ -612,7 +610,7 @@ events.prototype._canGetNextItem = function (direction) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     var block = core.getBlock(nx, ny);
-    return block != null && block.block.event.trigger == 'getItem';
+    return block != null && block.event.trigger == 'getItem';
 }
 
 events.prototype._getNextItem = function (direction, noRoute) {

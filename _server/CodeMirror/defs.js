@@ -1932,6 +1932,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "fgmaps": {
           "!doc": "各地图前景层"
         },
+        "mapBlockObjs": {
+          "!doc": "以<位置,block>存放的各地图图块信息"
+        },
         "boxAnimateObjs": {
           "!doc": "（手册和剧情文本的）帧动画对象"
         },
@@ -3060,8 +3063,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getMapArray": {
           "!doc": "生成事件层矩阵<br/>例如：core.getMapArray('MT0'); // 生成主塔0层的事件层矩阵，隐藏的图块视为0<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 可选，true表示隐藏的图块也会被表示出来<br/>返回值：事件层矩阵，注意对其阵元的访问是[y][x]", 
-          "!type": "fn(floorId?: string) -> [[number]]"
+          "!type": "fn(floorId?: string, noCache?: bool) -> [[number]]"
         }, 
+        "getMapNumber": {
+          "!doc": "获得事件层某个点的数字",
+          "!type": "fn(x: number, y: number, floorId?: string, noCache?: bool) -> number"
+        },
         "jumpBlock": {
           "!doc": "跳跃图块；从V2.7开始不再有音效<br/>例如：core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出<br/>sx: 起点的横坐标<br/>sy: 起点的纵坐标<br/>ex: 终点的横坐标<br/>ey: 终点的纵坐标<br/>time: 单步和淡出用时，单位为毫秒。不填视为半秒<br/>keep: 是否不淡出，true表示不淡出<br/>callback: 落地或淡出后的回调函数，可选", 
           "!type": "fn(sx: number, sy: number, ex: number, ey: number, time?: number, keep?: bool, callback?: fn())"
@@ -3186,6 +3193,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "判定某个点的图块id<br/>例如：if(core.getBlockId(x1, y1) != 'greenSlime' && core.getBlockId(x2, y2) != 'redSlime') core.openDoor(x3, y3); // 一个简单的机关门事件，打败或炸掉这一对绿头怪和红头怪就开门<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块id，该点无图块则返回null", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string"
         }, 
+        "getBlockNumber": {
+          "!doc": "判定某个点的图块数字<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块数字，该点无图块则返回null", 
+          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number"
+        }, 
         "loadFloor": {
           "!doc": "从文件或存档中加载某个楼层", 
           "!type": "fn(floorId?: string, map?: ?)"
@@ -3212,7 +3223,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getMapBlocksObj": {
           "!doc": "以x,y的形式返回每个点的事件", 
-          "!type": "fn(floorId?: string, showDisable?: bool)"
+          "!type": "fn(floorId?: string, noCache?: bool)"
         }, 
         "removeGlobalAnimate": {
           "!doc": "删除一个或所有全局动画", 
@@ -3244,7 +3255,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getBlock": {
           "!doc": "获得某个点的block", 
-          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}"
+          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> block"
         }, 
         "initBlock": {
           "!doc": "初始化一个图块", 

@@ -132,6 +132,7 @@ function core() {
         'maps': null,
         'bgmaps': {},
         'fgmaps': {},
+        'mapBlockObjs': {},
         'checkBlock': {}, // 每个点的阻激夹域信息
         'damage': {  // 每个点的显伤绘制
             'posX': 0,
@@ -221,7 +222,7 @@ function core() {
         'globalAnimateObjs': [],
         'floorAnimateObjs': [],
         'boxAnimateObjs': [],
-        'autotileAnimateObjs': {"blocks": [], "map": null, "bgmap": null, "fgmap": null},
+        'autotileAnimateObjs': [],
         "globalAnimateStatus": 0,
         'animateObjs': [],
     };

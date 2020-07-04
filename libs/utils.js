@@ -715,11 +715,30 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
+    var _isNumber = core.statusBar[name].getAttribute('_isNumber') == "1";
+    var _style = core.statusBar[name].getAttribute('_style');
+    var _value = core.statusBar[name].getAttribute('_value');
     if (isNumber) {
-        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+        if (_isNumber && _style == style) {
+            if (value == _value) return;
+            core.statusBar[name].innerText = value;
+        } else {
+            core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+            core.statusBar[name].setAttribute('_isNumber', '1');
+            core.statusBar[name].setAttribute('_style', style);
+        }
+        core.statusBar[name].setAttribute('_value', value);
     } else {
-        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
-        core.statusBar[name].children[0].innerText = value;
+        if (!_isNumber && _style == style) {
+            if (value == _value) return;
+            core.statusBar[name].children[0].innerText = value;
+        } else {
+            core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
+            core.statusBar[name].children[0].innerText = value;
+            core.statusBar[name].setAttribute('_isNumber', '0');
+            core.statusBar[name].setAttribute('_style', style);
+        }
+        core.statusBar[name].setAttribute('_value', value);
     }
 }
 

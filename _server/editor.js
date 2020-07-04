@@ -457,7 +457,7 @@ editor.prototype._updateMap_bigmap = function () {
     bm.clearRect(0, 0, core.__PIXELS__, core.__PIXELS__);
     bm.fillStyle = '#000000';
     bm.fillRect(0, 0, core.__PIXELS__, core.__PIXELS__);
-    core.drawThumbnail(editor.currentFloorId, core.status.thisMap.blocks, {ctx: bm, all: true});
+    core.drawThumbnail(editor.currentFloorId, null, {ctx: bm, all: true});
     var width = editor.currentFloorData.width;
     var height = editor.currentFloorData.height;
     editor.uivalues.bigmapInfo.top = core.__PIXELS__ * Math.max(0, (1 - height / width) / 2);

@@ -149,6 +149,7 @@ type gameStatus = {
     thisMap: ResolvedMap
     bgmaps: { [key: string]: number[][] }
     fgmaps: { [key: string]: number[][] }
+    mapBlockObjs: { [key: string]: any }
     /** 显伤伤害 */
     checkBlock: {}
     damage: {}
@@ -231,12 +232,7 @@ type gameStatus = {
     globalAnimateObjs: []
     floorAnimateObjs: []
     boxAnimateObjs: []
-    autotileAnimateObjs: {
-        blocks: [],
-        map: any
-        bgmap: any
-        fgmap: null
-    }
+    autotileAnimateObjs: []
     globalAnimateStatus: number
     animateObjs: []
 }
@@ -1414,7 +1410,10 @@ declare class maps {
      * @param showDisable 可选，true表示隐藏的图块也会被表示出来
      * @returns 事件层矩阵，注意对其阵元的访问是[y][x]
      */
-    getMapArray(floorId?: string): number[][]
+    getMapArray(floorId?: string, noCache?: boolean): number[][]
+
+    /** 判定图块的事件层数字；不存在为0 */
+    getMapNumber(floorId?: string, noCache?: boolean): number
     
     /**
      * 生成背景层矩阵
@@ -1554,6 +1553,9 @@ declare class maps {
      */
     getBlockId(x: number, y: number, floorId?: string, showDisable?: boolean): string | null
     
+    /** 判定某个点的图块数字；空图块为0 */
+    getBlockNumber(x: number, y: number, floorId?: string, showDisable?: boolean): number
+
     /**
      * 判定某个点的图块类型
      * @example if(core.getBlockCls(x1, y1) != 'enemys' && core.getBlockCls(x2, y2) != 'enemy48') core.openDoor(x3, y3); // 另一个简单的机关门事件，打败或炸掉这一对不同身高的敌人就开门
@@ -1742,7 +1744,7 @@ declare class maps {
     resizeMap(floorId?: string): void
 
     /** 以x,y的形式返回每个点的事件 */
-    getMapBlocksObj(floorId?: string, showDisable?: any): any
+    getMapBlocksObj(floorId?: string, noCache?: boolean): any
 
     /** 获得某些点可否通行的信息 */
     canMoveDirectlyArray(locs?: any): any
@@ -1769,7 +1771,7 @@ declare class maps {
     enemyExists(x?: number, y?: number, id?: string, floorId?: string): boolean
 
     /** 获得某个点的block */
-    getBlock(x?: number, y?: number, floorId?: string, showDisable?: boolean): any
+    getBlock(x?: number, y?: number, floorId?: string, showDisable?: boolean): Block
 
     /** 获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等 */
     getBlockInfo(block?: any): any

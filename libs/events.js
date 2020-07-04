@@ -335,7 +335,6 @@ events.prototype.trigger = function (x, y, callback) {
 
     var block = core.getBlock(x, y);
     if (block == null) return _executeCallback();
-    block = block.block;
 
     // 执行该点的脚本
     if (block.event.script) {
@@ -363,7 +362,6 @@ events.prototype._trigger_inAction = function (x, y) {
     
     var block = core.getBlock(x, y);
     if (block == null) return core.doAction();
-    block = block.block;
 
     // 执行该点的脚本
     try {
@@ -612,7 +610,7 @@ events.prototype._canGetNextItem = function (direction) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     var block = core.getBlock(nx, ny);
-    return block != null && block.block.event.trigger == 'getItem';
+    return block != null && block.event.trigger == 'getItem';
 }
 
 events.prototype._getNextItem = function (direction, noRoute) {

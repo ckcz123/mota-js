@@ -143,7 +143,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         core.maps._drawFloorImages(core.status.floorId, core.canvas.fg, 'fg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
 
         // Global Autotile Animate
-        core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+        core.status.autotileAnimateObjs.forEach(function (block) {
             core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
         });
 

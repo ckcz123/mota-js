@@ -1222,12 +1222,15 @@ nearStair: fn() -> bool
 turnBlock: fn(direction?: string, x?: number, y?: number, floorId?: string)
 事件转向
 
-getMapArray: fn(floorId?: string) -> [[number]]
+getMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 生成事件层矩阵
 例如：core.getMapArray('MT0'); // 生成主塔0层的事件层矩阵，隐藏的图块视为0
 floorId: 地图id，不填视为当前地图
 showDisable: 可选，true表示隐藏的图块也会被表示出来
 返回值：事件层矩阵，注意对其阵元的访问是[y][x]
+
+getMapNumber: fn(x: number, y: number, floorId?: string, noCache?: bool) -> number
+获得事件层某个点的数字
 
 jumpBlock: fn(sx: number, sy: number, ex: number, ey: number, time?: number, keep?: bool, callback?: fn())
 跳跃图块；从V2.7开始不再有音效
@@ -1373,6 +1376,14 @@ floorId: 地图id，不填视为当前地图
 showDisable: 隐藏点是否不返回null，true表示不返回null
 返回值：图块id，该点无图块则返回null
 
+getBlockNumber: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number
+判定某个点的图块数字
+x: 横坐标
+y: 纵坐标
+floorId: 地图id，不填视为当前地图
+showDisable: 隐藏点是否不返回null，true表示不返回null
+返回值：图块数字，该点无图块则返回null
+
 loadFloor: fn(floorId?: string, map?: ?)
 从文件或存档中加载某个楼层
 
@@ -1401,7 +1412,7 @@ x: 横坐标
 y: 纵坐标
 floorId: 地图id，不填视为当前地图
 
-getMapBlocksObj: fn(floorId?: string, showDisable?: bool)
+getMapBlocksObj: fn(floorId?: string, noCache?: bool)
 以x,y的形式返回每个点的事件
 
 removeGlobalAnimate: fn(x?: number, y?: number, name?: string)
@@ -1442,7 +1453,7 @@ drawFg: fn(floorId?: string, ctx?: CanvasRenderingContext2D)
 floorId: 地图id，不填视为当前地图
 ctx: 某画布的ctx，用于绘制缩略图，一般不需要
 
-getBlock: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}
+getBlock: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> block: block
 获得某个点的block
 
 initBlock: fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?) -> block

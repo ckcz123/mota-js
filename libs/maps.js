@@ -43,8 +43,7 @@ maps.prototype.loadFloor = function (floorId, map) {
         map = {"map": map};
     }
     var content = {};
-    var notCopy = ["firstArrive", "eachArrive", "parallelDo", "map", "bgmap", "fgmap",
-        "events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"];
+    var notCopy = this._loadFloor_doNotCopy();
     for (var name in floor) {
         if (notCopy.indexOf(name) == -1 && floor[name] != null)
             content[name] = core.clone(floor[name]);
@@ -58,6 +57,13 @@ maps.prototype.loadFloor = function (floorId, map) {
         this.extractBlocks(content);
     }
     return content;
+}
+
+maps.prototype._loadFloor_doNotCopy = function () {
+    return [
+        "firstArrive", "eachArrive", "blocks", "parallelDo", "map", "bgmap", "fgmap",
+        "events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
+    ];
 }
 
 /// 根据需求解析出blocks
@@ -353,7 +359,7 @@ maps.prototype.saveMap = function (floorId) {
     var map = maps[floorId];
     var thisFloor = this._compressFloorData(map, core.floors[floorId]);
     if (map.blocks) {
-        var mapArr = this.compressMap(this._getMapArrayFromBlocks(map.blocks, map.width, map.height), floorId);
+        var mapArr = this.compressMap(this._getMapArrayFromBlocks(map.blocks, map.width, map.height, true), floorId);
         if (mapArr != null) thisFloor.map = mapArr;
     }
     return thisFloor;
@@ -361,8 +367,9 @@ maps.prototype.saveMap = function (floorId) {
 
 maps.prototype._compressFloorData = function (map, floor) {
     var thisFloor = {};
+    var notCopy = this._loadFloor_doNotCopy();
     for (var name in map) {
-        if (name != 'blocks') {
+        if (notCopy.indexOf(name) == -1) {
             var floorData = floor[name];
             if (!core.utils.same(map[name], floorData)) {
                 thisFloor[name] = core.clone(map[name]);
@@ -432,12 +439,13 @@ maps.prototype._updateMapArray = function (floorId, x, y) {
     else map.map[y][x] = block.id;
 }
 
-maps.prototype._getMapArrayFromBlocks = function (blockArray, width, height) {
+maps.prototype._getMapArrayFromBlocks = function (blockArray, width, height, showDisable) {
     var blocks = [];
     for (var x = 0; x < height; x++) blocks.push(Array(width).fill(0));
 
     blockArray.forEach(function (block) {
-        blocks[block.y][block.x] = block.id;
+        if (showDisable || !block.disable)
+            blocks[block.y][block.x] = block.id;
     });
     return blocks;
 }
@@ -1714,6 +1722,7 @@ maps.prototype.hideBlock = function (x, y, floorId) {
 
     block.disable = true;
     core.setMapBlockDisabled(floorId, block.x, block.y, true);
+    this._updateMapArray(floorId, block.x, block.y);
 
     // 删除动画，清除地图
     this._removeBlockFromMap(floorId, block);

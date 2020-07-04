@@ -1167,7 +1167,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type = {}, // 每个点的伤害类型
 		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
-	var betweenAttackLocs = {}; // 所有带夹击的怪物
+	var betweenAttackLocs = {}; // 所有可能的夹击点
 	var needCache = false;
 	var canGoDeadZone = core.flags.canGoDeadZone;
 	core.flags.canGoDeadZone = true;
@@ -1294,8 +1294,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if ((core.status.event.id == 'book' || core.status.event.id == 'bool-detail') && core.status.event.ui) needCache = true;
 	}
 
-	// 更新夹击伤害
-	// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
+	// 对每个可能的夹击点计算夹击伤害
 	for (var loc in betweenAttackLocs) {
 		var xy = loc.split(","),
 			x = parseInt(xy[0]),
@@ -1306,14 +1305,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 检查左右夹击
 		var leftBlock = blocks[(x - 1) + "," + y],
 			rightBlock = blocks[(x + 1) + "," + y];
-		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable &&  leftBlock.id == rightBlock.id) {
+		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable && leftBlock.id == rightBlock.id) {
 			if (core.hasSpecial(leftBlock.event.id, 16))
 				enemyId1 = leftBlock.event.id;
 		}
 		// 检查上下夹击
 		var topBlock = blocks[x + "," + (y - 1)],
 			bottomBlock = blocks[x + "," + (y + 1)];
-		if (topBlock && !topBlock.disable &&  bottomBlock && !bottomBlock.disable && topBlock.id == bottomBlock.id) {
+		if (topBlock && !topBlock.disable && bottomBlock && !bottomBlock.disable && topBlock.id == bottomBlock.id) {
 			if (core.hasSpecial(topBlock.event.id, 16))
 				enemyId2 = topBlock.event.id;
 		}

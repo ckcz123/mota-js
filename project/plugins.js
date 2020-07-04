@@ -426,7 +426,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			"events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
 		];
 	}
-
 	////// 绘制背景和前景层 //////
 	core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
 		config.ctx = cacheCtx;
@@ -457,8 +456,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (config.onMap) core.drawImage('fg2', cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
 		config.ctx = toDrawCtx;
 	}
-
-	/* cannotIn/cannotOut适配 start*/
+	////// 移动判定 //////
 	core.maps._generateMovableArray_arrays = function (floorId) {
 		return {
 			bgArray: this.getBgMapArray(floorId),

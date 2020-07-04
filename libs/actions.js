@@ -2354,7 +2354,9 @@ actions.prototype._clickSyncSelect = function (x, y) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                core.syncSave('all');
+                core.myconfirm('你确定要同步全部存档么？\n这可能在存档较多的时候比较慢。', function () {
+                    core.syncSave('all');
+                });
                 break;
             case 1:
                 core.syncSave();

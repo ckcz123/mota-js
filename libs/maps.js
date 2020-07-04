@@ -99,7 +99,7 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
     for (var i = 0; i < mh; i++) {
         for (var j = 0; j < mw; j++) {
             var number = (decompressed[i] || [])[j] || 0;
-            if (!number || number == 17 || this.isMapBlockDisabled(floorId, i, j, flags)) continue;
+            if (!number || number == 17 || this.isMapBlockDisabled(floorId, j, i, flags)) continue;
             map.blocks.push(this.initBlock(j, i, number));
         }
     }

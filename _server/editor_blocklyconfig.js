@@ -450,7 +450,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\(i|c|d|e|z)/g, '\\\\$1');
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\(i|c|d|e|g|z)/g, '\\\\$1');
     editor_blockly.setValue(code);
   } catch (error) {
     editor_blockly.setValue(String(error));

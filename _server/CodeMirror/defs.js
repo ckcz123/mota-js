@@ -3561,7 +3561,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, x?: number, y?: number, width?: number, height?: number)"
         }, 
         "drawTextContent": {
-          "!doc": "绘制一段文字到某个画布上面<br/>ctx: 要绘制到的画布<br/>content: 要绘制的内容；转义字符不允许保留 \\t, \\b 和 \\f<br/>config: 绘制配置项，目前暂时包含如下内容（均为可选）<br/>left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右<br/>fontSize：字体大小；lineHeight：行高；time：打字机间隔<br/>返回值：绘制信息", 
+          "!doc": "绘制一段文字到某个画布上面<br/>ctx: 要绘制到的画布<br/>content: 要绘制的内容；转义字符不允许保留 \\t, \\b 和 \\f<br/>config: 绘制配置项，目前暂时包含如下内容（均为可选）<br/>left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右<br/>fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体名<br/>返回值：绘制信息", 
           "!type": "fn(ctx: string|CanvasRenderingContext2D, content: string, config: ?)"
         }, 
         "calWidth": {

@@ -1747,7 +1747,7 @@ ctx: 要绘制到的画布
 content: 要绘制的内容；转义字符不允许保留 \t, \b 和 \f
 config: 绘制配置项，目前暂时包含如下内容（均为可选）
 left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
-fontSize：字体大小；lineHeight：行高；time：打字机间隔
+fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体
 返回值：绘制信息
 
 calWidth: fn(name: string|CanvasRenderingContext2D, text: string, font?: string) -> number

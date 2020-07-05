@@ -104,7 +104,7 @@ editor_blockly = function () {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\(r|f|i|c|d|e|z)/g,'\\\\$1')),
+            }).replace(/\\(r|f|i|c|d|e|g|z)/g,'\\\\$1')),
             editor_blockly.entryType
         );
     }
@@ -190,7 +190,7 @@ editor_blockly = function () {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
-        code = code.replace(/\\(i|c|d|e|z)/g, '\\\\$1');
+        code = code.replace(/\\(i|c|d|e|g|z)/g, '\\\\$1');
         eval('var obj=' + code);
         if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
             "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
@@ -272,7 +272,7 @@ editor_blockly = function () {
                 return true;
             }
 
-            var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|z)/g, '\\\\$1') + "]";
+            var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|g|z)/g, '\\\\$1') + "]";
             eval("var obj="+code);
             if (obj.length == 0) return true;
             obj = obj[0];
@@ -654,6 +654,7 @@ editor_blockly = function () {
         namesObj.allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
                          "maroon（深红色）", "navy（深蓝色）", "gold（金色）",  "olive（黄褐色）", "orange（橙色）", "purple（品红色）", 
                          "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
+        namesObj.allFonts = [main.styles.font].concat(main.fonts);
         namesObj.allDoors = ["this"].concat(Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e)
             .map(function (key) { return maps_90f36752_8815_4be8_b32b_d7fad1d0542e[key]; })
             .filter(function (one) { return one.doorInfo != null; })
@@ -708,9 +709,18 @@ editor_blockly = function () {
           }
         }
 
+        // 对\g进行补全
+        index = content.lastIndexOf("\\g[");
+        if (index >= 0) {
+          var after = content.substring(index + 3);
+          if (after.indexOf("]") < 0) {
+            return filter(namesObj.allFonts, after);
+          }
+        }
+
         // 对\进行补全！
         if (content.charAt(content.length - 1) == '\\') {
-          return ["n（换行）", "f（立绘）", "r（变色）", "i（图标）", "z（暂停打字）", "t（标题图标）", "b（对话框）", "c（字体大小）", "d（粗体）", "e（斜体）"];
+          return ["n（换行）", "f（立绘）", "r（变色）", "i（图标）", "z（暂停打字）", "t（标题图标）", "b（对话框）", "c（字体大小）", "d（粗体）", "e（斜体）", "g（字体）"];
         }
 
         return [];

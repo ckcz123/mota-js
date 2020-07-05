@@ -2169,7 +2169,7 @@ declare class ui {
      * @param content 要绘制的内容；转义字符不允许保留 \t, \b 和 \f
      * @param config 绘制配置项，目前暂时包含如下内容（均为可选）
      *                left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
-     *                fontSize：字体大小；lineHeight：行高；time：打字机间隔
+     *                fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
      * @returns 绘制信息 
      */ 
     drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: any): any

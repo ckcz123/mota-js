@@ -1098,6 +1098,12 @@ ActionParser.prototype.matchEvalAtom = function(args) {
     args=[match[1],match[2]]
     return rt(MotaActionBlocks['blockId_e'].xmlText, args);
   }
+  // 图块数字
+  match=/^blockNumber:(-?\d+),(-?\d+)$/.exec(args[0])
+  if(match){
+    args=[match[1],match[2]]
+    return rt(MotaActionBlocks['blockNumber_e'].xmlText, args);
+  }
   // 图块类别
   match=/^blockCls:(-?\d+),(-?\d+)$/.exec(args[0])
   if(match){
@@ -1412,7 +1418,7 @@ MotaActionFunctions.replaceToName = function (str) {
     return map[b] ? ("怪物：" + map[b]) : b;
   }).replace(/enemy:/g, "怪物：");
 
-  str = str.replace(/blockId:/g, "图块ID：").replace(/blockCls:/g, "图块类别：").replace(/equip:/g, "装备孔：");
+  str = str.replace(/blockId:/g, "图块ID：").replace(/blockNumber:/g, "图块数字：").replace(/blockCls:/g, "图块类别：").replace(/equip:/g, "装备孔：");
   return str;
 }
 
@@ -1450,7 +1456,7 @@ MotaActionFunctions.replaceFromName = function (str) {
     return map[c] ? ("enemy:" + b + ":" + map[c]) : c;
   }).replace(/(enemy:[a-zA-Z0-9_]+)[:：]/g, '$1:');
 
-  str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块类别[:：]/g, "blockCls:").replace(/装备孔[:：]/g, "equip:");
+  str = str.replace(/图块I[dD][:：]/g, "blockId:").replace(/图块数字[:：]/g, "blockNumber:").replace(/图块类别[:：]/g, "blockCls:").replace(/装备孔[:：]/g, "equip:");
 
   return str;
 }

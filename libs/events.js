@@ -2599,6 +2599,8 @@ events.prototype.setValue = function (name, operator, value, prefix) {
         case '**=': value = Math.pow(originValue, value); break;
         case '//=': value = Math.trunc(originValue / value); break;
         case '%=': value = originValue % value; break;
+        case 'min=': value = Math.min(originValue, value); break;
+        case 'max=': value = Math.max(originValue, value); break;
         default: break;
     }
     this._setValue_setStatus(name, value);

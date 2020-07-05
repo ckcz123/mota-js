@@ -3098,6 +3098,7 @@ statExprSplit : '=== statement ^ === expression v ===' ;
 expression
     :   expression Arithmetic_List expression
     |   negate_e
+    |   unaryOperation_e
     |   bool_e
     |   idFixedList_e
     |   idFlag_e
@@ -3106,6 +3107,7 @@ expression
     |   idString_e
     |   enemyattr_e
     |   blockId_e
+    |   blockNumber_e
     |   blockCls_e
     |   equip_e
     |   evalString_e
@@ -3115,7 +3117,9 @@ expression
 //todo 修改recieveOrder,根据Arithmetic_List_0不同的值设定不同的recieveOrder
 var code = expression_0 + Arithmetic_List_0 + expression_1;
 var ops = {
-    '**': 'Math.pow('+expression_0+','+expression_1+')'
+    '**': 'Math.pow('+expression_0+','+expression_1+')',
+    'min': 'Math.min('+expression_0+','+expression_1+')',
+    'max': 'Math.max('+expression_0+','+expression_1+')',
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -3135,7 +3139,9 @@ var orders = {
     '<=': Blockly.JavaScript.ORDER_RELATIONAL,
     '&&': Blockly.JavaScript.ORDER_LOGICAL_AND,
     '||': Blockly.JavaScript.ORDER_LOGICAL_OR,
-    '^': Blockly.JavaScript.ORDER_BITWISE_XOR
+    '^': Blockly.JavaScript.ORDER_BITWISE_XOR,
+    'min': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'max': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -3149,6 +3155,16 @@ negate_e
 var code = '!'+expression_0;
 return [code, Blockly.JavaScript.ORDER_LOGICAL_NOT];
 */;
+
+unaryOperation_e
+    :   UnaryOperator_List expression
+    
+
+/* unaryOperation_e
+var code = UnaryOperator_List_0 + expression_0;
+return [code, Blockly.JavaScript.ORDER_MEMBER];
+*/;
+
 
 bool_e
     :   ':' Bool
@@ -3213,6 +3229,17 @@ blockId_e
 /* blockId_e
 default : [0,0]
 var code = 'blockId:'+Int_0+','+Int_1;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+blockNumber_e
+    :   '图块数字:' Int ',' Int
+
+
+/* blockNumber_e
+default : [0,0]
+var code = 'blockNumber:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -3332,12 +3359,16 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'弱相等'|'弱不相等'
-    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','==','!=']*/;
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'
+    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=']*/;
 
 AssignOperator_List
-    :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'
-    /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=']*/;  
+    :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'|'设为不小于'|'设为不大于'
+    /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=','min=','max=']*/;  
+
+UnaryOperator_List
+    :   '向下取整'|'向上取整'|'四舍五入'|'整数截断'|'绝对值'|'开方'
+    /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt']*/;
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'|'云'

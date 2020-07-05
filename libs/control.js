@@ -1683,8 +1683,9 @@ control.prototype._replayAction_getNext = function (action) {
 
 control.prototype._replayAction_moveDirectly = function (action) {
     if (action.indexOf("move:")!=0) return false;
-    // 忽略连续的瞬移事件
-    if (!core.hasFlag('poison')) {
+    // 忽略连续的瞬移事件；如果大地图某一边超过计算范围则不合并
+    if (!core.hasFlag('poison') && core.status.thisMap.width < 2 * core.bigmap.extend + core.__SIZE__
+        && core.status.thisMap.height < 2 * core.bigmap.extend + core.__SIZE__) {
         while (core.status.replay.toReplay.length>0 &&
             core.status.replay.toReplay[0].indexOf('move:')==0) {
                 core.status.route.push(action);

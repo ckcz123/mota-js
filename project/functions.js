@@ -1340,6 +1340,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		}
 	}
 
+	// 取消注释下面这一段可以让护盾抵御阻激夹域伤害
+	/*
+	for (var loc in damage) {
+		damage[loc] = Math.max(0, damage[loc] - core.getRealStatus('mdef'));
+	}
+	*/
+
 	core.flags.canGoDeadZone = canGoDeadZone;
 	core.status.checkBlock = {
 		damage: damage,

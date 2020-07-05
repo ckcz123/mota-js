@@ -1702,11 +1702,13 @@ drawWindowSkin: fn(background: string, ctx: string|CanvasRenderingContext2D, x: 
 drawGameInfo: fn()
 绘制游戏信息界面
 
-fillRect: fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, font?: string)
+fillRect: fn(name: string|CanvasRenderingContext2D, string, x: number, y: number, width: number, height: number, style?: string, angle?: number)
 绘制一个矩形。style可选为绘制样式
 text: 要绘制的文本
+x,y: 绘制的坐标
+width,height: 绘制的长宽
 style: 绘制的样式
-font: 绘制的字体
+angle: 旋转的角度，弧度制，如Math.PI/2代表90度
 参考资料：https://www.w3school.com.cn/tags/canvas_fillrect.asp
 
 drawScrollText: fn(content: string, time: number, lineHeight?: number, callback?: fn())
@@ -1787,9 +1789,11 @@ drawQuickShop: fn()
 drawCenterFly: fn()
 绘制中心对称飞行器
 
-strokeRect: fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style: string)
+strokeRect: fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style?: string, lineWidth?: number, angle?: number)
 绘制一个矩形的边框
 style: 绘制的样式
+lineWidth: 线宽
+angle: 旋转角度，弧度制，如Math.PI/2为90度
 参考资料：https://www.w3school.com.cn/tags/canvas_strokerect.asp
 
 drawBook: fn(index?: ?)

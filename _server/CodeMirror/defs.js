@@ -3517,9 +3517,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "fillRect": {
-          "!doc": "绘制一个矩形。style可选为绘制样式<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>font: 绘制的字体", 
+          "!doc": "绘制一个矩形。<br/>x,y: 绘制的坐标<br/>width,height: 绘制的长宽<br/>style: 绘制的样式<br/>angle: 旋转的角度，弧度制，如Math.PI/2代表90度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_fillrect.asp",
-          "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, font?: string)"
+          "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style?: string, angle?: number)"
         }, 
         "drawScrollText": {
           "!doc": "绘制滚动字幕", 
@@ -3621,9 +3621,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "strokeRect": {
-          "!doc": "绘制一个矩形的边框<br/>style: 绘制的样式", 
+          "!doc": "绘制一个矩形的边框<br/>style: 绘制的样式<br/>lineWidth: 线宽<br/>angle: 旋转角度，弧度制，如Math.PI/2为90度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_strokerect.asp",
-          "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style: string)"
+          "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style?: string, lineWidth?: number, angle?: number)"
         }, 
         "drawBook": {
           "!doc": "绘制怪物手册", 

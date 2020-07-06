@@ -814,7 +814,6 @@ editor.prototype.buildMark = function(){
 }
 
 editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
-    if (editor.uivalues.bigmap) return;
     var pos={x: 0, y: 0, images: "terrains"};
     var ysize = 32;
     if(thisevent==0){

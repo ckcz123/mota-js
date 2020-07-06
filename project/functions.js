@@ -1490,10 +1490,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果是非状态栏canvas化，直接返回
 	if (!core.flags.statusCanvas) return;
-	var canvas = core.dom.statusCanvas,
-		ctx = core.dom.statusCanvasCtx;
+	var ctx = core.dom.statusCanvasCtx;
 	// 清空状态栏
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	core.clearMap(ctx);
 	// 如果是隐藏状态栏模式，直接返回
 	if (!core.domStyle.showStatusBar) return;
 
@@ -1504,53 +1503,90 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 竖屏模式下的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
 
-	ctx.fillStyle = core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor;
-	ctx.font = 'italic bold 18px Verdana';
+	core.setFillStyle(ctx, core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor);
 
-	// 距离左侧边框6像素，上侧边框9像素，行距约为39像素
-	var leftOffset = 6,
-		topOffset = 9,
-		lineHeight = 39;
-	if (core.domStyle.isVertical) { // 竖屏模式，行高32像素
-		leftOffset = 6;
-		topOffset = 6;
-		lineHeight = 32;
-	}
-
-	var toDraw = ["floor", "hp", "atk", "def", "mdef", "money"];
-	for (var index = 0; index < toDraw.length; index++) {
-		// 绘制下一个数据
-		var name = toDraw[index];
-		// 图片大小25x25
-		core.drawImage(ctx, core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
-		// 文字内容
-		var text = (core.statusBar[name] || {}).innerText || " ";
+	// 绘制一段文字，带斜体判定
+	var _fillBoldTextWithFontCheck = function (text, x, y, style) {
 		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
 		if (!/^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(text))
-			ctx.font = 'bold 18px Verdana';
-		// 绘制文字
-		ctx.fillText(text, leftOffset + 36, topOffset + 20);
-		ctx.font = 'italic bold 18px Verdana';
-		// 计算下一个绘制的坐标
-		if (core.domStyle.isVertical) {
-			// 竖屏模式
-			if (index % 3 != 2) leftOffset += 131;
-			else {
-				leftOffset = 6;
-				topOffset += lineHeight;
-			}
-		} else {
-			// 横屏模式
-			topOffset += lineHeight;
-		}
+			core.setFont(ctx, 'bold 18px Verdana');
+		else core.setFont(ctx, 'italic bold 18px Verdana');
+		core.fillBoldText(ctx, text, x, y, style);
 	}
-	// 绘制三色钥匙
-	ctx.fillStyle = '#FFCCAA';
-	ctx.fillText(core.statusBar.yellowKey.innerText, leftOffset + 5, topOffset + 20);
-	ctx.fillStyle = '#AAAADD';
-	ctx.fillText(core.statusBar.blueKey.innerText, leftOffset + 40, topOffset + 20);
-	ctx.fillStyle = '#FF8888';
-	ctx.fillText(core.statusBar.redKey.innerText, leftOffset + 75, topOffset + 20);
+
+	// 横竖屏需要分别绘制...
+	if (!core.domStyle.isVertical) {
+		// 横屏模式
+
+		// 绘制楼层
+		core.drawImage(ctx, core.statusBar.icons.floor, 6, 9, 25, 25);
+		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 42, 29);
+
+		// 绘制生命
+		core.drawImage(ctx, core.statusBar.icons.hp, 6, 43, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 42, 63);
+
+		// 绘制攻击
+		core.drawImage(ctx, core.statusBar.icons.atk, 6, 77, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 42, 97);
+
+		// 绘制防御
+		core.drawImage(ctx, core.statusBar.icons.def, 6, 111, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 42, 131);
+
+		// 绘制护盾
+		core.drawImage(ctx, core.statusBar.icons.mdef, 6, 145, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 42, 165);
+
+		// 绘制金币
+		core.drawImage(ctx, core.statusBar.icons.money, 6, 179, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 42, 199);
+
+		// 绘制经验
+		core.drawImage(ctx, core.statusBar.icons.exp, 6, 213, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 42, 233);
+
+		// 绘制三色钥匙
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 11, 267, '#FFCCAA');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 46, 267, '#AAAADD');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 81, 267, '#FF8888');
+
+	} else {
+		// 竖屏模式
+
+		// 绘制楼层
+		core.drawImage(ctx, core.statusBar.icons.floor, 6, 6, 25, 25);
+		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 42, 26);
+
+		// 绘制生命
+		core.drawImage(ctx, core.statusBar.icons.hp, 137, 6, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 173, 26);
+
+		// 绘制攻击
+		core.drawImage(ctx, core.statusBar.icons.atk, 268, 6, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 304, 26);
+
+		// 绘制防御
+		core.drawImage(ctx, core.statusBar.icons.def, 6, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 42, 58);
+
+		// 绘制护盾
+		core.drawImage(ctx, core.statusBar.icons.mdef, 137, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 173, 58);
+
+		// 绘制金币
+		core.drawImage(ctx, core.statusBar.icons.money, 268, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 304, 58);
+
+		// 绘制经验
+		core.drawImage(ctx, core.statusBar.icons.exp, 6, 70, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 42, 90);
+
+		// 绘制三色钥匙
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 142, 90, '#FFCCAA');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 177, 90, '#AAAADD');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 212, 90, '#FF8888');
+	}
 },
         "drawStatistics": function () {
 	// 浏览地图时参与的统计项目

@@ -321,7 +321,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
 	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
 	// 插件作者：ad
-	var __enable = true;
+	var __enable = false;
 	if (!__enable) return;
 
 	// 创建新图层

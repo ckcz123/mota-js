@@ -15,10 +15,13 @@ function core() {
         'images': {},
         'bgms': {},
         'sounds': {},
-        'ground': null,
         'items': {},
         'enemys': {},
         'icons': {},
+        'ground': null,
+        'grundCanvas': null,
+        'groundPattern': null,
+        'autotileEdges': {},
     }
     this.timeout = {
         'turnHeroTimeout': null,

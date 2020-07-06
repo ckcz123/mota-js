@@ -1083,6 +1083,7 @@ ActionParser.prototype.matchEvalAtom = function(args) {
   // 勾选框
   match = /^(true|false)$/.exec(args[0])
   if(match){
+    args[0]='true'==args[0];
     return rt(MotaActionBlocks['bool_e'].xmlText, args);
   }
   // 怪物属性

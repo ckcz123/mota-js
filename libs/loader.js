@@ -176,13 +176,14 @@ loader.prototype._loadAutotiles_async = function (onprogress, onfinished) {
 
 loader.prototype._loadAutotiles_afterLoad = function (keys, autotiles) {
    // autotile需要保证顺序
-   keys.forEach(function (v) {
-    core.material.images.autotile[v] = autotiles[v];
+    keys.forEach(function (v) {
+        core.material.images.autotile[v] = autotiles[v];
     });
 
     setTimeout(function () {
         core.maps._makeAutotileEdges();
     });
+    
 }
 
 // ------ 加载额外素材 ------ //

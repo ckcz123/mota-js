@@ -336,12 +336,11 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId = floorId || core.status.floorId;
     var enemys = [], used = {};
     core.extractBlocks(floorId);
-    var mapBlocks = core.status.maps[floorId].blocks;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
-            this._getCurrentEnemys_addEnemy(mapBlocks[b].event.id, enemys, used, floorId);
+    core.status.maps[floorId].blocks.forEach(function (block) {
+        if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
+            this._getCurrentEnemys_addEnemy(block.event.id, enemys, used, floorId);
         }
-    }
+    }, this);
     return this._getCurrentEnemys_sort(enemys);
 }
 

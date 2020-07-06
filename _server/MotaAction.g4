@@ -143,15 +143,8 @@ if (EvalString_0==''){
     if (IdString_1=='')title='\t['+EvalString_0+']';
     else title='\t['+EvalString_0+','+IdString_1+']';
 }
-var code = {
-    'id': IdString_0,
-    'text': title+EvalString_Multi_0,
-    'textInList': EvalString_1,
-    'mustEnable': Bool_0,
-    'disablePreview': Bool_1,
-    'choices': 'choices_asdfefw'
-}
-code=JSON.stringify(code,null,2).split('"choices_asdfefw"').join('[\n'+shopChoices_0+']')+',\n';
+title += EvalString_Multi_0;
+var code = '{\n"id": "'+IdString_0+'",\n"text": "'+title+'",\n"textInList": "'+EvalString_1+'",\n"mustEnable": '+Bool_0+',\n"disablePreview": '+Bool_1+',\n"choices":[\n'+shopChoices_0+']},\n';
 return code;
 */;
 
@@ -769,8 +762,9 @@ tooltip : text：显示一段文字（剧情）
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
 default : ["欢迎使用事件编辑器(回车直接多行编辑)"]
-var code = '"'+EvalString_Multi_0+'",\n';
-return code;
+var code = '"'+EvalString_Multi_0+'"';
+if (block.isCollapsed()) code = '{"type": "text", "text": '+code+', "_collapsed": true}';
+return code+',\n';
 */;
 
 text_1_s
@@ -795,8 +789,9 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+EvalString_Multi_0+'",\n';
-return code;
+var code =  '"'+title+EvalString_2+EvalString_Multi_0+'"';
+if (block.isCollapsed()) code = '{"type": "text", "text": '+code+', "_collapsed": true}';
+return code+',\n';
 */;
 
 text_2_s
@@ -821,8 +816,9 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'",\n';
-return code;
+var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'"';
+if (block.isCollapsed()) code = '{"type": "text", "text": '+code+', "_collapsed": true}';
+return code+',\n';
 */;
 
 textDrawingList
@@ -2358,9 +2354,9 @@ if_s
 tooltip : if: 条件判断
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "if", "condition": "',expression_0,'",\n',
+var code = ['{"type": "if", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"true": [\n',action_0,'],\n',
-    '"false": [\n',action_1,']\n',
+    '"false": [\n',action_1,']',
 '},\n'].join('');
 return code;
 */;
@@ -2373,8 +2369,8 @@ if_1_s
 tooltip : if: 条件判断
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "if", "condition": "',expression_0,'",\n',
-    '"true": [\n',action_0,'],\n',
+var code = ['{"type": "if", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
+    '"true": [\n',action_0,']',
 '},\n'].join('');
 return code;
 */;
@@ -2388,7 +2384,7 @@ tooltip : switch: 多重条件分歧
 helpUrl : /_docs/#/instruction
 default : ["判别值"]
 colour : this.eventColor
-var code = ['{"type": "switch", "condition": "',expression_0,'", "caseList": [\n',
+var code = ['{"type": "switch", "condition": "',expression_0,'", ',block.isCollapsed()?'"_collapsed": true, ':'','"caseList": [\n',
     switchCase_0,
 '], },\n'].join('');
 return code;
@@ -2404,7 +2400,8 @@ helpUrl : /_docs/#/instruction
 default : ["", false]
 colour : this.subColor
 Bool_0 = Bool_0?', "nobreak": true':'';
-var code = '{"case": "'+expression_0+'"'+Bool_0+', "action": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "'+expression_0+'"'+Bool_0+collapsed+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2429,7 +2426,7 @@ if (EvalString_0==''){
 EvalString_Multi_0 = title+EvalString_Multi_0;
 EvalString_Multi_0 = EvalString_Multi_0 ?(', "text": "'+EvalString_Multi_0+'"'):'';
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,', "choices": [\n',
+var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,block.isCollapsed()?', "_collapsed": true':'',', "choices": [\n',
     choicesContext_0,
 ']},\n'].join('');
 return code;
@@ -2448,7 +2445,8 @@ colour : this.subColor
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
 EvalString_1 = EvalString_1 && (', "condition": "'+EvalString_1+'"')
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+collapsed+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2462,7 +2460,7 @@ default : ["确认要xxx吗?",0,false]
 doubleclicktext : EvalString_Multi_0
 Bool_0 = Bool_0?', "default": true':''
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",\n',
+var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"yes": [\n',action_0,'],\n',
     '"no": [\n',action_1,']\n',
 '},\n'].join('');
@@ -2479,7 +2477,8 @@ colour : this.eventColor
 if (!/^temp:[A-Z]$/.test(expression_0)) {
   throw new Error('循环遍历仅允许使用临时变量！');
 }
-return '{"type": "for", "name": "'+expression_0+'", "from": "'+EvalString_0+'", "to": "'+EvalString_1+'", "step": "'+EvalString_2+'",\n"data": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+return '{"type": "for", "name": "'+expression_0+'", "from": "'+EvalString_0+'", "to": "'+EvalString_1+'", "step": "'+EvalString_2+'"'+collapsed+',\n"data": [\n'+action_0+']},\n';
 */;    
 
 forEach_s
@@ -2495,7 +2494,8 @@ if (!/^temp:[A-Z]$/.test(expression_0)) {
 if (JsonEvalString_0 == '' || !(JSON.parse(JsonEvalString_0) instanceof Array)) {
   throw new Error('参数列表必须是个有效的数组！');
 }
-return '{"type": "forEach", "name": "'+expression_0+'", "list": '+JsonEvalString_0 + ',\n"data": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+return '{"type": "forEach", "name": "'+expression_0+'", "list": '+JsonEvalString_0 + collapsed+',\n"data": [\n'+action_0+']},\n';
 */;
 
 while_s
@@ -2505,7 +2505,7 @@ while_s
 tooltip : while：前置条件循环
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "while", "condition": "',expression_0,'",\n',
+var code = ['{"type": "while", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"data": [\n',action_0,'],\n',
 '},\n'].join('');
 return code;
@@ -2518,7 +2518,7 @@ dowhile_s
 tooltip : dowhile：后置条件循环
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "dowhile", "condition": "',expression_0,'",\n',
+var code = ['{"type": "dowhile", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"data": [\n',action_0,'],\n',
 '},\n'].join('');
 return code;
@@ -2558,7 +2558,8 @@ default : [0]
 colour : this.soundColor
 Int_0 = Int_0?(', "timeout": ' + Int_0):'';
 waitContext_0 = waitContext_0 ? (', "data": [\n' + waitContext_0 + ']') : '';
-var code = '{"type": "wait"' + Int_0 + waitContext_0 + '},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"type": "wait"' + Int_0 + collapsed + waitContext_0 + '},\n';
 return code;
 */;
 
@@ -2579,7 +2580,8 @@ colour : this.subColor
 if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
   throw new Error('键值必须是正整数，可以以逗号分隔');
 }
-var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '", "action": [\n' + action_0 + ']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '"'+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
@@ -2593,7 +2595,8 @@ helpUrl : /_docs/#/instruction
 default : [0,32,0,32]
 previewBlock : true
 colour : this.subColor
-var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + '], "action": [\n' + action_0 + ']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + ']'+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
@@ -2679,7 +2682,8 @@ previewUI_s
 tooltip : previewUI: ui绘制并预览
 helpUrl : /_docs/#/instruction
 previewBlock : true
-var code = ['{"type": "previewUI", "action": [\n', action_0,']},\n'].join('');
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = ['{"type": "previewUI"'+collapsed+', "action": [\n', action_0,']},\n'].join('');
 return code;
 */;
 
@@ -3105,6 +3109,7 @@ statExprSplit : '=== statement ^ === expression v ===' ;
 expression
     :   expression Arithmetic_List expression
     |   negate_e
+    |   unaryOperation_e
     |   bool_e
     |   idFixedList_e
     |   idFlag_e
@@ -3113,6 +3118,7 @@ expression
     |   idString_e
     |   enemyattr_e
     |   blockId_e
+    |   blockNumber_e
     |   blockCls_e
     |   equip_e
     |   evalString_e
@@ -3122,7 +3128,9 @@ expression
 //todo 修改recieveOrder,根据Arithmetic_List_0不同的值设定不同的recieveOrder
 var code = expression_0 + Arithmetic_List_0 + expression_1;
 var ops = {
-    '**': 'Math.pow('+expression_0+','+expression_1+')'
+    '**': 'Math.pow('+expression_0+','+expression_1+')',
+    'min': 'Math.min('+expression_0+','+expression_1+')',
+    'max': 'Math.max('+expression_0+','+expression_1+')',
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -3142,7 +3150,9 @@ var orders = {
     '<=': Blockly.JavaScript.ORDER_RELATIONAL,
     '&&': Blockly.JavaScript.ORDER_LOGICAL_AND,
     '||': Blockly.JavaScript.ORDER_LOGICAL_OR,
-    '^': Blockly.JavaScript.ORDER_BITWISE_XOR
+    '^': Blockly.JavaScript.ORDER_BITWISE_XOR,
+    'min': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'max': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -3156,6 +3166,16 @@ negate_e
 var code = '!'+expression_0;
 return [code, Blockly.JavaScript.ORDER_LOGICAL_NOT];
 */;
+
+unaryOperation_e
+    :   UnaryOperator_List expression
+    
+
+/* unaryOperation_e
+var code = UnaryOperator_List_0 + expression_0;
+return [code, Blockly.JavaScript.ORDER_MEMBER];
+*/;
+
 
 bool_e
     :   ':' Bool
@@ -3220,6 +3240,17 @@ blockId_e
 /* blockId_e
 default : [0,0]
 var code = 'blockId:'+Int_0+','+Int_1;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+blockNumber_e
+    :   '图块数字:' Int ',' Int
+
+
+/* blockNumber_e
+default : [0,0]
+var code = 'blockNumber:'+Int_0+','+Int_1;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -3339,12 +3370,16 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'弱等于'|'弱不等于'
-    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','==','!=']*/;
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'
+    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=']*/;
 
 AssignOperator_List
-    :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'
-    /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=']*/;  
+    :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'|'设为不小于'|'设为不大于'
+    /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=','min=','max=']*/;  
+
+UnaryOperator_List
+    :   '向下取整'|'向上取整'|'四舍五入'|'整数截断'|'绝对值'|'开方'
+    /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt']*/;
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'|'云'

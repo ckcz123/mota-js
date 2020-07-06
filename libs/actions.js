@@ -1211,11 +1211,11 @@ actions.prototype._clickViewMaps = function (x, y) {
         return;
     }
 
-    if (x >= per && x <= this.LAST - per && y <= per - 1 && mh > this.SIZE) {
+    if (x >= per && x <= this.LAST - per && y <= per - 1 && (!core.status.event.data.all && mh > this.SIZE)) {
         core.ui.drawMaps(index, cx, cy - 1);
         return;
     }
-    if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && mh > this.SIZE) {
+    if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && (!core.status.event.data.all && mh > this.SIZE)) {
         core.ui.drawMaps(index, cx, cy + 1);
         return;
     }
@@ -2354,7 +2354,9 @@ actions.prototype._clickSyncSelect = function (x, y) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                core.syncSave('all');
+                core.myconfirm('你确定要同步全部存档么？\n这可能在存档较多的时候比较慢。', function () {
+                    core.syncSave('all');
+                });
                 break;
             case 1:
                 core.syncSave();
@@ -2531,7 +2533,7 @@ actions.prototype._clickReplay = function (x, y) {
 
 actions.prototype._clickReplay_fromBeginning = function () {
     core.ui.closePanel();
-    core.startGame(core.status.hard, core.getFlag('__seed__'), core.clone(core.status.route));
+    core.startGame(core.status.hard, core.getFlag('__seed__'), core.cloneArray(core.status.route));
 }
 
 actions.prototype._clickReplay_fromLoad = function () {

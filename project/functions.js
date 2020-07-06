@@ -125,6 +125,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			if (block.disable && core.enemys.hasSpecial(block.event.id, 23)) {
 				block.disable = false;
 				core.setMapBlockDisabled(floorId, block.x, block.y, false);
+				core.maps._updateMapArray(floorId, block.x, block.y);
 			}
 		});
 		core.control.gatherFollowers();
@@ -284,15 +285,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		return;
 	}
 
-	// 删除该块
 	var guards = []; // 支援
 	if (x != null && y != null) {
-		// 检查是否是重生怪物；如果是则仅隐藏不删除
-		if (core.hasSpecial(enemy.special, 23)) {
-			core.hideBlock(x, y);
-		} else {
-			core.removeBlock(x, y);
-		}
 		guards = core.getFlag("__guards__" + x + "_" + y, []);
 		core.removeFlag("__guards__" + x + "_" + y);
 	}
@@ -389,7 +383,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果事件不为空，将其插入
 	if (todo.length > 0) core.insertAction(todo, x, y);
-	core.updateStatusBar();
+	
+	// 因为removeBlock和hideBlock都会刷新状态栏，因此移动到这里并保证刷新只执行一次，以提升效率
+	if (core.getBlock(x, y) != null) {
+		// 检查是否是重生怪物；如果是则仅隐藏不删除
+		if (core.hasSpecial(enemy.special, 23)) {
+			core.hideBlock(x, y);
+		} else {
+			core.removeBlock(x, y);
+		}
+	} else {
+		core.updateStatusBar();
+	}
 
 	// 如果已有事件正在处理中
 	if (core.status.event.id == null)
@@ -1137,8 +1142,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.setStatusBarInnerHTML('fly', "飞" + core.itemCount('centerFly'));
 
 	// 难度
-	core.statusBar.hard.innerText = core.status.hard;
-	core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
+	if (core.statusBar.hard.innerText != core.status.hard) {
+		core.statusBar.hard.innerText = core.status.hard;
+		core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
+	}
 	// 自定义状态栏绘制
 	core.drawStatusBar();
 
@@ -1160,6 +1167,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		type = {}, // 每个点的伤害类型
 		repulse = {}, // 每个点的阻击怪信息
 		ambush = {}; // 每个点的捕捉信息
+	var betweenAttackLocs = {}; // 所有可能的夹击点
 	var needCache = false;
 	var canGoDeadZone = core.flags.canGoDeadZone;
 	core.flags.canGoDeadZone = true;
@@ -1171,6 +1179,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			y = block.y,
 			id = block.event.id,
 			enemy = core.material.enemys[id];
+		if (block.disable) continue;
 
 		type[loc] = type[loc] || {};
 
@@ -1266,6 +1275,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 
+		// 夹击；在这里提前计算所有可能的夹击点，具体计算逻辑在下面
+		// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
+		if (enemy && core.enemys.hasSpecial(enemy.special, 16) && !core.hasFlag('no_betweenAttack')) {
+			for (var dir in core.utils.scan) {
+				var nx = x + core.utils.scan[dir].x,
+					ny = y + core.utils.scan[dir].y,
+					currloc = nx + "," + ny;
+				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+				betweenAttackLocs[currloc] = true;
+			}
+		}
+
 		// 检查地图范围类技能
 		var specialFlag = core.getSpecialFlag(enemy);
 		if (specialFlag & 1) needCache = true;
@@ -1273,54 +1294,58 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if ((core.status.event.id == 'book' || core.status.event.id == 'bool-detail') && core.status.event.ui) needCache = true;
 	}
 
-	// 更新夹击伤害
-	// 如果要防止夹击伤害，可以简单的将 flag:no_betweenAttack 设为true
-	if (!core.hasFlag('no_betweenAttack')) {
-		for (var x = 0; x < width; x++) {
-			for (var y = 0; y < height; y++) {
-				var loc = x + "," + y;
-				// 夹击怪物的ID
-				var enemyId1 = null,
-					enemyId2 = null;
-				// 检查左右夹击
-				var leftBlock = blocks[(x - 1) + "," + y],
-					rightBlock = blocks[(x + 1) + "," + y];
-				if (leftBlock && rightBlock && leftBlock.id == rightBlock.id) {
-					if (core.hasSpecial(leftBlock.event.id, 16))
-						enemyId1 = leftBlock.event.id;
-				}
-				// 检查上下夹击
-				var topBlock = blocks[x + "," + (y - 1)],
-					bottomBlock = blocks[x + "," + (y + 1)];
-				if (topBlock && bottomBlock && topBlock.id == bottomBlock.id) {
-					if (core.hasSpecial(topBlock.event.id, 16))
-						enemyId2 = topBlock.event.id;
-				}
+	// 对每个可能的夹击点计算夹击伤害
+	for (var loc in betweenAttackLocs) {
+		var xy = loc.split(","),
+			x = parseInt(xy[0]),
+			y = parseInt(xy[1]);
+		// 夹击怪物的ID
+		var enemyId1 = null,
+			enemyId2 = null;
+		// 检查左右夹击
+		var leftBlock = blocks[(x - 1) + "," + y],
+			rightBlock = blocks[(x + 1) + "," + y];
+		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable && leftBlock.id == rightBlock.id) {
+			if (core.hasSpecial(leftBlock.event.id, 16))
+				enemyId1 = leftBlock.event.id;
+		}
+		// 检查上下夹击
+		var topBlock = blocks[x + "," + (y - 1)],
+			bottomBlock = blocks[x + "," + (y + 1)];
+		if (topBlock && !topBlock.disable && bottomBlock && !bottomBlock.disable && topBlock.id == bottomBlock.id) {
+			if (core.hasSpecial(topBlock.event.id, 16))
+				enemyId2 = topBlock.event.id;
+		}
 
-				if (enemyId1 != null || enemyId2 != null) {
-					var leftHp = core.status.hero.hp - (damage[loc] || 0);
-					if (leftHp > 1) {
-						// 夹击伤害值
-						var value = Math.floor(leftHp / 2);
-						// 是否不超过怪物伤害值
-						if (core.flags.betweenAttackMax) {
-							var enemyDamage1 = core.getDamage(enemyId1, x, y, floorId);
-							if (enemyDamage1 != null && enemyDamage1 < value)
-								value = enemyDamage1;
-							var enemyDamage2 = core.getDamage(enemyId2, x, y, floorId);
-							if (enemyDamage2 != null && enemyDamage2 < value)
-								value = enemyDamage2;
-						}
-						if (value > 0) {
-							damage[loc] = (damage[loc] || 0) + value;
-							type[loc] = type[loc] || {};
-							type[loc]["夹击伤害"] = true;
-						}
-					}
+		if (enemyId1 != null || enemyId2 != null) {
+			var leftHp = core.status.hero.hp - (damage[loc] || 0);
+			if (leftHp > 1) {
+				// 夹击伤害值
+				var value = Math.floor(leftHp / 2);
+				// 是否不超过怪物伤害值
+				if (core.flags.betweenAttackMax) {
+					var enemyDamage1 = core.getDamage(enemyId1, x, y, floorId);
+					if (enemyDamage1 != null && enemyDamage1 < value)
+						value = enemyDamage1;
+					var enemyDamage2 = core.getDamage(enemyId2, x, y, floorId);
+					if (enemyDamage2 != null && enemyDamage2 < value)
+						value = enemyDamage2;
+				}
+				if (value > 0) {
+					damage[loc] = (damage[loc] || 0) + value;
+					type[loc] = type[loc] || {};
+					type[loc]["夹击伤害"] = true;
 				}
 			}
 		}
 	}
+
+	// 取消注释下面这一段可以让护盾抵御阻激夹域伤害
+	/*
+	for (var loc in damage) {
+		damage[loc] = Math.max(0, damage[loc] - core.getRealStatus('mdef'));
+	}
+	*/
 
 	core.flags.canGoDeadZone = canGoDeadZone;
 	core.status.checkBlock = {
@@ -1372,7 +1397,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		nowy = core.getHeroLoc('y');
 	var block = core.getBlock(nowx, nowy);
 	var hasTrigger = false;
-	if (block != null && block.block.event.trigger == 'getItem' &&
+	if (block != null && block.event.trigger == 'getItem' &&
 		!core.floors[core.status.floorId].afterGetItem[nowx + "," + nowy]) {
 		hasTrigger = true;
 		core.trigger(nowx, nowy, callback);
@@ -1465,10 +1490,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果是非状态栏canvas化，直接返回
 	if (!core.flags.statusCanvas) return;
-	var canvas = core.dom.statusCanvas,
-		ctx = core.dom.statusCanvasCtx;
+	var ctx = core.dom.statusCanvasCtx;
 	// 清空状态栏
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	core.clearMap(ctx);
 	// 如果是隐藏状态栏模式，直接返回
 	if (!core.domStyle.showStatusBar) return;
 
@@ -1479,53 +1503,90 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 竖屏模式下的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
 
-	ctx.fillStyle = core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor;
-	ctx.font = 'italic bold 18px Verdana';
+	core.setFillStyle(ctx, core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor);
 
-	// 距离左侧边框6像素，上侧边框9像素，行距约为39像素
-	var leftOffset = 10,
-		topOffset = 9,
-		lineHeight = 42;
-	if (core.domStyle.isVertical) { // 竖屏模式，行高32像素
-		leftOffset = 10;
-		topOffset = 6;
-		lineHeight = 32;
-	}
-
-	var toDraw = ["floor", "hp", "atk", "def", "mdef", "money"];
-	for (var index = 0; index < toDraw.length; index++) {
-		// 绘制下一个数据
-		var name = toDraw[index];
-		// 图片大小25x25
-		core.drawImage(ctx, core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
-		// 文字内容
-		var text = (core.statusBar[name] || {}).innerText || " ";
+	// 绘制一段文字，带斜体判定
+	var _fillBoldTextWithFontCheck = function (text, x, y, style) {
 		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
 		if (!/^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(text))
-			ctx.font = 'bold 18px Verdana';
-		// 绘制文字
-		ctx.fillText(text, leftOffset + 36, topOffset + 20);
-		ctx.font = 'italic bold 18px Verdana';
-		// 计算下一个绘制的坐标
-		if (core.domStyle.isVertical) {
-			// 竖屏模式
-			if (index % 3 != 2) leftOffset += 150;
-			else {
-				leftOffset = 10;
-				topOffset += lineHeight;
-			}
-		} else {
-			// 横屏模式
-			topOffset += lineHeight;
-		}
+			core.setFont(ctx, 'bold 18px Verdana');
+		else core.setFont(ctx, 'italic bold 18px Verdana');
+		core.fillBoldText(ctx, text, x, y, style);
 	}
-	// 绘制三色钥匙
-	ctx.fillStyle = '#FFCCAA';
-	ctx.fillText(core.statusBar.yellowKey.innerText, leftOffset + 5, topOffset + 20);
-	ctx.fillStyle = '#AAAADD';
-	ctx.fillText(core.statusBar.blueKey.innerText, leftOffset + 40, topOffset + 20);
-	ctx.fillStyle = '#FF8888';
-	ctx.fillText(core.statusBar.redKey.innerText, leftOffset + 75, topOffset + 20);
+
+	// 横竖屏需要分别绘制...
+	if (!core.domStyle.isVertical) {
+		// 横屏模式
+
+		// 绘制楼层
+		core.drawImage(ctx, core.statusBar.icons.floor, 10, 9, 25, 25);
+		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 46, 29);
+
+		// 绘制生命
+		core.drawImage(ctx, core.statusBar.icons.hp, 10, 43, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 46, 63);
+
+		// 绘制攻击
+		core.drawImage(ctx, core.statusBar.icons.atk, 10, 77, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 46, 97);
+
+		// 绘制防御
+		core.drawImage(ctx, core.statusBar.icons.def, 10, 111, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 46, 131);
+
+		// 绘制护盾
+		core.drawImage(ctx, core.statusBar.icons.mdef, 10, 145, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 46, 165);
+
+		// 绘制金币
+		core.drawImage(ctx, core.statusBar.icons.money, 10, 179, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 46, 199);
+
+		// 绘制经验
+		core.drawImage(ctx, core.statusBar.icons.exp, 10, 213, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 46, 233);
+
+		// 绘制三色钥匙
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 15, 267, '#FFCCAA');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 50, 267, '#AAAADD');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 85, 267, '#FF8888');
+
+	} else {
+		// 竖屏模式
+
+		// 绘制楼层
+		core.drawImage(ctx, core.statusBar.icons.floor, 10, 6, 25, 25);
+		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 46, 26);
+
+		// 绘制生命
+		core.drawImage(ctx, core.statusBar.icons.hp, 141, 6, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 177, 26);
+
+		// 绘制攻击
+		core.drawImage(ctx, core.statusBar.icons.atk, 272, 6, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 308, 26);
+
+		// 绘制防御
+		core.drawImage(ctx, core.statusBar.icons.def, 10, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 46, 58);
+
+		// 绘制护盾
+		core.drawImage(ctx, core.statusBar.icons.mdef, 141, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 177, 58);
+
+		// 绘制金币
+		core.drawImage(ctx, core.statusBar.icons.money, 272, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 308, 58);
+
+		// 绘制经验
+		core.drawImage(ctx, core.statusBar.icons.exp, 10, 70, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 46, 90);
+
+		// 绘制三色钥匙
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 146, 90, '#FFCCAA');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 181, 90, '#AAAADD');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 216, 90, '#FF8888');
+	}
 },
         "drawStatistics": function () {
 	// 浏览地图时参与的统计项目

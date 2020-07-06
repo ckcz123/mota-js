@@ -15,10 +15,13 @@ function core() {
         'images': {},
         'bgms': {},
         'sounds': {},
-        'ground': null,
         'items': {},
         'enemys': {},
         'icons': {},
+        'ground': null,
+        'grundCanvas': null,
+        'groundPattern': null,
+        'autotileEdges': {},
     }
     this.timeout = {
         'turnHeroTimeout': null,
@@ -93,9 +96,16 @@ function core() {
         canvas: ["bg", "event", "event2", "fg", "damage"],
         offsetX: 0, // in pixel
         offsetY: 0,
+        posX: 0, // 
+        posY: 0, 
         width: this.__SIZE__, // map width and height
         height: this.__SIZE__,
+        v2: false,
+        threshold: 512,
+        extend: 10,
+        scale: 1.0,
         tempCanvas: null, // A temp canvas for drawing
+        cacheCanvas: null, // A cache canvas
     }
     this.saves = {
         "saveIndex": null,
@@ -125,7 +135,14 @@ function core() {
         'maps': null,
         'bgmaps': {},
         'fgmaps': {},
-        'checkBlock': {}, // 显伤伤害
+        'mapBlockObjs': {},
+        'checkBlock': {}, // 每个点的阻激夹域信息
+        'damage': {  // 每个点的显伤绘制
+            'posX': 0,
+            'posY': 0,
+            'data': [],
+            'extraData': [],
+        },
 
         'lockControl': false,
 
@@ -208,7 +225,7 @@ function core() {
         'globalAnimateObjs': [],
         'floorAnimateObjs': [],
         'boxAnimateObjs': [],
-        'autotileAnimateObjs': {"blocks": [], "map": null, "bgmap": null, "fgmap": null},
+        'autotileAnimateObjs': [],
         "globalAnimateStatus": 0,
         'animateObjs': [],
     };
@@ -392,6 +409,7 @@ core.prototype._init_others = function () {
     core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
     core.material.groundPattern = core.material.groundCanvas.createPattern(core.material.groundCanvas.canvas, 'repeat');
     core.bigmap.tempCanvas = document.createElement('canvas').getContext('2d');
+    core.bigmap.cacheCanvas = document.createElement('canvas').getContext('2d');
     core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
     core.loadImage("materials", "cloud", function (name, img) { core.animateFrame.weather.cloud = img; })
     core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });

@@ -476,11 +476,11 @@ function omitedcheckUpdateFunction(event) {
   }
 
   // 因为在editor_blockly.parse里已经HTML转义过一次了,所以这里要覆盖掉以避免在注释中出现&lt;等
-  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment) {
+  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment,collapsed) {
     var rule = MotaActionBlocks[ruleName];
     var blocktext = isShadow?'shadow':'block';
     var xmlText = [];
-    xmlText.push('<'+blocktext+' type="'+ruleName+'">');
+    xmlText.push('<'+blocktext+' type="'+ruleName+'"'+(collapsed ? ' collapsed="true"' : '')+'>');
     if(!inputs)inputs=[];
     for (var ii=0,inputType;inputType=rule.argsType[ii];ii++) {
       var input = inputs[ii];

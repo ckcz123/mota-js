@@ -762,8 +762,9 @@ tooltip : text：显示一段文字（剧情）
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
 default : ["欢迎使用事件编辑器(回车直接多行编辑)"]
-var code = '"'+EvalString_Multi_0+'",\n';
-return code;
+var code = '"'+EvalString_Multi_0+'"';
+if (block.isCollapsed()) code = '{"type": "text", "text": '+code+', "_collapsed": true}';
+return code+',\n';
 */;
 
 text_1_s
@@ -788,8 +789,9 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+EvalString_Multi_0+'",\n';
-return code;
+var code =  '"'+title+EvalString_2+EvalString_Multi_0+'"';
+if (block.isCollapsed()) code = '{"type": "text", "text": '+code+', "_collapsed": true}';
+return code+',\n';
 */;
 
 text_2_s
@@ -814,8 +816,9 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
-var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'",\n';
-return code;
+var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'"';
+if (block.isCollapsed()) code = '{"type": "text", "text": '+code+', "_collapsed": true}';
+return code+',\n';
 */;
 
 textDrawingList
@@ -2351,9 +2354,9 @@ if_s
 tooltip : if: 条件判断
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "if", "condition": "',expression_0,'",\n',
+var code = ['{"type": "if", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"true": [\n',action_0,'],\n',
-    '"false": [\n',action_1,']\n',
+    '"false": [\n',action_1,']',
 '},\n'].join('');
 return code;
 */;
@@ -2366,8 +2369,8 @@ if_1_s
 tooltip : if: 条件判断
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "if", "condition": "',expression_0,'",\n',
-    '"true": [\n',action_0,'],\n',
+var code = ['{"type": "if", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
+    '"true": [\n',action_0,']',
 '},\n'].join('');
 return code;
 */;
@@ -2381,7 +2384,7 @@ tooltip : switch: 多重条件分歧
 helpUrl : /_docs/#/instruction
 default : ["判别值"]
 colour : this.eventColor
-var code = ['{"type": "switch", "condition": "',expression_0,'", "caseList": [\n',
+var code = ['{"type": "switch", "condition": "',expression_0,'", ',block.isCollapsed()?'"_collapsed": true, ':'','"caseList": [\n',
     switchCase_0,
 '], },\n'].join('');
 return code;
@@ -2397,7 +2400,8 @@ helpUrl : /_docs/#/instruction
 default : ["", false]
 colour : this.subColor
 Bool_0 = Bool_0?', "nobreak": true':'';
-var code = '{"case": "'+expression_0+'"'+Bool_0+', "action": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "'+expression_0+'"'+Bool_0+collapsed+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2422,7 +2426,7 @@ if (EvalString_0==''){
 EvalString_Multi_0 = title+EvalString_Multi_0;
 EvalString_Multi_0 = EvalString_Multi_0 ?(', "text": "'+EvalString_Multi_0+'"'):'';
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,', "choices": [\n',
+var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,block.isCollapsed()?', "_collapsed": true':'',', "choices": [\n',
     choicesContext_0,
 ']},\n'].join('');
 return code;
@@ -2441,7 +2445,8 @@ colour : this.subColor
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
 EvalString_1 = EvalString_1 && (', "condition": "'+EvalString_1+'"')
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+', "action": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+collapsed+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 
@@ -2455,7 +2460,7 @@ default : ["确认要xxx吗?",0,false]
 doubleclicktext : EvalString_Multi_0
 Bool_0 = Bool_0?', "default": true':''
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",\n',
+var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"yes": [\n',action_0,'],\n',
     '"no": [\n',action_1,']\n',
 '},\n'].join('');
@@ -2472,7 +2477,8 @@ colour : this.eventColor
 if (!/^temp:[A-Z]$/.test(expression_0)) {
   throw new Error('循环遍历仅允许使用临时变量！');
 }
-return '{"type": "for", "name": "'+expression_0+'", "from": "'+EvalString_0+'", "to": "'+EvalString_1+'", "step": "'+EvalString_2+'",\n"data": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+return '{"type": "for", "name": "'+expression_0+'", "from": "'+EvalString_0+'", "to": "'+EvalString_1+'", "step": "'+EvalString_2+'"'+collapsed+',\n"data": [\n'+action_0+']},\n';
 */;    
 
 forEach_s
@@ -2488,7 +2494,8 @@ if (!/^temp:[A-Z]$/.test(expression_0)) {
 if (JsonEvalString_0 == '' || !(JSON.parse(JsonEvalString_0) instanceof Array)) {
   throw new Error('参数列表必须是个有效的数组！');
 }
-return '{"type": "forEach", "name": "'+expression_0+'", "list": '+JsonEvalString_0 + ',\n"data": [\n'+action_0+']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+return '{"type": "forEach", "name": "'+expression_0+'", "list": '+JsonEvalString_0 + collapsed+',\n"data": [\n'+action_0+']},\n';
 */;
 
 while_s
@@ -2498,7 +2505,7 @@ while_s
 tooltip : while：前置条件循环
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "while", "condition": "',expression_0,'",\n',
+var code = ['{"type": "while", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"data": [\n',action_0,'],\n',
 '},\n'].join('');
 return code;
@@ -2511,7 +2518,7 @@ dowhile_s
 tooltip : dowhile：后置条件循环
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = ['{"type": "dowhile", "condition": "',expression_0,'",\n',
+var code = ['{"type": "dowhile", "condition": "',expression_0,'",',block.isCollapsed()?'"_collapsed": true,\n':'\n',
     '"data": [\n',action_0,'],\n',
 '},\n'].join('');
 return code;
@@ -2551,7 +2558,8 @@ default : [0]
 colour : this.soundColor
 Int_0 = Int_0?(', "timeout": ' + Int_0):'';
 waitContext_0 = waitContext_0 ? (', "data": [\n' + waitContext_0 + ']') : '';
-var code = '{"type": "wait"' + Int_0 + waitContext_0 + '},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"type": "wait"' + Int_0 + collapsed + waitContext_0 + '},\n';
 return code;
 */;
 
@@ -2572,7 +2580,8 @@ colour : this.subColor
 if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
   throw new Error('键值必须是正整数，可以以逗号分隔');
 }
-var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '", "action": [\n' + action_0 + ']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '"'+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
@@ -2586,7 +2595,8 @@ helpUrl : /_docs/#/instruction
 default : [0,32,0,32]
 previewBlock : true
 colour : this.subColor
-var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + '], "action": [\n' + action_0 + ']},\n';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + ']'+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
@@ -2672,7 +2682,8 @@ previewUI_s
 tooltip : previewUI: ui绘制并预览
 helpUrl : /_docs/#/instruction
 previewBlock : true
-var code = ['{"type": "previewUI", "action": [\n', action_0,']},\n'].join('');
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = ['{"type": "previewUI"'+collapsed+', "action": [\n', action_0,']},\n'].join('');
 return code;
 */;
 

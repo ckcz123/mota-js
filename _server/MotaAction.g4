@@ -487,7 +487,7 @@ floorImageList
     |   floorEmptyImage;
 
 floorOneImage
-    :   '图片名' EvalString '翻转' Reverse_List '图层' Bg_Fg2_List '绘制坐标' 'x' Int 'y' Int '初始禁用' Bool BGNL? Newline 
+    :   '图片名' EvalString '翻转' Reverse_List '图层' Bg_Fg2_List '绘制坐标' 'x' NInt 'y' NInt '初始禁用' Bool BGNL? Newline 
         '裁剪起点坐标' 'x' IntString? 'y' IntString? '宽' IntString? '高' IntString? '帧数' IntString? BEND
 
 
@@ -506,7 +506,7 @@ IntString_1 = IntString_1 && (', "sy": '+IntString_1);
 IntString_2 = IntString_2 && (', "w": '+IntString_2);
 IntString_3 = IntString_3 && (', "h": '+IntString_3);
 IntString_4 = IntString_4 && (', "frame": '+IntString_4);
-return '{"name": "'+EvalString_0+'"'+Reverse_List_0+', "canvas": "'+Bg_Fg2_List_0+'", "x": '+Int_0+', "y": '+Int_1+Bool_0+IntString_0+IntString_1+IntString_2+IntString_3+IntString_4+'},\n';
+return '{"name": "'+EvalString_0+'"'+Reverse_List_0+', "canvas": "'+Bg_Fg2_List_0+'", "x": '+NInt_0+', "y": '+NInt_1+Bool_0+IntString_0+IntString_1+IntString_2+IntString_3+IntString_4+'},\n';
 */;
 
 floorEmptyImage
@@ -1850,7 +1850,7 @@ return code;
 */;
 
 showImage_s
-    :   '显示图片' '图片编号' Int '图片' EvalString '翻转' Reverse_List BGNL?
+    :   '显示图片' '图片编号' NInt '图片' EvalString '翻转' Reverse_List BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
@@ -1861,17 +1861,16 @@ default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
 colour : this.printColor
 previewBlock : true
-if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
+var code = '{"type": "showImage", "code": '+NInt_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', "loc": ['+PosString_0+','+PosString_1+'], "opacity": '+Number_0+', "time": '+Int_0+async+'},\n';
 return code;
 */;
 
 showImage_1_s
-    :   '显示图片' '图片编号' Int '图片' EvalString '翻转' Reverse_List BGNL?
+    :   '显示图片' '图片编号' NInt '图片' EvalString '翻转' Reverse_List BGNL?
         '裁剪的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '不透明度' Number BGNL?
         '绘制的起点像素' 'x' PosString 'y' PosString '宽' PosString? '高' PosString? '时间' Int '不等待执行完毕' Bool Newline
 
@@ -1883,21 +1882,20 @@ default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
 colour : this.printColor
 previewBlock : true
-if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showImage", "code": '+Int_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', '+
+var code = '{"type": "showImage", "code": '+NInt_0+', "image": "'+EvalString_0+'"'+Reverse_List_0+', '+
            '"sloc": ['+PosString_0+','+PosString_1+','+PosString_2+','+PosString_3+'], '+
            '"loc": ['+PosString_4+','+PosString_5+','+PosString_6+','+PosString_7+'], '+
-           '"opacity": '+Number_0+', "time": '+Int_1+async+'},\n';
+           '"opacity": '+Number_0+', "time": '+Int_0+async+'},\n';
 return code;
 */;
 
 showTextImage_s
     :   '显示图片化文本' EvalString_Multi BGNL?
-        '图片编号' Int '起点像素' 'x' PosString 'y' PosString '行距' Number '翻转' Reverse_List '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
+        '图片编号' NInt '起点像素' 'x' PosString 'y' PosString '行距' Number '翻转' Reverse_List '不透明度' Number '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* showTextImage_s
@@ -1906,12 +1904,11 @@ helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
 colour : this.printColor
 default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1.4,"null",1,0,false]
-if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "showTextImage", "code": '+Int_0+', "text": "'+EvalString_Multi_0+'", "loc": ['+PosString_0+','+PosString_1+'], "lineHeight": '+Number_0+Reverse_List_0+', "opacity": '+Number_1+', "time": '+Int_1+async+'},\n';
+var code = '{"type": "showTextImage", "code": '+NInt_0+', "text": "'+EvalString_Multi_0+'", "loc": ['+PosString_0+','+PosString_1+'], "lineHeight": '+Number_0+Reverse_List_0+', "opacity": '+Number_1+', "time": '+Int_0+async+'},\n';
 return code;
 */;
 
@@ -1924,9 +1921,8 @@ tooltip : hideImage：清除图片
 helpUrl : /_docs/#/instruction
 colour : this.printColor
 default : [1,0,false]
-if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "hideImage", "code": '+Int_0+', "time": '+Int_1+async+'},\n';
+var code = '{"type": "hideImage", "code": '+NInt_0+', "time": '+Int_0+async+'},\n';
 return code;
 */;
 
@@ -1948,7 +1944,7 @@ return code;
 */;
 
 moveImage_s
-    :   '图片移动' '图片编号' Int '终点像素位置' 'x' PosString? 'y' PosString? BGNL?
+    :   '图片移动' '图片编号' NInt '终点像素位置' 'x' PosString? 'y' PosString? BGNL?
         '不透明度' EvalString? '移动时间' Int '不等待执行完毕' Bool Newline
     
 
@@ -1957,13 +1953,12 @@ tooltip : moveImage：图片移动
 helpUrl : /_docs/#/instruction
 default : [1,'','','',500,false]
 colour : this.printColor
-if(Int_0<=0 || Int_0>50) throw new Error('图片编号在1~50之间');
 var toloc = '';
 if (PosString_0 && PosString_1)
   toloc = ', "to": ['+PosString_0+','+PosString_1+']';
 EvalString_0 = (EvalString_0!=='') ? (', "opacity": '+EvalString_0):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "moveImage", "code": '+Int_0+toloc+EvalString_0+',"time": '+Int_1+async+'},\n';
+var code = '{"type": "moveImage", "code": '+NInt_0+toloc+EvalString_0+',"time": '+Int_0+async+'},\n';
 return code;
 */;
 

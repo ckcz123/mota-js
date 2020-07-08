@@ -50,7 +50,7 @@ ui.prototype._createUIEvent = function () {
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
         for (var m in core.canvas) {
-            core.canvas[m].clearRect(-32, -32, core.canvas[m].width+32, core.canvas[m].height+32);
+            core.canvas[m].clearRect(-32, -32, core.canvas[m].canvas.width+32, core.canvas[m].canvas.height+32);
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();

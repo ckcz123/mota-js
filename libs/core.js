@@ -320,7 +320,8 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
-    core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', 500);
+    core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
+    if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     if (main.mode != 'editor') {
         core.domStyle.scale = core.getLocalStorage('scale', 1);
         if (core.domStyle.scale != 1) {

@@ -374,6 +374,16 @@ editor_blockly = function () {
         }
     }
 
+    editor_blockly.selectPointFromButton = function () {
+        var b = Blockly.selected;
+        if (b && MotaActionBlocks[b.type].selectPoint) {
+            editor_blockly.selectPoint(b,eval(MotaActionBlocks[b.type].selectPoint));
+            return;
+        } else {
+            editor.uievent.selectPoint();
+        }
+    }
+
     editor_blockly.lastUsedType=[
         'text_0_s',
         'comment_s',

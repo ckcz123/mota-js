@@ -1770,6 +1770,7 @@ maps.prototype.removeBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return false;
 
+    core.extractBlocks(floorId);
     for (var i in core.status.maps[floorId].blocks) {
         var block = core.status.maps[floorId].blocks[i];
         if (block.x == x && block.y == y) {

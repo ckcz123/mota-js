@@ -1936,10 +1936,10 @@ actions.prototype._clickSwitchs = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 1 && selection != 2 && selection != 3 && selection != 4) return;
     }
-    var width = choices[selection].width;
-    var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
-    var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
     if (selection >= 0 && selection < choices.length) {
+        var width = choices[selection].width;
+        var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
+        var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
         core.status.event.selection = selection;
         switch (selection) {
             case 0:

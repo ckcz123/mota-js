@@ -704,12 +704,7 @@ utils.prototype.getCookie = function (name) {
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (!core.statusBar[name]) return;
-    var isNumber = false;
-    if (typeof value == 'number') {
-        value = this.formatBigNumber(value);
-        isNumber = true;
-    }
-    // 判定是否斜体
+    if (typeof value == 'number') value = this.formatBigNumber(value);
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
     style += 'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
@@ -717,31 +712,17 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
-    var _isNumber = core.statusBar[name].getAttribute('_isNumber') == "1";
     var _style = core.statusBar[name].getAttribute('_style');
     var _value = core.statusBar[name].getAttribute('_value');
-    if (isNumber) {
-        if (_isNumber && _style == style) {
-            if (value == _value) return;
-            core.statusBar[name].innerText = value;
-        } else {
-            core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
-            core.statusBar[name].setAttribute('_isNumber', '1');
-            core.statusBar[name].setAttribute('_style', style);
-        }
-        core.statusBar[name].setAttribute('_value', value);
+    if (_style == style) {
+        if (value == _value) return;
+        core.statusBar[name].children[0].innerText = value;
     } else {
-        if (!_isNumber && _style == style) {
-            if (value == _value) return;
-            core.statusBar[name].children[0].innerText = value;
-        } else {
-            core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
-            core.statusBar[name].children[0].innerText = value;
-            core.statusBar[name].setAttribute('_isNumber', '0');
-            core.statusBar[name].setAttribute('_style', style);
-        }
-        core.statusBar[name].setAttribute('_value', value);
+        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
+        core.statusBar[name].children[0].innerText = value;
+        core.statusBar[name].setAttribute('_style', style);
     }
+    core.statusBar[name].setAttribute('_value', value);;
 }
 
 utils.prototype.strlen = function (str) {

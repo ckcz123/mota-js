@@ -1116,7 +1116,7 @@ control.prototype._checkBlock_ambush = function (ambush) {
 ////// 更新全地图显伤 //////
 control.prototype.updateDamage = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
-    if (!floorId || core.status.gameOver) return;
+    if (!floorId || core.status.gameOver || main.mode != 'play') return;
     var onMap = ctx == null;
 
     // 没有怪物手册
@@ -1192,7 +1192,7 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
 
 ////// 重绘地图显伤 //////
 control.prototype.drawDamage = function (ctx) {
-    if (core.status.gameOver || !core.status.damage) return;
+    if (core.status.gameOver || !core.status.damage || main.mode != 'play') return;
     var onMap = false;
     if (ctx == null) {
         ctx = core.canvas.damage;
@@ -1217,6 +1217,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
     cacheCtx.canvas.width = ctx.canvas.width;
     cacheCtx.canvas.height = ctx.canvas.height;
     cacheCtx.clearRect(0, 0, cacheCtx.canvas.width, cacheCtx.canvas.height);
+    if (onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
 
     core.setFont(cacheCtx, "bold 11px Arial");
     core.setTextAlign(cacheCtx, 'left');
@@ -1242,8 +1243,9 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
         }
         core.fillBoldText(cacheCtx, one.text, px, py, one.color);
     });
+    cacheCtx.translate(0, 0);
 
-    core.drawImage(ctx, cacheCtx.canvas, 0, 0);
+    core.drawImage(ctx, cacheCtx.canvas, onMap && core.bigmap.v2 ? -32 : 0, onMap && core.bigmap.v2 ? -32 : 0);
 }
 
 // ------ 录像相关 ------ //
@@ -2636,7 +2638,6 @@ control.prototype.clearStatusBar = function() {
     Object.keys(core.statusBar).forEach(function (e) {
         if (core.statusBar[e].innerHTML != null) {
             core.statusBar[e].innerHTML = "&nbsp;";
-            core.statusBar[e].removeAttribute('_isNumber');
             core.statusBar[e].removeAttribute('_style');
             core.statusBar[e].removeAttribute('_value');
         }

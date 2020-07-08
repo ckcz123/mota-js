@@ -1568,9 +1568,7 @@ control.prototype.__replay_getTimeout = function () {
 
 control.prototype._replayAction_move = function (action) {
     if (["up","down","left","right"].indexOf(action)<0) return false;
-    core.moveHero(action, function () {
-        setTimeout(core.replay);
-    });
+    core.moveHero(action, core.replay);
     return true;
 }
 

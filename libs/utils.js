@@ -1143,7 +1143,7 @@ utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onpr
 
 utils.prototype._unzip_readEntries = function (entries, success, convertToText) {
     var results = {};
-    if (entries == null) {
+    if (entries == null || entries.length == 0) {
         return success(results);
     }
     var length = entries.length;

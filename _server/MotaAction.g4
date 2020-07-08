@@ -1913,7 +1913,7 @@ return code;
 */;
 
 hideImage_s
-    :   '清除图片' '图片编号' Int '时间' Int '不等待执行完毕' Bool Newline
+    :   '清除图片' '图片编号' NInt '时间' Int '不等待执行完毕' Bool Newline
     
 
 /* hideImage_s

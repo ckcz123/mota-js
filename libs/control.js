@@ -1958,7 +1958,7 @@ control.prototype.syncLoad = function () {
         }
         core.ui.drawWaiting("正在同步，请稍候...");
         if (idpassword.length == 7) {
-            core.control._syncLoad_http(idpassword.substring(0, 4), idpassword.substring(3));
+            core.control._syncLoad_http(idpassword.substring(0, 4), idpassword.substring(4));
         } else {
             core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
         }

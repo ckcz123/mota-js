@@ -601,7 +601,7 @@ events.prototype.getNextItem = function (noRoute) {
     var directions = ["up", "down", "left", "right"].filter(function (dir) {
         return core.events._canGetNextItem(dir);
     });
-    return directions.length == 1 ? this._getNextItem(directions[0]) : false;
+    return directions.length == 1 ? this._getNextItem(directions[0], noRoute) : false;
 }
 
 events.prototype._canGetNextItem = function (direction) {

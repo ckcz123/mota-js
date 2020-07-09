@@ -43,7 +43,7 @@ button {
 }
 
 /** 素材区背景 */
-#iconLib {
+#iconLib, #mapEdit {
     background-color: #242424;
 }
 

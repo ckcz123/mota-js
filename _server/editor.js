@@ -477,7 +477,7 @@ editor.prototype.updateMap = function () {
                 return 0;
             }
         });
-    }), {'events': editor.currentFloorData.events}, editor.currentFloorId);
+    }), null, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     if (editor.uivalues.bigmap) return this._updateMap_bigmap();
 
@@ -513,15 +513,17 @@ editor.prototype.updateMap = function () {
         }
         //ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
     }
-    // 绘制地图 start
-    for (var y = 0; y < editor.map.length; y++) {
-        for (var x = 0; x < editor.map[0].length; x++) {
-            drawTile(editor.dom.evCtx, x, y, editor.map[y][x]);
-            editor.dom.canvas.forEach(function (one) {
-                drawTile(editor.dom[one + 'Ctx'], x, y, editor[one+'map'][y][x]);
-            });
+    if (editor.map.length * editor.map[0].length < 4096) {
+        for (var y = 0; y < editor.map.length; y++) {
+            for (var x = 0; x < editor.map[0].length; x++) {
+                drawTile(editor.dom.evCtx, x, y, editor.map[y][x]);
+                editor.dom.canvas.forEach(function (one) {
+                    drawTile(editor.dom[one + 'Ctx'], x, y, editor[one+'map'][y][x]);
+                });
+            }
         }
     }
+
     // 绘制地图 end
 
     editor.drawEventBlock();

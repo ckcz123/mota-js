@@ -2,6 +2,7 @@
  * 表格配置项。
  * 在这里可以对表格中的各项显示进行配置，包括表格项、提示内容等内容。具体写法照葫芦画瓢即可。
  * 本配置项包括：脚本编辑。
+ * 相关文档 _docs/editor.md ~ http://127.0.0.1:1055/_docs/#/editor?id=修改表格
  */
 
 var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
@@ -14,25 +15,19 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "重置整个游戏"
-				},
-				"setInitData": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "设置初始属性"
+					"_data": "重置游戏"
 				},
 				"win": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "游戏获胜事件"
+					"_data": "游戏获胜"
 				},
 				"lose": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "游戏失败事件"
+					"_data": "游戏失败"
 				},
 				"changingFloor": {
 					"_leaf": true,
@@ -56,49 +51,31 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "战前事件"
+					"_data": "战前判定"
 				},
 				"afterBattle": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "战后事件"
+					"_data": "战后脚本"
 				},
 				"afterOpenDoor": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "开门后事件"
+					"_data": "开门后脚本"
 				},
 				"afterGetItem": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "获得道具后事件"
-				},
-				"afterChangeLight": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "改变亮灯事件"
+					"_data": "道具后脚本"
 				},
 				"afterPushBox": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "推箱子事件"
-				},
-				"afterUseBomb": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "炸弹事件"
-				},
-				"canUseQuickShop": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "能否用快捷商店"
+					"_data": "推箱子后"
 				}
 			}
 		},
@@ -109,25 +86,19 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "怪物特殊属性定义"
+					"_data": "怪物特殊属性"
 				},
 				"getEnemyInfo": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "获得怪物真实属性"
+					"_data": "怪物真实属性"
 				},
 				"getDamageInfo": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "获得战斗伤害信息"
-				},
-				"updateEnemys": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_lint": true,
-					"_data": "更新怪物数据"
+					"_data": "战斗伤害信息"
 				}
 			}
 		},
@@ -139,6 +110,13 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_lint": true,
 					"_data": "按键处理"
+				},
+				"onStatusBarClick": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_docs": "点击状态栏",
+					"_data": "状态栏点击事件，仅在开启自绘状态栏时生效"
 				}
 			}
 		},
@@ -157,6 +135,18 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_lint": true,
 					"_data": "读档操作"
 				},
+				"getStatusLabel": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "状态名定义"
+				},
+				"triggerDebuff": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "毒衰咒处理"
+				},
 				"updateStatusBar": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -173,25 +163,31 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "每一步后的操作"
+					"_data": "每步后操作"
 				},
 				"moveDirectly": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "瞬间移动处理"
+					"_data": "瞬间移动"
 				},
 				"parallelDo": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "并行事件处理"
+					"_data": "并行脚本"
 				}
 			}
 		},
 		"ui": {
 			"_type": "object",
 			"_data": {
+				"getToolboxItems": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_lint": true,
+					"_data": "道具栏显示项"
+				},
 				"drawStatusBar": {
 					"_leaf": true,
 					"_type": "textarea",
@@ -202,13 +198,13 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "地图数据统计"
+					"_data": "数据统计"
 				},
 				"drawAbout": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
-					"_data": "绘制关于界面"
+					"_data": "关于界面"
 				}
 			}
 		}

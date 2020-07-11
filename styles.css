@@ -17,7 +17,7 @@
 
 #mainTips {
     color: #fff;
-    font-size: 0.8rem;
+    font-size: 0.8em;
     position: fixed;
     top: 10px;
     left: 10px;
@@ -72,9 +72,9 @@
 
 #startTopLoadTips {
     color: #fff;
-    font-size: 0.6rem;
+    font-size: 0.6em;
     position: absolute;
-    top: 8%;
+    top: 10%;
     left: 5%;
     z-index: 15;
 }
@@ -85,7 +85,7 @@
     bottom: 0;
     left: 5%;
     z-index: 15;
-    font-size: 18px;
+    font-size: 1.1em;
 }
 
 #startBackground {
@@ -108,7 +108,7 @@
     margin-top: 8%;
     max-width: 100%;
     text-align: center;
-    font: bold 4rem STXingkai;
+    font: bold 4em STXingkai;
 }
 
 #startTitle {
@@ -120,7 +120,7 @@
     width: auto;
     position: absolute;
     text-align: center;
-    font-size: 1.4rem;
+    font-size: 1.4em;
     display: none;
     z-index: 310;
     bottom: 0;
@@ -176,20 +176,20 @@
 
 #logoLabel {
     margin-top: 8%;
-    font: bold 3rem STXingkai;
+    font: bold 3em STXingkai;
     margin-left: auto;
     margin-right: auto;
 }
 
 #versionLabel {
     margin-top: -3%;
-    font-size: 1.2rem;
+    font-size: 1.2em;
     font-weight: bold;
 }
 
 #floorNameLabel {
     margin-top: 30px;
-    font-size: 1.6rem;
+    font-size: 1.6em;
     font-weight: bold;
 }
 
@@ -198,7 +198,7 @@
     box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    background: url(project/images/ground.png) repeat;
+    background: url(project/materials/ground.png) repeat;
     z-index: 185;
     display: none;
     top: 0;
@@ -219,6 +219,7 @@
 }
 #statusBar span{
     font: bold italic 1.1em Verdana;
+    display: inline;
 }
 #statusBar p {
     display: inline-block;
@@ -231,7 +232,7 @@
 }
 #toolBar {
     position: absolute;
-    background: url(project/images/ground.png) repeat;
+    background: url(project/materials/ground.png) repeat;
     z-index: 210;
     box-sizing: border-box;
     -moz-box-sizing: border-box;
@@ -347,11 +348,10 @@ p#name {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -60%);
+    transform: translate(-50%, -55%);
     background: white;
     width: 250px;
     min-height: 50px;
-    max-height: 250px;
 }
 
 #inputMessage {
@@ -380,7 +380,7 @@ p#name {
     margin-right: 10%;
 }
 
-#_selector, #_uievent_selector {
+#_selector, ._uievent_selector {
     animation: selector 2s ease-in-out 0s infinite normal none running;
 }
 
@@ -423,4 +423,62 @@ p#name {
     100% {
         transform: rotate(45deg) translate(-3px, -3px);
     }
+}
+
+#startImageBackgroundDiv {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: 10000;
+}
+
+#startImageDiv {
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    background: black;
+    opacity: 1;
+}
+
+#startImageLogo {
+    opacity: 0;
+    max-width: 60%;
+    max-height: 60%;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.startImageAnimation {
+    -webkit-animation: startImage 4s ease-in-out 1s alternate 1;
+    animation: startImage 4s ease-in-out 1s alternate 1;
+}
+
+@-webkit-keyframes startImage {
+    0% { opacity: 0; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+@keyframes startImage {
+    0% { opacity: 0; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.startImageDivAnimation {
+    -webkit-animation: startImageDivDisappear 2s ease-in-out 5s alternate 1;
+    animation: startImageDivDisappear 2s ease-in-out 5s alternate 1;
+}
+
+@-webkit-keyframes startImageDivDisappear {
+    0% { opacity: 1 }
+    100% { opacity: 0 }
+}
+
+@keyframes startImageDivDisappear {
+    0% { opacity: 1 }
+    100% { opacity: 0 }
 }

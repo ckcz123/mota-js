@@ -8,8 +8,10 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"sample3",
 			"MT0"
 		],
+		"floorPartitions": [],
 		"images": [
 			"bg.jpg",
+			"hero.png",
 			"winskin.png"
 		],
 		"tilesets": [
@@ -35,52 +37,79 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bomb.mp3",
 			"centerFly.mp3"
 		],
+		"fonts": [],
 		"nameMap": {
 			"背景图.jpg": "bg.jpg",
 			"背景音乐.mp3": "bgm.mp3"
 		},
-		"startBackground": "bg.jpg",
-		"startLogoStyle": "color: black",
 		"levelChoose": [
-			[
-				"简单",
-				"Easy"
-			],
-			[
-				"普通",
-				"Normal"
-			],
-			[
-				"困难",
-				"Hard"
-			],
-			[
-				"噩梦",
-				"Hell"
-			]
+			{
+				"title": "简单",
+				"name": "Easy",
+				"hard": 1,
+				"action": [
+					{
+						"type": "comment",
+						"text": "在这里写该难度需执行的事件"
+					}
+				]
+			},
+			{
+				"title": "普通",
+				"name": "Normal",
+				"hard": 2,
+				"color": [
+					0,
+					255,
+					0,
+					1
+				],
+				"action": []
+			}
 		],
 		"equipName": [
 			"武器",
 			"盾牌"
 		],
-		"startBgm": "bgm.mp3",
-		"statusLeftBackground": "url(project/images/ground.png) repeat",
-		"statusTopBackground": "url(project/images/ground.png) repeat",
-		"toolsBackground": "url(project/images/ground.png) repeat",
-		"borderColor": "#CCCCCC",
-		"statusBarColor": "white",
-		"hardLabelColor": "red",
-		"floorChangingBackground": "black",
-		"floorChangingTextColor": "white",
-		"font": "Verdana",
-		"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;"
+		"startBgm": null,
+		"styles": {
+			"startBackground": "project/images/bg.jpg",
+			"startVerticalBackground": "project/images/bg.jpg",
+			"startLogoStyle": "color: white",
+			"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;",
+			"statusLeftBackground": "url(project/materials/ground.png) repeat",
+			"statusTopBackground": "url(project/materials/ground.png) repeat",
+			"toolsBackground": "url(project/materials/ground.png) repeat",
+			"borderColor": [
+				204,
+				204,
+				204,
+				1
+			],
+			"statusBarColor": [
+				255,
+				255,
+				255,
+				1
+			],
+			"selectColor": [
+				255,
+				215,
+				0,
+				1
+			],
+			"floorChangingStyle": "background-color: black; color: white",
+			"font": "Verdana"
+		}
 	},
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.6.3",
+		"version": "Ver 2.7.2",
 		"floorId": "sample0",
 		"hero": {
+			"image": "hero.png",
+			"animate": false,
 			"name": "阳光",
 			"lv": 1,
 			"hpmax": 9999,
@@ -91,14 +120,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"def": 100,
 			"mdef": 0,
 			"money": 0,
-			"experience": 0,
+			"exp": 0,
 			"equipment": [],
 			"items": {
-				"keys": {
-					"yellowKey": 0,
-					"blueKey": 0,
-					"redKey": 0
-				},
 				"constants": {},
 				"tools": {},
 				"equips": {}
@@ -109,6 +133,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"y": 10
 			},
 			"flags": {},
+			"followers": [],
 			"steps": 0
 		},
 		"startCanvas": [
@@ -128,8 +153,6 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					0,
 					0
 				],
-				"dw": 100,
-				"dh": 100,
 				"opacity": 1,
 				"time": 0
 			},
@@ -161,15 +184,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 									},
 									{
 										"type": "if",
-										"condition": "core.flags.startDirectly",
+										"condition": "main.levelChoose.length == 0",
 										"true": [
 											{
 												"type": "comment",
-												"text": "直接开始游戏，设置初始化数据"
-											},
-											{
-												"type": "function",
-												"function": "function(){\ncore.events.setInitData('')\n}"
+												"text": "直接开始游戏"
 											}
 										],
 										"false": [
@@ -179,7 +198,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 											},
 											{
 												"type": "function",
-												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
+												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one.title || '',\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + (one.name || '') + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
 											}
 										]
 									},
@@ -226,14 +245,13 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 									},
 									{
 										"type": "if",
-										"condition": "!core.isReplaying()",
+										"condition": "(!core.isReplaying())",
 										"true": [
 											{
 												"type": "function",
 												"function": "function(){\ncore.chooseReplayFile()\n}"
 											}
-										],
-										"false": []
+										]
 									}
 								]
 							}
@@ -247,70 +265,128 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			}
 		],
 		"startText": [
+			{
+				"type": "comment",
+				"text": "初始剧情"
+			},
 			"Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
-			"这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
-			"赶快来试一试吧！"
+			"这里游戏开始时的剧情。\n\n你可以在这里写上自己的内容。\n赶快来试一试吧！"
 		],
 		"shops": [
 			{
-				"id": "moneyShop1",
-				"name": "贪婪之神",
-				"icon": "blueShop",
+				"id": "shop1",
+				"text": "\t[贪婪之神,moneyShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
 				"textInList": "1F金币商店",
-				"commonTimes": false,
 				"mustEnable": false,
-				"use": "money",
-				"need": "20+10*times*(times+1)",
-				"text": "勇敢的武士啊，给我${need}金币就可以：",
+				"disablePreview": false,
 				"choices": [
 					{
 						"text": "生命+800",
-						"effect": "status:hp+=800"
+						"need": "status:money>=20+2*flag:shop1",
+						"action": [
+							{
+								"type": "comment",
+								"text": "新版商店中需要手动扣减金币和增加访问次数"
+							},
+							{
+								"type": "setValue",
+								"name": "status:money",
+								"operator": "-=",
+								"value": "20+2*flag:shop1"
+							},
+							{
+								"type": "setValue",
+								"name": "flag:shop1",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:hp",
+								"operator": "+=",
+								"value": "800"
+							}
+						]
 					},
 					{
 						"text": "攻击+4",
-						"effect": "status:atk+=4"
-					},
-					{
-						"text": "防御+4",
-						"effect": "status:def+=4"
-					},
-					{
-						"text": "魔防+10",
-						"effect": "status:mdef+=10"
+						"need": "status:money>=20+2*flag:shop1",
+						"action": [
+							{
+								"type": "comment",
+								"text": "新版商店中需要手动扣减金币和增加访问次数"
+							},
+							{
+								"type": "setValue",
+								"name": "status:money",
+								"operator": "-=",
+								"value": "20+2*flag:shop1"
+							},
+							{
+								"type": "setValue",
+								"name": "flag:shop1",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:atk",
+								"operator": "+=",
+								"value": "4"
+							}
+						]
 					}
 				]
 			},
 			{
-				"id": "expShop1",
-				"name": "经验之神",
-				"icon": "pinkShop",
+				"id": "shop2",
+				"text": "\t[贪婪之神,expShop]勇敢的武士啊, 给我一定经验就可以：",
 				"textInList": "1F经验商店",
-				"commonTimes": false,
 				"mustEnable": false,
-				"use": "experience",
-				"need": "-1",
-				"text": "勇敢的武士啊，给我若干经验就可以：",
+				"disablePreview": true,
 				"choices": [
 					{
-						"text": "等级+1",
-						"need": "100",
-						"effect": "status:lv+=1;status:hp+=1000;status:atk+=7;status:def+=7"
-					},
-					{
-						"text": "攻击+5",
-						"need": "30",
-						"effect": "status:atk+=5"
-					},
-					{
-						"text": "防御+5",
-						"need": "30",
-						"effect": "status:def+=5"
+						"text": "等级+1（100经验）",
+						"need": "status:exp>=100",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "status:exp",
+								"operator": "-=",
+								"value": "100"
+							},
+							{
+								"type": "setValue",
+								"name": "status:lv",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:hp",
+								"operator": "+=",
+								"value": "1000"
+							}
+						]
 					}
 				]
 			},
 			{
-				"id": "keyShop1",
+				"id": "itemShop",
+				"item": true,
+				"textInList": "道具商店",
+				"mustEnable": false,
+				"choices": [
+					{
+						"id": "yellowKey",
+						"number": 10,
+						"money": "10",
+						"sell": "5"
+					}
+				]
+			},
+			{
+				"id": "keyShop",
 				"textInList": "回收钥匙商店",
 				"mustEnable": false,
 				"commonEvent": "回收钥匙商店"
@@ -329,17 +405,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"need": "20",
-				"title": "第二级",
+				"title": "",
 				"action": [
 					{
 						"type": "setValue",
 						"name": "status:atk",
-						"value": "status:atk+10"
+						"operator": "+=",
+						"value": "10"
 					},
 					{
 						"type": "setValue",
 						"name": "status:def",
-						"value": "status:def+10"
+						"operator": "+=",
+						"value": "10"
 					}
 				]
 			},
@@ -359,9 +437,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"lavaDamage": 100,
 		"poisonDamage": 10,
 		"weakValue": 20,
-		"redJewel": 3,
-		"blueJewel": 3,
-		"greenJewel": 5,
+		"redGem": 3,
+		"blueGem": 3,
+		"greenGem": 5,
 		"redPotion": 100,
 		"bluePotion": 250,
 		"yellowPotion": 500,
@@ -370,57 +448,40 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"counterAttack": 0.1,
 		"purify": 3,
 		"hatred": 2,
-		"moveSpeed": 100,
 		"animateSpeed": 400,
-		"floorChangeTime": 800
+		"statusCanvasRowsOnMobile": 3,
+		"floorChangeTime": 500
 	},
 	"flags": {
-		"enableFloor": true,
-		"enableName": false,
-		"enableLv": false,
-		"enableHPMax": false,
-		"enableMana": false,
-		"enableMDef": true,
-		"enableMoney": true,
-		"enableExperience": false,
-		"enableLevelUp": false,
-		"levelUpLeftMode": false,
-		"enableKeys": true,
-		"enablePZF": false,
-		"enableDebuff": false,
-		"enableSkill": false,
+		"statusBarItems": [
+			"enableFloor",
+			"enableHP",
+			"enableAtk",
+			"enableDef",
+			"enableMDef",
+			"enableMoney",
+			"enableKeys"
+		],
 		"flyNearStair": true,
 		"flyRecordPosition": false,
-		"pickaxeFourDirections": false,
-		"bombFourDirections": false,
-		"snowFourDirections": false,
-		"bigKeyIsBox": false,
 		"steelDoorWithoutKey": false,
-		"itemFirstText": true,
-		"equipment": false,
+		"itemFirstText": false,
 		"equipboxButton": false,
-		"iconInEquipbox": false,
 		"enableAddPoint": false,
 		"enableNegativeDamage": false,
-		"hatredDecrease": true,
-		"betweenAttackCeil": false,
 		"betweenAttackMax": false,
 		"useLoop": false,
 		"startUsingCanvas": false,
-		"startDirectly": false,
 		"statusCanvas": false,
-		"statusCanvasRowsOnMobile": 3,
 		"displayEnemyDamage": true,
 		"displayCritical": true,
 		"displayExtraDamage": true,
 		"enableGentleClick": true,
-		"potionWhileRouting": false,
 		"ignoreChangeFloor": true,
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
-		"enableDisabledShop": true,
+		"enableRouteFolding": true,
 		"disableShopOnDamage": false,
-		"blurFg": false,
-		"checkConsole": false
+		"blurFg": false
 	}
 }

@@ -1,6 +1,6 @@
 # 脚本
 
-?> 目前版本**v2.6.3**，上次更新时间：* {docsify-updated} *
+?> 在这一节中，让我们来了解如何使用控制台和复写函数！
 
 在V2.6版本中，基本对整个项目代码进行了重写，更加方便造塔者的使用和复写函数。
 
@@ -313,9 +313,9 @@ core.events.openShop = function (shopId, needVisited) {
 
 ```js
 var drawMap = core.maps.drawMap; // 先把原始函数用一个变量记录下来
-core.maps.drawMap = function (floorId, callback) {
+core.maps.drawMap = function (floorId) {
     console.log("drawMap..."); // 控制台打出一条信息
-    return drawMap.call(core.maps, floorId, callback); // 需要使用`call`来告知this是core.maps
+    return drawMap.call(core.maps, floorId); // 需要使用`call`来告知this是core.maps
 }
 ```
 
@@ -349,6 +349,6 @@ core.registerAnimationFrame("globalAnimate", true, "myGlobalAnimate");
 
 ==========================================================================================
 
-[继续阅读下一章：API列表](api)
+[继续阅读下一章：修改编辑器](editor)
 
 

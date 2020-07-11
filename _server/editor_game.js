@@ -115,10 +115,12 @@ editor_game_wrapper = function (editor, main, core) {
             var img = core.material.images.tilesets[imgName];
             var width = Math.floor(img.width / 32), height = Math.floor(img.height / 32);
             if (img.width % 32 || img.height % 32) {
-                alert(imgName + '的长或宽不是32的整数倍, 请修改后刷新页面');
+                // alert(imgName + '的长或宽不是32的整数倍, 请修改后刷新页面');
+                console.warn(imgName + '的长或宽不是32的整数倍, 请修改后刷新页面');
             }
             if (img.width * img.height > 32 * 32 * 3000) {
-                alert(imgName + '上的图块数量超过了3000，请修改后刷新页面');
+                // alert(imgName + '上的图块数量超过了3000，请修改后刷新页面');
+                console.warn(imgName + '上的图块数量超过了3000，请修改后刷新页面');
             }
             for (var id = startOffset; id < startOffset + width * height; id++) {
                 var x = (id - startOffset) % width, y = parseInt((id - startOffset) / width);
@@ -133,7 +135,7 @@ editor_game_wrapper = function (editor, main, core) {
 
     // 获取当前地图
     editor_game.prototype.fetchMapFromCore = function () {
-        var mapArray = core.maps.saveMap(core.status.floorId);
+        var mapArray = core.getMapArray(core.status.floorId);
         editor.map = mapArray.map(function (v) {
             return v.map(function (v) {
                 var x = parseInt(v), y = editor.indexs[x];
@@ -146,12 +148,17 @@ editor_game_wrapper = function (editor, main, core) {
         });
         editor.currentFloorId = core.status.floorId;
         editor.currentFloorData = core.floors[core.status.floorId];
-        for (var ii = 0, name; name = ['bgmap', 'fgmap'][ii]; ii++) {
+        // 补出缺省的数据
+        editor.currentFloorData.autoEvent = editor.currentFloorData.autoEvent || {};
+        //
+        for (var ii = 0, name; name = editor.dom.canvas[ii]; ii++) {
+            name += 'map';
             var mapArray = editor.currentFloorData[name];
             if (!mapArray || JSON.stringify(mapArray) == JSON.stringify([])) {//未设置或空数组
                 //与editor.map同形的全0
                 mapArray = eval('[' + Array(editor.map.length + 1).join('[' + Array(editor.map[0].length + 1).join('0,') + '],') + ']');
             }
+            mapArray = core.maps._processInvalidMap(mapArray, editor.map[0].length, editor.map.length);
             editor[name] = mapArray.map(function (v) {
                 return v.map(function (v) {
                     var x = parseInt(v), y = editor.indexs[x];
@@ -173,6 +180,18 @@ editor_game_wrapper = function (editor, main, core) {
           callback([data,err]);
         }); */
         callback([editor.core.floorIds, null]);
+    }
+
+    editor_game.prototype.doCoreFunc = function (funcname) {
+        return core[funcname].apply(core, Array.prototype.slice.call(arguments, 1));
+    }
+
+    editor_game.prototype.getEnemy = function (id) {
+        return core.material.enemys[id];
+    }
+
+    editor_game.prototype.getFirstData = function () {
+        return core.firstData;
     }
 
     editor.constructor.prototype.game = new editor_game();

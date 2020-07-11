@@ -15,33 +15,52 @@ editor_listen_wrapper = function (editor) {
 
         editor.dom.mid.onmousewheel = editor.uifunctions.map_mousewheel
 
-        editor.uivalues.shortcut = core.getLocalStorage('shortcut', { 48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0 });
+        editor.uivalues.shortcut = editor.config.get('shortcut', { 48: 0, 49: 0, 50: 0, 51: 0, 52: 0, 53: 0, 54: 0, 55: 0, 56: 0, 57: 0 });
         editor.dom.body.onkeydown = editor.uifunctions.body_shortcut
 
         editor.uivalues.scrollBarHeight = editor.uifunctions.getScrollBarHeight();
         editor.dom.iconExpandBtn.style.display = 'block';
-        editor.dom.iconExpandBtn.innerText = editor.uivalues.folded ? "展开" : "折叠";
+        editor.dom.iconExpandBtn.innerText = editor.uivalues.folded ? "展开素材区" : "折叠素材区";
         editor.dom.iconExpandBtn.onclick = editor.uifunctions.fold_material_click
 
         editor.dom.iconLib.onmousedown = editor.uifunctions.material_ondown
+        editor.dom.iconLib.onmousemove = editor.uifunctions.material_onmove
+        editor.dom.iconLib.onmouseup = editor.uifunctions.material_onup
+        editor.dom.iconLib.oncontextmenu = function (e) { e.preventDefault() }
 
-        editor.dom.addFloorEvent.onmousedown = editor.addFloorEvent_click
-        editor.dom.chooseThis.onmousedown = editor.uifunctions.chooseThis_click
-        editor.dom.chooseInRight.onmousedown = editor.uifunctions.chooseInRight_click
-        editor.dom.copyLoc.onmousedown = editor.uifunctions.copyLoc_click
-        editor.dom.moveLoc.onmousedown = editor.uifunctions.moveLoc_click
-        editor.dom.clearEvent.onmousedown = editor.uifunctions.clearEvent_click
-        editor.dom.clearLoc.onmousedown = editor.uifunctions.clearLoc_click
+        editor.dom.extraEvent.onmouseup = editor.uifunctions.extraEvent_click
+        editor.dom.chooseThis.onmouseup = editor.uifunctions.chooseThis_click
+        editor.dom.chooseInRight.onmouseup = editor.uifunctions.chooseInRight_click
+        editor.dom.copyLoc.onmouseup = editor.uifunctions.copyLoc_click
+        editor.dom.pasteLoc.onmouseup = editor.uifunctions.pasteLoc_click
+        editor.dom.clearEvent.onmouseup = editor.uifunctions.clearEvent_click
+        editor.dom.clearLoc.onmouseup = editor.uifunctions.clearLoc_click
+        editor.dom.undoFloor.onclick = editor.uifunctions.undoFloor_click
+        editor.dom.editorTheme.onchange = editor.uifunctions.editorTheme_onchange
+
+        editor.dom.lastUsed.onmouseup = editor.uifunctions.lastUsed_click;
+        editor.dom.lastUsed.oncontextmenu = function (e) { e.preventDefault(); }
+        editor.dom.clearLastUsedBtn.onclick = editor.uifunctions.clearLastUsedBtn_click;
+        editor.dom.lockMode.onchange = editor.uifunctions.lockMode_onchange;
 
         editor.dom.brushMod.onchange = editor.uifunctions.brushMod_onchange
         if (editor.dom.brushMod2) editor.dom.brushMod2.onchange = editor.uifunctions.brushMod2_onchange;
         if (editor.dom.brushMod3) editor.dom.brushMod3.onchange = editor.uifunctions.brushMod3_onchange;
+        if (editor.dom.brushMod4) editor.dom.brushMod4.onchange = editor.uifunctions.brushMod4_onchange;
 
         editor.dom.layerMod.onchange = editor.uifunctions.layerMod_onchange
         if (editor.dom.layerMod2) editor.dom.layerMod2.onchange = editor.uifunctions.layerMod2_onchange;
         if (editor.dom.layerMod3) editor.dom.layerMod3.onchange = editor.uifunctions.layerMod3_onchange;
 
         editor.uifunctions.viewportButtons_func()
+
+        window.onbeforeunload = function () {
+            var saveFloor = document.getElementById('saveFloor');
+            if (saveFloor && saveFloor.classList.contains('highlight')) {
+                return '你尚未保存地图，确定退出么？';
+            }
+            return null;
+        }
     }
 
     editor.constructor.prototype.mobile_listen = function () {
@@ -50,13 +69,13 @@ editor_listen_wrapper = function (editor) {
         var mobileview = document.getElementById('mobileview');
         var mid = document.getElementById('mid');
         var right = document.getElementById('right');
-        var mobileeditdata = document.getElementById('mobileeditdata');
+        // var mobileeditdata = document.getElementById('mobileeditdata');
 
 
         editor.showdataarea = function (callShowMode) {
             mid.style = 'z-index:-1;opacity: 0;';
             right.style = 'z-index:-1;opacity: 0;';
-            mobileeditdata.style = '';
+            // mobileeditdata.style = '';
             if (callShowMode) editor.mode.showMode(editor.dom.editModeSelect.value);
             editor.uifunctions.hideMidMenu();
         }
@@ -64,19 +83,19 @@ editor_listen_wrapper = function (editor) {
             editor.showdataarea(true)
         }
         mobileview.children[1].onclick = function () {
-            mid.style = '';
+            mid.style = 'z-index:110';
             right.style = 'z-index:-1;opacity: 0;';
-            mobileeditdata.style = 'z-index:-1;opacity: 0;';
+            // mobileeditdata.style = 'z-index:-1;opacity: 0;';
             editor.lastClickId = '';
         }
         mobileview.children[3].onclick = function () {
             mid.style = 'z-index:-1;opacity: 0;';
-            right.style = '';
-            mobileeditdata.style = 'z-index:-1;opacity: 0;';
+            right.style = 'z-index:110';
+            // mobileeditdata.style = 'z-index:-1;opacity: 0;';
             editor.lastClickId = '';
         }
 
-
+        /*
         var gettrbyid = function () {
             if (!editor.lastClickId) return false;
             thisTr = document.getElementById(editor.lastClickId);
@@ -100,6 +119,7 @@ editor_listen_wrapper = function (editor) {
             if (!info) return;
             printf(info[0].children[1].getAttribute('title'))
         }
+        */
 
         //=====
 
@@ -120,10 +140,18 @@ editor_listen_wrapper = function (editor) {
         editor.dom.chooseInRight.onmousedown = null
         editor.dom.copyLoc.ontouchstart = editor.dom.copyLoc.onmousedown
         editor.dom.copyLoc.onmousedown = null
-        editor.dom.moveLoc.ontouchstart = editor.dom.moveLoc.onmousedown
-        editor.dom.moveLoc.onmousedown = null
+        editor.dom.pasteLoc.ontouchstart = editor.dom.pasteLoc.onmousedown
+        editor.dom.pasteLoc.onmousedown = null
         editor.dom.clearLoc.ontouchstart = editor.dom.clearLoc.onmousedown
         editor.dom.clearLoc.onmousedown = null
+        
+        // 不使用以下6语句, 会使得素材区手机无法拖动, 手机的框选素材只能放弃, 要通过弹框实现框选
+        // editor.dom.iconLib.ontouchstart = editor.dom.iconLib.onmousedown
+        // editor.dom.iconLib.onmousedown = null
+        // editor.dom.iconLib.ontouchmove = editor.dom.iconLib.onmousemove
+        // editor.dom.iconLib.onmousemove = null
+        // editor.dom.iconLib.ontouchend = editor.dom.iconLib.onmouseup
+        // editor.dom.iconLib.onmouseup = null
     }
 
     editor.constructor.prototype.mode_listen = function (callback) {
@@ -132,6 +160,7 @@ editor_listen_wrapper = function (editor) {
 
         editor.uifunctions.newIdIdnum_func()
         editor.uifunctions.changeId_func()
+        editor.uifunctions.copyPasteEnemyItem_func();
 
         editor.uifunctions.selectFloor_func()
         editor.uifunctions.saveFloor_func()
@@ -141,14 +170,17 @@ editor_listen_wrapper = function (editor) {
         editor.uifunctions.createNewMaps_func()
 
         editor.uifunctions.changeFloorId_func()
+        editor.uifunctions.changeFloorSize_func()
 
-        editor.uifunctions.fixCtx_func()
-
+        // editor.uifunctions.fixCtx_func()
+        editor.uifunctions.appendPic_func();
+        /*
         editor.uifunctions.selectAppend_func()
         editor.uifunctions.selectFileBtn_func()
         editor.uifunctions.changeColorInput_func()
         editor.uifunctions.picClick_func()
         editor.uifunctions.appendConfirm_func()
+        */
 
         editor.dom.editModeSelect.onchange = editor.mode.editModeSelect_onchange
 

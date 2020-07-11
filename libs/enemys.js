@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 "use strict";
 
 function enemys() {
@@ -8,18 +10,27 @@ function enemys() {
 enemys.prototype._init = function () {
     this.enemys = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
     this.enemydata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.enemys;
+    for (var enemyId in this.enemys) {
+        this.enemys[enemyId].id = enemyId;
+    }
     if (main.mode == 'play') {
         this.enemydata.hasSpecial = function (a, b) {
             return core.enemys.hasSpecial(a, b)
         };
-        for (var enemyId in this.enemys) {
-            this.enemys[enemyId].id = enemyId;
-        }
     }
 }
 
 enemys.prototype.getEnemys = function () {
-    return core.clone(this.enemys);
+    var enemys = core.clone(this.enemys);
+    var enemyInfo = core.getFlag('enemyInfo');
+    if (enemyInfo) {
+        for (var id in enemyInfo) {
+            for (var name in enemyInfo[id]) {
+                enemys[id][name] = core.clone(enemyInfo[id][name]);
+            }
+        }
+    }
+    return enemys;
 }
 
 ////// 判断是否含有某特殊属性 //////
@@ -66,6 +77,41 @@ enemys.prototype.getSpecialText = function (enemy) {
     return text;
 }
 
+////// 获得所有特殊属性的颜色 //////
+enemys.prototype.getSpecialColor = function (enemy) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (!enemy) return [];
+    var special = enemy.special;
+    var colors = [];
+
+    var specials = this.getSpecials();
+    if (specials) {
+        for (var i = 0; i < specials.length; i++) {
+            if (this.hasSpecial(special, specials[i][0]))
+                colors.push(specials[i][3] || null);
+        }
+    }
+    return colors;
+
+}
+
+////// 获得所有特殊属性的额外标记 //////
+enemys.prototype.getSpecialFlag = function (enemy) {
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (!enemy) return [];
+    var special = enemy.special;
+    var flag = 0;
+
+    var specials = this.getSpecials();
+    if (specials) {
+        for (var i = 0; i < specials.length; i++) {
+            if (this.hasSpecial(special, specials[i][0]))
+                flag |= (specials[i][4] || 0);
+        }
+    }
+    return flag;
+}
+
 ////// 获得每个特殊属性的说明 //////
 enemys.prototype.getSpecialHint = function (enemy, special) {
     var specials = this.getSpecials();
@@ -75,7 +121,8 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
         var hints = [];
         for (var i = 0; i < specials.length; i++) {
             if (this.hasSpecial(enemy, specials[i][0]))
-                hints.push(this._calSpecialContent(enemy, specials[i][1]) + "：" + this._calSpecialContent(enemy, specials[i][2]));
+                hints.push("\r[" + core.arrayToRGBA(specials[i][3] || "#FF6A6A") + "]\\d" + this._calSpecialContent(enemy, specials[i][1]) +
+                    "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]));
         }
         return hints;
     }
@@ -83,7 +130,7 @@ enemys.prototype.getSpecialHint = function (enemy, special) {
     if (specials == null) return "";
     for (var i = 0; i < specials.length; i++) {
         if (special == specials[i][0])
-            return this._calSpecialContent(enemy, specials[i][1]) + "：" + this._calSpecialContent(enemy, specials[i][2]);
+            return "\r[#FF6A6A]\\d"+this._calSpecialContent(enemy, specials[i][1]) + "：\\d\r[]" + this._calSpecialContent(enemy, specials[i][2]);
     }
     return "";
 }
@@ -104,27 +151,6 @@ enemys.prototype.canBattle = function (enemy, x, y, floorId) {
     return damage != null && damage < core.status.hero.hp;
 }
 
-////// 获得某个怪物的伤害 //////
-enemys.prototype.getDamage = function (enemy, x, y, floorId) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var damage = this._calDamage(enemy, null, x, y, floorId);
-    if (damage == null) return null;
-    return damage + this.getExtraDamage(enemy, x, y, floorId);
-}
-
-////// 获得某个怪物的额外伤害 //////
-enemys.prototype.getExtraDamage = function (enemy, x, y, floorId) {
-    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
-    var extra_damage = 0;
-    if (this.hasSpecial(enemy.special, 17)) { // 仇恨
-        extra_damage += core.getFlag('hatred', 0);
-    }
-    if (this.hasSpecial(enemy.special, 22)) { // 固伤
-        extra_damage += enemy.damage || 0;
-    }
-    return extra_damage;
-}
-
 enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId);
@@ -133,14 +159,14 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
 
     if (damage == null) {
         damage = "???";
-        color = '#FF0000';
+        color = '#FF2222';
     }
     else {
-        if (damage <= 0) color = '#00FF00';
+        if (damage <= 0) color = '#11FF11';
         else if (damage < core.status.hero.hp / 3) color = '#FFFFFF';
         else if (damage < core.status.hero.hp * 2 / 3) color = '#FFFF00';
-        else if (damage < core.status.hero.hp) color = '#FF7F00';
-        else color = '#FF0000';
+        else if (damage < core.status.hero.hp) color = '#FF9933';
+        else color = '#FF2222';
 
         damage = core.formatBigNumber(damage, true);
         if (core.enemys.hasSpecial(enemy, 19))
@@ -270,26 +296,33 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     k = k || 1;
-    var nowDamage = this._calDamage(enemy, null, x, y, floorId);
-    var nextDamage = this._calDamage(enemy, {"def": core.status.hero.def + k}, x, y, floorId);
+    var nowDamage = this._getDamage(enemy, null, x, y, floorId);
+    var nextDamage = this._getDamage(enemy, {"def": core.status.hero.def + k}, x, y, floorId);
     if (nowDamage == null || nextDamage == null) return "???";
     return nowDamage - nextDamage;
 }
 
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
+    if (enemy == null) return null;
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     return this.enemydata.getEnemyInfo(enemy, hero, x, y, floorId)
 }
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
+    if (enemy == null) return null;
     // 移动到了脚本编辑 - getDamageInfo中
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     return this.enemydata.getDamageInfo(enemy, hero, x, y, floorId);
 }
 
 ////// 获得在某个勇士属性下怪物伤害 //////
-enemys.prototype._calDamage = function (enemy, hero, x, y, floorId) {
+enemys.prototype.getDamage = function (enemy, x, y, floorId) {
+    return this._getDamage(enemy, null, x, y, floorId);
+}
+
+enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
+    if (enemy == null) return null;
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
 
     var info = this.getDamageInfo(enemy, hero, x, y, floorId);
@@ -298,21 +331,16 @@ enemys.prototype._calDamage = function (enemy, hero, x, y, floorId) {
     return info.damage;
 }
 
-////// 更新怪物数据 //////
-enemys.prototype.updateEnemys = function () {
-    return this.enemydata.updateEnemys();
-}
-
 ////// 获得当前楼层的怪物列表 //////
 enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId = floorId || core.status.floorId;
     var enemys = [], used = {};
-    var mapBlocks = core.status.maps[floorId].blocks;
-    for (var b = 0; b < mapBlocks.length; b++) {
-        if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') == 0) {
-            this._getCurrentEnemys_addEnemy(mapBlocks[b].event.id, enemys, used, floorId);
+    core.extractBlocks(floorId);
+    core.status.maps[floorId].blocks.forEach(function (block) {
+        if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
+            this._getCurrentEnemys_addEnemy(block.event.id, enemys, used, floorId);
         }
-    }
+    }, this);
     return this._getCurrentEnemys_sort(enemys);
 }
 
@@ -330,8 +358,7 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, f
 
     var enemyInfo = this.getEnemyInfo(enemy, null, null, null, floorId);
     var specialText = core.enemys.getSpecialText(enemy);
-    if (specialText.length >= 3) specialText = "多属性...";
-    else specialText = specialText.join("  ");
+    var specialColor = core.enemys.getSpecialColor(enemy);
 
     var critical = this.nextCriticals(enemy, 1, null, null, floorId);
     if (critical.length > 0) critical = critical[0];
@@ -341,6 +368,7 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, f
         e[x] = enemyInfo[x];
     }
     e.specialText = specialText;
+    e.specialColor = specialColor;
     e.damage = this.getDamage(enemy, null, null, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];
@@ -366,14 +394,19 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
 
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
     if (floorId == null) floorId = core.status.floorId;
-    if (floorId instanceof Array) {
-        for (var i = 0; i < floorId.length; ++i) {
-            if (core.hasEnemyLeft(enemyId, floorId[i]))
-                return true;
+    if (!(floorId instanceof Array)) floorId = [floorId];
+    var enemyMap = {};
+    if (enemyId instanceof Array) enemyId.forEach(function(v) { enemyMap[v] = true;});
+    else if (enemyId) enemyMap[enemyId] = true;
+    else enemyMap = null;
+    for (var i = 0; i < floorId.length; i++) {
+        core.extractBlocks(floorId[i]);
+        var mapBlocks = core.status.maps[floorId[i]].blocks;
+        for (var b = 0; b < mapBlocks.length; b++) {
+            if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') === 0) {
+                if (enemyMap === null || enemyMap[mapBlocks[b].event.id]) return true;
+            }
         }
-        return false;
     }
-    return core.getCurrentEnemys(floorId).filter(function (enemy) {
-        return enemyId == null || enemy.id == enemyId;
-    }).length > 0;
+    return false;
 }

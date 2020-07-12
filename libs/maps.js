@@ -1423,7 +1423,7 @@ maps.prototype._makeAutotileEdges = function () {
 // options为绘制选项（可为null），包括：
 //    heroLoc: 勇士位置；heroIcon：勇士图标（默认当前勇士）；damage：是否绘制显伤；flags：当前的flags（存读档时使用）
 //    ctx：要绘制到的画布（名）；x,y：起点横纵坐标（默认0）；size：大小（默认416/480）；
-//    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心）
+//    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心） field: 以截取中心绘制的范围
 maps.prototype.drawThumbnail = function (floorId, blocks, options) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -1450,6 +1450,20 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         tempCanvas.canvas.width = width * 32 * scale;
         tempCanvas.canvas.height = height * 32 * scale;
         tempCanvas.scale(scale, scale);
+    } else if(options.viewField) {
+        // 绘制一个范围
+        options.v2 = true;
+        var field = Math.min(Math.max(width, height), options.viewField);
+        var halfField = ~~(field/2);
+        tempCanvas.canvas.width = field * 32;
+        tempCanvas.canvas.height = field * 32;
+        var centerX = options.centerX, centerY = options.centerY;
+        if (centerX == null) centerX = Math.floor(width / 2);
+        if (centerY == null) centerY = Math.floor(height / 2);
+        var offsetX = core.clamp(centerX - halfField, 0, width - field),
+            offsetY = core.clamp(centerY - halfField, 0, height - field);
+        tempCanvas.translate(-32 * offsetX, -32 * offsetY);
+        
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
         tempCanvas.canvas.width = core.__PIXELS__;
@@ -1520,7 +1534,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas; 
 
-    if (options.all) {
+    if (options.all || options.viewField) {
         var tempWidth = tempCanvas.canvas.width, tempHeight = tempCanvas.canvas.height;
         // 绘制全景图
         if (tempWidth <= tempHeight) {

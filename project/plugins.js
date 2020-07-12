@@ -1256,5 +1256,47 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return true;
 	}, 100);
 
+},
+"miniMap": function(){
+	// 小地图插件
+	var __enable = true;
+	if(!__enable)return;
+	var name = 'miniMap';
+	var viewField = 17; // 最大显示范围
+	var zIndex = 120; // 图层层级
+	var size = 120; // 宽高
+	var boldWidth = 1; // 边框宽度
+	var lastPos = {};
+
+	function miniMapUpdate(){
+		if(core.hasFlag(name)){
+			// 更新依据：勇士的位置
+			var hx = core.getHeroLoc('x'), hy = core.getHeroLoc('y');
+			if(lastPos.x != hx || lastPos.y != hy || lastPos.floorId != core.status.floorId){
+				core.clearMap(name);
+				core.fillRect(name, 0, 0, size, size, 'white');
+				core.drawThumbnail(core.status.floorId, null, {
+					ctx: name, viewField: viewField, size: size-boldWidth*2,
+					x: boldWidth, y: boldWidth,
+					centerX: hx, 
+					centerY: hy,
+				});
+			}
+			lastPos.x = hx;
+			lastPos.y = hy;
+			lastPos.floorId = core.status.floorId;
+		}
+	}
+	this.openMiniMap = function(){
+		core.setFlag(name, true);
+		core.createCanvas(name, 0, core.__PIXELS__-size, size, size, zIndex); // 位置根据需求自己修改 默认左下角
+		core.registerAnimationFrame(name, true, miniMapUpdate);
+	}
+	this.closeMiniMap = function(){
+		core.setFlag(name, false);
+		core.deleteCanvas(name);
+		core.unregisterAnimationFrame(name);
+	}
+	
 }
 }

@@ -974,10 +974,15 @@ actions.prototype._clickAction = function (x, y) {
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
             var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
             if (y >= topIndex && y < topIndex + choices.length) {
+                var choice = choices[y - topIndex];
+                if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
+                    core.drawTip("无法选择此项");
+                    return;
+                }
                 clearTimeout(core.status.event.interval);
                 // 选择
                 core.status.route.push("choices:" + (y - topIndex));
-                core.insertAction(choices[y - topIndex].action);
+                core.insertAction(choice.action);
                 core.doAction();
             }
         }

@@ -1659,6 +1659,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
     core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
+        if (choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
         core.setFillStyle('ui', color);
         var offset = this.HPIXEL;
         if (choices[i].icon) {

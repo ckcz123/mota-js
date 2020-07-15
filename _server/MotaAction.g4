@@ -2428,20 +2428,21 @@ return code;
 */;
 
 choicesContext
-    :   '子选项' EvalString '图标' IdString? '颜色' ColorString? Colour '出现条件' EvalString? BGNL? Newline action+
+    :   '子选项' EvalString '图标' IdString? '颜色' ColorString? Colour '启用条件' EvalString? '出现条件' EvalString? BGNL? Newline action+
 
 
 /* choicesContext
 tooltip : 选项的选择
 helpUrl : /_docs/#/instruction
-default : ["提示文字:红钥匙","","",""]
+default : ["提示文字:红钥匙","","","",""]
 allIds : ['IdString_0']
 colour : this.subColor
 ColorString_0 = ColorString_0 ? (', "color": ['+ColorString_0+']') : '';
-EvalString_1 = EvalString_1 && (', "condition": "'+EvalString_1+'"')
+EvalString_1 = EvalString_1 && (', "need": "'+EvalString_1+'"');
+EvalString_2 = EvalString_2 && (', "condition": "'+EvalString_2+'"');
 IdString_0 = IdString_0?(', "icon": "'+IdString_0+'"'):'';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
-var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+collapsed+', "action": [\n'+action_0+']},\n';
+var code = '{"text": "'+EvalString_0+'"'+IdString_0+ColorString_0+EvalString_1+EvalString_2+collapsed+', "action": [\n'+action_0+']},\n';
 return code;
 */;
 

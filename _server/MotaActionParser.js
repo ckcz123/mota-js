@@ -689,7 +689,7 @@ ActionParser.prototype.parseAction = function() {
       for(var ii=data.choices.length-1,choice;choice=data.choices[ii];ii--) {
         choice.color = this.Colour(choice.color);
         text_choices=MotaActionFunctions.xmlText('choicesContext', [
-          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.condition||'',this.insertActionList(choice.action),text_choices],
+          choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.need||'',choice.condition||'',this.insertActionList(choice.action),text_choices],
            /* isShadow */false, /*comment*/ null, /*collapsed*/ choice._collapsed);
       }
       if (!this.isset(data.text)) data.text = '';

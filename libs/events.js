@@ -1866,7 +1866,13 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                 setTimeout(function () {
                     core.status.route.push("choices:"+index);
                     if (index != 'none') {
-                        core.insertAction(data.choices[index].action);
+                        // 检查
+                        var choice = data.choices[index];
+                        if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
+                            // 无法选择此项：直接忽略
+                        } else {
+                            core.insertAction(choice.action);
+                        }
                     }
                     core.doAction();
                 }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));

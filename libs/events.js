@@ -2421,7 +2421,7 @@ events.prototype.openBook = function (fromUserAction) {
     // 当前是book，且从“浏览地图”打开
     if (core.status.event.id == 'book' && core.status.event.ui) {
         core.status.boxAnimateObjs = [];
-        core.ui.drawMaps(core.status.event.ui);
+        core.ui._drawViewMaps(core.status.event.ui);
         return;
     }
     // 从“浏览地图”页面打开
@@ -2463,14 +2463,14 @@ events.prototype.flyTo = function (toId, callback) {
 events.prototype.openEquipbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('equipbox', fromUserAction)) return;
-    core.ui.drawEquipbox();
+    core.ui._drawEquipbox();
 }
 
 ////// 点击工具栏时的打开操作 //////
 events.prototype.openToolbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('toolbox', fromUserAction)) return;
-    core.ui.drawToolbox();
+    core.ui._drawToolbox();
 }
 
 ////// 点击快捷商店按钮时的打开操作 //////
@@ -2500,13 +2500,13 @@ events.prototype.openQuickShop = function (fromUserAction) {
     }
 
     if (!this._checkStatus('selectShop', fromUserAction)) return;
-    core.ui.drawQuickShop();
+    core.ui._drawQuickShop();
 }
 
 events.prototype.openKeyBoard = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('keyBoard', fromUserAction)) return;
-    core.ui.drawKeyBoard();
+    core.ui._drawKeyBoard();
 }
 
 ////// 点击保存按钮时的打开操作 //////
@@ -2517,7 +2517,7 @@ events.prototype.save = function (fromUserAction) {
     if (!this._checkStatus('save', fromUserAction)) return;
     var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
-    core.ui.drawSLPanel(10*page+offset);
+    core.ui._drawSLPanel(10*page+offset);
 }
 
 ////// 点击读取按钮时的打开操作 //////
@@ -2532,13 +2532,13 @@ events.prototype.load = function (fromUserAction) {
         core.clearMap('all');
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
-        core.ui.drawSLPanel(10*page+offset);
+        core.ui._drawSLPanel(10*page+offset);
         return;
     }
     if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval))
         return;
     if (!this._checkStatus('load', fromUserAction)) return;
-    core.ui.drawSLPanel(10*page+offset);
+    core.ui._drawSLPanel(10*page+offset);
 }
 
 ////// 点击设置按钮时的操作 //////
@@ -2546,7 +2546,7 @@ events.prototype.openSettings = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('settings', fromUserAction))
         return;
-    core.ui.drawSettings();
+    core.ui._drawSettings();
 }
 
 // ------ 一些事件的具体执行过程 ------ //
@@ -3077,7 +3077,7 @@ events.prototype.tryUseItem = function (itemId) {
 
     if (itemId == 'book') return core.openBook(false);
     if (itemId == 'fly') return core.useFly(false);
-    if (itemId == 'centerFly') return core.ui.drawCenterFly();
+    if (itemId == 'centerFly') return core.ui._drawCenterFly();
 
     if (core.canUseItem(itemId)) core.useItem(itemId);
     else core.drawTip("当前无法使用" + core.material.items[itemId].name);

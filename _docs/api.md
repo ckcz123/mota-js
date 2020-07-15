@@ -1732,6 +1732,10 @@ clearTip: fn()
 clearUI: fn()
 清空UI层内容
 
+clearUIEventSelector: fn(codes?: number|[number])
+清除若干个自绘的选择光标
+codes: 清除的光标编号；可以是单个编号或编号数组；不填则清除所有光标
+
 closePanel: fn()
 结束一切事件和绘制，关闭UI窗口，返回游戏进程
 
@@ -1749,9 +1753,6 @@ deleteAllCanvas: fn()
 deleteCanvas: fn(name: string)
 删除一个自定义画布
 
-drawAbout: fn()
-绘制“关于”界面
-
 drawArrow: fn(name: string|CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number)
 在某个canvas上绘制一个箭头
 
@@ -1760,12 +1761,6 @@ drawBackground: fn(left: string, top: string, right: string, bottom: string, pos
 
 drawBook: fn(index?: ?)
 绘制怪物手册
-
-drawBookDetail: fn(index?: ?)
-绘制怪物属性的详细信息
-
-drawCenterFly: fn()
-绘制中心对称飞行器
 
 drawChoices: fn(content?: string, choices?: [?])
 绘制一个选项界面
@@ -1777,20 +1772,8 @@ text: 要绘制的内容，支持 ${} 语法
 yesCallback: 点击确认后的回调
 noCallback: 点击取消后的回调
 
-drawCursor: fn()
-绘制键盘光标
-
-drawEquipbox: fn(index?: ?)
-绘制装备界面
-
 drawFly: fn(page?: ?)
 绘制楼层传送器
-
-drawGameInfo: fn()
-绘制游戏信息界面
-
-drawHelp: fn()
-绘制帮助页面
 
 drawIcon: fn(name: string|CanvasRenderingContext2D, id: string, x: number, y: number, w?: number, h?: number, frame?: number)
 在某个canvas上绘制一个图标
@@ -1803,57 +1786,18 @@ image: 要绘制的图片，可以是一个全塔属性中定义的图片名（�
 angle：旋转角度
 参考资料：http://www.w3school.com.cn/html5/canvas_drawimage.asp
 
-drawKeyBoard: fn()
-绘制虚拟键盘
-
 drawLine: fn(name: string|CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number)
 在某个canvas上绘制一条线
 参考资料：https://www.w3school.com.cn/tags/canvas_lineto.asp
 
-drawLocalSaveSelect: fn()
-绘制单存档界面
-
-drawMaps: fn(index?: ?, x?: number, y?: number)
-绘制浏览地图界面
-
-drawNotes: fn()
-绘制存档笔记
-
 drawPagination: fn(page?: ?, totalPage?: ?, y?: number)
 绘制分页
-
-drawQuickShop: fn()
-绘制快捷商店选择栏
-
-drawReplay: fn()
-绘制回放界面
-
-drawSLPanel: fn(index?: ?, refresh?: bool)
-绘制存档/读档界面
 
 drawScrollText: fn(content: string, time: number, lineHeight?: number, callback?: fn())
 绘制滚动字幕
 
-drawSettings: fn()
-绘制系统菜单栏
-
-drawStatistics: fn(floorIds?: string)
-绘制“数据统计”界面
-
 drawStatusBar: fn()
 绘制状态栏
-
-drawStorageRemove: fn()
-绘制存档删除页面
-
-drawSwitchs: fn()
-绘制系统设置界面
-
-drawSyncSave: fn()
-绘制存档同步界面
-
-drawSyncSelect: fn()
-绘制存档同步选择页面
 
 drawText: fn(contents: string, callback?: fn())
 地图中间绘制一段文字
@@ -1876,14 +1820,15 @@ text: 要提示的字符串，支持${}语法
 id: 要绘制的图标ID
 frame: 要绘制该图标的第几帧
 
-drawToolbox: fn(index?: ?)
-绘制道具栏
+drawUIEventSelector: fn(code: number, background: string, x: number, y: number, w: number, h: number, z?: number)
+自绘一个闪烁的选择光标
+code: 选择光标的编号，必填
+background: 要绘制的光标背景，必须是一个合法的WindowSkin
+x, y, w, h: 绘制的坐标和长宽
+z: 可选，光标的的z值
 
 drawWaiting: fn(text: string)
 绘制等待界面
-
-drawWindowSelector: fn(background: ?, x: number, y: number, w: number, h: number)
-绘制选择光标
 
 drawWindowSkin: fn(background: string, ctx: string|CanvasRenderingContext2D, x: number, y: number, w: string, h: string, direction?: string, px?: number, py?: number)
 绘制WindowSkin

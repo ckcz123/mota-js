@@ -3331,19 +3331,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "deleteCanvas": {
           "!doc": "删除一个自定义画布", 
           "!type": "fn(name: string)"
-        }, 
-        "drawSLPanel": {
-          "!doc": "绘制存档/读档界面", 
-          "!type": "fn(index?: ?, refresh?: bool)"
-        }, 
-        "drawKeyBoard": {
-          "!doc": "绘制虚拟键盘", 
-          "!type": "fn()"
-        }, 
-        "drawStorageRemove": {
-          "!doc": "绘制存档删除页面", 
-          "!type": "fn()"
-        }, 
+        },
         "deleteAllCanvas": {
           "!doc": "清空所有的自定义画布", 
           "!type": "fn()"
@@ -3359,31 +3347,15 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "setOpacity": {
           "!doc": "设置某个canvas整体的透明度；此函数直接改变画布本身，对已经绘制的内容也生效<br/>如果仅想对接下来的绘制生效请使用setAlpha", 
           "!type": "fn(name: string|CanvasRenderingContext2D, opacity: number)"
-        }, 
-        "drawAbout": {
-          "!doc": "绘制“关于”界面", 
-          "!type": "fn()"
-        }, 
+        },
         "getTextContentHeight": {
           "!doc": "获得某段文字的预计绘制高度；参数说明详见 drawTextContent", 
           "!type": "fn(content: string, config?: ?)"
-        }, 
-        "drawSwitchs": {
-          "!doc": "绘制系统设置界面", 
-          "!type": "fn()"
-        }, 
-        "drawSyncSelect": {
-          "!doc": "绘制存档同步选择页面", 
-          "!type": "fn()"
-        }, 
+        },
         "drawArrow": {
           "!doc": "在某个canvas上绘制一个箭头", 
           "!type": "fn(name: string|CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number)"
-        }, 
-        "drawReplay": {
-          "!doc": "绘制回放界面", 
-          "!type": "fn()"
-        }, 
+        },
         "strokeEllipse": {
           "!doc": "在某个canvas上绘制一个椭圆的边框", 
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, a: number, b: number, angle?: number, style?: string, lineWidth?: number)"
@@ -3435,13 +3407,17 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "绘制一个确认框<br/>此项会打断事件流，如需不打断版本的请使用core.myconfirm()<br/>text: 要绘制的内容，支持 ${} 语法<br/>yesCallback: 点击确认后的回调<br/>noCallback: 点击取消后的回调",
           "!type": "fn(text: string, yesCallback?: fn(), noCallback?: fn())"
         },
+        "drawUIEventSelector": {
+          "!doc": "自绘一个闪烁的选择光标<br/>code: 选择光标的编号，必填<br/>background: 要绘制的光标背景，必须是一个合法的WindowSkin<br/>x, y, w, h: 绘制的坐标和长宽<br/>z: 可选，光标的的z值",
+          "!type": "fn(code: number, background: string, x: number, y: number, w: number, h: number, z?: number)"
+        },
+        "clearUIEventSelector": {
+          "!doc": "清除若干个自绘的选择光标<br/>codes: 清除的光标编号；可以是单个编号或编号数组；不填则清除所有光标",
+          "!type": "fn(codes?: number|[number])"
+        },
         "fillPolygon": {
           "!doc": "在某个canvas上绘制一个多边形", 
           "!type": "fn(name: string|CanvasRenderingContext2D, nodes?: [[number]], style?: string)"
-        }, 
-        "drawStatistics": {
-          "!doc": "绘制“数据统计”界面", 
-          "!type": "fn(floorIds?: string)"
         }, 
         "fillText": {
           "!doc": "在某个画布上绘制一段文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>font: 绘制的字体<br/>最大宽度，超过此宽度会自动放缩", 
@@ -3452,11 +3428,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个canvas的基准线<br/>baseline: 可为alphabetic, top, hanging, middle, ideographic, bottom", 
           "!url": "https://www.w3school.com.cn/tags/canvas_textbaseline.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, baseline: string)"
-        }, 
-        "drawSettings": {
-          "!doc": "绘制系统菜单栏", 
-          "!type": "fn()"
-        }, 
+        },
         "loadCanvas": {
           "!doc": "加载某个canvas状态", 
           "!type": "fn(name: string|CanvasRenderingContext2D)"
@@ -3474,11 +3446,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个canvas的线宽度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_linewidth.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, lineWidth: number)"
-        }, 
-        "drawEquipbox": {
-          "!doc": "绘制装备界面", 
-          "!type": "fn(index?: ?)"
-        }, 
+        },
         "drawTextBox": {
           "!doc": "绘制一个对话框", 
           "!type": "fn(content: string, showAll?: bool)"
@@ -3511,11 +3479,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "drawWindowSkin": {
           "!doc": "绘制WindowSkin", 
           "!type": "fn(background: string, ctx: string|CanvasRenderingContext2D, x: number, y: number, w: string, h: string, direction?: string, px?: number, py?: number)"
-        }, 
-        "drawGameInfo": {
-          "!doc": "绘制游戏信息界面", 
-          "!type": "fn()"
-        }, 
+        },
         "fillRect": {
           "!doc": "绘制一个矩形。<br/>x,y: 绘制的坐标<br/>width,height: 绘制的长宽<br/>style: 绘制的样式<br/>angle: 旋转的角度，弧度制，如Math.PI/2代表90度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_fillrect.asp",
@@ -3533,11 +3497,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "在某个canvas上绘制一个圆的边框", 
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: ?, style?: string, lineWidth?: number)"
-        }, 
-        "drawLocalSaveSelect": {
-          "!doc": "绘制单存档界面", 
-          "!type": "fn()"
-        }, 
+        },
         "drawWaiting": {
           "!doc": "绘制等待界面", 
           "!type": "fn(text: string)"
@@ -3573,11 +3533,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "在某个canvas上绘制一个扇形", 
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: number, start: number, end: number, style?: string)"
-        }, 
-        "drawWindowSelector": {
-          "!doc": "绘制选择光标", 
-          "!type": "fn(background: ?, x: number, y: number, w: number, h: number)"
-        }, 
+        },
         "strokeArc": {
           "!doc": "在某个canvas上绘制一段弧", 
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
@@ -3591,35 +3547,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "drawPagination": {
           "!doc": "绘制分页", 
           "!type": "fn(page?: ?, totalPage?: ?, y?: number)"
-        }, 
-        "drawBookDetail": {
-          "!doc": "绘制怪物属性的详细信息", 
-          "!type": "fn(index?: ?)"
-        }, 
+        },
         "getToolboxItems": {
           "!doc": "获得所有应该在道具栏显示的某个类型道具",
           "!type": "fn(cls: string) -> [string]"
         },
-        "drawToolbox": {
-          "!doc": "绘制道具栏", 
-          "!type": "fn(index?: ?)"
-        }, 
-        "drawHelp": {
-          "!doc": "绘制帮助页面", 
-          "!type": "fn()"
-        }, 
-        "drawNotes": {
-          "!doc": "绘制存档笔记",
-          "!type": "fn()"
-        },
-        "drawQuickShop": {
-          "!doc": "绘制快捷商店选择栏", 
-          "!type": "fn()"
-        }, 
-        "drawCenterFly": {
-          "!doc": "绘制中心对称飞行器", 
-          "!type": "fn()"
-        }, 
         "strokeRect": {
           "!doc": "绘制一个矩形的边框<br/>style: 绘制的样式<br/>lineWidth: 线宽<br/>angle: 旋转角度，弧度制，如Math.PI/2为90度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_strokerect.asp",
@@ -3636,18 +3568,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "fillBoldText": {
           "!doc": "在某个画布上绘制一个描边文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>strokeStyle: 要绘制的描边颜色<br/>font: 绘制的字体", 
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string)"
-        }, 
-        "drawSyncSave": {
-          "!doc": "绘制存档同步界面", 
-          "!type": "fn()"
-        }, 
+        },
         "saveCanvas": {
           "!doc": "保存某个canvas状态", 
           "!type": "fn(name: string|CanvasRenderingContext2D)"
-        }, 
-        "drawCursor": {
-          "!doc": "绘制键盘光标", 
-          "!type": "fn()"
         },
         "createCanvas": {
           "!doc": "动态创建一个画布。<br/>name： 要创建的画布名，如果已存在则会直接取用当前存在的。<br/>x,y: 创建的画布相对窗口左上角的像素坐标<br/>width,height: 创建的长宽。<br/>zIndex: 创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。<br/>返回创建的画布的context，也可以通过core.dymCanvas[name]调用。", 
@@ -3657,11 +3581,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个canvas的对齐", 
           "!url": "https://www.w3school.com.cn/tags/canvas_textalign.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, align: string)"
-        }, 
-        "drawMaps": {
-          "!doc": "绘制浏览地图界面", 
-          "!type": "fn(index?: ?, x?: number, y?: number)"
-        }
+        },
       }, 
       "enemys": {
         "!doc": "定义了一系列和怪物相关的API函数。",

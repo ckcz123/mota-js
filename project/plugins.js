@@ -493,7 +493,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// Step 1: 背景和固定的几个文字
 		core.ui._createUIEvent();
 		core.clearMap('uievent');
-		core.ui._clearUIEventSelector([1, 2]);
+		core.ui.clearUIEventSelector();
 		core.setTextAlign('uievent', 'left');
 		core.setTextBaseline('uievent', 'top');
 		core.fillRect('uievent', 0, 0, 480, 480, 'black');
@@ -511,15 +511,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setTextAlign("uievent", "right");
 		core.fillText("uievent", core.formatBigNumber(core.status.hero.money), 466, 100);
 		core.setTextAlign("uievent", "left");
-		core.ui._uievent_drawSelector({
-			"type": "drawSelector",
-			"image": "winskin.png",
-			"code": 2,
-			"x": 22 + 120 * type,
-			"y": 76,
-			"width": 60,
-			"height": 33
-		});
+		core.ui.drawUIEventSelector(1, "winskin.png", 22 + 120 * type, 76, 60, 33);
 		if (selectItem != null) {
 			core.setTextAlign('uievent', 'center');
 			core.fillText("uievent", type == 0 ? "买入个数" : "卖出个数", 420, 360, null, bigFont);
@@ -573,7 +565,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 						break;
 					}
 				}
-				core.ui._uievent_drawSelector({ "type": "drawSelector", "image": "winskin.png", "code": 1, "x": 8, "y": 137 + i * 40, "width": 343, "height": 40 });
+				core.ui.drawUIEventSelector(2, "winskin.png", 8, 137 + i * 40, 343, 40);
 				if (type == 0 && item.number != null) {
 					core.fillText("uievent", "存货", 370, 152, null, bigFont);
 					core.setTextAlign("uievent", "right");
@@ -771,7 +763,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			},
 			{
 				"type": "function",
-				"function": "function () { core.deleteCanvas('uievent'); core.ui._clearUIEventSelector([1, 2]); }"
+				"function": "function () { core.deleteCanvas('uievent'); core.ui.clearUIEventSelector(); }"
 			}
 		]);
 	}
@@ -1151,9 +1143,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 当前选中的道具类别
 	var currentCategory = null;
 
-	// 重写 core.ui.drawToolbox 以绘制分类类别
-	var _drawToolbox = core.ui.drawToolbox;
-	core.ui.drawToolbox = function (index) {
+	// 重写 core.ui._drawToolbox 以绘制分类类别
+	var _drawToolbox = core.ui._drawToolbox;
+	core.ui._drawToolbox = function (index) {
 		_drawToolbox.call(this, index);
 		core.setTextAlign('ui', 'left');
 		core.fillText('ui', '类别[E]：' + (currentCategory || "全部"), 15, this.PIXEL - 13);

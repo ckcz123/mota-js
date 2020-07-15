@@ -610,7 +610,7 @@ main.statusBar.image.keyboard.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.bookReplay();
+        core.control._replay_book();
         return;
     }
 
@@ -623,7 +623,7 @@ main.statusBar.image.shop.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.viewMapReplay();
+        core.control._replay_viewMap();
         return;
     }
 
@@ -670,7 +670,7 @@ main.statusBar.image.settings.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.saveReplay();
+        core.control._replay_SL();
         return;
     }
 

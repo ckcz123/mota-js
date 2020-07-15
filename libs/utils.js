@@ -680,11 +680,10 @@ utils.prototype.isset = function (val) {
 utils.prototype.subarray = function (a, b) {
     if (!(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
-    var na = core.cloneArray(a), nb = core.cloneArray(b);
-    while (nb.length > 0) {
-        if (na.shift() != nb.shift()) return null;
+    for (var i = 0; i < b.length; ++i) {
+        if (a[i] != b[i]) return null;
     }
-    return na;
+    return a.slice(b.length);
 }
 
 utils.prototype.inArray = function (array, element) {

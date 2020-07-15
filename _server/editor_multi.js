@@ -151,6 +151,17 @@ editor_multi = function () {
                     if (one["!url"]) coredef.core[funcname]["!url"] = one["!url"];
                 }
             }
+            for (var funcname in core[name]) {
+                if (!(core[name][funcname] instanceof Function) || funcname.charAt(0) == '_' || coredef.core[name][funcname]) continue;
+                var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
+                var parameters = (parameterInfo == null ? "" : parameterInfo[1])
+                    .replace(/\s*/g, '').replace(/,/g, ', ').split(', ')
+                    .filter(function (one) { return one.trim() != ''; })
+                    .map(function (one) { return one.trim() + ': ?'; }).join(', ');
+                coredef.core[funcname] = coredef.core[name][funcname] = {
+                    "!type": "fn(" + parameters + ")"
+                }
+            }
         }
     }
 

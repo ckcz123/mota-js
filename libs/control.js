@@ -1390,7 +1390,7 @@ control.prototype.rewindReplay = function () {
 }
 
 ////// 回放时存档 //////
-control.prototype.saveReplay = function () {
+control.prototype._replay_SL = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1401,11 +1401,11 @@ control.prototype.saveReplay = function () {
     var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
-    core.ui.drawSLPanel(10*page+offset);
+    core.ui._drawSLPanel(10*page+offset);
 }
 
 ////// 回放时查看怪物手册 //////
-control.prototype.bookReplay = function () {
+control.prototype._replay_book = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate
@@ -1423,7 +1423,7 @@ control.prototype.bookReplay = function () {
 }
 
 ////// 回放录像时浏览地图 //////
-control.prototype.viewMapReplay = function () {
+control.prototype._replay_viewMap = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1431,10 +1431,10 @@ control.prototype.viewMapReplay = function () {
 
     core.lockControl();
     core.status.event.id='viewMaps';
-    core.ui.drawMaps();
+    core.ui._drawViewMaps();
 }
 
-control.prototype.toolboxReplay = function () {
+control.prototype._replay_toolbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1442,10 +1442,10 @@ control.prototype.toolboxReplay = function () {
 
     core.lockControl();
     core.status.event.id='toolbox';
-    core.ui.drawToolbox();
+    core.ui._drawToolbox();
 }
 
-control.prototype.equipboxReplay = function () {
+control.prototype._replay_equipbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1453,7 +1453,7 @@ control.prototype.equipboxReplay = function () {
 
     core.lockControl();
     core.status.event.id='equipbox';
-    core.ui.drawEquipbox();
+    core.ui._drawEquipbox();
 }
 
 ////// 是否正在播放录像 //////
@@ -1592,7 +1592,7 @@ control.prototype._replayAction_item = function (action) {
         index = index%per+per;
     }
     if (index<0) return false;
-    core.ui.drawToolbox(index);
+    core.ui._drawToolbox(index);
     setTimeout(function () {
         core.ui.closePanel();
         core.useItem(itemId, false, core.replay);
@@ -1613,7 +1613,7 @@ control.prototype._replayAction_equip = function (action) {
     }
     core.status.event.data = {"page":Math.floor(index/per)+1, "selectId":null};
     index = index%per+per;
-    core.ui.drawEquipbox(index);
+    core.ui._drawEquipbox(index);
     setTimeout(function () {
         core.ui.closePanel();
         core.loadEquip(equipId, core.replay);
@@ -1625,7 +1625,7 @@ control.prototype._replayAction_unEquip = function (action) {
     if (action.indexOf("unEquip:")!=0) return false;
     var equipType = parseInt(action.substring(8));
     if (!core.isset(equipType)) return false;
-    core.ui.drawEquipbox(equipType);
+    core.ui._drawEquipbox(equipType);
     core.status.route.push(action);
     if (core.status.replay.speed == 24) {
         core.unloadEquip(equipType, core.replay);
@@ -1911,7 +1911,7 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
         core.lockControl();
         var saveIndex = core.saves.saveIndex;
         var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
-        core.ui.drawSLPanel(10 * page + offset);
+        core.ui._drawSLPanel(10 * page + offset);
     });
 }
 
@@ -1951,14 +1951,14 @@ control.prototype._syncSave_http = function (type, saves) {
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
     core.myprompt("请输入存档编号+密码", null, function (idpassword) {
-        if (!idpassword) return core.ui.drawSyncSave();
+        if (!idpassword) return core.ui._drawSyncSave();
         if (!/^\d{6}\w{4}$/.test(idpassword) && !/^\d{4}\w{3}$/.test(idpassword)) {
             core.drawText("不合法的存档编号+密码！");
             return;
         }
         core.ui.drawWaiting("正在同步，请稍候...");
         if (idpassword.length == 7) {
-            core.control._syncLoad_http(idpassword.substring(0, 4), idpassword.substring(3));
+            core.control._syncLoad_http(idpassword.substring(0, 4), idpassword.substring(4));
         } else {
             core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
         }
@@ -1999,7 +1999,7 @@ control.prototype._syncLoad_write = function (data) {
             core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
         }, function () {
             core.status.event.selection=0;
-            core.ui.drawSyncSave();
+            core.ui._drawSyncSave();
         });
     }
     else {

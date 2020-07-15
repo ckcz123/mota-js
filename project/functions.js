@@ -808,7 +808,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.load(true);
 		break;
 	case 69: // E：打开光标
-		core.ui.drawCursor();
+		core.ui._drawCursor();
 		break;
 	case 84: // T：打开道具栏
 		core.openToolbox(true);
@@ -826,17 +826,17 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.getNextItem();
 		break;
 	case 82: // R：回放录像
-		core.actions._clickSyncSave_replay();
+		core.ui._drawReplay();
 		break;
 	case 33:
 	case 34: // PgUp/PgDn：浏览地图
-		core.ui.drawMaps();
+		core.ui._drawViewMaps();
 		break;
 	case 66: // B：打开数据统计
-		core.ui.drawStatistics();
+		core.ui._drawStatistics();
 		break;
 	case 72: // H：打开帮助页面
-		core.ui.drawHelp();
+		core.ui._drawHelp();
 		break;
 	case 77: // M：打开存档笔记
 		core.actions._clickNotes_show();
@@ -864,7 +864,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		break;
 	case 51: // 快捷键3: 飞
 		if (core.hasItem('centerFly')) {
-			core.ui.drawCenterFly();
+			core.ui._drawCenterFly();
 		}
 		break;
 	case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断

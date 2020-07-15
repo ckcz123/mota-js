@@ -666,21 +666,6 @@ declare class control {
     /** 回退 */
     rewindReplay(): void
 
-    /** 回放时存档 */
-    saveReplay(): void
-
-    /** 回放时查看怪物手册 */
-    bookReplay(): void
-
-    /** 回放录像时浏览地图 */
-    viewMapReplay(): void
-
-    /** 回放录像时打开道具栏 */
-    toolboxReplay(): void
-
-    /** 回放录像时打开装备栏 */
-    equipboxReplay(): void
-
     /** 是否正在播放录像 */
     isReplaying(): boolean
 
@@ -2149,11 +2134,14 @@ declare class ui {
     /** 地图中间绘制一段文字 */
     drawText(contents: string, callback?: () => any): void
 
+    /** 自绘选择光标 */
+    drawUIEventSelector(code: number, background: string, x: number, y: number, w: number, h: number, z?: number): void
+
+    /** 清除一个或多个选择光标 */
+    clearUIEventSelector(code: number|number[]): void
+
     /** 绘制一个确认框 */
     drawConfirmBox(text: string, yesCallback?: () => void, noCallback?: () => void): void
-
-    /** 绘制选择光标 */
-    drawWindowSelector(background: any, x: number, y: number, w: number, h: number): void
 
     /** 绘制WindowSkin */
     drawWindowSkin(background: any, ctx: string | CanvasRenderingContext2D, x: number, y: number, w: string, h: string, direction?: any, px?: any, py?: any): void
@@ -2190,83 +2178,20 @@ declare class ui {
     /** 绘制等待界面 */
     drawWaiting(text: string): void
 
-    /** 绘制系统设置界面 */
-    drawSwitchs(): void
-
-    /** 绘制系统菜单栏 */
-    drawSettings(): void
-
-    /** 绘制存档笔记 */
-    drawNotes(): void
-
-    /** 绘制快捷商店选择栏 */
-    drawQuickShop(): void
-
-    /** 绘制存档同步界面 */
-    drawSyncSave(): void
-
-    /** 绘制存档同步选择页面 */
-    drawSyncSelect(): void
-
-    /** 绘制单存档界面 */
-    drawLocalSaveSelect(): void
-
-    /** 绘制存档删除页面 */
-    drawStorageRemove(): void
-
-    /** 绘制回放界面 */
-    drawReplay(): void
-
-    /** 绘制游戏信息界面 */
-    drawGameInfo(): void
-
     /** 绘制分页 */
     drawPagination(page?: any, totalPage?: any, y?: number): void
-
-    /** 绘制键盘光标 */
-    drawCursor(): void
 
     /** 绘制怪物手册 */
     drawBook(index?: any): void
 
-    /** 绘制怪物属性的详细信息 */
-    drawBookDetail(index?: any): void
-
     /** 绘制楼层传送器 */
     drawFly(page?: any): void
-
-    /** 绘制中心对称飞行器 */
-    drawCenterFly(): void
-
-    /** 绘制浏览地图界面 */
-    drawMaps(index?: any, x?: number, y?: number): void
-
-    /** 绘制道具栏 */
-    drawToolbox(index?: any): void
 
     /** 获得所有应该在道具栏显示的某个类型道具 */
     getToolboxItems(cls: string): string[]
 
-    /** 绘制装备界面 */
-    drawEquipbox(index?: any): void
-
-    /** 绘制存档/读档界面 */
-    drawSLPanel(index?: any, refresh?: any): void
-
-    /** 绘制虚拟键盘 */
-    drawKeyBoard(): void
-
     /** 绘制状态栏 */
     drawStatusBar(): void
-
-    /** 绘制“数据统计”界面 */
-    drawStatistics(floorIds?: string): void
-
-    /** 绘制“关于”界面 */
-    drawAbout(): void
-
-    /** 绘制帮助页面 */
-    drawHelp(): void
 
     /** 绘制灯光效果 */
     drawLight(name: string | CanvasRenderingContext2D, color?: any, lights?: any, lightDec?: number): void

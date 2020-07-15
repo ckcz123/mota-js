@@ -831,35 +831,45 @@ ui.prototype._getPosition = function (content) {
     return {content: content, position: pos, px: px, py: py, noPeak: noPeak};
 }
 
-////// 绘制选择光标
-ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
+////// 绘制系统选择光标
+ui.prototype._drawWindowSelector = function(background, x, y, w, h) {
     w = Math.round(w), h = Math.round(h);
     var ctx = core.ui.createCanvas("_selector", x, y, w, h, 165);
     this._drawSelector(ctx, background, w, h);
 }
 
-ui.prototype._uievent_drawSelector = function (data) {
-    var canvasName = '_uievent_selector_' + (data.code || 0);
-    if (data.image == null) return core.deleteCanvas(canvasName);
-
-    var background = data.image || core.status.textAttribute.background;
+////// 自绘一个选择光标
+ui.prototype.drawUIEventSelector = function (code, background, x, y, w, h, z) {
+    var canvasName = '_uievent_selector_' + (code || 0);
+    var background = background || core.status.textAttribute.background;
     if (typeof background != 'string') return;
-    var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);
-    w = Math.round(w); h = Math.round(h);
     if (main.mode == 'editor') {
         this._drawSelector('uievent', background, w, h, x, y);
         return;
     }
-    var z = 136;
-    if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
+    z = z || (core.dymCanvas.uievent ? (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1 : 136);
     var ctx = core.createCanvas(canvasName, x, y, w, h, z);
     ctx.canvas.classList.add('_uievent_selector');
     this._drawSelector(ctx, background, w, h);
 }
 
-ui.prototype._clearUIEventSelector = function (codes) {
+ui.prototype._uievent_drawSelector = function (data) {
+    if (data.image == null) this.clearUIEventSelector(data.code || 0);
+    else this.drawUIEventSelector(data.code, data.image, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
+}
+
+////// 清除自绘的选择光标
+ui.prototype.clearUIEventSelector = function (codes) {
+    if (codes == null) {
+        Object.keys(core.dymCanvas).forEach(function (name) {
+            if (name.startsWith('_uievent_selector_')) {
+                core.deleteCanvas(name);
+            }
+        });
+        return;
+    }
     if (codes instanceof Array) {
-        codes.forEach(function (code) { core.ui._clearUIEventSelector(code); });
+        codes.forEach(function (code) { core.ui.clearUIEventSelector(code); });
         return;
     }
     core.deleteCanvas('_uievent_selector_' + (codes || 0));
@@ -1649,6 +1659,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
     core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
+        if (choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
         core.setFillStyle('ui', color);
         var offset = this.HPIXEL;
         if (choices[i].icon) {
@@ -1668,7 +1679,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
         var len = choices[core.status.event.selection].width;
         if (isWindowSkin)
-            this.drawWindowSelector(core.status.textAttribute.background,
+            this._drawWindowSelector(core.status.textAttribute.background,
                 this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
         else
             core.strokeRoundRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
@@ -1709,7 +1720,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
     
         if (isWindowSkin)
-            this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+            this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
         else
             core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
@@ -1739,7 +1750,7 @@ ui.prototype.drawWaiting = function(text) {
 }
 
 ////// 绘制系统设置界面 //////
-ui.prototype.drawSwitchs = function() {
+ui.prototype._drawSwitchs = function() {
     core.status.event.id = 'switchs';
     var choices = [
         "音乐/音效： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]") + " "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
@@ -1759,7 +1770,7 @@ ui.prototype.drawSwitchs = function() {
 }
 
 ////// 绘制系统菜单栏 //////
-ui.prototype.drawSettings = function () {
+ui.prototype._drawSettings = function () {
     core.status.event.id = 'settings';
     this.drawChoices(null, [
         "系统设置", "虚拟键盘", "浏览地图", "存档笔记", "同步存档", "游戏信息", "返回标题", "返回游戏"
@@ -1767,7 +1778,7 @@ ui.prototype.drawSettings = function () {
 }
 
 ////// 绘制存档笔记 //////
-ui.prototype.drawNotes = function () {
+ui.prototype._drawNotes = function () {
     core.status.event.id = 'notes';
     core.status.hero.notes = core.status.hero.notes || [];
     core.lockControl();
@@ -1777,7 +1788,7 @@ ui.prototype.drawNotes = function () {
 }
 
 ////// 绘制快捷商店选择栏 //////
-ui.prototype.drawQuickShop = function () {
+ui.prototype._drawQuickShop = function () {
     core.status.event.id = 'selectShop';
     var shopList = core.status.shops, keys = core.listShopIds();
     var choices = keys.map(function (shopId) {
@@ -1788,7 +1799,7 @@ ui.prototype.drawQuickShop = function () {
 }
 
 ////// 绘制存档同步界面 //////
-ui.prototype.drawSyncSave = function () {
+ui.prototype._drawSyncSave = function () {
     core.status.event.id = 'syncSave';
     this.drawChoices(null, [
         "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放和下载录像", "清空本地存档", "返回主菜单"
@@ -1796,7 +1807,7 @@ ui.prototype.drawSyncSave = function () {
 }
 
 ////// 绘制存档同步选择页面 //////
-ui.prototype.drawSyncSelect = function () {
+ui.prototype._drawSyncSelect = function () {
     core.status.event.id = 'syncSelect';
     this.drawChoices(null, [
         "同步本地所有存档", "只同步当前单存档", "返回上级菜单"
@@ -1804,7 +1815,7 @@ ui.prototype.drawSyncSelect = function () {
 }
 
 ////// 绘制单存档界面 //////
-ui.prototype.drawLocalSaveSelect = function () {
+ui.prototype._drawLocalSaveSelect = function () {
     core.status.event.id = 'localSaveSelect';
     this.drawChoices(null, [
         "下载所有存档", "只下载当前单存档", "返回上级菜单"
@@ -1812,14 +1823,14 @@ ui.prototype.drawLocalSaveSelect = function () {
 }
 
 ////// 绘制存档删除页面 //////
-ui.prototype.drawStorageRemove = function () {
+ui.prototype._drawStorageRemove = function () {
     core.status.event.id = 'storageRemove';
     this.drawChoices(null, [
         "清空全部塔的存档", "只清空当前塔的存档", "返回上级菜单"
     ]);
 }
 
-ui.prototype.drawReplay = function () {
+ui.prototype._drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
@@ -1827,7 +1838,7 @@ ui.prototype.drawReplay = function () {
     ]);
 }
 
-ui.prototype.drawGameInfo = function () {
+ui.prototype._drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
         "数据统计", "查看工程", "游戏主页", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
@@ -1854,7 +1865,7 @@ ui.prototype.drawPagination = function (page, totalPage, y) {
 }
 
 ////// 绘制键盘光标 //////
-ui.prototype.drawCursor = function () {
+ui.prototype._drawCursor = function () {
     var automaticRoute = core.status.automaticRoute;
     if (automaticRoute.cursorX == null)
         automaticRoute.cursorX = core.getHeroLoc('x');
@@ -2110,7 +2121,7 @@ ui.prototype._drawBook_drawDamage = function (index, enemy, offset, position) {
 }
 
 ////// 绘制怪物属性的详细信息 //////
-ui.prototype.drawBookDetail = function (index) {
+ui.prototype._drawBookDetail = function (index) {
     var info = this._drawBookDetail_getInfo(index), enemy = info[0];
     if (!enemy) return;
     var content = info[1].join("\n");
@@ -2296,7 +2307,7 @@ ui.prototype.drawFly = function(page) {
 }
 
 ////// 绘制中心对称飞行器
-ui.prototype.drawCenterFly = function () {
+ui.prototype._drawCenterFly = function () {
     core.lockControl();
     core.status.event.id = 'centerFly';
     var fillstyle = 'rgba(255,0,0,0.5)';
@@ -2314,7 +2325,7 @@ ui.prototype.drawCenterFly = function () {
 }
 
 ////// 绘制浏览地图界面 //////
-ui.prototype.drawMaps = function (index, x, y) {
+ui.prototype._drawViewMaps = function (index, x, y) {
     core.lockControl();
     core.status.event.id = 'viewMaps';
     this.clearUI();
@@ -2397,7 +2408,7 @@ ui.prototype._drawMaps_buildData = function (index, x, y) {
 }
 
 ////// 绘制道具栏 //////
-ui.prototype.drawToolbox = function(index) {
+ui.prototype._drawToolbox = function(index) {
     var info = this._drawToolbox_getInfo(index);
     this._drawToolbox_drawBackground();
 
@@ -2535,7 +2546,7 @@ ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawC
 }
 
 ////// 绘制装备界面 //////
-ui.prototype.drawEquipbox = function(index) {
+ui.prototype._drawEquipbox = function(index) {
     var info = this._drawEquipbox_getInfo(index);
     this._drawToolbox_drawBackground();
 
@@ -2697,7 +2708,7 @@ ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
 }
 
 ////// 绘制存档/读档界面 //////
-ui.prototype.drawSLPanel = function(index, refresh) {
+ui.prototype._drawSLPanel = function(index, refresh) {
     core.control._loadFavoriteSaves();
     if (index == null) index = 1;
     if (index < 0) index = 0;
@@ -2855,7 +2866,7 @@ ui.prototype._drawSLPanel_drawRecords  = function (n) {
     }
 };
 
-ui.prototype.drawKeyBoard = function () {
+ui.prototype._drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
     core.clearUI();
@@ -2892,7 +2903,7 @@ ui.prototype.drawKeyBoard = function () {
     core.fillText("ui", "返回游戏", this.HPIXEL + 128, offset-3, '#FFFFFF', this._buildFont(15, true));
 
     if (isWindowSkin)
-        this.drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
+        this._drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
     else
         core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
 }
@@ -2903,7 +2914,7 @@ ui.prototype.drawStatusBar = function () {
 }
 
 ////// 绘制“数据统计”界面 //////
-ui.prototype.drawStatistics = function (floorIds) {
+ui.prototype._drawStatistics = function (floorIds) {
     var obj = this._drawStatistics_buildObj();
     if (typeof floorIds == 'string') floorIds = [floorIds];
     (floorIds || core.floorIds).forEach(function (floorId) {
@@ -3072,12 +3083,12 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
 }
 
 ////// 绘制“关于”界面 //////
-ui.prototype.drawAbout = function () {
+ui.prototype._drawAbout = function () {
     return this.uidata.drawAbout();
 }
 
 ////// 绘制帮助页面 //////
-ui.prototype.drawHelp = function () {
+ui.prototype._drawHelp = function () {
     core.clearUI();
     if (core.material.images.keyboard) {
         core.status.event.id = 'help';

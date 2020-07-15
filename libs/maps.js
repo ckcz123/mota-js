@@ -86,7 +86,13 @@ maps.prototype._mapIntoBlocks = function (map, floor, floorId) {
     var mh = core.floors[floorId].height;
     for (var i = 0; i < mh; i++) {
         for (var j = 0; j < mw; j++) {
-            var block = this.initBlock(j, i, (map[i] || [])[j], true, floor);
+            var number = (map[i] || [])[j] || 0, block;
+            if (main.mode == 'editor') {
+                if (!number) continue;
+                block = {x: j, y: i, id: number, event: this.getBlockByNumber(number).event};
+            } else {
+                block = this.initBlock(j, i, number, true, floor);
+            }
             if (block.id != 0 || block.event.trigger)
                 blocks.push(block);
         }
@@ -358,10 +364,8 @@ maps.prototype.saveMap = function (floorId) {
 
     var map = maps[floorId];
     var thisFloor = this._compressFloorData(map, core.floors[floorId]);
-    if (map.blocks) {
-        var mapArr = this.compressMap(this._getMapArrayFromBlocks(map.blocks, map.width, map.height, true), floorId);
-        if (mapArr != null) thisFloor.map = mapArr;
-    }
+    var mapArr = this.compressMap(map.blocks ? this._getMapArrayFromBlocks(map.blocks, map.width, map.height, true) : map.map, floorId);
+    if (mapArr != null) thisFloor.map = mapArr;
     return thisFloor;
 }
 

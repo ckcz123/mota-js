@@ -39,7 +39,6 @@ dynamicMapEditor.prototype._init = function () {
 	this.dom.style.top = '3px';
 	this.dom.style.zIndex = 99999;
 	this.canvas = this.dom.getContext("2d");
-	this.canvas.font = "12px Verdana";
 	core.dom.gameGroup.appendChild(this.dom);
 
 	this.initInfos();
@@ -52,13 +51,16 @@ dynamicMapEditor.prototype._init = function () {
 
 dynamicMapEditor.prototype.initInfos = function () {
 	this.items = [];
+	var ids = {};
 	this.displayIds.forEach(function (v) {
 		if (v.startsWith("cls:")) {
 			var cls = v.substr(4);
 			for (var id in core.maps.blocksInfo) {
 				var u = core.maps.blocksInfo[id];
 				if (u && u.cls == cls) {
+					if (ids[u.id]) continue;
 					this.items.push(core.getBlockInfo(u.id));
+					ids[u.id] = true;
 				}
 			}
 		} else if (v == 'none') {
@@ -91,14 +93,12 @@ dynamicMapEditor.prototype.onKeyUp = function(e) {
 	} else if (e.keyCode == 221) {
 		this.applyCurrentChange();
 		return true;
-	} else {
+	} else if (e.keyCode >= 48 && e.keyCode <= 57) {
 		// 0-9
-		if (e.keyCode >= 48 && e.keyCode <= 57) {
-			if (e.altKey) {
-				this.savedItem(e.keyCode - 48);
-			} else {
-				this.loadItem(e.keyCode - 48);
-			}
+		if (e.altKey) {
+			this.savedItem(e.keyCode - 48);
+		} else {
+			this.loadItem(e.keyCode - 48);
 		}
 		return true;
 	}
@@ -335,12 +335,12 @@ dynamicMapEditor.prototype.refreshToolBox = function() {
 		if (item.image) core.drawImage(this.canvas, item.image, 0, item.height * item.posY, 32, 32, rect.x + 4, rect.y, 32, 32);
 		if (item.name) {
 			this.canvas.textAlign = 'center';
-			core.fillText(this.canvas, item.name, rect.x + 20, rect.y + 44, '#FFFFFF', null, 40);
+			core.fillText(this.canvas, item.name, rect.x + 20, rect.y + 44, '#FFFFFF', '11px Verdana', 40);
 		}
 		if (core.material.enemys[item.id]) {
 			this.canvas.textAlign = 'left';
 			var damageString = core.enemys.getDamageString(item.id);
-			core.fillBoldText(this.canvas, damageString.damage, rect.x + 5, rect.y + 31, damageString.color);
+			core.fillBoldText(this.canvas, damageString.damage, rect.x + 5, rect.y + 31, damageString.color, null, '11px Verdana');
 			var critical = core.enemys.nextCriticals(item.id, 1);
 			critical = core.formatBigNumber((critical[0]||[])[0], true);
 			if (critical == '???') critical = '?';
@@ -350,25 +350,25 @@ dynamicMapEditor.prototype.refreshToolBox = function() {
 
 	this.canvas.textAlign = 'center';
 	this.canvas.fillStyle = '#FFFFFF';
-	if(this.pageId > 0) core.fillText(this.canvas, '上一页', this.offsetX + 20, 365, '#FFFFFF');
-	if(this.pageId < this.pageMax-1) core.fillText(this.canvas, '下一页',this.offsetX + 100, 365, '#FFFFFF');
+	if(this.pageId > 0) core.fillText(this.canvas, '上一页', this.offsetX + 20, 365, '#FFFFFF', '11px Verdana');
+	if(this.pageId < this.pageMax-1) core.fillText(this.canvas, '下一页',this.offsetX + 100, 365, '#FFFFFF', '11px Verdana');
 	core.fillText(this.canvas, '帮助', this.offsetX + 60, 365, '#FFFFFF');
 	var text1 = core.formatBigNumber(core.getRealStatus('hp'), true) + "/" +
 		core.formatBigNumber(core.getRealStatus('atk'), true) + "/" +
 		core.formatBigNumber(core.getRealStatus("def"), true) + "/" +
 		core.formatBigNumber(core.getRealStatus("mdef"), true);
-	core.fillText(this.canvas, text1, this.offsetX + 60, 380, '#FF7F00', 120);
+	core.fillText(this.canvas, text1, this.offsetX + 60, 380, '#FF7F00', '11px Verdana', 120);
 	var text2 = core.formatBigNumber(core.getRealStatus('money', true)) + "/" +
 		core.formatBigNumber(core.getRealStatus('exp'), true) + "/" +
 		core.itemCount('yellowKey') + '/' + core.itemCount('blueKey') + '/' +
 		core.itemCount('redKey');
-	core.fillText(this.canvas, text2, this.offsetX + 60, 395, '#FF7F00', 120);
+	core.fillText(this.canvas, text2, this.offsetX + 60, 395, '#FF7F00', '11px Verdana', 120);
 	var text3 = core.itemCount('pickaxe') + '/' + core.itemCount('bomb') + '/' +
 		core.itemCount('centerFly');
 	if (core.hasFlag('poison')) text3 += "/毒";
 	if (core.hasFlag('weak')) text3 += "/衰";
 	if (core.hasFlag('curse')) text3 += "/咒";
-	core.fillText(this.canvas, text3, this.offsetX + 60, 410, '#FF7F00', 120);
+	core.fillText(this.canvas, text3, this.offsetX + 60, 410, '#FF7F00', '11px Verdana', 120);
 	if(this.selectedItem) {
 		var rect = this.itemRect(this.selectedIndex);
 		core.strokeRect(this.canvas, rect.x, rect.y, rect.w, rect.h, '#FF7F00', 4);

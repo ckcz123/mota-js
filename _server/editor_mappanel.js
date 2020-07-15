@@ -1032,6 +1032,7 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.constructor.prototype.savePreMap = function () {
+        if (editor.map.length * editor.map[0].length >= 4096) return;
         var dt = {};
         editor.dom.maps.forEach(function (one) {
             dt[one] = editor[one];

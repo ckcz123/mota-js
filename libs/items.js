@@ -211,12 +211,14 @@ items.prototype.removeItem = function (itemId, itemNum) {
 
 items.prototype.getEquipTypeByName = function (name) {
     var names = core.status.globalAttribute.equipName;
+    var types = [];
     for (var i = 0; i < names.length; ++i) {
-        if (names[i] === name && !core.status.hero.equipment[i]) {
-            return i;
+        if (names[i] === name) {
+            types.push(i);
+            if (!core.status.hero.equipment[i]) return i;
         }
     }
-    return -1;
+    return types.length == 1 ? types[0] : -1;
 }
 
 items.prototype.getEquipTypeById = function (equipId) {

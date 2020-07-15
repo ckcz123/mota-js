@@ -601,7 +601,7 @@ events.prototype.getNextItem = function (noRoute) {
     var directions = ["up", "down", "left", "right"].filter(function (dir) {
         return core.events._canGetNextItem(dir);
     });
-    return directions.length == 1 ? this._getNextItem(directions[0], noRoute) : false;
+    return directions.length > 0 ? this._getNextItem(directions[0], noRoute) : false;
 }
 
 events.prototype._canGetNextItem = function (direction) {
@@ -610,7 +610,7 @@ events.prototype._canGetNextItem = function (direction) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     var block = core.getBlock(nx, ny);
-    return block != null && block.event.trigger == 'getItem';
+    return block != null && !block.event.script && block.event.trigger == 'getItem';
 }
 
 events.prototype._getNextItem = function (direction, noRoute) {

@@ -745,6 +745,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		page = 0;
 		selectItem = null;
 		selectCount = 0;
+		core.isShopVisited(itemShopId);
 		shopInfo = flags.__shops__[shopId];
 		if (shopInfo.choices == null) shopInfo.choices = core.clone(core.status.shops[shopId].choices);
 		choices = shopInfo.choices;

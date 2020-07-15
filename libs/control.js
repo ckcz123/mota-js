@@ -1126,7 +1126,7 @@ control.prototype.updateDamage = function (floorId, ctx) {
     if (!onMap) {
         var width = core.floors[floorId].width, height = core.floors[floorId].height;
         // 地图过大的缩略图不绘制显伤
-        if (width * height > (core.__SIZE__ + 2 * core.bigmap.extend) * (core.__SIZE__ + 2 * core.bigmap.extend)) return;
+        if (width * height > core.bigmap.threshold) return;
     }
     this._updateDamage_damage(floorId, onMap);
     this._updateDamage_extraDamage(floorId, onMap);

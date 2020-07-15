@@ -1468,7 +1468,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     options.ctx = tempCanvas;
     
     // 地图过大的缩略图不绘制显伤
-    if (width * height > (core.__SIZE__ + 2 * core.bigmap.extend) * (core.__SIZE__ + 2 * core.bigmap.extend))
+    if (width * height > core.bigmap.threshold)
         options.damage = false;
 
     // --- 暂存 flags

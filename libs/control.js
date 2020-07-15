@@ -143,7 +143,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         core.maps._drawFloorImages(core.status.floorId, core.canvas.fg, 'fg', core.status.floorAnimateObjs||[], core.status.globalAnimateStatus);
 
         // Global Autotile Animate
-        core.status.autotileAnimateObjs.blocks.forEach(function (block) {
+        core.status.autotileAnimateObjs.forEach(function (block) {
             core.maps._drawAutotileAnimate(block, core.status.globalAnimateStatus);
         });
 
@@ -770,7 +770,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
     if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
     var dirs = [[destX,destY],[destX-1,destY,"right"],[destX,destY-1,"down"],[destX,destY+1,"up"],[destX+1,destY,"left"]];
-    var canMoveDirectlyArray = core.canMoveDirectlyArray(dirs);
+    var canMoveDirectlyArray = core.canMoveDirectlyArray(dirs, canMoveArray);
 
     for (var i = 0; i < dirs.length; ++i) {
         var d = dirs[i], dx = d[0], dy = d[1], dir = d[2];
@@ -915,8 +915,13 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
         if (id=='ui' || id=='data') continue; // UI层和data层不移动
         var offsetX = x, offsetY = y;
         if (core.bigmap.canvas.indexOf(id)>=0) {
-            offsetX -= core.bigmap.offsetX;
-            offsetY -= core.bigmap.offsetY;
+            if (core.bigmap.v2) {
+                offsetX -= (core.bigmap.offsetX - 32 * core.bigmap.posX) + 32;
+                offsetY -= (core.bigmap.offsetY - 32 * core.bigmap.posY) + 32;
+            } else {
+                offsetX -= core.bigmap.offsetX;
+                offsetY -= core.bigmap.offsetY;
+            }
         }
         core.control.setGameCanvasTranslate(id, offsetX, offsetY);
     }
@@ -924,8 +929,24 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
 
 ////// 更新视野范围 //////
 control.prototype.updateViewport = function() {
+    // 当前是否应该重绘？
+    if (core.bigmap.v2) {
+        if (core.bigmap.offsetX >= core.bigmap.posX * 32 + 32
+            || core.bigmap.offsetX <= core.bigmap.posX * 32 - 32
+            || core.bigmap.offsetY >= core.bigmap.posY * 32 + 32
+            || core.bigmap.offsetY <= core.bigmap.posY * 32 - 32) {
+                core.bigmap.posX = parseInt(core.bigmap.offsetX / 32);
+                core.bigmap.posY = parseInt(core.bigmap.offsetY / 32);
+                core.redrawMap();
+            }
+    } else {
+        core.bigmap.posX = core.bigmap.posY = 0;
+    }
+    var offsetX = core.bigmap.v2 ? -(core.bigmap.offsetX - 32 * core.bigmap.posX) - 32 : -core.bigmap.offsetX;
+    var offsetY = core.bigmap.v2 ? -(core.bigmap.offsetY - 32 * core.bigmap.posY) - 32 : -core.bigmap.offsetY;
+
     core.bigmap.canvas.forEach(function(cn){
-        core.control.setGameCanvasTranslate(cn,-core.bigmap.offsetX,-core.bigmap.offsetY);
+        core.control.setGameCanvasTranslate(cn, offsetX, offsetY);
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
@@ -1095,63 +1116,136 @@ control.prototype._checkBlock_ambush = function (ambush) {
 ////// 更新全地图显伤 //////
 control.prototype.updateDamage = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
-    if (!core.isset(floorId) || core.status.gameOver) return;
-    if (core.status.gameOver) return;
-    var refreshCheckBlock = true;
-    if (!core.isset(ctx)) {
-        ctx = core.canvas.damage;
-        core.clearMap('damage');
-        refreshCheckBlock = false;
-    }
+    if (!floorId || core.status.gameOver || main.mode != 'play') return;
+    var onMap = ctx == null;
 
     // 没有怪物手册
     if (!core.hasItem('book')) return;
-    core.setFont(ctx, "bold 11px Arial");
-    this._updateDamage_damage(floorId, ctx);
-    this._updateDamage_extraDamage(floorId, ctx, refreshCheckBlock);
+    core.status.damage.posX = core.bigmap.posX;
+    core.status.damage.posY = core.bigmap.posY;
+    if (!onMap) {
+        var width = core.floors[floorId].width, height = core.floors[floorId].height;
+        // 地图过大的缩略图不绘制显伤
+        if (width * height > (core.__SIZE__ + 2 * core.bigmap.extend) * (core.__SIZE__ + 2 * core.bigmap.extend)) return;
+    }
+    this._updateDamage_damage(floorId, onMap);
+    this._updateDamage_extraDamage(floorId, onMap);
+    this.drawDamage(ctx);
 }
 
-control.prototype._updateDamage_damage = function (floorId, ctx) {
-    core.setTextAlign(ctx, 'left');
+control.prototype._updateDamage_damage = function (floorId, onMap) {
+    core.status.damage.data = [];
+    if (!core.flags.displayEnemyDamage && !core.flags.displayExtraDamage) return;
+
     core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         var x = block.x, y = block.y;
+
+        // v2优化，只绘制范围内的部分
+        if (onMap && core.bigmap.v2) {
+            if (x < core.bigmap.posX - core.bigmap.extend || x > core.bigmap.posX + core.__SIZE__ + core.bigmap.extend
+                || y < core.bigmap.posY - core.bigmap.extend || y > core.bigmap.posY + core.__SIZE__ + core.bigmap.extend) {
+                return;
+            }
+        }
+
         if (!block.disable && block.event.cls.indexOf('enemy') == 0 && block.event.displayDamage !== false) {
-           if (core.flags.displayEnemyDamage) {
+            if (core.flags.displayEnemyDamage) {
                var damageString = core.enemys.getDamageString(block.event.id, x, y, floorId);
-               var damage = damageString.damage, color = damageString.color;
-               core.fillBoldText(ctx, damage, 32*x+1, 32*(y+1)-1, color);
-           }
-           if (core.flags.displayCritical) {
+               core.status.damage.data.push({text: damageString.damage, px: 32*x+1, py: 32*(y+1)-1, color: damageString.color});
+            }
+            if (core.flags.displayCritical) {
                var critical = core.enemys.nextCriticals(block.event.id, 1, x, y, floorId);
                critical = core.formatBigNumber((critical[0]||[])[0], true);
                if (critical == '???') critical = '?';
-               core.fillBoldText(ctx, critical, 32*x+1, 32*(y+1)-11, '#FFFFFF');
-           }
+               core.status.damage.data.push({text: critical, px: 32*x+1, py: 32*(y+1)-11, color: '#FFFFFF'});
+            }
         }
     });
 }
 
-control.prototype._updateDamage_extraDamage = function (floorId, ctx, refresh) {
-    core.setTextAlign(ctx, 'center');
-    if (refresh) this.updateCheckBlock(floorId);
-    if (core.flags.displayExtraDamage) {
-        var width = core.floors[floorId].width, height = core.floors[floorId].height;
-        for (var x=0;x<width;x++) {
-            for (var y=0;y<height;y++) {
-                var damage = core.status.checkBlock.damage[x+","+y]||0;
-                if (damage>0) { // 该点伤害
-                    damage = core.formatBigNumber(damage, true);
-                    core.fillBoldText(ctx, damage, 32*x+16, 32*(y+1)-14, '#ffaa33');
-                }
-                else { // 检查捕捉
-                    if (core.status.checkBlock.ambush[x+","+y]) {
-                        core.fillBoldText(ctx, '!', 32*x+16, 32*(y+1)-14, '#ffaa33');
-                    }
+control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
+    core.status.damage.extraData = [];
+    if (!core.flags.displayExtraDamage) return;
+    
+    var width = core.floors[floorId].width, height = core.floors[floorId].height;
+    var startX = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posX - core.bigmap.extend) : 0;
+    var endX = onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + core.bigmap.extend + 1) : width;
+    var startY = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posY - core.bigmap.extend) : 0;
+    var endY = onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + core.bigmap.extend + 1) : height;
+
+    for (var x=startX;x<endX;x++) {
+        for (var y=startY;y<endY;y++) {
+            var damage = core.status.checkBlock.damage[x+","+y]||0;
+            if (damage>0) { // 该点伤害
+                damage = core.formatBigNumber(damage, true);
+                core.status.damage.extraData.push({text: damage, px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
+            }
+            else { // 检查捕捉
+                if (core.status.checkBlock.ambush[x+","+y]) {
+                    core.status.damage.extraData.push({text: '!', px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
                 }
             }
         }
     }
+}
+
+////// 重绘地图显伤 //////
+control.prototype.drawDamage = function (ctx) {
+    if (core.status.gameOver || !core.status.damage || main.mode != 'play') return;
+    var onMap = false;
+    if (ctx == null) {
+        ctx = core.canvas.damage;
+        core.clearMap('damage');
+        onMap = true;
+    }
+
+    if (onMap && core.bigmap.v2) {
+        // 检查是否需要重算...
+        if (Math.abs(core.bigmap.posX - core.status.damage.posX) >= core.bigmap.extend - 1
+            || Math.abs(core.bigmap.posY - core.status.damage.posY) >= core.bigmap.extend - 1) {
+            return this.updateDamage();
+        }
+    }
+    return this._drawDamage_draw(ctx, onMap);
+}
+
+control.prototype._drawDamage_draw = function (ctx, onMap) {
+    if (!core.hasItem('book')) return;
+    // 双缓冲
+    var cacheCtx = core.bigmap.cacheCanvas;
+    cacheCtx.canvas.width = ctx.canvas.width;
+    cacheCtx.canvas.height = ctx.canvas.height;
+    cacheCtx.clearRect(0, 0, cacheCtx.canvas.width, cacheCtx.canvas.height);
+    if (onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
+
+    core.setFont(cacheCtx, "bold 11px Arial");
+    core.setTextAlign(cacheCtx, 'left');
+    core.status.damage.data.forEach(function (one) {
+        var px = one.px, py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;
+            if (px < -32 * 2 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
+                return;
+        }
+        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
+    });
+
+    core.setTextAlign(cacheCtx, 'center');
+    core.status.damage.extraData.forEach(function (one) {
+        var px = one.px, py = one.py;
+        if (onMap && core.bigmap.v2) {
+            px -= core.bigmap.posX * 32;
+            py -= core.bigmap.posY * 32;   
+            if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
+                return;         
+        }
+        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
+    });
+    cacheCtx.translate(0, 0);
+
+    core.drawImage(ctx, cacheCtx.canvas, onMap && core.bigmap.v2 ? -32 : 0, onMap && core.bigmap.v2 ? -32 : 0);
 }
 
 // ------ 录像相关 ------ //
@@ -1178,7 +1272,7 @@ control.prototype.startReplay = function (list) {
     core.status.replay.replaying=true;
     core.status.replay.pausing=true;
     core.status.replay.speed=1.0;
-    core.status.replay.toReplay = core.clone(list);
+    core.status.replay.toReplay = core.cloneArray(list);
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
@@ -1296,7 +1390,7 @@ control.prototype.rewindReplay = function () {
 }
 
 ////// 回放时存档 //////
-control.prototype.saveReplay = function () {
+control.prototype._replay_SL = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1307,11 +1401,11 @@ control.prototype.saveReplay = function () {
     var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
 
-    core.ui.drawSLPanel(10*page+offset);
+    core.ui._drawSLPanel(10*page+offset);
 }
 
 ////// 回放时查看怪物手册 //////
-control.prototype.bookReplay = function () {
+control.prototype._replay_book = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate
@@ -1329,7 +1423,7 @@ control.prototype.bookReplay = function () {
 }
 
 ////// 回放录像时浏览地图 //////
-control.prototype.viewMapReplay = function () {
+control.prototype._replay_viewMap = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1337,10 +1431,10 @@ control.prototype.viewMapReplay = function () {
 
     core.lockControl();
     core.status.event.id='viewMaps';
-    core.ui.drawMaps();
+    core.ui._drawViewMaps();
 }
 
-control.prototype.toolboxReplay = function () {
+control.prototype._replay_toolbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1348,10 +1442,10 @@ control.prototype.toolboxReplay = function () {
 
     core.lockControl();
     core.status.event.id='toolbox';
-    core.ui.drawToolbox();
+    core.ui._drawToolbox();
 }
 
-control.prototype.equipboxReplay = function () {
+control.prototype._replay_equipbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1359,7 +1453,7 @@ control.prototype.equipboxReplay = function () {
 
     core.lockControl();
     core.status.event.id='equipbox';
-    core.ui.drawEquipbox();
+    core.ui._drawEquipbox();
 }
 
 ////// 是否正在播放录像 //////
@@ -1433,8 +1527,8 @@ control.prototype._replay_save = function () {
         if (core.status.replay.save.length == 30)
             core.status.replay.save.shift();
         core.status.replay.save.push({"data": core.saveData(), "replay": {
-            "totalList": core.clone(core.status.replay.totalList),
-            "toReplay": core.clone(core.status.replay.toReplay),
+            "totalList": core.cloneArray(core.status.replay.totalList),
+            "toReplay": core.cloneArray(core.status.replay.toReplay),
             "speed": core.status.replay.speed,
             "steps": core.status.replay.steps
         }});
@@ -1498,7 +1592,7 @@ control.prototype._replayAction_item = function (action) {
         index = index%per+per;
     }
     if (index<0) return false;
-    core.ui.drawToolbox(index);
+    core.ui._drawToolbox(index);
     setTimeout(function () {
         core.ui.closePanel();
         core.useItem(itemId, false, core.replay);
@@ -1519,7 +1613,7 @@ control.prototype._replayAction_equip = function (action) {
     }
     core.status.event.data = {"page":Math.floor(index/per)+1, "selectId":null};
     index = index%per+per;
-    core.ui.drawEquipbox(index);
+    core.ui._drawEquipbox(index);
     setTimeout(function () {
         core.ui.closePanel();
         core.loadEquip(equipId, core.replay);
@@ -1531,7 +1625,7 @@ control.prototype._replayAction_unEquip = function (action) {
     if (action.indexOf("unEquip:")!=0) return false;
     var equipType = parseInt(action.substring(8));
     if (!core.isset(equipType)) return false;
-    core.ui.drawEquipbox(equipType);
+    core.ui._drawEquipbox(equipType);
     core.status.route.push(action);
     if (core.status.replay.speed == 24) {
         core.unloadEquip(equipType, core.replay);
@@ -1591,8 +1685,9 @@ control.prototype._replayAction_getNext = function (action) {
 
 control.prototype._replayAction_moveDirectly = function (action) {
     if (action.indexOf("move:")!=0) return false;
-    // 忽略连续的瞬移事件
-    if (!core.hasFlag('poison')) {
+    // 忽略连续的瞬移事件；如果大地图某一边超过计算范围则不合并
+    if (!core.hasFlag('poison') && core.status.thisMap.width < 2 * core.bigmap.extend + core.__SIZE__
+        && core.status.thisMap.height < 2 * core.bigmap.extend + core.__SIZE__) {
         while (core.status.replay.toReplay.length>0 &&
             core.status.replay.toReplay[0].indexOf('move:')==0) {
                 core.status.route.push(action);
@@ -1816,7 +1911,7 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
         core.lockControl();
         var saveIndex = core.saves.saveIndex;
         var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
-        core.ui.drawSLPanel(10 * page + offset);
+        core.ui._drawSLPanel(10 * page + offset);
     });
 }
 
@@ -1856,14 +1951,14 @@ control.prototype._syncSave_http = function (type, saves) {
 ////// 从服务器加载存档 //////
 control.prototype.syncLoad = function () {
     core.myprompt("请输入存档编号+密码", null, function (idpassword) {
-        if (!idpassword) return core.ui.drawSyncSave();
+        if (!idpassword) return core.ui._drawSyncSave();
         if (!/^\d{6}\w{4}$/.test(idpassword) && !/^\d{4}\w{3}$/.test(idpassword)) {
             core.drawText("不合法的存档编号+密码！");
             return;
         }
         core.ui.drawWaiting("正在同步，请稍候...");
         if (idpassword.length == 7) {
-            core.control._syncLoad_http(idpassword.substring(0, 4), idpassword.substring(3));
+            core.control._syncLoad_http(idpassword.substring(0, 4), idpassword.substring(4));
         } else {
             core.control._syncLoad_http(idpassword.substring(0, 6), idpassword.substring(6));
         }
@@ -1904,7 +1999,7 @@ control.prototype._syncLoad_write = function (data) {
             core.drawText("同步成功！\n你的本地所有存档均已被覆盖。");
         }, function () {
             core.status.event.selection=0;
-            core.ui.drawSyncSave();
+            core.ui._drawSyncSave();
         });
     }
     else {
@@ -2229,7 +2324,7 @@ control.prototype.clearRouteFolding = function () {
 
 ////// 检查录像折叠 //////
 control.prototype.checkRouteFolding = function () {
-    // 未开启、未开始游戏、正在录像播放中、正在事件中：不执行
+    // 未开启、未开始游戏、正在事件中：不执行
     if (!core.flags.enableRouteFolding || !core.isPlaying() || core.status.event.id) {
         return this.clearRouteFolding();
     }
@@ -2541,8 +2636,11 @@ control.prototype.checkBgm = function() {
 ////// 清空状态栏 //////
 control.prototype.clearStatusBar = function() {
     Object.keys(core.statusBar).forEach(function (e) {
-        if (core.statusBar[e].innerHTML != null)
+        if (core.statusBar[e].innerHTML != null) {
             core.statusBar[e].innerHTML = "&nbsp;";
+            core.statusBar[e].removeAttribute('_style');
+            core.statusBar[e].removeAttribute('_value');
+        }
     })
     core.statusBar.image.book.style.opacity = 0.3;
     if (!core.flags.equipboxButton)
@@ -2856,9 +2954,9 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gameDraw.style.right = 0;
     core.dom.gameDraw.style.border = obj.border;
     // resize bigmap
-    core.bigmap.canvas.forEach(function(cn){
-        core.canvas[cn].canvas.style.width = core.bigmap.width * 32 * core.domStyle.scale + "px";
-        core.canvas[cn].canvas.style.height = core.bigmap.height * 32 * core.domStyle.scale + "px";
+    core.bigmap.canvas.forEach(function (cn) {
+        core.canvas[cn].canvas.style.width = core.canvas[cn].canvas.width * core.domStyle.scale + "px";
+        core.canvas[cn].canvas.style.height = core.canvas[cn].canvas.height * core.domStyle.scale + "px";
     });
     // resize dynamic canvas
     for (var name in core.dymCanvas) {

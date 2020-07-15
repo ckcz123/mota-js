@@ -7,7 +7,8 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.fillPos = function (pos) {
         editor.dom.euiCtx.fillStyle = '#' + ~~(Math.random() * 8) + ~~(Math.random() * 8) + ~~(Math.random() * 8);
-        editor.dom.euiCtx.fillRect(pos.x * 32 + 12 - core.bigmap.offsetX, pos.y * 32 + 12 - core.bigmap.offsetY, 8, 8);
+        var grid = _getGridByPos({x: pos.x, y: pos.y});
+        editor.dom.euiCtx.fillRect(grid.x + grid.size * 3 / 8, grid.y + grid.size * 3 / 8, grid.size / 4, grid.size / 4);
     }
 
     /**
@@ -55,7 +56,7 @@ editor_mappanel_wrapper = function (editor) {
      * 双击地图可以选中素材
      */
     editor.uifunctions.map_doubleClick = function (e) {
-        if (editor.uivalues.bindSpecialDoor.loc != null || editor.uivalues.bigmap) return;
+        if (editor.uivalues.bindSpecialDoor.loc != null) return;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
         editor.setSelectBoxFromInfo(editor[editor.layerMod][pos.y][pos.x], true);
@@ -89,18 +90,6 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
-        if (editor.uivalues.bigmap) {
-            if (!selectBox.isSelected()) {
-                editor_mode.onmode('nextChange');
-                editor_mode.onmode('loc');
-                printi("大地图模式（F键）下，可以拖动、右键拉框与复制剪切粘贴；但不可进行绘图。");
-                editor.uivalues.startPos = pos;
-                editor.dom.euiCtx.strokeStyle = '#FF0000';
-                editor.dom.euiCtx.lineWidth = 2;
-                if (editor.isMobile) editor.uifunctions.showMidMenu(e.clientX, e.clientY);
-            }
-            return false;
-        }
 
         if (editor.uivalues.bindSpecialDoor.loc != null) {
             var x = editor.pos.x, y = editor.pos.y, id = (editor.map[y][x] || {}).id;
@@ -125,7 +114,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uifunctions.showTips(6);
             editor.uivalues.startPos = pos;
             editor.dom.euiCtx.strokeStyle = '#FF0000';
-            editor.dom.euiCtx.lineWidth = 3;
+            editor.dom.euiCtx.lineWidth = 2;
             if (editor.isMobile) editor.uifunctions.showMidMenu(e.clientX, e.clientY);
             return false;
         }
@@ -196,7 +185,6 @@ editor_mappanel_wrapper = function (editor) {
             //editor_mode.loc();
             return false;
         }
-        if (editor.uivalues.bigmap) return false;
 
         if (editor.uivalues.holdingPath == 0) {
             return false;
@@ -228,8 +216,9 @@ editor_mappanel_wrapper = function (editor) {
                 // draw rect
                 editor.dom.euiCtx.clearRect(0, 0, editor.dom.euiCtx.canvas.width, editor.dom.euiCtx.canvas.height);
                 editor.dom.euiCtx.fillStyle = 'rgba(0, 127, 255, 0.4)';
-                editor.dom.euiCtx.fillRect(32 * x0 - core.bigmap.offsetX, 32 * y0 - core.bigmap.offsetY,
-                    32 * (x1 - x0) + 32, 32 * (y1 - y0) + 32);
+                var grid = _getGridByPos({x: x0, y: y0});
+                editor.dom.euiCtx.fillRect(grid.x, grid.y,
+                    grid.size * (x1 - x0 + 1), grid.size * (y1 - y0 + 1));
             }
             editor.uivalues.stepPostfix.push(pos);
         }
@@ -270,7 +259,7 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.startPos = editor.uivalues.endPos = null;
             return false;
         }
-        if (editor.uivalues.bigmap) return false;
+
         editor.uivalues.holdingPath = 0;
         if (editor.uivalues.stepPostfix && editor.uivalues.stepPostfix.length) {
             editor.savePreMap();
@@ -809,15 +798,10 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.uifunctions.triggerBigmap = function () {
-        if (selectBox.isSelected()) {
-            printe("请先点击【保存地图】以退出绘图模式");
-            return;
-        }
-
         editor.uivalues.bigmap = !editor.uivalues.bigmap;
         if (editor.uivalues.bigmap) {
             editor.dom.bigmapBtn.classList.add('highlight');
-            printi("大地图模式（F键）下，可以拖动与复制剪切粘贴；但不可拉框、绘图或呼出右键菜单。");
+            printf("已进入大地图模式");
         } else {
             editor.dom.bigmapBtn.classList.remove('highlight');
             editor.setViewport(32 * (editor.pos.x - core.__HALF_SIZE__), 32 * (editor.pos.y - core.__HALF_SIZE__));
@@ -1048,6 +1032,7 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.constructor.prototype.savePreMap = function () {
+        if (editor.map.length * editor.map[0].length >= 4096) return;
         var dt = {};
         editor.dom.maps.forEach(function (one) {
             dt[one] = editor[one];

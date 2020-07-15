@@ -399,43 +399,36 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "红宝石值",
-					"_data": "红宝石加攻击的数值"
 				},
 				"blueGem": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "蓝宝石值",
-					"_data": "蓝宝石加防御的数值"
 				},
 				"greenGem": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "绿宝石值",
-					"_data": "绿宝石加护盾的数值"
 				},
 				"redPotion": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "红血瓶值",
-					"_data": "红血瓶加血数值"
 				},
 				"bluePotion": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "蓝血瓶值",
-					"_data": "蓝血瓶加血数值"
 				},
 				"yellowPotion": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "黄血瓶值",
-					"_data": "黄血瓶加血数值"
 				},
 				"greenPotion": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_docs": "绿血瓶值",
-					"_data": "绿血瓶加血数值"
 				},
 				"breakArmor": {
 					"_leaf": true,
@@ -476,6 +469,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "竖状态栏自绘行数",
 					"_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于4。\n仅在statusCanvas开启时才有效"
 				},
+				"floorChangeTime": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "楼层切换时间",
+					"_data": "默认楼层切换时间；当楼层切换没有显式设置时间时将用此值；可以被用户在系统设置内手动修改"
+				}
 			}
 		},
 		"flags": {

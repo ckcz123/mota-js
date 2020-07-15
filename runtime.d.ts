@@ -149,8 +149,10 @@ type gameStatus = {
     thisMap: ResolvedMap
     bgmaps: { [key: string]: number[][] }
     fgmaps: { [key: string]: number[][] }
+    mapBlockObjs: { [key: string]: any }
     /** 显伤伤害 */
     checkBlock: {}
+    damage: {}
 
     lockControl: boolean
 
@@ -230,12 +232,7 @@ type gameStatus = {
     globalAnimateObjs: []
     floorAnimateObjs: []
     boxAnimateObjs: []
-    autotileAnimateObjs: {
-        blocks: [],
-        map: any
-        bgmap: any
-        fgmap: null
-    }
+    autotileAnimateObjs: []
     globalAnimateStatus: number
     animateObjs: []
 }
@@ -393,13 +390,16 @@ declare class control {
     nearHero(x: number, y: number, n?: number): boolean
     
     /**
-     * 更新地图显伤
+     * 重算并绘制地图显伤
      * @example core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）
      * @param floorId 地图id，不填视为当前地图。预览地图时填写
      * @param ctx 绘制到的画布，如果填写了就会画在该画布而不是显伤层
      */
     updateDamage(floorId?: string, ctx?: CanvasRenderingContext2D): void
     
+    /** 仅重绘地图显伤 */
+    drawDamage(ctx?: CanvasRenderingContext2D): void
+
     /**
      * 设置主角的某个属性
      * @example core.setStatus('loc', {x : 0, y : 0, direction : 'up'}); // 设置主角位置为地图左上角，脸朝上
@@ -665,21 +665,6 @@ declare class control {
 
     /** 回退 */
     rewindReplay(): void
-
-    /** 回放时存档 */
-    saveReplay(): void
-
-    /** 回放时查看怪物手册 */
-    bookReplay(): void
-
-    /** 回放录像时浏览地图 */
-    viewMapReplay(): void
-
-    /** 回放录像时打开道具栏 */
-    toolboxReplay(): void
-
-    /** 回放录像时打开装备栏 */
-    equipboxReplay(): void
 
     /** 是否正在播放录像 */
     isReplaying(): boolean
@@ -1410,7 +1395,10 @@ declare class maps {
      * @param showDisable 可选，true表示隐藏的图块也会被表示出来
      * @returns 事件层矩阵，注意对其阵元的访问是[y][x]
      */
-    getMapArray(floorId?: string): number[][]
+    getMapArray(floorId?: string, noCache?: boolean): number[][]
+
+    /** 判定图块的事件层数字；不存在为0 */
+    getMapNumber(floorId?: string, noCache?: boolean): number
     
     /**
      * 生成背景层矩阵
@@ -1454,12 +1442,9 @@ declare class maps {
      * 可通行性判定
      * @example core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动
      * @param floorId 地图id，不填视为当前地图
-     * @param x 起点横坐标，不填视为挨个判定
-     * @param y 起点纵坐标，不填视为挨个判定
-     * @param direction 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值
-     * @returns 不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值
+     * @returns 从各点可移动方向的三维数组
      */
-    generateMovableArray(floorId?: string, x?: number, y?: number, direction?: direction): boolean | Array<direction | Array<Array<direction>>>
+    generateMovableArray(floorId?: string): Array<Array<Array<direction>>>
     
     /**
      * 单点单朝向的可通行性判定
@@ -1529,9 +1514,8 @@ declare class maps {
      * @param floorId 地图id，不填视为当前地图
      * @param blocks 一般不需要
      * @param options 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
-     * @param toDraw 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心
      */
-    drawThumbnail(floorId?: string, blocks?: Block[], options?: object, toDraw?: string | CanvasRenderingContext2D | object): void
+    drawThumbnail(floorId?: string, blocks?: Block[], options?: object): void
     
     /**
      * 判定某个点是否不可被踏入（不基于主角生命值和图块cannotIn属性）
@@ -1554,6 +1538,9 @@ declare class maps {
      */
     getBlockId(x: number, y: number, floorId?: string, showDisable?: boolean): string | null
     
+    /** 判定某个点的图块数字；空图块为0 */
+    getBlockNumber(x: number, y: number, floorId?: string, showDisable?: boolean): number
+
     /**
      * 判定某个点的图块类型
      * @example if(core.getBlockCls(x1, y1) != 'enemys' && core.getBlockCls(x2, y2) != 'enemy48') core.openDoor(x3, y3); // 另一个简单的机关门事件，打败或炸掉这一对不同身高的敌人就开门
@@ -1709,6 +1696,9 @@ declare class maps {
     loadFloor(floorId?: string, map?: any): any
 
     /** 根据需求解析出blocks */
+    extractBlocks(map?: any): void
+
+    /** 根据需求为UI解析出blocks */
     extractBlocks(map?: any, flags?: any): void
 
     /** 根据数字获得图块 */
@@ -1721,7 +1711,7 @@ declare class maps {
     getIdOfThis(id?: string): string
 
     /** 初始化一个图块 */
-    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any, flags?: any): any
+    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any): any
 
     /** 压缩地图 */
     compressMap(mapArr?: any, floorId?: string): any
@@ -1739,7 +1729,7 @@ declare class maps {
     resizeMap(floorId?: string): void
 
     /** 以x,y的形式返回每个点的事件 */
-    getMapBlocksObj(floorId?: string, showDisable?: any): any
+    getMapBlocksObj(floorId?: string, noCache?: boolean): any
 
     /** 获得某些点可否通行的信息 */
     canMoveDirectlyArray(locs?: any): any
@@ -1766,7 +1756,7 @@ declare class maps {
     enemyExists(x?: number, y?: number, id?: string, floorId?: string): boolean
 
     /** 获得某个点的block */
-    getBlock(x?: number, y?: number, floorId?: string, showDisable?: boolean): any
+    getBlock(x?: number, y?: number, floorId?: string, showDisable?: boolean): Block
 
     /** 获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等 */
     getBlockInfo(block?: any): any
@@ -2029,18 +2019,16 @@ declare class ui {
 
     /**
      * 绘制一个矩形。style可选为绘制样式
-     * @param text 要绘制的文本
      * @param style 绘制的样式
-     * @param font 绘制的字体
+     * @param angle 旋转角度，弧度制
      */
-    fillRect(name: CtxRefer, text: string, x: number, y: number, style: string, font: string): void
-
+    fillRect(name: CtxRefer, x: number, y: number, width: number, height: number, style?: string, angle?: number): void
 
     /**
      * 绘制一个矩形的边框
      * @param style 绘制的样式
      */
-    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string): void
+    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, angle?: number): void
 
     /**
      * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
@@ -2146,11 +2134,14 @@ declare class ui {
     /** 地图中间绘制一段文字 */
     drawText(contents: string, callback?: () => any): void
 
+    /** 自绘选择光标 */
+    drawUIEventSelector(code: number, background: string, x: number, y: number, w: number, h: number, z?: number): void
+
+    /** 清除一个或多个选择光标 */
+    clearUIEventSelector(code: number|number[]): void
+
     /** 绘制一个确认框 */
     drawConfirmBox(text: string, yesCallback?: () => void, noCallback?: () => void): void
-
-    /** 绘制选择光标 */
-    drawWindowSelector(background: any, x: number, y: number, w: number, h: number): void
 
     /** 绘制WindowSkin */
     drawWindowSkin(background: any, ctx: string | CanvasRenderingContext2D, x: number, y: number, w: string, h: string, direction?: any, px?: any, py?: any): void
@@ -2164,7 +2155,7 @@ declare class ui {
      * @param content 要绘制的内容；转义字符不允许保留 \t, \b 和 \f
      * @param config 绘制配置项，目前暂时包含如下内容（均为可选）
      *                left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
-     *                fontSize：字体大小；lineHeight：行高；time：打字机间隔
+     *                fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
      * @returns 绘制信息 
      */ 
     drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: any): any
@@ -2187,83 +2178,20 @@ declare class ui {
     /** 绘制等待界面 */
     drawWaiting(text: string): void
 
-    /** 绘制系统设置界面 */
-    drawSwitchs(): void
-
-    /** 绘制系统菜单栏 */
-    drawSettings(): void
-
-    /** 绘制存档笔记 */
-    drawNotes(): void
-
-    /** 绘制快捷商店选择栏 */
-    drawQuickShop(): void
-
-    /** 绘制存档同步界面 */
-    drawSyncSave(): void
-
-    /** 绘制存档同步选择页面 */
-    drawSyncSelect(): void
-
-    /** 绘制单存档界面 */
-    drawLocalSaveSelect(): void
-
-    /** 绘制存档删除页面 */
-    drawStorageRemove(): void
-
-    /** 绘制回放界面 */
-    drawReplay(): void
-
-    /** 绘制游戏信息界面 */
-    drawGameInfo(): void
-
     /** 绘制分页 */
     drawPagination(page?: any, totalPage?: any, y?: number): void
-
-    /** 绘制键盘光标 */
-    drawCursor(): void
 
     /** 绘制怪物手册 */
     drawBook(index?: any): void
 
-    /** 绘制怪物属性的详细信息 */
-    drawBookDetail(index?: any): void
-
     /** 绘制楼层传送器 */
     drawFly(page?: any): void
-
-    /** 绘制中心对称飞行器 */
-    drawCenterFly(): void
-
-    /** 绘制浏览地图界面 */
-    drawMaps(index?: any, x?: number, y?: number): void
-
-    /** 绘制道具栏 */
-    drawToolbox(index?: any): void
 
     /** 获得所有应该在道具栏显示的某个类型道具 */
     getToolboxItems(cls: string): string[]
 
-    /** 绘制装备界面 */
-    drawEquipbox(index?: any): void
-
-    /** 绘制存档/读档界面 */
-    drawSLPanel(index?: any, refresh?: any): void
-
-    /** 绘制虚拟键盘 */
-    drawKeyBoard(): void
-
     /** 绘制状态栏 */
     drawStatusBar(): void
-
-    /** 绘制“数据统计”界面 */
-    drawStatistics(floorIds?: string): void
-
-    /** 绘制“关于”界面 */
-    drawAbout(): void
-
-    /** 绘制帮助页面 */
-    drawHelp(): void
 
     /** 绘制灯光效果 */
     drawLight(name: string | CanvasRenderingContext2D, color?: any, lights?: any, lightDec?: number): void
@@ -2371,6 +2299,9 @@ declare class utils {
      * @returns 拷贝的结果，注意函数将原样返回
      */
     clone<T>(data?: T, filter?: (name: string, value: any) => boolean, recursion?: boolean): T
+
+    /** 深拷贝一个1D或2D的数组 */
+    cloneArray(data?: Array<number>|Array<Array<number>>): Array<number>|Array<Array<number>>
 
     /**
      * 等比例切分一张图片
@@ -2748,9 +2679,16 @@ type core = {
         canvas: string[],
         offsetX: number // in pixel
         offsetY: number
+        posX: number
+        posY: number
         width: number // map width and height
         height: number
+        v2: boolean
+        threshold: number
+        extend: number
+        scale: number
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
+        cacheCanvas: CanvasRenderingContext2D
     }
     saves: {
         saveIndex: number

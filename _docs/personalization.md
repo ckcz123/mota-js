@@ -260,9 +260,9 @@ this.statusBar = {
 6. 显示内容的设置。在脚本编辑的updateStatusBar函数，可以对该状态栏显示内容进行设置，下面是几个例子。
 ``` js
 // 设置其显示内容为status:speed值；需要在project/data.js中firstData的hero那里新增初始值`"speed": 0`。
-core.statusBar.speed.innerHTML = core.getStatus('speed');
+core.setStatusBarInnerHTML('speed', core.getStatus('speed'));
 // 设置其显示内容为flag:speed值，无需额外进行定义。
-core.statusBar.speed.innerHTML = core.getFlag('speed', 0);
+core.setStatusBarInnerHTML('speed', core.getFlag('speed', 0));
 ```
 总的来说不建议这样做，因为 `main.js` 和 `html` 文件不在 `project` 文件夹，会导致随样板更新迁移接档变得困难。
 
@@ -302,7 +302,7 @@ else {
 }
 // 设置技能栏
 // 可以用flag:skill表示当前开启的技能类型，flag:skillName显示技能名
-core.statusBar.skill.innerHTML = core.getFlag('skillName', '无');
+core.setStatusBarInnerHTML('skill', core.getFlag('skillName', '无'));
 ```
 
 ### 技能的触发

@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.7.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.7.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -186,8 +186,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.7.1";
-    this.__VERSION_CODE__ = 176;
+    this.__VERSION__ = "2.7.2";
+    this.__VERSION_CODE__ = 233;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -386,7 +386,7 @@ main.prototype.importFonts = function (fonts) {
     style.type = 'text/css';
     var html = '';
     fonts.forEach(function (font) {
-        html += '@font-face { font-family: "'+font+'"; src: url("project/fonts/'+font+'.ttf") format("truetype")';
+        html += '@font-face { font-family: "'+font+'"; src: url("project/fonts/'+font+'.ttf") format("truetype"); }';
     });
     style.innerHTML = html;
     document.body.appendChild(style);
@@ -610,7 +610,7 @@ main.statusBar.image.keyboard.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.bookReplay();
+        core.control._replay_book();
         return;
     }
 
@@ -623,7 +623,7 @@ main.statusBar.image.shop.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.viewMapReplay();
+        core.control._replay_viewMap();
         return;
     }
 
@@ -670,7 +670,7 @@ main.statusBar.image.settings.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.saveReplay();
+        core.control._replay_SL();
         return;
     }
 

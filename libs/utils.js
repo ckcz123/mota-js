@@ -58,6 +58,14 @@ utils.prototype._init = function () {
             return this.substring(0, search.length) === search;
         }
     }
+    if (typeof Array.prototype.fill != "function") {
+        Array.prototype.fill = function (value) {
+            for (var i = 0; i < this.length; ++i)
+                if (this[i] == null)
+                    this[i] = value;
+            return this;
+        }
+    }
 
 }
 
@@ -85,6 +93,8 @@ utils.prototype.replaceValue = function (value) {
             value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
             value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
+        if (value.indexOf('blockNumber:')>=0)
+            value = value.replace(/blockNumber:(\d+),(\d+)/g, "core.getBlockNumber($1, $2)");
         if (value.indexOf('blockCls:')>=0)
             value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
         if (value.indexOf('equip:')>=0)
@@ -340,6 +350,16 @@ utils.prototype.clone = function (data, filter, recursion) {
         return copy;
     }
     return data;
+}
+
+////// 深拷贝1D/2D数组优化 //////
+utils.prototype.cloneArray = function (data) {
+    if (!(data instanceof Array)) return this.clone(data);
+    if (data[0] instanceof Array) {
+        return data.map(function (one) { return one.slice(); });
+    } else {
+        return data.slice();
+    }
 }
 
 ////// 裁剪图片 //////
@@ -660,11 +680,10 @@ utils.prototype.isset = function (val) {
 utils.prototype.subarray = function (a, b) {
     if (!(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
-    var na = core.clone(a), nb = core.clone(b);
-    while (nb.length > 0) {
-        if (na.shift() != nb.shift()) return null;
+    for (var i = 0; i < b.length; ++i) {
+        if (a[i] != b[i]) return null;
     }
-    return na;
+    return a.slice(b.length);
 }
 
 utils.prototype.inArray = function (array, element) {
@@ -684,12 +703,7 @@ utils.prototype.getCookie = function (name) {
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (!core.statusBar[name]) return;
-    var isNumber = false;
-    if (typeof value == 'number') {
-        value = this.formatBigNumber(value);
-        isNumber = true;
-    }
-    // 判定是否斜体
+    if (typeof value == 'number') value = this.formatBigNumber(value);
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
     style += 'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
@@ -697,12 +711,17 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
-    if (isNumber) {
-        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+    var _style = core.statusBar[name].getAttribute('_style');
+    var _value = core.statusBar[name].getAttribute('_value');
+    if (_style == style) {
+        if (value == _value) return;
+        core.statusBar[name].children[0].innerText = value;
     } else {
         core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
         core.statusBar[name].children[0].innerText = value;
+        core.statusBar[name].setAttribute('_style', style);
     }
+    core.statusBar[name].setAttribute('_value', value);;
 }
 
 utils.prototype.strlen = function (str) {
@@ -1123,7 +1142,7 @@ utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onpr
 
 utils.prototype._unzip_readEntries = function (entries, success, convertToText) {
     var results = {};
-    if (entries == null) {
+    if (entries == null || entries.length == 0) {
         return success(results);
     }
     var length = entries.length;

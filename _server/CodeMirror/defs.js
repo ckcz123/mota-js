@@ -1867,6 +1867,30 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "number",
           "!doc": "大地图视角纵向偏移量"
         },
+        "posX": {
+          "!type": "number",
+          "!doc": "大地图视角横向基准格"
+        },
+        "posY": {
+          "!type": "number",
+          "!doc": "大地图视角纵向基准格"
+        },
+        "v2": {
+          "!type": "bool",
+          "!doc": "是否是新版大地图绘制方式"
+        },
+        "threshold": {
+          "!type": "number",
+          "!doc": "新版大地图绘制方式的分界线"
+        },
+        "extend": {
+          "!type": "number",
+          "!doc": "新版大地图模式下向每一侧额外计算的数量"
+        },
+        "scale": {
+          "!type": "number",
+          "!doc": "缩略图的比例放缩"
+        },
         "tempCanvas": {
           "!type": "CanvasRenderingContext2D",
           "!doc": "临时画布"
@@ -1908,6 +1932,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "fgmaps": {
           "!doc": "各地图前景层"
         },
+        "mapBlockObjs": {
+          "!doc": "以<位置,block>存放的各地图图块信息"
+        },
         "boxAnimateObjs": {
           "!doc": "（手册和剧情文本的）帧动画对象"
         },
@@ -1932,6 +1959,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "cache": {
             "!doc": "每个点的光环缓存"
           },
+        },
+        "damage": {
+          "!doc": "每个点的显伤信息",
         },
         "ctrlDown": {
           "!type": "bool",
@@ -2089,7 +2119,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!type": "fn(func: name|fn(), _this?: ?)"
       },
       "control": {
-        "!doc": "游戏控制",
+        "!doc": "负责整个游戏的核心控制系统，分为如下几个部分：<br/>- requestAnimationFrame相关<br/>- 标题界面，开始和重新开始游戏<br/>- 自动寻路和人物行走相关<br/>- 画布、位置、阻激夹域、显伤等相关<br/>- 录像的回放相关<br/>- 存读档，自动存档，同步存档等相关<br/>- 人物属性和状态、位置、变量等相关<br/>- 天气、色调、音乐和音效的播放<br/>- 状态栏和工具栏相关<br/>- 界面resize相关",
         "showStatusBar": {
           "!doc": "显示状态栏", 
           "!type": "fn()"
@@ -2111,9 +2141,13 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(color?: [number], time?: number, callback?: fn())"
         }, 
         "updateDamage": {
-          "!doc": "更新地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
+          "!doc": "重算并绘制地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
           "!type": "fn(floorId?: string, ctx?: string|CanvasRenderingContext2D)"
         }, 
+        "drawDamage": {
+          "!doc": "仅绘制地图显伤",
+          "!type": "fn(string|CanvasRenderingContext2D)"
+        },
         "nextX": {
           "!doc": "获取主角面前第n格的横坐标<br/>例如：core.closeDoor(core.nextX(), core.nextY(), 'yellowDoor', core.turnHero); // 在主角面前关上一扇黄门，然后主角顺时针旋转90°<br/>n: 目标格与主角的距离，面前为正数，背后为负数，脚下为0，不填视为1", 
           "!type": "fn(n?: number) -> number"
@@ -2141,11 +2175,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "setFlag": {
           "!doc": "设置一个flag变量<br/>例如：core.setFlag('poison', true); // 令主角中毒<br/>name: 变量名，支持中文<br/>value: 变量的新值，不填或填null视为删除", 
           "!type": "fn(name: string, value: ?)"
-        }, 
-        "viewMapReplay": {
-          "!doc": "回放录像时浏览地图", 
-          "!type": "fn()"
-        }, 
+        },
         "playSound": {
           "!doc": "播放一个音效",
           "!type": "fn(sound: string)"
@@ -2281,11 +2311,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "continueAutomaticRoute": {
           "!doc": "继续剩下的自动寻路操作", 
           "!type": "fn()"
-        }, 
-        "saveReplay": {
-          "!doc": "回放时存档", 
-          "!type": "fn()"
-        }, 
+        },
         "setAutoHeroMove": {
           "!doc": "连续行走<br/>例如：core.setAutoHeroMove([{direction: \"up\", step: 1}, {direction: \"left\", step: 3}]); // 上左左左<br/>steps: 压缩的步伐数组，每项表示朝某方向走多少步", 
           "!type": "fn(steps: [?])"
@@ -2381,11 +2407,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "rewindReplay": {
           "!doc": "回退到上一个录像节点", 
           "!type": "fn()"
-        }, 
-        "toolboxReplay": {
-          "!doc": "回放录像时打开道具栏", 
-          "!type": "fn()"
-        }, 
+        },
         "playBgm": {
           "!doc": "播放背景音乐，中途开播但不计入存档且只会持续到下次场景切换。如需长期生效请将背景音乐的文件名赋值给flags.__bgm__<br/>例如：core.playBgm('bgm.mp3', 30); // 播放bgm.mp3，并跳过前半分钟<br/>bgm: 背景音乐的文件名，支持全塔属性中映射前的中文名<br/>startTime: 跳过前多少秒，不填则不跳过", 
           "!type": "fn(bgm: string, startTime?: number)"
@@ -2421,11 +2443,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "stopReplay": {
           "!doc": "停止播放", 
           "!type": "fn(force?: bool)"
-        }, 
-        "bookReplay": {
-          "!doc": "回放时查看怪物手册", 
-          "!type": "fn()"
-        }, 
+        },
         "turnHero": {
           "!doc": "主角转向并计入录像，不会导致跟随者聚集，会导致视野重置到以主角为中心<br/>例如：core.turnHero(); // 主角顺时针旋转90°，即单击主角或按下Z键的效果<br/>direction: 主角的新朝向，可为 up, down, left, right, :left, :right, :back 七种之一", 
           "!type": "fn(direction?: string)"
@@ -2437,11 +2455,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "resize": {
           "!doc": "屏幕分辨率改变后重新自适应", 
           "!type": "fn()"
-        }, 
-        "equipboxReplay": {
-          "!doc": "回放录像时打开装备栏", 
-          "!type": "fn()"
-        }, 
+        },
         "getSave": {
           "!doc": "获得某个存档内容", 
           "!type": "fn(index?: number, callback?: fn(data: ?))"
@@ -2662,7 +2676,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }
       }, 
       "utils": {
-        "!doc": "工具类函数",
+        "!doc": "工具函数库，里面有各个样板中使用到的工具函数。",
         "scan": {
           "!doc": "朝向到x,y映射",
           "up": {
@@ -2693,6 +2707,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "clone": {
           "!doc": "深拷贝一个对象(函数将原样返回)<br/>例如：core.clone(core.status.hero, (name, value) => (name == 'items' || typeof value == 'number'), false); // 深拷贝主角的属性和道具<br/>data: 待拷贝对象<br/>filter: 过滤器，可选，表示data为数组或对象时拷贝哪些项或属性，true表示拷贝<br/>recursion: 过滤器是否递归，可选。true表示过滤器也被递归<br/>返回值：拷贝的结果，注意函数将原样返回", 
           "!type": "fn(data?: ?, filter?: fn(name: string, value: ?) -> bool, recursion?: bool)"
+        }, 
+        "cloneArray": {
+          "!doc": "深拷贝一个1D或2D数组对象<br/>例如：core.cloneArray(core.status.thisMap.map)", 
+          "!type": "fn(data?: [number]|[[number]]) -> [number]|[[number]]"
         }, 
         "setLocalForage": {
           "!doc": "往数据库写入一段数据", 
@@ -2892,7 +2910,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }
       }, 
       "actions": {
-        "!doc": "用户操作相关的函数",
+        "!doc": "主要是处理一些和用户交互相关的内容。",
         "onup": {
           "!doc": "当点击（触摸）事件放开时", 
           "!type": "fn(loc: {x: number, y: number, size: number})"
@@ -2990,7 +3008,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }
       }, 
       "maps": {
-        "!doc": "地图处理相关的函数",
+        "!doc": "负责一切和地图相关的处理内容，包括如下几个方面：<br/>- 地图的初始化，保存和读取，地图数组的生成<br/>- 是否可移动或瞬间移动的判定<br/>- 地图的绘制<br/>- 获得某个点的图块信息<br/>- 启用和禁用图块，改变图块	<br/>- 移动/跳跃图块，淡入淡出图块<br/>- 全局动画控制，动画的绘制",
         "noPass": {
           "!doc": "判定某个点是否不可被踏入（不基于主角生命值和图块cannotIn属性）<br/>例如：core.noPass(0, 0); // 判断地图左上角能否被踏入<br/>x: 目标点的横坐标<br/>y: 目标点的纵坐标<br/>floorId: 目标点所在的地图id，不填视为当前地图<br/>返回值：true表示可踏入", 
           "!type": "fn(x: number, y: number, floorId?: string) -> bool"
@@ -3025,8 +3043,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getMapArray": {
           "!doc": "生成事件层矩阵<br/>例如：core.getMapArray('MT0'); // 生成主塔0层的事件层矩阵，隐藏的图块视为0<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 可选，true表示隐藏的图块也会被表示出来<br/>返回值：事件层矩阵，注意对其阵元的访问是[y][x]", 
-          "!type": "fn(floorId?: string) -> [[number]]"
+          "!type": "fn(floorId?: string, noCache?: bool) -> [[number]]"
         }, 
+        "getMapNumber": {
+          "!doc": "获得事件层某个点的数字",
+          "!type": "fn(x: number, y: number, floorId?: string, noCache?: bool) -> number"
+        },
         "jumpBlock": {
           "!doc": "跳跃图块；从V2.7开始不再有音效<br/>例如：core.jumpBlock(0, 0, 0, 0); // 令地图左上角的图块原地跳跃半秒，再花半秒淡出<br/>sx: 起点的横坐标<br/>sy: 起点的纵坐标<br/>ex: 终点的横坐标<br/>ey: 终点的纵坐标<br/>time: 单步和淡出用时，单位为毫秒。不填视为半秒<br/>keep: 是否不淡出，true表示不淡出<br/>callback: 落地或淡出后的回调函数，可选", 
           "!type": "fn(sx: number, sy: number, ex: number, ey: number, time?: number, keep?: bool, callback?: fn())"
@@ -3141,19 +3163,27 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "extractBlocks": {
           "!doc": "根据需求解析出blocks", 
-          "!type": "fn(map?: [[number]], flags?: flags)"
+          "!type": "fn(map?: ?)"
+        }, 
+        "extractBlocksForUI": {
+          "!doc": "根据需求为UI解析出blocks", 
+          "!type": "fn(map?: ?, flags?: ?)"
         }, 
         "getBlockId": {
           "!doc": "判定某个点的图块id<br/>例如：if(core.getBlockId(x1, y1) != 'greenSlime' && core.getBlockId(x2, y2) != 'redSlime') core.openDoor(x3, y3); // 一个简单的机关门事件，打败或炸掉这一对绿头怪和红头怪就开门<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块id，该点无图块则返回null", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string"
+        }, 
+        "getBlockNumber": {
+          "!doc": "判定某个点的图块数字<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块数字，该点无图块则返回null", 
+          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number"
         }, 
         "loadFloor": {
           "!doc": "从文件或存档中加载某个楼层", 
           "!type": "fn(floorId?: string, map?: ?)"
         }, 
         "generateMovableArray": {
-          "!doc": "可通行性判定<br/>例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动<br/>floorId: 地图id，不填视为当前地图<br/>x: 起点横坐标，不填视为挨个判定<br/>y: 起点纵坐标，不填视为挨个判定<br/>direction: 可选，必须和坐标一起使用。填写后将只检查是否可向该方向移动并返回布尔值<br/>返回值：不设置坐标时为从各点可移动方向的三维数组，设置坐标但不设置方向时为该点可移动方向的一维数组，都设置时为布尔值", 
-          "!type": "fn(floorId?: string, x?: number, y?: number, direction?: string)"
+          "!doc": "可通行性判定<br/>例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动<br/>floorId: 地图id，不填视为当前地图<br/>返回值：从各点可移动方向的三维数组", 
+          "!type": "fn(floorId?: string) -> [[[string]]]"
         }, 
         "terrainExists": {
           "!doc": "某个点是否存在（指定的）地形", 
@@ -3173,7 +3203,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getMapBlocksObj": {
           "!doc": "以x,y的形式返回每个点的事件", 
-          "!type": "fn(floorId?: string, showDisable?: bool)"
+          "!type": "fn(floorId?: string, noCache?: bool)"
         }, 
         "removeGlobalAnimate": {
           "!doc": "删除一个或所有全局动画", 
@@ -3205,11 +3235,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "getBlock": {
           "!doc": "获得某个点的block", 
-          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> {index: number, block: block}"
+          "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> block"
         }, 
         "initBlock": {
           "!doc": "初始化一个图块", 
-          "!type": "fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?, flags?: ?) -> block"
+          "!type": "fn(x: number, y: number, id: string|number, addInfo?: bool, eventFloor?: ?) -> block"
         }, 
         "addGlobalAnimate": {
           "!doc": "添加一个全局动画", 
@@ -3240,8 +3270,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(x?: number, y?: number, direction?: string, floorId?: string) -> bool"
         }, 
         "drawThumbnail": {
-          "!doc": "绘制缩略图<br/>例如：core.drawThumbnail(); // 绘制当前地图的缩略图<br/>floorId: 地图id，不填视为当前地图<br/>blocks: 一般不需要<br/>options: 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档<br/>toDraw: 要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心", 
-          "!type": "fn(floorId?: string, blocks?: [block], options?: ?, toDraw?: string|CanvasRenderingContext2D|?)"
+          "!doc": "绘制缩略图<br/>例如：core.drawThumbnail(); // 绘制当前地图的缩略图<br/>floorId: 地图id，不填视为当前地图<br/>blocks: 一般不需要<br/>options: 绘制信息，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档，同时包含要绘制到的画布名或画布的ctx或还有其他信息，如起绘坐标、绘制大小、是否绘制全图、截取中心", 
+          "!type": "fn(floorId?: string, blocks?: [block], options?: ?)"
         }, 
         "hideBlockByIndex": {
           "!doc": "根据图块的索引来隐藏图块", 
@@ -3273,7 +3303,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }
       }, 
       "ui": {
-        "!doc": "UI绘制相关的函数",
+        "!doc": "负责一切UI界面的绘制。主要包括三个部分：<br/>- 设置某个画布的属性与在某个画布上绘制的相关API<br/>- 具体的某个UI界面的绘制<br/>- 动态创建画布相关的API",
         "resizeCanvas": {
           "!doc": "重新设置一个自定义画布的大小", 
           "!type": "fn(name: string, x: number, y: number)"
@@ -3281,19 +3311,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "deleteCanvas": {
           "!doc": "删除一个自定义画布", 
           "!type": "fn(name: string)"
-        }, 
-        "drawSLPanel": {
-          "!doc": "绘制存档/读档界面", 
-          "!type": "fn(index?: ?, refresh?: bool)"
-        }, 
-        "drawKeyBoard": {
-          "!doc": "绘制虚拟键盘", 
-          "!type": "fn()"
-        }, 
-        "drawStorageRemove": {
-          "!doc": "绘制存档删除页面", 
-          "!type": "fn()"
-        }, 
+        },
         "deleteAllCanvas": {
           "!doc": "清空所有的自定义画布", 
           "!type": "fn()"
@@ -3309,31 +3327,15 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "setOpacity": {
           "!doc": "设置某个canvas整体的透明度；此函数直接改变画布本身，对已经绘制的内容也生效<br/>如果仅想对接下来的绘制生效请使用setAlpha", 
           "!type": "fn(name: string|CanvasRenderingContext2D, opacity: number)"
-        }, 
-        "drawAbout": {
-          "!doc": "绘制“关于”界面", 
-          "!type": "fn()"
-        }, 
+        },
         "getTextContentHeight": {
           "!doc": "获得某段文字的预计绘制高度；参数说明详见 drawTextContent", 
           "!type": "fn(content: string, config?: ?)"
-        }, 
-        "drawSwitchs": {
-          "!doc": "绘制系统设置界面", 
-          "!type": "fn()"
-        }, 
-        "drawSyncSelect": {
-          "!doc": "绘制存档同步选择页面", 
-          "!type": "fn()"
-        }, 
+        },
         "drawArrow": {
           "!doc": "在某个canvas上绘制一个箭头", 
           "!type": "fn(name: string|CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number)"
-        }, 
-        "drawReplay": {
-          "!doc": "绘制回放界面", 
-          "!type": "fn()"
-        }, 
+        },
         "strokeEllipse": {
           "!doc": "在某个canvas上绘制一个椭圆的边框", 
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, a: number, b: number, angle?: number, style?: string, lineWidth?: number)"
@@ -3385,13 +3387,17 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "绘制一个确认框<br/>此项会打断事件流，如需不打断版本的请使用core.myconfirm()<br/>text: 要绘制的内容，支持 ${} 语法<br/>yesCallback: 点击确认后的回调<br/>noCallback: 点击取消后的回调",
           "!type": "fn(text: string, yesCallback?: fn(), noCallback?: fn())"
         },
+        "drawUIEventSelector": {
+          "!doc": "自绘一个闪烁的选择光标<br/>code: 选择光标的编号，必填<br/>background: 要绘制的光标背景，必须是一个合法的WindowSkin<br/>x, y, w, h: 绘制的坐标和长宽<br/>z: 可选，光标的的z值",
+          "!type": "fn(code: number, background: string, x: number, y: number, w: number, h: number, z?: number)"
+        },
+        "clearUIEventSelector": {
+          "!doc": "清除若干个自绘的选择光标<br/>codes: 清除的光标编号；可以是单个编号或编号数组；不填则清除所有光标",
+          "!type": "fn(codes?: number|[number])"
+        },
         "fillPolygon": {
           "!doc": "在某个canvas上绘制一个多边形", 
           "!type": "fn(name: string|CanvasRenderingContext2D, nodes?: [[number]], style?: string)"
-        }, 
-        "drawStatistics": {
-          "!doc": "绘制“数据统计”界面", 
-          "!type": "fn(floorIds?: string)"
         }, 
         "fillText": {
           "!doc": "在某个画布上绘制一段文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>font: 绘制的字体<br/>最大宽度，超过此宽度会自动放缩", 
@@ -3402,11 +3408,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个canvas的基准线<br/>baseline: 可为alphabetic, top, hanging, middle, ideographic, bottom", 
           "!url": "https://www.w3school.com.cn/tags/canvas_textbaseline.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, baseline: string)"
-        }, 
-        "drawSettings": {
-          "!doc": "绘制系统菜单栏", 
-          "!type": "fn()"
-        }, 
+        },
         "loadCanvas": {
           "!doc": "加载某个canvas状态", 
           "!type": "fn(name: string|CanvasRenderingContext2D)"
@@ -3424,11 +3426,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个canvas的线宽度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_linewidth.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, lineWidth: number)"
-        }, 
-        "drawEquipbox": {
-          "!doc": "绘制装备界面", 
-          "!type": "fn(index?: ?)"
-        }, 
+        },
         "drawTextBox": {
           "!doc": "绘制一个对话框", 
           "!type": "fn(content: string, showAll?: bool)"
@@ -3461,15 +3459,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "drawWindowSkin": {
           "!doc": "绘制WindowSkin", 
           "!type": "fn(background: string, ctx: string|CanvasRenderingContext2D, x: number, y: number, w: string, h: string, direction?: string, px?: number, py?: number)"
-        }, 
-        "drawGameInfo": {
-          "!doc": "绘制游戏信息界面", 
-          "!type": "fn()"
-        }, 
+        },
         "fillRect": {
-          "!doc": "绘制一个矩形。style可选为绘制样式<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>font: 绘制的字体", 
+          "!doc": "绘制一个矩形。<br/>x,y: 绘制的坐标<br/>width,height: 绘制的长宽<br/>style: 绘制的样式<br/>angle: 旋转的角度，弧度制，如Math.PI/2代表90度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_fillrect.asp",
-          "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, font?: string)"
+          "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style?: string, angle?: number)"
         }, 
         "drawScrollText": {
           "!doc": "绘制滚动字幕", 
@@ -3483,11 +3477,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "在某个canvas上绘制一个圆的边框", 
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: ?, style?: string, lineWidth?: number)"
-        }, 
-        "drawLocalSaveSelect": {
-          "!doc": "绘制单存档界面", 
-          "!type": "fn()"
-        }, 
+        },
         "drawWaiting": {
           "!doc": "绘制等待界面", 
           "!type": "fn(text: string)"
@@ -3511,7 +3501,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, x?: number, y?: number, width?: number, height?: number)"
         }, 
         "drawTextContent": {
-          "!doc": "绘制一段文字到某个画布上面<br/>ctx: 要绘制到的画布<br/>content: 要绘制的内容；转义字符不允许保留 \\t, \\b 和 \\f<br/>config: 绘制配置项，目前暂时包含如下内容（均为可选）<br/>left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右<br/>fontSize：字体大小；lineHeight：行高；time：打字机间隔<br/>返回值：绘制信息", 
+          "!doc": "绘制一段文字到某个画布上面<br/>ctx: 要绘制到的画布<br/>content: 要绘制的内容；转义字符不允许保留 \\t, \\b 和 \\f<br/>config: 绘制配置项，目前暂时包含如下内容（均为可选）<br/>left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右<br/>fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体名<br/>返回值：绘制信息", 
           "!type": "fn(ctx: string|CanvasRenderingContext2D, content: string, config: ?)"
         }, 
         "calWidth": {
@@ -3523,11 +3513,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "在某个canvas上绘制一个扇形", 
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: number, start: number, end: number, style?: string)"
-        }, 
-        "drawWindowSelector": {
-          "!doc": "绘制选择光标", 
-          "!type": "fn(background: ?, x: number, y: number, w: number, h: number)"
-        }, 
+        },
         "strokeArc": {
           "!doc": "在某个canvas上绘制一段弧", 
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
@@ -3541,39 +3527,15 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "drawPagination": {
           "!doc": "绘制分页", 
           "!type": "fn(page?: ?, totalPage?: ?, y?: number)"
-        }, 
-        "drawBookDetail": {
-          "!doc": "绘制怪物属性的详细信息", 
-          "!type": "fn(index?: ?)"
-        }, 
+        },
         "getToolboxItems": {
           "!doc": "获得所有应该在道具栏显示的某个类型道具",
           "!type": "fn(cls: string) -> [string]"
         },
-        "drawToolbox": {
-          "!doc": "绘制道具栏", 
-          "!type": "fn(index?: ?)"
-        }, 
-        "drawHelp": {
-          "!doc": "绘制帮助页面", 
-          "!type": "fn()"
-        }, 
-        "drawNotes": {
-          "!doc": "绘制存档笔记",
-          "!type": "fn()"
-        },
-        "drawQuickShop": {
-          "!doc": "绘制快捷商店选择栏", 
-          "!type": "fn()"
-        }, 
-        "drawCenterFly": {
-          "!doc": "绘制中心对称飞行器", 
-          "!type": "fn()"
-        }, 
         "strokeRect": {
-          "!doc": "绘制一个矩形的边框<br/>style: 绘制的样式", 
+          "!doc": "绘制一个矩形的边框<br/>style: 绘制的样式<br/>lineWidth: 线宽<br/>angle: 旋转角度，弧度制，如Math.PI/2为90度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_strokerect.asp",
-          "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style: string)"
+          "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, style?: string, lineWidth?: number, angle?: number)"
         }, 
         "drawBook": {
           "!doc": "绘制怪物手册", 
@@ -3586,18 +3548,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "fillBoldText": {
           "!doc": "在某个画布上绘制一个描边文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>strokeStyle: 要绘制的描边颜色<br/>font: 绘制的字体", 
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string)"
-        }, 
-        "drawSyncSave": {
-          "!doc": "绘制存档同步界面", 
-          "!type": "fn()"
-        }, 
+        },
         "saveCanvas": {
           "!doc": "保存某个canvas状态", 
           "!type": "fn(name: string|CanvasRenderingContext2D)"
-        }, 
-        "drawCursor": {
-          "!doc": "绘制键盘光标", 
-          "!type": "fn()"
         },
         "createCanvas": {
           "!doc": "动态创建一个画布。<br/>name： 要创建的画布名，如果已存在则会直接取用当前存在的。<br/>x,y: 创建的画布相对窗口左上角的像素坐标<br/>width,height: 创建的长宽。<br/>zIndex: 创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。<br/>返回创建的画布的context，也可以通过core.dymCanvas[name]调用。", 
@@ -3607,14 +3561,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个canvas的对齐", 
           "!url": "https://www.w3school.com.cn/tags/canvas_textalign.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, align: string)"
-        }, 
-        "drawMaps": {
-          "!doc": "绘制浏览地图界面", 
-          "!type": "fn(index?: ?, x?: number, y?: number)"
-        }
+        },
       }, 
       "enemys": {
-        "!doc": "怪物处理的相关函数",
+        "!doc": "定义了一系列和怪物相关的API函数。",
         "getEnemys": {
           "!doc": "获得所有怪物原始数据的一个副本。<br/>请使用core.material.enemys获得当前各项怪物属性。",
           "!type": "fn()"
@@ -3681,7 +3631,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }
       }, 
       "events": {
-        "!doc": "事件处理相关的函数",
+        "!doc": "events.js将处理所有和事件相关的操作，主要分为五个部分：<br/>- 游戏的开始和结束<br/>- 系统事件的处理<br/>- 自定义事件的处理<br/>- 点击状态栏图标所进行的操作<br/>- 一些具体事件的执行内容",
         "afterChangeFloor": {
           "!doc": "转换楼层结束的事件", 
           "!type": "fn(floorId?: string)"
@@ -3976,7 +3926,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }
       },
       "plugin": {
-        "!doc": "插件编写",
+        "!doc": "插件编写中内置了一些常用的插件。",
         "drawLight": {
           "!doc": "绘制一段灯光效果<br/>name：必填，要绘制到的画布名；可以是一个系统画布，或者是个自定义画布；如果不存在则创建<br/>color：可选，只能是一个0~1之间的数，为不透明度的值。不填则默认为0.9。<br/>lights：可选，一个数组，定义了每个独立的灯光。其中每一项是三元组 [x,y,r] x和y分别为该灯光的横纵坐标，r为该灯光的半径。<br/>lightDec：可选，0到1之间，光从多少百分比才开始衰减（在此范围内保持全亮），不设置默认为0。比如lightDec为0.5代表，每个灯光部分内圈50%的范围全亮，50%以后才开始快速衰减。<br/>例如：core.plugin.drawLight('test', 0.2, [[25,11,46,0.1]]); // 创建一个test图层，不透明度0.2，其中在(25,11)点存在一个半径为46的灯光效果，灯光中心不透明度0.1。<br/>core.plugin.drawLight('test2', 0.9, [[25,11,46],[105,121,88],[301,221,106]]); // 创建test2图层，且存在三个灯光效果，分别是中心(25,11)半径46，中心(105,121)半径88，中心(301,221)半径106。",
           "!type": "fn(name: string|CanvasRenderingContext2D, color?: number, lights?: [[number]], lightDec?: number)"

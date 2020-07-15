@@ -50,14 +50,20 @@ ui.prototype._createUIEvent = function () {
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
         for (var m in core.canvas) {
-            core.canvas[m].clearRect(0, 0, core.bigmap.width*32, core.bigmap.height*32);
+            core.canvas[m].clearRect(-32, -32, core.canvas[m].canvas.width+32, core.canvas[m].canvas.height+32);
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();
     }
     else {
         var ctx = this.getContextByName(name);
-        if (ctx) ctx.clearRect(x||0, y||0, width||ctx.canvas.width, height||ctx.canvas.height);
+        if (ctx) {
+            if (x != null && y != null && width != null && height != null) {
+                ctx.clearRect(x, y, width, height);
+            } else {
+                ctx.clearRect(-32, -32, ctx.canvas.width + 32, ctx.canvas.height + 32);
+            }
+        }
     }
 }
 
@@ -825,35 +831,45 @@ ui.prototype._getPosition = function (content) {
     return {content: content, position: pos, px: px, py: py, noPeak: noPeak};
 }
 
-////// 绘制选择光标
-ui.prototype.drawWindowSelector = function(background, x, y, w, h) {
+////// 绘制系统选择光标
+ui.prototype._drawWindowSelector = function(background, x, y, w, h) {
     w = Math.round(w), h = Math.round(h);
     var ctx = core.ui.createCanvas("_selector", x, y, w, h, 165);
     this._drawSelector(ctx, background, w, h);
 }
 
-ui.prototype._uievent_drawSelector = function (data) {
-    var canvasName = '_uievent_selector_' + (data.code || 0);
-    if (data.image == null) return core.deleteCanvas(canvasName);
-
-    var background = data.image || core.status.textAttribute.background;
+////// 自绘一个选择光标
+ui.prototype.drawUIEventSelector = function (code, background, x, y, w, h, z) {
+    var canvasName = '_uievent_selector_' + (code || 0);
+    var background = background || core.status.textAttribute.background;
     if (typeof background != 'string') return;
-    var x = core.calValue(data.x), y = core.calValue(data.y), w = core.calValue(data.width), h = core.calValue(data.height);
-    w = Math.round(w); h = Math.round(h);
     if (main.mode == 'editor') {
         this._drawSelector('uievent', background, w, h, x, y);
         return;
     }
-    var z = 136;
-    if (core.dymCanvas.uievent) z = (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1;
+    z = z || (core.dymCanvas.uievent ? (parseInt(core.dymCanvas.uievent.canvas.style.zIndex) || 135) + 1 : 136);
     var ctx = core.createCanvas(canvasName, x, y, w, h, z);
     ctx.canvas.classList.add('_uievent_selector');
     this._drawSelector(ctx, background, w, h);
 }
 
-ui.prototype._clearUIEventSelector = function (codes) {
+ui.prototype._uievent_drawSelector = function (data) {
+    if (data.image == null) this.clearUIEventSelector(data.code || 0);
+    else this.drawUIEventSelector(data.code, data.image, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height));
+}
+
+////// 清除自绘的选择光标
+ui.prototype.clearUIEventSelector = function (codes) {
+    if (codes == null) {
+        Object.keys(core.dymCanvas).forEach(function (name) {
+            if (name.startsWith('_uievent_selector_')) {
+                core.deleteCanvas(name);
+            }
+        });
+        return;
+    }
     if (codes instanceof Array) {
-        codes.forEach(function (code) { core.ui._clearUIEventSelector(code); });
+        codes.forEach(function (code) { core.ui.clearUIEventSelector(code); });
         return;
     }
     core.deleteCanvas('_uievent_selector_' + (codes || 0));
@@ -1030,11 +1046,11 @@ ui.prototype._getDrawableIconInfo = function (id) {
     return [image,icon];
 }
 
-ui.prototype._buildFont = function (fontSize, bold, italic) {
+ui.prototype._buildFont = function (fontSize, bold, italic, font) {
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute,
         globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
     if (bold == null) bold = textAttribute.bold;
-    return (bold?"bold ":"") + (italic?"italic ":"") + (fontSize || textAttribute.textfont) + "px " + globalAttribute.font;
+    return (bold?"bold ":"") + (italic?"italic ":"") + (fontSize || textAttribute.textfont) + "px " + (font || globalAttribute.font);
 }
 
 ////// 绘制一段文字到某个画布上面
@@ -1042,11 +1058,12 @@ ui.prototype._buildFont = function (fontSize, bold, italic) {
 // content：要绘制的内容；转义字符目前只允许留 \n, \r[...], \i[...], \c[...], \d, \e
 // config：绘制配置项，目前暂时包含如下内容（均为可选）
 //         left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
-//         fontSize：字体大小；lineHeight：行高；time：打字机间隔
+//         fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体类型
 ui.prototype.drawTextContent = function (ctx, content, config) {
     ctx = core.getContextByName(ctx);
     // 设置默认配置项
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute;
+    var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
     config = core.clone(config || {});
     config.left = config.left || 0;
     config.right = config.left + (config.maxWidth == null ? (ctx != null ? ctx.canvas.width : core.__PIXELS__) : config.maxWidth)
@@ -1057,6 +1074,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.align = config.align || textAttribute.align || "left";
     config.fontSize = config.fontSize || textAttribute.textfont;
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
+    config.defaultFont = config.font = config.font || globalAttribute.font;
     config.time = config.time || 0;
     config.interval = config.interval == null ? (textAttribute.interval || 0) : config.interval;
 
@@ -1074,7 +1092,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     // 创建一个新的临时画布
     var tempCtx = core.createCanvas('__temp__', 0, 0, ctx==null?1:ctx.canvas.width, ctx==null?1:ctx.canvas.height, -1);
     tempCtx.textBaseline = 'top';
-    tempCtx.font = this._buildFont(config.fontSize, config.bold, config.italic);
+    tempCtx.font = this._buildFont(config.fontSize, config.bold, config.italic, config.font);
     tempCtx.fillStyle = config.color;
     config = this._drawTextContent_draw(ctx, tempCtx, content, config);
     core.deleteCanvas('__temp__');
@@ -1151,20 +1169,16 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
     if (ch == '\\') {
         var c = content.charAt(config.index);
         if (c == 'i') return this._drawTextContent_drawIcon(tempCtx, content, config);
-        if (c == 'c') return this._drawTextContent_changeFont(tempCtx, content, config);
+        if (c == 'c') return this._drawTextContent_changeFontSize(tempCtx, content, config);
         if (c == 'd' || c == 'e') {
             config.index++;
             if (c == 'd') config.bold = !config.bold;
             if (c == 'e') config.italic = !config.italic;
-            tempCtx.font = this._buildFont(config.currfont, config.bold, config.italic);
+            tempCtx.font = this._buildFont(config.currfont, config.bold, config.italic, config.font);
             return true;
         }
+        if (c == 'g') return this._drawTextContent_changeFont(tempCtx, content, config);
         if (c == 'z') return this._drawTextContent_emptyChar(tempCtx, content, config);
-    }
-    // \\e 斜体切换
-    if (ch == '\\' && content.charAt(config.index)=='e') {
-        config.italic = !config.italic;
-        tempCtx.font = this._buildFont(config.fontSize, config.bold, config.italic);
     }
     // 检查是不是自动换行
     var charwidth = core.calWidth(tempCtx, ch) + config.interval;
@@ -1222,7 +1236,7 @@ ui.prototype._drawTextContent_changeColor = function (tempCtx, content, config) 
     return this._drawTextContent_next(tempCtx, content, config);
 }
 
-ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
+ui.prototype._drawTextContent_changeFontSize = function (tempCtx, content, config) {
     config.index++;
     // 检查是不是 []
     var index = config.index, index2;
@@ -1234,7 +1248,21 @@ ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
     }
     else config.currfont = config.fontSize;
     config.lineMaxHeight = Math.max(config.lineMaxHeight, config.currfont + config.lineMargin);
-    tempCtx.font = this._buildFont(config.currfont, config.bold, config.italic);
+    tempCtx.font = this._buildFont(config.currfont, config.bold, config.italic, config.font);
+    return this._drawTextContent_next(tempCtx, content, config);
+}
+
+ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
+    config.index++;
+    // 检查是不是 []
+    var index = config.index, index2;
+    if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
+        var str = content.substring(index+1, index2);
+        if (str=="") config.font = config.defaultFont;
+        else config.font = str;
+        config.index = index2 + 1;
+    } else config.font = config.defaultFont;
+    tempCtx.font = this._buildFont(config.currfont, config.bold, config.italic, config.font);
     return this._drawTextContent_next(tempCtx, content, config);
 }
 
@@ -1289,7 +1317,7 @@ ui.prototype.getTextContentHeight = function (content, config) {
 }
 
 ui.prototype._getRealContent = function (content) {
-    return content.replace(/(\r|\\(r|c|d|e|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
+    return content.replace(/(\r|\\(r|c|d|e|g|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
 }
 
 ////// 绘制一个对话框 //////
@@ -1631,6 +1659,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
     core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
+        if (choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
         core.setFillStyle('ui', color);
         var offset = this.HPIXEL;
         if (choices[i].icon) {
@@ -1650,7 +1679,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
         var len = choices[core.status.event.selection].width;
         if (isWindowSkin)
-            this.drawWindowSelector(core.status.textAttribute.background,
+            this._drawWindowSelector(core.status.textAttribute.background,
                 this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
         else
             core.strokeRoundRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
@@ -1691,7 +1720,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
         var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
     
         if (isWindowSkin)
-            this.drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+            this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
         else
             core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
@@ -1721,7 +1750,7 @@ ui.prototype.drawWaiting = function(text) {
 }
 
 ////// 绘制系统设置界面 //////
-ui.prototype.drawSwitchs = function() {
+ui.prototype._drawSwitchs = function() {
     core.status.event.id = 'switchs';
     var choices = [
         "音乐/音效： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]") + " "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
@@ -1741,7 +1770,7 @@ ui.prototype.drawSwitchs = function() {
 }
 
 ////// 绘制系统菜单栏 //////
-ui.prototype.drawSettings = function () {
+ui.prototype._drawSettings = function () {
     core.status.event.id = 'settings';
     this.drawChoices(null, [
         "系统设置", "虚拟键盘", "浏览地图", "存档笔记", "同步存档", "游戏信息", "返回标题", "返回游戏"
@@ -1749,7 +1778,7 @@ ui.prototype.drawSettings = function () {
 }
 
 ////// 绘制存档笔记 //////
-ui.prototype.drawNotes = function () {
+ui.prototype._drawNotes = function () {
     core.status.event.id = 'notes';
     core.status.hero.notes = core.status.hero.notes || [];
     core.lockControl();
@@ -1759,7 +1788,7 @@ ui.prototype.drawNotes = function () {
 }
 
 ////// 绘制快捷商店选择栏 //////
-ui.prototype.drawQuickShop = function () {
+ui.prototype._drawQuickShop = function () {
     core.status.event.id = 'selectShop';
     var shopList = core.status.shops, keys = core.listShopIds();
     var choices = keys.map(function (shopId) {
@@ -1770,7 +1799,7 @@ ui.prototype.drawQuickShop = function () {
 }
 
 ////// 绘制存档同步界面 //////
-ui.prototype.drawSyncSave = function () {
+ui.prototype._drawSyncSave = function () {
     core.status.event.id = 'syncSave';
     this.drawChoices(null, [
         "同步存档到服务器", "从服务器加载存档", "存档至本地文件", "从本地文件读档", "回放和下载录像", "清空本地存档", "返回主菜单"
@@ -1778,7 +1807,7 @@ ui.prototype.drawSyncSave = function () {
 }
 
 ////// 绘制存档同步选择页面 //////
-ui.prototype.drawSyncSelect = function () {
+ui.prototype._drawSyncSelect = function () {
     core.status.event.id = 'syncSelect';
     this.drawChoices(null, [
         "同步本地所有存档", "只同步当前单存档", "返回上级菜单"
@@ -1786,7 +1815,7 @@ ui.prototype.drawSyncSelect = function () {
 }
 
 ////// 绘制单存档界面 //////
-ui.prototype.drawLocalSaveSelect = function () {
+ui.prototype._drawLocalSaveSelect = function () {
     core.status.event.id = 'localSaveSelect';
     this.drawChoices(null, [
         "下载所有存档", "只下载当前单存档", "返回上级菜单"
@@ -1794,14 +1823,14 @@ ui.prototype.drawLocalSaveSelect = function () {
 }
 
 ////// 绘制存档删除页面 //////
-ui.prototype.drawStorageRemove = function () {
+ui.prototype._drawStorageRemove = function () {
     core.status.event.id = 'storageRemove';
     this.drawChoices(null, [
         "清空全部塔的存档", "只清空当前塔的存档", "返回上级菜单"
     ]);
 }
 
-ui.prototype.drawReplay = function () {
+ui.prototype._drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
     this.drawChoices(null, [
@@ -1809,7 +1838,7 @@ ui.prototype.drawReplay = function () {
     ]);
 }
 
-ui.prototype.drawGameInfo = function () {
+ui.prototype._drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
         "数据统计", "查看工程", "游戏主页", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
@@ -1836,7 +1865,7 @@ ui.prototype.drawPagination = function (page, totalPage, y) {
 }
 
 ////// 绘制键盘光标 //////
-ui.prototype.drawCursor = function () {
+ui.prototype._drawCursor = function () {
     var automaticRoute = core.status.automaticRoute;
     if (automaticRoute.cursorX == null)
         automaticRoute.cursorX = core.getHeroLoc('x');
@@ -1864,10 +1893,7 @@ ui.prototype.drawBook = function (index) {
     core.setAlpha('ui', 1);
 
     if (enemys.length == 0) {
-        core.setTextAlign('ui', 'center');
-        core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
-        core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
-        return;
+        return this._drawBook_drawEmpty();
     }
 
     index = core.clamp(index, 0, enemys.length - 1);
@@ -1902,6 +1928,12 @@ ui.prototype._drawBook_drawBackground = function () {
     core.setAlpha('ui', 0.6);
     core.setFillStyle('ui', '#000000');
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL);
+}
+
+ui.prototype._drawBook_drawEmpty = function () {
+    core.setTextAlign('ui', 'center');
+    core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
 }
 
 ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, selected) {
@@ -2089,7 +2121,7 @@ ui.prototype._drawBook_drawDamage = function (index, enemy, offset, position) {
 }
 
 ////// 绘制怪物属性的详细信息 //////
-ui.prototype.drawBookDetail = function (index) {
+ui.prototype._drawBookDetail = function (index) {
     var info = this._drawBookDetail_getInfo(index), enemy = info[0];
     if (!enemy) return;
     var content = info[1].join("\n");
@@ -2271,11 +2303,11 @@ ui.prototype.drawFly = function(page) {
     }
     var size = this.PIXEL - 143;
     core.strokeRect('ui', 20, 100, size, size, '#FFFFFF', 2);
-    core.drawThumbnail(floorId, null, null, {ctx: 'ui', x: 20, y: 100, size: size});
+    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size});
 }
 
 ////// 绘制中心对称飞行器
-ui.prototype.drawCenterFly = function () {
+ui.prototype._drawCenterFly = function () {
     core.lockControl();
     core.status.event.id = 'centerFly';
     var fillstyle = 'rgba(255,0,0,0.5)';
@@ -2283,8 +2315,7 @@ ui.prototype.drawCenterFly = function () {
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
     this.clearUI();
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
-    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image},
-        {ctx: 'ui', centerX: toX, centerY: toY});
+    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image, ctx: 'ui', centerX: toX, centerY: toY});
     var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
@@ -2294,7 +2325,7 @@ ui.prototype.drawCenterFly = function () {
 }
 
 ////// 绘制浏览地图界面 //////
-ui.prototype.drawMaps = function (index, x, y) {
+ui.prototype._drawViewMaps = function (index, x, y) {
     core.lockControl();
     core.status.event.id = 'viewMaps';
     this.clearUI();
@@ -2303,8 +2334,7 @@ ui.prototype.drawMaps = function (index, x, y) {
     core.status.checkBlock.cache = {};
     var data = this._drawMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
-    core.drawThumbnail(data.floorId, null, {damage: data.damage},
-        {ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
+    core.drawThumbnail(data.floorId, null, {damage: data.damage, ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     core.clearMap('data');
     core.setTextAlign('data', 'left');
     core.setFont('data', '16px Arial');
@@ -2378,7 +2408,7 @@ ui.prototype._drawMaps_buildData = function (index, x, y) {
 }
 
 ////// 绘制道具栏 //////
-ui.prototype.drawToolbox = function(index) {
+ui.prototype._drawToolbox = function(index) {
     var info = this._drawToolbox_getInfo(index);
     this._drawToolbox_drawBackground();
 
@@ -2516,7 +2546,7 @@ ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawC
 }
 
 ////// 绘制装备界面 //////
-ui.prototype.drawEquipbox = function(index) {
+ui.prototype._drawEquipbox = function(index) {
     var info = this._drawEquipbox_getInfo(index);
     this._drawToolbox_drawBackground();
 
@@ -2678,7 +2708,7 @@ ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
 }
 
 ////// 绘制存档/读档界面 //////
-ui.prototype.drawSLPanel = function(index, refresh) {
+ui.prototype._drawSLPanel = function(index, refresh) {
     core.control._loadFavoriteSaves();
     if (index == null) index = 1;
     if (index < 0) index = 0;
@@ -2769,10 +2799,9 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     if (data && data.floorId) {
         core.setTextAlign('ui', "center");
         var map = core.maps.loadMap(data.maps, data.floorId);
-        core.extractBlocks(map, data.hero.flags);
+        core.extractBlocksForUI(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
-            heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags
-        }, {
+            heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags,
             ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });
         if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {
@@ -2837,7 +2866,7 @@ ui.prototype._drawSLPanel_drawRecords  = function (n) {
     }
 };
 
-ui.prototype.drawKeyBoard = function () {
+ui.prototype._drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
     core.clearUI();
@@ -2874,7 +2903,7 @@ ui.prototype.drawKeyBoard = function () {
     core.fillText("ui", "返回游戏", this.HPIXEL + 128, offset-3, '#FFFFFF', this._buildFont(15, true));
 
     if (isWindowSkin)
-        this.drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
+        this._drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
     else
         core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
 }
@@ -2885,7 +2914,7 @@ ui.prototype.drawStatusBar = function () {
 }
 
 ////// 绘制“数据统计”界面 //////
-ui.prototype.drawStatistics = function (floorIds) {
+ui.prototype._drawStatistics = function (floorIds) {
     var obj = this._drawStatistics_buildObj();
     if (typeof floorIds == 'string') floorIds = [floorIds];
     (floorIds || core.floorIds).forEach(function (floorId) {
@@ -3054,12 +3083,12 @@ ui.prototype._drawStatistics_generateText = function (obj, type, data) {
 }
 
 ////// 绘制“关于”界面 //////
-ui.prototype.drawAbout = function () {
+ui.prototype._drawAbout = function () {
     return this.uidata.drawAbout();
 }
 
 ////// 绘制帮助页面 //////
-ui.prototype.drawHelp = function () {
+ui.prototype._drawHelp = function () {
     core.clearUI();
     if (core.material.images.keyboard) {
         core.status.event.id = 'help';

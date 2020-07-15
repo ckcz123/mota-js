@@ -2175,11 +2175,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "setFlag": {
           "!doc": "设置一个flag变量<br/>例如：core.setFlag('poison', true); // 令主角中毒<br/>name: 变量名，支持中文<br/>value: 变量的新值，不填或填null视为删除", 
           "!type": "fn(name: string, value: ?)"
-        }, 
-        "viewMapReplay": {
-          "!doc": "回放录像时浏览地图", 
-          "!type": "fn()"
-        }, 
+        },
         "playSound": {
           "!doc": "播放一个音效",
           "!type": "fn(sound: string)"
@@ -2315,11 +2311,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "continueAutomaticRoute": {
           "!doc": "继续剩下的自动寻路操作", 
           "!type": "fn()"
-        }, 
-        "saveReplay": {
-          "!doc": "回放时存档", 
-          "!type": "fn()"
-        }, 
+        },
         "setAutoHeroMove": {
           "!doc": "连续行走<br/>例如：core.setAutoHeroMove([{direction: \"up\", step: 1}, {direction: \"left\", step: 3}]); // 上左左左<br/>steps: 压缩的步伐数组，每项表示朝某方向走多少步", 
           "!type": "fn(steps: [?])"
@@ -2415,11 +2407,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "rewindReplay": {
           "!doc": "回退到上一个录像节点", 
           "!type": "fn()"
-        }, 
-        "toolboxReplay": {
-          "!doc": "回放录像时打开道具栏", 
-          "!type": "fn()"
-        }, 
+        },
         "playBgm": {
           "!doc": "播放背景音乐，中途开播但不计入存档且只会持续到下次场景切换。如需长期生效请将背景音乐的文件名赋值给flags.__bgm__<br/>例如：core.playBgm('bgm.mp3', 30); // 播放bgm.mp3，并跳过前半分钟<br/>bgm: 背景音乐的文件名，支持全塔属性中映射前的中文名<br/>startTime: 跳过前多少秒，不填则不跳过", 
           "!type": "fn(bgm: string, startTime?: number)"
@@ -2455,11 +2443,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "stopReplay": {
           "!doc": "停止播放", 
           "!type": "fn(force?: bool)"
-        }, 
-        "bookReplay": {
-          "!doc": "回放时查看怪物手册", 
-          "!type": "fn()"
-        }, 
+        },
         "turnHero": {
           "!doc": "主角转向并计入录像，不会导致跟随者聚集，会导致视野重置到以主角为中心<br/>例如：core.turnHero(); // 主角顺时针旋转90°，即单击主角或按下Z键的效果<br/>direction: 主角的新朝向，可为 up, down, left, right, :left, :right, :back 七种之一", 
           "!type": "fn(direction?: string)"
@@ -2471,11 +2455,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "resize": {
           "!doc": "屏幕分辨率改变后重新自适应", 
           "!type": "fn()"
-        }, 
-        "equipboxReplay": {
-          "!doc": "回放录像时打开装备栏", 
-          "!type": "fn()"
-        }, 
+        },
         "getSave": {
           "!doc": "获得某个存档内容", 
           "!type": "fn(index?: number, callback?: fn(data: ?))"

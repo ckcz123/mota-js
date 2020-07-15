@@ -1390,7 +1390,7 @@ control.prototype.rewindReplay = function () {
 }
 
 ////// 回放时存档 //////
-control.prototype.saveReplay = function () {
+control.prototype._replay_SL = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1405,7 +1405,7 @@ control.prototype.saveReplay = function () {
 }
 
 ////// 回放时查看怪物手册 //////
-control.prototype.bookReplay = function () {
+control.prototype._replay_book = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate
@@ -1423,7 +1423,7 @@ control.prototype.bookReplay = function () {
 }
 
 ////// 回放录像时浏览地图 //////
-control.prototype.viewMapReplay = function () {
+control.prototype._replay_viewMap = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1434,7 +1434,7 @@ control.prototype.viewMapReplay = function () {
     core.ui._drawViewMaps();
 }
 
-control.prototype.toolboxReplay = function () {
+control.prototype._replay_toolbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
@@ -1445,7 +1445,7 @@ control.prototype.toolboxReplay = function () {
     core.ui._drawToolbox();
 }
 
-control.prototype.equipboxReplay = function () {
+control.prototype._replay_equipbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)

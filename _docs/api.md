@@ -264,9 +264,6 @@ value: 属性的增量
 autosave: fn(removeLast?: bool)
 自动存档
 
-bookReplay: fn()
-回放时查看怪物手册
-
 checkAutosave: fn()
 实际将自动存档写入存储
 
@@ -316,9 +313,6 @@ drawHero: fn(status?: string, offset?: number, frame?: number)
 status: 只能为 stop, leftFoot 和 rightFoot，不填用stop。
 offset: 相对主角逻辑位置的偏移量，不填视为无偏移。
 frame: 绘制的第几帧
-
-equipboxReplay: fn()
-回放录像时打开装备栏
 
 fillPosWithPoint: fn(pos?: ?)
 显示离散的寻路点
@@ -518,9 +512,6 @@ saveAndStopAutomaticRoute: fn()
 saveData: fn()
 存档到本地
 
-saveReplay: fn()
-回放时存档
-
 screenFlash: fn(color: [number], time: number, times?: number, callback?: fn())
 画面闪烁
 例如：core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过
@@ -637,9 +628,6 @@ syncLoad: fn()
 syncSave: fn(type?: string)
 同步存档到服务器
 
-toolboxReplay: fn()
-回放录像时打开道具栏
-
 triggerBgm: fn()
 开启或关闭背景音乐的播放
 
@@ -698,9 +686,6 @@ doNotCheckAutoEvents: 是否不检查自动事件
 
 updateViewport: fn()
 更新大地图的可见区域
-
-viewMapReplay: fn()
-回放录像时浏览地图
 
 waitHeroToStop: fn(callback?: fn())
 等待主角停下

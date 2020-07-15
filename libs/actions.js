@@ -159,24 +159,24 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
             core.stopReplay();
         else if (e.keyCode == 90) // Z
             core.speedDownReplay();
-        else if (e.keyCode == 88) // X
+        else if (e.keyCode == 67) // C
             core.speedUpReplay();
         else if (e.keyCode == 32) // SPACE
             core.triggerReplay();
         else if (e.keyCode == 65) // A
             core.rewindReplay();
         else if (e.keyCode == 83) // S
-            core.saveReplay();
-        else if (e.keyCode == 67) // C
-            core.bookReplay();
+            core.control._replay_SL();
+        else if (e.keyCode == 88) // X
+            core.control._replay_book();
         else if (e.keyCode == 33 || e.keyCode == 34) // PgUp/PgDn
-            core.viewMapReplay();
+            core.control._replay_viewMap();
         else if (e.keyCode == 78) // N
             core.stepReplay();
         else if (e.keyCode == 84) // T
-            core.toolboxReplay();
+            core.control._replay_toolbox();
         else if (e.keyCode == 81) // Q
-            core.equipboxReplay();
+            core.control._replay_equipbox();
         else if (e.keyCode == 66) // B
             core.ui._drawStatistics();
         else if (e.keyCode >= 49 && e.keyCode <= 51) // 1-3
@@ -1297,7 +1297,7 @@ actions.prototype._keyUpViewMaps = function (keycode) {
     }
     if (keycode == 88 || (core.isReplaying() && keycode == 67)) {
         if (core.isReplaying()) {
-            core.bookReplay();
+            core.control._replay_book();
         } else {
             core.openBook(false);
         }
@@ -1353,7 +1353,7 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.equipboxReplay();
+            core.control._replay_equipbox();
         else
             core.openEquipbox();
         return;
@@ -1521,7 +1521,7 @@ actions.prototype._keyUpToolbox = function (keycode) {
     if (keycode == 81) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.equipboxReplay();
+            core.control._replay_equipbox();
         else
             core.openEquipbox();
         return;
@@ -1544,7 +1544,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.toolboxReplay();
+            core.control._replay_toolbox();
         else
             core.openToolbox();
         return;
@@ -1696,7 +1696,7 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
     if (keycode == 84) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.toolboxReplay();
+            core.control._replay_toolbox();
         else
             core.openToolbox();
         return;

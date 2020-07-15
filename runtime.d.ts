@@ -666,21 +666,6 @@ declare class control {
     /** 回退 */
     rewindReplay(): void
 
-    /** 回放时存档 */
-    saveReplay(): void
-
-    /** 回放时查看怪物手册 */
-    bookReplay(): void
-
-    /** 回放录像时浏览地图 */
-    viewMapReplay(): void
-
-    /** 回放录像时打开道具栏 */
-    toolboxReplay(): void
-
-    /** 回放录像时打开装备栏 */
-    equipboxReplay(): void
-
     /** 是否正在播放录像 */
     isReplaying(): boolean
 

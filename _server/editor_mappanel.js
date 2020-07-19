@@ -138,6 +138,18 @@ editor_mappanel_wrapper = function (editor) {
         }
     }
 
+    var _setMarksHightlight = function (marks, index) {
+        for (var i = 0; i < marks.length; ++i) {
+            if (marks[i].classList.contains('highlight')) {
+                if (i == index) index = null;
+                else marks[i].classList.remove('highlight');
+            }
+        }
+        if (index != null) {
+            marks[index].classList.add('highlight');
+        }
+    }
+
     /**
      * editor.dom.eui.onmousemove
      * + 非绘图模式时维护起止位置并画箭头
@@ -145,6 +157,13 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.map_onmove = function (e) {
         editor.uivalues.lastMoveE=e;
+        if (!editor.uivalues.bigmap && !editor.isMobile) {
+            var loc = editor.uifunctions.eToLoc(e);
+            var pos = editor.uifunctions.locToPos(loc);
+            _setMarksHightlight(Array.from(editor.dom.mapColMark.children[0].rows[0].cells), pos.x);
+            _setMarksHightlight(Array.from(editor.dom.mapRowMark.children[0].rows).map(function (tr) {return tr.cells[0];}), pos.y);
+        }
+
         if (!selectBox.isSelected()) {
             if (editor.uivalues.startPos == null) return;
             var loc = editor.uifunctions.eToLoc(e);
@@ -223,6 +242,13 @@ editor_mappanel_wrapper = function (editor) {
             editor.uivalues.stepPostfix.push(pos);
         }
         return false;
+    }
+
+    editor.uifunctions.map_onmoveout = function () {
+        if (!editor.uivalues.bigmap && !editor.isMobile) {
+            _setMarksHightlight(Array.from(editor.dom.mapColMark.children[0].rows[0].cells));
+            _setMarksHightlight(Array.from(editor.dom.mapRowMark.children[0].rows).map(function (tr) {return tr.cells[0];}));
+        }
     }
 
     /**

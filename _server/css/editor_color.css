@@ -219,6 +219,14 @@ textarea[disabled] {
     color: black;
 }
 
+table.col td.highlight {
+    background-color: #77ddcc;
+}
+
+table.row td.highlight {
+    background-color: #88bbdd;
+}
+
 /** ======== blockly 相关 ======== */
 
 /*魔改*/

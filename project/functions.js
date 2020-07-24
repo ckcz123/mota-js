@@ -1144,7 +1144,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 难度
 	if (core.statusBar.hard.innerText != core.status.hard) {
 		core.statusBar.hard.innerText = core.status.hard;
-		core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
+	}
+	var hardColor = core.getFlag('__hardColor__', 'red');
+	if (core.statusBar.hard.getAttribute('_style') != hardColor) {
+		core.statusBar.hard.style.color = hardColor;
+		core.statusBar.hard.setAttribute('_style', hardColor);
 	}
 	// 自定义状态栏绘制
 	core.drawStatusBar();

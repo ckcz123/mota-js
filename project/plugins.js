@@ -975,6 +975,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.ui.drawTip = function () {};
 		var _playSound = core.control.playSound;
 		core.control.playSound = function () {}
+		// 记录当前录像，因为可能存在换装问题
+		core.clearRouteFolding();
+		var routeLength = core.status.route.length;
 		// 优先判定装备
 		if (hero1.equipment) {
 			core.items.quickSaveEquip(100 + currHeroId);
@@ -1012,6 +1015,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		core.ui.drawTip = _drawTip;
 		core.control.playSound = _playSound;
+		core.status.route = core.status.route.slice(0, routeLength);
 
 		// 插入事件：改变角色行走图并进行楼层切换
 		var toFloorId = data.floorId || core.status.floorId;

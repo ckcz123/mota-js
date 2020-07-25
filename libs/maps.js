@@ -42,6 +42,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     if (map instanceof Array) {
         map = {"map": map};
     }
+    if (!map.map) map.map = floor.map;
     var content = {};
     var notCopy = this._loadFloor_doNotCopy();
     for (var name in floor) {

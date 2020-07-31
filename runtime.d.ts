@@ -277,6 +277,21 @@ declare class control {
     /** 删除某个flag/变量 */
     removeFlag(name: string): void
 
+    /** 设置某个独立开关 */
+    setSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+
+    /** 获得某个独立开关 */
+    getSwitch(x: number, y: number, floorId?: string, name: string, defaultValue: any): any
+
+    /** 增加某个独立开关 */
+    addSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+
+    /** 判定某个独立开关 */
+    hasSwitch(x: number, y: number, floorId?: string, name: string): boolean
+
+    /** 删除独立开关 */
+    removeSwitch(x: number, y: number, floorId?: string, name: string): boolean
+
     /** 设置大地图的偏移量 */
     setGameCanvasTranslate(canvasId: string, x: number, y: number): void
 

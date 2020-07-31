@@ -2251,8 +2251,6 @@ control.prototype.getHeroLoc = function (name) {
     return core.status.hero.loc[name];
 }
 
-
-
 ////// 获得某个等级的名称 //////
 control.prototype.getLvName = function (lv) {
     if (!core.status.hero) return null;
@@ -2289,6 +2287,36 @@ control.prototype.hasFlag = function(name) {
 control.prototype.removeFlag = function(name) {
     if (!core.status.hero) return;
     delete core.status.hero.flags[name];
+}
+
+////// 获得某个点的独立开关 //////
+control.prototype.getSwitch = function (x, y, floorId, name, defaultValue) {
+    var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    return this.getFlag(prefix + "@" + name, defaultValue);
+}
+
+////// 设置某个点的独立开关 //////
+control.prototype.setSwitch = function (x, y, floorId, name, value) {
+    var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    return this.setFlag(prefix + "@" + name, value);
+}
+
+////// 增加某个点的独立开关 //////
+control.prototype.addSwitch = function (x, y, floorId, name, value) {
+    var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    return this.addFlag(prefix + "@" + name, value);
+}
+
+////// 判定某个点的独立开关 //////
+control.prototype.hasSwitch = function (x, y, floorId, name) {
+    var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    return this.hasFlag(prefix + "@" + name);
+}
+
+////// 删除某个点的独立开关 //////
+control.prototype.removeSwitch = function (x, y, floorId, name) {
+    var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
+    return this.removeFlag(prefix + "@" + name);
 }
 
 ////// 锁定状态栏，常常用于事件处理 //////

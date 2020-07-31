@@ -201,8 +201,13 @@ editor_multi = function () {
         }
     });
 
+    var ctrlRelease = new Date();
     codeEditor.on("keyup", function (cm, event) {
-        if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
+        var date = new Date();
+        if (event.keyCode == 17 || event.keyCode == 91) { // ctrl, cmd
+            ctrlRelease = date;
+        }
+        else if (codeEditor.getOption("autocomplete") && !event.ctrlKey && date - ctrlRelease >= 1000 && (
             (event.keyCode >= 65 && event.keyCode <= 90) ||
             (!event.shiftKey && event.keyCode == 190) || (event.shiftKey && event.keyCode == 189))) {
             try {

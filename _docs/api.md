@@ -261,6 +261,9 @@ addStatus: fn(name: string, value: number)
 name: 属性的英文名
 value: 属性的增量
 
+addSwitch: fn(x: number, y: number, floorId?: string, name: string, value: number)
+增加某个独立开关的值
+
 autosave: fn(removeLast?: bool)
 自动存档
 
@@ -379,6 +382,9 @@ getStatusLabel: fn(name: string) -> string
 getStatusOrDefault: fn(status?: ?, name?: string)
 从status中获得属性，如果不存在则从勇士属性中获取
 
+getSwitch: fn(x: number, y: number, floorId?: string, name: string, defaultValue?: ?)
+获得某个独立开关的值
+
 hasFlag: fn(name: string) -> bool
 判定一个flag变量是否存在且不为false、0、''、null、undefined和NaN
 例如：core.hasFlag('poison'); // 判断主角当前是否中毒
@@ -387,6 +393,9 @@ name: 变量名，支持中文
 
 hasSave: fn(index?: number) -> bool
 判断某个存档位是否存在存档
+
+hasSwitch: fn(x: number, y: number, floorId?: string, name: string) -> bool
+判定某个独立开关的值
 
 hideStartAnimate: fn(callback?: fn())
 淡出标题画面
@@ -490,6 +499,9 @@ removeFlag: fn(name: string)
 removeSave: fn(index?: number, callback?: fn())
 删除某个存档
 
+removeSwitch: fn(x: number, y: number, floorId?: string, name: string)
+删除某个独立开关
+
 replay: fn()
 回放下一个操作
 
@@ -578,6 +590,9 @@ setStatus: fn(name: string, value: number)
 例如：core.setStatus('atk', 100); // 设置攻击力为100
 name: 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.setHeroLoc(name, value)，其他的会直接对 core.status.hero[name] 赋值
 value: 属性的新值
+
+setSwitch: fn(x: number, y: number, floorId?: string, name: string, value?: ?)
+设置某个独立开关的值
 
 setToolbarButton: fn(useButton?: bool)
 改变工具栏为按钮1-8

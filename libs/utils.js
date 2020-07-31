@@ -515,6 +515,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "e" + this._encodeRoute_id2number(t.substring(6)) + ":";
     else if (t.indexOf('fly:') == 0)
         return "F" + t.substring(4) + ":";
+    else if (t == 'choices:none')
+        return "c";
     else if (t.indexOf('choices:') == 0)
         return "C" + t.substring(8);
     else if (t.indexOf('shop:') == 0)
@@ -525,6 +527,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "t" + t.substring(5).substring(0, 1).toUpperCase() + ":";
     else if (t == 'getNext')
         return 'G';
+    else if (t == 'input:none')
+        return 'p';
     else if (t.indexOf('input:') == 0)
         return "P" + t.substring(6);
     else if (t.indexOf('input2:') == 0)
@@ -621,6 +625,9 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "F":
             decodeObj.ans.push("fly:" + nxt);
             break;
+        case 'c':
+            decodeObj.ans.push('choices:none');
+            break;
         case "C":
             decodeObj.ans.push("choices:" + nxt);
             break;
@@ -648,6 +655,9 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "G":
             decodeObj.ans.push("getNext");
+            break;
+        case "p":
+            decodeObj.ans.push("input:none");
             break;
         case "P":
             decodeObj.ans.push("input:" + nxt);

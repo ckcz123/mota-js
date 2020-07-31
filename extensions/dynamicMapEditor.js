@@ -108,6 +108,8 @@ dynamicMapEditor.prototype.onKeyUp = function(e) {
 dynamicMapEditor.prototype.onMapClick = function(x, y) {
 	if (!this.isValid()) return false;
 	if (!this.isUsingTool || !this.selectedItem) return false;
+	x += parseInt(core.bigmap.offsetX / 32);
+	y += parseInt(core.bigmap.offsetY / 32);
 	var number = this.selectedItem.number;
 	this.addOperation('put', number, x, y, core.status.floorId);
 	return true;

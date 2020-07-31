@@ -42,6 +42,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     if (map instanceof Array) {
         map = {"map": map};
     }
+    if (!map.map) map.map = floor.map;
     var content = {};
     var notCopy = this._loadFloor_doNotCopy();
     for (var name in floor) {
@@ -112,7 +113,7 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
         for (var j = 0; j < mw; j++) {
             var number = (decompressed[i] || [])[j] || 0;
             if (!number || number == 17 || this.isMapBlockDisabled(floorId, j, i, flags)) continue;
-            map.blocks.push(this.initBlock(j, i, number));
+            map.blocks.push(Object.assign({}, this.getBlockByNumber(number), {x: j, y: i}));
         }
     }
 }
@@ -865,7 +866,22 @@ maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y, ctx) {
         }
         core.drawImage(ctx, core.material.groundCanvas.canvas, px, py);
     }
+    var alpha = null;
+    if (name == 'fg' && this._drawBlockInfo_shouldBlurFg()) {
+        var eventArr = this.getMapArray();
+        if (eventArr != null && eventArr[y][x] != 0) {
+            ctx = core.getContextByName(ctx);
+            alpha = ctx.globalAlpha;
+            core.setAlpha(ctx, 0.6);
+        }
+    }
     core.drawImage(ctx, image, posX * 32, posY * height, 32, height, px, py + 32 - height, 32, height);
+    if (alpha != null) core.setAlpha(ctx, alpha);
+}
+
+////// 是否应当存在事件时虚化前景层 //////
+maps.prototype._drawBlockInfo_shouldBlurFg = function () {
+    return main.mode == 'editor' || core.flags.blurFg;
 }
 
 ////// 生成groundPattern //////
@@ -1099,11 +1115,6 @@ maps.prototype._drawBgFgMap = function (floorId, name, config) {
     var endY = config.onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + 2) : height; // +1 for 48 px
 
     var arr = this._getBgFgMapArray(name, floorId, !config.redraw);
-    var eventArr = null;
-    if (name == 'fg' && config.onMap && this._drawBgFgMap_shouldBlurFg()) {
-        eventArr = this.getMapArray(floorId);
-    }
-
     for (var x = startX; x < endX; x++) {
         for (var y = startY; y < endY; y++) {
             if (arr[y][x] == 0) continue;
@@ -1111,22 +1122,9 @@ maps.prototype._drawBgFgMap = function (floorId, name, config) {
             block.name = name;
             var blockInfo = this.getBlockInfo(block);
             if (!blockInfo) continue;
-            // --- 前景虚化
-            var blur = false, alpha;
-            if (eventArr != null && eventArr[y][x] != 0) {
-                blur = true;
-                alpha = config.ctx.globalAlpha;
-                config.ctx.globalAlpha = 0.6;
-            }
             this._drawMap_drawBlockInfo(config.ctx, block, blockInfo, arr, config.onMap);
-            if (blur) config.ctx.globalAlpha = alpha;
         }
     }
-}
-
-////// 是否应当存在事件时虚化前景层 //////
-maps.prototype._drawBgFgMap_shouldBlurFg = function () {
-    return main.mode == 'editor' || core.flags.blurFg;
 }
 
 ////// 绘制楼层贴图 //////
@@ -1468,7 +1466,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     options.ctx = tempCanvas;
     
     // 地图过大的缩略图不绘制显伤
-    if (width * height > (core.__SIZE__ + 2 * core.bigmap.extend) * (core.__SIZE__ + 2 * core.bigmap.extend))
+    if (width * height > core.bigmap.threshold)
         options.damage = false;
 
     // --- 暂存 flags

@@ -101,7 +101,7 @@ function core() {
         width: this.__SIZE__, // map width and height
         height: this.__SIZE__,
         v2: false,
-        threshold: 512,
+        threshold: 1024,
         extend: 10,
         scale: 1.0,
         tempCanvas: null, // A temp canvas for drawing

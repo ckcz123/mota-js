@@ -59,6 +59,8 @@ function editor() {
         undoFloor: document.getElementById('undoFloor'),
         editorTheme: document.getElementById('editorTheme'),
         bigmapBtn : document.getElementById('bigmapBtn'),
+        mapRowMark: document.getElementById('mapRowMark'),
+        mapColMark: document.getElementById('mapColMark'),
         maps: ['bgmap', 'fgmap', 'map'],
         canvas: ['bg', 'fg'],
     };

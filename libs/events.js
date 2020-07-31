@@ -2139,7 +2139,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
         if (code.indexOf("input:") == 0) {
             if (code == "input:none") {
                 core.status.route.push("input:none");
-                core.removeFlag("type");
+                core.setFlag("type", -1);
             } else {
                 var value = parseInt(code.substring(6));
                 core.status.route.push("input:" + value);

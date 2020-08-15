@@ -406,7 +406,7 @@ maps.prototype.resizeMap = function (floorId) {
 
     core.bigmap.v2 = core.bigmap.width * core.bigmap.height > core.bigmap.threshold;
     var width = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.width * 32;
-    var height = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.width * 32;
+    var height = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.height * 32;
 
     core.bigmap.canvas.forEach(function (cn) {
         core.canvas[cn].canvas.setAttribute("width", width);

@@ -65,7 +65,7 @@ function core() {
         'userVolume': 1.0, // 用户音量
         'designVolume': 1.0, //设计音量
         'cachedBgms': [], // 缓存BGM内容
-        'cachedBgmCount': 4, // 缓存的bgm数量
+        'cachedBgmCount': 8, // 缓存的bgm数量
     }
     this.platform = {
         'isOnline': true, // 是否http

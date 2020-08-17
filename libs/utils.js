@@ -234,9 +234,10 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
     }
 
     // Save to localforage
-    var compressed = lzw_encode(JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
+    var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
         return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
-    }));
+    });
+    var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
     localforage.setItem(core.firstData.name + "_" + key, compressed, function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);

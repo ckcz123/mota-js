@@ -287,6 +287,8 @@ loader.prototype.loadImagesFromZip = function (url, names, toSave, onprogress, o
                 img.onload = function () {
                     cnt--;
                     URL.revokeObjectURL(url);
+                    img.setAttribute('_width', img.width);
+                    img.setAttribute('_height', img.height);
                     if (cnt == 0 && onfinished) onfinished();
                 }
                 img.src = url;

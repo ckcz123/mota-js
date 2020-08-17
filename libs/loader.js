@@ -251,6 +251,8 @@ loader.prototype.loadImage = function (dir, imgName, callback) {
             name = name + ".png";
         var image = new Image();
         image.onload = function () {
+            image.setAttribute('_width', image.width);
+            image.setAttribute('_height', image.height);
             callback(imgName, image);
         }
         image.onerror = function () {
@@ -285,6 +287,8 @@ loader.prototype.loadImagesFromZip = function (url, names, toSave, onprogress, o
                 img.onload = function () {
                     cnt--;
                     URL.revokeObjectURL(url);
+                    img.setAttribute('_width', img.width);
+                    img.setAttribute('_height', img.height);
                     if (cnt == 0 && onfinished) onfinished();
                 }
                 img.src = url;

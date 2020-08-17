@@ -521,14 +521,19 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
     core.lockControl();
     core.status.replay.animate = true;
     core.removeBlock(x, y);
-    core.drawImage('event', image, 0, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+    var offsetX = 32 * x, offsetY = 32 * y;
+    if (core.bigmap.v2) {
+        offsetX -= core.bigmap.offsetX;
+        offsetY -= core.bigmap.offsetY;
+    }
+    core.drawImage('event', image, 0, posY * height + height - 32, 32, 32, offsetX, offsetY, 32, 32);
     if (height > 32)
-        core.drawImage('event2', image, 0, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
+        core.drawImage('event2', image, 0, posY * height, 32, height - 32, offsetX, offsetY + 32 - height, 32, height - 32);
     var state = 0;
     var animate = window.setInterval(function () {
-        core.clearMap('event', 32 * x, 32 * y, 32, 32);
+        core.clearMap('event', offsetX, offsetY, 32, 32);
         if (height > 32) 
-            core.clearMap('event2', x * 32, y * 32 + 32 - height, 32, height - 32)
+            core.clearMap('event2', offsetX, offsetY + 32 - height, 32, height - 32)
         state++;
         if (state == 4) {
             clearInterval(animate);
@@ -539,9 +544,9 @@ events.prototype._openDoor_animate = function (id, x, y, callback) {
             if (callback) callback();
             return;
         }
-        core.drawImage('event', image, 32 * state, posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        core.drawImage('event', image, 32 * state, posY * height + height - 32, 32, 32, offsetX, offsetY, 32, 32);
         if (height > 32)
-            core.drawImage('event2', image, 32 * state, posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
+            core.drawImage('event2', image, 32 * state, posY * height, 32, height - 32, offsetX, offsetY + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
@@ -2139,7 +2144,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
         if (code.indexOf("input:") == 0) {
             if (code == "input:none") {
                 core.status.route.push("input:none");
-                core.removeFlag("type");
+                core.setFlag("type", -1);
             } else {
                 var value = parseInt(code.substring(6));
                 core.status.route.push("input:" + value);
@@ -2725,6 +2730,12 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
 
     var speed = (doorInfo.time || 160) / 4, state = 0;
+    var offsetX = 32 * x, offsetY = 32 * y;
+    if (core.bigmap.v2) {
+        offsetX -= core.bigmap.offsetX;
+        offsetY -= core.bigmap.offsetY;
+    }
+
     var animate = window.setInterval(function () {
         state++;
         if (state == 4) {
@@ -2734,10 +2745,10 @@ events.prototype.closeDoor = function (x, y, id, callback) {
             if (callback) callback();
             return;
         }
-        core.clearMap('event', 32 * x, 32 * y, 32, 32);
-        core.drawImage('event', image, 32 * (4-state), posY * height + height - 32, 32, 32, x * 32, y * 32, 32, 32);
+        core.clearMap('event', offsetX, offsetY, 32, 32);
+        core.drawImage('event', image, 32 * (4-state), posY * height + height - 32, 32, 32, offsetX, offsetY, 32, 32);
         if (height > 32)
-        core.drawImage('event2', image, 32 * (4-state), posY * height, 32, height - 32, x * 32, y * 32 + 32 - height, 32, height - 32);
+        core.drawImage('event2', image, 32 * (4-state), posY * height, 32, height - 32, offsetX, offsetY + 32 - height, 32, height - 32);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }

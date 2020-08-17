@@ -65,7 +65,7 @@ function core() {
         'userVolume': 1.0, // 用户音量
         'designVolume': 1.0, //设计音量
         'cachedBgms': [], // 缓存BGM内容
-        'cachedBgmCount': 4, // 缓存的bgm数量
+        'cachedBgmCount': 8, // 缓存的bgm数量
     }
     this.platform = {
         'isOnline': true, // 是否http
@@ -101,7 +101,7 @@ function core() {
         width: this.__SIZE__, // map width and height
         height: this.__SIZE__,
         v2: false,
-        threshold: 512,
+        threshold: 1024,
         extend: 10,
         scale: 1.0,
         tempCanvas: null, // A temp canvas for drawing

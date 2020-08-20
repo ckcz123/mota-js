@@ -592,7 +592,7 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, arr
         return false;
 
     // 3. 检查是否能进将死的领域
-    if (floorId == core.status.floorId && !core.flags.canGoDeadZone &&
+    if (floorId == core.status.floorId && !core.flags.canGoDeadZone && !core.status.lockControl &&
          core.status.hero.hp <= (core.status.checkBlock.damage[nx + "," + ny]||0)
          && arrays.eventArray[ny][nx] == 0)
         return false;

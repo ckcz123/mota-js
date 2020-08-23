@@ -719,7 +719,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var turn = Math.ceil(mon_hp / hero_per_damage);
 
 	// ------ 支援 ----- //
-	// 这个递归最好想明白为什么，flag:extra_turn是怎么用的
+	// 这个递归最好想明白为什么，flag:__extraTurn__是怎么用的
 	var guards = core.getFlag("__guards__" + x + "_" + y, enemyInfo.guards);
 	var guard_before_current_enemy = false; // ------ 支援怪是先打(true)还是后打(false)？
 	turn += core.getFlag("__extraTurn__", 0);
@@ -736,6 +736,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			// 这里的mdef传0，因为护盾应该只会被计算一次
 			var info = core.enemys.getDamageInfo(core.material.enemys[gid], { hp: origin_hero_hp, atk: origin_hero_atk, def: origin_hero_def, mdef: 0 });
 			if (info == null) { // 小队中任何一个怪物不可战斗，直接返回null
+				core.removeFlag("__extraTurn__");
 				return null;
 			}
 			// 已经进行的回合数

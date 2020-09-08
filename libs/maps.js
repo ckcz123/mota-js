@@ -2103,6 +2103,8 @@ maps.prototype.resetMap = function (floorId) {
         Object.keys(core.status.hero.flags).forEach(function (one) {
             if (one.startsWith(floorId + '@')) delete core.status.hero.flags[one];
         })
+        // 重置本层的图块删除信息
+        delete (flags.__disabled__ || {})[t];
         if (t == core.status.floorId) needRefresh = true;
     });
     if (needRefresh) this.drawMap();

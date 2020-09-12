@@ -2105,6 +2105,7 @@ maps.prototype.resetMap = function (floorId) {
         })
         // 重置本层的图块删除信息
         delete (flags.__disabled__ || {})[t];
+        delete (core.status.mapBlockObjs || {})[t];
         if (t == core.status.floorId) needRefresh = true;
     });
     if (needRefresh) this.drawMap();

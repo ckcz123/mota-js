@@ -2703,7 +2703,7 @@ events.prototype.setGlobalFlag = function (name, value) {
         core.flags.statusBarItems = statusBarItems;
         flags.statusBarItems = core.clone(statusBarItems);
     } else {
-        flags[name] = core.flags.name = value;
+        flags[name] = core.flags[name] = value;
     }
     core.setFlag("globalFlags", flags);
     core.resize();

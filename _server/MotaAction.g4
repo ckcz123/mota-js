@@ -1164,6 +1164,7 @@ insert_1_s
 /* insert_1_s
 tooltip : insert: 插入公共事件并执行
 helpUrl : /_docs/#/instruction
+allEvents : ['EvalString_0']
 default : ["加点事件", ""]
 colour : this.eventColor
 if (JsonEvalString_0) {

@@ -669,6 +669,7 @@ editor_blockly = function () {
             .map(function (key) { return maps_90f36752_8815_4be8_b32b_d7fad1d0542e[key]; })
             .filter(function (one) { return one.doorInfo != null; })
             .map(function (one) { return one.id; }));
+        namesObj.allEvents = Object.keys(core.events.commonEvent);
         var filter = function (list, content) {
           return list.filter(function (one) {
             return one != content && one.startsWith(content);
@@ -684,7 +685,7 @@ editor_blockly = function () {
         // 对音效进行补全
         // 对全局商店进行补全
         // 对楼层名进行补全
-        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors'][ii];ii++){
+        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
             if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
                 return filter(namesObj[names], content);
             }

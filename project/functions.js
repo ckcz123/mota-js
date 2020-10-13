@@ -1496,10 +1496,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 获得道具栏中当前某类型道具的显示项和显示顺序
 	// cls为道具类型，只可能是 tools, constants 和 equips
 	// 返回一个数组，代表当前某类型道具的显示内容和顺序
+	// 默认按id升序排列，您可以取消下面的注释改为按名称排列
 
 	return Object.keys(core.status.hero.items[cls] || {})
 		.filter(function (id) { return !core.material.items[id].hideInToolbox; })
-		.sort();
+		.sort( /*function (id1, id2) { return core.material.items[id1].name <= core.material.items[id2].name ? -1 : 1 }*/ );
 },
         "drawStatusBar": function () {
 	// 自定义绘制状态栏，需要开启状态栏canvas化

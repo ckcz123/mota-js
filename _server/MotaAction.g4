@@ -418,7 +418,7 @@ return code;
 
 // equip 事件编辑器入口之一
 equip_m 
-    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ BEND
+    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '此道具cls须为equips并设置canUseItemEffect' BEND
 
 
 /* equip_m
@@ -441,25 +441,27 @@ equipList
 
 
 equipKnown
-    : Equip_List ':' Number BEND
+    : Equip_List ':' EvalString BEND
 
 
 /* equipKnown
 tooltip : 装备项
 default : ['atk', 10]
 helpUrl : /_docs/#/instruction
-return '"'+Equip_List_0+'": '+Number_0+', ';
+if (!/^[+-]?\d+(\.\d+)?$/.test(EvalString_0)) EvalString_0 = '"' + EvalString_0 + '"';
+return '"'+Equip_List_0+'": '+EvalString_0+', ';
 */;
 
 equipUnknown
-    : EvalString ':' Number BEND
+    : EvalString ':' EvalString BEND
 
 
 /* equipUnknown
 tooltip : 装备项
 default : ['speed', 10]
 helpUrl : /_docs/#/instruction
-return '"'+EvalString_0+'": '+Number_0+', ';
+if (!/^[+-]?\d+(\.\d+)?$/.test(EvalString_1)) EvalString_1 = '"' + EvalString_1 + '"';
+return '"'+EvalString_0+'": '+EvalString_1+', ';
 */;
 
 

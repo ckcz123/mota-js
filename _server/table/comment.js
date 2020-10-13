@@ -97,16 +97,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_string": true,
 					"_lint": true,
-					"_docs": "能否使用",
-					"_data": "当前能否使用该道具，仅对cls为tools或constants有效。"
-				},
-				"equipCondition": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_lint": true,
-					"_docs": "能否装备",
-					"_data": "能装备某个装备的条件，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
+					"_docs": "能否使用或装备",
+					"_data": "当前能否使用或装备该道具，仅对cls不为items有效。null表示始终不可使用但可装备"
 				}
 			}
 		},

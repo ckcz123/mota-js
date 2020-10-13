@@ -421,7 +421,7 @@ utils.prototype.formatSize = function (size) {
 
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
-    if (!core.isset(x)) return '???';
+    if (!core.isset(x) || !Number.isFinite(x)) return '???';
     if (x > 1e24 || x < -1e24) return x.toExponential(2);
 
     var c = x < 0 ? "-" : "";

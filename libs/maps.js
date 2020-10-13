@@ -867,21 +867,22 @@ maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y, ctx) {
         core.drawImage(ctx, core.material.groundCanvas.canvas, px, py);
     }
     var alpha = null;
-    if (name == 'fg' && this._drawBlockInfo_shouldBlurFg()) {
-        var eventArr = this.getMapArray();
-        if (eventArr != null && eventArr[y][x] != 0) {
-            ctx = core.getContextByName(ctx);
-            alpha = ctx.globalAlpha;
-            core.setAlpha(ctx, 0.6);
-        }
+    if (name == 'fg' && this._drawBlockInfo_shouldBlurFg(x, y)) {
+        ctx = core.getContextByName(ctx);
+        alpha = ctx.globalAlpha;
+        core.setAlpha(ctx, 0.6);
     }
     core.drawImage(ctx, image, posX * 32, posY * height, 32, height, px, py + 32 - height, 32, height);
     if (alpha != null) core.setAlpha(ctx, alpha);
 }
 
 ////// 是否应当存在事件时虚化前景层 //////
-maps.prototype._drawBlockInfo_shouldBlurFg = function () {
-    return main.mode == 'editor' || core.flags.blurFg;
+maps.prototype._drawBlockInfo_shouldBlurFg = function (x, y) {
+    if (main.mode == 'play' && !core.flags.blurFg) return false;
+    var block = this.getBlock(x, y);
+    if (block == null || block.id == 0) return false;
+    if (block.event.cls == 'autotile' || block.event.cls == 'tileset') return !block.event.script;
+    return true;
 }
 
 ////// 生成groundPattern //////
@@ -1577,8 +1578,7 @@ maps.prototype.stairExists = function (x, y, floorId) {
     var blockId = this.getBlockId(x, y, floorId);
     if (blockId == null) return false;
     var ids = ['upFloor','downFloor'];
-    if (core.flags.flyRecordPosition)
-        ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal']);
+    ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal']);
     return ids.indexOf(blockId)>=0;
 }
 

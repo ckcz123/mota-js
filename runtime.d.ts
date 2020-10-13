@@ -2143,9 +2143,6 @@ declare class ui {
      */
     drawTip(text: string, id?: string, frame?: number): void
 
-    /** 清除提示内容 */
-    clearTip(): void
-
     /** 地图中间绘制一段文字 */
     drawText(contents: string, callback?: () => any): void
 

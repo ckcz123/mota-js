@@ -1726,9 +1726,6 @@ name为画布名，可以是系统画布之一，也可以是任意自定义动�
 如果name也可以是'all'，若为all则为清空所有系统画布。
 参考资料：https://www.w3school.com.cn/tags/canvas_clearrect.asp
 
-clearTip: fn()
-清除左上角提示内容
-
 clearUI: fn()
 清空UI层内容
 

@@ -3365,10 +3365,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: number, style?: string)"
         }, 
-        "clearTip": {
-          "!doc": "清除左上角提示内容", 
-          "!type": "fn()"
-        }, 
         "strokeRoundRect": {
           "!doc": "在某个canvas上绘制一个圆角矩形的边框", 
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, style?: string, lineWidth?: number, angle?: number)"

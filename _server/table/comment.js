@@ -236,6 +236,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "thiseval==~~thiseval||thiseval==null",
 					"_docs": "固伤",
 					"_data": "战前扣血的点数"
+				},
+				"afterBattle": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "afterBattle",
+					"_docs": "战后事件",
+					"_data": "和该怪物战斗后触发的事件列表"
 				}
 			}
 		},

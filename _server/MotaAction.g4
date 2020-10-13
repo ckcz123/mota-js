@@ -2070,7 +2070,7 @@ moveHero_s
 tooltip : moveHero：移动勇士,用这种方式移动勇士的过程中将无视一切地形, 无视一切事件, 中毒状态也不会扣血
 helpUrl : /_docs/#/instruction
 default : ["",false,"上右3下2后4左前2"]
-colour : this.dataColor
+colour : this.mapColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
 var code = '{"type": "moveHero"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
@@ -2137,7 +2137,7 @@ tooltip : jumpHero: 跳跃勇士
 helpUrl : /_docs/#/instruction
 default : ["","",500,false]
 selectPoint : ["PosString_0", "PosString_1"]
-colour : this.dataColor
+colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
@@ -2156,7 +2156,7 @@ jumpHero_1_s
 tooltip : jumpHero: 跳跃勇士，给定增量
 helpUrl : /_docs/#/instruction
 default : ["0","0",500,false]
-colour : this.dataColor
+colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "dxy": ['+PosString_0+','+PosString_1+']';

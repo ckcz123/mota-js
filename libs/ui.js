@@ -708,11 +708,6 @@ ui.prototype._drawTip_drawOne = function (tip) {
     core.setAlpha('data', 1);
 }
 
-ui.prototype.clearTip = function () {
-    core.clearMap('data', 0, 0, this.PIXEL, 50);
-    core.animateFrame.tip = null;
-}
-
 ////// 地图中间绘制一段文字 //////
 ui.prototype.drawText = function (contents, callback) {
     if (contents != null) return this._drawText_setContent(contents, callback);
@@ -2126,7 +2121,7 @@ ui.prototype._drawBookDetail = function (index) {
     if (!enemy) return;
     var content = info[1].join("\n");
     core.status.event.id = 'book-detail';
-    core.clearTip();
+    core.animateFrame.tip = null;
     core.clearMap('data');
 
     var left = 10, width = this.PIXEL - 2 * left, right = left + width;
@@ -2330,7 +2325,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.status.event.id = 'viewMaps';
     this.clearUI();
     if (index == null) return this._drawMaps_drawHint();
-    core.clearTip();
+    core.animateFrame.tip = null;
     core.status.checkBlock.cache = {};
     var data = this._drawMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');

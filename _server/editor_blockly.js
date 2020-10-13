@@ -801,12 +801,26 @@ editor_blockly = function () {
                 },
                 filter: function () {return true;},
                 item: function (text, input) {
+                    var id = text.label, info = core.getBlockInfo(id);
                     var li = document.createElement("li");
                     li.setAttribute("role", "option");
                     li.setAttribute("aria-selected", "false");
                     input = awesomplete.prefix.trim();
                     if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
                     li.innerHTML = text;
+                    if (info) {
+                        var height = (info.height || 32), width = 32;
+                        var scale = 75;
+                        height *= scale / 100;
+                        width *= scale / 100;
+                        var ctx = core.createCanvas('list_' + id, 0, 0, width, height),
+                            canvas = ctx.canvas;
+                        canvas.style.display = 'inline';
+                        canvas.style.marginRight = '8px';
+                        core.drawIcon(ctx, id, 0, 0, width, height);
+                        canvas.style.position = '';
+                        li.insertBefore(canvas, li.children[0]);
+                    }
                     return li;
                 },
                 sort: function (a, b) {

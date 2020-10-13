@@ -208,7 +208,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
 					"_docs": "连击数",
-					"_data": "多连击的连击数"
+					"_data": "多连击的连击数，净化怪的净化倍率"
 				},
 				"add": {
 					"_leaf": true,
@@ -220,15 +220,15 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣除攻击",
-					"_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例"
+					"_docs": "退化扣攻",
+					"_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例；反击的比例"
 				},
 				"defValue": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣除防御",
-					"_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例"
+					"_docs": "退化扣防",
+					"_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例；破甲的比例"
 				},
 				"damage": {
 					"_leaf": true,
@@ -402,8 +402,14 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"canFlyTo": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_docs": "可楼传",
-							"_data": "该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）"
+							"_docs": "可楼传飞到",
+							"_data": "该楼能否被楼传器飞到"
+						},
+						"canFlyFrom": {
+							"_leaf": true,
+							"_type": "checkbox",
+							"_docs": "可楼传飞出",
+							"_data": "该楼能否用楼传器飞出"
 						},
 						"canUseQuickShop": {
 							"_leaf": true,
@@ -593,6 +599,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"width": 13,
 			"height": 13,
 			"canFlyTo": true,
+			"canFlyFrom": true,
 			"canUseQuickShop": true,
 			"cannotViewMap": false,
 			"cannotMoveDirectly": false,

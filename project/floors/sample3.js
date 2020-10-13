@@ -4,6 +4,7 @@ main.floors.sample3=
     "title": "主塔 40 层",
     "name": "40",
     "canFlyTo": false,
+    "canFlyFrom": false,
     "canUseQuickShop": true,
     "defaultGround": "snowGround",
     "images": [],

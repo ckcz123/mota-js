@@ -1677,7 +1677,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "canFlyTo": {
           "!type": "bool",
-          "!doc": "该楼是否可以楼传，包括飞来和飞走"
+          "!doc": "该楼是否可以楼传飞到"
+        },
+        "canFlyFrom": {
+          "!type": "bool",
+          "!doc": "该楼是否可以楼传飞出"
         },
         "canUseQuickShop": {
           "!type": "bool",

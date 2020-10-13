@@ -263,6 +263,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			delete flags.__disabled__[floorId];
 			core.status.maps[floorId].deleted = true;
 			core.status.maps[floorId].canFlyTo = false;
+			core.status.maps[floorId].canFlyFrom = false;
 			core.status.maps[floorId].cannotViewMap = true;
 		}
 	}

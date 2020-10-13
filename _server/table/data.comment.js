@@ -82,7 +82,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "editor.mode.checkUnique(thiseval)",
 					"_directory": "./project/bgms/",
 					"_transform": (function (one) {
-						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav'))
+						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac'))
 							return one;
 						return null;
 					}).toString(),
@@ -95,7 +95,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "editor.mode.checkUnique(thiseval)",
 					"_directory": "./project/sounds/",
 					"_transform": (function (one) {
-						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav'))
+						if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac'))
 							return one;
 						return null;
 					}).toString(),

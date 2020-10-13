@@ -360,7 +360,7 @@ maps.prototype.saveMap = function (floorId) {
     }
     // 砍层状态：直接返回
     if ((flags.__removed__ || []).indexOf(floorId) >= 0) {
-        return { deleted: true, canFlyTo: false, cannotViewMap: true };
+        return { deleted: true, canFlyTo: false, canFlyFrom: false, cannotViewMap: true };
     }
 
     var map = maps[floorId];
@@ -593,8 +593,7 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, arr
 
     // 3. 检查是否能进将死的领域
     if (floorId == core.status.floorId && !core.flags.canGoDeadZone && !core.status.lockControl &&
-         core.status.hero.hp <= (core.status.checkBlock.damage[nx + "," + ny]||0)
-         && arrays.eventArray[ny][nx] == 0)
+        Math.max(core.status.hero.hp, 1) <= (core.status.checkBlock.damage[nx + "," + ny]||0) && arrays.eventArray[ny][nx] == 0)
         return false;
 
     return true;
@@ -729,6 +728,7 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     }
     // 是否存在阻激夹域伤害
     if (core.status.checkBlock.damage[index]) return false;
+    if (core.status.checkBlock.repulse[index]) return false;
     // 是否存在捕捉
     if (core.status.checkBlock.ambush[index]) return false;
 

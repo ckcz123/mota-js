@@ -208,6 +208,7 @@ editor_file = function (editor, callback) {
             map: map,
         },saveStatus?{
             canFlyTo: currData.canFlyTo,
+            canFlyFrom: currData.canFlyFrom,
             canUseQuickShop: currData.canUseQuickShop,
             cannotViewMap: currData.cannotViewMap,
             cannotMoveDirectly: currData.cannotMoveDirectly,
@@ -256,6 +257,7 @@ editor_file = function (editor, callback) {
                 map: map,
             },saveStatus?{
                 canFlyTo: currData.canFlyTo,
+                canFlyFrom: currData.canFlyFrom,
                 canUseQuickShop: currData.canUseQuickShop,
                 cannotViewMap: currData.cannotViewMap,
                 cannotMoveDirectly: currData.cannotMoveDirectly,

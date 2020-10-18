@@ -178,8 +178,9 @@ editor_blocklyconfig=(function(){
     '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
-        {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件"}]},
-        {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件"}]},
+        {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件\n超时剩余时间会写入flag:timeout"}]},
+        {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件\n超时剩余时间会写入flag:timeout"}]},
+        {"case": "timeout", "action": [{"type": "comment", "text": "当超时未操作时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
@@ -245,6 +246,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['idTemp_e'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
       MotaActionBlocks['unaryOperation_e'].xmlText(),
+      MotaActionBlocks['utilOperation_e'].xmlText(),
       MotaActionBlocks['bool_e'].xmlText(),
       MotaActionBlocks['idString_e'].xmlText(),
       MotaActionBlocks['idIdList_e'].xmlText(),

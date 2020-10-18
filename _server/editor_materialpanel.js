@@ -190,10 +190,7 @@ editor_materialpanel_wrapper = function (editor) {
                         }
                     }
 
-                    if (editor.info.isTile && e.button == 2) { //这段改一改之类的应该能给手机用,就不删了
-                        // 废弃好了
-                        alert('V2.7后右键已被废弃，请直接素材区拖框选中区域。');
-                        /*
+                    if (editor.info.isTile && (editor.isMobile || e.button == 2)) { //这段改一改之类的应该能给手机用,就不删了
                         var v = prompt("请输入该额外素材区域绑定宽高，以逗号分隔", "1,1");
                         if (v != null && /^\d+,\d+$/.test(v)) {
                             v = v.split(",");
@@ -209,9 +206,8 @@ editor_materialpanel_wrapper = function (editor) {
                                 editor.dom.dataSelection.style.width = 32*x - 6 + 'px';
                             }
                         }
-                        */
                     }
-                    if (editor.info.isTile && e.button != 2) { //左键拖拽框选
+                    if (editor.info.isTile && !editor.isMobile && e.button != 2) { //左键拖拽框选
 
                         var x = pos.x-pos0.x+1, y = pos.y-pos0.y+1;
                         var widthX = editor.widthsX[editor.info.images];

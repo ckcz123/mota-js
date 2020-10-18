@@ -1857,7 +1857,12 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
             if (index == "-1") index = data.choices.length - 1;
-            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
+                if (index != 'none') {
+                    var timeout = Math.floor(index / 100) || 0;
+                    core.setFlag('timeout', timeout);
+                    index %= 100;
+                } else core.setFlag('timeout', 0);
                 core.status.event.selection = index;
                 setTimeout(function () {
                     core.status.route.push("choices:"+index);
@@ -1874,11 +1879,15 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                 }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
             }
         }
-    } else if (data.timeout) {
-        core.status.event.interval = setTimeout(function () {
-            core.status.route.push("choices:none");
-            core.doAction();
-        }, data.timeout);
+    } else {
+        if (data.timeout) {
+            core.status.event.interval = setTimeout(function () {
+                core.status.route.push("choices:none");
+                core.setFlag('timeout', 0);
+                core.doAction();
+            }, data.timeout);   
+        }
+        core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
     core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices);
 }
@@ -1901,7 +1910,12 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
         if (action == 'turn') action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
-            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < 2) {
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < 2) {
+                if (index != 'none') {
+                    var timeout = Math.floor(index / 100) || 0;
+                    core.setFlag('timeout', timeout);
+                    index %= 100;
+                } else core.setFlag('timeout', 0);
                 core.status.event.selection = index;
                 setTimeout(function () {
                     core.status.route.push("choices:"+index);
@@ -1922,9 +1936,11 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
         if (data.timeout) {
             core.status.event.interval = setTimeout(function () {
                 core.status.route.push("choices:none");
+                core.setFlag('timeout', 0);
                 core.doAction();
             }, data.timeout);
         }
+        core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
     core.ui.drawConfirmBox(data.text);
 }
@@ -2039,12 +2055,20 @@ events.prototype._precompile_dowhile = function (data) {
 }
 
 events.prototype._action_break = function (data, x, y, prefix) {
-    if (core.status.event.data.list.length > 1)
-        core.status.event.data.list.shift();
+    var n = data.n || 1;
+    while (n--) {
+        if (core.status.event.data.list.length > 1)
+            core.status.event.data.list.shift();
+    }
     core.doAction();
 }
 
 events.prototype._action_continue = function (data, x, y, prefix) {
+    var n = data.n || 1;
+    while (n-- > 1) {
+        if (core.status.event.data.list.length > 1)
+            core.status.event.data.list.shift();
+    }
     if (core.status.event.data.list.length > 1) {
         if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
             core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
@@ -2136,6 +2160,8 @@ events.prototype._action_wait = function (data, x, y, prefix) {
             if (code == "input:none") {
                 core.status.route.push("input:none");
                 core.setFlag("type", -1);
+                core.setFlag("timeout", 0);
+                this.__action_wait_afterGet(data);
             } else {
                 var value = parseInt(code.substring(6));
                 core.status.route.push("input:" + value);
@@ -2154,12 +2180,17 @@ events.prototype._action_wait = function (data, x, y, prefix) {
         core.status.event.interval = setTimeout(function() {
             core.status.route.push("input:none");
             core.setFlag("type", -1);
+            core.setFlag("timeout", 0);
+            core.events.__action_wait_afterGet(data);
             core.doAction();
         }, data.timeout);
     }
+    core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
 }
 
 events.prototype.__action_wait_getValue = function (value) {
+    core.setFlag("timeout", Math.floor(value / 1e8) || 0);
+    value %= 1e8;
     if (value >= 1000000) {
         core.setFlag('type', 1);
         var px = parseInt((value - 1000000) / 1000), py = value % 1000;
@@ -2185,11 +2216,14 @@ events.prototype.__action_wait_getValue = function (value) {
 events.prototype.__action_wait_afterGet = function (data) {
     if (!data.data) return;
     var todo = [];
+    var stop = false;
     data.data.forEach(function (one) {
+        if (stop) return;
         if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
             (one.keycode + "").split(",").forEach(function (keycode) {
                 if (core.getFlag("keycode", 0) == keycode) {
                     core.push(todo, one.action);
+                    if (one["break"]) stop = true;
                 }
             });
         }
@@ -2202,7 +2236,12 @@ events.prototype.__action_wait_afterGet = function (data) {
             var px = core.getFlag("px", 0), py = core.getFlag("py", 0);
             if (px >= pxmin && px <= pxmax && py >= pymin && py <= pymax) {
                 core.push(todo, one.action);
+                if (one["break"]) stop = true;
             }
+        }
+        if (one["case"] == "timeout" && core.getFlag("type") == -1) {
+            core.push(todo, one.action);
+            if (one["break"]) stop = true;
         }
     })
     if (todo.length > 0)

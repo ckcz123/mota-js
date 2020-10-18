@@ -1097,6 +1097,20 @@ utils.prototype.getGuid = function () {
     return guid;
 }
 
+utils.prototype.hashCode = function (obj) {
+    if (typeof obj == 'string') {
+        var hash = 0, i, chr;
+        if (obj.length === 0) return hash;
+        for (i = 0; i < obj.length; i++) {
+            chr = obj.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash;
+    }
+    return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
+}
+
 utils.prototype.same = function (a, b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;

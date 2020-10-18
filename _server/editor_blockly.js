@@ -233,13 +233,11 @@ editor_blockly = function () {
 
     editor_blockly.previewBlock = function (b,args) {
 
-        try {
-            // 特殊处理立绘
-            if (b.type == 'textDrawing') {
-                var str = Blockly.JavaScript.blockToCode(b);
-                var list = str.substring(str.indexOf('[')+1, str.lastIndexOf(']')).split(",");
+        var previewTextDrawing = function (content) {
+            var arr = [];
+            content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {        
+                var list = str.split(",");
                 if (list.length == 3 || list.length == 5 || list.length >= 9) {
-                    var arr = [];
                     var name = list[0];
                     var obj = {"type": "drawImage"};
                     if (name.endsWith(":o") || name.endsWith(":x") || name.endsWith(":y")) {
@@ -266,9 +264,17 @@ editor_blockly = function () {
                         obj.angle = parseFloat(list[10]);
                     }
                     arr.push(obj);
-                    console.log(arr);
-                    editor.uievent.previewUI(arr);
                 }
+                return "";
+            });
+            editor.uievent.previewUI(arr);
+            return true;
+        }
+
+        try {
+            // 特殊处理立绘
+            if (b.type == 'textDrawing' || b.type == 'text_2_s') {
+                previewTextDrawing(Blockly.JavaScript.blockToCode(b));
                 return true;
             }
 

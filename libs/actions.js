@@ -423,12 +423,15 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
     // --- wait事件也要提供px和py
     if (core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 1);
         core.setFlag('x', x);
         core.setFlag('y', y);
         core.setFlag('px', px);
         core.setFlag('py', py);
-        core.status.route.push("input:" + (1000000 + 1000 * px + py));
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
     }
@@ -727,10 +730,13 @@ actions.prototype._sys_onmousewheel = function (direct) {
     // wait事件
     if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 0);
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
-        core.status.route.push("input:" + keycode);
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + keycode));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
@@ -980,8 +986,10 @@ actions.prototype._clickAction = function (x, y) {
                     return;
                 }
                 clearTimeout(core.status.event.interval);
-                // 选择
-                core.status.route.push("choices:" + (y - topIndex));
+                var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+                delete core.status.event.timeout;
+                core.setFlag('timeout', timeout);
+                core.status.route.push("choices:" + (100 * timeout + y - topIndex));
                 core.insertAction(choice.action);
                 core.doAction();
             }
@@ -992,13 +1000,19 @@ actions.prototype._clickAction = function (x, y) {
     if (core.status.event.data.type == 'confirm') {
         if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1) {
             clearTimeout(core.status.event.interval);
-            core.status.route.push("choices:0");
+            var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+            delete core.status.event.timeout;
+            core.setFlag('timeout', timeout);
+            core.status.route.push("choices:" + 100 * timeout);
             core.insertAction(core.status.event.ui.yes);
             core.doAction();
         }
         else if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
             clearTimeout(core.status.event.interval);
-            core.status.route.push("choices:1");
+            var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+            delete core.status.event.timeout;
+            core.setFlag('timeout', timeout);
+            core.status.route.push("choices:" + (100 * timeout + 1));
             core.insertAction(core.status.event.ui.no);
             core.doAction();
         }
@@ -1031,9 +1045,12 @@ actions.prototype._keyUpAction = function (keycode) {
     }
     if (core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
-        core.status.route.push("input:" + keycode);
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + keycode));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
@@ -1047,7 +1064,10 @@ actions.prototype._keyUpAction = function (keycode) {
         return;
     }
     if (core.status.event.data.type == 'confirm'&& (keycode == 13 || keycode == 32 || keycode == 67)) {
-        core.status.route.push("choices:" + core.status.event.selection);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
+        core.setFlag('timeout', timeout);
+        core.status.route.push("choices:" + (100 * timeout + core.status.event.selection));
         if (core.status.event.selection == 0)
             core.insertAction(core.status.event.ui.yes);
         else core.insertAction(core.status.event.ui.no);

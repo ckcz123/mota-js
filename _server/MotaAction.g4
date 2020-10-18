@@ -806,6 +806,7 @@ tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮�
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
 allIds : ['EvalString_1']
+menu : [['预览所有立绘','editor_blockly.previewBlock(block)']]
 default : ["小妖精","fairy","","欢迎使用事件编辑器(回车直接多行编辑)",null]
 var title='';
 if (EvalString_0==''){
@@ -2036,7 +2037,7 @@ move_s
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : /_docs/#/instruction
-default : ["","",500,false,false,"上右3下2后4左前2"]
+default : ["","",500,true,false,"上右3下2后4左前2"]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.mapColor
 var floorstr = '';
@@ -2525,24 +2526,28 @@ return code;
 */;
 
 break_s
-    :   '跳出当前循环或公共事件' Newline
+    :   '跳出循环或公共事件' '层数' Int Newline
 
 /* break_s
 tooltip : break：跳出循环或公共事件！
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = '{"type": "break"},\n';
+default : [1]
+if (Int_0 <= 0) throw "层数至少为1！";
+var code = '{"type": "break", "n": '+Int_0+'},\n';
 return code;
 */;
 
 continue_s
-    :   '提前结束本轮循环或跳出公共事件' Newline
+    :   '提前结束循环或跳出公共事件' '层数' Int Newline
 
 /* continue_s
-tooltip : continue：继续执行当前循环的下一轮，或跳出公共事件！
+tooltip : continue：提前结束循环或跳出公共事件，或跳出公共事件！
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = '{"type": "continue"},\n';
+default : [1]
+if (Int_0 <= 0) throw "层数至少为1！";
+var code = '{"type": "continue", "n": '+Int_0+'},\n';
 return code;
 */;
 
@@ -2567,36 +2572,54 @@ return code;
 waitContext
     : waitContext_1
     | waitContext_2
+    | waitContext_3
     | waitContext_empty;
 
 
 waitContext_1
-    : '按键的场合' '键值' EvalString BGNL? Newline action+ BEND Newline
+    : '按键的场合' '键值' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_1
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
 colour : this.subColor
+default : ["",false]
 if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
   throw new Error('键值必须是正整数，可以以逗号分隔');
 }
+Bool_0 = Bool_0?', "break": true':'';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
-var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '"'+collapsed+', "action": [\n' + action_0 + ']},\n';
+var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '"'+Bool_0+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
 
 waitContext_2
-    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString BGNL? Newline action+ BEND Newline
+    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_2
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
-default : [0,32,0,32]
+default : [0,32,0,32,false]
 previewBlock : true
 colour : this.subColor
+Bool_0 = Bool_0?', "break": true':'';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
-var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + ']'+collapsed+', "action": [\n' + action_0 + ']},\n';
+var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + ']'+Bool_0+collapsed+', "action": [\n' + action_0 + ']},\n';
+return code;
+*/;
+
+waitContext_3
+    : '超时的场合' '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+
+/* waitContext_3
+tooltip : wait: 等待用户操作并获得按键或点击信息
+helpUrl : /_docs/#/instruction
+colour : this.subColor
+default : [false]
+Bool_0 = Bool_0?', "break": true':'';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "timeout"'+Bool_0+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
@@ -2786,6 +2809,7 @@ drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
+menu : [['预览多行文本','editor_blockly.previewBlock(block)']]
 colour : this.subColor
 default : ["绘制多行文本\\n可双击编辑","0","0","","",'rgba(255,255,255,1)',null,"","",false]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
@@ -3125,6 +3149,7 @@ expression
     :   expression Arithmetic_List expression
     |   negate_e
     |   unaryOperation_e
+    |   utilOperation_e
     |   bool_e
     |   idFixedList_e
     |   idFlag_e
@@ -3187,7 +3212,16 @@ unaryOperation_e
     
 
 /* unaryOperation_e
-var code = UnaryOperator_List_0 + expression_0;
+var code = UnaryOperator_List_0 + '(' + expression_0 + ')';
+return [code, Blockly.JavaScript.ORDER_MEMBER];
+*/;
+
+utilOperation_e
+    :   UtilOperator_List expression
+    
+
+/* utilOperation_e
+var code = UtilOperator_List_0 + '(' + expression_0 + ')';
 return [code, Blockly.JavaScript.ORDER_MEMBER];
 */;
 
@@ -3241,7 +3275,7 @@ enemyattr_e
 
 
 /* enemyattr_e
-default : ['greenSlime',"攻击"]
+default : ['greenSlime',"hp"]
 allEnemys : ['IdString_0']
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
@@ -3393,8 +3427,12 @@ AssignOperator_List
     /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=','min=','max=']*/;  
 
 UnaryOperator_List
-    :   '向下取整'|'向上取整'|'四舍五入'|'整数截断'|'绝对值'|'开方'
-    /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt']*/;
+    :   '向下取整'|'向上取整'|'四舍五入'|'整数截断'|'绝对值'|'开方'|'变量类型'
+    /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt', 'typeof']*/;
+
+UtilOperator_List
+    :   '大数字格式化'|'哈希值'|'base64编码'|'base64解码'|'不可SL的随机'|'可以SL的随机'|'表达式求值'|'深拷贝'|'日期格式化'|'时间格式化'|'获得cookie'|'字符串字节数'
+    /*UtilOperator_List ['core.formatBigNumber', 'core.hashCode', 'core.encodeBase64', 'core.decodeBase64', 'core.rand', 'core.rand2', 'core.calValue', 'core.clone', 'core.formatDate', 'core.formatTime', 'core.getCookie', 'core.strlen']*/;
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'|'云'

@@ -788,7 +788,6 @@ editor_ui_wrapper = function (editor) {
             html += "</p>";
             html += "<p style='margin-left: 10px'><small>如果文件未在此列表显示，请检查文件名是否合法（只能由数字字母下划线横线和点组成），后缀名是否正确。</small></p>";
             uievent.elements.extraBody.innerHTML = html;
-            if (hasAudio) new Awesomplete(".awesomplete");
         });
     }
 
@@ -852,6 +851,7 @@ editor_ui_wrapper = function (editor) {
     var _previewMaterialAnimate = function (span, content) {
         var input = span.children[1];
         input.value = content.se || "";
+        new Awesomplete(input);
 
         // 创建dom
         if (!uievent.values.dom) {

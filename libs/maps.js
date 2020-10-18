@@ -2193,7 +2193,6 @@ maps.prototype._getAndRemoveBlock = function (x, y) {
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
 maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     if (core.status.replay.speed == 24) time = 1;
-    if (keep == null) keep = true;
     time = time || 500;
     var blockArr = this._getAndRemoveBlock(x, y);
     if (blockArr == null) {
@@ -2283,7 +2282,6 @@ maps.prototype._moveBlock_moving = function (blockInfo, canvases, moveInfo) {
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
 maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
     time = time || 500;
-    if (keep == null) keep = true;
     var blockArr = this._getAndRemoveBlock(sx, sy);
     if (blockArr == null) {
         if (callback) callback();

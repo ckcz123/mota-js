@@ -3431,8 +3431,8 @@ UnaryOperator_List
     /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt', 'typeof']*/;
 
 UtilOperator_List
-    :   '大数字格式化'|'哈希值'|'base64编码'|'base64解码'|'不可SL的随机'|'可以SL的随机'|'表达式求值'|'深拷贝'|'日期格式化'|'时间格式化'|'获得cookie'|'字符串字节数'
-    /*UtilOperator_List ['core.formatBigNumber', 'core.hashCode', 'core.encodeBase64', 'core.decodeBase64', 'core.rand', 'core.rand2', 'core.calValue', 'core.clone', 'core.formatDate', 'core.formatTime', 'core.getCookie', 'core.strlen']*/;
+    :   '大数字格式化'|'哈希值'|'base64编码'|'base64解码'|'不可SL的随机'|'可以SL的随机'|'深拷贝'|'日期格式化'|'时间格式化'|'获得cookie'|'字符串字节数'
+    /*UtilOperator_List ['core.formatBigNumber', 'core.hashCode', 'core.encodeBase64', 'core.decodeBase64', 'core.rand', 'core.rand2', 'core.clone', 'core.formatDate', 'core.formatTime', 'core.getCookie', 'core.strlen']*/;
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'|'云'

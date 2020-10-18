@@ -2288,7 +2288,10 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
     else {
         var e = core.clone(core.status.event.data);
         core.ui.closePanel();
+        var forbidSave = core.hasFlag('__forbidSave__');
+        core.removeFlag('__forbidSave__');
         core.save();
+        if (forbidSave) core.setFlag('__forbidSave__', true);
         core.status.event.interval = e;
     }
 }

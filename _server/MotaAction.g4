@@ -3361,8 +3361,8 @@ Floor_List
     /*Floor_List ['floorId',':before',':next',':now']*/;
 
 Stair_List
-    :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'|'中心对称点'|'x对称点'|'y对称点'
-    /*Stair_List ['loc','upFloor','downFloor',':now',':symmetry',':symmetry_x',':symmetry_y']*/;
+    :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'|'中心对称点'|'x对称点'|'y对称点'|'楼传落点'
+    /*Stair_List ['loc','upFloor','downFloor',':now',':symmetry',':symmetry_x',':symmetry_y','flyPoint']*/;
 
 SetTextPosition_List
     :   '不改变'|'距离顶部'|'居中'|'距离底部'

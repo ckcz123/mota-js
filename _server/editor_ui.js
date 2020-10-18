@@ -754,6 +754,7 @@ editor_ui_wrapper = function (editor) {
             }
 
             // 显示每一项内容
+            var hasAudio = false;
             var html = "<p style='margin-left: 10px; line-height: 25px'>";
             html += "<button onclick='editor.uievent._selectAllMaterial(true)'>全选</button>"+
                     "<button style='margin-left: 10px' onclick='editor.uievent._selectAllMaterial(false)'>全不选</button><br/>";
@@ -765,7 +766,7 @@ editor_ui_wrapper = function (editor) {
                     html += '<br style="display:none"/><img key="'+directory+one+'" style="display:none; max-width: 100%"/>';
                 }
                 // 试听音频
-                if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || one.endsWith('.wav')) {
+                if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac')) {
                     html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>";
                     html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>
                         <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
@@ -773,17 +774,21 @@ editor_ui_wrapper = function (editor) {
                 }
                 // 预览动画
                 if (directory.indexOf('animates') >= 0) {
+                    var audios = Object.keys(core.material.sounds).sort().join(",");
                     html += "<button onclick='editor.uievent._previewMaterialAnimate(this)' style='margin-left: 10px'>预览</button>";
-                    html += `<span style="display:none; margin-left: 10px" key="${directory+one+'.animate'}"><br/>音效：<input type="text" />
+                    html += `<span style="display:none; margin-left: 10px" key="${directory+one+'.animate'}"><br/>音效
+                        <input type="text" class="awesomplete" data-list="${audios}" data-minchars="1" data-autofirst="true"/>
                         <button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style='marin-left: 10px'>试听</button>
                         <button onclick="editor.uievent._previewMaterialAnimate_saveSound(this)">保存</button><br/>
                         </span>`;
+                    hasAudio = true;
                 }
                 html += '<br/>';
             });
             html += "</p>";
             html += "<p style='margin-left: 10px'><small>如果文件未在此列表显示，请检查文件名是否合法（只能由数字字母下划线横线和点组成），后缀名是否正确。</small></p>";
             uievent.elements.extraBody.innerHTML = html;
+            if (hasAudio) new Awesomplete(".awesomplete");
         });
     }
 

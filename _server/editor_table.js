@@ -261,11 +261,11 @@ editor_table_wrapper = function (editor) {
         var thiseval = vobj;
         var comment = String(cobj._data);
 
-        var charlength = 15;
+        // var charlength = 15;
         // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
+        // shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.util.HTMLescape(comment);

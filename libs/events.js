@@ -696,7 +696,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
             heroLoc.x = core.bigmap.width - 1 - core.getHeroLoc('x');
         else if (stair == ':symmetry_y')
             heroLoc.y = core.bigmap.height - 1 - core.getHeroLoc('y');
-        // 检查该层地图的 upFloor & downFloor
+        // 检查该层地图的 upFloor & downFloor & flyPoint
         else if (core.status.maps[floorId][stair]) {
             heroLoc.x = core.status.maps[floorId][stair][0];
             heroLoc.y = core.status.maps[floorId][stair][1];

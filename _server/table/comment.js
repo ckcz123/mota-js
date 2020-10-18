@@ -505,10 +505,17 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"bgm": {
 							"_leaf": true,
-							"_type": "select",
-							"_select": {
-								"values": [null].concat(Object.keys(editor.core.material.bgms))
-							},
+							"_type": "material",
+							"_directory": "./project/bgms/",
+							"_transform": (function (one) {
+								if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac'))
+									return one;
+								return null;
+							}).toString(),
+							"_onconfirm": (function (previous, current) {
+								if (current.length == 0) return null;
+								return current[0];
+							}).toString(),
 							"_docs": "背景音乐",
 							"_data": "到达该层后默认播放的BGM"
 						},

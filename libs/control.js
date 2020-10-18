@@ -1571,7 +1571,7 @@ control.prototype._replay_error = function (action) {
 
 control.prototype._replay_drawProgress = function () {
     var total = core.status.replay.totalList.length, left = total - core.status.replay.toReplay.length;
-    var content = '播放进度：' + left + '/' + total + '（'+(left/total*100).toFixed(2)+'%）';
+    var content = '播放进度：' + left + ' / ' + total + '（'+(left/total*100).toFixed(2)+'%）';
     var width = 26 + core.calWidth('replay', content, "16px Arial");
     core.clearMap('replay');
     core.fillRect('replay', 0, 0, width, 40, '#000000');

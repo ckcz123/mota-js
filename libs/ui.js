@@ -2152,6 +2152,8 @@ ui.prototype._drawBookDetail_getInfo = function (index) {
 }
 
 ui.prototype._drawBookDetail_getTexts = function (enemy, floorId, texts) {
+    // --- 原始数值
+    this._drawBookDetail_origin(enemy, texts);
     // --- 模仿临界计算器
     this._drawBookDetail_mofang(enemy, texts);
     // --- 吸血怪最低生命值
@@ -2160,6 +2162,21 @@ ui.prototype._drawBookDetail_getTexts = function (enemy, floorId, texts) {
     this._drawBookDetail_hatred(enemy, texts);
     // --- 战斗回合数，临界表
     this._drawBookDetail_turnAndCriticals(enemy, floorId, texts);
+}
+
+ui.prototype._drawBookDetail_origin = function (enemy, texts) {
+    // 怪物数值和原始值不一样时，在详细信息页显示原始数值
+    var originEnemy = core.enemys._getCurrentEnemys_getEnemy(enemy.id);
+    var content = [];
+    ["hp", "atk", "def", "point", "money", "exp"].forEach(function (one) {
+        if (enemy[one] == null || originEnemy[one] == null) return;
+        if (enemy[one] != originEnemy[one]) {
+            content.push(core.getStatusLabel(one) + " " + originEnemy[one]);
+        }
+    });
+    if (content.length > 0) {
+        texts.push("\r[#FF6A6A]\\d原始数值：\\d\r[]" + content.join("；"));
+    }
 }
 
 ui.prototype._drawBookDetail_mofang = function (enemy, texts) {

@@ -881,7 +881,7 @@ maps.prototype._drawBlockInfo_shouldBlurFg = function (x, y) {
     if (main.mode == 'play' && !core.flags.blurFg) return false;
     var block = this.getBlock(x, y);
     if (block == null || block.id == 0) return false;
-    if (block.event.cls == 'autotile' || block.event.cls == 'tileset') return !block.event.script;
+    if (block.event.cls == 'autotile' || block.event.cls == 'tileset') return block.event.script;
     return true;
 }
 

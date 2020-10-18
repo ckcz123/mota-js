@@ -807,6 +807,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['autoSave_s'].xmlText([
         data.nohint||false, this.next]);
       break;
+    case "forbidSave": // 禁止存档
+      this.next = MotaActionBlocks['forbidSave_s'].xmlText([
+        data.forbid||false, this.next]);
+      break;
     case "callLoad": // 呼出读档界面
       this.next = MotaActionBlocks['callLoad_s'].xmlText([
         this.next]);

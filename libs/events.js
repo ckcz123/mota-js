@@ -87,21 +87,12 @@ events.prototype._startGame_setHard = function () {
 
 events.prototype._startGame_afterStart = function (callback) {
     core.ui.closePanel();
-    this._startGame_statusBar();
     core.changeFloor(core.firstData.floorId, null, core.firstData.hero.loc, null, function () {
         // 插入一个空事件避免直接回放录像出错
         core.insertAction([]);
         if (callback) callback();
     });
     this._startGame_upload();
-}
-
-// 开始游戏时是否显示状态栏
-events.prototype._startGame_statusBar = function () {
-    if (core.flags.startUsingCanvas)
-        core.hideStatusBar();
-    else
-        core.showStatusBar();
 }
 
 events.prototype._startGame_upload = function () {
@@ -2269,6 +2260,11 @@ events.prototype._action_autoSave = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_forbidSave = function (data, x, y, prefix) {
+    core.setFlag('__forbidSave__', data.forbid || null);
+    core.doAction();
+}
+
 events.prototype._action_callLoad = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     var e = core.clone(core.status.event.data);
@@ -2523,6 +2519,10 @@ events.prototype.openKeyBoard = function (fromUserAction) {
 ////// 点击保存按钮时的打开操作 //////
 events.prototype.save = function (fromUserAction) {
     if (core.isReplaying()) return;
+    if (core.hasFlag('__forbidSave__')) {
+        core.drawTip('当前禁止存档');
+        return;
+    }
     if (core.status.event.id == 'save' && core.events.recoverEvents(core.status.event.interval))
         return;
     if (!this._checkStatus('save', fromUserAction)) return;

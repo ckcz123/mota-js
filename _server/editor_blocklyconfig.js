@@ -205,6 +205,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
       MotaActionBlocks['autoSave_s'].xmlText(),
+      MotaActionBlocks['forbidSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
     ],
     'UI绘制':[

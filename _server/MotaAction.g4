@@ -727,6 +727,7 @@ action
     |   callBook_s
     |   callSave_s
     |   autoSave_s
+    |   forbidSave_s
     |   callLoad_s
     |   previewUI_s
     |   clearMap_s
@@ -2656,6 +2657,21 @@ colour : this.soundColor
 default : [false]
 Bool_0 = Bool_0 ? (', "nohint": true') : '';
 var code = '{"type": "autoSave"'+Bool_0+'},\n';
+return code;
+*/;
+
+
+forbidSave_s
+    :   '是否禁止存档' Bool Newline
+
+
+/* forbidSave_s
+tooltip : forbidSave: 禁止存档
+helpUrl : /_docs/#/instruction
+colour : this.soundColor
+default : [false]
+Bool_0 = Bool_0 ? (', "forbid": true') : '';
+var code = '{"type": "forbidSave"'+Bool_0+'},\n';
 return code;
 */;
 

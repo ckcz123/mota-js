@@ -1276,6 +1276,9 @@ control.prototype.startReplay = function (list) {
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
+    core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
+    core.setOpacity('replay', 0.6);
+    this._replay_drawProgress();
     core.updateStatusBar();
     core.drawTip("开始播放");
     this.replay();
@@ -1359,6 +1362,7 @@ control.prototype.stopReplay = function (force) {
     core.status.replay.speed=1.0;
     core.status.replay.steps = 0;
     core.status.replay.save = [];
+    core.deleteCanvas('replay');
     core.updateStatusBar();
     core.drawTip("停止播放并恢复游戏");
 }
@@ -1384,6 +1388,9 @@ control.prototype.rewindReplay = function () {
             "steps": data.replay.steps,
             "save": save
         }
+        core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
+        core.setOpacity('replay', 0.6);
+        core.control._replay_drawProgress();
         core.updateStatusBar();
         core.drawTip("成功回退到上一个节点");
     });
@@ -1466,6 +1473,7 @@ control.prototype.replay = function (force) {
     if (!core.isPlaying() || !core.isReplaying()
          || core.status.replay.animate || core.status.event.id) return;
     if (core.status.replay.pausing && !force) return;
+    this._replay_drawProgress();
     if (core.status.replay.toReplay.length==0)
         return this._replay_finished();
     this._replay_save();
@@ -1559,6 +1567,15 @@ control.prototype._replay_error = function (action) {
         core.ui.closePanel();
         core.stopReplay(true);
     });
+}
+
+control.prototype._replay_drawProgress = function () {
+    var total = core.status.replay.totalList.length, left = total - core.status.replay.toReplay.length;
+    var content = '播放进度：' + left + '/' + total + '（'+(left/total*100).toFixed(2)+'%）';
+    var width = 26 + core.calWidth('replay', content, "16px Arial");
+    core.clearMap('replay');
+    core.fillRect('replay', 0, 0, width, 40, '#000000');
+    core.fillText('replay', content, 16, 27, '#FFFFFF');
 }
 
 control.prototype.__replay_getTimeout = function () {
@@ -1727,6 +1744,7 @@ control.prototype._replayAction_key = function (action) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
+    if (core.hasFlag('__forbidSave__')) return;
     var x=null;
     if (removeLast) {
         x=core.status.route.pop();

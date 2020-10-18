@@ -470,7 +470,7 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
         return clearAndReturn();
     }
 
-    if (id == 'steelDoor' && core.flags.steelDoorWithoutKey)
+    if (id.indexOf('steelDoor') === 0 && core.flags.steelDoorWithoutKey)
         needKey = false;
     var doorInfo = core.getBlockById(id).event;
     if (doorInfo == null || doorInfo.doorInfo == null)

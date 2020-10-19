@@ -2712,6 +2712,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
         core.statusBar.image.shop.src = core.statusBar.icons.floor.src;
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
+        core.statusBar.image.save.style.opacity = 1;
         core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
         core.statusBar.image.settings.src = core.statusBar.icons.save.src;
     }
@@ -2730,6 +2731,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
         core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
         core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
+        core.statusBar.image.save.style.opacity = core.hasFlag('__forbidSave__') ? 0.3 : 1;
         core.statusBar.image.load.src = core.statusBar.icons.load.src;
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
     }

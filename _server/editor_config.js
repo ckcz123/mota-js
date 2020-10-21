@@ -11,8 +11,14 @@ editor_config.prototype.load = function(callback) {
             _this.config = {};
             _this.save(callback);
         } else {
-            _this.config = JSON.parse(d);
-            if (callback) callback();
+            try {
+                _this.config = JSON.parse(d);
+                if (callback) callback();
+            } catch (e) {
+                console.error(e);
+                _this.config = {};
+                _this.save(callback);
+            }
         }
     });
 }
@@ -32,11 +38,12 @@ editor_config.prototype.save = function(callback) {
     if (this._isWriting) return;
     try {
         this._isWriting = true;
-        fs.writeFile(this.address, JSON.stringify(this.config) ,'utf-8', (function(e) {
-            this._isWriting = false;
+        var _this = this;
+        fs.writeFile(this.address, JSON.stringify(this.config) ,'utf-8', function(e) {
+            _this._isWriting = false;
             if (e) console.error("写入配置文件失败");
             if (callback instanceof Function) callback();
-        }).bind(this))
+        })
     } catch (e) {
         this._isWriting = false;
         console.error(e);

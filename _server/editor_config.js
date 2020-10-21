@@ -32,11 +32,11 @@ editor_config.prototype.save = function(callback) {
     if (this._isWriting) return;
     try {
         this._isWriting = true;
-        fs.writeFile(this.address, JSON.stringify(this.config) ,'utf-8', function(e) {
+        fs.writeFile(this.address, JSON.stringify(this.config) ,'utf-8', (function(e) {
             this._isWriting = false;
             if (e) console.error("写入配置文件失败");
             if (callback instanceof Function) callback();
-        })
+        }).bind(this))
     } catch (e) {
         this._isWriting = false;
         console.error(e);

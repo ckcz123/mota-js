@@ -3275,7 +3275,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "loadMap": {
           "!doc": "将存档中的地图信息重新读取出来", 
-          "!type": "fn(data?: ?, floorId?: string)"
+          "!type": "fn(data?: ?, floorId?: string, flags?: ?)"
         }, 
         "setBlock": {
           "!doc": "转变图块<br/>例如：core.setBlock(1, 0, 0); // 把地图左上角变成黄墙<br/>number: 新图块的数字（也支持纯数字字符串如'1'）或id<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图", 

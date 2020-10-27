@@ -255,12 +255,20 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		flags.__visited__ = flags.__visited__ || {};
 		flags.__removed__ = flags.__removed__ || [];
 		flags.__disabled__ = flags.__disabled__ || {};
+		flags.__leaveLoc__ = flags.__leaveLoc__ || {};
 		for (var i = fromIndex; i <= toIndex; ++i) {
 			var floorId = core.floorIds[i];
 			if (core.status.maps[floorId].deleted) continue;
 			delete flags.__visited__[floorId];
 			flags.__removed__.push(floorId);
 			delete flags.__disabled__[floorId];
+			delete flags.__leaveLoc__[floorId];
+			(core.status.autoEvents || []).forEach(function (event) {
+				if (event.floorId == floorId && event.currentFloor) {
+					core.autoEventExecuting(event.symbol, false);
+					core.autoEventExecuted(event.symbol, false);
+				} 
+			});
 			core.status.maps[floorId].deleted = true;
 			core.status.maps[floorId].canFlyTo = false;
 			core.status.maps[floorId].canFlyFrom = false;

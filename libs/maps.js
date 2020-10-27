@@ -360,7 +360,7 @@ maps.prototype.saveMap = function (floorId) {
     }
     // 砍层状态：直接返回
     if ((flags.__removed__ || []).indexOf(floorId) >= 0) {
-        return { deleted: true, canFlyTo: false, canFlyFrom: false, cannotViewMap: true };
+        return {};
     }
 
     var map = maps[floorId];
@@ -385,10 +385,13 @@ maps.prototype._compressFloorData = function (map, floor) {
 }
 
 ////// 将存档中的地图信息重新读取出来 //////
-maps.prototype.loadMap = function (data, floorId) {
+maps.prototype.loadMap = function (data, floorId, flags) {
     if (!floorId) {
         var map = {};
         core.floorIds.forEach(function (id) {
+            if (core.inArray((flags||{}).__removed__, id)) {
+                data[id] = { deleted: true, canFlyTo: false, canFlyFrom: false, cannotViewMap: true };
+            }
             map[id] = core.maps.loadFloor(id, data[id]);
         })
         return map;

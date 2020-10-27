@@ -1738,7 +1738,7 @@ declare class maps {
     saveMap(floorId?: string): any
 
     /** 将存档中的地图信息重新读取出来 */
-    loadMap(data?: any, floorId?: string): any
+    loadMap(data?: any, floorId?: string, flags?: any): any
 
     /** 更改地图画布的尺寸 */
     resizeMap(floorId?: string): void

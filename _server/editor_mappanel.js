@@ -611,7 +611,8 @@ editor_mappanel_wrapper = function (editor) {
                 "delayExecute": false,
                 "multiExecute": false,
                 "data": [
-                    {"type": "openDoor"}
+                    {"type": "openDoor"},
+                    {"type": "setValue", "name": doorFlag, "operator": "=", "value": "null"},
                 ]
             }
         };

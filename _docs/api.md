@@ -1593,7 +1593,7 @@ callback: 落地或淡出后的回调函数，可选
 loadFloor: fn(floorId?: string, map?: ?)
 从文件或存档中加载某个楼层
 
-loadMap: fn(data?: ?, floorId?: string)
+loadMap: fn(data?: ?, floorId?: string, flags?: ?)
 将存档中的地图信息重新读取出来
 
 moveBlock: fn(x: number, y: number, steps: [string], time?: number, keep?: bool, callback?: fn())

@@ -1102,15 +1102,23 @@ events.prototype.checkAutoEvents = function () {
 }
 
 events.prototype.autoEventExecuting = function (symbol, value) {
-    var name = '_executing_autoEvent_' + symbol;
-    if (value == null) return core.hasFlag(name);
-    else core.setFlag(name, value || null);
+    var aei = core.getFlag('__aei__', []);
+    if (value == null) return aei.indexOf(symbol) >= 0;
+    else {
+        aei = aei.filter(function (one) { return one != symbol; });
+        if (value) aei.push(symbol);
+        core.setFlag('__aei__', aei);
+    }
 }
 
 events.prototype.autoEventExecuted = function (symbol, value) {
-    var name = '_executed_autoEvent_' + symbol;
-    if (value == null) return core.hasFlag(name);
-    else core.setFlag(name, value || null);
+    var aed = core.getFlag('__aed__', []);
+    if (value == null) return aed.indexOf(symbol) >= 0;
+    else {
+        aed = aed.filter(function (one) { return one != symbol; });
+        if (value) aed.push(symbol);
+        core.setFlag('__aed__', aed);
+    }
 }
 
 events.prototype.pushEventLoc = function (x, y, floorId) {

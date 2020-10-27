@@ -81,11 +81,26 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     if (style) core.setFillStyle(name, style);
     if (font) core.setFont(name, font);
     var ctx = this.getContextByName(name);
-    if (ctx) {
-        // 如果存在最大宽度
-        if (maxWidth != null) {
-            this.setFontForMaxWidth(ctx, text, maxWidth);
+    if (!ctx) return;
+    var currentStyle = ctx.fillStyle;
+    text = (text + "").replace(/\\r/g, '\r');
+    var index = text.indexOf('\r');
+    if (maxWidth != null) {
+        this.setFontForMaxWidth(ctx, index >= 0 ? text.replace(/\r(\[.*\])?/g, "") : text, maxWidth);
+    }
+    if (index >= 0) {
+        text = text.replace(/\r(?!\[.*\])/g, "\r[" + currentStyle + "]");
+        var colorArray = text.match(/(?<=\r\[).*(?=\])/g);
+        var textArray = text.split(/\r\[.*\]/);
+        var width = 0;
+        for (var i = 0; i < textArray.length; i++) {
+            var subtext = textArray[i];
+            if (colorArray[i-1]) ctx.fillStyle = colorArray[i-1];
+            width += core.calWidth(ctx, subtext, x, y);
+            ctx.fillText(subtext, x + width, y);
         }
+        ctx.fillStyle = currentStyle;
+    } else {
         ctx.fillText(text, x, y);
     }
 }
@@ -1576,8 +1591,8 @@ ui.prototype.drawChoices = function(content, choices) {
 }
 
 ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
-    // 宽度计算：考虑选项的长度
-    var width = 246;
+    // 宽度计算：考虑提示文字和选项的长度
+    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
     core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
@@ -1759,6 +1774,7 @@ ui.prototype._drawSwitchs = function() {
         "临界/领域： "+(core.flags.displayCritical ? "[ON]" : "[OFF]")+" "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "血瓶绕路： "+(core.hasFlag('__potionNoRouting__') ? "[ON]":"[OFF]"),
         "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
+        "左撇模式： "+(core.flags.leftHandPrefer ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];
     this.drawChoices(null, choices);

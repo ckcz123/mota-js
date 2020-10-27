@@ -1176,6 +1176,7 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
 
     for (var x=startX;x<endX;x++) {
         for (var y=startY;y<endY;y++) {
+            if (core.noPass(x, y, floorId)) continue;
             var damage = core.status.checkBlock.damage[x+","+y]||0;
             if (damage>0) { // 该点伤害
                 damage = core.formatBigNumber(damage, true);

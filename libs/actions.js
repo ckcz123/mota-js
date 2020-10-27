@@ -125,9 +125,37 @@ actions.prototype._sys_checkReplay = function () {
     if (this._checkReplaying()) return true;
 }
 
+////// 检查左撇子模式
+actions.prototype.__checkLeftHandPrefer = function (e) {
+    if (!core.flags.leftHandPrefer) return e;
+    var map = {
+        87: 38, // W -> up 
+        83: 40, // S -> down
+        65: 37, // A -> left
+        68: 39, // D -> right
+        73: 87, // I -> W
+        74: 65, // J -> A
+        75: 83, // K -> S
+        76: 68, // L -> D
+    }
+    var newEvent = {};
+    for (var one in e) {
+        if (!(e[one] instanceof Function)) {
+            newEvent[one] = e[one];
+        }
+    };
+    ["stopPropagation", "stopImmediatePropagation", "preventDefault"].forEach(function (one) {
+        newEvent[one] = function () {
+            return e[one]();
+        }
+    });
+    newEvent.keyCode = map[e.keyCode] || e.keyCode;
+    return newEvent;
+}
+
 ////// 按下某个键时 //////
 actions.prototype.onkeyDown = function (e) {
-    this.doRegisteredAction('onkeyDown', e);
+    this.doRegisteredAction('onkeyDown', this.__checkLeftHandPrefer(e));
 }
 
 actions.prototype._sys_onkeyDown = function (e) {
@@ -150,7 +178,7 @@ actions.prototype._sys_onkeyDown = function (e) {
 
 ////// 放开某个键时 //////
 actions.prototype.onkeyUp = function (e) {
-    this.doRegisteredAction('onkeyUp', e);
+    this.doRegisteredAction('onkeyUp', this.__checkLeftHandPrefer(e));
 }
 
 actions.prototype._sys_onkeyUp_replay = function (e) {
@@ -1994,6 +2022,8 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 8:
                 return this._clickSwitchs_clickMove();
             case 9:
+                return this._clickSwitchs_leftHandPrefer();
+            case 10:
                 core.status.event.selection = 0;
                 core.ui._drawSettings();
                 break;
@@ -2096,6 +2126,15 @@ actions.prototype._clickSwitchs_potionNoRouting = function () {
 actions.prototype._clickSwitchs_clickMove = function () {
     if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
     else core.setFlag('__noClickMove__', true);
+    core.ui._drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_leftHandPrefer = function () {
+    core.flags.leftHandPrefer = !core.flags.leftHandPrefer;
+    core.setLocalStorage('leftHandPrefer', core.flags.leftHandPrefer);
+    if (core.flags.leftHandPrefer) {
+        core.myconfirm("左撇子模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。")
+    }
     core.ui._drawSwitchs();
 }
 

@@ -2496,8 +2496,8 @@ maps.prototype.drawAnimate = function (name, x, y, alignWindow, callback) {
         centerX += core.bigmap.offsetX;
         centerY += core.bigmap.offsetY;
     }
-    // 播放音效
-    core.playSound(animate.se);
+    animate.se = animate.se || {};
+    if (typeof animate.se == 'string') animate.se = {1: animate.se};
 
     var id = setTimeout(null);
     core.status.animateObjs.push({
@@ -2524,8 +2524,8 @@ maps.prototype.drawHeroAnimate = function (name, callback) {
 
     // 开始绘制
     var animate = core.material.animates[name];
-    // 播放音效
-    core.playSound(animate.se);
+    animate.se = animate.se || {};
+    if (typeof animate.se == 'string') animate.se = {1: animate.se};
 
     var id = setTimeout(null);
     core.status.animateObjs.push({
@@ -2544,6 +2544,7 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
     var ctx = core.getContextByName(name);
     if (!ctx) return;
     var frame = animate.frames[index % animate.frame];
+    core.playSound((animate.se||{})[index % animate.frame + 1]);
     var ratio = animate.ratio;
     frame.forEach(function (t) {
         var image = animate.images[t.index];

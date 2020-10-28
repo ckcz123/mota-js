@@ -3140,12 +3140,22 @@ events.prototype._checkLvUp_check = function () {
 
 ////// 尝试使用道具 //////
 events.prototype.tryUseItem = function (itemId) {
-    core.ui.closePanel();
-
-    if (itemId == 'book') return core.openBook(false);
-    if (itemId == 'fly') return core.useFly(false);
-    if (itemId == 'centerFly') return core.ui._drawCenterFly();
-
-    if (core.canUseItem(itemId)) core.useItem(itemId);
-    else core.drawTip("当前无法使用" + core.material.items[itemId].name);
+    if (itemId == 'book') {
+        core.ui.closePanel();
+        return core.openBook(false);
+    }
+    if (itemId == 'fly') {
+        core.ui.closePanel();
+        return core.useFly(false);
+    }
+    if (itemId == 'centerFly') {
+        core.ui.closePanel();
+        return core.ui._drawCenterFly();
+    }
+    if (core.canUseItem(itemId)) {
+        core.ui.closePanel();
+        core.useItem(itemId);
+    } else {
+        core.drawTip("当前无法使用" + core.material.items[itemId].name);
+    }
 }

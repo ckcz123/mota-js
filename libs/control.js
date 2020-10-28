@@ -1071,8 +1071,8 @@ control.prototype.checkBlock = function () {
             core.updateStatusBar();
         }
     }
-    this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
+    this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
 }
 
 control.prototype._checkBlock_disableQuickShop = function () {

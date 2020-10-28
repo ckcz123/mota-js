@@ -1776,7 +1776,7 @@ ui.prototype._drawSwitchs = function() {
         "临界/领域： "+(core.flags.displayCritical ? "[ON]" : "[OFF]")+" "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "血瓶绕路： "+(core.hasFlag('__potionNoRouting__') ? "[ON]":"[OFF]"),
         "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
-        "左撇模式： "+(core.flags.leftHandPrefer ? "[ON]":"[OFF]"),
+        "左手模式： "+(core.flags.leftHandPrefer ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];
     this.drawChoices(null, choices);

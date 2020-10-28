@@ -125,7 +125,7 @@ actions.prototype._sys_checkReplay = function () {
     if (this._checkReplaying()) return true;
 }
 
-////// 检查左撇子模式
+////// 检查左手模式
 actions.prototype.__checkLeftHandPrefer = function (e) {
     if (!core.flags.leftHandPrefer) return e;
     var map = {
@@ -2133,7 +2133,7 @@ actions.prototype._clickSwitchs_leftHandPrefer = function () {
     core.flags.leftHandPrefer = !core.flags.leftHandPrefer;
     core.setLocalStorage('leftHandPrefer', core.flags.leftHandPrefer);
     if (core.flags.leftHandPrefer) {
-        core.myconfirm("左撇子模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。")
+        core.myconfirm("左手模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。")
     }
     core.ui._drawSwitchs();
 }

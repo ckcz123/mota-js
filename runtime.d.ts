@@ -2123,7 +2123,7 @@ declare class ui {
     /** 设置某个canvas的baseline */
     setTextBaseline(name: string | CanvasRenderingContext2D, baseline: any): void
 
-    /** 字符串自动换行的分割；具有标点禁则功能 */
+    /** 字符串自动换行的分割 */
     splitLines(name: string | CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string): void
 
     /** 在某个canvas上绘制一个图标 */

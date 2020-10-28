@@ -3434,7 +3434,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D)"
         }, 
         "splitLines": {
-          "!doc": "字符串自动换行的分割；具有标点禁则功能", 
+          "!doc": "字符串自动换行的分割", 
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string)"
         }, 
         "setAlpha": {

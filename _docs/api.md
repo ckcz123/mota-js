@@ -1930,7 +1930,7 @@ baseline: 可为alphabetic, top, hanging, middle, ideographic, bottom
 参考资料：https://www.w3school.com.cn/tags/canvas_textbaseline.asp
 
 splitLines: fn(name: string|CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string)
-字符串自动换行的分割；具有标点禁则功能
+字符串自动换行的分割
 
 strokeArc: fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: number, start: number, end: number, style?: string, lineWidth?: number)
 在某个canvas上绘制一段弧

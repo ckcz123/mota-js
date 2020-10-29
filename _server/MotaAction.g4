@@ -1864,7 +1864,6 @@ tooltip : showImage：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
-colour : this.printColor
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1885,7 +1884,6 @@ tooltip : showImage_1：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
-colour : this.printColor
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1907,7 +1905,6 @@ showTextImage_s
 tooltip : showTextImage：显示图片化文本
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
-colour : this.printColor
 default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1.4,"null",1,0,false]
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1924,7 +1921,6 @@ hideImage_s
 /* hideImage_s
 tooltip : hideImage：清除图片
 helpUrl : /_docs/#/instruction
-colour : this.printColor
 default : [1,0,false]
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "hideImage", "code": '+NInt_0+', "time": '+Int_0+async+'},\n';
@@ -1940,7 +1936,6 @@ tooltip : showGif：显示动图
 helpUrl : /_docs/#/instruction
 default : ["","",""]
 allImages : ['EvalString_0']
-colour : this.printColor
 previewBlock : true
 EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
@@ -1957,7 +1952,6 @@ moveImage_s
 tooltip : moveImage：图片移动
 helpUrl : /_docs/#/instruction
 default : [1,'','','',500,false]
-colour : this.printColor
 var toloc = '';
 if (PosString_0 && PosString_1)
   toloc = ', "to": ['+PosString_0+','+PosString_1+']';
@@ -2732,7 +2726,7 @@ clearMap_s
 /* clearMap_s
 tooltip : clearMap: 清除画布
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 default : ["", "", "", ""]
 previewBlock : true
 PosString_0 = PosString_0 && (', "x": ' + PosString_0);
@@ -2751,7 +2745,7 @@ setAttribute_s
 tooltip : setAttribute：设置画布属性
 helpUrl : /_docs/#/instruction
 previewBlock : true
-colour : this.subColor
+colour : this.uiColor
 default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null,""]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 TextBaseline_List_0 = TextBaseline_List_0==='null'?'': ', "baseline": "'+TextBaseline_List_0+'"';
@@ -2776,7 +2770,7 @@ fillText_s
 /* fillText_s
 tooltip : fillText：绘制一行文本；可以设置最大宽度进行放缩
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","",'rgba(255,255,255,1)',"","","绘制一行文本"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2792,7 +2786,7 @@ fillBoldText_s
 /* fillBoldText_s
 tooltip : fillBoldText：绘制一行描边文本
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","",'rgba(255,255,255,1)',"",'rgba(0,0,0,1)',"","绘制一行描边文本"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2810,7 +2804,7 @@ tooltip : drawTextContent：绘制多行文本
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
 menu : [['预览多行文本','editor_blockly.previewBlock(block)']]
-colour : this.subColor
+colour : this.uiColor
 default : ["绘制多行文本\\n可双击编辑","0","0","","",'rgba(255,255,255,1)',null,"","",false]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 Bool_0 = Bool_0 ?  (', "bold": true') : '';
@@ -2828,7 +2822,7 @@ fillRect_s
 /* fillRect_s
 tooltip : fillRect：绘制矩形
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","","","rgba(255,255,255,1)"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2844,7 +2838,7 @@ strokeRect_s
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2861,7 +2855,7 @@ drawLine_s
 /* drawLine_s
 tooltip : drawLine：绘制线段
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2876,7 +2870,7 @@ drawArrow_s
 /* drawArrow_s
 tooltip : drawArrow：绘制箭头
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2892,7 +2886,7 @@ fillPolygon_s
 /* fillPolygon_s
 tooltip : fillPolygon：绘制多边形
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0,0,100","0,100,0","","rgba(255,255,255,1)"]
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
@@ -2913,7 +2907,7 @@ strokePolygon_s
 /* strokePolygon_s
 tooltip : strokePolygon：绘制多边形边框
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0,0,100","0,100,0","","rgba(255,255,255,1)",""]
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
@@ -2934,7 +2928,7 @@ fillEllipse_s
 /* fillEllipse_s
 tooltip : fillEllipse：绘制椭圆
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","100","100","0","","rgba(255,255,255,1)"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2949,7 +2943,7 @@ strokeEllipse_s
 /* strokeEllipse_s
 tooltip : strokeEllipse：绘制椭圆边框
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","100","100","0","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2965,7 +2959,7 @@ fillArc_s
 /* fillArc_s
 tooltip : fillArc：绘制扇形
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 default : ["0","0","100","0","90","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 var code = '{"type": "fillArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+'},\n';
@@ -2979,7 +2973,7 @@ strokeArc_s
 /* strokeArc_s
 tooltip : strokeArc：绘制弧
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 default : ["0","0","100","0","90","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
@@ -2999,7 +2993,7 @@ helpUrl : /_docs/#/instruction
 previewBlock : true
 allImages : ['EvalString_0']
 default : ["bg.jpg","null","0","0","","",""]
-colour : this.subColor
+colour : this.uiColor
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
@@ -3019,7 +3013,7 @@ drawImage_1_s
 tooltip : drawImage：绘制图片
 helpUrl : /_docs/#/instruction
 default : ["bg.jpg","null","0","0","32","32","0","0","32","32",""]
-colour : this.subColor
+colour : this.uiColor
 allImages : ['EvalString_0']
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
@@ -3042,7 +3036,7 @@ helpUrl : /_docs/#/instruction
 default : ["yellowKey",0,"0","0","",""]
 previewBlock : true
 allIds : ['IdString_0']
-colour : this.subColor
+colour : this.uiColor
 Int_0 = Int_0 ? (', "frame": '+Int_0) : '';
 PosString_2 = PosString_2 ? (', "width": '+PosString_2) : '';
 PosString_3 = PosString_3 ? (', "height": '+PosString_3) : '';
@@ -3058,7 +3052,7 @@ drawBackground_s
 tooltip : drawBackground：绘制背景
 helpUrl : /_docs/#/instruction
 default : ["winskin.png","rgba(255,255,255,1)","0","0","100","100"]
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 var colorRe = MotaActionFunctions.pattern.colorRe;
 if (colorRe.test(EvalString_0)) {
@@ -3083,7 +3077,7 @@ tooltip : drawSelector：绘制闪烁光标
 helpUrl : /_docs/#/instruction
 previewBlock : true
 default : ["winskin.png","1","0","0","100","100"]
-colour : this.subColor
+colour : this.uiColor
 var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "code": '+Int_0+', "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
 return code;
 */;
@@ -3097,7 +3091,7 @@ tooltip : drawSelector：清除闪烁光标
 helpUrl : /_docs/#/instruction
 default : ["1"]
 previewBlock : true
-colour : this.subColor
+colour : this.uiColor
 var code = '{"type": "drawSelector", "code": '+Int_0+'},\n';
 return code;
 */;
@@ -3594,13 +3588,13 @@ this.evisitor.statementColor=70;
 this.evisitor.entryColor=250;
 
 this.evisitor.idstring_eColor=310;
-this.evisitor.subColor=190;
-this.evisitor.printColor=70;
+this.evisitor.subColor=250;
 this.evisitor.dataColor=130;
 this.evisitor.eventColor=220;
 this.evisitor.soundColor=20;
 this.evisitor.commentColor=285;
 this.evisitor.mapColor=175;
+this.evisitor.uiColor=359;
 */
 
 /* Function_1

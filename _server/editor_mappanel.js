@@ -157,7 +157,7 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.map_onmove = function (e) {
         editor.uivalues.lastMoveE=e;
-        if (!editor.uivalues.bigmap && !editor.isMobile) {
+        if (!editor.uivalues.bigmap && !editor.isMobile && editor.dom.midMenu.style.display == 'none') {
             var loc = editor.uifunctions.eToLoc(e);
             var pos = editor.uifunctions.locToPos(loc);
             _setMarksHightlight(Array.from(editor.dom.mapColMark.children[0].rows[0].cells), pos.x);

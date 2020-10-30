@@ -332,7 +332,7 @@ core.prototype._init_sys_flags = function () {
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     if (main.mode != 'editor') {
         core.domStyle.scale = core.getLocalStorage('scale', 1);
-        core.domStyle.ratio = window.devicePixelRatio || 1;
+        core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, 2);
     }
 }
 

@@ -1267,5 +1267,48 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return true;
 	}, 100);
 
+},
+    "heroFourFrames": function () {
+	// 样板的勇士/跟随者移动时只使用2、4两帧，观感较差。本插件可以将四帧全用上。
+
+	// 是否启用本插件
+	var __enable = true;
+	if (!__enable) return;
+
+	["up", "down", "left", "right"].forEach(function (one) {
+		// 指定中间帧动画
+		core.material.icons.hero[one].midFoot = 2;
+	});
+
+	var heroMoving = function (timestamp) {
+		if (core.status.heroMoving <= 0) return;
+		if (timestamp - core.animateFrame.moveTime > core.values.moveSpeed) {
+			core.animateFrame.leftLeg++;
+			core.animateFrame.moveTime = timestamp;
+		}
+		core.drawHero(['stop', 'leftFoot', 'midFoot', 'rightFoot'][core.animateFrame.leftLeg % 4], 4 * core.status.heroMoving);
+	}
+	core.registerAnimationFrame('heroMoving', true, heroMoving);
+
+	core.events._eventMoveHero_moving = function (step, moveSteps) {
+		var direction = moveSteps[0],
+			x = core.getHeroLoc('x'),
+			y = core.getHeroLoc('y'); // ------ 前进/后退
+		var o = direction == 'backward' ? -1 : 1;
+		if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+		core.setHeroLoc('direction', direction); // if (step <= 4) core.drawHero('leftFoot', 4 * o * step); else if (step <= 8) core.drawHero('rightFoot', 4 * o * step);
+		if (step <= 4) core.drawHero('stop', 4 * o * step);
+		else if (step <= 8) core.drawHero('leftFoot', 4 * o * step);
+		else if (step <= 12) core.drawHero('midFoot', 4 * o * (step - 8));
+		else if (step <= 16) core.drawHero('rightFoot', 4 * o * (step - 8)); // if (step == 8) {
+		if (step == 8 || step == 16) {
+			core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
+			core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+			core.updateFollowers();
+			moveSteps.shift(); // return true;
+			return step == 16;
+		}
+		return false;
+	}
 }
 }

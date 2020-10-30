@@ -1048,7 +1048,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
     config = core.clone(config || {});
     config.left = config.left || 0;
-    config.right = config.left + (config.maxWidth == null ? (ctx != null ? ctx.canvas.width : core.__PIXELS__) : config.maxWidth)
+    config.right = config.left + (config.maxWidth == null ? core.__PIXELS__ : config.maxWidth)
     config.top = config.top || 0;
     config.color = core.arrayToRGBA(config.color || textAttribute.text);
     if (config.bold == null) config.bold = textAttribute.bold;
@@ -1175,8 +1175,8 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
         if (c == 'z') return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // 检查是不是自动换行
+    var charwidth = core.calWidth(tempCtx, ch) + config.interval;
     if (config.maxWidth != null) {
-        var charwidth = core.calWidth(tempCtx, ch) + config.interval;
         if (config.offsetX + charwidth > config.maxWidth) {
             // --- 当前应当换行，然而还是检查一下是否是forbidStart
             if (!config.forceChangeLine && forbidStart.indexOf(ch) >= 0) {

@@ -203,9 +203,9 @@ dynamicMapEditor.prototype.openToolBox = function() {
 	this.selectedIndex = -1;
 	this.dom.style.display = this.isUsingTool ? 'block' : 'none';
 	this.dom.style.width = core.dom.statusCanvas.style.width;
-	this.dom.width = core.dom.statusCanvas.width;
+	this.dom.width = core.dom.statusCanvas.width / core.domStyle.ratio;
 	this.dom.style.height = core.dom.statusCanvas.style.height;
-	this.dom.height = core.dom.statusCanvas.height;
+	this.dom.height = core.dom.statusCanvas.height / core.domStyle.ratio;
 	this.offsetX = this.dom.width / 2 - 60;
 	this.refreshToolBox();
 	if (this.isUsingTool) this.showHelp();

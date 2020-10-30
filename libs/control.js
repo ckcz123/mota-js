@@ -3045,15 +3045,13 @@ control.prototype._resize_statusBar = function (obj) {
     // 自绘状态栏
     if (core.domStyle.isVertical) {
         core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.width = obj.CANVAS_WIDTH;
         core.dom.statusCanvas.style.height = obj.statusBarHeightInVertical - 3 + "px";
-        core.dom.statusCanvas.height = obj.col * 32 + 9;
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.CANVAS_WIDTH, obj.col * 32 + 9);
     }
     else {
         core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.width = obj.BAR_WIDTH;
         core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER + "px";
-        core.dom.statusCanvas.height = obj.CANVAS_WIDTH;
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_WIDTH);
     }
     core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
 }

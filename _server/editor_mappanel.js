@@ -501,9 +501,7 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.hideMidMenu = function () {
         editor.uivalues.lastMoveE={buttons:0,clientX:0,clientY:0};
-        setTimeout(function () {
-            editor.dom.midMenu.style = 'display:none';
-        }, 100)
+        editor.dom.midMenu.style = 'display:none';
     }
 
     /**

@@ -324,6 +324,7 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.firstArrive = [];
     editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
+    editor.currentFloorData.autoEvent = {};
     editor.currentFloorData.changeFloor = {};
     editor.currentFloorData.afterBattle = {};
     editor.currentFloorData.afterGetItem = {};

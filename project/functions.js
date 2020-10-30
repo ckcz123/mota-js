@@ -1285,7 +1285,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var nx = x + core.utils.scan[dir].x,
 					ny = y + core.utils.scan[dir].y,
 					currloc = nx + "," + ny;
-				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+				if (nx < 0 || nx >= width || ny < 0 || ny >= height || !core.canMoveHero(x, y, dir, floorId)) continue;
 				ambush[currloc] = (ambush[currloc] || []).concat([
 					[x, y, id, dir]
 				]);

@@ -139,7 +139,7 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font
     if (!strokeStyle) strokeStyle = '#000000';
     strokeStyle = core.arrayToRGBA(strokeStyle);
     ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2;
     ctx.strokeText(text, x, y);
     ctx.fillStyle = style;
     ctx.fillText(text, x, y);

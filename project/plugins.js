@@ -1272,7 +1272,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 样板的勇士/跟随者移动时只使用2、4两帧，观感较差。本插件可以将四帧全用上。
 
 	// 是否启用本插件
-	var __enable = true;
+	var __enable = false;
 	if (!__enable) return;
 
 	["up", "down", "left", "right"].forEach(function (one) {

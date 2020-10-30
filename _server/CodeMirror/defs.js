@@ -1832,6 +1832,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "number",
           "!doc": "当前界面放缩比例",
         },
+        "ratio": {
+          "!type": "number",
+          "!doc": "高清UI放缩比例"
+        },
+        "hdCanvas": {
+          "!type": "[string]",
+          "!doc": "高清UI的系统画布"
+        },
         "availableScale": {
           "!type": "[number]",
           "!doc": "当前界面支持的放缩比例"

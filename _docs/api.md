@@ -62,6 +62,7 @@ core.platform.useLocalForage    （是否开启了新版存档）
 core.domStyle
 游戏的界面信息，包含如下几个：
 core.domStyle.scale    （当前的放缩比）
+core.domStyle.ratio    （高清UI的放缩比）
 core.domStyle.isVertical    （当前是否是竖屏状态）
 core.domStyle.showStatusBar    （当前是否显示状态栏）
 core.domStyle.toolbarBtn    （当前是否显示工具栏）

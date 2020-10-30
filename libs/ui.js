@@ -1072,14 +1072,20 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.offsetY = 0;
     config.line = 0;
     config.blocks = [];
+    config.isHD = ctx != null && ctx.canvas.hasAttribute('isHD');
 
     // 创建一个新的临时画布
-    var tempCtx = core.createCanvas('__temp__', 0, 0, ctx==null?1:ctx.canvas.width, ctx==null?1:ctx.canvas.height, -1);
+    var tempCtx = document.createElement('canvas').getContext('2d');
+    if (config.isHD) {
+        core.maps._setHDCanvasSize(tempCtx, ctx.canvas.width, ctx.canvas.height);
+    } else {
+        tempCtx.canvas.width = ctx==null?1:ctx.canvas.width;
+        tempCtx.canvas.height = ctx==null?1:ctx.canvas.height;
+    }
     tempCtx.textBaseline = 'top';
     tempCtx.font = this._buildFont(config.fontSize, config.bold, config.italic, config.font);
     tempCtx.fillStyle = config.color;
     config = this._drawTextContent_draw(ctx, tempCtx, content, config);
-    core.deleteCanvas('__temp__');
     return config;
 }
 
@@ -1106,7 +1112,8 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
         if (config.index >= config.blocks.length) return false;
         var block = config.blocks[config.index++];
         if (block != null) {
-            core.drawImage(ctx, tempCtx.canvas, block.left, block.top, block.width, block.height,
+            var ratio = config.isHD ? core.domStyle.ratio : 1;
+            core.drawImage(ctx, tempCtx.canvas, block.left * ratio, block.top * ratio, block.width * ratio, block.height * ratio,
                 config.left + block.left + block.marginLeft, config.top + block.top + block.marginTop,
                 block.width, block.height);
         }
@@ -3161,8 +3168,6 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     var newCanvas = document.createElement("canvas");
     newCanvas.id = name;
     newCanvas.style.display = 'block';
-    newCanvas.width = width;
-    newCanvas.height = height;
     newCanvas.setAttribute("_left", x);
     newCanvas.setAttribute("_top", y);
     newCanvas.style.width = width * core.domStyle.scale + 'px';
@@ -3172,6 +3177,7 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
     core.dymCanvas[name] = newCanvas.getContext('2d');
+    core.maps._setHDCanvasSize(core.dymCanvas[name], width, height);
     core.dom.gameDraw.appendChild(newCanvas);
     return core.dymCanvas[name];
 }
@@ -3196,11 +3202,11 @@ ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
     if (width != null) {
-        if (!styleOnly) ctx.canvas.width = width;
+        if (!styleOnly) core.maps._setHDCanvasSize(ctx, width, null);
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (height != null) {
-        if (!styleOnly) ctx.canvas.height = height;
+        if (!styleOnly) core.maps._setHDCanvasSize(ctx, null, height);
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
     return ctx;

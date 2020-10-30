@@ -87,6 +87,8 @@ function core() {
     // 样式
     this.domStyle = {
         scale: 1.0,
+        ratio: 1.0,
+        hdCanvas: ["damage", "ui", "data"],
         availableScale: [],
         isVertical: false,
         showStatusBar: true,
@@ -249,7 +251,12 @@ core.prototype.init = function (coreData, callback) {
 
     // 初始化画布
     for (var name in core.canvas) {
-        core.canvas[name].canvas.width = core.canvas[name].canvas.height = core.__PIXELS__;
+        if (core.domStyle.hdCanvas.indexOf(name) >= 0)
+            core.maps._setHDCanvasSize(core.canvas[name], core.__PIXELS__, core.__PIXELS__);
+        else {
+            core.canvas[name].canvas.width = core.__PIXELS__;
+            core.canvas[name].canvas.height = core.__PIXELS__;
+        }
     }
 
     core.loader._load(function () {
@@ -325,9 +332,7 @@ core.prototype._init_sys_flags = function () {
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     if (main.mode != 'editor') {
         core.domStyle.scale = core.getLocalStorage('scale', 1);
-        if (core.domStyle.scale != 1) {
-            core.resize();
-        }
+        if (core.flags.enableHDCanvas) core.domStyle.ratio = window.devicePixelRatio || 1;
     }
 }
 

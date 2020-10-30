@@ -33,6 +33,14 @@ maps.prototype._resetFloorImages = function () {
     }
 }
 
+maps.prototype._setHDCanvasSize = function (ctx, width, height) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (width != null) ctx.canvas.width = width * core.domStyle.ratio;
+    if (height != null) ctx.canvas.height = height * core.domStyle.ratio;
+    ctx.scale(core.domStyle.ratio, core.domStyle.ratio);
+    ctx.canvas.setAttribute('isHD', 1);
+}
+
 // ------ 加载地图与地图的存档读档（压缩与解压缩） ------ //
 
 ////// 加载某个楼层（从剧本或存档中） //////
@@ -412,8 +420,12 @@ maps.prototype.resizeMap = function (floorId) {
     var height = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.height * 32;
 
     core.bigmap.canvas.forEach(function (cn) {
-        core.canvas[cn].canvas.setAttribute("width", width);
-        core.canvas[cn].canvas.setAttribute("height", height);
+        if (core.domStyle.hdCanvas.indexOf(cn) >= 0)
+            core.maps._setHDCanvasSize(core.canvas[cn], width, height);
+        else {
+            core.canvas[cn].canvas.width = width;
+            core.canvas[cn].canvas.height = height;
+        }
         core.canvas[cn].canvas.style.width = width * core.domStyle.scale + "px";
         core.canvas[cn].canvas.style.height = height * core.domStyle.scale + "px";
         core.canvas[cn].translate(core.bigmap.v2 ? 32 : 0, core.bigmap.v2 ? 32 : 0);

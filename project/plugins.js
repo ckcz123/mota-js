@@ -339,13 +339,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var canvas = document.createElement('canvas');
 		canvas.id = name;
 		canvas.className = 'gameCanvas';
-		canvas.width = canvas.height = core.__PIXELS__;
 		// 编辑器模式下设置zIndex会导致加入的图层覆盖优先级过高
 		if (main.mode != "editor") canvas.style.zIndex = zIndex || 0;
 		// 将图层插入进游戏内容
 		document.getElementById('gameDraw').appendChild(canvas);
 		var ctx = canvas.getContext('2d');
 		core.canvas[name] = ctx;
+		if (core.domStyle.hdCanvas.indexOf('name') >= 0)
+			core.maps._setHDCanvasSize(ctx, core.__PIXELS__, core.__PIXELS__);
+		else {
+			canvas.width = core.__PIXELS__;
+			canvas.height = core.__PIXELS__;
+		}
 		return canvas;
 	}
 

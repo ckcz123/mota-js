@@ -125,9 +125,37 @@ actions.prototype._sys_checkReplay = function () {
     if (this._checkReplaying()) return true;
 }
 
+////// 检查左手模式
+actions.prototype.__checkLeftHandPrefer = function (e) {
+    if (!core.flags.leftHandPrefer) return e;
+    var map = {
+        87: 38, // W -> up 
+        83: 40, // S -> down
+        65: 37, // A -> left
+        68: 39, // D -> right
+        73: 87, // I -> W
+        74: 65, // J -> A
+        75: 83, // K -> S
+        76: 68, // L -> D
+    }
+    var newEvent = {};
+    for (var one in e) {
+        if (!(e[one] instanceof Function)) {
+            newEvent[one] = e[one];
+        }
+    };
+    ["stopPropagation", "stopImmediatePropagation", "preventDefault"].forEach(function (one) {
+        newEvent[one] = function () {
+            return e[one]();
+        }
+    });
+    newEvent.keyCode = map[e.keyCode] || e.keyCode;
+    return newEvent;
+}
+
 ////// 按下某个键时 //////
 actions.prototype.onkeyDown = function (e) {
-    this.doRegisteredAction('onkeyDown', e);
+    this.doRegisteredAction('onkeyDown', this.__checkLeftHandPrefer(e));
 }
 
 actions.prototype._sys_onkeyDown = function (e) {
@@ -150,7 +178,7 @@ actions.prototype._sys_onkeyDown = function (e) {
 
 ////// 放开某个键时 //////
 actions.prototype.onkeyUp = function (e) {
-    this.doRegisteredAction('onkeyUp', e);
+    this.doRegisteredAction('onkeyUp', this.__checkLeftHandPrefer(e));
 }
 
 actions.prototype._sys_onkeyUp_replay = function (e) {
@@ -423,12 +451,15 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
     // --- wait事件也要提供px和py
     if (core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 1);
         core.setFlag('x', x);
         core.setFlag('y', y);
         core.setFlag('px', px);
         core.setFlag('py', py);
-        core.status.route.push("input:" + (1000000 + 1000 * px + py));
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
     }
@@ -727,10 +758,13 @@ actions.prototype._sys_onmousewheel = function (direct) {
     // wait事件
     if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 0);
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
-        core.status.route.push("input:" + keycode);
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + keycode));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
@@ -980,8 +1014,10 @@ actions.prototype._clickAction = function (x, y) {
                     return;
                 }
                 clearTimeout(core.status.event.interval);
-                // 选择
-                core.status.route.push("choices:" + (y - topIndex));
+                var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+                delete core.status.event.timeout;
+                core.setFlag('timeout', timeout);
+                core.status.route.push("choices:" + (100 * timeout + y - topIndex));
                 core.insertAction(choice.action);
                 core.doAction();
             }
@@ -992,13 +1028,19 @@ actions.prototype._clickAction = function (x, y) {
     if (core.status.event.data.type == 'confirm') {
         if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1) {
             clearTimeout(core.status.event.interval);
-            core.status.route.push("choices:0");
+            var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+            delete core.status.event.timeout;
+            core.setFlag('timeout', timeout);
+            core.status.route.push("choices:" + 100 * timeout);
             core.insertAction(core.status.event.ui.yes);
             core.doAction();
         }
         else if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
             clearTimeout(core.status.event.interval);
-            core.status.route.push("choices:1");
+            var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+            delete core.status.event.timeout;
+            core.setFlag('timeout', timeout);
+            core.status.route.push("choices:" + (100 * timeout + 1));
             core.insertAction(core.status.event.ui.no);
             core.doAction();
         }
@@ -1031,9 +1073,12 @@ actions.prototype._keyUpAction = function (keycode) {
     }
     if (core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
-        core.status.route.push("input:" + keycode);
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + keycode));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
@@ -1047,7 +1092,10 @@ actions.prototype._keyUpAction = function (keycode) {
         return;
     }
     if (core.status.event.data.type == 'confirm'&& (keycode == 13 || keycode == 32 || keycode == 67)) {
-        core.status.route.push("choices:" + core.status.event.selection);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
+        core.setFlag('timeout', timeout);
+        core.status.route.push("choices:" + (100 * timeout + core.status.event.selection));
         if (core.status.event.selection == 0)
             core.insertAction(core.status.event.ui.yes);
         else core.insertAction(core.status.event.ui.no);
@@ -1974,6 +2022,8 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 8:
                 return this._clickSwitchs_clickMove();
             case 9:
+                return this._clickSwitchs_leftHandPrefer();
+            case 10:
                 core.status.event.selection = 0;
                 core.ui._drawSettings();
                 break;
@@ -2076,6 +2126,15 @@ actions.prototype._clickSwitchs_potionNoRouting = function () {
 actions.prototype._clickSwitchs_clickMove = function () {
     if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
     else core.setFlag('__noClickMove__', true);
+    core.ui._drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_leftHandPrefer = function () {
+    core.flags.leftHandPrefer = !core.flags.leftHandPrefer;
+    core.setLocalStorage('leftHandPrefer', core.flags.leftHandPrefer);
+    if (core.flags.leftHandPrefer) {
+        core.myconfirm("左手模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。")
+    }
     core.ui._drawSwitchs();
 }
 

@@ -62,6 +62,7 @@ core.platform.useLocalForage    （是否开启了新版存档）
 core.domStyle
 游戏的界面信息，包含如下几个：
 core.domStyle.scale    （当前的放缩比）
+core.domStyle.ratio    （高清UI的放缩比）
 core.domStyle.isVertical    （当前是否是竖屏状态）
 core.domStyle.showStatusBar    （当前是否显示状态栏）
 core.domStyle.toolbarBtn    （当前是否显示工具栏）
@@ -1593,7 +1594,7 @@ callback: 落地或淡出后的回调函数，可选
 loadFloor: fn(floorId?: string, map?: ?)
 从文件或存档中加载某个楼层
 
-loadMap: fn(data?: ?, floorId?: string)
+loadMap: fn(data?: ?, floorId?: string, flags?: ?)
 将存档中的地图信息重新读取出来
 
 moveBlock: fn(x: number, y: number, steps: [string], time?: number, keep?: bool, callback?: fn())
@@ -1725,9 +1726,6 @@ clearMap: fn(name: string|CanvasRenderingContext2D, x?: number, y?: number, widt
 name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。
 如果name也可以是'all'，若为all则为清空所有系统画布。
 参考资料：https://www.w3school.com.cn/tags/canvas_clearrect.asp
-
-clearTip: fn()
-清除左上角提示内容
 
 clearUI: fn()
 清空UI层内容
@@ -1933,7 +1931,7 @@ baseline: 可为alphabetic, top, hanging, middle, ideographic, bottom
 参考资料：https://www.w3school.com.cn/tags/canvas_textbaseline.asp
 
 splitLines: fn(name: string|CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string)
-字符串自动换行的分割；具有标点禁则功能
+字符串自动换行的分割
 
 strokeArc: fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: number, start: number, end: number, style?: string, lineWidth?: number)
 在某个canvas上绘制一段弧

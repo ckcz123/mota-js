@@ -45,7 +45,6 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"silverSlimelord": {"name":"银怪王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"goldSlimelord": {"name":"金怪王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"skeletonWarrior": {"name":"骷髅士兵","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
-	"ghostWarrior": {"name":"冥队长","hp":100,"atk":120,"def":0,"money":8,"exp":0,"point":0,"special":7},
 	"whiteSlimeman": {"name":"水银战士","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"slimeman": {"name":"影子战士","hp":100,"atk":0,"def":0,"money":11,"exp":0,"point":0,"special":[10,21],"atkValue":2,"defValue":3},
 	"yellowGateKeeper": {"name":"初级卫兵","hp":100,"atk":120,"def":0,"money":10,"exp":0,"point":0,"special":0},

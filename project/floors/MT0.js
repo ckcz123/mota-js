@@ -4,6 +4,7 @@ main.floors.MT0=
     "title": "主塔 0 层",
     "name": "0",
     "canFlyTo": true,
+    "canFlyFrom": true,
     "canUseQuickShop": true,
     "cannotViewMap": false,
     "defaultGround": "ground",

@@ -1738,7 +1738,7 @@ declare class maps {
     saveMap(floorId?: string): any
 
     /** 将存档中的地图信息重新读取出来 */
-    loadMap(data?: any, floorId?: string): any
+    loadMap(data?: any, floorId?: string, flags?: any): any
 
     /** 更改地图画布的尺寸 */
     resizeMap(floorId?: string): void
@@ -2123,7 +2123,7 @@ declare class ui {
     /** 设置某个canvas的baseline */
     setTextBaseline(name: string | CanvasRenderingContext2D, baseline: any): void
 
-    /** 字符串自动换行的分割；具有标点禁则功能 */
+    /** 字符串自动换行的分割 */
     splitLines(name: string | CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string): void
 
     /** 在某个canvas上绘制一个图标 */
@@ -2142,9 +2142,6 @@ declare class ui {
      * @param frame 要绘制图标的第几帧
      */
     drawTip(text: string, id?: string, frame?: number): void
-
-    /** 清除提示内容 */
-    clearTip(): void
 
     /** 地图中间绘制一段文字 */
     drawText(contents: string, callback?: () => any): void

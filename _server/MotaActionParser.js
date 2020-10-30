@@ -725,11 +725,11 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "break": // 跳出循环
       this.next = MotaActionBlocks['break_s'].xmlText([
-        this.next]);
+        data.n || 1, this.next]);
       break;
     case "continue": // 继续执行当前循环
       this.next = MotaActionBlocks['continue_s'].xmlText([
-        this.next]);
+        data.n || 1, this.next]);
       break;
     case "win":
       this.next = MotaActionBlocks['win_s'].xmlText([
@@ -779,11 +779,15 @@ ActionParser.prototype.parseAction = function() {
         for(var ii=data.data.length-1,caseNow;caseNow=data.data[ii];ii--) {
           if (caseNow["case"] == "keyboard") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_1',[
-              caseNow.keycode || "0", this.insertActionList(caseNow.action), case_waitList
+              caseNow.keycode || "0", caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
           } else if (caseNow["case"] == "mouse") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_2',[
-              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], this.insertActionList(caseNow.action), case_waitList
+              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+          } else if (caseNow["case"] == "timeout") {
+            case_waitList = MotaActionFunctions.xmlText('waitContext_3',[
+              caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
           }
         }
@@ -806,6 +810,10 @@ ActionParser.prototype.parseAction = function() {
     case "autoSave": // 自动存档
       this.next = MotaActionBlocks['autoSave_s'].xmlText([
         data.nohint||false, this.next]);
+      break;
+    case "forbidSave": // 禁止存档
+      this.next = MotaActionBlocks['forbidSave_s'].xmlText([
+        data.forbid||false, this.next]);
       break;
     case "callLoad": // 呼出读档界面
       this.next = MotaActionBlocks['callLoad_s'].xmlText([

@@ -4,6 +4,7 @@ main.floors.sample0=
     "title": "样板 0 层",
     "name": "0",
     "canFlyTo": true,
+    "canFlyFrom": true,
     "canUseQuickShop": true,
     "defaultGround": "ground",
     "images": [],

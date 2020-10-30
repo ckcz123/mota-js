@@ -233,13 +233,11 @@ editor_blockly = function () {
 
     editor_blockly.previewBlock = function (b,args) {
 
-        try {
-            // 特殊处理立绘
-            if (b.type == 'textDrawing') {
-                var str = Blockly.JavaScript.blockToCode(b);
-                var list = str.substring(str.indexOf('[')+1, str.lastIndexOf(']')).split(",");
+        var previewTextDrawing = function (content) {
+            var arr = [];
+            content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {        
+                var list = str.split(",");
                 if (list.length == 3 || list.length == 5 || list.length >= 9) {
-                    var arr = [];
                     var name = list[0];
                     var obj = {"type": "drawImage"};
                     if (name.endsWith(":o") || name.endsWith(":x") || name.endsWith(":y")) {
@@ -266,9 +264,17 @@ editor_blockly = function () {
                         obj.angle = parseFloat(list[10]);
                     }
                     arr.push(obj);
-                    console.log(arr);
-                    editor.uievent.previewUI(arr);
                 }
+                return "";
+            });
+            editor.uievent.previewUI(arr);
+            return true;
+        }
+
+        try {
+            // 特殊处理立绘
+            if (b.type == 'textDrawing' || b.type == 'text_2_s') {
+                previewTextDrawing(Blockly.JavaScript.blockToCode(b));
                 return true;
             }
 
@@ -669,6 +675,7 @@ editor_blockly = function () {
             .map(function (key) { return maps_90f36752_8815_4be8_b32b_d7fad1d0542e[key]; })
             .filter(function (one) { return one.doorInfo != null; })
             .map(function (one) { return one.id; }));
+        namesObj.allEvents = Object.keys(core.events.commonEvent);
         var filter = function (list, content) {
           return list.filter(function (one) {
             return one != content && one.startsWith(content);
@@ -684,7 +691,7 @@ editor_blockly = function () {
         // 对音效进行补全
         // 对全局商店进行补全
         // 对楼层名进行补全
-        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors'][ii];ii++){
+        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
             if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
                 return filter(namesObj[names], content);
             }
@@ -800,12 +807,26 @@ editor_blockly = function () {
                 },
                 filter: function () {return true;},
                 item: function (text, input) {
+                    var id = text.label, info = core.getBlockInfo(id);
                     var li = document.createElement("li");
                     li.setAttribute("role", "option");
                     li.setAttribute("aria-selected", "false");
                     input = awesomplete.prefix.trim();
                     if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
                     li.innerHTML = text;
+                    if (info) {
+                        var height = (info.height || 32), width = 32;
+                        var scale = 75;
+                        height *= scale / 100;
+                        width *= scale / 100;
+                        var ctx = core.createCanvas('list_' + id, 0, 0, width, height),
+                            canvas = ctx.canvas;
+                        canvas.style.display = 'inline';
+                        canvas.style.marginRight = '8px';
+                        core.drawIcon(ctx, id, 0, 0, width, height);
+                        canvas.style.position = '';
+                        li.insertBefore(canvas, li.children[0]);
+                    }
                     return li;
                 },
                 sort: function (a, b) {

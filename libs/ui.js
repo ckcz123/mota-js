@@ -81,11 +81,33 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     if (style) core.setFillStyle(name, style);
     if (font) core.setFont(name, font);
     var ctx = this.getContextByName(name);
-    if (ctx) {
-        // 如果存在最大宽度
-        if (maxWidth != null) {
-            this.setFontForMaxWidth(ctx, text, maxWidth);
+    if (!ctx) return;
+    text = (text + "").replace(/\\r/g, '\r');
+    var originText = text.replace(/\r(\[.*\])?/g, "");
+    var index = text.indexOf('\r');
+    if (maxWidth != null) {
+        this.setFontForMaxWidth(ctx, index >= 0 ? originText : text, maxWidth);
+    }
+    if (index >= 0) {
+        var currentStyle = ctx.fillStyle;
+        var textWidth = core.calWidth(ctx, originText);
+        var textAlign = ctx.textAlign;
+        if (textAlign == 'center') x -= textWidth / 2;
+        else if (textAlign == 'right') x -= textWidth;
+        ctx.textAlign = 'left';
+        text = text.replace(/\r(?!\[.*\])/g, "\r[" + currentStyle + "]");
+        var colorArray = text.match(/(?<=\r\[).*(?=\])/g);
+        var textArray = text.split(/\r\[.*\]/);
+        var width = 0;
+        for (var i = 0; i < textArray.length; i++) {
+            var subtext = textArray[i];
+            if (colorArray[i-1]) ctx.fillStyle = colorArray[i-1];
+            ctx.fillText(subtext, x + width, y);
+            width += core.calWidth(ctx, subtext, x, y);
         }
+        ctx.textAlign = textAlign;
+        ctx.fillStyle = currentStyle;
+    } else {
         ctx.fillText(text, x, y);
     }
 }
@@ -116,11 +138,9 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font
     style = core.arrayToRGBA(style);
     if (!strokeStyle) strokeStyle = '#000000';
     strokeStyle = core.arrayToRGBA(strokeStyle);
-    ctx.fillStyle = strokeStyle;
-    ctx.fillText(text, x-1, y-1);
-    ctx.fillText(text, x-1, y+1);
-    ctx.fillText(text, x+1, y-1);
-    ctx.fillText(text, x+1, y+1);
+    ctx.strokeStyle = strokeStyle;
+    ctx.lineWidth = 3;
+    ctx.strokeText(text, x, y);
     ctx.fillStyle = style;
     ctx.fillText(text, x, y);
 }
@@ -493,56 +513,23 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
     if (!ctx) return [text];
     if (font) core.setFont(name, font);
 
-    // 不能在行首的标点
-    var forbidStart = "）)】》＞﹞>)]»›〕〉}］」｝〗』" + "，。？！：；·…,.?!:;、……~&@#～＆＠＃";
-    // 不能在行尾的标点
-    var forbidEnd = "（(【《＜﹝<([«‹〔〈{［「｛〖『";
-
     var contents = [];
     var last = 0;
-    var forceChangeLine = false; // 是否强制换行，避免多个连续forbidStart存在
     for (var i = 0; i < text.length; i++) {
         if (text.charAt(i) == '\n') {
             contents.push(text.substring(last, i));
             last = i + 1;
-            forceChangeLine = false;
         }
         else if (text.charAt(i) == '\\' && text.charAt(i + 1) == 'n') {
             contents.push(text.substring(last, i));
             last = i + 2;
-            forceChangeLine = false;
         }
         else {
-            var curr = text.charAt(i);
             var toAdd = text.substring(last, i + 1);
             var width = core.calWidth(name, toAdd);
             if (maxWidth && width > maxWidth) {
-                // --- 当前应当换行，然而还是检查一下是否是forbidStart
-                if (!forceChangeLine && forbidStart.indexOf(curr) >= 0) {
-                    forceChangeLine = true;
-                    continue;
-                }
                 contents.push(text.substring(last, i));
                 last = i;
-                forceChangeLine = false;
-            } else {
-                // --- 当前不应该换行；但是提前检查一下是否是行尾标点
-                var curr = text.charAt(i);
-                if (forbidEnd.indexOf(curr) >= 0 && i < text.length -1) {
-                    // 检查是否是行尾
-                    var nextcurr = text.charAt(i+1);
-                    // 确认不是手动换行
-                    if (nextcurr != '\n' && !(nextcurr == '\\' && text.charAt(i+2) == 'n')) {
-                        var toAdd = text.substring(last, i+2);
-                        var width = core.calWidth(name, toAdd);
-                        if (maxWidth && width > maxWidth) {
-                            // 下一项会换行，因此在此处换行
-                            contents.push(text.substring(last, i));
-                            last = i;
-                            forceChangeLine = false;
-                        }
-                    }
-                }
             }
         }
     }
@@ -706,11 +693,6 @@ ui.prototype._drawTip_drawOne = function (tip) {
         core.drawImage('data', tip.image, (tip.posX + tip.frame) * 32, tip.posY * tip.height, 32, 32, 10, 10, 32, 32);
     core.fillText('data', tip.text, tip.textX, 33, '#FFFFFF');
     core.setAlpha('data', 1);
-}
-
-ui.prototype.clearTip = function () {
-    core.clearMap('data', 0, 0, this.PIXEL, 50);
-    core.animateFrame.tip = null;
 }
 
 ////// 地图中间绘制一段文字 //////
@@ -1088,14 +1070,20 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.offsetY = 0;
     config.line = 0;
     config.blocks = [];
+    config.isHD = ctx != null && ctx.canvas.hasAttribute('isHD');
 
     // 创建一个新的临时画布
-    var tempCtx = core.createCanvas('__temp__', 0, 0, ctx==null?1:ctx.canvas.width, ctx==null?1:ctx.canvas.height, -1);
+    var tempCtx = document.createElement('canvas').getContext('2d');
+    if (config.isHD) {
+        core.maps._setHDCanvasSize(tempCtx, ctx.canvas.width, ctx.canvas.height);
+    } else {
+        tempCtx.canvas.width = ctx==null?1:ctx.canvas.width;
+        tempCtx.canvas.height = ctx==null?1:ctx.canvas.height;
+    }
     tempCtx.textBaseline = 'top';
     tempCtx.font = this._buildFont(config.fontSize, config.bold, config.italic, config.font);
     tempCtx.fillStyle = config.color;
     config = this._drawTextContent_draw(ctx, tempCtx, content, config);
-    core.deleteCanvas('__temp__');
     return config;
 }
 
@@ -1122,7 +1110,8 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
         if (config.index >= config.blocks.length) return false;
         var block = config.blocks[config.index++];
         if (block != null) {
-            core.drawImage(ctx, tempCtx.canvas, block.left, block.top, block.width, block.height,
+            var ratio = config.isHD ? core.domStyle.ratio : 1;
+            core.drawImage(ctx, tempCtx.canvas, block.left * ratio, block.top * ratio, block.width * ratio, block.height * ratio,
                 config.left + block.left + block.marginLeft, config.top + block.top + block.marginTop,
                 block.width, block.height);
         }
@@ -1155,6 +1144,11 @@ ui.prototype._drawTextContent_next = function (tempCtx, content, config) {
 
 // 绘制下一个字符
 ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch) {
+    // 标点禁则：不能在行首的标点
+    var forbidStart = "）)】》＞﹞>)]»›〕〉}］」｝〗』" + "，。？！：；·…,.?!:;、……~&@#～＆＠＃";
+    // 标点禁则：不能在行尾的标点
+    var forbidEnd = "（(【《＜﹝<([«‹〔〈{［「｛〖『";
+
     // \n, \\n
     if (ch == '\n' || (ch=='\\' && content.charAt(config.index)=='n')) {
         this._drawTextContent_newLine(tempCtx, config);
@@ -1181,12 +1175,34 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
         if (c == 'z') return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // 检查是不是自动换行
-    var charwidth = core.calWidth(tempCtx, ch) + config.interval;
-    if (config.maxWidth != null && config.offsetX + charwidth > config.maxWidth) {
-        this._drawTextContent_newLine(tempCtx, config);
-        config.index--;
-        return this._drawTextContent_next(tempCtx, content, config);
+    if (config.maxWidth != null) {
+        var charwidth = core.calWidth(tempCtx, ch) + config.interval;
+        if (config.offsetX + charwidth > config.maxWidth) {
+            // --- 当前应当换行，然而还是检查一下是否是forbidStart
+            if (!config.forceChangeLine && forbidStart.indexOf(ch) >= 0) {
+                config.forceChangeLine = true;
+            } else {
+                this._drawTextContent_newLine(tempCtx, config);
+                config.index--;
+                return this._drawTextContent_next(tempCtx, content, config);
+            }
+        } else if (forbidEnd.indexOf(ch) >= 0 && config.index < content.length) {
+            // --- 当前不应该换行；但是提前检查一下是否是行尾标点
+            var nextch = content.charAt(config.index);
+            // 确认不是手动换行
+            if (nextch != '\n' && !(nextch == '\\' && content.charAt(config.index+1) == 'n')) {
+                // 检查是否会换行
+                var nextchwidth = core.calWidth(tempCtx, nextch) + config.interval;
+                if (config.offsetX + charwidth + nextchwidth > config.maxWidth) {
+                    // 下一项会换行，因此在此处换行
+                    this._drawTextContent_newLine(tempCtx, config);
+                    config.index--;
+                    return this._drawTextContent_next(tempCtx, content, config);
+                }
+            }
+        }
     }
+
     // 输出
     var left = config.offsetX, top = config.offsetY + config.topMargin;
     core.fillText(tempCtx, ch, left, top);
@@ -1220,6 +1236,7 @@ ui.prototype._drawTextContent_newLine = function (tempCtx, config) {
     config.offsetY += config.lineMaxHeight;
     config.lineMaxHeight = config.currfont + config.lineMargin;
     config.line++;
+    config.forceChangeLine = false;
 }
 
 ui.prototype._drawTextContent_changeColor = function (tempCtx, content, config) {
@@ -1581,8 +1598,8 @@ ui.prototype.drawChoices = function(content, choices) {
 }
 
 ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
-    // 宽度计算：考虑选项的长度
-    var width = 246;
+    // 宽度计算：考虑提示文字和选项的长度
+    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
     core.setFont('ui', this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
@@ -1764,6 +1781,7 @@ ui.prototype._drawSwitchs = function() {
         "临界/领域： "+(core.flags.displayCritical ? "[ON]" : "[OFF]")+" "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "血瓶绕路： "+(core.hasFlag('__potionNoRouting__') ? "[ON]":"[OFF]"),
         "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
+        "左手模式： "+(core.flags.leftHandPrefer ? "[ON]":"[OFF]"),
         "返回主菜单"
     ];
     this.drawChoices(null, choices);
@@ -2126,7 +2144,7 @@ ui.prototype._drawBookDetail = function (index) {
     if (!enemy) return;
     var content = info[1].join("\n");
     core.status.event.id = 'book-detail';
-    core.clearTip();
+    core.animateFrame.tip = null;
     core.clearMap('data');
 
     var left = 10, width = this.PIXEL - 2 * left, right = left + width;
@@ -2157,6 +2175,8 @@ ui.prototype._drawBookDetail_getInfo = function (index) {
 }
 
 ui.prototype._drawBookDetail_getTexts = function (enemy, floorId, texts) {
+    // --- 原始数值
+    this._drawBookDetail_origin(enemy, texts);
     // --- 模仿临界计算器
     this._drawBookDetail_mofang(enemy, texts);
     // --- 吸血怪最低生命值
@@ -2165,6 +2185,21 @@ ui.prototype._drawBookDetail_getTexts = function (enemy, floorId, texts) {
     this._drawBookDetail_hatred(enemy, texts);
     // --- 战斗回合数，临界表
     this._drawBookDetail_turnAndCriticals(enemy, floorId, texts);
+}
+
+ui.prototype._drawBookDetail_origin = function (enemy, texts) {
+    // 怪物数值和原始值不一样时，在详细信息页显示原始数值
+    var originEnemy = core.enemys._getCurrentEnemys_getEnemy(enemy.id);
+    var content = [];
+    ["hp", "atk", "def", "point", "money", "exp"].forEach(function (one) {
+        if (enemy[one] == null || originEnemy[one] == null) return;
+        if (enemy[one] != originEnemy[one]) {
+            content.push(core.getStatusLabel(one) + " " + originEnemy[one]);
+        }
+    });
+    if (content.length > 0) {
+        texts.push("\r[#FF6A6A]\\d原始数值：\\d\r[]" + content.join("；"));
+    }
 }
 
 ui.prototype._drawBookDetail_mofang = function (enemy, texts) {
@@ -2330,7 +2365,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.status.event.id = 'viewMaps';
     this.clearUI();
     if (index == null) return this._drawMaps_drawHint();
-    core.clearTip();
+    core.animateFrame.tip = null;
     core.status.checkBlock.cache = {};
     var data = this._drawMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
@@ -2507,26 +2542,23 @@ ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     core.setTextAlign('ui', 'left');
     if (!info.selectId) return;
     var item=core.material.items[info.selectId];
-    core.fillText('ui', item.name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
-    var text = item.text||"该道具暂无描述。";
-    try {
-        // 检查能否eval
-        text = core.replaceText(text);
-    } catch (e) {}
+    var name = item.name || "未知道具";
+    try { name = core.replateText(name); } catch (e) {}
+    core.fillText('ui', name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
+    var text = item.text || "该道具暂无描述。";
+    try { text = core.replaceText(text); } catch (e) {}
 
-    for (var font_size = 17; font_size >= 14; font_size -= 3) {
-        var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(font_size, false));
-        var line_height = parseInt(font_size * 1.4), curr = 37 + line_height;
-        if (curr + lines.length * line_height < max_height) break;
+    var height = null;
+    for (var fontSize = 17; fontSize >= 9; fontSize -= 2) {
+        var config = { left: 10, top: 46, fontSize: fontSize, maxWidth: this.PIXEL - 15, bold: false, color: "white" };
+        height = 42 + core.getTextContentHeight(text, config);
+        if (height < max_height || fontSize == 9) {
+            core.drawTextContent('ui', text, config);
+            break;
+        }
     }
-    core.setFillStyle('ui', '#FFFFFF');
-    for (var i=0;i<lines.length;++i) {
-        core.fillText('ui', lines[i], 10, curr);
-        curr += line_height;
-        if (curr>=max_height) break;
-    }
-    if (curr < max_height) {
-        core.fillText('ui', '<继续点击该道具即可进行使用>', 10, curr, '#CCCCCC', this._buildFont(14, false));
+    if (height < max_height - 33) {
+        core.fillText('ui', '<继续点击该道具即可进行使用>', 10, max_height - 15, '#CCCCCC', this._buildFont(14, false));
     }
 }
 
@@ -2619,24 +2651,19 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
     core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     // --- 描述
     var text = equip.text || "该装备暂无描述。";
-    try {
-        text = core.replaceText(text);
-    } catch (e) {}
+    try { text = core.replaceText(text); } catch (e) {}
 
-    for (var font_size = 17; font_size >= 11; font_size -= 3) {
-        var lines = core.splitLines('ui', text, this.PIXEL - 15, this._buildFont(font_size, false));
-        var line_height = parseInt(font_size * 1.4), curr = 37 + line_height;
-        if (curr + lines.length * line_height < max_height) break;
-    }
-    core.setFillStyle('ui', '#FFFFFF');
-    for (var i = 0; i < lines.length; ++i) {
-        core.fillText('ui', lines[i], 10, curr);
-        curr += line_height;
-        if (curr >= max_height) break;
+    var height = null;
+    for (var fontSize = 17; fontSize >= 9; fontSize -= 2) {
+        var config = { left: 10, top: 46, fontSize: fontSize, maxWidth: this.PIXEL - 15, bold: false, color: "white" };
+        height = 42 + core.getTextContentHeight(text, config);
+        if (height < max_height - 30 || fontSize == 9) {
+            core.drawTextContent('ui', text, config);
+            break;
+        }
     }
     // --- 变化值
-    if (curr >= max_height) return;
-    this._drawEquipbox_drawStatusChanged(info, curr, equip, equipType);
+    this._drawEquipbox_drawStatusChanged(info, max_height - 15, equip, equipType);
 }
 
 ui.prototype._drawEquipbox_getStatusChanged = function (info, equip, equipType, y) {
@@ -3139,8 +3166,6 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     var newCanvas = document.createElement("canvas");
     newCanvas.id = name;
     newCanvas.style.display = 'block';
-    newCanvas.width = width;
-    newCanvas.height = height;
     newCanvas.setAttribute("_left", x);
     newCanvas.setAttribute("_top", y);
     newCanvas.style.width = width * core.domStyle.scale + 'px';
@@ -3150,6 +3175,7 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
     core.dymCanvas[name] = newCanvas.getContext('2d');
+    core.maps._setHDCanvasSize(core.dymCanvas[name], width, height);
     core.dom.gameDraw.appendChild(newCanvas);
     return core.dymCanvas[name];
 }
@@ -3174,11 +3200,11 @@ ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
     if (width != null) {
-        if (!styleOnly) ctx.canvas.width = width;
+        if (!styleOnly) core.maps._setHDCanvasSize(ctx, width, null);
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (height != null) {
-        if (!styleOnly) ctx.canvas.height = height;
+        if (!styleOnly) core.maps._setHDCanvasSize(ctx, null, height);
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
     return ctx;

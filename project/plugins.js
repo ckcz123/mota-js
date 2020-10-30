@@ -255,14 +255,23 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		flags.__visited__ = flags.__visited__ || {};
 		flags.__removed__ = flags.__removed__ || [];
 		flags.__disabled__ = flags.__disabled__ || {};
+		flags.__leaveLoc__ = flags.__leaveLoc__ || {};
 		for (var i = fromIndex; i <= toIndex; ++i) {
 			var floorId = core.floorIds[i];
 			if (core.status.maps[floorId].deleted) continue;
 			delete flags.__visited__[floorId];
 			flags.__removed__.push(floorId);
 			delete flags.__disabled__[floorId];
+			delete flags.__leaveLoc__[floorId];
+			(core.status.autoEvents || []).forEach(function (event) {
+				if (event.floorId == floorId && event.currentFloor) {
+					core.autoEventExecuting(event.symbol, false);
+					core.autoEventExecuted(event.symbol, false);
+				} 
+			});
 			core.status.maps[floorId].deleted = true;
 			core.status.maps[floorId].canFlyTo = false;
+			core.status.maps[floorId].canFlyFrom = false;
 			core.status.maps[floorId].cannotViewMap = true;
 		}
 	}
@@ -330,13 +339,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var canvas = document.createElement('canvas');
 		canvas.id = name;
 		canvas.className = 'gameCanvas';
-		canvas.width = canvas.height = core.__PIXELS__;
 		// 编辑器模式下设置zIndex会导致加入的图层覆盖优先级过高
 		if (main.mode != "editor") canvas.style.zIndex = zIndex || 0;
 		// 将图层插入进游戏内容
 		document.getElementById('gameDraw').appendChild(canvas);
 		var ctx = canvas.getContext('2d');
 		core.canvas[name] = ctx;
+		if (core.domStyle.hdCanvas.indexOf('name') >= 0)
+			core.maps._setHDCanvasSize(ctx, core.__PIXELS__, core.__PIXELS__);
+		else {
+			canvas.width = core.__PIXELS__;
+			canvas.height = core.__PIXELS__;
+		}
 		return canvas;
 	}
 
@@ -1253,5 +1267,48 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return true;
 	}, 100);
 
+},
+    "heroFourFrames": function () {
+	// 样板的勇士/跟随者移动时只使用2、4两帧，观感较差。本插件可以将四帧全用上。
+
+	// 是否启用本插件
+	var __enable = false;
+	if (!__enable) return;
+
+	["up", "down", "left", "right"].forEach(function (one) {
+		// 指定中间帧动画
+		core.material.icons.hero[one].midFoot = 2;
+	});
+
+	var heroMoving = function (timestamp) {
+		if (core.status.heroMoving <= 0) return;
+		if (timestamp - core.animateFrame.moveTime > core.values.moveSpeed) {
+			core.animateFrame.leftLeg++;
+			core.animateFrame.moveTime = timestamp;
+		}
+		core.drawHero(['stop', 'leftFoot', 'midFoot', 'rightFoot'][core.animateFrame.leftLeg % 4], 4 * core.status.heroMoving);
+	}
+	core.registerAnimationFrame('heroMoving', true, heroMoving);
+
+	core.events._eventMoveHero_moving = function (step, moveSteps) {
+		var direction = moveSteps[0],
+			x = core.getHeroLoc('x'),
+			y = core.getHeroLoc('y'); // ------ 前进/后退
+		var o = direction == 'backward' ? -1 : 1;
+		if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+		core.setHeroLoc('direction', direction); // if (step <= 4) core.drawHero('leftFoot', 4 * o * step); else if (step <= 8) core.drawHero('rightFoot', 4 * o * step);
+		if (step <= 4) core.drawHero('stop', 4 * o * step);
+		else if (step <= 8) core.drawHero('leftFoot', 4 * o * step);
+		else if (step <= 12) core.drawHero('midFoot', 4 * o * (step - 8));
+		else if (step <= 16) core.drawHero('rightFoot', 4 * o * (step - 8)); // if (step == 8) {
+		if (step == 8 || step == 16) {
+			core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
+			core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+			core.updateFollowers();
+			moveSteps.shift(); // return true;
+			return step == 16;
+		}
+		return false;
+	}
 }
 }

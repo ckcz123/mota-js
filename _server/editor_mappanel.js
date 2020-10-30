@@ -157,7 +157,7 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.map_onmove = function (e) {
         editor.uivalues.lastMoveE=e;
-        if (!editor.uivalues.bigmap && !editor.isMobile) {
+        if (!editor.uivalues.bigmap && !editor.isMobile && editor.dom.midMenu.style.display == 'none') {
             var loc = editor.uifunctions.eToLoc(e);
             var pos = editor.uifunctions.locToPos(loc);
             _setMarksHightlight(Array.from(editor.dom.mapColMark.children[0].rows[0].cells), pos.x);
@@ -501,9 +501,7 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions.hideMidMenu = function () {
         editor.uivalues.lastMoveE={buttons:0,clientX:0,clientY:0};
-        setTimeout(function () {
-            editor.dom.midMenu.style = 'display:none';
-        }, 100)
+        editor.dom.midMenu.style = 'display:none';
     }
 
     /**
@@ -611,7 +609,8 @@ editor_mappanel_wrapper = function (editor) {
                 "delayExecute": false,
                 "multiExecute": false,
                 "data": [
-                    {"type": "openDoor"}
+                    {"type": "openDoor"},
+                    {"type": "setValue", "name": doorFlag, "operator": "=", "value": "null"},
                 ]
             }
         };

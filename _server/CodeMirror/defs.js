@@ -2473,8 +2473,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(index?: number, callback?: fn(data: ?))"
         }, 
         "setViewport": {
-          "!doc": "设置视野范围<br/>x,y: 左上角相对大地图的像素坐标，不需要为32倍数", 
-          "!type": "fn(x?: number, y?: number)"
+          "!doc": "设置视野范围<br/>px,py: 左上角相对大地图的像素坐标，不需要为32倍数", 
+          "!type": "fn(px?: number, py?: number)"
         }, 
         "chooseReplayFile": {
           "!doc": "选择录像文件", 
@@ -2522,7 +2522,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "moveViewport": {
           "!doc": "移动视野范围", 
-          "!type": "fn(steps?: ?, time?: number, callback?: fn())"
+          "!type": "fn(x: number, y: number, time?: number, callback?: fn())"
         }, 
         "syncLoad": {
           "!doc": "从服务器加载存档", 

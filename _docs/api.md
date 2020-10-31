@@ -441,7 +441,7 @@ moveOneStep: fn(callback?: fn())
 每移动一格后执行的事件
 【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】
 
-moveViewport: fn(steps?: ?, time?: number, callback?: fn())
+moveViewport: fn(x: number, y: number, time?: number, callback?: fn())
 移动视野范围
 
 nearHero: fn(x: number, y: number, n?: number) -> bool
@@ -598,9 +598,9 @@ setSwitch: fn(x: number, y: number, floorId?: string, name: string, value?: ?)
 setToolbarButton: fn(useButton?: bool)
 改变工具栏为按钮1-8
 
-setViewport: fn(x?: number, y?: number)
+setViewport: fn(px?: number, py?: number)
 设置视野范围
-x,y: 左上角相对大地图的像素坐标，不需要为32倍数
+px,py: 左上角相对大地图的像素坐标，不需要为32倍数
 
 setWeather: fn(type?: string, level?: number)
 设置天气，不计入存档。如需长期生效请使用core.events._action_setWeather()函数

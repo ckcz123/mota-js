@@ -953,9 +953,9 @@ control.prototype.updateViewport = function() {
 }
 
 ////// 设置视野范围 //////
-control.prototype.setViewport = function (x, y) {
-    core.bigmap.offsetX = core.clamp(x, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp(y, 0, 32 * core.bigmap.height - core.__PIXELS__);
+control.prototype.setViewport = function (px, py) {
+    core.bigmap.offsetX = core.clamp(px, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
     var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
@@ -964,34 +964,31 @@ control.prototype.setViewport = function (x, y) {
 }
 
 ////// 移动视野范围 //////
-control.prototype.moveViewport = function (steps, time, callback) {
-    time = time || core.values.moveSpeed;
-    var step = 0, moveSteps = (steps||[]).filter(function (t) {
-        return ['up','down','left','right'].indexOf(t)>=0;
-    });
+control.prototype.moveViewport = function (x, y, time, callback) {
+    time = time || 0;
+    time /= Math.max(core.status.replay.speed, 1)
+    var per_time = 10, step = parseInt(time / per_time);
+    if (step <= 0) {
+        this.setViewport(32 * x, 32 * y);
+        if (callback) callback();
+        return;
+    }
+    var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    var py = core.clamp(32 * y, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    var dx = (px - core.bigmap.offsetX) / step, dy = (py - core.bigmap.offsetY) / step;
+
     var animate=window.setInterval(function() {
-        if (moveSteps.length==0) {
+        core.setViewport(core.bigmap.offsetX + dx, core.bigmap.offsetY + dy);
+        step--;
+        if (step <= 0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
+            core.setViewport(px, py);
             if (callback) callback();
         }
-        else {
-            if (core.control._moveViewport_moving(++step, moveSteps))
-                step = 0;
-        }
-    }, time / 16 / core.status.replay.speed);
+    }, per_time);
 
     core.animateFrame.asyncId[animate] = true;
-}
-
-control.prototype._moveViewport_moving = function (step, moveSteps) {
-    var direction = moveSteps[0], scan = core.utils.scan[direction];
-    core.setViewport(core.bigmap.offsetX + 2 * scan.x, core.bigmap.offsetY + 2 * scan.y);
-    if (step == 16) {
-        moveSteps.shift();
-        return true;
-    }
-    return false;
 }
 
 ////// 获得勇士面对位置的x坐标 //////

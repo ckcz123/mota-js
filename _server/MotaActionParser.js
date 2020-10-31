@@ -461,13 +461,14 @@ ActionParser.prototype.parseAction = function() {
         data.name,animate_loc,data.alignWindow||false,data.async||false,this.next]);
       break;
     case "setViewport": // 设置视角
-      data.loc = data.loc||['',''];
-      this.next = MotaActionBlocks['setViewport_s'].xmlText([
-        data.loc[0],data.loc[1],this.next]);
-      break;
-    case "moveViewport": // 移动视角
-      this.next = MotaActionBlocks['moveViewport_s'].xmlText([
-        data.time,data.async||false,this.StepString(data.steps),this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['setViewport_1_s'].xmlText([
+          data.dxy[0],data.dxy[1],data.time||0,data.async||false,this.next]);
+      } else {
+        data.loc = data.loc||['',''];
+        this.next = MotaActionBlocks['setViewport_s'].xmlText([
+          data.loc[0],data.loc[1],data.time||0,data.async||false,this.next]);
+      }
       break;
     case "vibrate": // 画面震动
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);

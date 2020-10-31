@@ -1138,7 +1138,12 @@ ui.prototype._drawTextContent_next = function (tempCtx, content, config) {
         return false;
     }
     // get next character
-    var ch = content.charAt(config.index++);
+    var ch = content.charAt(config.index);
+    var code = content.charCodeAt(config.index++);
+    while (code >= 0xD800 && code <= 0xDBFF) {
+        ch += content.charAt(config.index);
+        code = content.charCodeAt(config.index++);
+    }
     return this._drawTextContent_drawChar(tempCtx, content, config, ch);
 }
 
@@ -1183,7 +1188,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
                 config.forceChangeLine = true;
             } else {
                 this._drawTextContent_newLine(tempCtx, config);
-                config.index--;
+                config.index-=ch.length;
                 return this._drawTextContent_next(tempCtx, content, config);
             }
         } else if (forbidEnd.indexOf(ch) >= 0 && config.index < content.length) {
@@ -1196,7 +1201,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
                 if (config.offsetX + charwidth + nextchwidth > config.maxWidth) {
                     // 下一项会换行，因此在此处换行
                     this._drawTextContent_newLine(tempCtx, config);
-                    config.index--;
+                    config.index-=ch.length;
                     return this._drawTextContent_next(tempCtx, content, config);
                 }
             }

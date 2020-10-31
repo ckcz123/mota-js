@@ -96,12 +96,12 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
         else if (textAlign == 'right') x -= textWidth;
         ctx.textAlign = 'left';
         text = text.replace(/\r(?!\[.*\])/g, "\r[" + currentStyle + "]");
-        var colorArray = text.match(/(?<=\r\[).*(?=\])/g);
-        var textArray = text.split(/\r\[.*\]/);
+        var colorArray = text.match(/\r\[.*?\]/g);
+        var textArray = text.split(/\r\[.*?\]/);
         var width = 0;
         for (var i = 0; i < textArray.length; i++) {
             var subtext = textArray[i];
-            if (colorArray[i-1]) ctx.fillStyle = colorArray[i-1];
+            if (colorArray[i-1]) ctx.fillStyle = colorArray[i-1].slice(2, -1);
             ctx.fillText(subtext, x + width, y);
             width += core.calWidth(ctx, subtext, x, y);
         }

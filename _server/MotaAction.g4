@@ -673,7 +673,7 @@ action
     |   changeFloor_s
     |   changePos_s
     |   setViewport_s
-    |   moveViewport_s
+    |   setViewport_1_s
     |   useItem_s
     |   loadEquip_s
     |   unloadEquip_s
@@ -1822,35 +1822,41 @@ return code;
 */;
 
 setViewport_s
-    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? Newline
+    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
 
 
 /* setViewport_s
 tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : ["",""]
+default : ["","",0,false]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.soundColor
 var loc = '';
 if (PosString_0 && PosString_1) {
     loc = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "setViewport"'+loc+'},\n';
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
 return code;
 */;
 
-moveViewport_s
-    :   '移动视角' '动画时间' IntString '不等待执行完毕' Bool BGNL? StepString Newline
+setViewport_1_s
+    :   '设置视角' '增量坐标' 'dx' PosString? ',' 'dy' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
 
 
-/* moveViewport_s
-tooltip : moveViewport：移动视角
+/* setViewport_1_s
+tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : [300,false,"上右3下2左"]
+default : ["0","0",0,false]
 colour : this.soundColor
-IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+var loc = '';
+if (PosString_0 && PosString_1) {
+    loc = ', "dxy": ['+PosString_0+','+PosString_1+']';
+}
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "moveViewport"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
 return code;
 */;
 

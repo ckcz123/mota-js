@@ -396,6 +396,18 @@ editor.prototype.drawEventBlock = function () {
                 editor.game.doCoreFunc("fillBoldText", fg, index + 1,
                     32 * i + 28, 32 * j + 15, '#FF7F00', null, '14px Verdana');
             }
+            if (editor.currentFloorData.upFloor && editor.currentFloorData.upFloor.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔼", 32 * i, 32 * j + 8, null, "8px Verdana");
+            }
+            if (editor.currentFloorData.downFloor && editor.currentFloorData.downFloor.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔽", 32 * i, 32 * j + 8, null, "8px Verdana");
+            }
+            if (editor.currentFloorData.flyPoint && editor.currentFloorData.flyPoint.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔃", 32 * i, 32 * j + 8, null, "8px Verdana");
+            }
         }
     }
 }

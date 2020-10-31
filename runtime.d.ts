@@ -632,12 +632,12 @@ declare class control {
 
     /**
      * 设置视野范围 
-     * x,y: 左上角相对大地图的像素坐标，不需要为32倍数
+     * px,py: 左上角相对大地图的像素坐标，不需要为32倍数
      */
-    setViewport(x?: number, y?: number): void
+    setViewport(px?: number, py?: number): void
 
     /** 移动视野范围 */
-    moveViewport(steps?: any, time?: number, callback?: () => any): void
+    moveViewport(x: number, y: number, time?: number, callback?: () => any): void
 
     /** 更新跟随者坐标 */
     updateFollowers(): void

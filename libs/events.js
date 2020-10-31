@@ -1426,18 +1426,15 @@ events.prototype._action_animate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setViewport = function (data, x, y, prefix) {
-    if (data.loc == null) {
-        core.drawHero();
+    if (data.dxy != null) {
+        data.loc = [core.bigmap.offsetX / 32 + (core.calValue(data.dxy[0], prefix) || 0), core.bigmap.offsetY / 32 + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else if (data.loc == null) {
+        data.loc = [core.getHeroLoc('x') - core.__HALF_SIZE__, core.getHeroLoc('y') - core.__HALF_SIZE__];
+    } else {
+        data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     }
-    else {
-        var loc = this.__action_getLoc(data.loc, x, y, prefix);
-        core.setViewport(32 * loc[0], 32 * loc[1]);
-    }
-    core.doAction();
-}
-
-events.prototype._action_moveViewport = function (data, x, y, prefix) {
-    this.__action_doAsyncFunc(data.async, core.moveViewport, data.steps, data.time);
+    console.log(data.loc);
+    this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.time);
 }
 
 events.prototype._action_move = function (data, x, y, prefix) {

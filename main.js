@@ -197,13 +197,6 @@ main.prototype.init = function (mode, callback) {
     main.mode = mode;
 
     main.loadJs('project', main.pureData, function(){
-        if (items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffect
-            && items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a.itemEffectTip) {
-            alert('即将跳转到接档工具...');
-            window.location = 'migration.html';
-            return;
-        }
-
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
         

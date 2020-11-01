@@ -634,19 +634,6 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "S":
             decodeObj.ans.push("shop:" + nxt);
-            // V266->V2.7商店录像兼容性
-            if (core.initStatus.shops[nxt]) {
-                if (!isNaN(decodeObj.route.charAt(decodeObj.index))) {
-                    var selections = this._decodeRoute_getNumber(decodeObj, true);
-                    // 只接普通商店
-                    if (!core.initStatus.shops[nxt].item && !core.initStatus.shops[nxt].commonEvent) {
-                        decodeObj.ans = decodeObj.ans.concat(selections.split("").map(function (one) {
-                            return 'choices:' + one;
-                        }));
-                        decodeObj.ans.push("choices:-1");
-                    }   
-                }
-            }
             break;
         case "T":
             decodeObj.ans.push("turn");

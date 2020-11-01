@@ -2083,6 +2083,10 @@ actions.prototype._clickSwitchs_setSize = function (delta) {
     core.domStyle.scale = core.domStyle.availableScale[index];
     core.setLocalStorage('scale', core.domStyle.scale);
     core.resize();
+    var currentRatio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
+    if (currentRatio > core.domStyle.ratio) {
+        core.drawTip("需刷新页面以调整UI清晰度");
+    }
     core.ui._drawSwitchs();
 }
 
@@ -2613,7 +2617,8 @@ actions.prototype._clickReplay_replayRemain = function () {
     core.closePanel();
     core.drawText([
         "\t[接续播放录像]该功能允许你播放\r[yellow]两个存档之间的录像\r，常常用于\r[yellow]区域优化\r。\n" +
-        "例如，有若干个区，已经全部通关；之后重打一区并进行了优化，则可以对剩余区域直接播放录像而无需全部重打。",
+        "例如，有若干个区，已经全部通关；之后重打一区并进行了优化，则可以对剩余区域直接播放录像而无需全部重打。\n\n" + 
+        "详细使用方法参见露珠录制的视频教程：\n\r[yellow]https://bilibili.com/video/BV1az4y1C78x",
         "\t[步骤1]请选择一个存档。\n\r[yellow]该存档的坐标必须和当前勇士坐标完全相同。\r\n将尝试从此处开始回放。",
     ], function () {
         core.status.event.id = 'replayRemain';

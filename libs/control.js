@@ -2746,6 +2746,7 @@ control.prototype.showStatusBar = function () {
         statusItems[i].style.opacity = 1;
     this.setToolbarButton(false);
     core.dom.tools.hard.style.display = 'block';
+    core.dom.toolBar.style.display = 'block';
 }
 
 control.prototype.hideStatusBar = function (showToolbox) {
@@ -2766,6 +2767,9 @@ control.prototype.hideStatusBar = function (showToolbox) {
     if (!core.domStyle.isVertical || !showToolbox) {
         for (var i = 0; i < toolItems.length; ++i)
             toolItems[i].style.display = 'none';
+    }
+    if (!core.domStyle.isVertical) {
+        core.dom.toolBar.style.display = 'none';
     }
 }
 
@@ -3099,10 +3103,15 @@ control.prototype._resize_toolBar = function (obj) {
         toolBar.style.height = 0.281 * obj.outerSize + "px";
         toolBar.style.background = 'transparent';
     }
-    toolBar.style.display = 'block';
     toolBar.style.borderLeft = obj.border;
     toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
+
+    if (!core.domStyle.showStatusBar && !core.domStyle.isVertical) {
+        toolBar.style.display = 'none';
+    } else {
+        toolBar.style.display = 'block';
+    }
 }
 
 control.prototype._resize_tools = function (obj) {

@@ -290,6 +290,9 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
             break;
         case 'selectShop':
         case 'switchs':
+        case 'switchs-sounds':
+        case 'switchs-display':
+        case 'switchs-action':
         case 'notes':
         case 'settings':
         case 'syncSave':
@@ -392,6 +395,15 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
             break;
         case 'switchs':
             this._keyUpSwitchs(keyCode);
+            break;
+        case 'switchs-sounds':
+            this._keyUpSwitchs_sounds(keyCode);
+            break;
+        case 'switchs-display':
+            this._keyUpSwitchs_display(keyCode);
+            break;
+        case 'switchs-action':
+            this._keyUpSwitchs_action(keyCode);
             break;
         case 'settings':
             this._keyUpSettings(keyCode);
@@ -507,6 +519,9 @@ actions.prototype._sys_onmove_choices = function (x, y) {
             if (core.status.event.data.type != 'choices') break;
         case 'selectShop':
         case 'switchs':
+        case 'switchs-sounds':
+        case 'switchs-display':
+        case 'switchs-action':
         case 'notes':
         case 'settings':
         case 'syncSave':
@@ -642,6 +657,15 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
             break;
         case 'switchs':
             this._clickSwitchs(x, y);
+            break;
+        case 'switchs-sounds':
+            this._clickSwitchs_sounds(x, y);
+            break;
+        case 'switchs-display':
+            this._clickSwitchs_display(x, y);
+            break;
+        case 'switchs-action':
+            this._clickSwitchs_action(x, y);
             break;
         case 'settings':
             this._clickSettings(x, y);
@@ -1986,156 +2010,24 @@ actions.prototype._clickSwitchs = function (x, y) {
     var choices = core.status.event.ui.choices;
     var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
     var selection = y - topIndex;
-    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
-        if (selection != 1 && selection != 2 && selection != 3 && selection != 4) return;
-    }
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     if (selection >= 0 && selection < choices.length) {
-        var width = choices[selection].width;
-        var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
-        var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                return this._clickSwitchs_bgmSound();
-            case 1:
-                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_userVolume(-1);
-                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_userVolume(1);
-                return;
-            case 2:
-                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_moveSpeed(-10);
-                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_moveSpeed(10);
-                return;
-            case 3:
-                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_floorChangeTime(-100);
-                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_floorChangeTime(100);
-                return;
-            case 4:
-                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_setSize(-1);
-                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_setSize(1);
-                return;
-            case 5:
-                return this._clickSwitchs_displayEnemyDamage();
-            case 6:
-                return this._clickSwitchs_displayCriticalExtra();
-            case 7:
-                return this._clickSwitchs_potionNoRouting();
-            case 8:
-                return this._clickSwitchs_clickMove();
-            case 9:
-                return this._clickSwitchs_leftHandPrefer();
-            case 10:
                 core.status.event.selection = 0;
-                core.ui._drawSettings();
-                break;
+                return core.ui._drawSwitchs_sounds();
+            case 1:
+                core.status.event.selection = 0;
+                return core.ui._drawSwitchs_display();
+            case 2:
+                core.status.event.selection = 0;
+                return core.ui._drawSwitchs_action();
+            case 3:
+                core.status.event.selection = 0;
+                return core.ui._drawSettings();
         }
     }
-}
-
-actions.prototype._clickSwitchs_bgmSound = function () {
-    var bgm = core.musicStatus.bgmStatus;
-    var sound = core.musicStatus.soundStatus;
-    if (bgm && sound) {
-        sound = false;
-    } else if (bgm && !sound) {
-        bgm = false;
-        sound = true;
-    } else if (!bgm && sound) {
-        sound = false;
-    } else {
-        bgm = true;
-        sound = true;
-    }
-    if (bgm != core.musicStatus.bgmStatus)
-        core.triggerBgm();
-    core.musicStatus.soundStatus = sound;
-    core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_userVolume = function (delta) {
-    var value = Math.round(Math.sqrt(100 * core.musicStatus.userVolume));
-    if (value == 0 && delta < 0) return;
-    core.musicStatus.userVolume = core.clamp(Math.pow(value + delta, 2) / 100, 0, 1);
-    //audioContext 音效 不受designVolume 影响
-    if (core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
-    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
-    core.setLocalStorage('userVolume', core.musicStatus.userVolume);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_moveSpeed = function (delta) {
-    core.values.moveSpeed = core.clamp(core.values.moveSpeed + delta, 50, 200);
-    core.setLocalStorage("moveSpeed", core.values.moveSpeed);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_floorChangeTime = function (delta) {
-    core.values.floorChangeTime = core.clamp(core.values.floorChangeTime + delta, 0, 2000);
-    core.setLocalStorage("floorChangeTime", core.values.floorChangeTime);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_setSize = function (delta) {
-    var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
-    if (index < 0) return;
-    index += delta;
-    if (index < 0 || index >= core.domStyle.availableScale.length);
-    core.domStyle.scale = core.domStyle.availableScale[index];
-    core.setLocalStorage('scale', core.domStyle.scale);
-    core.resize();
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_displayEnemyDamage = function () {
-    core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
-    core.updateDamage();
-    core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_displayCriticalExtra = function () {
-    var critical = core.flags.displayCritical;
-    var extra = core.flags.displayExtraDamage;
-    if (critical && extra) {
-        extra = false;
-    } else if (critical && !extra) {
-        critical = false;
-        extra = true;
-    } else if (!critical && extra) {
-        critical = false;
-        extra = false;
-    } else {
-        critical = true;
-        extra = true;
-    }
-
-    core.flags.displayCritical = critical;
-    core.flags.displayExtraDamage = extra;
-    core.updateDamage();
-    core.setLocalStorage('critical', core.flags.displayCritical);
-    core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_potionNoRouting = function () {
-    if (core.hasFlag('__potionNoRouting__')) core.removeFlag('__potionNoRouting__');
-    else core.setFlag('__potionNoRouting__', true);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_clickMove = function () {
-    if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
-    else core.setFlag('__noClickMove__', true);
-    core.ui._drawSwitchs();
-}
-
-actions.prototype._clickSwitchs_leftHandPrefer = function () {
-    core.flags.leftHandPrefer = !core.flags.leftHandPrefer;
-    core.setLocalStorage('leftHandPrefer', core.flags.leftHandPrefer);
-    if (core.flags.leftHandPrefer) {
-        core.myconfirm("左手模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。")
-    }
-    core.ui._drawSwitchs();
 }
 
 ////// 系统设置界面时，放开某个键的操作 //////
@@ -2145,22 +2037,257 @@ actions.prototype._keyUpSwitchs = function (keycode) {
         core.ui._drawSettings();
         return;
     }
+    this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs);
+}
+
+actions.prototype._clickSwitchs_sounds = function (x, y) {
+    var choices = core.status.event.ui.choices;
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var selection = y - topIndex;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
+        if (selection != 2) return;
+    }
+    if (selection >= 0 && selection < choices.length) {
+        var width = choices[selection].width;
+        var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
+        var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
+        core.status.event.selection = selection;
+        switch (selection) {
+            case 0:
+                return this._clickSwitchs_sounds_bgm();
+            case 1:
+                return this._clickSwitchs_sounds_se();
+            case 2:
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_sounds_userVolume(-1);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_sounds_userVolume(1);
+                return;
+            case 3:
+                core.status.event.selection = 0;
+                core.ui._drawSwitchs();
+                return;
+        }
+    }
+}
+
+actions.prototype._clickSwitchs_sounds_bgm = function () {
+    core.triggerBgm();
+    core.ui._drawSwitchs_sounds();
+}
+
+actions.prototype._clickSwitchs_sounds_se = function () {
+    core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
+    core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
+    core.ui._drawSwitchs_sounds();
+}
+
+actions.prototype._clickSwitchs_sounds_userVolume = function (delta) {
+    var value = Math.round(Math.sqrt(100 * core.musicStatus.userVolume));
+    if (value == 0 && delta < 0) return;
+    core.musicStatus.userVolume = core.clamp(Math.pow(value + delta, 2) / 100, 0, 1);
+    //audioContext 音效 不受designVolume 影响
+    if (core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
+    if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
+    core.setLocalStorage('userVolume', core.musicStatus.userVolume);
+    core.ui._drawSwitchs_sounds();
+}
+
+actions.prototype._keyUpSwitchs_sounds = function (keycode) {
+    if (keycode == 27 || keycode == 88) {
+        core.status.event.selection = 0;
+        core.ui._drawSwitchs();
+        return;
+    }
     if (keycode == 37) {
         switch (core.status.event.selection) {
-            case 1: return this._clickSwitchs_userVolume(-1);
-            case 2: return this._clickSwitchs_moveSpeed(-10);
-            case 3: return this._clickSwitchs_floorChangeTime(-100);
-            case 4: return this._clickSwitchs_setSize(-1);
+            case 2: return this._clickSwitchs_sounds_userVolume(-1);
         }
     } else if (keycode == 39) {
         switch (core.status.event.selection) {
-            case 1: return this._clickSwitchs_userVolume(1);
-            case 2: return this._clickSwitchs_moveSpeed(10);
-            case 3: return this._clickSwitchs_floorChangeTime(100);
-            case 4: return this._clickSwitchs_setSize(1);
+            case 2: return this._clickSwitchs_sounds_userVolume(1);
         }
     }
-    this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs);
+    this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs_sounds);
+}
+
+actions.prototype._clickSwitchs_display = function (x, y) {
+    var choices = core.status.event.ui.choices;
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var selection = y - topIndex;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
+        if (selection != 0) return;
+    }
+    if (selection >= 0 && selection < choices.length) {
+        var width = choices[selection].width;
+        var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
+        var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
+        core.status.event.selection = selection;
+        switch (selection) {
+            case 0:
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_display_setSize(-1);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_display_setSize(1);
+                return;
+            case 1:
+                return this._clickSwitchs_display_enemyDamage();
+            case 2:
+                return this._clickSwitchs_display_critical();
+            case 3:
+                return this._clickSwitchs_display_extraDamage();
+            case 4:
+                return this._clickSwitchs_display_extraDamageType();
+            case 5:
+                core.status.event.selection = 1;
+                core.ui._drawSwitchs();
+                return;
+        }
+    }
+}
+
+actions.prototype._clickSwitchs_display_setSize = function (delta) {
+    var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
+    if (index < 0) return;
+    index += delta;
+    if (index < 0 || index >= core.domStyle.availableScale.length);
+    core.domStyle.scale = core.domStyle.availableScale[index];
+    core.setLocalStorage('scale', core.domStyle.scale);
+    core.resize();
+    var currentRatio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
+    if (currentRatio > core.domStyle.ratio) {
+        core.drawTip("需刷新页面以调整UI清晰度");
+    }
+    core.ui._drawSwitchs_display();
+}
+
+actions.prototype._clickSwitchs_display_enemyDamage = function () {
+    core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
+    core.updateDamage();
+    core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
+    core.ui._drawSwitchs_display();
+}
+
+actions.prototype._clickSwitchs_display_critical = function () {
+    core.flags.displayCritical = !core.flags.displayCritical;
+    core.updateDamage();
+    core.setLocalStorage('critical', core.flags.displayExtraDamage);
+    core.ui._drawSwitchs_display();
+}
+
+actions.prototype._clickSwitchs_display_extraDamage = function () {
+    core.flags.displayExtraDamage = !core.flags.displayExtraDamage;
+    core.updateDamage();
+    core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.ui._drawSwitchs_display();
+}
+
+actions.prototype._clickSwitchs_display_extraDamageType = function () {
+    core.flags.extraDamageType = (core.flags.extraDamageType + 1) % 3;
+    core.updateDamage();
+    core.setLocalStorage('extraDamageType', core.flags.extraDamageType);
+    core.ui._drawSwitchs_display();
+}
+
+actions.prototype._keyUpSwitchs_display = function (keycode) {
+    if (keycode == 27 || keycode == 88) {
+        core.status.event.selection = 0;
+        core.ui._drawSwitchs();
+        return;
+    }
+    if (keycode == 37) {
+        switch (core.status.event.selection) {
+            case 0: return this._clickSwitchs_display_setSize(-1);
+        }
+    } else if (keycode == 39) {
+        switch (core.status.event.selection) {
+            case 0: return this._clickSwitchs_display_setSize(1);
+        }
+    }
+    this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs_display);
+}
+
+actions.prototype._clickSwitchs_action = function (x, y) {
+    var choices = core.status.event.ui.choices;
+    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var selection = y - topIndex;
+    if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
+        if (selection != 0 && selection != 1) return;
+    }
+    if (selection >= 0 && selection < choices.length) {
+        var width = choices[selection].width;
+        var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
+        var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
+        core.status.event.selection = selection;
+        switch (selection) {
+            case 0:
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_action_moveSpeed(-10);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_action_moveSpeed(10);
+                return;
+            case 1:
+                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_action_floorChangeTime(-100);
+                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_action_floorChangeTime(100);
+            case 2:
+                return this._clickSwitchs_action_potionNoRouting();
+            case 3:
+                return this._clickSwitchs_action_clickMove();
+            case 4:
+                return this._clickSwitchs_action_leftHandPrefer();
+            case 5:
+                core.status.event.selection = 2;
+                core.ui._drawSwitchs();
+                return;
+        }
+    }
+}
+
+actions.prototype._clickSwitchs_action_moveSpeed = function (delta) {
+    core.values.moveSpeed = core.clamp(core.values.moveSpeed + delta, 50, 200);
+    core.setLocalStorage("moveSpeed", core.values.moveSpeed);
+    core.ui._drawSwitchs_action();
+}
+
+actions.prototype._clickSwitchs_action_floorChangeTime = function (delta) {
+    core.values.floorChangeTime = core.clamp(core.values.floorChangeTime + delta, 0, 2000);
+    core.setLocalStorage("floorChangeTime", core.values.floorChangeTime);
+    core.ui._drawSwitchs_action();
+}
+
+actions.prototype._clickSwitchs_action_potionNoRouting = function () {
+    if (core.hasFlag('__potionNoRouting__')) core.removeFlag('__potionNoRouting__');
+    else core.setFlag('__potionNoRouting__', true);
+    core.ui._drawSwitchs_action();
+}
+
+actions.prototype._clickSwitchs_action_clickMove = function () {
+    if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
+    else core.setFlag('__noClickMove__', true);
+    core.ui._drawSwitchs_action();
+}
+
+actions.prototype._clickSwitchs_action_leftHandPrefer = function () {
+    core.flags.leftHandPrefer = !core.flags.leftHandPrefer;
+    core.setLocalStorage('leftHandPrefer', core.flags.leftHandPrefer);
+    if (core.flags.leftHandPrefer) {
+        core.myconfirm("左手模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。")
+    }
+    core.ui._drawSwitchs_action();
+}
+
+actions.prototype._keyUpSwitchs_action = function (keycode) {
+    if (keycode == 27 || keycode == 88) {
+        core.status.event.selection = 0;
+        core.ui._drawSwitchs();
+        return;
+    }
+    if (keycode == 37) {
+        switch (core.status.event.selection) {
+            case 0: return this._clickSwitchs_action_moveSpeed(-10);
+            case 1: return this._clickSwitchs_action_floorChangeTime(-100);
+        }
+    } else if (keycode == 39) {
+        switch (core.status.event.selection) {
+            case 0: return this._clickSwitchs_action_moveSpeed(10);
+            case 1: return this._clickSwitchs_action_floorChangeTime(100);
+        }
+    }
+    this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs_action);
 }
 
 ////// 系统菜单栏界面时的点击操作 //////
@@ -2613,7 +2740,8 @@ actions.prototype._clickReplay_replayRemain = function () {
     core.closePanel();
     core.drawText([
         "\t[接续播放录像]该功能允许你播放\r[yellow]两个存档之间的录像\r，常常用于\r[yellow]区域优化\r。\n" +
-        "例如，有若干个区，已经全部通关；之后重打一区并进行了优化，则可以对剩余区域直接播放录像而无需全部重打。",
+        "例如，有若干个区，已经全部通关；之后重打一区并进行了优化，则可以对剩余区域直接播放录像而无需全部重打。\n\n" + 
+        "详细使用方法参见露珠录制的视频教程：\n\r[yellow]https://bilibili.com/video/BV1az4y1C78x",
         "\t[步骤1]请选择一个存档。\n\r[yellow]该存档的坐标必须和当前勇士坐标完全相同。\r\n将尝试从此处开始回放。",
     ], function () {
         core.status.event.id = 'replayRemain';

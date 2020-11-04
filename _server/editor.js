@@ -361,10 +361,8 @@ editor.prototype.changeFloor = function (floorId, callback) {
     var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
     editor.setViewport(x, y);
     editor.uifunctions.unhighlightSaveFloorButton();
-
-    editor.config.set('editorLastFloorId', floorId, function() {
-        if (callback) callback();
-    });
+    editor.config.set('editorLastFloorId', floorId);
+    if (callback) callback();
 }
 
 /////////// 游戏绘图相关 ///////////

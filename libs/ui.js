@@ -1775,19 +1775,49 @@ ui.prototype.drawWaiting = function(text) {
 ui.prototype._drawSwitchs = function() {
     core.status.event.id = 'switchs';
     var choices = [
-        "音乐/音效： "+(core.musicStatus.bgmStatus ? "[ON]" : "[OFF]") + " "+(core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
-        //显示为 0~10 十挡
+        "音效设置",
+        "显示设置",
+        "操作设置",
+        "返回主菜单"
+    ];
+    this.drawChoices(null, choices);
+}
+
+ui.prototype._drawSwitchs_sounds = function () {
+    core.status.event.id = 'switchs-sounds';
+    var choices = [
+        "音乐： " + (core.musicStatus.bgmStatus ? "[ON]" : "[OFF]"),
+        "音效： " + (core.musicStatus.soundStatus ? "[ON]" : "[OFF]"),
+        // 显示为 0~10 十挡
         " <     音量：" + Math.round(Math.sqrt(100 * core.musicStatus.userVolume)) + "     > ",
-        //数值越大耗时越长
+        "返回上一级"
+    ];
+    this.drawChoices(null, choices);
+}
+
+ui.prototype._drawSwitchs_display = function () {
+    core.status.event.id = 'switchs-display';
+    var choices = [
+        " <   放缩：" + Math.max(core.domStyle.scale, 1) + "x   > ",
+        "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
+        "临界显伤： " + (core.flags.displayCritical ? "[ON]" : "[OFF]"),
+        "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
+        "领域模式： " + (core.flags.extraDamageType == 2 ? "[最简]" : core.flags.extraDamageType == 1 ? "[半透明]" : "[完整]" ),
+        "返回上一级",
+    ];
+    this.drawChoices(null, choices);
+}
+
+ui.prototype._drawSwitchs_action = function () {
+    core.status.event.id = 'switchs-action';
+    var choices = [
+        // 数值越大耗时越长
         " <   步时：" + core.values.moveSpeed + "   > ",
         " <   转场：" + core.values.floorChangeTime + "   > ",
-        " <   放缩：" + Math.max(core.domStyle.scale, 1) + "x   > ",
-        "怪物显伤： "+(core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
-        "临界/领域： "+(core.flags.displayCritical ? "[ON]" : "[OFF]")+" "+(core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "血瓶绕路： "+(core.hasFlag('__potionNoRouting__') ? "[ON]":"[OFF]"),
         "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
         "左手模式： "+(core.flags.leftHandPrefer ? "[ON]":"[OFF]"),
-        "返回主菜单"
+        "返回上一级",
     ];
     this.drawChoices(null, choices);
 }

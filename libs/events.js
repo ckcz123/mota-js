@@ -235,6 +235,12 @@ events.prototype._gameOver_askRate = function (ending) {
     }
 
     if (ending == null) {
+        if (!core.hasSave(0)) {
+            core.ui.closePanel();
+            core.restart();
+            return;
+        }
+
         core.status.event.selection = 0;
         core.ui.drawConfirmBox("你想读取自动存档么？", function () {
             core.ui.closePanel();
@@ -1856,12 +1862,8 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        // --- 忽略可能的turn事件
-        if (action == 'turn') action = core.status.replay.toReplay.shift();
-        if (core.hasFlag('@temp@shop') && action.startsWith('shop:')) action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
-            if (index == "-1") index = data.choices.length - 1;
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
                 if (index != 'none') {
                     var timeout = Math.floor(index / 100) || 0;
@@ -1883,6 +1885,9 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                     core.doAction();
                 }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
             }
+        } else {
+            core.control._replay_error(action);
+            return;
         }
     } else {
         if (data.timeout) {
@@ -1911,8 +1916,6 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
     core.status.event.ui = {"text": core.replaceText(data.text, prefix), "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        // --- 忽略可能的turn事件
-        if (action == 'turn') action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < 2) {

@@ -188,7 +188,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var fromId = core.status.floorId;
 
 	// 检查能否飞行
-	if (!core.status.maps[fromId].canFlyTo || !core.status.maps[toId].canFlyTo || !core.hasVisitedFloor(toId)) {
+	if (!core.status.maps[fromId].canFlyFrom || !core.status.maps[toId].canFlyTo || !core.hasVisitedFloor(toId)) {
 		core.drawTip("无法飞往" + core.status.maps[toId].title + "！");
 		return false;
 	}
@@ -253,53 +253,64 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 战斗结束后触发的事件
 
 	var enemy = core.material.enemys[enemyId];
+	var special = enemy.special;
 
 	// 播放战斗音效和动画
-	var equipAnimate = 'hand',
-		equipId = (core.status.hero.equipment || [])[0];
+	// 默认播放的动画；你也可以使用
+	var animate = 'hand'; // 默认动画
+	// 检查当前装备是否存在攻击动画
+	var equipId = core.getEquip(0);
 	if (equipId && (core.material.items[equipId].equip || {}).animate)
-		equipAnimate = core.material.items[equipId].equip.animate;
-	// 检查equipAnimate是否存在SE，如果不存在则使用默认音效
-	if (!(core.material.animates[equipAnimate] || {}).se)
+		animate = core.material.items[equipId].equip.animate;
+	// 你也可以在这里根据自己的需要，比如enemyId或special或flag来修改播放的动画效果
+	// if (enemyId == '...') animate = '...';
+
+	// 检查该动画是否存在SE，如果不存在则使用默认音效
+	if (!(core.material.animates[animate] || {}).se)
 		core.playSound('attack.mp3');
-	// 强制战斗的战斗动画
+
+	// 播放动画；如果不存在坐标（强制战斗）则播放到勇士自身
 	if (x != null && y != null)
-		core.drawAnimate(equipAnimate, x, y);
+		core.drawAnimate(animate, x, y);
 	else
-		core.drawHeroAnimate(equipAnimate);
+		core.drawHeroAnimate(animate);
 
-	var damage = core.enemys.getDamage(enemyId, x, y);
-	if (damage == null) damage = core.status.hero.hp + 1;
-
-	// 扣减体力值
-	core.status.hero.hp -= damage;
-
-	// 记录
-	core.status.hero.statistics.battleDamage += damage;
-	core.status.hero.statistics.battle++;
-
-	if (core.status.hero.hp <= 0) {
+	// 获得战斗伤害信息
+	var damageInfo = core.getDamageInfo(enemyId, null, x, y) || {};
+	// 战斗伤害
+	var damage = damageInfo.damage;
+	// 当前战斗回合数，可用于战后所需的判定
+	var turn = damageInfo.turn;
+	// 判定是否致死
+	if (damage == null || damage >= core.status.hero.hp) {
 		core.status.hero.hp = 0;
 		core.updateStatusBar();
 		core.events.lose('战斗失败');
 		return;
 	}
 
-	var guards = []; // 支援
+	// 扣减体力值并记录统计数据
+	core.status.hero.hp -= damage;
+	core.status.hero.statistics.battleDamage += damage;
+	core.status.hero.statistics.battle++;
+
+	// 计算当前怪物的支援怪物
+	var guards = [];
 	if (x != null && y != null) {
 		guards = core.getFlag("__guards__" + x + "_" + y, []);
 		core.removeFlag("__guards__" + x + "_" + y);
 	}
 
-	// 获得金币和经验
+	// 获得金币
 	var money = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].money;
 	}, enemy.money);
-	if (core.hasItem('coin')) money *= 2;
-	if (core.hasFlag('curse')) money = 0;
+	if (core.hasItem('coin')) money *= 2; // 幸运金币：双倍
+	if (core.hasFlag('curse')) money = 0; // 诅咒效果
 	core.status.hero.money += money;
 	core.status.hero.statistics.money += money;
 
+	// 获得经验
 	var exp = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].exp;
 	}, enemy.exp);
@@ -312,10 +323,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.flags.statusBarItems.indexOf('enableExp') >= 0) hint += "，经验+" + exp;
 	core.drawTip(hint, enemy.id);
 
-	// 事件的处理
-	var todo = [];
-
-	var special = enemy.special;
 	// 中毒
 	if (core.enemys.hasSpecial(special, 12)) {
 		core.triggerDebuff('get', 'poison');
@@ -328,7 +335,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.enemys.hasSpecial(special, 14)) {
 		core.triggerDebuff('get', 'curse');
 	}
-	// 仇恨属性
+	// 仇恨怪物将仇恨值减半
 	if (core.enemys.hasSpecial(special, 17)) {
 		core.setFlag('hatred', Math.floor(core.getFlag('hatred', 0) / 2));
 	}
@@ -359,7 +366,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.setFlag('skillName', '无');
 	}
 
-	// 如果有加点
+
+	// 事件的处理
+	var todo = [];
+
+	// 加点事件
 	var point = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].point;
 	}, enemy.point) || 0;
@@ -367,10 +378,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 	}
 
-	// 如果该点存在事件 -- V2.5.4 以后阻击怪也可以有战后事件了
+	// 战后事件
 	if (core.status.floorId != null) {
 		core.push(todo, core.floors[core.status.floorId].afterBattle[x + "," + y]);
 	}
+	core.push(todo, enemy.afterBattle);
 
 	// 在这里增加其他的自定义事件需求
 	/*
@@ -383,8 +395,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 如果事件不为空，将其插入
 	if (todo.length > 0) core.insertAction(todo, x, y);
-	
-	// 因为removeBlock和hideBlock都会刷新状态栏，因此移动到这里并保证刷新只执行一次，以提升效率
+
+	// 因为removeBlock和hideBlock都会刷新状态栏，因此将删除部分移动到这里并保证刷新只执行一次，以提升效率
 	if (core.getBlock(x, y) != null) {
 		// 检查是否是重生怪物；如果是则仅隐藏不删除
 		if (core.hasSpecial(enemy.special, 23)) {
@@ -457,33 +469,33 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 第五项为该特殊属性的标记；目前 1 代表是地图类技能（需要进行遍历全图）
 	// 名字和描述可以直接写字符串，也可以写个function将怪物传进去
 	return [
-		[1, "先攻", "怪物首先攻击"],
-		[2, "魔攻", "怪物无视勇士的防御", "#b6b0ff"],
-		[3, "坚固", "怪物防御不小于勇士攻击-1", "#b9822d"],
-		[4, "2连击", "怪物每回合攻击2次"],
-		[5, "3连击", "怪物每回合攻击3次"],
-		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }],
+		[1, "先攻", "怪物首先攻击", "#ffcc33"],
+		[2, "魔攻", "怪物无视勇士的防御", "#bbb0ff"],
+		[3, "坚固", "怪物防御不小于勇士攻击-1", "#c0b088"],
+		[4, "2连击", "怪物每回合攻击2次", "#ffee77"],
+		[5, "3连击", "怪物每回合攻击3次", "#ffee77"],
+		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }, "#ffee77"],
 		[7, "破甲", function (enemy) { return "战斗前，怪物附加角色防御的" + Math.floor(100 * (enemy.defValue || core.values.breakArmor || 0)) + "%作为伤害"; }, "#b30000"],
-		[8, "反击", function (enemy) { return "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * (enemy.atkValue || core.values.counterAttack || 0)) + "%作为伤害，无视角色防御"; }, "#bd26ce"],
-		[9, "净化", function (enemy) { return "战斗前，怪物附加勇士护盾的" + (enemy.n || core.values.purify) + "倍作为伤害"; }, "#00d2d4"],
-		[10, "模仿", "怪物的攻防和勇士攻防相等", "#ff00d2"],
+		[8, "反击", function (enemy) { return "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * (enemy.atkValue || core.values.counterAttack || 0)) + "%作为伤害，无视角色防御"; }, "#ffaa44"],
+		[9, "净化", function (enemy) { return "战斗前，怪物附加勇士护盾的" + (enemy.n || core.values.purify) + "倍作为伤害"; }, "#80eed6"],
+		[10, "模仿", "怪物的攻防和勇士攻防相等", "#b0c0dd"],
 		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }, "#ff00d2"],
-		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点", "#4aff60"],
-		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%"), "#feccd0"],
-		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验", "#747dff"],
-		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }],
-		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半", "#ff00d2"],
-		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）"],
-		[18, "阻击", function (enemy) { return "经过怪物的十字领域时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }],
-		[19, "自爆", "战斗后勇士的生命值变成1", "#ff0000"],
-		[20, "无敌", "勇士无法打败怪物，除非拥有十字架", "#fbff00"],
-		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }, "#ff0000"],
-		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，无视勇士护盾。"; }],
-		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现"],
-		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }],
-		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#fff900", 1],
-		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。", "#fff900", 1],
-		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。"]
+		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点", "#99ee88"],
+		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%"), "#f0bbcc"],
+		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验", "#bbeef0"],
+		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }, "#c677dd"],
+		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半", "#bb99ee"],
+		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）", "#b0b666"],
+		[18, "阻击", function (enemy) { return "经过怪物的十字领域时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }, "#8888e6"],
+		[19, "自爆", "战斗后勇士的生命值变成1", "#ff6666"],
+		[20, "无敌", "勇士无法打败怪物，除非拥有十字架", "#aaaaaa"],
+		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }],
+		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，未开启负伤时无视勇士护盾。"; }, "#ff9977"],
+		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现", "#a0e0ff"],
+		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }, "#dda0dd"],
+		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#e6e099", 1],
+		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。", "#77c0b6", 1],
+		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。", "#c0ddbb"]
 	];
 },
         "getEnemyInfo": function (enemy, hero, x, y, floorId) {
@@ -528,8 +540,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 从V2.5.4开始，对光环效果增加缓存，以解决多次重复计算的问题，从而大幅提升运行效率。
 		var hp_buff = 0,
 			atk_buff = 0,
-			def_buff = 0,
-			cnt = 0;
+			def_buff = 0;
+		// 已经计算过的光环怪ID列表，用于判定叠加
+		var usedEnemyIds = {};
 		// 检查光环和支援的缓存
 		var index = x != null && y != null ? (x + "," + y) : "floor";
 		if (!core.status.checkBlock.cache) core.status.checkBlock.cache = {};
@@ -554,13 +567,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 							if (enemy.zoneSquare && dx <= enemy.range && dy <= enemy.range) inRange = true;
 						}
 						// 检查是否可叠加
-						if (inRange && (enemy.add || cnt == 0)) {
+						if (inRange && (enemy.add || !usedEnemyIds[enemy.id])) {
 							hp_buff += enemy.value || 0;
 							atk_buff += enemy.atkValue || 0;
 							def_buff += enemy.defValue || 0;
-							cnt++;
+							usedEnemyIds[enemy.id] = true;
 						}
-
 					}
 					// 检查【支援】技能，数字26
 					if (enemy && core.hasSpecial(enemy.special, 26) &&
@@ -596,7 +608,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// if (core.hasSpecial(mon_special, 27) && mon_atk < hero_atk) {
 	//     mon_atk = hero_atk;
 	// }
-	// 也可以按需增加各种自定义内容（比如幻塔的魔杖效果等）
+	// 也可以按需增加各种自定义内容
 
 	return {
 		"hp": Math.floor(mon_hp),
@@ -708,7 +720,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	var turn = Math.ceil(mon_hp / hero_per_damage);
 
 	// ------ 支援 ----- //
-	// 这个递归最好想明白为什么，flag:extra_turn是怎么用的
+	// 这个递归最好想明白为什么，flag:__extraTurn__是怎么用的
 	var guards = core.getFlag("__guards__" + x + "_" + y, enemyInfo.guards);
 	var guard_before_current_enemy = false; // ------ 支援怪是先打(true)还是后打(false)？
 	turn += core.getFlag("__extraTurn__", 0);
@@ -725,6 +737,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			// 这里的mdef传0，因为护盾应该只会被计算一次
 			var info = core.enemys.getDamageInfo(core.material.enemys[gid], { hp: origin_hero_hp, atk: origin_hero_atk, def: origin_hero_def, mdef: 0 });
 			if (info == null) { // 小队中任何一个怪物不可战斗，直接返回null
+				core.removeFlag("__extraTurn__");
 				return null;
 			}
 			// 已经进行的回合数
@@ -808,7 +821,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.load(true);
 		break;
 	case 69: // E：打开光标
-		core.ui.drawCursor();
+		core.ui._drawCursor();
 		break;
 	case 84: // T：打开道具栏
 		core.openToolbox(true);
@@ -826,17 +839,17 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.getNextItem();
 		break;
 	case 82: // R：回放录像
-		core.actions._clickSyncSave_replay();
+		core.ui._drawReplay();
 		break;
 	case 33:
 	case 34: // PgUp/PgDn：浏览地图
-		core.ui.drawMaps();
+		core.ui._drawViewMaps();
 		break;
 	case 66: // B：打开数据统计
-		core.ui.drawStatistics();
+		core.ui._drawStatistics();
 		break;
 	case 72: // H：打开帮助页面
-		core.ui.drawHelp();
+		core.ui._drawHelp();
 		break;
 	case 77: // M：打开存档笔记
 		core.actions._clickNotes_show();
@@ -864,7 +877,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		break;
 	case 51: // 快捷键3: 飞
 		if (core.hasItem('centerFly')) {
-			core.ui.drawCenterFly();
+			core.ui._drawCenterFly();
 		}
 		break;
 	case 52: // 快捷键4：破冰/冰冻/地震/上下楼器/... 其他道具依次判断
@@ -1144,7 +1157,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 难度
 	if (core.statusBar.hard.innerText != core.status.hard) {
 		core.statusBar.hard.innerText = core.status.hard;
-		core.statusBar.hard.style.color = core.getFlag('__hardColor__', 'red');
+	}
+	var hardColor = core.getFlag('__hardColor__', 'red');
+	if (core.statusBar.hard.getAttribute('_style') != hardColor) {
+		core.statusBar.hard.style.color = hardColor;
+		core.statusBar.hard.setAttribute('_style', hardColor);
 	}
 	// 自定义状态栏绘制
 	core.drawStatusBar();
@@ -1268,7 +1285,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				var nx = x + core.utils.scan[dir].x,
 					ny = y + core.utils.scan[dir].y,
 					currloc = nx + "," + ny;
-				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
+				if (nx < 0 || nx >= width || ny < 0 || ny >= height || !core.canMoveHero(x, y, dir, floorId)) continue;
 				ambush[currloc] = (ambush[currloc] || []).concat([
 					[x, y, id, dir]
 				]);
@@ -1339,6 +1356,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 	}
+
+	// 取消注释下面这一段可以让护盾抵御阻激夹域伤害
+	/*
+	for (var loc in damage) {
+		damage[loc] = Math.max(0, damage[loc] - core.getRealStatus('mdef'));
+	}
+	*/
 
 	core.flags.canGoDeadZone = canGoDeadZone;
 	core.status.checkBlock = {
@@ -1473,20 +1497,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 获得道具栏中当前某类型道具的显示项和显示顺序
 	// cls为道具类型，只可能是 tools, constants 和 equips
 	// 返回一个数组，代表当前某类型道具的显示内容和顺序
+	// 默认按id升序排列，您可以取消下面的注释改为按名称排列
 
 	return Object.keys(core.status.hero.items[cls] || {})
 		.filter(function (id) { return !core.material.items[id].hideInToolbox; })
-		.sort();
+		.sort( /*function (id1, id2) { return core.material.items[id1].name <= core.material.items[id2].name ? -1 : 1 }*/ );
 },
         "drawStatusBar": function () {
 	// 自定义绘制状态栏，需要开启状态栏canvas化
 
 	// 如果是非状态栏canvas化，直接返回
 	if (!core.flags.statusCanvas) return;
-	var canvas = core.dom.statusCanvas,
-		ctx = core.dom.statusCanvasCtx;
+	var ctx = core.dom.statusCanvasCtx;
 	// 清空状态栏
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	core.clearMap(ctx);
 	// 如果是隐藏状态栏模式，直接返回
 	if (!core.domStyle.showStatusBar) return;
 
@@ -1497,53 +1521,90 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 竖屏模式下的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
 
-	ctx.fillStyle = core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor;
-	ctx.font = 'italic bold 18px Verdana';
+	core.setFillStyle(ctx, core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor);
 
-	// 距离左侧边框6像素，上侧边框9像素，行距约为39像素
-	var leftOffset = 10,
-		topOffset = 9,
-		lineHeight = 42;
-	if (core.domStyle.isVertical) { // 竖屏模式，行高32像素
-		leftOffset = 10;
-		topOffset = 6;
-		lineHeight = 32;
-	}
-
-	var toDraw = ["floor", "hp", "atk", "def", "mdef", "money"];
-	for (var index = 0; index < toDraw.length; index++) {
-		// 绘制下一个数据
-		var name = toDraw[index];
-		// 图片大小25x25
-		core.drawImage(ctx, core.statusBar.icons[name], leftOffset, topOffset, 25, 25);
-		// 文字内容
-		var text = (core.statusBar[name] || {}).innerText || " ";
+	// 绘制一段文字，带斜体判定
+	var _fillBoldTextWithFontCheck = function (text, x, y, style) {
 		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
 		if (!/^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(text))
-			ctx.font = 'bold 18px Verdana';
-		// 绘制文字
-		ctx.fillText(text, leftOffset + 36, topOffset + 20);
-		ctx.font = 'italic bold 18px Verdana';
-		// 计算下一个绘制的坐标
-		if (core.domStyle.isVertical) {
-			// 竖屏模式
-			if (index % 3 != 2) leftOffset += 150;
-			else {
-				leftOffset = 10;
-				topOffset += lineHeight;
-			}
-		} else {
-			// 横屏模式
-			topOffset += lineHeight;
-		}
+			core.setFont(ctx, 'bold 18px Verdana');
+		else core.setFont(ctx, 'italic bold 18px Verdana');
+		core.fillBoldText(ctx, text, x, y, style);
 	}
-	// 绘制三色钥匙
-	ctx.fillStyle = '#FFCCAA';
-	ctx.fillText(core.statusBar.yellowKey.innerText, leftOffset + 5, topOffset + 20);
-	ctx.fillStyle = '#AAAADD';
-	ctx.fillText(core.statusBar.blueKey.innerText, leftOffset + 40, topOffset + 20);
-	ctx.fillStyle = '#FF8888';
-	ctx.fillText(core.statusBar.redKey.innerText, leftOffset + 75, topOffset + 20);
+
+	// 横竖屏需要分别绘制...
+	if (!core.domStyle.isVertical) {
+		// 横屏模式
+
+		// 绘制楼层
+		core.drawImage(ctx, core.statusBar.icons.floor, 10, 9, 25, 25);
+		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 46, 29);
+
+		// 绘制生命
+		core.drawImage(ctx, core.statusBar.icons.hp, 10, 43, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 46, 63);
+
+		// 绘制攻击
+		core.drawImage(ctx, core.statusBar.icons.atk, 10, 77, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 46, 97);
+
+		// 绘制防御
+		core.drawImage(ctx, core.statusBar.icons.def, 10, 111, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 46, 131);
+
+		// 绘制护盾
+		core.drawImage(ctx, core.statusBar.icons.mdef, 10, 145, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 46, 165);
+
+		// 绘制金币
+		core.drawImage(ctx, core.statusBar.icons.money, 10, 179, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 46, 199);
+
+		// 绘制经验
+		core.drawImage(ctx, core.statusBar.icons.exp, 10, 213, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 46, 233);
+
+		// 绘制三色钥匙
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 15, 267, '#FFCCAA');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 50, 267, '#AAAADD');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 85, 267, '#FF8888');
+
+	} else {
+		// 竖屏模式
+
+		// 绘制楼层
+		core.drawImage(ctx, core.statusBar.icons.floor, 10, 6, 25, 25);
+		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 46, 26);
+
+		// 绘制生命
+		core.drawImage(ctx, core.statusBar.icons.hp, 141, 6, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 177, 26);
+
+		// 绘制攻击
+		core.drawImage(ctx, core.statusBar.icons.atk, 272, 6, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 308, 26);
+
+		// 绘制防御
+		core.drawImage(ctx, core.statusBar.icons.def, 10, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 46, 58);
+
+		// 绘制护盾
+		core.drawImage(ctx, core.statusBar.icons.mdef, 141, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 177, 58);
+
+		// 绘制金币
+		core.drawImage(ctx, core.statusBar.icons.money, 272, 38, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 308, 58);
+
+		// 绘制经验
+		core.drawImage(ctx, core.statusBar.icons.exp, 10, 70, 25, 25);
+		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 46, 90);
+
+		// 绘制三色钥匙
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 146, 90, '#FFCCAA');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 181, 90, '#AAAADD');
+		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 216, 90, '#FF8888');
+	}
 },
         "drawStatistics": function () {
 	// 浏览地图时参与的统计项目

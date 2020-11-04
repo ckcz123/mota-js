@@ -43,7 +43,7 @@ button {
 }
 
 /** 素材区背景 */
-#iconLib {
+#iconLib, #mapEdit {
     background-color: #242424;
 }
 
@@ -319,6 +319,14 @@ option:checked {
 
 .popCheckboxItem {
     color: #bbbbbb;
+}
+
+table.col td.highlight {
+    background-color: #66ccbb;
+}
+
+table.row td.highlight {
+    background-color: #77aacc;
 }
 
 /** ======== blockly 相关 ======== */

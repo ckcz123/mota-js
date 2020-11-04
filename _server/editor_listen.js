@@ -12,6 +12,7 @@ editor_listen_wrapper = function (editor) {
         editor.dom.eui.onmousedown = editor.uifunctions.map_ondown
         editor.dom.eui.onmousemove = editor.uifunctions.map_onmove
         editor.dom.eui.onmouseup = editor.uifunctions.map_onup
+        editor.dom.eui.onmouseout = editor.uifunctions.map_onmoveout
 
         editor.dom.mid.onmousewheel = editor.uifunctions.map_mousewheel
 

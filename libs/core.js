@@ -15,10 +15,13 @@ function core() {
         'images': {},
         'bgms': {},
         'sounds': {},
-        'ground': null,
         'items': {},
         'enemys': {},
         'icons': {},
+        'ground': null,
+        'grundCanvas': null,
+        'groundPattern': null,
+        'autotileEdges': {},
     }
     this.timeout = {
         'turnHeroTimeout': null,
@@ -62,7 +65,7 @@ function core() {
         'userVolume': 1.0, // 用户音量
         'designVolume': 1.0, //设计音量
         'cachedBgms': [], // 缓存BGM内容
-        'cachedBgmCount': 4, // 缓存的bgm数量
+        'cachedBgmCount': 8, // 缓存的bgm数量
     }
     this.platform = {
         'isOnline': true, // 是否http
@@ -84,6 +87,8 @@ function core() {
     // 样式
     this.domStyle = {
         scale: 1.0,
+        ratio: 1.0,
+        hdCanvas: ["damage", "ui", "data"],
         availableScale: [],
         isVertical: false,
         showStatusBar: true,
@@ -98,7 +103,7 @@ function core() {
         width: this.__SIZE__, // map width and height
         height: this.__SIZE__,
         v2: false,
-        threshold: 512,
+        threshold: 1024,
         extend: 10,
         scale: 1.0,
         tempCanvas: null, // A temp canvas for drawing
@@ -246,7 +251,12 @@ core.prototype.init = function (coreData, callback) {
 
     // 初始化画布
     for (var name in core.canvas) {
-        core.canvas[name].canvas.width = core.canvas[name].canvas.height = core.__PIXELS__;
+        if (core.domStyle.hdCanvas.indexOf(name) >= 0)
+            core.maps._setHDCanvasSize(core.canvas[name], core.__PIXELS__, core.__PIXELS__);
+        else {
+            core.canvas[name].canvas.width = core.__PIXELS__;
+            core.canvas[name].canvas.height = core.__PIXELS__;
+        }
     }
 
     core.loader._load(function () {
@@ -315,14 +325,14 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
-    core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', 500);
+    core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
+    if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     if (main.mode != 'editor') {
         core.domStyle.scale = core.getLocalStorage('scale', 1);
-        if (core.domStyle.scale != 1) {
-            core.resize();
-        }
+        core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, 2);
     }
 }
 

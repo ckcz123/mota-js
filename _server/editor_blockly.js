@@ -104,7 +104,7 @@ editor_blockly = function () {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\(r|f|i|c|d|e|z)/g,'\\\\$1')),
+            }).replace(/\\(r|f|i|c|d|e|g|z)/g,'\\\\$1')),
             editor_blockly.entryType
         );
     }
@@ -190,7 +190,7 @@ editor_blockly = function () {
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
-        code = code.replace(/\\(i|c|d|e|z)/g, '\\\\$1');
+        code = code.replace(/\\(i|c|d|e|g|z)/g, '\\\\$1');
         eval('var obj=' + code);
         if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
             "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
@@ -233,13 +233,11 @@ editor_blockly = function () {
 
     editor_blockly.previewBlock = function (b,args) {
 
-        try {
-            // 特殊处理立绘
-            if (b.type == 'textDrawing') {
-                var str = Blockly.JavaScript.blockToCode(b);
-                var list = str.substring(str.indexOf('[')+1, str.lastIndexOf(']')).split(",");
+        var previewTextDrawing = function (content) {
+            var arr = [];
+            content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {        
+                var list = str.split(",");
                 if (list.length == 3 || list.length == 5 || list.length >= 9) {
-                    var arr = [];
                     var name = list[0];
                     var obj = {"type": "drawImage"};
                     if (name.endsWith(":o") || name.endsWith(":x") || name.endsWith(":y")) {
@@ -266,13 +264,21 @@ editor_blockly = function () {
                         obj.angle = parseFloat(list[10]);
                     }
                     arr.push(obj);
-                    console.log(arr);
-                    editor.uievent.previewUI(arr);
                 }
+                return "";
+            });
+            editor.uievent.previewUI(arr);
+            return true;
+        }
+
+        try {
+            // 特殊处理立绘
+            if (b.type == 'textDrawing' || b.type == 'text_2_s') {
+                previewTextDrawing(Blockly.JavaScript.blockToCode(b));
                 return true;
             }
 
-            var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|z)/g, '\\\\$1') + "]";
+            var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|g|z)/g, '\\\\$1') + "]";
             eval("var obj="+code);
             if (obj.length == 0) return true;
             obj = obj[0];
@@ -371,6 +377,16 @@ editor_blockly = function () {
         if (b && MotaActionBlocks[b.type].doubleclicktext) { //多行编辑
             editor_blockly.doubleclicktext(b,MotaActionBlocks[b.type].doubleclicktext);
             return;
+        }
+    }
+
+    editor_blockly.selectPointFromButton = function () {
+        var b = Blockly.selected;
+        if (b && MotaActionBlocks[b.type].selectPoint) {
+            editor_blockly.selectPoint(b,eval(MotaActionBlocks[b.type].selectPoint));
+            return;
+        } else {
+            editor.uievent.selectPoint();
         }
     }
 
@@ -654,10 +670,12 @@ editor_blockly = function () {
         namesObj.allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
                          "maroon（深红色）", "navy（深蓝色）", "gold（金色）",  "olive（黄褐色）", "orange（橙色）", "purple（品红色）", 
                          "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
+        namesObj.allFonts = [main.styles.font].concat(main.fonts);
         namesObj.allDoors = ["this"].concat(Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e)
             .map(function (key) { return maps_90f36752_8815_4be8_b32b_d7fad1d0542e[key]; })
             .filter(function (one) { return one.doorInfo != null; })
             .map(function (one) { return one.id; }));
+        namesObj.allEvents = Object.keys(core.events.commonEvent);
         var filter = function (list, content) {
           return list.filter(function (one) {
             return one != content && one.startsWith(content);
@@ -673,7 +691,7 @@ editor_blockly = function () {
         // 对音效进行补全
         // 对全局商店进行补全
         // 对楼层名进行补全
-        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors'][ii];ii++){
+        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
             if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
                 return filter(namesObj[names], content);
             }
@@ -708,9 +726,18 @@ editor_blockly = function () {
           }
         }
 
+        // 对\g进行补全
+        index = content.lastIndexOf("\\g[");
+        if (index >= 0) {
+          var after = content.substring(index + 3);
+          if (after.indexOf("]") < 0) {
+            return filter(namesObj.allFonts, after);
+          }
+        }
+
         // 对\进行补全！
         if (content.charAt(content.length - 1) == '\\') {
-          return ["n（换行）", "f（立绘）", "r（变色）", "i（图标）", "z（暂停打字）", "t（标题图标）", "b（对话框）", "c（字体大小）", "d（粗体）", "e（斜体）"];
+          return ["n（换行）", "f（立绘）", "r（变色）", "i（图标）", "z（暂停打字）", "t（标题图标）", "b（对话框）", "c（字体大小）", "d（粗体）", "e（斜体）", "g（字体）"];
         }
 
         return [];
@@ -780,12 +807,26 @@ editor_blockly = function () {
                 },
                 filter: function () {return true;},
                 item: function (text, input) {
+                    var id = text.label, info = core.getBlockInfo(id);
                     var li = document.createElement("li");
                     li.setAttribute("role", "option");
                     li.setAttribute("aria-selected", "false");
                     input = awesomplete.prefix.trim();
                     if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
                     li.innerHTML = text;
+                    if (info) {
+                        var height = (info.height || 32), width = 32;
+                        var scale = 75;
+                        height *= scale / 100;
+                        width *= scale / 100;
+                        var ctx = core.createCanvas('list_' + id, 0, 0, width, height),
+                            canvas = ctx.canvas;
+                        canvas.style.display = 'inline';
+                        canvas.style.marginRight = '8px';
+                        core.drawIcon(ctx, id, 0, 0, width, height);
+                        canvas.style.position = '';
+                        li.insertBefore(canvas, li.children[0]);
+                    }
                     return li;
                 },
                 sort: function (a, b) {

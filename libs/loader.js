@@ -176,13 +176,14 @@ loader.prototype._loadAutotiles_async = function (onprogress, onfinished) {
 
 loader.prototype._loadAutotiles_afterLoad = function (keys, autotiles) {
    // autotile需要保证顺序
-   keys.forEach(function (v) {
-    core.material.images.autotile[v] = autotiles[v];
+    keys.forEach(function (v) {
+        core.material.images.autotile[v] = autotiles[v];
     });
 
     setTimeout(function () {
         core.maps._makeAutotileEdges();
     });
+    
 }
 
 // ------ 加载额外素材 ------ //
@@ -250,6 +251,8 @@ loader.prototype.loadImage = function (dir, imgName, callback) {
             name = name + ".png";
         var image = new Image();
         image.onload = function () {
+            image.setAttribute('_width', image.width);
+            image.setAttribute('_height', image.height);
             callback(imgName, image);
         }
         image.onerror = function () {
@@ -284,6 +287,8 @@ loader.prototype.loadImagesFromZip = function (url, names, toSave, onprogress, o
                 img.onload = function () {
                     cnt--;
                     URL.revokeObjectURL(url);
+                    img.setAttribute('_width', img.width);
+                    img.setAttribute('_height', img.height);
                     if (cnt == 0 && onfinished) onfinished();
                 }
                 img.src = url;

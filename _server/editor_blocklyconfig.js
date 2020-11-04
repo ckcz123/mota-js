@@ -108,7 +108,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
         '选择剑或者盾','流浪者','man',0,MotaActionBlocks['choicesContext'].xmlText([
-          '剑','','',null,'',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
+          '剑','','',null,'','',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
         ])
       ]),
     ],
@@ -125,9 +125,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
       MotaActionBlocks['moveAction_s'].xmlText(),
-      MotaActionBlocks['moveHero_s'].xmlText(),
-      MotaActionBlocks['jumpHero_s'].xmlText(),
-      MotaActionBlocks['jumpHero_1_s'].xmlText(),
       MotaActionBlocks['changeFloor_s'].xmlText(),
       MotaActionBlocks['changePos_s'].xmlText(),
       MotaActionBlocks['battle_s'].xmlText(),
@@ -148,7 +145,10 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['hide_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
       MotaActionBlocks['turnBlock_s'].xmlText(),
+      MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
+      MotaActionBlocks['jumpHero_s'].xmlText(),
+      MotaActionBlocks['jumpHero_1_s'].xmlText(),
       MotaActionBlocks['jump_s'].xmlText(),
       MotaActionBlocks['jump_1_s'].xmlText(),
       MotaActionBlocks['showBgFgMap_s'].xmlText(),
@@ -178,14 +178,15 @@ editor_blocklyconfig=(function(){
     '特效/声音':[
       MotaActionBlocks['sleep_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
-        {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件"}]},
-        {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件"}]},
+        {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件\n超时剩余时间会写入flag:timeout"}]},
+        {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件\n超时剩余时间会写入flag:timeout"}]},
+        {"case": "timeout", "action": [{"type": "comment", "text": "当超时未操作时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
       MotaActionBlocks['setViewport_s'].xmlText(),
-      MotaActionBlocks['moveViewport_s'].xmlText(),
+      MotaActionBlocks['setViewport_1_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
       MotaActionBlocks['showHero_s'].xmlText(),
@@ -205,6 +206,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
       MotaActionBlocks['autoSave_s'].xmlText(),
+      MotaActionBlocks['forbidSave_s'].xmlText(),
       MotaActionBlocks['callLoad_s'].xmlText(),
     ],
     'UI绘制':[
@@ -243,12 +245,15 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['idFlag_e'].xmlText(),
       MotaActionBlocks['idTemp_e'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
+      MotaActionBlocks['unaryOperation_e'].xmlText(),
+      MotaActionBlocks['utilOperation_e'].xmlText(),
       MotaActionBlocks['bool_e'].xmlText(),
       MotaActionBlocks['idString_e'].xmlText(),
       MotaActionBlocks['idIdList_e'].xmlText(),
       MotaActionBlocks['idFixedList_e'].xmlText(),
       MotaActionBlocks['enemyattr_e'].xmlText(),
       MotaActionBlocks['blockId_e'].xmlText(),
+      MotaActionBlocks['blockNumber_e'].xmlText(),
       MotaActionBlocks['blockCls_e'].xmlText(),
       MotaActionBlocks['equip_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
@@ -450,7 +455,7 @@ function omitedcheckUpdateFunction(event) {
     }
   }
   try {
-    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\(i|c|d|e|z)/g, '\\\\$1');
+    var code = Blockly.JavaScript.workspaceToCode(workspace).replace(/\\(i|c|d|e|g|z)/g, '\\\\$1');
     editor_blockly.setValue(code);
   } catch (error) {
     editor_blockly.setValue(String(error));
@@ -474,11 +479,11 @@ function omitedcheckUpdateFunction(event) {
   }
 
   // 因为在editor_blockly.parse里已经HTML转义过一次了,所以这里要覆盖掉以避免在注释中出现&lt;等
-  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment) {
+  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment,collapsed) {
     var rule = MotaActionBlocks[ruleName];
     var blocktext = isShadow?'shadow':'block';
     var xmlText = [];
-    xmlText.push('<'+blocktext+' type="'+ruleName+'">');
+    xmlText.push('<'+blocktext+' type="'+ruleName+'"'+(collapsed ? ' collapsed="true"' : '')+'>');
     if(!inputs)inputs=[];
     for (var ii=0,inputType;inputType=rule.argsType[ii];ii++) {
       var input = inputs[ii];

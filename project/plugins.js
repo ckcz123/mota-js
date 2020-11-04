@@ -255,14 +255,23 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		flags.__visited__ = flags.__visited__ || {};
 		flags.__removed__ = flags.__removed__ || [];
 		flags.__disabled__ = flags.__disabled__ || {};
+		flags.__leaveLoc__ = flags.__leaveLoc__ || {};
 		for (var i = fromIndex; i <= toIndex; ++i) {
 			var floorId = core.floorIds[i];
 			if (core.status.maps[floorId].deleted) continue;
 			delete flags.__visited__[floorId];
 			flags.__removed__.push(floorId);
 			delete flags.__disabled__[floorId];
+			delete flags.__leaveLoc__[floorId];
+			(core.status.autoEvents || []).forEach(function (event) {
+				if (event.floorId == floorId && event.currentFloor) {
+					core.autoEventExecuting(event.symbol, false);
+					core.autoEventExecuted(event.symbol, false);
+				} 
+			});
 			core.status.maps[floorId].deleted = true;
 			core.status.maps[floorId].canFlyTo = false;
+			core.status.maps[floorId].canFlyFrom = false;
 			core.status.maps[floorId].cannotViewMap = true;
 		}
 	}
@@ -321,7 +330,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
 	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
 	// 插件作者：ad
-	var __enable = true;
+	var __enable = false;
 	if (!__enable) return;
 
 	// 创建新图层
@@ -330,13 +339,18 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var canvas = document.createElement('canvas');
 		canvas.id = name;
 		canvas.className = 'gameCanvas';
-		canvas.width = canvas.height = core.__PIXELS__;
 		// 编辑器模式下设置zIndex会导致加入的图层覆盖优先级过高
 		if (main.mode != "editor") canvas.style.zIndex = zIndex || 0;
 		// 将图层插入进游戏内容
 		document.getElementById('gameDraw').appendChild(canvas);
 		var ctx = canvas.getContext('2d');
 		core.canvas[name] = ctx;
+		if (core.domStyle.hdCanvas.indexOf('name') >= 0)
+			core.maps._setHDCanvasSize(ctx, core.__PIXELS__, core.__PIXELS__);
+		else {
+			canvas.width = core.__PIXELS__;
+			canvas.height = core.__PIXELS__;
+		}
 		return canvas;
 	}
 
@@ -493,7 +507,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		// Step 1: 背景和固定的几个文字
 		core.ui._createUIEvent();
 		core.clearMap('uievent');
-		core.ui._clearUIEventSelector([1, 2]);
+		core.ui.clearUIEventSelector();
 		core.setTextAlign('uievent', 'left');
 		core.setTextBaseline('uievent', 'top');
 		core.fillRect('uievent', 0, 0, 480, 480, 'black');
@@ -511,15 +525,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setTextAlign("uievent", "right");
 		core.fillText("uievent", core.formatBigNumber(core.status.hero.money), 466, 100);
 		core.setTextAlign("uievent", "left");
-		core.ui._uievent_drawSelector({
-			"type": "drawSelector",
-			"image": "winskin.png",
-			"code": 2,
-			"x": 22 + 120 * type,
-			"y": 76,
-			"width": 60,
-			"height": 33
-		});
+		core.ui.drawUIEventSelector(1, "winskin.png", 22 + 120 * type, 76, 60, 33);
 		if (selectItem != null) {
 			core.setTextAlign('uievent', 'center');
 			core.fillText("uievent", type == 0 ? "买入个数" : "卖出个数", 420, 360, null, bigFont);
@@ -573,7 +579,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 						break;
 					}
 				}
-				core.ui._uievent_drawSelector({ "type": "drawSelector", "image": "winskin.png", "code": 1, "x": 8, "y": 137 + i * 40, "width": 343, "height": 40 });
+				core.ui.drawUIEventSelector(2, "winskin.png", 8, 137 + i * 40, 343, 40);
 				if (type == 0 && item.number != null) {
 					core.fillText("uievent", "存货", 370, 152, null, bigFont);
 					core.setTextAlign("uievent", "right");
@@ -753,6 +759,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		page = 0;
 		selectItem = null;
 		selectCount = 0;
+		core.isShopVisited(itemShopId);
 		shopInfo = flags.__shops__[shopId];
 		if (shopInfo.choices == null) shopInfo.choices = core.clone(core.status.shops[shopId].choices);
 		choices = shopInfo.choices;
@@ -771,7 +778,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			},
 			{
 				"type": "function",
-				"function": "function () { core.deleteCanvas('uievent'); core.ui._clearUIEventSelector([1, 2]); }"
+				"function": "function () { core.deleteCanvas('uievent'); core.ui.clearUIEventSelector(); }"
 			}
 		]);
 	}
@@ -982,6 +989,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.ui.drawTip = function () {};
 		var _playSound = core.control.playSound;
 		core.control.playSound = function () {}
+		// 记录当前录像，因为可能存在换装问题
+		core.clearRouteFolding();
+		var routeLength = core.status.route.length;
 		// 优先判定装备
 		if (hero1.equipment) {
 			core.items.quickSaveEquip(100 + currHeroId);
@@ -1019,6 +1029,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		core.ui.drawTip = _drawTip;
 		core.control.playSound = _playSound;
+		core.status.route = core.status.route.slice(0, routeLength);
 
 		// 插入事件：改变角色行走图并进行楼层切换
 		var toFloorId = data.floorId || core.status.floorId;
@@ -1151,9 +1162,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 当前选中的道具类别
 	var currentCategory = null;
 
-	// 重写 core.ui.drawToolbox 以绘制分类类别
-	var _drawToolbox = core.ui.drawToolbox;
-	core.ui.drawToolbox = function (index) {
+	// 重写 core.ui._drawToolbox 以绘制分类类别
+	var _drawToolbox = core.ui._drawToolbox;
+	core.ui._drawToolbox = function (index) {
 		_drawToolbox.call(this, index);
 		core.setTextAlign('ui', 'left');
 		core.fillText('ui', '类别[E]：' + (currentCategory || "全部"), 15, this.PIXEL - 13);
@@ -1256,5 +1267,48 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return true;
 	}, 100);
 
+},
+    "heroFourFrames": function () {
+	// 样板的勇士/跟随者移动时只使用2、4两帧，观感较差。本插件可以将四帧全用上。
+
+	// 是否启用本插件
+	var __enable = false;
+	if (!__enable) return;
+
+	["up", "down", "left", "right"].forEach(function (one) {
+		// 指定中间帧动画
+		core.material.icons.hero[one].midFoot = 2;
+	});
+
+	var heroMoving = function (timestamp) {
+		if (core.status.heroMoving <= 0) return;
+		if (timestamp - core.animateFrame.moveTime > core.values.moveSpeed) {
+			core.animateFrame.leftLeg++;
+			core.animateFrame.moveTime = timestamp;
+		}
+		core.drawHero(['stop', 'leftFoot', 'midFoot', 'rightFoot'][core.animateFrame.leftLeg % 4], 4 * core.status.heroMoving);
+	}
+	core.registerAnimationFrame('heroMoving', true, heroMoving);
+
+	core.events._eventMoveHero_moving = function (step, moveSteps) {
+		var direction = moveSteps[0],
+			x = core.getHeroLoc('x'),
+			y = core.getHeroLoc('y'); // ------ 前进/后退
+		var o = direction == 'backward' ? -1 : 1;
+		if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+		core.setHeroLoc('direction', direction); // if (step <= 4) core.drawHero('leftFoot', 4 * o * step); else if (step <= 8) core.drawHero('rightFoot', 4 * o * step);
+		if (step <= 4) core.drawHero('stop', 4 * o * step);
+		else if (step <= 8) core.drawHero('leftFoot', 4 * o * step);
+		else if (step <= 12) core.drawHero('midFoot', 4 * o * (step - 8));
+		else if (step <= 16) core.drawHero('rightFoot', 4 * o * (step - 8)); // if (step == 8) {
+		if (step == 8 || step == 16) {
+			core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
+			core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+			core.updateFollowers();
+			moveSteps.shift(); // return true;
+			return step == 16;
+		}
+		return false;
+	}
 }
 }

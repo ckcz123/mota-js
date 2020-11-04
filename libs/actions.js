@@ -125,9 +125,37 @@ actions.prototype._sys_checkReplay = function () {
     if (this._checkReplaying()) return true;
 }
 
+////// 检查左手模式
+actions.prototype.__checkLeftHandPrefer = function (e) {
+    if (!core.flags.leftHandPrefer) return e;
+    var map = {
+        87: 38, // W -> up 
+        83: 40, // S -> down
+        65: 37, // A -> left
+        68: 39, // D -> right
+        73: 87, // I -> W
+        74: 65, // J -> A
+        75: 83, // K -> S
+        76: 68, // L -> D
+    }
+    var newEvent = {};
+    for (var one in e) {
+        if (!(e[one] instanceof Function)) {
+            newEvent[one] = e[one];
+        }
+    };
+    ["stopPropagation", "stopImmediatePropagation", "preventDefault"].forEach(function (one) {
+        newEvent[one] = function () {
+            return e[one]();
+        }
+    });
+    newEvent.keyCode = map[e.keyCode] || e.keyCode;
+    return newEvent;
+}
+
 ////// 按下某个键时 //////
 actions.prototype.onkeyDown = function (e) {
-    this.doRegisteredAction('onkeyDown', e);
+    this.doRegisteredAction('onkeyDown', this.__checkLeftHandPrefer(e));
 }
 
 actions.prototype._sys_onkeyDown = function (e) {
@@ -150,7 +178,7 @@ actions.prototype._sys_onkeyDown = function (e) {
 
 ////// 放开某个键时 //////
 actions.prototype.onkeyUp = function (e) {
-    this.doRegisteredAction('onkeyUp', e);
+    this.doRegisteredAction('onkeyUp', this.__checkLeftHandPrefer(e));
 }
 
 actions.prototype._sys_onkeyUp_replay = function (e) {
@@ -159,26 +187,26 @@ actions.prototype._sys_onkeyUp_replay = function (e) {
             core.stopReplay();
         else if (e.keyCode == 90) // Z
             core.speedDownReplay();
-        else if (e.keyCode == 88) // X
+        else if (e.keyCode == 67) // C
             core.speedUpReplay();
         else if (e.keyCode == 32) // SPACE
             core.triggerReplay();
         else if (e.keyCode == 65) // A
             core.rewindReplay();
         else if (e.keyCode == 83) // S
-            core.saveReplay();
-        else if (e.keyCode == 67) // C
-            core.bookReplay();
+            core.control._replay_SL();
+        else if (e.keyCode == 88) // X
+            core.control._replay_book();
         else if (e.keyCode == 33 || e.keyCode == 34) // PgUp/PgDn
-            core.viewMapReplay();
+            core.control._replay_viewMap();
         else if (e.keyCode == 78) // N
             core.stepReplay();
         else if (e.keyCode == 84) // T
-            core.toolboxReplay();
+            core.control._replay_toolbox();
         else if (e.keyCode == 81) // Q
-            core.equipboxReplay();
+            core.control._replay_equipbox();
         else if (e.keyCode == 66) // B
-            core.drawStatistics();
+            core.ui._drawStatistics();
         else if (e.keyCode >= 49 && e.keyCode <= 51) // 1-3
             core.setReplaySpeed(e.keyCode - 48);
         else if (e.keyCode == 52) // 4
@@ -423,12 +451,15 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
     // --- wait事件也要提供px和py
     if (core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 1);
         core.setFlag('x', x);
         core.setFlag('y', y);
         core.setFlag('px', px);
         core.setFlag('py', py);
-        core.status.route.push("input:" + (1000000 + 1000 * px + py));
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
     }
@@ -712,8 +743,8 @@ actions.prototype._sys_onmousewheel = function (direct) {
     // 存读档
     if (core.status.lockControl && (core.status.event.id == 'save' || core.status.event.id == 'load')) {
         var index = core.status.event.data.page*10+core.status.event.data.offset;
-        if (direct == 1) core.ui.drawSLPanel(index - 10);
-        if (direct == -1) core.ui.drawSLPanel(index + 10);
+        if (direct == 1) core.ui._drawSLPanel(index - 10);
+        if (direct == -1) core.ui._drawSLPanel(index + 10);
         return;
     }
 
@@ -727,10 +758,13 @@ actions.prototype._sys_onmousewheel = function (direct) {
     // wait事件
     if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 0);
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
-        core.status.route.push("input:" + keycode);
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + keycode));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
@@ -810,7 +844,7 @@ actions.prototype._sys_longClick = function (x, y, fromEvent) {
     if (!core.status.lockControl && !fromEvent) {
         // 虚拟键盘
         core.waitHeroToStop(function () {
-            core.ui.drawKeyBoard();
+            core.ui._drawKeyBoard();
         });
         return true;
     }
@@ -974,10 +1008,17 @@ actions.prototype._clickAction = function (x, y) {
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
             var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
             if (y >= topIndex && y < topIndex + choices.length) {
+                var choice = choices[y - topIndex];
+                if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
+                    core.drawTip("无法选择此项");
+                    return;
+                }
                 clearTimeout(core.status.event.interval);
-                // 选择
-                core.status.route.push("choices:" + (y - topIndex));
-                core.insertAction(choices[y - topIndex].action);
+                var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+                delete core.status.event.timeout;
+                core.setFlag('timeout', timeout);
+                core.status.route.push("choices:" + (100 * timeout + y - topIndex));
+                core.insertAction(choice.action);
                 core.doAction();
             }
         }
@@ -987,13 +1028,19 @@ actions.prototype._clickAction = function (x, y) {
     if (core.status.event.data.type == 'confirm') {
         if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1) {
             clearTimeout(core.status.event.interval);
-            core.status.route.push("choices:0");
+            var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+            delete core.status.event.timeout;
+            core.setFlag('timeout', timeout);
+            core.status.route.push("choices:" + 100 * timeout);
             core.insertAction(core.status.event.ui.yes);
             core.doAction();
         }
         else if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1) {
             clearTimeout(core.status.event.interval);
-            core.status.route.push("choices:1");
+            var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+            delete core.status.event.timeout;
+            core.setFlag('timeout', timeout);
+            core.status.route.push("choices:" + (100 * timeout + 1));
             core.insertAction(core.status.event.ui.no);
             core.doAction();
         }
@@ -1026,9 +1073,12 @@ actions.prototype._keyUpAction = function (keycode) {
     }
     if (core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
-        core.status.route.push("input:" + keycode);
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + keycode));
         core.events.__action_wait_afterGet(core.status.event.data.current);
         core.doAction();
         return;
@@ -1042,7 +1092,10 @@ actions.prototype._keyUpAction = function (keycode) {
         return;
     }
     if (core.status.event.data.type == 'confirm'&& (keycode == 13 || keycode == 32 || keycode == 67)) {
-        core.status.route.push("choices:" + core.status.event.selection);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
+        core.setFlag('timeout', timeout);
+        core.status.route.push("choices:" + (100 * timeout + core.status.event.selection));
         if (core.status.event.selection == 0)
             core.insertAction(core.status.event.ui.yes);
         else core.insertAction(core.status.event.ui.no);
@@ -1070,7 +1123,7 @@ actions.prototype._clickBook = function (x, y) {
         }
         else if (core.status.event.ui != null) {
             core.status.boxAnimateObjs = [];
-            core.ui.drawMaps(core.status.event.ui);
+            core.ui._drawViewMaps(core.status.event.ui);
         }
         else core.ui.closePanel();
         return;
@@ -1085,7 +1138,7 @@ actions.prototype._clickBook = function (x, y) {
             if (y >= u*i && y < u*(i+1)) {
                 var index = per_page * page + i;
                 core.ui.drawBook(index);
-                core.ui.drawBookDetail(index);
+                core.ui._drawBookDetail(index);
                 break;
             }
         }
@@ -1113,7 +1166,7 @@ actions.prototype._keyUpBook = function (keycode) {
         }
         else if (core.status.event.ui != null) {
             core.status.boxAnimateObjs = [];
-            core.ui.drawMaps(core.status.event.ui);
+            core.ui._drawViewMaps(core.status.event.ui);
         }
         else core.ui.closePanel();
         return;
@@ -1121,7 +1174,7 @@ actions.prototype._keyUpBook = function (keycode) {
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         var data = core.status.event.data;
         if (data != null) {
-            core.ui.drawBookDetail(data);
+            core.ui._drawBookDetail(data);
         }
         return;
     }
@@ -1185,7 +1238,7 @@ actions.prototype._keyUpFly = function (keycode) {
 ////// 查看地图界面时的点击操作 //////
 actions.prototype._clickViewMaps = function (x, y) {
     if (core.status.event.data == null) {
-        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+        core.ui._drawViewMaps(core.floorIds.indexOf(core.status.floorId));
         return;
     }
     var now = core.floorIds.indexOf(core.status.floorId);
@@ -1196,35 +1249,35 @@ actions.prototype._clickViewMaps = function (x, y) {
 
     if (x <= per - 2 && y <= per - 2) {
         core.status.event.data.damage = !core.status.event.data.damage;
-        core.ui.drawMaps(index, cx, cy);
+        core.ui._drawViewMaps(index, cx, cy);
         return;
     }
     if (x <= per - 2 && y >= this.SIZE + 1 - per) {
         if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
         else core.markedFloorIds[floorId] = true;
-        core.ui.drawMaps(index, cx, cy);
+        core.ui._drawViewMaps(index, cx, cy);
         return;
     }
     if (x >= this.SIZE + 1 - per && y <= per - 2) {
         core.status.event.data.all = !core.status.event.data.all;
-        core.ui.drawMaps(index, cx, cy);
+        core.ui._drawViewMaps(index, cx, cy);
         return;
     }
 
     if (x >= per && x <= this.LAST - per && y <= per - 1 && (!core.status.event.data.all && mh > this.SIZE)) {
-        core.ui.drawMaps(index, cx, cy - 1);
+        core.ui._drawViewMaps(index, cx, cy - 1);
         return;
     }
     if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && (!core.status.event.data.all && mh > this.SIZE)) {
-        core.ui.drawMaps(index, cx, cy + 1);
+        core.ui._drawViewMaps(index, cx, cy + 1);
         return;
     }
     if (x <= per - 1 && y >= per && y <= this.LAST - per) {
-        core.ui.drawMaps(index, cx - 1, cy);
+        core.ui._drawViewMaps(index, cx - 1, cy);
         return;
     }
     if (x >= this.SIZE - per && y >= per && y <= this.LAST - per) {
-        core.ui.drawMaps(index, cx + 1, cy);
+        core.ui._drawViewMaps(index, cx + 1, cy);
         return;
     }
 
@@ -1233,7 +1286,7 @@ actions.prototype._clickViewMaps = function (x, y) {
         while (index < core.floorIds.length && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index++;
         if (index < core.floorIds.length)
-            core.ui.drawMaps(index);
+            core.ui._drawViewMaps(index);
         return;
     }
     if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
@@ -1241,7 +1294,7 @@ actions.prototype._clickViewMaps = function (x, y) {
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
         if (index >= 0)
-            core.ui.drawMaps(index);
+            core.ui._drawViewMaps(index);
         return;
     }
     if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
@@ -1269,7 +1322,7 @@ actions.prototype._keyDownViewMaps = function (keycode) {
 ////// 查看地图界面时，放开某个键的操作 //////
 actions.prototype._keyUpViewMaps = function (keycode) {
     if (core.status.event.data == null) {
-        core.ui.drawMaps(core.floorIds.indexOf(core.status.floorId));
+        core.ui._drawViewMaps(core.floorIds.indexOf(core.status.floorId));
         return;
     }
     var floorId = core.floorIds[core.status.event.data.index];
@@ -1281,23 +1334,23 @@ actions.prototype._keyUpViewMaps = function (keycode) {
     }
     if (keycode == 86) {
         core.status.event.data.damage = !core.status.event.data.damage;
-        core.ui.drawMaps(core.status.event.data);
+        core.ui._drawViewMaps(core.status.event.data);
         return;
     }
     if (keycode == 90) {
         core.status.event.data.all = !core.status.event.data.all;
-        core.ui.drawMaps(core.status.event.data);
+        core.ui._drawViewMaps(core.status.event.data);
         return;
     }
     if (keycode == 66) {
         if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
         else core.markedFloorIds[floorId] = true;
-        core.ui.drawMaps(core.status.event.data);
+        core.ui._drawViewMaps(core.status.event.data);
         return;
     }
     if (keycode == 88 || (core.isReplaying() && keycode == 67)) {
         if (core.isReplaying()) {
-            core.bookReplay();
+            core.control._replay_book();
         } else {
             core.openBook(false);
         }
@@ -1353,7 +1406,7 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.equipboxReplay();
+            core.control._replay_equipbox();
         else
             core.openEquipbox();
         return;
@@ -1369,22 +1422,22 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x == this.HSIZE-2 || x == this.HSIZE-3) {
         if (y == this.LAST - 5 && toolsPage > 1) {
             core.status.event.data.toolsPage--;
-            core.ui.drawToolbox(core.status.event.selection);
+            core.ui._drawToolbox(core.status.event.selection);
         }
         if (y == this.LAST && constantsPage > 1) {
             core.status.event.data.constantsPage--;
-            core.ui.drawToolbox(core.status.event.selection);
+            core.ui._drawToolbox(core.status.event.selection);
         }
     }
     // 下一页
     if (x == this.HSIZE+2 || x == this.HSIZE+3) {
         if (y == this.LAST - 5 && toolsPage < Math.ceil(tools.length / this.LAST)) {
             core.status.event.data.toolsPage++;
-            core.ui.drawToolbox(core.status.event.selection);
+            core.ui._drawToolbox(core.status.event.selection);
         }
         if (y == this.LAST && constantsPage < Math.ceil(constants.length / this.LAST)) {
             core.status.event.data.constantsPage++;
-            core.ui.drawToolbox(core.status.event.selection);
+            core.ui._drawToolbox(core.status.event.selection);
         }
     }
 
@@ -1421,7 +1474,7 @@ actions.prototype._clickToolboxIndex = function (index) {
         core.events.tryUseItem(itemId);
     }
     else {
-        core.ui.drawToolbox(index);
+        core.ui._drawToolbox(index);
     }
 }
 
@@ -1521,7 +1574,7 @@ actions.prototype._keyUpToolbox = function (keycode) {
     if (keycode == 81) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.equipboxReplay();
+            core.control._replay_equipbox();
         else
             core.openEquipbox();
         return;
@@ -1544,7 +1597,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     if (x >= this.LAST - 2 && y == 0) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.toolboxReplay();
+            core.control._replay_toolbox();
         else
             core.openToolbox();
         return;
@@ -1559,7 +1612,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
         if (core.status.event.data.page > 1) {
             core.status.event.data.page--;
-            core.ui.drawEquipbox(core.status.event.selection);
+            core.ui._drawEquipbox(core.status.event.selection);
         }
         return;
     }
@@ -1568,7 +1621,7 @@ actions.prototype._clickEquipbox = function (x, y) {
         var lastPage = Math.ceil(core.getToolboxItems('equips').length / this.LAST);
         if (core.status.event.data.page < lastPage) {
             core.status.event.data.page++;
-            core.ui.drawEquipbox(core.status.event.selection);
+            core.ui._drawEquipbox(core.status.event.selection);
         }
         return;
     }
@@ -1609,7 +1662,7 @@ actions.prototype._clickEquipboxIndex = function (index) {
             core.status.route.push("equip:" + equipId);
         }
     }
-    core.ui.drawEquipbox(index);
+    core.ui._drawEquipbox(index);
 }
 
 ////// 装备栏界面时，按下某个键的操作 //////
@@ -1696,7 +1749,7 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
     if (keycode == 84) {
         core.ui.closePanel();
         if (core.isReplaying())
-            core.toolboxReplay();
+            core.control._replay_toolbox();
         else
             core.openToolbox();
         return;
@@ -1720,12 +1773,12 @@ actions.prototype._clickSL = function (x, y) {
 
     // 上一页
     if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
-        core.ui.drawSLPanel(10 * (page - 1) + offset);
+        core.ui._drawSLPanel(10 * (page - 1) + offset);
         return;
     }
     // 下一页
     if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
-        core.ui.drawSLPanel(10 * (page + 1) + offset);
+        core.ui._drawSLPanel(10 * (page + 1) + offset);
         return;
     }
     // 返回
@@ -1742,16 +1795,16 @@ actions.prototype._clickSL = function (x, y) {
     if (x >= 0 && x <= 2 && y == this.LAST) {
         if (core.status.event.id == 'save') {
             core.status.event.selection = !core.status.event.selection;
-            core.ui.drawSLPanel(index);
+            core.ui._drawSLPanel(index);
         }
         else { // 显示收藏
             core.status.event.data.mode = core.status.event.data.mode == 'all'?'fav':'all';
             if (core.status.event.data.mode == 'fav')
-                core.ui.drawSLPanel(1, true);
+                core.ui._drawSLPanel(1, true);
             else {
                 page = parseInt((core.saves.saveIndex-1)/5);
                 offset = core.saves.saveIndex-5*page;
-                core.ui.drawSLPanel(10*page + offset, true);
+                core.ui._drawSLPanel(10*page + offset, true);
             }
         }
         return;
@@ -1786,7 +1839,7 @@ actions.prototype._clickSL = function (x, y) {
                 core.drawTip("无法删除自动存档！");
             else {
                 core.removeSave(id, function () {
-                    core.ui.drawSLPanel(index, true);
+                    core.ui._drawSLPanel(index, true);
                 });
             }
         }
@@ -1807,7 +1860,7 @@ actions.prototype._clickSL_favorite = function (page, offset) {
             if(value && value.length <= 5){
                 core.saves.favoriteName[index] = value;
                 core.control._updateFavoriteSaves();
-                core.drawSLPanel(10 * page + offset);
+                core.ui._drawSLPanel(10 * page + offset);
             } else if (value) {
                 alert("无效的输入！");
             }
@@ -1824,7 +1877,7 @@ actions.prototype._clickSL_favorite = function (page, offset) {
             core.drawTip("收藏成功！");
         }
         core.control._updateFavoriteSaves();
-        core.ui.drawSLPanel(10 * page + offset);
+        core.ui._drawSLPanel(10 * page + offset);
     }
 }
 
@@ -1837,46 +1890,46 @@ actions.prototype._keyDownSL = function (keycode) {
 
     if (keycode == 37) { // left
         if (offset == 0) {
-            core.ui.drawSLPanel(10 * (page - 1) + 5);
+            core.ui._drawSLPanel(10 * (page - 1) + 5);
         }
         else {
-            core.ui.drawSLPanel(index - 1);
+            core.ui._drawSLPanel(index - 1);
         }
         return;
     }
     if (keycode == 38) { // up
         if (offset < 3) {
-            core.ui.drawSLPanel(10 * (page - 1) + offset + 3);
+            core.ui._drawSLPanel(10 * (page - 1) + offset + 3);
         }
         else {
-            core.ui.drawSLPanel(index - 3);
+            core.ui._drawSLPanel(index - 3);
         }
         return;
     }
     if (keycode == 39) { // right
         if (offset == 5) {
-            core.ui.drawSLPanel(10 * (page + 1) + 1);
+            core.ui._drawSLPanel(10 * (page + 1) + 1);
         }
         else {
-            core.ui.drawSLPanel(index + 1);
+            core.ui._drawSLPanel(index + 1);
         }
         return;
     }
     if (keycode == 40) { // down
         if (offset >= 3) {
-            core.ui.drawSLPanel(10 * (page + 1) + offset - 3);
+            core.ui._drawSLPanel(10 * (page + 1) + offset - 3);
         }
         else {
-            core.ui.drawSLPanel(index + 3);
+            core.ui._drawSLPanel(index + 3);
         }
         return;
     }
     if (keycode == 33) { // PAGEUP
-        core.ui.drawSLPanel(10 * (page - 1) + offset);
+        core.ui._drawSLPanel(10 * (page - 1) + offset);
         return;
     }
     if (keycode == 34) { // PAGEDOWN
-        core.ui.drawSLPanel(10 * (page + 1) + offset);
+        core.ui._drawSLPanel(10 * (page + 1) + offset);
         return;
     }
 }
@@ -1893,7 +1946,7 @@ actions.prototype._keyUpSL = function (keycode) {
     }
     if (keycode >= 48 && keycode <= 57) {
         if (keycode == 48) keycode = 58;
-        core.ui.drawSLPanel((keycode - 49) * 1000 + 1);
+        core.ui._drawSLPanel((keycode - 49) * 1000 + 1);
         return;
     }
     if (keycode == 13 || keycode == 32 || keycode == 67) {
@@ -1918,7 +1971,7 @@ actions.prototype._keyUpSL = function (keycode) {
             var id = 5 * page + offset;
             if(core.status.event.data.mode == 'fav') id = core.saves.favorite[id - 1];
             core.removeSave(id, function () {
-                core.ui.drawSLPanel(index, true);
+                core.ui._drawSLPanel(index, true);
             });
         }
     }
@@ -1936,10 +1989,10 @@ actions.prototype._clickSwitchs = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 1 && selection != 2 && selection != 3 && selection != 4) return;
     }
-    var width = choices[selection].width;
-    var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
-    var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
     if (selection >= 0 && selection < choices.length) {
+        var width = choices[selection].width;
+        var leftPos = (core.__PIXELS__ - width) / 2, rightPos = (core.__PIXELS__ + width) / 2;
+        var leftGrid = parseInt(leftPos / 32), rightGrid = parseInt(rightPos / 32) - 1;
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
@@ -1969,8 +2022,10 @@ actions.prototype._clickSwitchs = function (x, y) {
             case 8:
                 return this._clickSwitchs_clickMove();
             case 9:
+                return this._clickSwitchs_leftHandPrefer();
+            case 10:
                 core.status.event.selection = 0;
-                core.ui.drawSettings();
+                core.ui._drawSettings();
                 break;
         }
     }
@@ -1994,7 +2049,7 @@ actions.prototype._clickSwitchs_bgmSound = function () {
         core.triggerBgm();
     core.musicStatus.soundStatus = sound;
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_userVolume = function (delta) {
@@ -2005,19 +2060,19 @@ actions.prototype._clickSwitchs_userVolume = function (delta) {
     if (core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
     if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
     core.setLocalStorage('userVolume', core.musicStatus.userVolume);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_moveSpeed = function (delta) {
     core.values.moveSpeed = core.clamp(core.values.moveSpeed + delta, 50, 200);
     core.setLocalStorage("moveSpeed", core.values.moveSpeed);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_floorChangeTime = function (delta) {
     core.values.floorChangeTime = core.clamp(core.values.floorChangeTime + delta, 0, 2000);
     core.setLocalStorage("floorChangeTime", core.values.floorChangeTime);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_setSize = function (delta) {
@@ -2028,14 +2083,14 @@ actions.prototype._clickSwitchs_setSize = function (delta) {
     core.domStyle.scale = core.domStyle.availableScale[index];
     core.setLocalStorage('scale', core.domStyle.scale);
     core.resize();
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_displayEnemyDamage = function () {
     core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
     core.updateDamage();
     core.setLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_displayCriticalExtra = function () {
@@ -2059,26 +2114,35 @@ actions.prototype._clickSwitchs_displayCriticalExtra = function () {
     core.updateDamage();
     core.setLocalStorage('critical', core.flags.displayCritical);
     core.setLocalStorage('extraDamage', core.flags.displayExtraDamage);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_potionNoRouting = function () {
     if (core.hasFlag('__potionNoRouting__')) core.removeFlag('__potionNoRouting__');
     else core.setFlag('__potionNoRouting__', true);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
 }
 
 actions.prototype._clickSwitchs_clickMove = function () {
     if (core.hasFlag('__noClickMove__')) core.removeFlag('__noClickMove__');
     else core.setFlag('__noClickMove__', true);
-    core.ui.drawSwitchs();
+    core.ui._drawSwitchs();
+}
+
+actions.prototype._clickSwitchs_leftHandPrefer = function () {
+    core.flags.leftHandPrefer = !core.flags.leftHandPrefer;
+    core.setLocalStorage('leftHandPrefer', core.flags.leftHandPrefer);
+    if (core.flags.leftHandPrefer) {
+        core.myconfirm("左手模式已开启！\n此模式下WASD将用于移动勇士，IJKL对应于原始的WASD进行存读档等操作。")
+    }
+    core.ui._drawSwitchs();
 }
 
 ////// 系统设置界面时，放开某个键的操作 //////
 actions.prototype._keyUpSwitchs = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
-        core.ui.drawSettings();
+        core.ui._drawSettings();
         return;
     }
     if (keycode == 37) {
@@ -2110,26 +2174,26 @@ actions.prototype._clickSettings = function (x, y) {
         switch (selection) {
             case 0:
                 core.status.event.selection = 0;
-                core.ui.drawSwitchs();
+                core.ui._drawSwitchs();
                 break;
             case 1:
-                core.ui.drawKeyBoard();
+                core.ui._drawKeyBoard();
                 break;
             case 2:
                 core.clearUI();
-                core.ui.drawMaps();
+                core.ui._drawViewMaps();
                 break;
             case 3:
                 core.status.event.selection = 0;
-                core.ui.drawNotes();
+                core.ui._drawNotes();
                 break;
             case 4:
                 core.status.event.selection = 0;
-                core.ui.drawSyncSave();
+                core.ui._drawSyncSave();
                 break;
             case 5:
                 core.status.event.selection = 0;
-                core.ui.drawGameInfo();
+                core.ui._drawGameInfo();
                 break;
             case 6:
                 return core.confirmRestart();
@@ -2174,7 +2238,7 @@ actions.prototype._clickNotes = function (x, y) {
                 break;
             case 4:
                 core.status.event.selection = 3;
-                core.ui.drawSettings();
+                core.ui._drawSettings();
                 break;
         }
     }
@@ -2276,7 +2340,7 @@ actions.prototype._clickNotes_delete = function () {
 actions.prototype._keyUpNotes = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 3;
-        core.ui.drawSettings();
+        core.ui._drawSettings();
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickNotes);
@@ -2293,14 +2357,14 @@ actions.prototype._clickSyncSave = function (x, y) {
         switch (selection) {
             case 0:
                 core.status.event.selection = 0;
-                core.ui.drawSyncSelect();
+                core.ui._drawSyncSelect();
                 break;
             case 1:
                 core.syncLoad();
                 break;
             case 2:
                 core.status.event.selection = 0;
-                core.ui.drawLocalSaveSelect();
+                core.ui._drawLocalSaveSelect();
                 break;
             case 3:
                 return this._clickSyncSave_readFile();
@@ -2308,11 +2372,11 @@ actions.prototype._clickSyncSave = function (x, y) {
                 return this._clickSyncSave_replay();
             case 5:
                 core.status.event.selection = 0;
-                core.ui.drawStorageRemove();
+                core.ui._drawStorageRemove();
                 break;
             case 6:
                 core.status.event.selection = 4;
-                core.ui.drawSettings();
+                core.ui._drawSettings();
                 break;
 
         }
@@ -2330,14 +2394,14 @@ actions.prototype._clickSyncSave_readFile = function () {
 }
 
 actions.prototype._clickSyncSave_replay = function () {
-    core.ui.drawReplay();
+    core.ui._drawReplay();
 }
 
 ////// 同步存档界面时，放开某个键的操作 //////
 actions.prototype._keyUpSyncSave = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 2;
-        core.ui.drawSettings();
+        core.ui._drawSettings();
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSyncSave);
@@ -2354,14 +2418,16 @@ actions.prototype._clickSyncSelect = function (x, y) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                core.syncSave('all');
+                core.myconfirm('你确定要同步全部存档么？\n这可能在存档较多的时候比较慢。', function () {
+                    core.syncSave('all');
+                });
                 break;
             case 1:
                 core.syncSave();
                 break;
             case 2:
                 core.status.event.selection = 0;
-                core.ui.drawSyncSave();
+                core.ui._drawSyncSave();
                 break;
         }
     }
@@ -2371,7 +2437,7 @@ actions.prototype._clickSyncSelect = function (x, y) {
 actions.prototype._keyUpSyncSelect = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
-        core.ui.drawSettings();
+        core.ui._drawSettings();
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSyncSelect);
@@ -2403,7 +2469,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
         }
 
         core.status.event.selection = 2;
-        core.ui.drawSyncSave();
+        core.ui._drawSyncSave();
     }
 }
 
@@ -2411,7 +2477,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
 actions.prototype._keyUpLocalSaveSelect = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
-        core.ui.drawSettings();
+        core.ui._drawSettings();
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickLocalSaveSelect);
@@ -2434,7 +2500,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
                 return this._clickStorageRemove_current();
             case 2:
                 core.status.event.selection = 6;
-                core.ui.drawSyncSave();
+                core.ui._drawSyncSave();
                 break;
         }
     }
@@ -2502,7 +2568,7 @@ actions.prototype._clickStorageRemove_current = function () {
 actions.prototype._keyUpStorageRemove = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 5;
-        core.ui.drawSyncSave();
+        core.ui._drawSyncSave();
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickStorageRemove);
@@ -2540,7 +2606,7 @@ actions.prototype._clickReplay_fromLoad = function () {
     core.clearUI();
     var saveIndex = core.saves.saveIndex;
     var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
-    core.ui.drawSLPanel(10 * page + offset);
+    core.ui._drawSLPanel(10 * page + offset);
 }
 
 actions.prototype._clickReplay_replayRemain = function () {
@@ -2554,7 +2620,7 @@ actions.prototype._clickReplay_replayRemain = function () {
         core.lockControl();
         var saveIndex = core.saves.saveIndex;
         var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
-        core.ui.drawSLPanel(10 * page + offset);
+        core.ui._drawSLPanel(10 * page + offset);
     });
 }
 
@@ -2589,15 +2655,15 @@ actions.prototype._clickGameInfo = function (x, y) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
         switch (selection) {
-            case 0: return core.ui.drawStatistics();
+            case 0: return core.ui._drawStatistics();
             case 1: return this._clickGameInfo_openProject();
             case 2: return this._clickGameInfo_openComments();
-            case 3: return core.ui.drawHelp();
-            case 4: return core.ui.drawAbout();
+            case 3: return core.ui._drawHelp();
+            case 4: return core.ui._drawAbout();
             case 5: return this._clickGameInfo_download();
             case 6:
                 core.status.event.selection = 5;
-                core.ui.drawSettings();
+                core.ui._drawSettings();
                 break;
         }
     }
@@ -2719,29 +2785,29 @@ actions.prototype._clickCursor = function (x, y) {
     }
     core.status.automaticRoute.cursorX = x;
     core.status.automaticRoute.cursorY = y;
-    core.ui.drawCursor();
+    core.ui._drawCursor();
 }
 
 ////// 光标界面时，按下某个键的操作 //////
 actions.prototype._keyDownCursor = function (keycode) {
     if (keycode == 37) { // left
         core.status.automaticRoute.cursorX--;
-        core.ui.drawCursor();
+        core.ui._drawCursor();
         return;
     }
     if (keycode == 38) { // up
         core.status.automaticRoute.cursorY--;
-        core.ui.drawCursor();
+        core.ui._drawCursor();
         return;
     }
     if (keycode == 39) { // right
         core.status.automaticRoute.cursorX++;
-        core.ui.drawCursor();
+        core.ui._drawCursor();
         return;
     }
     if (keycode == 40) { // down
         core.status.automaticRoute.cursorY++;
-        core.ui.drawCursor();
+        core.ui._drawCursor();
         return;
     }
 }

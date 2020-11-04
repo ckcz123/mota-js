@@ -261,11 +261,11 @@ editor_table_wrapper = function (editor) {
         var thiseval = vobj;
         var comment = String(cobj._data);
 
-        var charlength = 15;
+        // var charlength = 15;
         // "['a']['b']" => "b"
         var shortField = field.split("']").slice(-2)[0].split("['").slice(-1)[0];
         // 把长度超过 charlength 的字符改成 固定长度+...的形式
-        shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
+        // shortField = (shortField.length < charlength ? shortField : shortField.slice(0, charlength) + '...');
 
         // 完整的内容转义后供悬停查看
         var commentHTMLescape = editor.util.HTMLescape(comment);
@@ -522,7 +522,9 @@ editor_table_wrapper = function (editor) {
         editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
         if (editor.table.checkRange(cobj, null)) {
             editor_mode.addAction(['delete', field, undefined]);
-            editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
+            editor_mode.onmode('save', function () {
+                printf('删除成功，刷新后生效。')
+            });
         } else {
             printe(field + ' : 该值不允许为null，无法删除');
         }
@@ -532,9 +534,18 @@ editor_table_wrapper = function (editor) {
      * 添加表格项
      */
     editor_table.prototype.addfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
-        editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+        if (modeNode) {
+            editor_mode.onmode(editor_mode._ids[modeNode.getAttribute('id')]);
+        }
 
         var mode = editor.dom.editModeSelect.value;
+        var supportText = mode === 'commonevent' || mode === 'plugins';
+
+        if (obj == null) {
+            if (mode === 'commonevent') obj = events_c12a15a8_c380_4b28_8144_256cba95f760;
+            else if (mode === 'plugins') obj = plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1;
+            else return;
+        }
 
         // 1.输入id
         var newid = '2';
@@ -546,15 +557,14 @@ editor_table_wrapper = function (editor) {
                 newid = testid + '';
             }
         } else {
-            newid = prompt('请输入新项的ID（仅公共事件支持中文ID）');
+            newid = prompt(supportText ? '请输入新项的ID（支持中文）' : '请输入新项的ID（数字字母下划线）');
             if (newid == null || newid.length == 0) {
                 return;
             }
         }
 
-        // 检查commentEvents
-        if (mode !== 'commonevent') {
-            // 2.检查id是否符合规范或与已有id重复
+        // 2.检查id是否符合规范或与已有id重复
+        if (!supportText) {
             if (!/^[a-zA-Z0-9_]+$/.test(newid)) {
                 printe('id不符合规范, 请使用大小写字母数字下划线来构成');
                 return;
@@ -562,7 +572,7 @@ editor_table_wrapper = function (editor) {
         }
 
         var conflict = true;
-        var basefield = field.replace(/\[[^\[]*\]$/, '');
+        var basefield = (field || "").replace(/\[[^\[]*\]$/, '');
         if (basefield === "['main']") {
             printe("全塔属性 ~ ['main'] 不允许添加新值");
             return;
@@ -581,7 +591,9 @@ editor_table_wrapper = function (editor) {
         }
         // 3.添加 
         editor_mode.addAction(['add', basefield + "['" + newid + "']", null]);
-        editor_mode.onmode('save');//自动保存 删掉此行的话点保存按钮才会保存
+        editor_mode.onmode('save', function () {
+            printf('添加成功，刷新后生效；也可以继续新增其他项目。')
+        });//自动保存 删掉此行的话点保存按钮才会保存
     }
 
     /////////////////////////////////////////////////////////////////////////////

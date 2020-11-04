@@ -277,6 +277,21 @@ declare class control {
     /** 删除某个flag/变量 */
     removeFlag(name: string): void
 
+    /** 设置某个独立开关 */
+    setSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+
+    /** 获得某个独立开关 */
+    getSwitch(x: number, y: number, floorId?: string, name: string, defaultValue: any): any
+
+    /** 增加某个独立开关 */
+    addSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+
+    /** 判定某个独立开关 */
+    hasSwitch(x: number, y: number, floorId?: string, name: string): boolean
+
+    /** 删除独立开关 */
+    removeSwitch(x: number, y: number, floorId?: string, name: string): boolean
+
     /** 设置大地图的偏移量 */
     setGameCanvasTranslate(canvasId: string, x: number, y: number): void
 
@@ -617,12 +632,12 @@ declare class control {
 
     /**
      * 设置视野范围 
-     * x,y: 左上角相对大地图的像素坐标，不需要为32倍数
+     * px,py: 左上角相对大地图的像素坐标，不需要为32倍数
      */
-    setViewport(x?: number, y?: number): void
+    setViewport(px?: number, py?: number): void
 
     /** 移动视野范围 */
-    moveViewport(steps?: any, time?: number, callback?: () => any): void
+    moveViewport(x: number, y: number, time?: number, callback?: () => any): void
 
     /** 更新跟随者坐标 */
     updateFollowers(): void
@@ -665,21 +680,6 @@ declare class control {
 
     /** 回退 */
     rewindReplay(): void
-
-    /** 回放时存档 */
-    saveReplay(): void
-
-    /** 回放时查看怪物手册 */
-    bookReplay(): void
-
-    /** 回放录像时浏览地图 */
-    viewMapReplay(): void
-
-    /** 回放录像时打开道具栏 */
-    toolboxReplay(): void
-
-    /** 回放录像时打开装备栏 */
-    equipboxReplay(): void
 
     /** 是否正在播放录像 */
     isReplaying(): boolean
@@ -1738,7 +1738,7 @@ declare class maps {
     saveMap(floorId?: string): any
 
     /** 将存档中的地图信息重新读取出来 */
-    loadMap(data?: any, floorId?: string): any
+    loadMap(data?: any, floorId?: string, flags?: any): any
 
     /** 更改地图画布的尺寸 */
     resizeMap(floorId?: string): void
@@ -2034,18 +2034,16 @@ declare class ui {
 
     /**
      * 绘制一个矩形。style可选为绘制样式
-     * @param text 要绘制的文本
      * @param style 绘制的样式
-     * @param font 绘制的字体
+     * @param angle 旋转角度，弧度制
      */
-    fillRect(name: CtxRefer, text: string, x: number, y: number, style: string, font: string): void
-
+    fillRect(name: CtxRefer, x: number, y: number, width: number, height: number, style?: string, angle?: number): void
 
     /**
      * 绘制一个矩形的边框
      * @param style 绘制的样式
      */
-    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string): void
+    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, angle?: number): void
 
     /**
      * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
@@ -2125,7 +2123,7 @@ declare class ui {
     /** 设置某个canvas的baseline */
     setTextBaseline(name: string | CanvasRenderingContext2D, baseline: any): void
 
-    /** 字符串自动换行的分割；具有标点禁则功能 */
+    /** 字符串自动换行的分割 */
     splitLines(name: string | CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string): void
 
     /** 在某个canvas上绘制一个图标 */
@@ -2145,17 +2143,17 @@ declare class ui {
      */
     drawTip(text: string, id?: string, frame?: number): void
 
-    /** 清除提示内容 */
-    clearTip(): void
-
     /** 地图中间绘制一段文字 */
     drawText(contents: string, callback?: () => any): void
 
+    /** 自绘选择光标 */
+    drawUIEventSelector(code: number, background: string, x: number, y: number, w: number, h: number, z?: number): void
+
+    /** 清除一个或多个选择光标 */
+    clearUIEventSelector(code: number|number[]): void
+
     /** 绘制一个确认框 */
     drawConfirmBox(text: string, yesCallback?: () => void, noCallback?: () => void): void
-
-    /** 绘制选择光标 */
-    drawWindowSelector(background: any, x: number, y: number, w: number, h: number): void
 
     /** 绘制WindowSkin */
     drawWindowSkin(background: any, ctx: string | CanvasRenderingContext2D, x: number, y: number, w: string, h: string, direction?: any, px?: any, py?: any): void
@@ -2169,7 +2167,7 @@ declare class ui {
      * @param content 要绘制的内容；转义字符不允许保留 \t, \b 和 \f
      * @param config 绘制配置项，目前暂时包含如下内容（均为可选）
      *                left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
-     *                fontSize：字体大小；lineHeight：行高；time：打字机间隔
+     *                fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
      * @returns 绘制信息 
      */ 
     drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: any): any
@@ -2192,83 +2190,20 @@ declare class ui {
     /** 绘制等待界面 */
     drawWaiting(text: string): void
 
-    /** 绘制系统设置界面 */
-    drawSwitchs(): void
-
-    /** 绘制系统菜单栏 */
-    drawSettings(): void
-
-    /** 绘制存档笔记 */
-    drawNotes(): void
-
-    /** 绘制快捷商店选择栏 */
-    drawQuickShop(): void
-
-    /** 绘制存档同步界面 */
-    drawSyncSave(): void
-
-    /** 绘制存档同步选择页面 */
-    drawSyncSelect(): void
-
-    /** 绘制单存档界面 */
-    drawLocalSaveSelect(): void
-
-    /** 绘制存档删除页面 */
-    drawStorageRemove(): void
-
-    /** 绘制回放界面 */
-    drawReplay(): void
-
-    /** 绘制游戏信息界面 */
-    drawGameInfo(): void
-
     /** 绘制分页 */
     drawPagination(page?: any, totalPage?: any, y?: number): void
-
-    /** 绘制键盘光标 */
-    drawCursor(): void
 
     /** 绘制怪物手册 */
     drawBook(index?: any): void
 
-    /** 绘制怪物属性的详细信息 */
-    drawBookDetail(index?: any): void
-
     /** 绘制楼层传送器 */
     drawFly(page?: any): void
-
-    /** 绘制中心对称飞行器 */
-    drawCenterFly(): void
-
-    /** 绘制浏览地图界面 */
-    drawMaps(index?: any, x?: number, y?: number): void
-
-    /** 绘制道具栏 */
-    drawToolbox(index?: any): void
 
     /** 获得所有应该在道具栏显示的某个类型道具 */
     getToolboxItems(cls: string): string[]
 
-    /** 绘制装备界面 */
-    drawEquipbox(index?: any): void
-
-    /** 绘制存档/读档界面 */
-    drawSLPanel(index?: any, refresh?: any): void
-
-    /** 绘制虚拟键盘 */
-    drawKeyBoard(): void
-
     /** 绘制状态栏 */
     drawStatusBar(): void
-
-    /** 绘制“数据统计”界面 */
-    drawStatistics(floorIds?: string): void
-
-    /** 绘制“关于”界面 */
-    drawAbout(): void
-
-    /** 绘制帮助页面 */
-    drawHelp(): void
 
     /** 绘制灯光效果 */
     drawLight(name: string | CanvasRenderingContext2D, color?: any, lights?: any, lightDec?: number): void

@@ -243,6 +243,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
 
         while (start < end) {
             var mid = Math.floor((start + end) / 2);
+            if (mid - start > end - mid) mid--;
             var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": mid}, x, y, floorId);
             if (nextInfo == null || (typeof nextInfo == 'number')) return null;
             if (pre > nextInfo.damage) end = mid;

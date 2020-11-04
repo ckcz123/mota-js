@@ -13,6 +13,10 @@ editor_materialpanel_wrapper = function (editor) {
         return selectBox._isSelected
     }
 
+    var locToPos = function (loc) {
+        return { 'x': ~~(loc.x / loc.size), 'y': ~~(loc.y / loc.size) };
+    }
+
     editor.uifunctions.getScrollBarHeight = function () {
         var outer = document.createElement("div");
         outer.style.visibility = "hidden";
@@ -66,7 +70,6 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_ondown = function (e) {
         e.stopPropagation();
         e.preventDefault();
-        if (editor.uivalues.bigmap) return;
         editor.uivalues.lastMoveMaterE=e;
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
         var scrollLeft = document.documentElement.scrollLeft || document.body.scrollLeft;
@@ -87,10 +90,9 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_onmove = function (e) {
         e.stopPropagation();
         e.preventDefault();
-        if (editor.uivalues.bigmap) return;
         editor.uivalues.lastMoveMaterE=e;
         if (!editor.uivalues.startLoc) return;
-        var pos0 = editor.uifunctions.locToPos(editor.uivalues.startLoc);
+        var pos0 = locToPos(editor.uivalues.startLoc);
 
         editor.dom.dataSelection.style.left = 32 * pos0.x + 'px';
         editor.dom.dataSelection.style.top = 32 * pos0.y + 'px';
@@ -106,7 +108,6 @@ editor_materialpanel_wrapper = function (editor) {
     editor.uifunctions.material_onup = function (ee) {
         var startLoc = editor.uivalues.startLoc;
         editor.uivalues.startLoc = null;
-        if (editor.uivalues.bigmap) return;
 
         var e=editor.uivalues.lastMoveMaterE;
         if (!editor.isMobile && e.clientY >= editor.dom.iconLib.offsetHeight - editor.uivalues.scrollBarHeight) return;
@@ -119,8 +120,8 @@ editor_materialpanel_wrapper = function (editor) {
         };
         editor.loc = loc;
         editor.uivalues.tileSize = [1,1];
-        var pos0 = editor.uifunctions.locToPos(startLoc);
-        var pos = editor.uifunctions.locToPos(loc);
+        var pos0 = locToPos(startLoc);
+        var pos = locToPos(loc);
         for (var spriter in editor.widthsX) {
             if (pos.x >= editor.widthsX[spriter][1] && pos.x < editor.widthsX[spriter][2]) {
                 var ysize = spriter.endsWith('48') ? 48 : 32;
@@ -189,10 +190,7 @@ editor_materialpanel_wrapper = function (editor) {
                         }
                     }
 
-                    if (editor.info.isTile && e.button == 2) { //这段改一改之类的应该能给手机用,就不删了
-                        // 废弃好了
-                        alert('V2.7后右键已被废弃，请直接素材区拖框选中区域。');
-                        /*
+                    if (editor.info.isTile && (editor.isMobile || e.button == 2)) { //这段改一改之类的应该能给手机用,就不删了
                         var v = prompt("请输入该额外素材区域绑定宽高，以逗号分隔", "1,1");
                         if (v != null && /^\d+,\d+$/.test(v)) {
                             v = v.split(",");
@@ -208,9 +206,8 @@ editor_materialpanel_wrapper = function (editor) {
                                 editor.dom.dataSelection.style.width = 32*x - 6 + 'px';
                             }
                         }
-                        */
                     }
-                    if (editor.info.isTile && e.button != 2) { //左键拖拽框选
+                    if (editor.info.isTile && !editor.isMobile && e.button != 2) { //左键拖拽框选
 
                         var x = pos.x-pos0.x+1, y = pos.y-pos0.y+1;
                         var widthX = editor.widthsX[editor.info.images];
@@ -219,7 +216,6 @@ editor_materialpanel_wrapper = function (editor) {
                             
                         } else {
                             editor.info = editor.ids[idindex-(x-1)-(y-1)*(widthX[2]-widthX[1])];
-                            editor.uifunctions.locToPos(startLoc); //重置editor.pos
                             editor.uivalues.tileSize = [x, y];
                             editor.dom.dataSelection.style.left = pos0.x * 32 + 'px';
                             editor.dom.dataSelection.style.top = pos0.y * ysize + 'px';

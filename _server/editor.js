@@ -59,6 +59,8 @@ function editor() {
         undoFloor: document.getElementById('undoFloor'),
         editorTheme: document.getElementById('editorTheme'),
         bigmapBtn : document.getElementById('bigmapBtn'),
+        mapRowMark: document.getElementById('mapRowMark'),
+        mapColMark: document.getElementById('mapColMark'),
         maps: ['bgmap', 'fgmap', 'map'],
         canvas: ['bg', 'fg'],
     };
@@ -322,6 +324,7 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.firstArrive = [];
     editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
+    editor.currentFloorData.autoEvent = {};
     editor.currentFloorData.changeFloor = {};
     editor.currentFloorData.afterBattle = {};
     editor.currentFloorData.afterGetItem = {};
@@ -392,6 +395,22 @@ editor.prototype.drawEventBlock = function () {
                 fg.textAlign = 'right';
                 editor.game.doCoreFunc("fillBoldText", fg, index + 1,
                     32 * i + 28, 32 * j + 15, '#FF7F00', null, '14px Verdana');
+            }
+            var offset = 0;
+            if (editor.currentFloorData.upFloor && editor.currentFloorData.upFloor.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔼", 32 * i + offset, 32 * j + 8, null, "8px Verdana");
+                offset += 8;
+            }
+            if (editor.currentFloorData.downFloor && editor.currentFloorData.downFloor.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔽", 32 * i + offset, 32 * j + 8, null, "8px Verdana");
+                offset += 8;
+            }
+            if (editor.currentFloorData.flyPoint && editor.currentFloorData.flyPoint.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔃", 32 * i + offset, 32 * j + 8, null, "8px Verdana");
+                offset += 8;
             }
         }
     }
@@ -477,7 +496,7 @@ editor.prototype.updateMap = function () {
                 return 0;
             }
         });
-    }), {'events': editor.currentFloorData.events}, editor.currentFloorId);
+    }), null, editor.currentFloorId);
     core.status.thisMap.blocks = blocks;
     if (editor.uivalues.bigmap) return this._updateMap_bigmap();
 
@@ -513,15 +532,17 @@ editor.prototype.updateMap = function () {
         }
         //ctx.drawImage(core.material.images[tileInfo.images], 0, tileInfo.y*32, 32, 32, x*32, y*32, 32, 32);
     }
-    // 绘制地图 start
-    for (var y = 0; y < editor.map.length; y++) {
-        for (var x = 0; x < editor.map[0].length; x++) {
-            drawTile(editor.dom.evCtx, x, y, editor.map[y][x]);
-            editor.dom.canvas.forEach(function (one) {
-                drawTile(editor.dom[one + 'Ctx'], x, y, editor[one+'map'][y][x]);
-            });
+    if (editor.map.length * editor.map[0].length < 4096) {
+        for (var y = 0; y < editor.map.length; y++) {
+            for (var x = 0; x < editor.map[0].length; x++) {
+                drawTile(editor.dom.evCtx, x, y, editor.map[y][x]);
+                editor.dom.canvas.forEach(function (one) {
+                    drawTile(editor.dom[one + 'Ctx'], x, y, editor[one+'map'][y][x]);
+                });
+            }
         }
     }
+
     // 绘制地图 end
 
     editor.drawEventBlock();
@@ -814,7 +835,6 @@ editor.prototype.buildMark = function(){
 }
 
 editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
-    if (editor.uivalues.bigmap) return;
     var pos={x: 0, y: 0, images: "terrains"};
     var ysize = 32;
     if(thisevent==0){

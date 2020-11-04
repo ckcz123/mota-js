@@ -151,6 +151,17 @@ editor_multi = function () {
                     if (one["!url"]) coredef.core[funcname]["!url"] = one["!url"];
                 }
             }
+            for (var funcname in core[name]) {
+                if (!(core[name][funcname] instanceof Function) || funcname.charAt(0) == '_' || coredef.core[name][funcname]) continue;
+                var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
+                var parameters = (parameterInfo == null ? "" : parameterInfo[1])
+                    .replace(/\s*/g, '').replace(/,/g, ', ').split(', ')
+                    .filter(function (one) { return one.trim() != ''; })
+                    .map(function (one) { return one.trim() + ': ?'; }).join(', ');
+                coredef.core[funcname] = coredef.core[name][funcname] = {
+                    "!type": "fn(" + parameters + ")"
+                }
+            }
         }
     }
 
@@ -190,8 +201,13 @@ editor_multi = function () {
         }
     });
 
+    var ctrlRelease = new Date();
     codeEditor.on("keyup", function (cm, event) {
-        if (codeEditor.getOption("autocomplete") && !event.ctrlKey && (
+        var date = new Date();
+        if (event.keyCode == 17 || event.keyCode == 91) { // ctrl, cmd
+            ctrlRelease = date;
+        }
+        else if (codeEditor.getOption("autocomplete") && !event.ctrlKey && date - ctrlRelease >= 1000 && (
             (event.keyCode >= 65 && event.keyCode <= 90) ||
             (!event.shiftKey && event.keyCode == 190) || (event.shiftKey && event.keyCode == 189))) {
             try {

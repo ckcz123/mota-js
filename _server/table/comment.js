@@ -97,16 +97,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_string": true,
 					"_lint": true,
-					"_docs": "能否使用",
-					"_data": "当前能否使用该道具，仅对cls为tools或constants有效。"
-				},
-				"equipCondition": {
-					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_lint": true,
-					"_docs": "能否装备",
-					"_data": "能装备某个装备的条件，仅对cls为equips有效。\n与canUseItemEffect不同，这里null代表可以装备。"
+					"_docs": "能否使用或装备",
+					"_data": "当前能否使用或装备该道具，仅对cls不为items有效。null表示始终不可使用但可装备"
 				}
 			}
 		},
@@ -216,7 +208,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "textarea",
 					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
 					"_docs": "连击数",
-					"_data": "多连击的连击数"
+					"_data": "多连击的连击数，净化怪的净化倍率"
 				},
 				"add": {
 					"_leaf": true,
@@ -228,15 +220,15 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣除攻击",
-					"_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例"
+					"_docs": "退化扣攻",
+					"_data": "退化时勇士下降的攻击力点数；光环怪增加攻击的比例；反击的比例"
 				},
 				"defValue": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "thiseval==~~thiseval||thiseval==null",
-					"_docs": "退化扣除防御",
-					"_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例"
+					"_docs": "退化扣防",
+					"_data": "退化时勇士下降的防御力点数；光环怪增加防御的比例；破甲的比例"
 				},
 				"damage": {
 					"_leaf": true,
@@ -244,6 +236,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_range": "thiseval==~~thiseval||thiseval==null",
 					"_docs": "固伤",
 					"_data": "战前扣血的点数"
+				},
+				"afterBattle": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "afterBattle",
+					"_docs": "战后事件",
+					"_data": "和该怪物战斗后触发的事件列表"
 				}
 			}
 		},
@@ -403,8 +402,14 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"canFlyTo": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_docs": "可楼传",
-							"_data": "该楼能否被楼传器飞到（不能的话在该楼也不允许使用楼传器）"
+							"_docs": "可楼传飞到",
+							"_data": "该楼能否被楼传器飞到"
+						},
+						"canFlyFrom": {
+							"_leaf": true,
+							"_type": "checkbox",
+							"_docs": "可楼传飞出",
+							"_data": "该楼能否用楼传器飞出"
 						},
 						"canUseQuickShop": {
 							"_leaf": true,
@@ -500,10 +505,17 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						},
 						"bgm": {
 							"_leaf": true,
-							"_type": "select",
-							"_select": {
-								"values": [null].concat(Object.keys(editor.core.material.bgms))
-							},
+							"_type": "material",
+							"_directory": "./project/bgms/",
+							"_transform": (function (one) {
+								if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac'))
+									return one;
+								return null;
+							}).toString(),
+							"_onconfirm": (function (previous, current) {
+								if (current.length == 0) return null;
+								return current[0];
+							}).toString(),
 							"_docs": "背景音乐",
 							"_data": "到达该层后默认播放的BGM"
 						},
@@ -594,6 +606,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"width": 13,
 			"height": 13,
 			"canFlyTo": true,
+			"canFlyFrom": true,
 			"canUseQuickShop": true,
 			"cannotViewMap": false,
 			"cannotMoveDirectly": false,

@@ -208,6 +208,7 @@ editor_file = function (editor, callback) {
             map: map,
         },saveStatus?{
             canFlyTo: currData.canFlyTo,
+            canFlyFrom: currData.canFlyFrom,
             canUseQuickShop: currData.canUseQuickShop,
             cannotViewMap: currData.cannotViewMap,
             cannotMoveDirectly: currData.cannotMoveDirectly,
@@ -256,6 +257,7 @@ editor_file = function (editor, callback) {
                 map: map,
             },saveStatus?{
                 canFlyTo: currData.canFlyTo,
+                canFlyFrom: currData.canFlyFrom,
                 canUseQuickShop: currData.canUseQuickShop,
                 cannotViewMap: currData.cannotViewMap,
                 cannotMoveDirectly: currData.cannotMoveDirectly,
@@ -304,7 +306,7 @@ editor_file = function (editor, callback) {
             callback('不能对自动元件进行自动注册！');
             return;
         }
-        if (image=='npc48' && confirm("你想绑定npc48的朝向么？\n如果是，则会连续四个一组的对npc48的faceIds进行自动绑定。")) {
+        if (image=='npc48' && confirm("你想绑定npc48的朝向么？\n如果是，则会将最后四个npc48的faceIds进行自动绑定。")) {
             bindFaceIds = true;
         }
         var c=image.toUpperCase().charAt(0);
@@ -353,7 +355,9 @@ editor_file = function (editor, callback) {
         }
 
         if (bindFaceIds) {
-            for (var i = 0; i < faceIds.length - 3; i+=4) {
+            // 只绑定最后四个，防止之前的单向npc乱掉
+            if (faceIds.length >= 4) {
+                var i = faceIds.length - 4;
                 var down = faceIds[i], left = faceIds[i+1], right = faceIds[i+2], up = faceIds[i+3];
                 var obj = {down: down.id, left: left.id, right: right.id, up: up.id};
                 mapActions.push(["add", "['" + down.idnum + "']['faceIds']", obj]);

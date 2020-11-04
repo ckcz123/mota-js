@@ -105,7 +105,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.7.1",
+		"version": "Ver 2.7.3",
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",
@@ -449,7 +449,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"purify": 3,
 		"hatred": 2,
 		"animateSpeed": 400,
-		"statusCanvasRowsOnMobile": 3
+		"statusCanvasRowsOnMobile": 3,
+		"floorChangeTime": 500
 	},
 	"flags": {
 		"statusBarItems": [

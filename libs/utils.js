@@ -93,6 +93,8 @@ utils.prototype.replaceValue = function (value) {
             value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
             value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
+        if (value.indexOf('blockNumber:')>=0)
+            value = value.replace(/blockNumber:(\d+),(\d+)/g, "core.getBlockNumber($1, $2)");
         if (value.indexOf('blockCls:')>=0)
             value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
         if (value.indexOf('equip:')>=0)
@@ -232,9 +234,10 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
     }
 
     // Save to localforage
-    var compressed = lzw_encode(JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
+    var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
         return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
-    }));
+    });
+    var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
     localforage.setItem(core.firstData.name + "_" + key, compressed, function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);
@@ -418,7 +421,7 @@ utils.prototype.formatSize = function (size) {
 
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
-    if (!core.isset(x)) return '???';
+    if (!core.isset(x) || !Number.isFinite(x)) return '???';
     if (x > 1e24 || x < -1e24) return x.toExponential(2);
 
     var c = x < 0 ? "-" : "";
@@ -513,6 +516,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "e" + this._encodeRoute_id2number(t.substring(6)) + ":";
     else if (t.indexOf('fly:') == 0)
         return "F" + t.substring(4) + ":";
+    else if (t == 'choices:none')
+        return "c";
     else if (t.indexOf('choices:') == 0)
         return "C" + t.substring(8);
     else if (t.indexOf('shop:') == 0)
@@ -523,6 +528,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "t" + t.substring(5).substring(0, 1).toUpperCase() + ":";
     else if (t == 'getNext')
         return 'G';
+    else if (t == 'input:none')
+        return 'p';
     else if (t.indexOf('input:') == 0)
         return "P" + t.substring(6);
     else if (t.indexOf('input2:') == 0)
@@ -619,6 +626,9 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "F":
             decodeObj.ans.push("fly:" + nxt);
             break;
+        case 'c':
+            decodeObj.ans.push('choices:none');
+            break;
         case "C":
             decodeObj.ans.push("choices:" + nxt);
             break;
@@ -646,6 +656,9 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "G":
             decodeObj.ans.push("getNext");
+            break;
+        case "p":
+            decodeObj.ans.push("input:none");
             break;
         case "P":
             decodeObj.ans.push("input:" + nxt);
@@ -678,11 +691,10 @@ utils.prototype.isset = function (val) {
 utils.prototype.subarray = function (a, b) {
     if (!(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
-    var na = core.cloneArray(a), nb = core.cloneArray(b);
-    while (nb.length > 0) {
-        if (na.shift() != nb.shift()) return null;
+    for (var i = 0; i < b.length; ++i) {
+        if (a[i] != b[i]) return null;
     }
-    return na;
+    return a.slice(b.length);
 }
 
 utils.prototype.inArray = function (array, element) {
@@ -702,12 +714,7 @@ utils.prototype.getCookie = function (name) {
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (!core.statusBar[name]) return;
-    var isNumber = false;
-    if (typeof value == 'number') {
-        value = this.formatBigNumber(value);
-        isNumber = true;
-    }
-    // 判定是否斜体
+    if (typeof value == 'number') value = this.formatBigNumber(value);
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
     style += 'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
@@ -715,31 +722,17 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
-    var _isNumber = core.statusBar[name].getAttribute('_isNumber') == "1";
     var _style = core.statusBar[name].getAttribute('_style');
     var _value = core.statusBar[name].getAttribute('_value');
-    if (isNumber) {
-        if (_isNumber && _style == style) {
-            if (value == _value) return;
-            core.statusBar[name].innerText = value;
-        } else {
-            core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
-            core.statusBar[name].setAttribute('_isNumber', '1');
-            core.statusBar[name].setAttribute('_style', style);
-        }
-        core.statusBar[name].setAttribute('_value', value);
+    if (_style == style) {
+        if (value == _value) return;
+        core.statusBar[name].children[0].innerText = value;
     } else {
-        if (!_isNumber && _style == style) {
-            if (value == _value) return;
-            core.statusBar[name].children[0].innerText = value;
-        } else {
-            core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
-            core.statusBar[name].children[0].innerText = value;
-            core.statusBar[name].setAttribute('_isNumber', '0');
-            core.statusBar[name].setAttribute('_style', style);
-        }
-        core.statusBar[name].setAttribute('_value', value);
+        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
+        core.statusBar[name].children[0].innerText = value;
+        core.statusBar[name].setAttribute('_style', style);
     }
+    core.statusBar[name].setAttribute('_value', value);;
 }
 
 utils.prototype.strlen = function (str) {
@@ -1104,6 +1097,20 @@ utils.prototype.getGuid = function () {
     return guid;
 }
 
+utils.prototype.hashCode = function (obj) {
+    if (typeof obj == 'string') {
+        var hash = 0, i, chr;
+        if (obj.length === 0) return hash;
+        for (i = 0; i < obj.length; i++) {
+            chr = obj.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash;
+    }
+    return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
+}
+
 utils.prototype.same = function (a, b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;
@@ -1160,7 +1167,7 @@ utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onpr
 
 utils.prototype._unzip_readEntries = function (entries, success, convertToText) {
     var results = {};
-    if (entries == null) {
+    if (entries == null || entries.length == 0) {
         return success(results);
     }
     var length = entries.length;

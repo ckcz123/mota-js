@@ -464,6 +464,11 @@ editor_mappanel_wrapper = function (editor) {
             parent.appendChild(extraEvent);
             editor.dom.extraEvent.style.display = 'block';
             editor.dom.extraEvent.children[0].innerHTML = '绑定出生点为此点';
+        } else if (editor.currentFloorData.changeFloor[editor.pos.x + "," + editor.pos.y]) {
+            parent.removeChild(extraEvent);
+            parent.insertBefore(extraEvent, parent.firstChild);
+            editor.dom.extraEvent.style.display = 'block';
+            editor.dom.extraEvent.children[0].innerHTML = '跳转到目标传送点';
         } else if (thisevent.id == 'upFloor') {
             parent.removeChild(extraEvent);
             parent.insertBefore(extraEvent, parent.firstChild);
@@ -514,6 +519,7 @@ editor_mappanel_wrapper = function (editor) {
 
         var thisevent = editor.map[editor.pos.y][editor.pos.x];
         return editor.uifunctions._extraEvent_bindStartPoint(thisevent)
+            || editor.uifunctions._extraEvent_changeFloor()
             || editor.uifunctions._extraEvent_bindStair(thisevent)
             || editor.uifunctions._extraEvent_bindSpecialDoor(thisevent);
     }
@@ -536,6 +542,25 @@ editor_mappanel_wrapper = function (editor) {
             editor.mode.tower();
             printf('绑定初始点成功');
         });
+    }
+
+    editor.uifunctions._extraEvent_changeFloor = function () {
+        var changeFloor = editor.currentFloorData.changeFloor[editor.pos.x + "," + editor.pos.y];
+        if (!changeFloor) return false;
+        core.status.hero.loc = {x: editor.pos.x, y: editor.pos.y, direction: "up"};
+        var targetLoc = changeFloor.loc ? {x: changeFloor.loc[0], y: changeFloor.loc[1]} : null;
+        var info = core.events._changeFloor_getInfo(changeFloor.floorId, changeFloor.stair, targetLoc);
+        editor_mode.onmode('nextChange');
+        editor_mode.onmode('floor');
+        editor.dom.selectFloor.value = info.floorId;
+        editor.uivalues.recentFloors.push(editor.currentFloorId);
+        editor.changeFloor(info.floorId, function () {
+            editor.pos.x = info.heroLoc.x;
+            editor.pos.y = info.heroLoc.y;
+            editor.setViewport(32 * (editor.pos.x - core.__HALF_SIZE__), 32 * (editor.pos.y - core.__HALF_SIZE__));
+            editor.drawPosSelection();
+        });
+        return true;
     }
 
     /**

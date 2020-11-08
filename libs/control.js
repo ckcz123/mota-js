@@ -1173,15 +1173,19 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
 
     for (var x=startX;x<endX;x++) {
         for (var y=startY;y<endY;y++) {
-            if (core.noPass(x, y, floorId)) continue;
+            var alpha = 1;
+            if (core.noPass(x, y, floorId)) {
+                if (core.flags.extraDamageType == 2) alpha = 0;
+                else if (core.flags.extraDamageType == 1) alpha = 0.6;
+            }
             var damage = core.status.checkBlock.damage[x+","+y]||0;
             if (damage>0) { // 该点伤害
                 damage = core.formatBigNumber(damage, true);
-                core.status.damage.extraData.push({text: damage, px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
+                core.status.damage.extraData.push({text: damage, px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33', alpha: alpha});
             }
             else { // 检查捕捉
                 if (core.status.checkBlock.ambush[x+","+y]) {
-                    core.status.damage.extraData.push({text: '!', px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
+                    core.status.damage.extraData.push({text: '!', px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33', alpha: alpha});
                 }
             }
         }
@@ -1239,7 +1243,10 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;         
         }
+        var alpha = cacheCtx.globalAlpha;
+        cacheCtx.globalAlpha = one.alpha;
         core.fillBoldText(cacheCtx, one.text, px, py, one.color);
+        cacheCtx.globalAlpha = alpha;
     });
     cacheCtx.translate(0, 0);
 
@@ -2746,6 +2753,7 @@ control.prototype.showStatusBar = function () {
         statusItems[i].style.opacity = 1;
     this.setToolbarButton(false);
     core.dom.tools.hard.style.display = 'block';
+    core.dom.toolBar.style.display = 'block';
 }
 
 control.prototype.hideStatusBar = function (showToolbox) {
@@ -2766,6 +2774,9 @@ control.prototype.hideStatusBar = function (showToolbox) {
     if (!core.domStyle.isVertical || !showToolbox) {
         for (var i = 0; i < toolItems.length; ++i)
             toolItems[i].style.display = 'none';
+    }
+    if (!core.domStyle.isVertical) {
+        core.dom.toolBar.style.display = 'none';
     }
 }
 
@@ -3099,10 +3110,15 @@ control.prototype._resize_toolBar = function (obj) {
         toolBar.style.height = 0.281 * obj.outerSize + "px";
         toolBar.style.background = 'transparent';
     }
-    toolBar.style.display = 'block';
     toolBar.style.borderLeft = obj.border;
     toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
+
+    if (!core.domStyle.showStatusBar && !core.domStyle.isVertical) {
+        toolBar.style.display = 'none';
+    } else {
+        toolBar.style.display = 'block';
+    }
 }
 
 control.prototype._resize_tools = function (obj) {

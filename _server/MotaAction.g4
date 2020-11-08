@@ -418,7 +418,7 @@ return code;
 
 // equip 事件编辑器入口之一
 equip_m 
-    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ BEND
+    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '此道具cls须为equips并设置canUseItemEffect' BEND
 
 
 /* equip_m
@@ -441,25 +441,27 @@ equipList
 
 
 equipKnown
-    : Equip_List ':' Number BEND
+    : Equip_List ':' EvalString BEND
 
 
 /* equipKnown
 tooltip : 装备项
 default : ['atk', 10]
 helpUrl : /_docs/#/instruction
-return '"'+Equip_List_0+'": '+Number_0+', ';
+if (!/^[+-]?\d+(\.\d+)?$/.test(EvalString_0)) EvalString_0 = '"' + EvalString_0 + '"';
+return '"'+Equip_List_0+'": '+EvalString_0+', ';
 */;
 
 equipUnknown
-    : EvalString ':' Number BEND
+    : EvalString ':' EvalString BEND
 
 
 /* equipUnknown
 tooltip : 装备项
 default : ['speed', 10]
 helpUrl : /_docs/#/instruction
-return '"'+EvalString_0+'": '+Number_0+', ';
+if (!/^[+-]?\d+(\.\d+)?$/.test(EvalString_1)) EvalString_1 = '"' + EvalString_1 + '"';
+return '"'+EvalString_0+'": '+EvalString_1+', ';
 */;
 
 
@@ -671,7 +673,7 @@ action
     |   changeFloor_s
     |   changePos_s
     |   setViewport_s
-    |   moveViewport_s
+    |   setViewport_1_s
     |   useItem_s
     |   loadEquip_s
     |   unloadEquip_s
@@ -725,6 +727,7 @@ action
     |   callBook_s
     |   callSave_s
     |   autoSave_s
+    |   forbidSave_s
     |   callLoad_s
     |   previewUI_s
     |   clearMap_s
@@ -803,6 +806,7 @@ tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮�
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
 allIds : ['EvalString_1']
+menu : [['预览所有立绘','editor_blockly.previewBlock(block)']]
 default : ["小妖精","fairy","","欢迎使用事件编辑器(回车直接多行编辑)",null]
 var title='';
 if (EvalString_0==''){
@@ -1164,6 +1168,7 @@ insert_1_s
 /* insert_1_s
 tooltip : insert: 插入公共事件并执行
 helpUrl : /_docs/#/instruction
+allEvents : ['EvalString_0']
 default : ["加点事件", ""]
 colour : this.eventColor
 if (JsonEvalString_0) {
@@ -1817,35 +1822,41 @@ return code;
 */;
 
 setViewport_s
-    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? Newline
+    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
 
 
 /* setViewport_s
 tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : ["",""]
+default : ["","",0,false]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.soundColor
 var loc = '';
 if (PosString_0 && PosString_1) {
     loc = ', "loc": ['+PosString_0+','+PosString_1+']';
 }
-var code = '{"type": "setViewport"'+loc+'},\n';
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
 return code;
 */;
 
-moveViewport_s
-    :   '移动视角' '动画时间' IntString '不等待执行完毕' Bool BGNL? StepString Newline
+setViewport_1_s
+    :   '设置视角' '增量坐标' 'dx' PosString? ',' 'dy' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
 
 
-/* moveViewport_s
-tooltip : moveViewport：移动视角
+/* setViewport_1_s
+tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : [300,false,"上右3下2左"]
+default : ["0","0",0,false]
 colour : this.soundColor
-IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+var loc = '';
+if (PosString_0 && PosString_1) {
+    loc = ', "dxy": ['+PosString_0+','+PosString_1+']';
+}
+Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "moveViewport"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1859,7 +1870,6 @@ tooltip : showImage：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
-colour : this.printColor
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1880,7 +1890,6 @@ tooltip : showImage_1：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
-colour : this.printColor
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1902,7 +1911,6 @@ showTextImage_s
 tooltip : showTextImage：显示图片化文本
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
-colour : this.printColor
 default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1.4,"null",1,0,false]
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -1919,7 +1927,6 @@ hideImage_s
 /* hideImage_s
 tooltip : hideImage：清除图片
 helpUrl : /_docs/#/instruction
-colour : this.printColor
 default : [1,0,false]
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "hideImage", "code": '+NInt_0+', "time": '+Int_0+async+'},\n';
@@ -1935,7 +1942,6 @@ tooltip : showGif：显示动图
 helpUrl : /_docs/#/instruction
 default : ["","",""]
 allImages : ['EvalString_0']
-colour : this.printColor
 previewBlock : true
 EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
@@ -1952,7 +1958,6 @@ moveImage_s
 tooltip : moveImage：图片移动
 helpUrl : /_docs/#/instruction
 default : [1,'','','',500,false]
-colour : this.printColor
 var toloc = '';
 if (PosString_0 && PosString_1)
   toloc = ', "to": ['+PosString_0+','+PosString_1+']';
@@ -2032,7 +2037,7 @@ move_s
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : /_docs/#/instruction
-default : ["","",500,false,false,"上右3下2后4左前2"]
+default : ["","",500,true,false,"上右3下2后4左前2"]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.mapColor
 var floorstr = '';
@@ -2067,7 +2072,7 @@ moveHero_s
 tooltip : moveHero：移动勇士,用这种方式移动勇士的过程中将无视一切地形, 无视一切事件, 中毒状态也不会扣血
 helpUrl : /_docs/#/instruction
 default : ["",false,"上右3下2后4左前2"]
-colour : this.dataColor
+colour : this.mapColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
 var code = '{"type": "moveHero"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
@@ -2134,7 +2139,7 @@ tooltip : jumpHero: 跳跃勇士
 helpUrl : /_docs/#/instruction
 default : ["","",500,false]
 selectPoint : ["PosString_0", "PosString_1"]
-colour : this.dataColor
+colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "loc": ['+PosString_0+','+PosString_1+']';
@@ -2153,7 +2158,7 @@ jumpHero_1_s
 tooltip : jumpHero: 跳跃勇士，给定增量
 helpUrl : /_docs/#/instruction
 default : ["0","0",500,false]
-colour : this.dataColor
+colour : this.mapColor
 var floorstr = '';
 if (PosString_0 && PosString_1) {
     floorstr = ', "dxy": ['+PosString_0+','+PosString_1+']';
@@ -2521,24 +2526,28 @@ return code;
 */;
 
 break_s
-    :   '跳出当前循环或公共事件' Newline
+    :   '跳出循环或公共事件' '层数' Int Newline
 
 /* break_s
 tooltip : break：跳出循环或公共事件！
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = '{"type": "break"},\n';
+default : [1]
+if (Int_0 <= 0) throw "层数至少为1！";
+var code = '{"type": "break", "n": '+Int_0+'},\n';
 return code;
 */;
 
 continue_s
-    :   '提前结束本轮循环或跳出公共事件' Newline
+    :   '提前结束循环或跳出公共事件' '层数' Int Newline
 
 /* continue_s
-tooltip : continue：继续执行当前循环的下一轮，或跳出公共事件！
+tooltip : continue：提前结束循环或跳出公共事件，或跳出公共事件！
 helpUrl : /_docs/#/instruction
 colour : this.eventColor
-var code = '{"type": "continue"},\n';
+default : [1]
+if (Int_0 <= 0) throw "层数至少为1！";
+var code = '{"type": "continue", "n": '+Int_0+'},\n';
 return code;
 */;
 
@@ -2563,36 +2572,54 @@ return code;
 waitContext
     : waitContext_1
     | waitContext_2
+    | waitContext_3
     | waitContext_empty;
 
 
 waitContext_1
-    : '按键的场合' '键值' EvalString BGNL? Newline action+ BEND Newline
+    : '按键的场合' '键值' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_1
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
 colour : this.subColor
+default : ["",false]
 if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
   throw new Error('键值必须是正整数，可以以逗号分隔');
 }
+Bool_0 = Bool_0?', "break": true':'';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
-var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '"'+collapsed+', "action": [\n' + action_0 + ']},\n';
+var code = '{"case": "keyboard", "keycode": "' + EvalString_0 + '"'+Bool_0+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
 
 waitContext_2
-    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString BGNL? Newline action+ BEND Newline
+    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_2
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
-default : [0,32,0,32]
+default : [0,32,0,32,false]
 previewBlock : true
 colour : this.subColor
+Bool_0 = Bool_0?', "break": true':'';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
-var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + ']'+collapsed+', "action": [\n' + action_0 + ']},\n';
+var code = '{"case": "mouse", "px": [' + PosString_0 + ',' + PosString_1 + '], "py": [' + PosString_2 + ',' + PosString_3 + ']'+Bool_0+collapsed+', "action": [\n' + action_0 + ']},\n';
+return code;
+*/;
+
+waitContext_3
+    : '超时的场合' '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+
+/* waitContext_3
+tooltip : wait: 等待用户操作并获得按键或点击信息
+helpUrl : /_docs/#/instruction
+colour : this.subColor
+default : [false]
+Bool_0 = Bool_0?', "break": true':'';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var code = '{"case": "timeout"'+Bool_0+collapsed+', "action": [\n' + action_0 + ']},\n';
 return code;
 */;
 
@@ -2657,6 +2684,21 @@ return code;
 */;
 
 
+forbidSave_s
+    :   '是否禁止存档' Bool Newline
+
+
+/* forbidSave_s
+tooltip : forbidSave: 禁止存档
+helpUrl : /_docs/#/instruction
+colour : this.soundColor
+default : [false]
+Bool_0 = Bool_0 ? (', "forbid": true') : '';
+var code = '{"type": "forbidSave"'+Bool_0+'},\n';
+return code;
+*/;
+
+
 callLoad_s
     :   '呼出读档页面' Newline
 
@@ -2690,7 +2732,7 @@ clearMap_s
 /* clearMap_s
 tooltip : clearMap: 清除画布
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 default : ["", "", "", ""]
 previewBlock : true
 PosString_0 = PosString_0 && (', "x": ' + PosString_0);
@@ -2709,7 +2751,7 @@ setAttribute_s
 tooltip : setAttribute：设置画布属性
 helpUrl : /_docs/#/instruction
 previewBlock : true
-colour : this.subColor
+colour : this.uiColor
 default : ["","",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","",null,null,""]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 TextBaseline_List_0 = TextBaseline_List_0==='null'?'': ', "baseline": "'+TextBaseline_List_0+'"';
@@ -2734,7 +2776,7 @@ fillText_s
 /* fillText_s
 tooltip : fillText：绘制一行文本；可以设置最大宽度进行放缩
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","",'rgba(255,255,255,1)',"","","绘制一行文本"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2750,7 +2792,7 @@ fillBoldText_s
 /* fillBoldText_s
 tooltip : fillBoldText：绘制一行描边文本
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","",'rgba(255,255,255,1)',"",'rgba(0,0,0,1)',"","绘制一行描边文本"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2767,7 +2809,8 @@ drawTextContent_s
 tooltip : drawTextContent：绘制多行文本
 helpUrl : /_docs/#/instruction
 doubleclicktext : EvalString_Multi_0
-colour : this.subColor
+menu : [['预览多行文本','editor_blockly.previewBlock(block)']]
+colour : this.uiColor
 default : ["绘制多行文本\\n可双击编辑","0","0","","",'rgba(255,255,255,1)',null,"","",false]
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 Bool_0 = Bool_0 ?  (', "bold": true') : '';
@@ -2785,7 +2828,7 @@ fillRect_s
 /* fillRect_s
 tooltip : fillRect：绘制矩形
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","","","rgba(255,255,255,1)"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2801,7 +2844,7 @@ strokeRect_s
 /* strokeRect_s
 tooltip : strokeRect：绘制矩形边框
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2818,7 +2861,7 @@ drawLine_s
 /* drawLine_s
 tooltip : drawLine：绘制线段
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2833,7 +2876,7 @@ drawArrow_s
 /* drawArrow_s
 tooltip : drawArrow：绘制箭头
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","flag:x","300","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2849,7 +2892,7 @@ fillPolygon_s
 /* fillPolygon_s
 tooltip : fillPolygon：绘制多边形
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0,0,100","0,100,0","","rgba(255,255,255,1)"]
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
@@ -2870,7 +2913,7 @@ strokePolygon_s
 /* strokePolygon_s
 tooltip : strokePolygon：绘制多边形边框
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0,0,100","0,100,0","","rgba(255,255,255,1)",""]
 var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
@@ -2891,7 +2934,7 @@ fillEllipse_s
 /* fillEllipse_s
 tooltip : fillEllipse：绘制椭圆
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","100","100","0","","rgba(255,255,255,1)"]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2906,7 +2949,7 @@ strokeEllipse_s
 /* strokeEllipse_s
 tooltip : strokeEllipse：绘制椭圆边框
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 default : ["0","0","100","100","0","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
@@ -2922,7 +2965,7 @@ fillArc_s
 /* fillArc_s
 tooltip : fillArc：绘制扇形
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 default : ["0","0","100","0","90","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 var code = '{"type": "fillArc", "x": '+PosString_0+', "y": '+PosString_1+', "r": '+PosString_2+', "start": '+PosString_3+', "end": '+PosString_4+ColorString_0+'},\n';
@@ -2936,7 +2979,7 @@ strokeArc_s
 /* strokeArc_s
 tooltip : strokeArc：绘制弧
 helpUrl : /_docs/#/instruction
-colour : this.subColor
+colour : this.uiColor
 default : ["0","0","100","0","90","","rgba(255,255,255,1)",""]
 ColorString_0 = ColorString_0 ? (', "style": ['+ColorString_0+']') : '';
 IntString_0 = IntString_0 ? (', "lineWidth": '+IntString_0) : '';
@@ -2956,7 +2999,7 @@ helpUrl : /_docs/#/instruction
 previewBlock : true
 allImages : ['EvalString_0']
 default : ["bg.jpg","null","0","0","","",""]
-colour : this.subColor
+colour : this.uiColor
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
@@ -2976,7 +3019,7 @@ drawImage_1_s
 tooltip : drawImage：绘制图片
 helpUrl : /_docs/#/instruction
 default : ["bg.jpg","null","0","0","32","32","0","0","32","32",""]
-colour : this.subColor
+colour : this.uiColor
 allImages : ['EvalString_0']
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
@@ -2999,7 +3042,7 @@ helpUrl : /_docs/#/instruction
 default : ["yellowKey",0,"0","0","",""]
 previewBlock : true
 allIds : ['IdString_0']
-colour : this.subColor
+colour : this.uiColor
 Int_0 = Int_0 ? (', "frame": '+Int_0) : '';
 PosString_2 = PosString_2 ? (', "width": '+PosString_2) : '';
 PosString_3 = PosString_3 ? (', "height": '+PosString_3) : '';
@@ -3015,7 +3058,7 @@ drawBackground_s
 tooltip : drawBackground：绘制背景
 helpUrl : /_docs/#/instruction
 default : ["winskin.png","rgba(255,255,255,1)","0","0","100","100"]
-colour : this.subColor
+colour : this.uiColor
 previewBlock : true
 var colorRe = MotaActionFunctions.pattern.colorRe;
 if (colorRe.test(EvalString_0)) {
@@ -3040,7 +3083,7 @@ tooltip : drawSelector：绘制闪烁光标
 helpUrl : /_docs/#/instruction
 previewBlock : true
 default : ["winskin.png","1","0","0","100","100"]
-colour : this.subColor
+colour : this.uiColor
 var code = '{"type": "drawSelector", "image": "'+EvalString_0+'", "code": '+Int_0+', "x": '+PosString_0+', "y": '+PosString_1+', "width": '+PosString_2+', "height": '+PosString_3+'},\n';
 return code;
 */;
@@ -3054,7 +3097,7 @@ tooltip : drawSelector：清除闪烁光标
 helpUrl : /_docs/#/instruction
 default : ["1"]
 previewBlock : true
-colour : this.subColor
+colour : this.uiColor
 var code = '{"type": "drawSelector", "code": '+Int_0+'},\n';
 return code;
 */;
@@ -3106,6 +3149,7 @@ expression
     :   expression Arithmetic_List expression
     |   negate_e
     |   unaryOperation_e
+    |   utilOperation_e
     |   bool_e
     |   idFixedList_e
     |   idFlag_e
@@ -3168,7 +3212,16 @@ unaryOperation_e
     
 
 /* unaryOperation_e
-var code = UnaryOperator_List_0 + expression_0;
+var code = UnaryOperator_List_0 + '(' + expression_0 + ')';
+return [code, Blockly.JavaScript.ORDER_MEMBER];
+*/;
+
+utilOperation_e
+    :   UtilOperator_List expression
+    
+
+/* utilOperation_e
+var code = UtilOperator_List_0 + '(' + expression_0 + ')';
 return [code, Blockly.JavaScript.ORDER_MEMBER];
 */;
 
@@ -3222,7 +3275,7 @@ enemyattr_e
 
 
 /* enemyattr_e
-default : ['greenSlime',"攻击"]
+default : ['greenSlime',"hp"]
 allEnemys : ['IdString_0']
 var code = 'enemy:'+IdString_0+':'+EnemyId_List_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
@@ -3342,8 +3395,8 @@ Floor_List
     /*Floor_List ['floorId',':before',':next',':now']*/;
 
 Stair_List
-    :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'|'中心对称点'|'x对称点'|'y对称点'
-    /*Stair_List ['loc','upFloor','downFloor',':now',':symmetry',':symmetry_x',':symmetry_y']*/;
+    :   '坐标'|'上楼梯'|'下楼梯'|'保持不变'|'中心对称点'|'x对称点'|'y对称点'|'楼传落点'
+    /*Stair_List ['loc','upFloor','downFloor',':now',':symmetry',':symmetry_x',':symmetry_y','flyPoint']*/;
 
 SetTextPosition_List
     :   '不改变'|'距离顶部'|'居中'|'距离底部'
@@ -3374,8 +3427,12 @@ AssignOperator_List
     /*AssignOperator_List ['=','+=','-=','*=','/=','**=','//=','%=','min=','max=']*/;  
 
 UnaryOperator_List
-    :   '向下取整'|'向上取整'|'四舍五入'|'整数截断'|'绝对值'|'开方'
-    /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt']*/;
+    :   '向下取整'|'向上取整'|'四舍五入'|'整数截断'|'绝对值'|'开方'|'变量类型'
+    /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt', 'typeof']*/;
+
+UtilOperator_List
+    :   '大数字格式化'|'哈希值'|'base64编码'|'base64解码'|'不可SL的随机'|'可以SL的随机'|'深拷贝'|'日期格式化'|'时间格式化'|'获得cookie'|'字符串字节数'
+    /*UtilOperator_List ['core.formatBigNumber', 'core.hashCode', 'core.encodeBase64', 'core.decodeBase64', 'core.rand', 'core.rand2', 'core.clone', 'core.formatDate', 'core.formatTime', 'core.getCookie', 'core.strlen']*/;
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'|'云'
@@ -3406,8 +3463,8 @@ Event_List
     /*Event_List ['null','afterBattle','afterGetItem','afterOpenDoor']*/;
 
 Floor_Meta_List
-    :   '楼层中文名'|'状态栏名称'|'能否使用楼传'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'楼传落点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
-    /*Floor_Meta_List ['title','name','canFlyTo', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'ratio', 'upFloor', 'downFloor', 'fwlyPoint', 'bgm', 'color', 'weather', 'underGround']*/;
+    :   '楼层中文名'|'状态栏名称'|'能否楼传飞到'|'能否楼传飞出'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'楼传落点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
+    /*Floor_Meta_List ['title','name','canFlyTo', 'canFlyFrom', 'canUseQuickShop', 'cannotViewMap', 'cannotMoveDirectly', 'defaultGround', 'ratio', 'upFloor', 'downFloor', 'flyPoint', 'bgm', 'color', 'weather', 'underGround']*/;
 
 Global_Attribute_List
     :   '全局字体'|'横屏左侧状态栏背景'|'竖屏上方状态栏背景'|'竖屏下方道具栏背景'|'边框颜色'|'状态栏文字色'|'选中框颜色'|'楼层转换样式'|'装备列表'
@@ -3537,13 +3594,13 @@ this.evisitor.statementColor=70;
 this.evisitor.entryColor=250;
 
 this.evisitor.idstring_eColor=310;
-this.evisitor.subColor=190;
-this.evisitor.printColor=70;
+this.evisitor.subColor=250;
 this.evisitor.dataColor=130;
 this.evisitor.eventColor=220;
 this.evisitor.soundColor=20;
 this.evisitor.commentColor=285;
 this.evisitor.mapColor=175;
+this.evisitor.uiColor=359;
 */
 
 /* Function_1

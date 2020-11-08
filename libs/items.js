@@ -244,10 +244,10 @@ items.prototype.canEquip = function (equipId, hint) {
     }
 
     // 可装备条件
-    var equipCondition = core.material.items[equipId].equipCondition;
-    if (equipCondition) {
+    var canUseItemEffect = core.material.items[equipId].canUseItemEffect;
+    if (canUseItemEffect) {
         try {
-            if (!eval(equipCondition)) {
+            if (!eval(canUseItemEffect)) {
                 if (hint) core.drawTip("当前不可换上" + equip.name);
                 return false;
             }

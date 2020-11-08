@@ -148,7 +148,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         });
 
         // Global hero animate
-        if ((core.status.hero || {}).animate && core.status.heroMoving == 0) {
+        if ((core.status.hero || {}).animate && core.status.heroMoving == 0 && main.mode == 'play') {
             core.drawHero('stop', null, core.status.globalAnimateStatus);
         }
     }
@@ -953,9 +953,9 @@ control.prototype.updateViewport = function() {
 }
 
 ////// 设置视野范围 //////
-control.prototype.setViewport = function (x, y) {
-    core.bigmap.offsetX = core.clamp(x, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp(y, 0, 32 * core.bigmap.height - core.__PIXELS__);
+control.prototype.setViewport = function (px, py) {
+    core.bigmap.offsetX = core.clamp(px, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
     var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
@@ -964,34 +964,31 @@ control.prototype.setViewport = function (x, y) {
 }
 
 ////// 移动视野范围 //////
-control.prototype.moveViewport = function (steps, time, callback) {
-    time = time || core.values.moveSpeed;
-    var step = 0, moveSteps = (steps||[]).filter(function (t) {
-        return ['up','down','left','right'].indexOf(t)>=0;
-    });
+control.prototype.moveViewport = function (x, y, time, callback) {
+    time = time || 0;
+    time /= Math.max(core.status.replay.speed, 1)
+    var per_time = 10, step = parseInt(time / per_time);
+    if (step <= 0) {
+        this.setViewport(32 * x, 32 * y);
+        if (callback) callback();
+        return;
+    }
+    var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    var py = core.clamp(32 * y, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    var dx = (px - core.bigmap.offsetX) / step, dy = (py - core.bigmap.offsetY) / step;
+
     var animate=window.setInterval(function() {
-        if (moveSteps.length==0) {
+        core.setViewport(core.bigmap.offsetX + dx, core.bigmap.offsetY + dy);
+        step--;
+        if (step <= 0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
+            core.setViewport(px, py);
             if (callback) callback();
         }
-        else {
-            if (core.control._moveViewport_moving(++step, moveSteps))
-                step = 0;
-        }
-    }, time / 16 / core.status.replay.speed);
+    }, per_time);
 
     core.animateFrame.asyncId[animate] = true;
-}
-
-control.prototype._moveViewport_moving = function (step, moveSteps) {
-    var direction = moveSteps[0], scan = core.utils.scan[direction];
-    core.setViewport(core.bigmap.offsetX + 2 * scan.x, core.bigmap.offsetY + 2 * scan.y);
-    if (step == 16) {
-        moveSteps.shift();
-        return true;
-    }
-    return false;
 }
 
 ////// 获得勇士面对位置的x坐标 //////
@@ -1071,8 +1068,8 @@ control.prototype.checkBlock = function () {
             core.updateStatusBar();
         }
     }
-    this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
+    this._checkBlock_repulse(core.status.checkBlock.repulse[loc]);
 }
 
 control.prototype._checkBlock_disableQuickShop = function () {
@@ -1176,14 +1173,19 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
 
     for (var x=startX;x<endX;x++) {
         for (var y=startY;y<endY;y++) {
+            var alpha = 1;
+            if (core.noPass(x, y, floorId)) {
+                if (core.flags.extraDamageType == 2) alpha = 0;
+                else if (core.flags.extraDamageType == 1) alpha = 0.6;
+            }
             var damage = core.status.checkBlock.damage[x+","+y]||0;
             if (damage>0) { // 该点伤害
                 damage = core.formatBigNumber(damage, true);
-                core.status.damage.extraData.push({text: damage, px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
+                core.status.damage.extraData.push({text: damage, px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33', alpha: alpha});
             }
             else { // 检查捕捉
                 if (core.status.checkBlock.ambush[x+","+y]) {
-                    core.status.damage.extraData.push({text: '!', px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33'});
+                    core.status.damage.extraData.push({text: '!', px: 32*x+16, py: 32*(y+1)-14, color: '#ffaa33', alpha: alpha});
                 }
             }
         }
@@ -1241,7 +1243,10 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;         
         }
+        var alpha = cacheCtx.globalAlpha;
+        cacheCtx.globalAlpha = one.alpha;
         core.fillBoldText(cacheCtx, one.text, px, py, one.color);
+        cacheCtx.globalAlpha = alpha;
     });
     cacheCtx.translate(0, 0);
 
@@ -1276,6 +1281,9 @@ control.prototype.startReplay = function (list) {
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
+    core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
+    core.setOpacity('replay', 0.6);
+    this._replay_drawProgress();
     core.updateStatusBar();
     core.drawTip("开始播放");
     this.replay();
@@ -1359,6 +1367,7 @@ control.prototype.stopReplay = function (force) {
     core.status.replay.speed=1.0;
     core.status.replay.steps = 0;
     core.status.replay.save = [];
+    core.deleteCanvas('replay');
     core.updateStatusBar();
     core.drawTip("停止播放并恢复游戏");
 }
@@ -1384,6 +1393,9 @@ control.prototype.rewindReplay = function () {
             "steps": data.replay.steps,
             "save": save
         }
+        core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
+        core.setOpacity('replay', 0.6);
+        core.control._replay_drawProgress();
         core.updateStatusBar();
         core.drawTip("成功回退到上一个节点");
     });
@@ -1466,6 +1478,7 @@ control.prototype.replay = function (force) {
     if (!core.isPlaying() || !core.isReplaying()
          || core.status.replay.animate || core.status.event.id) return;
     if (core.status.replay.pausing && !force) return;
+    this._replay_drawProgress();
     if (core.status.replay.toReplay.length==0)
         return this._replay_finished();
     this._replay_save();
@@ -1559,6 +1572,15 @@ control.prototype._replay_error = function (action) {
         core.ui.closePanel();
         core.stopReplay(true);
     });
+}
+
+control.prototype._replay_drawProgress = function () {
+    var total = core.status.replay.totalList.length, left = total - core.status.replay.toReplay.length;
+    var content = '播放进度：' + left + ' / ' + total + '（'+(left/total*100).toFixed(2)+'%）';
+    var width = 26 + core.calWidth('replay', content, "16px Arial");
+    core.clearMap('replay');
+    core.fillRect('replay', 0, 0, width, 40, '#000000');
+    core.fillText('replay', content, 16, 27, '#FFFFFF');
 }
 
 control.prototype.__replay_getTimeout = function () {
@@ -1727,6 +1749,7 @@ control.prototype._replayAction_key = function (action) {
 
 ////// 自动存档 //////
 control.prototype.autosave = function (removeLast) {
+    if (core.hasFlag('__forbidSave__')) return;
     var x=null;
     if (removeLast) {
         x=core.status.route.pop();
@@ -2694,6 +2717,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
         core.statusBar.image.keyboard.src = core.statusBar.icons.book.src;
         core.statusBar.image.shop.src = core.statusBar.icons.floor.src;
         core.statusBar.image.save.src = core.statusBar.icons.speedDown.src;
+        core.statusBar.image.save.style.opacity = 1;
         core.statusBar.image.load.src = core.statusBar.icons.speedUp.src;
         core.statusBar.image.settings.src = core.statusBar.icons.save.src;
     }
@@ -2712,6 +2736,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
         core.statusBar.image.keyboard.src = core.statusBar.icons.keyboard.src;
         core.statusBar.image.shop.src = core.statusBar.icons.shop.src;
         core.statusBar.image.save.src = core.statusBar.icons.save.src;
+        core.statusBar.image.save.style.opacity = core.hasFlag('__forbidSave__') ? 0.3 : 1;
         core.statusBar.image.load.src = core.statusBar.icons.load.src;
         core.statusBar.image.settings.src = core.statusBar.icons.settings.src;
     }
@@ -2728,6 +2753,7 @@ control.prototype.showStatusBar = function () {
         statusItems[i].style.opacity = 1;
     this.setToolbarButton(false);
     core.dom.tools.hard.style.display = 'block';
+    core.dom.toolBar.style.display = 'block';
 }
 
 control.prototype.hideStatusBar = function (showToolbox) {
@@ -2748,6 +2774,9 @@ control.prototype.hideStatusBar = function (showToolbox) {
     if (!core.domStyle.isVertical || !showToolbox) {
         for (var i = 0; i < toolItems.length; ++i)
             toolItems[i].style.display = 'none';
+    }
+    if (!core.domStyle.isVertical) {
+        core.dom.toolBar.style.display = 'none';
     }
 }
 
@@ -2983,16 +3012,18 @@ control.prototype._resize_canvas = function (obj) {
     core.dom.gameDraw.style.border = obj.border;
     // resize bigmap
     core.bigmap.canvas.forEach(function (cn) {
-        core.canvas[cn].canvas.style.width = core.canvas[cn].canvas.width * core.domStyle.scale + "px";
-        core.canvas[cn].canvas.style.height = core.canvas[cn].canvas.height * core.domStyle.scale + "px";
+        var ratio = core.canvas[cn].canvas.hasAttribute('isHD') ? core.domStyle.ratio : 1;
+        core.canvas[cn].canvas.style.width = core.canvas[cn].canvas.width  / ratio * core.domStyle.scale + "px";
+        core.canvas[cn].canvas.style.height = core.canvas[cn].canvas.height  / ratio * core.domStyle.scale + "px";
     });
     // resize dynamic canvas
     for (var name in core.dymCanvas) {
         var ctx = core.dymCanvas[name], canvas = ctx.canvas;
-        canvas.style.width = canvas.width * core.domStyle.scale + "px";
-        canvas.style.height = canvas.height * core.domStyle.scale + "px";
-        canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
-        canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
+        var ratio = canvas.hasAttribute('isHD') ? core.domStyle.ratio : 1;
+        canvas.style.width = canvas.width  / ratio * core.domStyle.scale + "px";
+        canvas.style.height = canvas.height  / ratio * core.domStyle.scale + "px";
+        canvas.style.left = parseFloat(canvas.getAttribute("_left"))  * core.domStyle.scale + "px";
+        canvas.style.top = parseFloat(canvas.getAttribute("_top"))  * core.domStyle.scale + "px";
     }
     // resize next
     main.dom.next.style.width = main.dom.next.style.height = 5 * core.domStyle.scale + "px";
@@ -3022,15 +3053,13 @@ control.prototype._resize_statusBar = function (obj) {
     // 自绘状态栏
     if (core.domStyle.isVertical) {
         core.dom.statusCanvas.style.width = obj.CANVAS_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.width = obj.CANVAS_WIDTH;
         core.dom.statusCanvas.style.height = obj.statusBarHeightInVertical - 3 + "px";
-        core.dom.statusCanvas.height = obj.col * 32 + 9;
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.CANVAS_WIDTH, obj.col * 32 + 9);
     }
     else {
         core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.width = obj.BAR_WIDTH;
         core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER + "px";
-        core.dom.statusCanvas.height = obj.CANVAS_WIDTH;
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_WIDTH);
     }
     core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
 }
@@ -3081,10 +3110,15 @@ control.prototype._resize_toolBar = function (obj) {
         toolBar.style.height = 0.281 * obj.outerSize + "px";
         toolBar.style.background = 'transparent';
     }
-    toolBar.style.display = 'block';
     toolBar.style.borderLeft = obj.border;
     toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
+
+    if (!core.domStyle.showStatusBar && !core.domStyle.isVertical) {
+        toolBar.style.display = 'none';
+    } else {
+        toolBar.style.display = 'block';
+    }
 }
 
 control.prototype._resize_tools = function (obj) {

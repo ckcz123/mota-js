@@ -324,6 +324,7 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.firstArrive = [];
     editor.currentFloorData.eachArrive = [];
     editor.currentFloorData.events = {};
+    editor.currentFloorData.autoEvent = {};
     editor.currentFloorData.changeFloor = {};
     editor.currentFloorData.afterBattle = {};
     editor.currentFloorData.afterGetItem = {};
@@ -360,10 +361,8 @@ editor.prototype.changeFloor = function (floorId, callback) {
     var loc = editor.viewportLoc[floorId] || [], x = loc[0] || 0, y = loc[1] || 0;
     editor.setViewport(x, y);
     editor.uifunctions.unhighlightSaveFloorButton();
-
-    editor.config.set('editorLastFloorId', floorId, function() {
-        if (callback) callback();
-    });
+    editor.config.set('editorLastFloorId', floorId);
+    if (callback) callback();
 }
 
 /////////// 游戏绘图相关 ///////////
@@ -394,6 +393,22 @@ editor.prototype.drawEventBlock = function () {
                 fg.textAlign = 'right';
                 editor.game.doCoreFunc("fillBoldText", fg, index + 1,
                     32 * i + 28, 32 * j + 15, '#FF7F00', null, '14px Verdana');
+            }
+            var offset = 0;
+            if (editor.currentFloorData.upFloor && editor.currentFloorData.upFloor.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔼", 32 * i + offset, 32 * j + 8, null, "8px Verdana");
+                offset += 8;
+            }
+            if (editor.currentFloorData.downFloor && editor.currentFloorData.downFloor.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔽", 32 * i + offset, 32 * j + 8, null, "8px Verdana");
+                offset += 8;
+            }
+            if (editor.currentFloorData.flyPoint && editor.currentFloorData.flyPoint.toString() == loc) {
+                fg.textAlign = 'left';
+                editor.game.doCoreFunc("fillText", fg, "🔃", 32 * i + offset, 32 * j + 8, null, "8px Verdana");
+                offset += 8;
             }
         }
     }

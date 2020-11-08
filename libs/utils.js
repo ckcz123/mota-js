@@ -421,7 +421,7 @@ utils.prototype.formatSize = function (size) {
 
 utils.prototype.formatBigNumber = function (x, onMap) {
     x = Math.floor(parseFloat(x));
-    if (!core.isset(x)) return '???';
+    if (!core.isset(x) || !Number.isFinite(x)) return '???';
     if (x > 1e24 || x < -1e24) return x.toExponential(2);
 
     var c = x < 0 ? "-" : "";
@@ -634,19 +634,6 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "S":
             decodeObj.ans.push("shop:" + nxt);
-            // V266->V2.7商店录像兼容性
-            if (core.initStatus.shops[nxt]) {
-                if (!isNaN(decodeObj.route.charAt(decodeObj.index))) {
-                    var selections = this._decodeRoute_getNumber(decodeObj, true);
-                    // 只接普通商店
-                    if (!core.initStatus.shops[nxt].item && !core.initStatus.shops[nxt].commonEvent) {
-                        decodeObj.ans = decodeObj.ans.concat(selections.split("").map(function (one) {
-                            return 'choices:' + one;
-                        }));
-                        decodeObj.ans.push("choices:-1");
-                    }   
-                }
-            }
             break;
         case "T":
             decodeObj.ans.push("turn");
@@ -1095,6 +1082,20 @@ utils.prototype.getGuid = function () {
     });
     localStorage.setItem('guid', guid);
     return guid;
+}
+
+utils.prototype.hashCode = function (obj) {
+    if (typeof obj == 'string') {
+        var hash = 0, i, chr;
+        if (obj.length === 0) return hash;
+        for (i = 0; i < obj.length; i++) {
+            chr = obj.charCodeAt(i);
+            hash = ((hash << 5) - hash) + chr;
+            hash |= 0;
+        }
+        return hash;
+    }
+    return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
 }
 
 utils.prototype.same = function (a, b) {

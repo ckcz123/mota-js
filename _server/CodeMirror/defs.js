@@ -1677,7 +1677,11 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "canFlyTo": {
           "!type": "bool",
-          "!doc": "该楼是否可以楼传，包括飞来和飞走"
+          "!doc": "该楼是否可以楼传飞到"
+        },
+        "canFlyFrom": {
+          "!type": "bool",
+          "!doc": "该楼是否可以楼传飞出"
         },
         "canUseQuickShop": {
           "!type": "bool",
@@ -1827,6 +1831,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "scale": {
           "!type": "number",
           "!doc": "当前界面放缩比例",
+        },
+        "ratio": {
+          "!type": "number",
+          "!doc": "高清UI放缩比例"
+        },
+        "hdCanvas": {
+          "!type": "[string]",
+          "!doc": "高清UI的系统画布"
         },
         "availableScale": {
           "!type": "[number]",
@@ -2461,8 +2473,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(index?: number, callback?: fn(data: ?))"
         }, 
         "setViewport": {
-          "!doc": "设置视野范围<br/>x,y: 左上角相对大地图的像素坐标，不需要为32倍数", 
-          "!type": "fn(x?: number, y?: number)"
+          "!doc": "设置视野范围<br/>px,py: 左上角相对大地图的像素坐标，不需要为32倍数", 
+          "!type": "fn(px?: number, py?: number)"
         }, 
         "chooseReplayFile": {
           "!doc": "选择录像文件", 
@@ -2510,7 +2522,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "moveViewport": {
           "!doc": "移动视野范围", 
-          "!type": "fn(steps?: ?, time?: number, callback?: fn())"
+          "!type": "fn(x: number, y: number, time?: number, callback?: fn())"
         }, 
         "syncLoad": {
           "!doc": "从服务器加载存档", 
@@ -3271,7 +3283,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "loadMap": {
           "!doc": "将存档中的地图信息重新读取出来", 
-          "!type": "fn(data?: ?, floorId?: string)"
+          "!type": "fn(data?: ?, floorId?: string, flags?: ?)"
         }, 
         "setBlock": {
           "!doc": "转变图块<br/>例如：core.setBlock(1, 0, 0); // 把地图左上角变成黄墙<br/>number: 新图块的数字（也支持纯数字字符串如'1'）或id<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图", 
@@ -3365,10 +3377,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!url": "https://www.w3school.com.cn/tags/canvas_arc.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: number, style?: string)"
         }, 
-        "clearTip": {
-          "!doc": "清除左上角提示内容", 
-          "!type": "fn()"
-        }, 
         "strokeRoundRect": {
           "!doc": "在某个canvas上绘制一个圆角矩形的边框", 
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, style?: string, lineWidth?: number, angle?: number)"
@@ -3434,7 +3442,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D)"
         }, 
         "splitLines": {
-          "!doc": "字符串自动换行的分割；具有标点禁则功能", 
+          "!doc": "字符串自动换行的分割", 
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string)"
         }, 
         "setAlpha": {

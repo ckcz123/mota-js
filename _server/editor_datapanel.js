@@ -993,8 +993,8 @@ editor_datapanel_wrapper = function (editor) {
             var ysize = value.endsWith('48') ? 48 : 32;
             var sw = editor.dom.appendSourceCtx.canvas.width, sh = editor.dom.appendSourceCtx.canvas.height;
             if (value == 'items') {
-                if ((sw != 96 && sw != 128) || sh != 4 * ysize) {
-                    return printe("只有 3*4 或 4*4 的道具才可以快速导入！");
+                if (sw % 32 || sh % 32) {
+                    return printe("只有长宽都是32的倍数的道具图才可以快速导入！");
                 }
             } else {
                 if (sw != 128 || sh != 4 * ysize) {

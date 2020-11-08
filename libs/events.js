@@ -87,21 +87,12 @@ events.prototype._startGame_setHard = function () {
 
 events.prototype._startGame_afterStart = function (callback) {
     core.ui.closePanel();
-    this._startGame_statusBar();
     core.changeFloor(core.firstData.floorId, null, core.firstData.hero.loc, null, function () {
         // 插入一个空事件避免直接回放录像出错
         core.insertAction([]);
         if (callback) callback();
     });
     this._startGame_upload();
-}
-
-// 开始游戏时是否显示状态栏
-events.prototype._startGame_statusBar = function () {
-    if (core.flags.startUsingCanvas)
-        core.hideStatusBar();
-    else
-        core.showStatusBar();
 }
 
 events.prototype._startGame_upload = function () {
@@ -244,6 +235,12 @@ events.prototype._gameOver_askRate = function (ending) {
     }
 
     if (ending == null) {
+        if (!core.hasSave(0)) {
+            core.ui.closePanel();
+            core.restart();
+            return;
+        }
+
         core.status.event.selection = 0;
         core.ui.drawConfirmBox("你想读取自动存档么？", function () {
             core.ui.closePanel();
@@ -705,7 +702,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
             heroLoc.x = core.bigmap.width - 1 - core.getHeroLoc('x');
         else if (stair == ':symmetry_y')
             heroLoc.y = core.bigmap.height - 1 - core.getHeroLoc('y');
-        // 检查该层地图的 upFloor & downFloor
+        // 检查该层地图的 upFloor & downFloor & flyPoint
         else if (core.status.maps[floorId][stair]) {
             heroLoc.x = core.status.maps[floorId][stair][0];
             heroLoc.y = core.status.maps[floorId][stair][1];
@@ -1111,15 +1108,23 @@ events.prototype.checkAutoEvents = function () {
 }
 
 events.prototype.autoEventExecuting = function (symbol, value) {
-    var name = '_executing_autoEvent_' + symbol;
-    if (value == null) return core.hasFlag(name);
-    else core.setFlag(name, value || null);
+    var aei = core.getFlag('__aei__', []);
+    if (value == null) return aei.indexOf(symbol) >= 0;
+    else {
+        aei = aei.filter(function (one) { return one != symbol; });
+        if (value) aei.push(symbol);
+        core.setFlag('__aei__', aei);
+    }
 }
 
 events.prototype.autoEventExecuted = function (symbol, value) {
-    var name = '_executed_autoEvent_' + symbol;
-    if (value == null) return core.hasFlag(name);
-    else core.setFlag(name, value || null);
+    var aed = core.getFlag('__aed__', []);
+    if (value == null) return aed.indexOf(symbol) >= 0;
+    else {
+        aed = aed.filter(function (one) { return one != symbol; });
+        if (value) aed.push(symbol);
+        core.setFlag('__aed__', aed);
+    }
 }
 
 events.prototype.pushEventLoc = function (x, y, floorId) {
@@ -1427,18 +1432,15 @@ events.prototype._action_animate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setViewport = function (data, x, y, prefix) {
-    if (data.loc == null) {
-        core.drawHero();
+    if (data.dxy != null) {
+        data.loc = [core.bigmap.offsetX / 32 + (core.calValue(data.dxy[0], prefix) || 0), core.bigmap.offsetY / 32 + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else if (data.loc == null) {
+        data.loc = [core.getHeroLoc('x') - core.__HALF_SIZE__, core.getHeroLoc('y') - core.__HALF_SIZE__];
+    } else {
+        data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     }
-    else {
-        var loc = this.__action_getLoc(data.loc, x, y, prefix);
-        core.setViewport(32 * loc[0], 32 * loc[1]);
-    }
-    core.doAction();
-}
-
-events.prototype._action_moveViewport = function (data, x, y, prefix) {
-    this.__action_doAsyncFunc(data.async, core.moveViewport, data.steps, data.time);
+    console.log(data.loc);
+    this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.time);
 }
 
 events.prototype._action_move = function (data, x, y, prefix) {
@@ -1501,7 +1503,7 @@ events.prototype._action_jumpHero = function (data, x, y, prefix) {
 events.prototype._action_changeFloor = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
     var heroLoc = {x: loc[0], y: loc[1], direction: data.direction};
-    core.changeFloor(data.floorId, null, heroLoc, data.time, core.doAction);
+    core.changeFloor(data.floorId, data.stair, heroLoc, data.time, core.doAction);
 }
 
 events.prototype._action_changePos = function (data, x, y, prefix) {
@@ -1860,13 +1862,14 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        // --- 忽略可能的turn事件
-        if (action == 'turn') action = core.status.replay.toReplay.shift();
-        if (core.hasFlag('@temp@shop') && action.startsWith('shop:')) action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
-            if (index == "-1") index = data.choices.length - 1;
-            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < data.choices.length) {
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
+                if (index != 'none') {
+                    var timeout = Math.floor(index / 100) || 0;
+                    core.setFlag('timeout', timeout);
+                    index %= 100;
+                } else core.setFlag('timeout', 0);
                 core.status.event.selection = index;
                 setTimeout(function () {
                     core.status.route.push("choices:"+index);
@@ -1882,12 +1885,19 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                     core.doAction();
                 }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
             }
+        } else {
+            core.control._replay_error(action);
+            return;
         }
-    } else if (data.timeout) {
-        core.status.event.interval = setTimeout(function () {
-            core.status.route.push("choices:none");
-            core.doAction();
-        }, data.timeout);
+    } else {
+        if (data.timeout) {
+            core.status.event.interval = setTimeout(function () {
+                core.status.route.push("choices:none");
+                core.setFlag('timeout', 0);
+                core.doAction();
+            }, data.timeout);   
+        }
+        core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
     core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices);
 }
@@ -1906,11 +1916,14 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
     core.status.event.ui = {"text": core.replaceText(data.text, prefix), "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        // --- 忽略可能的turn事件
-        if (action == 'turn') action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
-            if (index == 'none' || ((index = parseInt(index)) >= 0) && index < 2) {
+            if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < 2) {
+                if (index != 'none') {
+                    var timeout = Math.floor(index / 100) || 0;
+                    core.setFlag('timeout', timeout);
+                    index %= 100;
+                } else core.setFlag('timeout', 0);
                 core.status.event.selection = index;
                 setTimeout(function () {
                     core.status.route.push("choices:"+index);
@@ -1931,9 +1944,11 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
         if (data.timeout) {
             core.status.event.interval = setTimeout(function () {
                 core.status.route.push("choices:none");
+                core.setFlag('timeout', 0);
                 core.doAction();
             }, data.timeout);
         }
+        core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
     core.ui.drawConfirmBox(data.text);
 }
@@ -2048,12 +2063,20 @@ events.prototype._precompile_dowhile = function (data) {
 }
 
 events.prototype._action_break = function (data, x, y, prefix) {
-    if (core.status.event.data.list.length > 1)
-        core.status.event.data.list.shift();
+    var n = data.n || 1;
+    while (n--) {
+        if (core.status.event.data.list.length > 1)
+            core.status.event.data.list.shift();
+    }
     core.doAction();
 }
 
 events.prototype._action_continue = function (data, x, y, prefix) {
+    var n = data.n || 1;
+    while (n-- > 1) {
+        if (core.status.event.data.list.length > 1)
+            core.status.event.data.list.shift();
+    }
     if (core.status.event.data.list.length > 1) {
         if (core.calValue(core.status.event.data.list[0].condition, prefix)) {
             core.status.event.data.list[0].todo = core.clone(core.status.event.data.list[0].total);
@@ -2145,6 +2168,8 @@ events.prototype._action_wait = function (data, x, y, prefix) {
             if (code == "input:none") {
                 core.status.route.push("input:none");
                 core.setFlag("type", -1);
+                core.setFlag("timeout", 0);
+                this.__action_wait_afterGet(data);
             } else {
                 var value = parseInt(code.substring(6));
                 core.status.route.push("input:" + value);
@@ -2163,12 +2188,17 @@ events.prototype._action_wait = function (data, x, y, prefix) {
         core.status.event.interval = setTimeout(function() {
             core.status.route.push("input:none");
             core.setFlag("type", -1);
+            core.setFlag("timeout", 0);
+            core.events.__action_wait_afterGet(data);
             core.doAction();
         }, data.timeout);
     }
+    core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
 }
 
 events.prototype.__action_wait_getValue = function (value) {
+    core.setFlag("timeout", Math.floor(value / 1e8) || 0);
+    value %= 1e8;
     if (value >= 1000000) {
         core.setFlag('type', 1);
         var px = parseInt((value - 1000000) / 1000), py = value % 1000;
@@ -2194,11 +2224,14 @@ events.prototype.__action_wait_getValue = function (value) {
 events.prototype.__action_wait_afterGet = function (data) {
     if (!data.data) return;
     var todo = [];
+    var stop = false;
     data.data.forEach(function (one) {
+        if (stop) return;
         if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
             (one.keycode + "").split(",").forEach(function (keycode) {
                 if (core.getFlag("keycode", 0) == keycode) {
                     core.push(todo, one.action);
+                    if (one["break"]) stop = true;
                 }
             });
         }
@@ -2211,7 +2244,12 @@ events.prototype.__action_wait_afterGet = function (data) {
             var px = core.getFlag("px", 0), py = core.getFlag("py", 0);
             if (px >= pxmin && px <= pxmax && py >= pymin && py <= pymax) {
                 core.push(todo, one.action);
+                if (one["break"]) stop = true;
             }
+        }
+        if (one["case"] == "timeout" && core.getFlag("type") == -1) {
+            core.push(todo, one.action);
+            if (one["break"]) stop = true;
         }
     })
     if (todo.length > 0)
@@ -2258,7 +2296,10 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
     else {
         var e = core.clone(core.status.event.data);
         core.ui.closePanel();
+        var forbidSave = core.hasFlag('__forbidSave__');
+        core.removeFlag('__forbidSave__');
         core.save();
+        if (forbidSave) core.setFlag('__forbidSave__', true);
         core.status.event.interval = e;
     }
 }
@@ -2266,6 +2307,11 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
 events.prototype._action_autoSave = function (data, x, y, prefix) {
     core.autosave();
     if (!data.nohint) core.drawTip("已自动存档");
+    core.doAction();
+}
+
+events.prototype._action_forbidSave = function (data, x, y, prefix) {
+    core.setFlag('__forbidSave__', data.forbid || null);
     core.doAction();
 }
 
@@ -2523,6 +2569,10 @@ events.prototype.openKeyBoard = function (fromUserAction) {
 ////// 点击保存按钮时的打开操作 //////
 events.prototype.save = function (fromUserAction) {
     if (core.isReplaying()) return;
+    if (core.hasFlag('__forbidSave__')) {
+        core.drawTip('当前禁止存档');
+        return;
+    }
     if (core.status.event.id == 'save' && core.events.recoverEvents(core.status.event.interval))
         return;
     if (!this._checkStatus('save', fromUserAction)) return;
@@ -2703,7 +2753,7 @@ events.prototype.setGlobalFlag = function (name, value) {
         core.flags.statusBarItems = statusBarItems;
         flags.statusBarItems = core.clone(statusBarItems);
     } else {
-        flags[name] = core.flags.name = value;
+        flags[name] = core.flags[name] = value;
     }
     core.setFlag("globalFlags", flags);
     core.resize();
@@ -3090,12 +3140,22 @@ events.prototype._checkLvUp_check = function () {
 
 ////// 尝试使用道具 //////
 events.prototype.tryUseItem = function (itemId) {
-    core.ui.closePanel();
-
-    if (itemId == 'book') return core.openBook(false);
-    if (itemId == 'fly') return core.useFly(false);
-    if (itemId == 'centerFly') return core.ui._drawCenterFly();
-
-    if (core.canUseItem(itemId)) core.useItem(itemId);
-    else core.drawTip("当前无法使用" + core.material.items[itemId].name);
+    if (itemId == 'book') {
+        core.ui.closePanel();
+        return core.openBook(false);
+    }
+    if (itemId == 'fly') {
+        core.ui.closePanel();
+        return core.useFly(false);
+    }
+    if (itemId == 'centerFly') {
+        core.ui.closePanel();
+        return core.ui._drawCenterFly();
+    }
+    if (core.canUseItem(itemId)) {
+        core.ui.closePanel();
+        core.useItem(itemId);
+    } else {
+        core.drawTip("当前无法使用" + core.material.items[itemId].name);
+    }
 }

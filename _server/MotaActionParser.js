@@ -461,13 +461,14 @@ ActionParser.prototype.parseAction = function() {
         data.name,animate_loc,data.alignWindow||false,data.async||false,this.next]);
       break;
     case "setViewport": // 设置视角
-      data.loc = data.loc||['',''];
-      this.next = MotaActionBlocks['setViewport_s'].xmlText([
-        data.loc[0],data.loc[1],this.next]);
-      break;
-    case "moveViewport": // 移动视角
-      this.next = MotaActionBlocks['moveViewport_s'].xmlText([
-        data.time,data.async||false,this.StepString(data.steps),this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['setViewport_1_s'].xmlText([
+          data.dxy[0],data.dxy[1],data.time||0,data.async||false,this.next]);
+      } else {
+        data.loc = data.loc||['',''];
+        this.next = MotaActionBlocks['setViewport_s'].xmlText([
+          data.loc[0],data.loc[1],data.time||0,data.async||false,this.next]);
+      }
       break;
     case "vibrate": // 画面震动
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
@@ -725,11 +726,11 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "break": // 跳出循环
       this.next = MotaActionBlocks['break_s'].xmlText([
-        this.next]);
+        data.n || 1, this.next]);
       break;
     case "continue": // 继续执行当前循环
       this.next = MotaActionBlocks['continue_s'].xmlText([
-        this.next]);
+        data.n || 1, this.next]);
       break;
     case "win":
       this.next = MotaActionBlocks['win_s'].xmlText([
@@ -779,11 +780,15 @@ ActionParser.prototype.parseAction = function() {
         for(var ii=data.data.length-1,caseNow;caseNow=data.data[ii];ii--) {
           if (caseNow["case"] == "keyboard") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_1',[
-              caseNow.keycode || "0", this.insertActionList(caseNow.action), case_waitList
+              caseNow.keycode || "0", caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
           } else if (caseNow["case"] == "mouse") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_2',[
-              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], this.insertActionList(caseNow.action), case_waitList
+              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+          } else if (caseNow["case"] == "timeout") {
+            case_waitList = MotaActionFunctions.xmlText('waitContext_3',[
+              caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
           }
         }
@@ -806,6 +811,10 @@ ActionParser.prototype.parseAction = function() {
     case "autoSave": // 自动存档
       this.next = MotaActionBlocks['autoSave_s'].xmlText([
         data.nohint||false, this.next]);
+      break;
+    case "forbidSave": // 禁止存档
+      this.next = MotaActionBlocks['forbidSave_s'].xmlText([
+        data.forbid||false, this.next]);
       break;
     case "callLoad": // 呼出读档界面
       this.next = MotaActionBlocks['callLoad_s'].xmlText([

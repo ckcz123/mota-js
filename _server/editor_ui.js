@@ -120,10 +120,10 @@ editor_ui_wrapper = function (editor) {
             }
         }
         //editor.mode.onmode('');
-        if (e.button != 2 && !editor.isMobile) {
+        if (e.button != 2 && !editor.isMobile && clickpath.indexOf('midMenu') === -1) {
             editor.uifunctions.hideMidMenu();
         }
-        if (clickpath.indexOf('down') !== -1 && clickpath.indexOf('midMenu') === -1 && editor.isMobile && clickpath.indexOf('midMenu') === -1) {
+        if (clickpath.indexOf('down') !== -1 && clickpath.indexOf('midMenu') === -1 && editor.isMobile) {
             editor.uifunctions.hideMidMenu();
         }
         if (clickpath.length >= 2 && clickpath[0].indexOf('id_') === 0) { editor.lastClickId = clickpath[0] }
@@ -765,7 +765,7 @@ editor_ui_wrapper = function (editor) {
                     html += '<br style="display:none"/><img key="'+directory+one+'" style="display:none; max-width: 100%"/>';
                 }
                 // 试听音频
-                if (one.endsWith('.mp3') || one.endsWith('.wmv') || one.endsWith('.ogg') || one.endsWith('.wav')) {
+                if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac')) {
                     html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>";
                     html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>
                         <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
@@ -774,10 +774,7 @@ editor_ui_wrapper = function (editor) {
                 // 预览动画
                 if (directory.indexOf('animates') >= 0) {
                     html += "<button onclick='editor.uievent._previewMaterialAnimate(this)' style='margin-left: 10px'>预览</button>";
-                    html += `<span style="display:none; margin-left: 10px" key="${directory+one+'.animate'}"><br/>音效：<input type="text" />
-                        <button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style='marin-left: 10px'>试听</button>
-                        <button onclick="editor.uievent._previewMaterialAnimate_saveSound(this)">保存</button><br/>
-                        </span>`;
+                    html += "<span style='display:none; margin-left: 10px' key='"+directory+one+".animate'></span>";
                 }
                 html += '<br/>';
             });
@@ -845,8 +842,7 @@ editor_ui_wrapper = function (editor) {
     }
 
     var _previewMaterialAnimate = function (span, content) {
-        var input = span.children[1];
-        input.value = content.se || "";
+        _previewMaterialAnimate_buildSounds(span, content);
 
         // 创建dom
         if (!uievent.values.dom) {
@@ -884,8 +880,56 @@ editor_ui_wrapper = function (editor) {
         }, 50);
     }
 
+    var _previewMaterialAnimate_buildSounds = function (span, content) {
+        var sounds = content.se || {};
+        if (typeof sounds == 'string') sounds = {1: sounds};
+
+        span.appendChild(document.createElement('br'));
+        var dom = document.createElement('span');
+        dom.setAttribute('frames', content.frame);
+        var html = "";
+        Object.keys(sounds).forEach(function (frame) {
+            html += "<span>" + _previewMaterialAnimate_buildSoundRow(frame, sounds[frame], content.frame) + "</span>";
+        });
+        html += '<button onclick="editor.uievent._previewMaterialAnimate_addSound(this)">添加音效</button>';
+        html += '<button onclick="editor.uievent._previewMaterialAnimate_saveSound(this)" style="margin-left:10px">保存</button>';
+        html += "<br/><br/>";
+        dom.innerHTML = html;
+        span.appendChild(dom);
+        _previewMaterialAnimate_awesomplete(span);
+    }
+
+    var _previewMaterialAnimate_buildSoundRow = function (index, se, frames) {
+        var audios = Object.keys(core.material.sounds).sort().join(",");
+        var html = "";
+        html += "第 <select>";
+        for (var i = 1; i <= frames; ++i) {
+            html += "<option value="+i;
+            if (index == i) html += " selected";
+            html += ">"+i+"</option>";
+        }
+        html += "</select> 帧：";
+        html += '<input type="text" class="" data-list="'+audios+'" data-minchars="1" data-autofirst="true" style="margin-left: 5px" value="'+se+'"/>';
+        html += '<button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style="margin-left: 10px">试听</button>';
+        html += '<button onclick="editor.uievent._previewMaterialAnimate_deleteSound(this)" style="margin-left: 10px">删除</button>';
+        html += '<br/>';
+        return html;
+    }
+
+    var _previewMaterialAnimate_awesomplete = function (span) {
+        var inputs = span.getElementsByTagName("input");
+        for (var i = 0; i < inputs.length; ++i) {
+            var input = inputs[i];
+            if (!input.hasAttribute('awesomplete')) {
+                input.setAttribute('awesomplete', '1');
+                new Awesomplete(input);
+            }
+        }
+    }
+
     uievent._previewMaterialAnimate = function (button) {
         var span = button.nextElementSibling;
+        while (span.firstChild) span.removeChild(span.lastChild);
         var filename = span.getAttribute("key");
         uievent.values.animates = uievent.values.animates || {};
         if (span.style.display == 'none') {
@@ -913,6 +957,7 @@ editor_ui_wrapper = function (editor) {
 
     uievent._previewMaterialAnimate_previewSound = function (button) {
         var input = button.previousElementSibling;
+        if (input.tagName == 'DIV') input = input.firstChild;
         if (!input.value) return;
         if (!uievent.values.audio)
             uievent.values.audio = new Audio();
@@ -920,15 +965,39 @@ editor_ui_wrapper = function (editor) {
         uievent.values.audio.play();
     }
 
+    uievent._previewMaterialAnimate_addSound = function (button) {
+        var parent = button.parentElement;
+        var span = document.createElement("span");
+        span.innerHTML = _previewMaterialAnimate_buildSoundRow(1, "", parseInt(parent.getAttribute("frames")));
+        parent.insertBefore(span, button);
+        _previewMaterialAnimate_awesomplete(parent);
+    }
+
+    uievent._previewMaterialAnimate_deleteSound = function (button) {
+        var element = button.parentElement;
+        element.parentElement.removeChild(element);
+    }
+
     uievent._previewMaterialAnimate_saveSound = function (button) {
-        var input = button.previousElementSibling.previousElementSibling;
-        var filename = button.parentElement.getAttribute("key");
+        var span = button.parentElement;
+        var filename = span.parentElement.getAttribute("key");
         if (!filename || !uievent.values.animates[filename]) return;
-        uievent.values.animates[filename+':raw'].se = input.value || "";
+        var se = {};
+
+        var inputs = span.getElementsByTagName("input");
+        for (var i = 0; i < inputs.length; ++i) {
+            var input = inputs[i];
+            var select = input.parentElement.previousElementSibling;
+            if (input.value && select.tagName == 'SELECT') {
+                se[select.value] = input.value;
+            }
+        }
+        uievent.values.animates[filename].se = se;
+        uievent.values.animates[filename+':raw'].se = se;
         fs.writeFile(filename, JSON.stringify(uievent.values.animates[filename+':raw']), 'utf-8', function (e, d) {
             if (e) alert('无法修改音效文件！'+e);
             else {
-                alert('动画音效修改成功！别忘了在全塔属性中注册本音效哦！');
+                alert('动画音效修改成功！别忘了在全塔属性中注册音效哦！');
             }
         })
     }

@@ -138,8 +138,12 @@ editor_datapanel_wrapper = function (editor) {
         var newFileName = document.getElementById('newFileName');
         newMap.onclick = function () {
             if (!newFileName.value) return;
-            if (core.floorIds.indexOf(newFileName.value) >= 0) {
-                printe("该楼层已存在！");
+            var findFunc = function (id) {
+                var re = new RegExp(newFileName.value, 'i');
+                return re.test(id);
+            }
+            if (core.floorIds.find(findFunc) != null) {
+                printe("同名楼层已存在！(不区分大小写)");
                 return;
             }
             if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(newFileName.value)) {
@@ -200,8 +204,12 @@ editor_datapanel_wrapper = function (editor) {
                 var floorId = floorIds.replace(/\${(.*?)}/g, function (word, value) {
                     return eval(value);
                 });
-                if (core.floorIds.indexOf(floorId) >= 0) {
-                    printe("要创建的楼层 " + floorId + " 已存在！");
+                var findFunc = function (id) {
+                    var re = new RegExp(floorId, 'i');
+                    return re.test(id);
+                }
+                if (core.floorIds.find(findFunc) != null) {
+                    printe("同名楼层已存在！(不区分大小写)");
                     return;
                 }
                 if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(floorId)) {

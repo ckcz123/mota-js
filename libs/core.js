@@ -351,8 +351,8 @@ core.prototype._init_platform = function () {
     }
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
-    //新增 userVolume 默认值1.0
-    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 1.0);
+    //新增 userVolume 默认值0.7
+    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 0.7);
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
         if (navigator.userAgent.indexOf(t) >= 0) {
             if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;

@@ -2167,7 +2167,7 @@ actions.prototype._clickSwitchs_display_enemyDamage = function () {
 actions.prototype._clickSwitchs_display_critical = function () {
     core.flags.displayCritical = !core.flags.displayCritical;
     core.updateDamage();
-    core.setLocalStorage('critical', core.flags.displayExtraDamage);
+    core.setLocalStorage('critical', core.flags.displayCritical);
     core.ui._drawSwitchs_display();
 }
 

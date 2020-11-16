@@ -2561,25 +2561,20 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
     frame.forEach(function (t) {
         var image = animate.images[t.index];
         if (!image) return;
+
         var realWidth = image.width * ratio * t.zoom / 100;
         var realHeight = image.height * ratio * t.zoom / 100;
         core.setAlpha(ctx, t.opacity / 255);
 
         var cx = centerX + t.x, cy = centerY + t.y;
 
-        if (!t.mirror && !t.angle) {
-            core.drawImage(ctx, image, cx - realWidth / 2 - core.bigmap.offsetX, cy - realHeight / 2 - core.bigmap.offsetY, realWidth, realHeight);
-        }
-        else {
-            core.saveCanvas(ctx);
-            ctx.translate(cx, cy);
-            if (t.angle)
-                ctx.rotate(-t.angle * Math.PI / 180);
-            if (t.mirror)
-                ctx.scale(-1, 1);
-            core.drawImage(ctx, image, -realWidth / 2 - core.bigmap.offsetX, -realHeight / 2 - core.bigmap.offsetY, realWidth, realHeight);
-            core.loadCanvas(ctx);
-        }
+        var ix = cx - realWidth / 2 - core.bigmap.offsetX,
+            iy = cy - realHeight / 2 - core.bigmap.offsetY;
+
+        var mirror = t.mirror ? 'x' : null;
+        var angle = t.angle ? -t.angle * Math.PI / 180 : null;
+        core.drawImage(ctx, image, ix, iy, realWidth, realHeight, null, null, null, null, angle, mirror);
+        
         core.setAlpha(ctx, 1);
     })
 }

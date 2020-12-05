@@ -538,11 +538,11 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
 }
 
 ////// 绘制一张图片 //////
-ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1, angle) {
+ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1, angle, reverse) {
     // 检测文件名以 :x, :y, :o 结尾，表示左右翻转，上下翻转和中心翻转
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    var reverse = null;
+    // var reverse = null;
     if (typeof image == 'string') {
         if (image.endsWith(':x') || image.endsWith(':y') || image.endsWith(':o')) {
             reverse = image.charAt(image.length - 1);

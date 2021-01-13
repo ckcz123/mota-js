@@ -327,15 +327,10 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
     core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 0);
-    core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', true);
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
-    if (main.mode != 'editor') {
-        core.domStyle.scale = core.getLocalStorage('scale', 1);
-        if (core.flags.enableHDCanvas) core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
-    }
 }
 
 core.prototype._init_platform = function () {
@@ -378,6 +373,12 @@ core.prototype._init_platform = function () {
             if (core.platform.errorCallback)
                 core.platform.errorCallback();
         }
+    }
+
+    core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
+    if (main.mode != 'editor') {
+        core.domStyle.scale = core.getLocalStorage('scale', 1);
+        if (core.flags.enableHDCanvas) core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
     }
 }
 

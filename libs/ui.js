@@ -1604,8 +1604,8 @@ ui.prototype.drawChoices = function(content, choices) {
 
 ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
     // 宽度计算：考虑提示文字和选项的长度
-    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
     core.setFont('ui', this._buildFont(17, true));
+    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
             choices[i] = {"text": choices[i]};

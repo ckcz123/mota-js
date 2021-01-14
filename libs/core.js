@@ -340,6 +340,7 @@ core.prototype._init_platform = function () {
     try {
         core.musicStatus.audioContext = new window.AudioContext();
         core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
+        core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
         core.musicStatus.gainNode.connect(core.musicStatus.audioContext.destination);
     } catch (e) {
         console.log("该浏览器不支持AudioContext");

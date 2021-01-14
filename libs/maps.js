@@ -115,12 +115,20 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
     var floorId = map.floorId;
     var decompressed = this.decompressMap(map.map, floorId);
     map.blocks = [];
-    var mw = core.floors[floorId].width;
-    var mh = core.floors[floorId].height;
+    var floor = core.floors[floorId];
+    var mw = floor.width;
+    var mh = floor.height;
     for (var i = 0; i < mh; i++) {
         for (var j = 0; j < mw; j++) {
             var number = (decompressed[i] || [])[j] || 0;
-            if (!number || number == 17 || this.isMapBlockDisabled(floorId, j, i, flags)) continue;
+            if (!number || number == 17) continue;
+            var isDisabled = this.isMapBlockDisabled(floorId, j, i, flags);
+            if (isDisabled) continue;
+            if (isDisabled == null) {
+                // 检查是否初始禁用
+                var event = (floor.events || {})[j + "," + i];
+                if (event != null && event.enable === false) continue;
+            }
             map.blocks.push(Object.assign({}, this.getBlockByNumber(number), {x: j, y: i}));
         }
     }

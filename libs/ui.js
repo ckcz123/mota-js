@@ -2205,6 +2205,7 @@ ui.prototype._drawBookDetail_getInfo = function (index) {
     var enemy = enemys[index], enemyId = enemy.id;
     var texts=core.enemys.getSpecialHint(enemyId);
     if (texts.length == 0) texts.push("该怪物无特殊属性。");
+    if (enemy.description) texts.push(enemy.description + "\r");
     texts.push("");
     this._drawBookDetail_getTexts(enemy, floorId, texts);
     return [enemy, texts];

@@ -870,8 +870,9 @@ utils.prototype.readFile = function (success, error, accept, readType) {
             else core.platform.fileReader.readAsDataURL(core.platform.fileInput.files[0]);
             core.platform.fileInput.value = '';
         }
-        if (accept) core.platform.fileInput.accept = accept;
     }
+    core.platform.fileInput.value = '';
+    if (accept) core.platform.fileInput.accept = accept;
 
     core.platform.fileInput.click();
 }

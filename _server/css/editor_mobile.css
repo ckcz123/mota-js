@@ -539,7 +539,8 @@ table.row,div.row .rowtext {
     position: fixed;
     width: 100%;
     height: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 #left6 h3{
     font-size: 6vw;

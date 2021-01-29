@@ -486,7 +486,7 @@ editor_blockly = function () {
         editor.uievent.selectPoint(floorId, x, y, false, function (fv, xv, yv) {
             if (!arr) return;
             if (arr[2] != null) {
-                if (fv != editor.currentFloorId) block.setFieldValue(fv, arr[2]);
+                if (fv != editor.currentFloorId || editor_blockly.entryType == 'commonEvent') block.setFieldValue(fv, arr[2]);
                 else block.setFieldValue(arr[3] ? fv : "", arr[2]);
             }
             if (arr[0] === arr[1]) {

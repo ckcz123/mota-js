@@ -872,7 +872,6 @@ editor_ui_wrapper = function (editor) {
             if (span.style.display == 'none') {
                 clearInterval(uievent.values.interval);
                 uievent.values.interval = null;
-                span.removeChild(uievent.values.dom);
                 return;
             }
             core.clearMap(uievent.values.ctx);

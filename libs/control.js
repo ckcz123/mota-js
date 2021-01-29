@@ -1407,6 +1407,7 @@ control.prototype._replay_SL = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='save';
@@ -1424,6 +1425,7 @@ control.prototype._replay_book = function () {
         || (core.status.event.id && core.status.event.id != 'viewMaps'))
         return core.drawTip("请等待当前事件的处理结束");
     if (!core.hasItem('book')) return core.drawTip('你没有'+core.material.items['book'].name);
+    this._replay_hideProgress();
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')
@@ -1440,6 +1442,7 @@ control.prototype._replay_viewMap = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='viewMaps';
@@ -1451,6 +1454,7 @@ control.prototype._replay_toolbox = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='toolbox';
@@ -1462,6 +1466,7 @@ control.prototype._replay_equipbox = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='equipbox';
@@ -1574,7 +1579,13 @@ control.prototype._replay_error = function (action) {
     });
 }
 
+control.prototype._replay_hideProgress = function () {
+    if (core.dymCanvas.replay) core.dymCanvas.replay.canvas.style.display = 'none';
+}
+
 control.prototype._replay_drawProgress = function () {
+    if (!core.dymCanvas.replay) return;
+    if (core.dymCanvas.replay.canvas.style.display == 'none') core.dymCanvas.replay.canvas.style.display = 'block';
     var total = core.status.replay.totalList.length, left = total - core.status.replay.toReplay.length;
     var content = '播放进度：' + left + ' / ' + total + '（'+(left/total*100).toFixed(2)+'%）';
     var width = 26 + core.calWidth('replay', content, "16px Arial");
@@ -2700,7 +2711,7 @@ control.prototype.clearStatusBar = function() {
 
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
-    if (!core.isPlaying()) return;
+    if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
     this.controldata.updateStatusBar();
     if (!doNotCheckAutoEvents) core.checkAutoEvents();
     this._updateStatusBar_setToolboxIcon();

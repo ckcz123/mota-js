@@ -3929,7 +3929,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(steps: [step], time?: number, callback?: fn())"
         }, 
         "changeFloor": {
-          "!doc": "场景切换<br/>例如：core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取用户定义的值<br/>floorId: 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上<br/>stair: 传送的位置<br/>heroLoc: 传送的坐标；会覆盖stair<br/>time: 传送的黑屏时间，单位为毫秒；不填为用户设置值<br/>callback: 传送的回调函数<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
+          "!doc": "场景切换<br/>例如：core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取用户定义的值<br/>floorId: 传送的目标地图id，可以填':before'和':next'分别表示楼下或楼上<br/>stair: 传送的位置<br/>heroLoc: 传送的坐标；会覆盖stair<br/>time: 传送的黑屏时间，单位为毫秒；不填为用户设置值<br/>callback: 传送的回调函数<br/>【异步脚本，请勿在脚本中直接调用（而是使用对应的事件），否则可能导致录像出错】", 
           "!type": "fn(floorId: string, stair?: string, heroLoc?: {x?: number, y?: number, direction?: string}, time?: number, callback?: fn())"
         }, 
         "getCommonEvent": {

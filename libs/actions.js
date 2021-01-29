@@ -2127,14 +2127,16 @@ actions.prototype._clickSwitchs_display = function (x, y) {
                 if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_display_setSize(1);
                 return;
             case 1:
-                return this._clickSwitchs_display_enemyDamage();
+                return this._clickSwitchs_display_enableHDCanvas();
             case 2:
-                return this._clickSwitchs_display_critical();
+                return this._clickSwitchs_display_enemyDamage();
             case 3:
-                return this._clickSwitchs_display_extraDamage();
+                return this._clickSwitchs_display_critical();
             case 4:
-                return this._clickSwitchs_display_extraDamageType();
+                return this._clickSwitchs_display_extraDamage();
             case 5:
+                return this._clickSwitchs_display_extraDamageType();
+            case 6:
                 core.status.event.selection = 1;
                 core.ui._drawSwitchs();
                 return;
@@ -2157,6 +2159,13 @@ actions.prototype._clickSwitchs_display_setSize = function (delta) {
     core.ui._drawSwitchs_display();
 }
 
+actions.prototype._clickSwitchs_display_enableHDCanvas = function () {
+    core.flags.enableHDCanvas = !core.flags.enableHDCanvas;
+    core.setLocalStorage('enableHDCanvas', core.flags.enableHDCanvas);
+    core.drawTip("开关高清UI，需刷新页面方可生效");
+    core.ui._drawSwitchs_display();
+}
+
 actions.prototype._clickSwitchs_display_enemyDamage = function () {
     core.flags.displayEnemyDamage = !core.flags.displayEnemyDamage;
     core.updateDamage();
@@ -2167,7 +2176,7 @@ actions.prototype._clickSwitchs_display_enemyDamage = function () {
 actions.prototype._clickSwitchs_display_critical = function () {
     core.flags.displayCritical = !core.flags.displayCritical;
     core.updateDamage();
-    core.setLocalStorage('critical', core.flags.displayExtraDamage);
+    core.setLocalStorage('critical', core.flags.displayCritical);
     core.ui._drawSwitchs_display();
 }
 

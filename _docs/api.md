@@ -870,7 +870,7 @@ beforeBattle: fn(enemyId?: string, x?: number, y?: number) -> bool
 changeFloor: fn(floorId: string, stair?: string, heroLoc?: {x?: number, y?: number, direction?: string}, time?: number, callback?: fn())
 场景切换
 例如：core.changeFloor('MT0'); // 传送到主塔0层，主角坐标和朝向不变，黑屏时间取用户定义的值
-floorId: 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上
+floorId: 传送的目标地图id，可以填':before'和':next'分别表示楼下或楼上
 stair: 传送的位置
 heroLoc: 传送的坐标；会覆盖stair
 time: 传送的黑屏时间，单位为毫秒；不填为用户设置值

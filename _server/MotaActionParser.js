@@ -780,15 +780,15 @@ ActionParser.prototype.parseAction = function() {
         for(var ii=data.data.length-1,caseNow;caseNow=data.data[ii];ii--) {
           if (caseNow["case"] == "keyboard") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_1',[
-              caseNow.keycode || "0", caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
+              caseNow.keycode || "0", caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
           } else if (caseNow["case"] == "mouse") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_2',[
-              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
+              caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
           } else if (caseNow["case"] == "timeout") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_3',[
-              caseNow.nobreak || false, this.insertActionList(caseNow.action), case_waitList
+              caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
           }
         }

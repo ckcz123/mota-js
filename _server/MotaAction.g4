@@ -595,7 +595,7 @@ return '{' + [
 
 
 mainStyle_m
-    : '主要样式设置：' '标题界面背景图（544x422）：' EvalString BGNL? Newline 
+    : '主要样式设置：' '标题界面背景图（554x422）：' EvalString BGNL? Newline 
       '竖屏标题界面背景图（422x580）' EvalString BGNL? Newline 
       '标题样式；可写 display: none 隐藏标题' EvalString BGNL? Newline 
       '标题按钮样式：' EvalString BGNL? Newline 

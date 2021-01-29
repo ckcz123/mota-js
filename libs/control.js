@@ -2711,7 +2711,7 @@ control.prototype.clearStatusBar = function() {
 
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
-    if (!core.isPlaying()) return;
+    if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
     this.controldata.updateStatusBar();
     if (!doNotCheckAutoEvents) core.checkAutoEvents();
     this._updateStatusBar_setToolboxIcon();

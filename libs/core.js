@@ -331,6 +331,7 @@ core.prototype._init_sys_flags = function () {
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
+    core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
 }
 
 core.prototype._init_platform = function () {

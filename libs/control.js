@@ -1407,6 +1407,7 @@ control.prototype._replay_SL = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    if (core.hasFlag('__forbidSave__')) return core.drawTip('当前禁止存档');
     this._replay_hideProgress();
 
     core.lockControl();

@@ -518,8 +518,9 @@ control.prototype._setAutomaticRoute_isMoving = function (destX, destY) {
 control.prototype._setAutomaticRoute_isTurning = function (destX, destY, stepPostfix) {
     if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y && stepPostfix.length==0) {
         if (core.timeout.turnHeroTimeout==null) {
+            var routeLength = core.status.route.length;
             core.timeout.turnHeroTimeout = setTimeout(function() {
-                core.turnHero();
+                if (core.status.route.length == routeLength) core.turnHero();
                 clearTimeout(core.timeout.turnHeroTimeout);
                 core.timeout.turnHeroTimeout = null;
             }, 250);
@@ -974,7 +975,7 @@ control.prototype.moveViewport = function (x, y, time, callback) {
         return;
     }
     var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    var py = core.clamp(32 * y, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    var py = core.clamp(32 * y, 0, 32 * core.bigmap.height - core.__PIXELS__);
     var dx = (px - core.bigmap.offsetX) / step, dy = (py - core.bigmap.offsetY) / step;
 
     var animate=window.setInterval(function() {
@@ -1389,7 +1390,7 @@ control.prototype.rewindReplay = function () {
             "animate": false,
             "toReplay": data.replay.toReplay,
             "totalList": data.replay.totalList,
-            "speed": data.replay.speed,
+            "speed": core.status.replay.speed,
             "steps": data.replay.steps,
             "save": save
         }
@@ -1548,7 +1549,6 @@ control.prototype._replay_save = function () {
         core.status.replay.save.push({"data": core.saveData(), "replay": {
             "totalList": core.cloneArray(core.status.replay.totalList),
             "toReplay": core.cloneArray(core.status.replay.toReplay),
-            "speed": core.status.replay.speed,
             "steps": core.status.replay.steps
         }});
     }

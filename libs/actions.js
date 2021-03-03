@@ -452,8 +452,9 @@ actions.prototype._sys_keyUp = function (keyCode, altKey) {
 
 ////// 点击（触摸）事件按下时 //////
 actions.prototype.ondown = function (loc) {
-    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
+    var lx = Math.max(loc.x, 0), ly = Math.max(loc.y, 0);
+    var x = parseInt(lx / loc.size), y = parseInt(ly / loc.size);
+    var px = parseInt(lx / core.domStyle.scale), py = parseInt(ly / core.domStyle.scale);
     this.doRegisteredAction('ondown', x, y, px, py);
 }
 

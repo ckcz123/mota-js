@@ -1724,6 +1724,7 @@ maps.prototype.showBlock = function (x, y, floorId) {
     if (block.disable) {
         block.disable = false;
         core.setMapBlockDisabled(floorId, x, y, false);
+        this._updateMapArray(floorId, block.x, block.y);
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
             if (block.event.cls == 'autotile') {

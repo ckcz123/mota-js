@@ -191,7 +191,7 @@ editor_datapanel_wrapper = function (editor) {
             if (!floorIds) return;
             var from = parseInt(document.getElementById('newMapsFrom').value),
                 to = parseInt(document.getElementById('newMapsTo').value);
-            if (!core.isset(from) || !core.isset(to) || from > to || from < 0 || to < 0) {
+            if (!core.isset(from) || !core.isset(to) || from > to) {
                 printe("请输入有效的起始和终止楼层");
                 return;
             }

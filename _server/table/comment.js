@@ -195,14 +195,14 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "checkbox",
 					"_docs": "九宫格领域",
-					"_data": "领域怪是否九宫格伤害"
+					"_data": "领域或光环怪是否九宫格"
 				},
 				"range": {
 					"_leaf": true,
 					"_type": "textarea",
 					"_range": "(thiseval==~~thiseval && thiseval>0)||thiseval==null",
 					"_docs": "领域范围",
-					"_data": "领域伤害的范围；不加默认为1"
+					"_data": "领域或光环的范围；领域不加默认为1，光环不加则为全图效果"
 				},
 				"notBomb": {
 					"_leaf": true,

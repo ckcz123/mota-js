@@ -489,7 +489,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，未开启负伤时无视勇士护盾。"; }, "#ff9977"],
 		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现", "#a0e0ff"],
 		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }, "#dda0dd"],
-		[25, "光环", function (enemy) { return "同楼层所有怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#e6e099", 1],
+		[25, "光环", function (enemy) { return (enemy.range != null ? ((enemy.zoneSquare ? "该怪物九宫格" : "该怪物十字") + enemy.range + "格范围内") : "同楼层所有" ) + "怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#e6e099", 1],
 		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。", "#77c0b6", 1],
 		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。", "#c0ddbb"]
 	];

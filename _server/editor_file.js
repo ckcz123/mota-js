@@ -311,13 +311,11 @@ editor_file = function (editor, callback) {
         }
         var c=image.toUpperCase().charAt(0);
 
-        // terrains id
-        var terrainsId = [];
-        Object.keys(core.material.icons.terrains).forEach(function (id) {
-            terrainsId[core.material.icons.terrains[id]]=id;
-        })
-
         var allIds = [];
+        Object.keys(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[image] || {}).forEach(function (v) {
+            allIds[icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[image][v]] = v;
+        });
+
         editor.ids.forEach(function (v) {
             if (v.images==image) {
                 allIds[v.y]=v;
@@ -339,12 +337,7 @@ editor_file = function (editor, callback) {
             // get id num
             var id = c+idnum;
 
-            if (image=='terrains' && terrainsId[y] != null) {
-                id=terrainsId[y];
-            }
-            else {
-                iconActions.push(["add", "['" + image + "']['" + id + "']", y])
-            }
+            iconActions.push(["add", "['" + image + "']['" + id + "']", y])
             mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}]);
             faceIds.push({idnum: idnum, id: id});
             if (image=='items')

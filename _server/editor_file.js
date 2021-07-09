@@ -311,13 +311,11 @@ editor_file = function (editor, callback) {
         }
         var c=image.toUpperCase().charAt(0);
 
-        // terrains id
-        var terrainsId = [];
-        Object.keys(core.material.icons.terrains).forEach(function (id) {
-            terrainsId[core.material.icons.terrains[id]]=id;
-        })
-
         var allIds = [];
+        Object.keys(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[image] || {}).forEach(function (v) {
+            allIds[icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[image][v]] = v;
+        });
+
         editor.ids.forEach(function (v) {
             if (v.images==image) {
                 allIds[v.y]=v;
@@ -339,12 +337,7 @@ editor_file = function (editor, callback) {
             // get id num
             var id = c+idnum;
 
-            if (image=='terrains' && terrainsId[y] != null) {
-                id=terrainsId[y];
-            }
-            else {
-                iconActions.push(["add", "['" + image + "']['" + id + "']", y])
-            }
+            iconActions.push(["add", "['" + image + "']['" + id + "']", y])
             mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}]);
             faceIds.push({idnum: idnum, id: id});
             if (image=='items')
@@ -875,13 +868,21 @@ editor_file = function (editor, callback) {
     }
 
     var saveSetting = function (file, actionList, callback) {
+        var _update = function (name, value) {
+            if (value[2] === undefined) {
+                eval("delete " + name + value[1]);
+            } else {
+                eval(name + value[1] + "=" + JSON.stringify(value[2]));
+            }
+        }
+
         //console.log(file);
         //console.log(actionList);
         editor.file.alertWhenCompress();
 
         if (file == 'icons') {
             actionList.forEach(function (value) {
-                eval("icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1" + value[1] + '=' + JSON.stringify(value[2]));
+                _update("icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1", value);
             });
             var datastr = 'var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 = \n';
             datastr += JSON.stringify(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1, null, '\t');
@@ -892,7 +893,7 @@ editor_file = function (editor, callback) {
         }
         if (file == 'maps') {
             actionList.forEach(function (value) {
-                eval("maps_90f36752_8815_4be8_b32b_d7fad1d0542e" + value[1] + '=' + JSON.stringify(value[2]));
+                _update("maps_90f36752_8815_4be8_b32b_d7fad1d0542e", value);
             });
             var datastr = 'var maps_90f36752_8815_4be8_b32b_d7fad1d0542e = \n';
             //datastr+=JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e,null,4);
@@ -917,7 +918,7 @@ editor_file = function (editor, callback) {
         }
         if (file == 'items') {
             actionList.forEach(function (value) {
-                eval("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a" + value[1] + '=' + JSON.stringify(value[2]));
+                _update("items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a", value);
             });
             var datastr = 'var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a = \n';
             var items = core.clone(items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a);
@@ -930,7 +931,7 @@ editor_file = function (editor, callback) {
         }
         if (file == 'enemys') {
             actionList.forEach(function (value) {
-                eval("enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80" + value[1] + '=' + JSON.stringify(value[2]));
+                _update("enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80", value);
             });
             var datastr = 'var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 = \n';
             var emap = {};
@@ -954,7 +955,7 @@ editor_file = function (editor, callback) {
         }
         if (file == 'data') {
             actionList.forEach(function (value) {
-                eval("data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d" + value[1] + '=' + JSON.stringify(value[2]));
+                _update("data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d", value);
             });
             if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds.indexOf(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.floorId) < 0)
                 data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.floorId = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.floorIds[0];
@@ -1006,7 +1007,7 @@ editor_file = function (editor, callback) {
         }
         if (file == 'events') {
             actionList.forEach(function (value) {
-                eval("events_c12a15a8_c380_4b28_8144_256cba95f760" + value[1] + '=' + JSON.stringify(value[2]));
+                _update("events_c12a15a8_c380_4b28_8144_256cba95f760", value);
             });
             var datastr = 'var events_c12a15a8_c380_4b28_8144_256cba95f760 = \n';
             datastr += JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760, null, '\t');

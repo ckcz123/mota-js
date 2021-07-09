@@ -1604,8 +1604,8 @@ ui.prototype.drawChoices = function(content, choices) {
 
 ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
     // 宽度计算：考虑提示文字和选项的长度
-    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
     core.setFont('ui', this._buildFont(17, true));
+    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
             choices[i] = {"text": choices[i]};
@@ -1799,6 +1799,7 @@ ui.prototype._drawSwitchs_display = function () {
     core.status.event.id = 'switchs-display';
     var choices = [
         " <   放缩：" + Math.max(core.domStyle.scale, 1) + "x   > ",
+        "高清画面： " + (core.flags.enableHDCanvas ? "[ON]" : "[OFF]"),
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： " + (core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
@@ -2204,6 +2205,7 @@ ui.prototype._drawBookDetail_getInfo = function (index) {
     var enemy = enemys[index], enemyId = enemy.id;
     var texts=core.enemys.getSpecialHint(enemyId);
     if (texts.length == 0) texts.push("该怪物无特殊属性。");
+    if (enemy.description) texts.push(enemy.description + "\r");
     texts.push("");
     this._drawBookDetail_getTexts(enemy, floorId, texts);
     return [enemy, texts];

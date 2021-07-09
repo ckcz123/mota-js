@@ -331,10 +331,7 @@ core.prototype._init_sys_flags = function () {
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
-    if (main.mode != 'editor') {
-        core.domStyle.scale = core.getLocalStorage('scale', 1);
-        core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
-    }
+    core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
 }
 
 core.prototype._init_platform = function () {
@@ -344,6 +341,7 @@ core.prototype._init_platform = function () {
     try {
         core.musicStatus.audioContext = new window.AudioContext();
         core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
+        core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
         core.musicStatus.gainNode.connect(core.musicStatus.audioContext.destination);
     } catch (e) {
         console.log("该浏览器不支持AudioContext");
@@ -351,8 +349,8 @@ core.prototype._init_platform = function () {
     }
     core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
     core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
-    //新增 userVolume 默认值1.0
-    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 1.0);
+    //新增 userVolume 默认值0.7
+    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 0.7);
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
         if (navigator.userAgent.indexOf(t) >= 0) {
             if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;
@@ -377,6 +375,12 @@ core.prototype._init_platform = function () {
             if (core.platform.errorCallback)
                 core.platform.errorCallback();
         }
+    }
+
+    core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
+    if (main.mode != 'editor') {
+        core.domStyle.scale = core.getLocalStorage('scale', 1);
+        if (core.flags.enableHDCanvas) core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
     }
 }
 

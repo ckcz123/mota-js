@@ -518,8 +518,9 @@ control.prototype._setAutomaticRoute_isMoving = function (destX, destY) {
 control.prototype._setAutomaticRoute_isTurning = function (destX, destY, stepPostfix) {
     if (destX == core.status.hero.loc.x && destY == core.status.hero.loc.y && stepPostfix.length==0) {
         if (core.timeout.turnHeroTimeout==null) {
+            var routeLength = core.status.route.length;
             core.timeout.turnHeroTimeout = setTimeout(function() {
-                core.turnHero();
+                if (core.status.route.length == routeLength) core.turnHero();
                 clearTimeout(core.timeout.turnHeroTimeout);
                 core.timeout.turnHeroTimeout = null;
             }, 250);
@@ -974,7 +975,7 @@ control.prototype.moveViewport = function (x, y, time, callback) {
         return;
     }
     var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    var py = core.clamp(32 * y, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    var py = core.clamp(32 * y, 0, 32 * core.bigmap.height - core.__PIXELS__);
     var dx = (px - core.bigmap.offsetX) / step, dy = (py - core.bigmap.offsetY) / step;
 
     var animate=window.setInterval(function() {
@@ -1389,7 +1390,7 @@ control.prototype.rewindReplay = function () {
             "animate": false,
             "toReplay": data.replay.toReplay,
             "totalList": data.replay.totalList,
-            "speed": data.replay.speed,
+            "speed": core.status.replay.speed,
             "steps": data.replay.steps,
             "save": save
         }
@@ -1407,6 +1408,8 @@ control.prototype._replay_SL = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    if (core.hasFlag('__forbidSave__')) return core.drawTip('当前禁止存档');
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='save';
@@ -1424,6 +1427,7 @@ control.prototype._replay_book = function () {
         || (core.status.event.id && core.status.event.id != 'viewMaps'))
         return core.drawTip("请等待当前事件的处理结束");
     if (!core.hasItem('book')) return core.drawTip('你没有'+core.material.items['book'].name);
+    this._replay_hideProgress();
 
     // 从“浏览地图”页面打开
     if (core.status.event.id=='viewMaps')
@@ -1440,6 +1444,7 @@ control.prototype._replay_viewMap = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='viewMaps';
@@ -1451,6 +1456,7 @@ control.prototype._replay_toolbox = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='toolbox';
@@ -1462,6 +1468,7 @@ control.prototype._replay_equipbox = function () {
     if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
     if (core.isMoving() || core.status.replay.animate || core.status.event.id)
         return core.drawTip("请等待当前事件的处理结束");
+    this._replay_hideProgress();
 
     core.lockControl();
     core.status.event.id='equipbox';
@@ -1542,7 +1549,6 @@ control.prototype._replay_save = function () {
         core.status.replay.save.push({"data": core.saveData(), "replay": {
             "totalList": core.cloneArray(core.status.replay.totalList),
             "toReplay": core.cloneArray(core.status.replay.toReplay),
-            "speed": core.status.replay.speed,
             "steps": core.status.replay.steps
         }});
     }
@@ -1574,7 +1580,13 @@ control.prototype._replay_error = function (action) {
     });
 }
 
+control.prototype._replay_hideProgress = function () {
+    if (core.dymCanvas.replay) core.dymCanvas.replay.canvas.style.display = 'none';
+}
+
 control.prototype._replay_drawProgress = function () {
+    if (!core.dymCanvas.replay) return;
+    if (core.dymCanvas.replay.canvas.style.display == 'none') core.dymCanvas.replay.canvas.style.display = 'block';
     var total = core.status.replay.totalList.length, left = total - core.status.replay.toReplay.length;
     var content = '播放进度：' + left + ' / ' + total + '（'+(left/total*100).toFixed(2)+'%）';
     var width = 26 + core.calWidth('replay', content, "16px Arial");
@@ -2375,8 +2387,8 @@ control.prototype.clearRouteFolding = function () {
 
 ////// 检查录像折叠 //////
 control.prototype.checkRouteFolding = function () {
-    // 未开启、未开始游戏、正在事件中：不执行
-    if (!core.flags.enableRouteFolding || !core.isPlaying() || core.status.event.id) {
+    // 未开启、未开始游戏、录像播放中、正在事件中：不执行
+    if (!core.flags.enableRouteFolding || !core.isPlaying() || core.isReplaying() || core.status.event.id) {
         return this.clearRouteFolding();
     }
     var hero = core.clone(core.status.hero, function (name, value) {
@@ -2700,7 +2712,7 @@ control.prototype.clearStatusBar = function() {
 
 ////// 更新状态栏 //////
 control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
-    if (!core.isPlaying()) return;
+    if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
     this.controldata.updateStatusBar();
     if (!doNotCheckAutoEvents) core.checkAutoEvents();
     this._updateStatusBar_setToolboxIcon();

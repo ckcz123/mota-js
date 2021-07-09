@@ -927,10 +927,10 @@ events.prototype.startEvents = function (list, x, y, callback) {
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
 events.prototype.doAction = function (keepUI) {
- 	if (!core.isReplaying()) {
-		clearInterval((core.status.event.data.current || {}).interval);
-		core.dom.gameCanvas.ui.style.opacity = 1;
-	}   
+    if (!core.isReplaying()) {
+        core.dom.gameCanvas.ui.style.opacity = 1;
+        core.dom.next.style.opacity = 1;
+    } 
     if (!keepUI) {
         // 清空boxAnimate和UI层
         core.clearUI();
@@ -1291,9 +1291,23 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 }
 
 events.prototype._action_text = function (data, x, y, prefix) {
-    if (this.__action_checkReplaying()) return;
+   if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
-	if (data.showTime) core.status.event.data.current.interval = core.showWithAnimate(core.dom.gameCanvas.ui, data.showTime / 33);
+    if (data.showTime) {
+        core.dom.gameCanvas.ui.style.opacity = 0;
+        core.dom.next.style.opacity = 0;
+        var opacity = 0;
+        var show = setInterval(function() {
+        if (parseFloat(core.dom.gameCanvas.ui.style.opacity) >= 1) {
+            if (core.status.event.data) delete core.status.event.data.current.showTime;
+            clearInterval(show);
+            return;
+        }
+        opacity += 0.05;
+        core.dom.next.style.opacity = Math.min(opacity, 1);
+        core.dom.gameCanvas.ui.style.opacity = Math.min(opacity, 1);
+        }, data.showTime / 20);
+    }
     core.ui.drawTextBox(data.text, data.showAll);
 }
 

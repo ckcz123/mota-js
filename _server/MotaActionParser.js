@@ -248,7 +248,7 @@ ActionParser.prototype.parseAction = function() {
           return text_choices;
         }
         this.next = MotaActionFunctions.xmlText('text_2_s', [
-          info[0], info[1], info[2], data.showTime, data.hideTime, info[3], buildTextDrawing(textDrawing), data.showTime, data.hideTime, this.next
+          info[0], info[1], info[2], data.showTime, data.hideTime, info[3], buildTextDrawing(textDrawing), this.next
         ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
       } else if (info[0] || info[1] || info[2]) {
         this.next = MotaActionFunctions.xmlText('text_1_s',[

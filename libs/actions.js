@@ -1016,12 +1016,39 @@ actions.prototype._clickAction = function (x, y) {
     if (core.status.event.data.type == 'text') {
 
         // 打字机效果显示全部文字
-        if (core.status.event.interval != null) {
-            core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
+        if (core.status.event.interval != null || core.status.event.data.current.showTime > 0) {
+            core.insertAction({
+                "type": "text",
+                "text": core.status.event.ui,
+                "showAll": true,
+                "hideTime": core.status.event.data.current.hideTime
+            });
+            // 文字
+            core.doAction();
+            return;
         }
 
-        // 文字
-        core.doAction();
+        var hideTime = core.status.event.data.current.hideTime;
+        if (hideTime > 0) {
+            delete core.status.event.data.current.hideTime;
+            var opacity = parseInt(core.dom.gameCanvas.ui.style.opacity) || 1;
+            var ui = core.status.event.ui;
+            var hide = setInterval(function() {
+                if (ui != core.status.event.ui) {
+                    clearInterval(hide);
+                    core.dom.gameCanvas.ui.style.opacity = 1;
+                    core.dom.next.style.opacity = 1;
+                    return;
+                }
+                opacity -= 0.05;
+                core.dom.next.style.opacity = Math.max(opacity, 0);
+                core.dom.gameCanvas.ui.style.opacity = Math.max(opacity, 0);
+                if (opacity <= 0) {
+                    clearInterval(hide);
+                    core.doAction();
+                }
+            }, hideTime / 20)
+        } else core.doAction();
         return;
     }
 
@@ -1088,14 +1115,45 @@ actions.prototype._keyDownAction = function (keycode) {
 
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype._keyUpAction = function (keycode) {
+
     if (core.status.event.data.type == 'text' && (keycode == 13 || keycode == 32 || keycode == 67)) {
         // 打字机效果显示全部文字
-        if (core.status.event.interval != null) {
-            core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
+        if (core.status.event.interval != null || core.status.event.data.current.showTime > 0) {
+            core.insertAction({
+                "type": "text",
+                "text": core.status.event.ui,
+                "showAll": true,
+                "hideTime": core.status.event.data.current.hideTime
+            });
+            // 文字
+            core.doAction();
+            return;
         }
-        core.doAction();
+
+        var hideTime = core.status.event.data.current.hideTime;
+        if (hideTime > 0) {
+            delete core.status.event.data.current.hideTime;
+            var opacity = parseInt(core.dom.gameCanvas.ui.style.opacity) || 1;
+            var ui = core.status.event.ui;
+            var hide = setInterval(function() {
+                if (ui != core.status.event.ui) {
+                    clearInterval(hide);
+                    core.dom.gameCanvas.ui.style.opacity = 1;
+                    core.dom.next.style.opacity = 1;
+                    return;
+                }
+                opacity -= 0.05;
+                core.dom.next.style.opacity = Math.max(opacity, 0);
+                core.dom.gameCanvas.ui.style.opacity = Math.max(opacity, 0);
+                if (opacity <= 0) {
+                    clearInterval(hide);
+                    core.doAction();
+                }
+            }, hideTime / 20)
+        } else core.doAction();
         return;
     }
+    
     if (core.status.event.data.type == 'wait') {
         clearTimeout(core.status.event.interval);
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;

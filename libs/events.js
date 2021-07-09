@@ -927,6 +927,10 @@ events.prototype.startEvents = function (list, x, y, callback) {
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
 events.prototype.doAction = function (keepUI) {
+ 	if (!core.isReplaying()) {
+		clearInterval((core.status.event.data.current || {}).interval);
+		core.dom.gameCanvas.ui.style.opacity = 1;
+	}   
     if (!keepUI) {
         // 清空boxAnimate和UI层
         core.clearUI();
@@ -1289,6 +1293,7 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
+	if (data.showTime) core.status.event.data.current.interval = core.showWithAnimate(core.dom.gameCanvas.ui, data.showTime / 33);
     core.ui.drawTextBox(data.text, data.showAll);
 }
 

@@ -511,6 +511,13 @@ declare class control {
     getLvName(lv?: number): string | number
     
     /**
+     * 获得下次升级需要的经验值。
+     * 升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
+     * 如果无法进行下次升级，返回null。
+     */
+    getNextLvUpNeed() : number
+
+    /**
      * 设置一个flag变量
      * @example core.setFlag('poison', true); // 令主角中毒
      * @param name 变量名，支持中文
@@ -2021,7 +2028,7 @@ declare class ui {
      * @param style 绘制的样式
      * @param font 绘制的字体
      */
-    fillText(name: CtxRefer, text: string, x: number, y: number, style: string, font: string): void
+    fillText(name: CtxRefer, text: string, x: number, y: number, style?: string, font?: string, maxWidth?: number): void
 
     /**
      * 在某个画布上绘制一个描黑边的文字
@@ -2030,7 +2037,7 @@ declare class ui {
      * @param strokeStyle 绘制的描边颜色
      * @param font 绘制的字体
      */
-    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style: string, strokeStyle: string, font: string): void
+    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number): void
 
     /**
      * 绘制一个矩形。style可选为绘制样式

@@ -2252,6 +2252,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "根据级别的数字获取对应的名称，后者定义在全塔属性<br/>例如：core.getLvName(); // 获取主角当前级别的名称，如“下级佣兵”<br/>lv: 级别的数字，不填则视为主角当前的级别<br/>返回值：级别的名称，如果不存在就还是返回数字", 
           "!type": "fn(lv?: number) -> string|number"
         }, 
+        "getNextLvUpNeed": {
+          "!doc": "获得下次升级需要的经验值。<br/>升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。<br/>如果无法进行下次升级，返回null。",
+          "!type": "fn() -> number"
+        },
         "addStatus": {
           "!doc": "增减主角的某个属性，等价于core.setStatus(name, core.getStatus(name) + value)<br/>例如：core.addStatus('atk', 100'); // 给主角攻击力加100<br/>name: 属性的英文名<br/>value: 属性的增量", 
           "!type": "fn(name: string, value: number)"
@@ -3574,8 +3578,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, style?: string, angle?: number)"
         }, 
         "fillBoldText": {
-          "!doc": "在某个画布上绘制一个描边文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>strokeStyle: 要绘制的描边颜色<br/>font: 绘制的字体", 
-          "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string)"
+          "!doc": "在某个画布上绘制一个描边文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>strokeStyle: 要绘制的描边颜色<br/>font: 绘制的字体<br/>maxWidth: 最大宽度，超过此宽度会自动放缩", 
+          "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number)"
         },
         "saveCanvas": {
           "!doc": "保存某个canvas状态", 

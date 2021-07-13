@@ -355,6 +355,11 @@ getMappedName: fn(name: string) -> string
 getNakedStatus: fn(name: string)
 获得勇士原始属性（无装备和衰弱影响）
 
+getNextLvUpNeed: fn() -> number
+获得下次升级需要的经验值。
+升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
+如果无法进行下次升级，返回null。
+
 getRealStatus: fn(name: string)
 计算主角的某个属性，包括百分比修正
 例如：core.getRealStatus('atk'); // 计算主角的攻击力，包括百分比修正。战斗使用的就是这个值
@@ -1835,12 +1840,13 @@ fillArc: fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: numb
 在某个canvas上绘制一个扇形
 参考资料：https://www.w3school.com.cn/tags/canvas_arc.asp
 
-fillBoldText: fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string)
+fillBoldText: fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number)
 在某个画布上绘制一个描边文字
 text: 要绘制的文本
 style: 绘制的样式
 strokeStyle: 要绘制的描边颜色
 font: 绘制的字体
+maxWidth: 最大宽度，超过此宽度会自动放缩
 
 fillCircle: fn(name: string|CanvasRenderingContext2D, x: number, y: number, r: number, style?: string)
 在某个canvas上绘制一个圆
@@ -1868,7 +1874,7 @@ fillText: fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: 
 text: 要绘制的文本
 style: 绘制的样式
 font: 绘制的字体
-最大宽度，超过此宽度会自动放缩
+maxWidth: 最大宽度，超过此宽度会自动放缩
 参考资料：https://www.w3school.com.cn/tags/canvas_filltext.asp
 
 getContextByName: fn(canvas: string|CanvasRenderingContext2D) -> CanvasRenderingContext2D

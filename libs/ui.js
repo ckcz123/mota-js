@@ -130,7 +130,7 @@ ui.prototype.setFontForMaxWidth = function (name, text, maxWidth, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font) {
+ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font, maxWidth) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (font) ctx.font = font;
@@ -138,6 +138,9 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font
     style = core.arrayToRGBA(style);
     if (!strokeStyle) strokeStyle = '#000000';
     strokeStyle = core.arrayToRGBA(strokeStyle);
+    if (maxWidth != null) {
+        this.setFontForMaxWidth(ctx, text, maxWidth);
+    }
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth = 2;
     ctx.strokeText(text, x, y);

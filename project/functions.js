@@ -1128,12 +1128,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
 	// 进阶
-	if (core.flags.statusBarItems.indexOf('enableLevelUp') >= 0 && core.status.hero.lv < core.firstData.levelUp.length) {
-		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
-		if (core.flags.statusBarItems.indexOf('levelUpLeftMode') >= 0)
-			core.setStatusBarInnerHTML('up', core.formatBigNumber(need - core.getStatus('exp')) || "");
-		else
-			core.setStatusBarInnerHTML('up', core.formatBigNumber(need) || "");
+	if (core.flags.statusBarItems.indexOf('enableLevelUp') >= 0) {
+		core.setStatusBarInnerHTML('up', core.formatBigNumber(core.getNextLvUpNeed()) || "");
 	} else core.setStatusBarInnerHTML('up', "");
 
 	// 钥匙

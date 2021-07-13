@@ -2293,6 +2293,16 @@ control.prototype.getLvName = function (lv) {
     return ((core.firstData.levelUp||[])[lv-1]||{}).title || lv;
 }
 
+////// 获得下个等级所需经验；如果不存在下个等级，返回null。 //////
+control.prototype.getNextLvUpNeed = function () {
+    if (!core.status.hero) return null;
+    if (core.status.hero.lv >= core.firstData.levelUp.length) return null;
+    var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
+    if (core.flags.statusBarItems.indexOf('levelUpLeftMode') >= 0)
+        return Math.max(need - core.getStatus('exp'), 0);
+    else return need;
+}
+
 ////// 设置某个自定义变量或flag //////
 control.prototype.setFlag = function(name, value) {
     if (value == null) return this.removeFlag(name);

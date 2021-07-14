@@ -1000,7 +1000,7 @@ return code;
 
 
 setEnemy_s
-    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List '为' expression Newline
+    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List AssignOperator_List expression Newline
 
 
 /* setEnemy_s
@@ -1009,7 +1009,10 @@ helpUrl : /_docs/#/instruction
 default : ["greenSlime", "atk", "0"]
 allEnemys : ['IdString_0']
 colour : this.dataColor
-var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'", "value": "'+expression_0+'"},\n';
+if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
+  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
+} else AssignOperator_List_0 = '';
+var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
 return code;
 */;
 

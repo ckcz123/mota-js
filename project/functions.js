@@ -110,6 +110,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	//     core.deleteAllCanvas();
 	// }
 
+	// 播放换层音效
+    core.playSound('floor.mp3');
+
 	// 根据分区信息自动砍层与恢复
 	if (core.autoRemoveMaps) core.autoRemoveMaps(floorId);
 

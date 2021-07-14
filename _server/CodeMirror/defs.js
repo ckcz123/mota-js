@@ -3178,8 +3178,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(id?: string) -> string"
         }, 
         "searchBlock": {
-          "!doc": "搜索图块, 支持通配符和正则表达式<br/>例如：core.searchBlock('*Door'); // 搜索当前地图的所有门<br/>id: 图块id，支持星号表示任意多个（0个起）字符<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否计入，true表示计入<br/>返回值：一个详尽的数组，一般只用到其长度", 
-          "!type": "fn(id: string, floorId?: string, showDisable?: bool) -> [{floorId: string, index: number, x: number, y: number, block: block}]"
+          "!doc": "搜索图块, 支持通配符和正则表达式<br/>例如：core.searchBlock('*Door'); // 搜索当前地图的所有门<br/>id: 图块id，支持星号表示任意多个（0个起）字符<br/>floorId: 地图id或数组，不填视为当前地图<br/>showDisable: 隐藏点是否计入，true表示计入<br/>返回值：一个详尽的数组，一般只用到其长度", 
+          "!type": "fn(id: string, floorId?: string|[string], showDisable?: bool) -> [{floorId: string, index: number, x: number, y: number, block: block}]"
+        },
+        "searchBlockWithFilter": {
+          "!doc": "根据给定的筛选函数搜索全部满足条件的图块<br/>例如：core.searchBlockWithFilter(function (block) { return block.event.id.endsWith('Door'); }); // 搜索当前地图的所有门<br/>blockFilter: 筛选函数，可接受block输入，应当返回一个boolean值<br/>floorId: 地图id或数组，不填视为当前地图<br/>showDisable: 隐藏点是否计入，true表示计入<br/>返回值：一个详尽的数组",
+          "!type": "fn(blockFilter: fn(block: block) -> bool, floorId?: string|[string], showDisable?: bool): [{floorId: string, index: number, x: number, y: number, block: block}]"
         },
         "hideBgFgMap": {
           "!doc": "隐藏前景/背景地图", 
@@ -3749,8 +3753,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(id?: string, x?: number, y?: number, isGentleClick?: bool)"
         }, 
         "doAction": {
-          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果<br/>keepUI: true表示不清除UI画布和选择光标", 
-          "!type": "fn(keepUI?: true)"
+          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果", 
+          "!type": "fn()"
         }, 
         "openBook": {
           "!doc": "点击怪物手册时的打开操作", 
@@ -3901,8 +3905,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(x: number, y: number, needKey?: bool, callback?: fn())"
         }, 
         "setEnemy": {
-          "!doc": "设置一项敌人属性并计入存档<br/>例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0<br/>id: 敌人id<br/>name: 属性的英文缩写<br/>value: 属性的新值，可选<br/>prefix: 独立开关前缀，一般不需要，下同", 
-          "!type": "fn(id: string, name: string, value: ?, prefix?: string)"
+          "!doc": "设置一项敌人属性并计入存档<br/>例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0<br/>id: 敌人id<br/>name: 属性的英文缩写<br/>value: 属性的新值，可选<br/>operator: 运算操作符如+=，可选<br/>prefix: 独立开关前缀，一般不需要，下同", 
+          "!type": "fn(id: string, name: string, value: ?, operator?: string, prefix?: string)"
         }, 
         "autoEventExecuting": {
           "!doc": "当前是否在执行某个自动事件", 

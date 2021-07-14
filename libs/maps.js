@@ -1712,6 +1712,26 @@ maps.prototype.searchBlock = function (id, floorId, showDisable) {
     return result;
 }
 
+////// 给定筛选函数，搜索某个图块出现的所有位置 //////
+maps.prototype.searchBlockWithFilter = function (blockFilter, floorId, showDisable) {
+    floorId = floorId || core.status.floorId;
+    var result = [];
+    if (floorId instanceof Array) {
+        floorId.forEach(function (floorId) {
+            result = result.concat(core.searchBlockWithFilter(blockFilter, floorId, showDisable));
+        });
+        return result;
+    }
+    core.extractBlocks(floorId);
+    for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
+        var block = core.status.maps[floorId].blocks[i];
+        if ((showDisable || !block.disable) && blockFilter(block)) {
+            result.push({floorId: floorId, x: block.x, y: block.y, block: block});
+        }
+    }
+    return result;
+}
+
 // -------- 启用/禁用图块，楼层贴图 -------- //
 
 ////// 将某个块从禁用变成启用状态 //////

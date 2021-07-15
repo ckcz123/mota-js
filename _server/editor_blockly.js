@@ -870,6 +870,15 @@ editor_blockly = function () {
         }
     }
 
+    editor_blockly.isBlockCollapsedSupported = function (block) {
+        var supportedDisabledBlocks = [
+            'text_0_s', 'text_1_s', 'text_2_s', 'if_s', 'if_1_s', 'confirm_s', 'switch_s', 'choices_s', 
+            'for_s', 'forEach_s', 'while_s', 'dowhile_s', 'wait_s', 'previewUI_s',
+            'waitContext_1', 'waitContext_2', 'waitContext_3', 'switchCase', 'choicesContext'
+        ];
+        return supportedDisabledBlocks.indexOf(block.type || "") >= 0;
+    }
+
     return editor_blockly;
 }
 
@@ -1019,12 +1028,7 @@ Blockly.Generator.prototype.blockToCode = function(block, opt_thisOnly) {
     if (!block) {
         return '';
     }
-    var supportedDisabledBlocks = [
-        'text_0_s', 'text_1_s', 'text_2_s', 'if_s', 'if_1_s', 'confirm_s', 'switch_s', 'choices_s', 
-        'for_s', 'forEach_s', 'while_s', 'dowhile_s', 'wait_s', 'previewUI_s',
-        'waitContext_1', 'waitContext_2', 'waitContext_3', 'switchCase', 'choicesContext'
-    ];
-    if (!block.isEnabled() && supportedDisabledBlocks.indexOf(block.type) < 0) {
+    if (!block.isEnabled() && !editor_blockly.isBlockCollapsedSupported(block)) {
         // Skip past this block if it is disabled.
         return opt_thisOnly ? '' : this.blockToCode(block.getNextBlock());
     }
@@ -1046,15 +1050,15 @@ Blockly.Generator.prototype.blockToCode = function(block, opt_thisOnly) {
     if (Array.isArray(code)) {
         // Value blocks return tuples of code and operator order.
         if (!block.outputConnection) {
-        throw TypeError('Expecting string from statement block: ' + block.type);
+            throw TypeError('Expecting string from statement block: ' + block.type);
         }
         return [this.scrub_(block, code[0], opt_thisOnly), code[1]];
     } else if (typeof code == 'string') {
         if (this.STATEMENT_PREFIX && !block.suppressPrefixSuffix) {
-        code = this.injectId(this.STATEMENT_PREFIX, block) + code;
+            code = this.injectId(this.STATEMENT_PREFIX, block) + code;
         }
         if (this.STATEMENT_SUFFIX && !block.suppressPrefixSuffix) {
-        code = code + this.injectId(this.STATEMENT_SUFFIX, block);
+            code = code + this.injectId(this.STATEMENT_SUFFIX, block);
         }
         return this.scrub_(block, code, opt_thisOnly);
     } else if (code === null) {
@@ -1062,4 +1066,49 @@ Blockly.Generator.prototype.blockToCode = function(block, opt_thisOnly) {
         return '';
     }
     throw SyntaxError('Invalid code generated: ' + code);
+};
+
+Blockly.BlockSvg.prototype.generateContextMenu = function() {
+    if (this.workspace.options.readOnly || !this.contextMenu) {
+        return null;
+    }
+    // Save the current block in a variable for use in closures.
+    var block = this;
+    var menuOptions = [];
+  
+    if (!this.isInFlyout) {
+        // 删除
+        if (this.isDeletable() && this.isMovable()) {
+            menuOptions.push(Blockly.ContextMenu.blockDuplicateOption(block));
+        }
+
+        if (editor_blockly.isBlockCollapsedSupported(this)) {
+            menuOptions.push({
+                text: this.isCollapsed() ? Blockly.Msg['EXPAND_BLOCK'] : Blockly.Msg['COLLAPSE_BLOCK'],
+                enabled: true,
+                callback: function () { block.setCollapsed(!block.collapsed_); }
+            });
+
+            menuOptions.push({
+                text: this.isEnabled() ? Blockly.Msg['DISABLE_BLOCK'] : Blockly.Msg['ENABLE_BLOCK'],
+                enabled: !this.getInheritedDisabled(),
+                callback: function() {
+                    var group = Blockly.Events.getGroup();
+                    if (!group) {
+                        Blockly.Events.setGroup(true);
+                    }
+                    block.setEnabled(!block.isEnabled());
+                    if (!group) {
+                        Blockly.Events.setGroup(false);
+                    }
+                }
+            });
+        }
+        if (this.isDeletable()) {
+            menuOptions.push(Blockly.ContextMenu.blockDeleteOption(block));
+        }
+    }
+  
+    menuOptions.push(Blockly.ContextMenu.blockHelpOption(block));  
+    return menuOptions;
 };

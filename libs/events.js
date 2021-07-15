@@ -944,6 +944,8 @@ events.prototype.doAction = function () {
     core.status.event.data.current = data;
     if (typeof data == "string")
         data = {"type": "text", "text": data};
+    // 该事件块已经被禁用
+    if (data._disabled) return core.doAction();
     data.floorId = data.floorId || floorId;
     core.status.event.data.type = data.type;
     this.doEvent(data, x, y, prefix);
@@ -1831,6 +1833,7 @@ events.prototype._action_switch = function (data, x, y, prefix) {
     var key = core.calValue(data.condition, prefix)
     var list = [];
     for (var i = 0; i < data.caseList.length; i++) {
+        if (data.caseList[i]._disabled) continue;
         var condition = data.caseList[i]["case"];
         if (condition == "default" || core.calValue(condition, prefix) === key) {
             core.push(list, data.caseList[i].action);
@@ -1853,6 +1856,7 @@ events.prototype._precompile_switch = function (data) {
 
 events.prototype._action_choices = function (data, x, y, prefix) {
     data.choices = data.choices.filter(function (x) {
+        if (x._disabled) return false;
         if (x.condition == null || x.condition == '') return true;
         try { return core.calValue(x.condition, prefix); } catch (e) { return true; }
     })
@@ -2223,7 +2227,7 @@ events.prototype.__action_wait_afterGet = function (data) {
     var todo = [];
     var stop = false;
     data.data.forEach(function (one) {
-        if (stop) return;
+        if (one._disabled || stop) return;
         if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
             (one.keycode + "").split(",").forEach(function (keycode) {
                 if (core.getFlag("keycode", 0) == keycode) {

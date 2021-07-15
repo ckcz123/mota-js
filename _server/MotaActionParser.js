@@ -249,14 +249,14 @@ ActionParser.prototype.parseAction = function() {
         }
         this.next = MotaActionFunctions.xmlText('text_2_s', [
           info[0], info[1], info[2], info[3], buildTextDrawing(textDrawing), this.next
-        ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       } else if (info[0] || info[1] || info[2]) {
         this.next = MotaActionFunctions.xmlText('text_1_s',[
-          info[0], info[1], info[2], info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+          info[0], info[1], info[2], info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('text_0_s', [info[3],this.next],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+           /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       break;
     case "autoText": // 自动剧情文本
@@ -658,13 +658,13 @@ ActionParser.prototype.parseAction = function() {
           this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.insertActionList(data["false"]),
-          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('if_1_s', [
           this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
-          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       break;
     case "confirm": // 显示确认框
@@ -672,18 +672,18 @@ ActionParser.prototype.parseAction = function() {
         this.EvalString_Multi(data.text), data.timeout||0, data["default"],
         this.insertActionList(data["yes"]),
         this.insertActionList(data["no"]),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "switch": // 多重条件分歧
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionFunctions.xmlText('switchCase', [
           this.isset(caseNow.case)?this.expandEvalBlock([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+           /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
       }
       this.next = MotaActionFunctions.xmlText('switch_s', [
         this.expandEvalBlock([data.condition]),
-        case_caseList,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        case_caseList,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "choices": // 提供选项
       var text_choices = null;
@@ -691,38 +691,38 @@ ActionParser.prototype.parseAction = function() {
         choice.color = this.Colour(choice.color);
         text_choices=MotaActionFunctions.xmlText('choicesContext', [
           choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.need||'',choice.condition||'',this.insertActionList(choice.action),text_choices],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ choice._collapsed);
+           /* isShadow */false, /*comment*/ null, /*collapsed*/ choice._collapsed, /*disabled*/ choice._disabled);
       }
       if (!this.isset(data.text)) data.text = '';
       var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionFunctions.xmlText('choices_s', [
-        info[3],info[0],info[1],data.timeout||0,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        info[3],info[0],info[1],data.timeout||0,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "for": // 循环遍历
       this.next = MotaActionFunctions.xmlText('for_s',[
         this.expandEvalBlock([data.name]),
         data.from || 0, data.to || 0, data.step || 0,
         this.insertActionList(data.data),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "forEach": // 循环遍历列表
       this.next = MotaActionFunctions.xmlText('forEach_s',[
         this.expandEvalBlock([data.name]),
         JSON.stringify(data.list),
         this.insertActionList(data.data),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionFunctions.xmlText('while_s',[
         this.expandEvalBlock([data.condition]),
         this.insertActionList(data.data),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "dowhile": // 后置条件循环处理
       this.next = MotaActionFunctions.xmlText('dowhile_s',[
         this.insertActionList(data.data),
         this.expandEvalBlock([data.condition]),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "break": // 跳出循环
       this.next = MotaActionBlocks['break_s'].xmlText([
@@ -781,20 +781,20 @@ ActionParser.prototype.parseAction = function() {
           if (caseNow["case"] == "keyboard") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_1',[
               caseNow.keycode || "0", caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
-            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
           } else if (caseNow["case"] == "mouse") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_2',[
               caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
-            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
           } else if (caseNow["case"] == "timeout") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_3',[
               caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
-            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
           }
         }
       }
       this.next = MotaActionFunctions.xmlText('wait_s',[
-        data.timeout||0,case_waitList, this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        data.timeout||0,case_waitList, this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
@@ -827,7 +827,7 @@ ActionParser.prototype.parseAction = function() {
     case "previewUI": // UI绘制预览
       this.next = MotaActionFunctions.xmlText('previewUI_s',[
         this.insertActionList(data.action), this.next
-      ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+      ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "clearMap": // 清除画布
       this.next = MotaActionBlocks['clearMap_s'].xmlText([
@@ -1253,7 +1253,7 @@ MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
   //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   var comma = PosString.indexOf(',');
-  if (comma >= 0 && PosString.substring(0, comma).indexOf('(') < 0) throw '此处不可写多点坐标';
+  if (comma >= 0 && PosString.substring(0, comma).ifndexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
 }
 

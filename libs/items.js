@@ -349,6 +349,7 @@ items.prototype.quickSaveEquip = function (index) {
     var saveEquips = core.getFlag("saveEquips", []);
     saveEquips[index] = core.clone(core.status.hero.equipment);
     core.setFlag("saveEquips", saveEquips);
+    core.status.route.push("saveEquip:"+index);
     core.drawTip("已保存" + index + "号套装");
 }
 
@@ -366,6 +367,7 @@ items.prototype.quickLoadEquip = function (index) {
         if (v && !this.canEquip(v, true))
             return;
     }
+    core.status.route.push("loadEquip:"+index);
     core.setFlag("__quickLoadEquip__", true);
     // 快速换装
     var toEquip = [];
@@ -377,7 +379,6 @@ items.prototype.quickLoadEquip = function (index) {
             toEquip.push(to || null);
             if (now) {
                 this.unloadEquip(i);
-                core.status.route.push("unEquip:" + i);
             }
         }
     }
@@ -385,7 +386,6 @@ items.prototype.quickLoadEquip = function (index) {
         var to = toEquip[i];
         if (to) {
             this.loadEquip(to);
-            core.status.route.push("equip:" + to);
         }
     }
     core.removeFlag("__quickLoadEquip__");

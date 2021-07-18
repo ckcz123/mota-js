@@ -884,9 +884,9 @@ actions.prototype.onStatusBarClick = function (e) {
     return this.doRegisteredAction('onStatusBarClick', px, py);
 }
 
-actions.prototype._sys_onStatusBarClick = function (px, py) {
+actions.prototype._sys_onStatusBarClick = function (px, py, vertical) {
     if (this.actionsdata.onStatusBarClick)
-        return this.actionsdata.onStatusBarClick(px, py);
+        return this.actionsdata.onStatusBarClick(px, py, vertical);
 }
 
 /////////////////// 在某个界面时的按键点击效果 ///////////////////

@@ -215,6 +215,8 @@ type gameStatus = {
         textfont: number
         bold: boolean
         time: number
+        letterSpacing: number
+        animateTime: number
     },
     globalAttribute: {
         equipName: string[]

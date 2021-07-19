@@ -209,6 +209,8 @@ function core() {
             "textfont": 16,
             "bold": false,
             "time": 0,
+            "letterSpacing": 0,
+            "animateTime": 0,
         },
         "globalAttribute": {
             'equipName': main.equipName || [],

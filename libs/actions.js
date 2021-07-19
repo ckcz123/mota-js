@@ -1013,14 +1013,18 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
 ////// 自定义事件时的点击操作 //////
 actions.prototype._clickAction = function (x, y) {
     if (core.status.event.data.type == 'text') {
+        // 正在淡入淡出的话不执行
+        if (core.status.event.animateUI) return;
 
         // 打字机效果显示全部文字
         if (core.status.event.interval != null) {
             core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
+            core.doAction();
+            return;
         }
 
         // 文字
-        core.doAction();
+        core.ui._animateUI('hide', core.doAction);
         return;
     }
 
@@ -1088,11 +1092,16 @@ actions.prototype._keyDownAction = function (keycode) {
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype._keyUpAction = function (keycode) {
     if (core.status.event.data.type == 'text' && (keycode == 13 || keycode == 32 || keycode == 67)) {
+        // 正在淡入淡出的话不执行
+        if (core.status.event.animateUI) return;
+
         // 打字机效果显示全部文字
         if (core.status.event.interval != null) {
             core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
+            core.doAction();
+            return;
         }
-        core.doAction();
+        core.ui._animateUI('hide', core.doAction);
         return;
     }
     if (core.status.event.data.type == 'wait') {

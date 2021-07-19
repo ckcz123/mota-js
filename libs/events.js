@@ -927,10 +927,12 @@ events.prototype.startEvents = function (list, x, y, callback) {
 ////// 执行当前自定义事件列表中的下一个事件 //////
 events.prototype.doAction = function () {
     // 清空boxAnimate和UI层
-    core.clearUI();
     clearInterval(core.status.event.interval);
     clearTimeout(core.status.event.interval);
+    clearInterval(core.status.event.animateUI);
     core.status.event.interval = null;
+    delete core.status.event.aniamteUI;
+    core.clearUI();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     var floorId = core.status.event.data.floorId || core.status.floorId;
@@ -1289,6 +1291,7 @@ events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
     core.ui.drawTextBox(data.text, data.showAll);
+    if (!data.showAll) core.ui._animateUI('show');
 }
 
 events.prototype._action_autoText = function (data, x, y, prefix) {
@@ -1313,7 +1316,7 @@ events.prototype._action__label = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setText = function (data, x, y, prefix) {
-    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "interval"].forEach(function (t) {
+    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "letterSpacing", "animateTime"].forEach(function (t) {
         if (data[t] != null) core.status.textAttribute[t] = data[t];
     });
     ["background", "title", "text"].forEach(function (t) {

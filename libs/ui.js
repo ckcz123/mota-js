@@ -653,8 +653,10 @@ ui.prototype.clearUI = function () {
     core.status.boxAnimateObjs = [];
     if (core.dymCanvas._selector) core.deleteCanvas("_selector");
     main.dom.next.style.display = 'none';
+    main.dom.next.style.opacity = 1;
     core.clearMap('ui');
     core.setAlpha('ui', 1);
+    core.setOpacity('ui', 1);
 }
 
 ////// 左上角绘制一段提示 //////
@@ -1043,7 +1045,7 @@ ui.prototype._buildFont = function (fontSize, bold, italic, font) {
 // content：要绘制的内容；转义字符目前只允许留 \n, \r[...], \i[...], \c[...], \d, \e
 // config：绘制配置项，目前暂时包含如下内容（均为可选）
 //         left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
-//         fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体类型
+//         fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体类型；letterSpacing：字符间距
 ui.prototype.drawTextContent = function (ctx, content, config) {
     ctx = core.getContextByName(ctx);
     // 设置默认配置项
@@ -1061,7 +1063,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
     config.defaultFont = config.font = config.font || globalAttribute.font;
     config.time = config.time || 0;
-    config.interval = config.interval == null ? (textAttribute.interval || 0) : config.interval;
+    config.letterSpacing = config.letterSpacing == null ? (textAttribute.letterSpacing || 0) : config.letterSpacing;
 
     config.index = 0;
     config.currcolor = config.color;
@@ -1183,7 +1185,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
         if (c == 'z') return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // 检查是不是自动换行
-    var charwidth = core.calWidth(tempCtx, ch) + config.interval;
+    var charwidth = core.calWidth(tempCtx, ch) + config.letterSpacing;
     if (config.maxWidth != null) {
         if (config.offsetX + charwidth > config.maxWidth) {
             // --- 当前应当换行，然而还是检查一下是否是forbidStart
@@ -1200,7 +1202,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
             // 确认不是手动换行
             if (nextch != '\n' && !(nextch == '\\' && content.charAt(config.index+1) == 'n')) {
                 // 检查是否会换行
-                var nextchwidth = core.calWidth(tempCtx, nextch) + config.interval;
+                var nextchwidth = core.calWidth(tempCtx, nextch) + config.letterSpacing;
                 if (config.offsetX + charwidth + nextchwidth > config.maxWidth) {
                     // 下一项会换行，因此在此处换行
                     this._drawTextContent_newLine(tempCtx, config);
@@ -1343,6 +1345,34 @@ ui.prototype.getTextContentHeight = function (content, config) {
 
 ui.prototype._getRealContent = function (content) {
     return content.replace(/(\r|\\(r|c|d|e|g|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
+}
+
+ui.prototype._animateUI = function (type, callback) {
+    var time = core.status.textAttribute.animateTime || 0;
+    if (!core.status.event || !time || core.isReplaying() || (type != 'show' && type != 'hide')) {
+        if (callback) callback();
+        return;
+    }
+    clearInterval(core.status.event.animateUI);
+    var opacity = 0;
+    if (type == 'show') {
+        opacity = 0;
+    } else if (type == 'hide') {
+        opacity = 1;
+    }
+    core.setOpacity('ui', opacity);
+    core.dom.next.style.opacity = opacity;
+    core.status.event.animateUI = setInterval(function () {
+        if (type == 'show') opacity += 0.05;
+        else opacity -= 0.05;
+        core.setOpacity('ui', opacity);
+        core.dom.next.style.opacity = opacity;
+        if (opacity >= 1 || opacity <= 0) {
+            clearInterval(core.status.event.animateUI);
+            delete core.status.event.animateUI;
+            if (callback) callback();
+        }
+    }, time / 20);
 }
 
 ////// 绘制一个对话框 //////

@@ -452,9 +452,8 @@ actions.prototype._sys_keyUp = function (keyCode, altKey) {
 
 ////// 点击（触摸）事件按下时 //////
 actions.prototype.ondown = function (loc) {
-    var lx = Math.max(loc.x, 0), ly = Math.max(loc.y, 0);
-    var x = parseInt(lx / loc.size), y = parseInt(ly / loc.size);
-    var px = parseInt(lx / core.domStyle.scale), py = parseInt(ly / core.domStyle.scale);
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
     this.doRegisteredAction('ondown', x, y, px, py);
 }
 
@@ -628,7 +627,7 @@ actions.prototype._getClickLoc = function (x, y) {
 
     var left = core.dom.gameGroup.offsetLeft + statusBar.x;
     var top = core.dom.gameGroup.offsetTop + statusBar.y;
-    var loc = {'x': x - left, 'y': y - top, 'size': size};
+    var loc = {'x': Math.max(x - left), 'y': Math.max(y - top, 0), 'size': size};
     return loc;
 }
 
@@ -881,7 +880,7 @@ actions.prototype.onStatusBarClick = function (e) {
     var left = core.dom.gameGroup.offsetLeft + 3;
     var top = core.dom.gameGroup.offsetTop + 3;
     var px = parseInt((e.clientX - left) / core.domStyle.scale), py = parseInt((e.clientY - top) / core.domStyle.scale);
-    return this.doRegisteredAction('onStatusBarClick', px, py);
+    return this.doRegisteredAction('onStatusBarClick', Math.max(px, 0), Math.max(py, 0));
 }
 
 actions.prototype._sys_onStatusBarClick = function (px, py, vertical) {

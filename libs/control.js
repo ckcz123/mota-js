@@ -2873,6 +2873,7 @@ control.prototype.setToolbarButton = function (useButton) {
         ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {
             core.statusBar.image[t].style.display = 'block';
         })
+        main.statusBar.image.btn8.style.filter = core.getLocalStorage('altKey') ? 'sepia(1) contrast(1.5)' : '';
     }
     else {
         ["btn1","btn2","btn3","btn4","btn5","btn6","btn7","btn8"].forEach(function (t) {

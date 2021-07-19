@@ -1903,6 +1903,11 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         }
         core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
+    for (var i = 0; i < data.choices.length; i++) {
+        if (typeof data.choices[i] === 'string')
+            data.choices[i] = {"text": data.choices[i]};
+        data.choices[i].text = core.replaceText(data.choices[i].text, prefix);
+    }
     core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices);
 }
 

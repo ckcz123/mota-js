@@ -1318,12 +1318,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 本插件仅在全塔属性的 "startCanvas" 生效；进入 "startText" 时将会离开居中状态，回归正常界面。
 
 	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
-	var __enable = true;
+	var __enable = false;
 	if (!__enable) return;
 
 	// 检查【标题开启事件化】是否开启
 	if (!core.flags.startUsingCanvas || main.mode != 'play') return;
-
 
 	var _isTitleCanvasEnabled = false;
 	var _getClickLoc = core.actions._getClickLoc;

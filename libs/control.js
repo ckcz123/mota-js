@@ -31,12 +31,15 @@ control.prototype._init = function () {
     this.registerReplayAction("item", this._replayAction_item);
     this.registerReplayAction("equip", this._replayAction_equip);
     this.registerReplayAction("unEquip", this._replayAction_unEquip);
+    this.registerReplayAction("saveEquip", this._replayAction_saveEquip);
+    this.registerReplayAction("loadEquip", this._replayAction_loadEquip);
     this.registerReplayAction("fly", this._replayAction_fly);
     this.registerReplayAction("shop", this._replayAction_shop);
     this.registerReplayAction("turn", this._replayAction_turn);
     this.registerReplayAction("getNext", this._replayAction_getNext);
     this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
     this.registerReplayAction("key", this._replayAction_key);
+    this.registerReplayAction("click", this._replayAction_click);
     // --- 注册系统的resize
     this.registerResize("gameGroup", this._resize_gameGroup);
     this.registerResize("canvas", this._resize_canvas);
@@ -1672,6 +1675,20 @@ control.prototype._replayAction_unEquip = function (action) {
     return true;
 }
 
+control.prototype._replayAction_saveEquip = function (action) {
+    if (action.indexOf('saveEquip:')!=0) return false;
+    core.quickSaveEquip(parseInt(action.substring(10)));
+    core.replay();
+    return true;
+}
+
+control.prototype._replayAction_loadEquip = function (action) {
+    if (action.indexOf('loadEquip:')!=0) return false;
+    core.quickLoadEquip(parseInt(action.substring(10)));
+    core.replay();
+    return true;
+}
+
 control.prototype._replayAction_fly = function (action) {
     if (action.indexOf("fly:")!=0) return false;
     var floorId=action.substring(4);
@@ -1753,6 +1770,15 @@ control.prototype._replayAction_moveDirectly = function (action) {
 control.prototype._replayAction_key = function (action) {
     if (action.indexOf("key:") != 0) return false;
     core.actions.keyUp(parseInt(action.substring(4)), false, true);
+    core.replay();
+    return true;
+}
+
+control.prototype._replayAction_click = function (action) {
+    if (action.indexOf("click:") != 0) return false;
+    var p = action.split(":");
+    if (p.length != 4) return false;
+    core.actions.doRegisteredAction("onStatusBarClick", parseInt(p[2]), parseInt(p[3]), parseInt(p[1]));
     core.replay();
     return true;
 }
@@ -2291,6 +2317,16 @@ control.prototype.getLvName = function (lv) {
     if (!core.status.hero) return null;
     if (lv == null) lv = core.status.hero.lv;
     return ((core.firstData.levelUp||[])[lv-1]||{}).title || lv;
+}
+
+////// 获得下个等级所需经验；如果不存在下个等级，返回null。 //////
+control.prototype.getNextLvUpNeed = function () {
+    if (!core.status.hero) return null;
+    if (core.status.hero.lv >= core.firstData.levelUp.length) return null;
+    var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
+    if (core.flags.statusBarItems.indexOf('levelUpLeftMode') >= 0)
+        return Math.max(need - core.getStatus('exp'), 0);
+    else return need;
 }
 
 ////// 设置某个自定义变量或flag //////

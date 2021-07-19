@@ -511,6 +511,13 @@ declare class control {
     getLvName(lv?: number): string | number
     
     /**
+     * 获得下次升级需要的经验值。
+     * 升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
+     * 如果无法进行下次升级，返回null。
+     */
+    getNextLvUpNeed() : number
+
+    /**
      * 设置一个flag变量
      * @example core.setFlag('poison', true); // 令主角中毒
      * @param name 变量名，支持中文
@@ -898,9 +905,10 @@ declare class events {
      * @param id 敌人id
      * @param name 属性的英文缩写
      * @param value 属性的新值，可选
+     * @param operator 操作符，可选
      * @param prefix 独立开关前缀，一般不需要，下同
      */
-    setEnemy<K extends keyof Enemy>(id: string, name: K, value?: Enemy[K], prefix?: string): void
+    setEnemy<K extends keyof Enemy>(id: string, name: K, value?: Enemy[K], operator?: string, prefix?: string): void
     
     /**
      * 设置一项楼层属性并刷新状态栏
@@ -1575,8 +1583,18 @@ declare class maps {
      * @param showDisable 隐藏点是否计入，true表示计入
      * @returns 一个详尽的数组，一般只用到其长度
      */
-    searchBlock(id: string, floorId?: string, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
+    searchBlock(id: string, floorId?: string|Array<string>, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
     
+    /**
+     * 根据给定的筛选函数搜索全部满足条件的图块
+     * @example core.searchBlockWithFilter(function (block) { return block.event.id.endsWith('Door'); }); // 搜索当前地图的所有门
+     * @param blockFilter 筛选函数，可接受block输入，应当返回一个boolean值
+     * @param floorId 地图id，不填视为当前地图
+     * @param showDisable 隐藏点是否计入，true表示计入
+     * @returns 一个详尽的数组
+     */
+    searchBlockWithFilter(blockFilter: (Block) => boolean, floorId?: string|Array<string>, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
+
     /**
      * 显示（隐藏或显示的）图块，此函数将被“显示事件”指令和勾选了“不消失”的“移动/跳跃事件”指令（如阻击怪）的终点调用
      * @example core.showBlock(0, 0); // 显示地图左上角的图块
@@ -2021,7 +2039,7 @@ declare class ui {
      * @param style 绘制的样式
      * @param font 绘制的字体
      */
-    fillText(name: CtxRefer, text: string, x: number, y: number, style: string, font: string): void
+    fillText(name: CtxRefer, text: string, x: number, y: number, style?: string, font?: string, maxWidth?: number): void
 
     /**
      * 在某个画布上绘制一个描黑边的文字
@@ -2030,7 +2048,7 @@ declare class ui {
      * @param strokeStyle 绘制的描边颜色
      * @param font 绘制的字体
      */
-    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style: string, strokeStyle: string, font: string): void
+    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number): void
 
     /**
      * 绘制一个矩形。style可选为绘制样式

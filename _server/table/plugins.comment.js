@@ -80,6 +80,12 @@ var plugins_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"_type": "textarea",
 				"_range": "typeof(thiseval)=='string' || thiseval==null",
 				"_data": "勇士四帧行走动画"
+			},
+			"startCanvas": {
+				"_leaf": true,
+				"_type": "textarea",
+				"_range": "typeof(thiseval)=='string' || thiseval==null",
+				"_data": "自绘标题界面居中"
 			}
 		}
 		if (obj[key]) return obj[key];

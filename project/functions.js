@@ -110,6 +110,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	//     core.deleteAllCanvas();
 	// }
 
+	// 播放换层音效
+    core.playSound('floor.mp3');
+
 	// 根据分区信息自动砍层与恢复
 	if (core.autoRemoveMaps) core.autoRemoveMaps(floorId);
 
@@ -925,13 +928,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	}
 
 },
-        "onStatusBarClick": function (px, py) {
+        "onStatusBarClick": function (px, py, vertical) {
 	// 点击状态栏时触发的事件，仅在自绘状态栏开启时生效
 	// px和py为点击的像素坐标
+	// vertical为录像播放过程中的横竖屏信息
 	// 
 	// 横屏模式下状态栏的画布大小是 149*480
 	// 竖屏模式下状态栏的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
-	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
+	// 可以使用 _isVertical() 来判定当前是否是竖屏模式
+
+	// 判定当前是否是竖屏模式。录像播放过程中可能会记录当时的横竖屏信息以覆盖。
+	var _isVertical = function () {
+		if (core.isReplaying() && vertical != null) return vertical;
+		return core.domStyle.isVertical;
+	}
 
 	// 如果正在执行事件，则忽略
 	if (core.status.lockControl) return;
@@ -939,8 +949,54 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	if (core.isMoving()) return;
 
 	// 判定px和py来执行自己的脚本内容.... 注意横竖屏
-	// 这里是直接打出点击坐标的例子。
-	// console.log("onStatusBarClick:", px, py);
+	// console.log("onStatusBarClick: ", px, py, _isVertical());
+
+	// 样例一：点击某个区域后使用一个道具
+	/*
+	if (core.hasItem("pickaxe")) {
+		if (_isVertical()) {
+			// 竖屏模式下
+			if (px >= 200 && px <= 250 && py >= 50 && py <= 100) {
+				core.useItem("pickaxe");
+			}
+		} else {
+			// 横屏模式下
+			if (px >= 50 && px <= 100 && py >= 200 && py <= 250) {
+				core.useItem("pickaxe");
+			}
+		}
+	}
+	*/
+
+	// 样例二：点击某个区域后执行一段公共事件或脚本
+	/*
+	if (core.hasFlag("xxx")) {
+		if (_isVertical()) {
+			// 竖屏模式下
+			if (px >= 200 && px <= 250 && py >= 50 && py <= 100) {
+				// 记录点击坐标。这里的1代表此时是竖屏！
+				core.status.route.push("click:1:" + px + ":" + py);
+
+				// 可以插入公共事件 / 普通事件 / 执行一段脚本（如打开自绘UI或增减flag）
+				core.insertCommonEvent("道具商店");
+				// core.insertAction(["一段事件"]);
+				// core.openItemShop("shop1");
+			}
+		} else {
+			// 横屏模式下
+			if (px >= 50 && px <= 100 && py >= 200 && py <= 250) {
+				// 记录点击坐标。这里的0代表此时是横屏！
+				core.status.route.push("click:0:" + px + ":" + py);
+
+				// 可以插入公共事件 / 普通事件 / 执行一段脚本（如打开自绘UI或增减flag）
+				core.insertCommonEvent("道具商店");
+				// core.insertAction(["一段事件"]);
+				// core.openItemShop("shop1");
+			}
+		}
+	}
+	*/
+
 }
     },
     "control": {
@@ -1128,12 +1184,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果是自定义添加的状态栏，也需要在这里进行设置显示的数值
 
 	// 进阶
-	if (core.flags.statusBarItems.indexOf('enableLevelUp') >= 0 && core.status.hero.lv < core.firstData.levelUp.length) {
-		var need = core.calValue(core.firstData.levelUp[core.status.hero.lv].need);
-		if (core.flags.statusBarItems.indexOf('levelUpLeftMode') >= 0)
-			core.setStatusBarInnerHTML('up', core.formatBigNumber(need - core.getStatus('exp')) || "");
-		else
-			core.setStatusBarInnerHTML('up', core.formatBigNumber(need) || "");
+	if (core.flags.statusBarItems.indexOf('enableLevelUp') >= 0) {
+		core.setStatusBarInnerHTML('up', core.formatBigNumber(core.getNextLvUpNeed()) || "");
 	} else core.setStatusBarInnerHTML('up', "");
 
 	// 钥匙

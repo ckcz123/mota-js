@@ -727,7 +727,6 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
 }
 
 events.prototype._changeFloor_beforeChange = function (info, callback) {
-    core.playSound('floor.mp3');
     // 需要 setTimeout 执行，不然会出错
     window.setTimeout(function () {
         if (info.time == 0)
@@ -926,14 +925,12 @@ events.prototype.startEvents = function (list, x, y, callback) {
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
-events.prototype.doAction = function (keepUI) {
-    if (!keepUI) {
-        // 清空boxAnimate和UI层
-        core.clearUI();
-        clearInterval(core.status.event.interval);
-        clearTimeout(core.status.event.interval);
-        core.status.event.interval = null;
-    }
+events.prototype.doAction = function () {
+    // 清空boxAnimate和UI层
+    core.clearUI();
+    clearInterval(core.status.event.interval);
+    clearTimeout(core.status.event.interval);
+    core.status.event.interval = null;
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     var floorId = core.status.event.data.floorId || core.status.floorId;
@@ -947,6 +944,8 @@ events.prototype.doAction = function (keepUI) {
     core.status.event.data.current = data;
     if (typeof data == "string")
         data = {"type": "text", "text": data};
+    // 该事件块已经被禁用
+    if (data._disabled) return core.doAction();
     data.floorId = data.floorId || floorId;
     core.status.event.data.type = data.type;
     this.doEvent(data, x, y, prefix);
@@ -1747,7 +1746,7 @@ events.prototype._action_addValue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setEnemy = function (data, x, y, prefix) {
-    this.setEnemy(data.id, data.name, data.value, prefix);
+    this.setEnemy(data.id, data.name, data.value, data.operator, prefix);
     core.doAction();
 }
 
@@ -1834,6 +1833,7 @@ events.prototype._action_switch = function (data, x, y, prefix) {
     var key = core.calValue(data.condition, prefix)
     var list = [];
     for (var i = 0; i < data.caseList.length; i++) {
+        if (data.caseList[i]._disabled) continue;
         var condition = data.caseList[i]["case"];
         if (condition == "default" || core.calValue(condition, prefix) === key) {
             core.push(list, data.caseList[i].action);
@@ -1856,6 +1856,7 @@ events.prototype._precompile_switch = function (data) {
 
 events.prototype._action_choices = function (data, x, y, prefix) {
     data.choices = data.choices.filter(function (x) {
+        if (x._disabled) return false;
         if (x.condition == null || x.condition == '') return true;
         try { return core.calValue(x.condition, prefix); } catch (e) { return true; }
     })
@@ -2226,7 +2227,7 @@ events.prototype.__action_wait_afterGet = function (data) {
     var todo = [];
     var stop = false;
     data.data.forEach(function (one) {
-        if (stop) return;
+        if (one._disabled || stop) return;
         if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
             (one.keycode + "").split(",").forEach(function (keycode) {
                 if (core.getFlag("keycode", 0) == keycode) {
@@ -2648,10 +2649,7 @@ events.prototype.unfollow = function (name) {
     core.clearRouteFolding();
 }
 
-////// 数值操作 //////
-events.prototype.setValue = function (name, operator, value, prefix) {
-    value = core.calValue(value, prefix);
-    var originValue = core.calValue(name, prefix);
+events.prototype._updateValueByOperator = function (value, originValue, operator) {
     switch (operator) {
         case '+=': value = originValue + value; break;
         case '-=': value = originValue - value; break;
@@ -2664,6 +2662,12 @@ events.prototype.setValue = function (name, operator, value, prefix) {
         case 'max=': value = Math.max(originValue, value); break;
         default: break;
     }
+    return value;
+}
+
+////// 数值操作 //////
+events.prototype.setValue = function (name, operator, value, prefix) {
+    value = this._updateValueByOperator(core.calValue(value, prefix), core.calValue(name, prefix), operator);
     this._setValue_setStatus(name, value);
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
@@ -2705,13 +2709,13 @@ events.prototype._setValue_setGlobal = function (name, value) {
 }
 
 ////// 设置一个怪物属性 //////
-events.prototype.setEnemy = function (id, name, value, prefix) {
+events.prototype.setEnemy = function (id, name, value, operator, prefix) {
     if (!core.hasFlag('enemyInfo')) {
         core.setFlag('enemyInfo', {});
     }
     var enemyInfo = core.getFlag('enemyInfo');
     if (!enemyInfo[id]) enemyInfo[id] = {};
-    value = core.calValue(value, prefix);
+    value = this._updateValueByOperator(core.calValue(value, prefix), (core.material.enemys[id]||{})[name], operator);
     enemyInfo[id][name] = value;
     (core.material.enemys[id]||{})[name] = core.clone(value);
     core.updateStatusBar();

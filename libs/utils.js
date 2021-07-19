@@ -514,6 +514,10 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "u" + t.substring(8);
     else if (t.indexOf('equip:') == 0)
         return "e" + this._encodeRoute_id2number(t.substring(6)) + ":";
+    else if (t.indexOf('saveEquip:') == 0)
+        return "s" + t.substring(10);
+    else if (t.indexOf('loadEquip:') == 0)
+        return "l" + t.substring(10);
     else if (t.indexOf('fly:') == 0)
         return "F" + t.substring(4) + ":";
     else if (t == 'choices:none')
@@ -540,6 +544,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "M" + t.substring(5);
     else if (t.indexOf('key:') == 0)
         return 'K' + t.substring(4);
+    else if (t.indexOf('click:') == 0)
+        return 'k' + t.substring(6);
     else if (t.indexOf('random:') == 0)
         return 'X' + t.substring(7);
     return '('+t+')';
@@ -623,6 +629,12 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "e":
             decodeObj.ans.push("equip:" + this._decodeRoute_number2id(nxt));
             break;
+        case "s":
+            decodeObj.ans.push("saveEquip:" + nxt);
+            break;
+        case "l":
+            decodeObj.ans.push("loadEquip:" + nxt);
+            break;
         case "F":
             decodeObj.ans.push("fly:" + nxt);
             break;
@@ -662,6 +674,13 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "K":
             decodeObj.ans.push("key:" + nxt);
+            break;
+        case "k":
+            ++decodeObj.index;
+            var px = this._decodeRoute_getNumber(decodeObj);
+            ++decodeObj.index;
+            var py = this._decodeRoute_getNumber(decodeObj);
+            decodeObj.ans.push("click:"+nxt+":"+px+":"+py);
             break;
         case "X":
             decodeObj.ans.push("random:" + nxt);

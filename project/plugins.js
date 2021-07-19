@@ -1310,5 +1310,92 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 		return false;
 	}
+},
+    "startCanvas": function () {
+	// 使用本插件可以将自绘的标题界面居中。仅在【标题开启事件化】后才有效。
+	// 由于一些技术性的原因，标题界面事件化无法应用到覆盖状态栏的整个界面。
+	// 这是一个较为妥协的插件，会在自绘标题界面时隐藏状态栏、工具栏和边框，并将画布进行居中。
+	// 本插件仅在全塔属性的 "startCanvas" 生效；进入 "startText" 时将会离开居中状态，回归正常界面。
+
+	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
+	var __enable = true;
+	if (!__enable) return;
+
+	// 检查【标题开启事件化】是否开启
+	if (!core.flags.startUsingCanvas || main.mode != 'play') return;
+
+
+	var _isTitleCanvasEnabled = false;
+	var _getClickLoc = core.actions._getClickLoc;
+	this._setTitleCanvas = function () {
+		if (_isTitleCanvasEnabled) return;
+		_isTitleCanvasEnabled = true;
+
+		// 禁用窗口resize
+		window.onresize = function () {};
+		core.resize = function () {}
+
+		// 隐藏状态栏
+		core.dom.statusBar.style.display = 'none';
+		core.dom.statusCanvas.style.display = 'none';
+		core.dom.toolBar.style.display = 'none';
+		// 居中画布
+		if (core.domStyle.isVertical) {
+			core.dom.gameDraw.style.top =
+				(parseInt(core.dom.gameGroup.style.height) - parseInt(core.dom.gameDraw.style.height)) / 2 + "px";
+		} else {
+			core.dom.gameDraw.style.right =
+				(parseInt(core.dom.gameGroup.style.width) - parseInt(core.dom.gameDraw.style.width)) / 2 + "px";
+		}
+		core.dom.gameDraw.style.border = '3px transparent solid';
+		core.actions._getClickLoc = function (x, y) {
+			var left = core.dom.gameGroup.offsetLeft + core.dom.gameDraw.offsetLeft + 3;
+			var top = core.dom.gameGroup.offsetTop + core.dom.gameDraw.offsetTop + 3;
+			var loc = { 'x': Math.max(x - left, 0), 'y': Math.max(y - top, 0), 'size': 32 * core.domStyle.scale };
+			return loc;
+		}
+	}
+
+	this._resetTitleCanvas = function () {
+		if (!_isTitleCanvasEnabled) return;
+		_isTitleCanvasEnabled = false;
+		window.onresize = function () { try { main.core.resize(); } catch (e) { main.log(e); } }
+		core.resize = function () { return core.control.resize(); }
+		core.resize();
+		core.actions._getClickLoc = _getClickLoc;
+	}
+
+	// 复写“开始游戏”
+	core.events._startGame_start = function (hard, seed, route, callback) {
+		console.log('开始游戏');
+		core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
+		core.setHeroLoc('x', -1);
+		core.setHeroLoc('y', -1);
+
+		if (seed != null) {
+			core.setFlag('__seed__', seed);
+			core.setFlag('__rand__', seed);
+		} else core.utils.__init_seed();
+
+		core.clearStatusBar();
+		core.plugin._setTitleCanvas();
+
+		var todo = [];
+		core.hideStatusBar();
+		core.push(todo, core.firstData.startCanvas);
+		core.push(todo, { "type": "function", "function": "function() { core.plugin._resetTitleCanvas(); core.events._startGame_setHard(); }" })
+		core.push(todo, core.firstData.startText);
+		this.insertAction(todo, null, null, function () {
+			core.events._startGame_afterStart(callback);
+		});
+
+		if (route != null) core.startReplay(route);
+	}
+
+	var _loadData = core.control.loadData;
+	core.control.loadData = function (data, callback) {
+		core.plugin._resetTitleCanvas();
+		_loadData.call(core.control, data, callback);
+	}
 }
 }

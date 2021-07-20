@@ -2590,23 +2590,23 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "setSwitch": {
           "!doc": "设置某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: ?)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, value: ?)"
         },
         "getSwitch": {
           "!doc": "获得某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, defaultValue?: ?)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, defaultValue?: ?)"
         },
         "addSwitch": {
           "!doc": "增加某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: number)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, value: number)"
         },
         "removeSwitch": {
           "!doc": "删除某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string)"
         },
         "removeSwitch": {
           "!doc": "判定某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string) -> bool"
+          "!type": "fn(x: number, y: number, floorId: string, name: string) -> bool"
         }
       }, 
       "icons": {

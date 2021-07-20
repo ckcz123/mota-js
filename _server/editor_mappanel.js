@@ -277,6 +277,7 @@ editor_mappanel_wrapper = function (editor) {
                 // 后续的处理
             } else {
                 // 左键拖拽: 交换
+                editor.savePreMap();
                 // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.uifunctions.unhighlightSaveFloorButton();
@@ -640,9 +641,9 @@ editor_mappanel_wrapper = function (editor) {
             }
         };
         bindSpecialDoor.enemys.forEach(function (loc) {
-            editor.currentFloorData.afterBattle[loc] = [
-                {"type": "setValue", "name": doorFlag, "operator": "+=", "value": "1"}
-            ]
+            if (!editor.currentFloorData.afterBattle[loc])
+                editor.currentFloorData.afterBattle[loc] = [];
+            editor.currentFloorData.afterBattle[loc].push({"type": "setValue", "name": doorFlag, "operator": "+=", "value": "1"});
         });
         editor.file.saveFloorFile(function (err) {
             if (err) {

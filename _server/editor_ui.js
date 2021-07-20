@@ -222,6 +222,7 @@ editor_ui_wrapper = function (editor) {
             }
             if (e.ctrlKey && e.keyCode == 88 && !selectBox.isSelected()) {
                 e.preventDefault();
+                editor.savePreMap();
                 editor.uivalues.copyedInfo = editor.copyFromPos(editor.uivalues.selectedArea);
                 editor.clearPos(true, editor.uivalues.selectedArea, function () {
                     printf('该点事件已剪切；请注意右键地图拉框可以剪切一个区域；若有时剪切失灵请多点几下空白处');
@@ -235,6 +236,7 @@ editor_ui_wrapper = function (editor) {
                     printe("没有复制的事件");
                     return;
                 }
+                editor.savePreMap();
                 editor.pasteToPos(editor.uivalues.copyedInfo);
                 editor.updateMap();
                 editor.file.saveFloorFile(function (err) {
@@ -250,6 +252,7 @@ editor_ui_wrapper = function (editor) {
             }
             // DELETE
             if (e.keyCode == 46 && !selectBox.isSelected()) {
+                editor.savePreMap();
                 editor.clearPos(true, editor.uivalues.selectedArea, function () {
                     printf('该点事件已删除；请注意右键地图拉框可以删除一个区域；；若有时删除失灵请多点几下空白处');
                     editor.uifunctions.unhighlightSaveFloorButton();

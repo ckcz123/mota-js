@@ -2251,7 +2251,7 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
 
     var moveInfo = {
-        x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep, lastDirection: null, offset: 1,
+        sx: x, sy: y, x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep, lastDirection: null, offset: 1,
         moveSteps: moveSteps, step: 0, per_time: time / 16 / core.status.replay.speed
     }
     this._moveBlock_doMove(blockInfo, canvases, moveInfo, callback);
@@ -2345,7 +2345,7 @@ maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
     var jump_peak = 6 + distance, jump_count = jump_peak * 2;
     time /= Math.max(core.status.replay.speed, 1)
     return {
-        x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
+        sx: sx, sy: sy, x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
         jump_peak: jump_peak, jump_count: jump_count,
         step: 0, per_time: time / jump_count
     };
@@ -2387,6 +2387,7 @@ maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, an
         if (info.keep) {
             core.setBlock(blockInfo.number, info.x, info.y);
             core.showBlock(info.x, info.y);
+            core.moveEnemyOnPoint(info.sx, info.sy, info.x, info.y);
         }
         if (callback) callback();
     }

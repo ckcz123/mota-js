@@ -912,6 +912,15 @@ declare class events {
      */
     setEnemy<K extends keyof Enemy>(id: string, name: K, value?: Enemy[K], operator?: string, prefix?: string): void
     
+    /** 设置某个点的敌人属性 */
+    setEnemyOnPoint<K extends keyof Enemy>(x: number, y: number, floorId: string, name: K, value?: Enemy[K], operator?: string, prefix?: string): void
+
+    /** 重置某个点的敌人属性 */
+    resetEnemyOnPoint(x: number, y: number, floorId?: string): void
+
+    /** 将某个点已经设置的敌人属性移动到其他点 */
+    moveEnemyOnPoint(fromX: number, fromY: number, toX: number, toY: number, floorId?: string): void
+
     /**
      * 设置一项楼层属性并刷新状态栏
      * @example core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
@@ -1305,6 +1314,9 @@ declare class enemys {
      * @returns 属性的介绍，以属性名加中文冒号开头
      */
     getSpecialHint(enemy: string | Enemy, special: number): string
+
+    /** 获得某个敌人的某项属性值 */
+    getEnemyValue(enemy: string | Enemy, name: string, x?: number, y?: number, floorId?: string): any
 
     /**
      * 判定主角当前能否打败某只敌人

@@ -395,6 +395,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果事件不为空，将其插入
 	if (todo.length > 0) core.insertAction(todo, x, y);
 
+	// 删除该点设置的怪物信息
+	delete ((flags.enemyOnPoint||{})[core.status.floorId]||{})[x+","+y];
+
 	// 因为removeBlock和hideBlock都会刷新状态栏，因此将删除部分移动到这里并保证刷新只执行一次，以提升效率
 	if (core.getBlock(x, y) != null) {
 		// 检查是否是重生怪物；如果是则仅隐藏不删除
@@ -513,13 +516,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		hero_def = core.getRealStatusOrDefault(hero, 'def'),
 		hero_mdef = core.getRealStatusOrDefault(hero, 'mdef');
 
-	var mon_hp = enemy.hp,
-		mon_atk = enemy.atk,
-		mon_def = enemy.def,
-		mon_special = enemy.special;
-	var mon_money = enemy.money,
-		mon_exp = enemy.exp,
-		mon_point = enemy.point;
+	var mon_hp = core.getEnemyValue(enemy, 'hp', x, y, floorId),
+		mon_atk = core.getEnemyValue(enemy, 'atk', x, y, floorId),
+		mon_def = core.getEnemyValue(enemy, 'def', x, y, floorId),
+		mon_special = core.getEnemyValue(enemy, 'special', x, y, floorId);
+	var mon_money = core.getEnemyValue(enemy, 'money', x, y, floorId),
+		mon_exp = core.getEnemyValue(enemy, 'exp', x, y, floorId),
+		mon_point = core.getEnemyValue(enemy, 'point', x, y, floorId);
 	// 模仿
 	if (core.hasSpecial(mon_special, 10)) {
 		mon_atk = hero_atk;

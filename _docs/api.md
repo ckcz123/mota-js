@@ -780,6 +780,9 @@ getEnemys: fn()
 获得所有怪物原始数据的一个副本。
 请使用core.material.enemys获得当前各项怪物属性。
 
+getEnemyValue: fn(enemy?: string|enemy, name: string, x?: number, y?: number, floorId?: string)
+获得某个点上怪物的某个属性值
+
 getSpecialColor: fn(enemy: string|enemy) -> [string]
 获得某个怪物所有特殊属性的颜色
 
@@ -998,6 +1001,9 @@ load: fn(fromUserAction?: bool)
 lose: fn(reason?: string)
 游戏失败事件
 
+moveEnemyOnPoint: fn(fromX: number, fromY: number, toX: number, toY: number, floorId?: string)
+将某个点已经设置的敌人属性移动到其他点
+
 moveImage: fn(code: number, to?: [number], opacityVal?: number, time?: number, callback?: fn())
 移动一张图片并/或改变其透明度
 例如：core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
@@ -1063,6 +1069,9 @@ registerSystemEvent: fn(type: string, func: fn(data?: ?, callback?: fn()))
 type: 事件名
 func: 为事件的处理函数，可接受(data,callback)参数
 
+resetEnemyOnPoint: fn(x: number, y: number, floorId?: string)
+重置某个点的怪物属性
+
 resetGame: fn(hero?: ?, hard?: ?, floorId?: string, maps?: ?, values?: ?)
 初始化游戏
 
@@ -1080,6 +1089,10 @@ name: 属性的英文缩写
 value: 属性的新值，可选
 operator: 运算操作符，可选
 prefix: 独立开关前缀，一般不需要，下同
+
+setEnemyOnPoint: fn(x: number, y: number, floorId?: string, name: string, value: ?, operator?: string, prefix?: string)
+设置某个点的敌人属性。如果该点不是怪物，则忽略此函数。
+例如：core.setEnemyOnPoint(3, 5, null, 'atk', 100, '+='); // 仅将(3,5)点怪物的攻击力加100。
 
 setEvents: fn(list?: [?], x?: number, y?: number, callback?: fn())
 直接设置事件列表

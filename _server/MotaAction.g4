@@ -640,6 +640,9 @@ action
     |   tip_s
     |   setValue_s
     |   setEnemy_s
+    |   setEnemyOnPoint_s
+    |   resetEnemyOnPoint_s
+    |   moveEnemyOnPoint_s
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
@@ -1022,7 +1025,7 @@ setEnemy_s
 /* setEnemy_s
 tooltip : setEnemy：设置某个怪物的属性
 helpUrl : /_docs/#/instruction
-default : ["greenSlime", "atk", "0"]
+default : ["greenSlime", "atk", "="]
 allEnemys : ['IdString_0']
 colour : this.dataColor
 if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
@@ -1032,6 +1035,62 @@ var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List
 return code;
 */;
 
+
+setEnemyOnPoint_s
+    :   '设置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '的' EnemyId_List AssignOperator_List expression Newline
+
+
+/* setEnemyOnPoint_s
+tooltip : setEnemyOnPoint：设置某个点上怪物的属性
+helpUrl : /_docs/#/instruction
+default : ["", "", "", "atk", "="]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.dataColor
+if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
+  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
+} else AssignOperator_List_0 = '';
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
+var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
+return code;
+*/;
+
+resetEnemyOnPoint_s
+    :   '重置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+
+
+/* resetEnemyOnPoint_s
+tooltip : resetEnemyOnPoint：重置某个点上怪物的属性
+helpUrl : /_docs/#/instruction
+default : ["", "", ""]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.dataColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
+var code = '{"type": "resetEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+return code;
+*/;
+
+moveEnemyOnPoint_s
+    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '终点' 'x' PosString? 'y' PosString? '楼层' IdString? Newline
+
+
+/* moveEnemyOnPoint_s
+tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
+helpUrl : /_docs/#/instruction
+default : ["", "", "", "", ""]
+allFloorIds : ['IdString_0']
+selectPoint : ["PosString_2", "PosString_3"]
+menu : [['选择起点位置','editor_blockly.selectPoint(block,["PosString_0", "PosString_1"])']]
+colour : this.dataColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
+if (PosString_2 && PosString_3) floorstr += ', "to": ['+PosString_2+','+PosString_3+']'
+var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+return code;
+*/;
 
 setFloor_s
     :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '为' JsonEvalString Newline

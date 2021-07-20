@@ -144,6 +144,22 @@ enemys.prototype._calSpecialContent = function (enemy, content) {
     return "";
 }
 
+////// 获得某个点上某个怪物的某项属性 //////
+enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
+    floorId = floorId || core.status.floorId;
+    if ((((flags.enemyOnPoint||{})[floorId]||{})[x+","+y]||{})[name] != null) {
+        return flags.enemyOnPoint[floorId][x+","+y][name];
+    }
+    if (enemy == null) {
+        var block = core.getBlock(x, y, floorId);
+        if (block == null) return null;
+        enemy = core.material.enemys[block.event.id];
+    }
+    if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (enemy == null) return null;
+    return enemy[name];
+}
+
 ////// 能否获胜 //////
 enemys.prototype.canBattle = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];

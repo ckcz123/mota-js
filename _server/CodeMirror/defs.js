@@ -3605,6 +3605,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "获得所有怪物原始数据的一个副本。<br/>请使用core.material.enemys获得当前各项怪物属性。",
           "!type": "fn()"
         },
+        "getEnemyValue": {
+          "!doc": "获得某个点上怪物的某个属性值",
+          "!type": "fn(enemy?: string|enemy, name: string, x?: number, y?: number, floorId?: string)"
+        },
         "getSpecials": {
           "!doc": "获得所有特殊属性的定义",
           "!type": "fn() -> [[?]]"
@@ -3908,6 +3912,18 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置一项敌人属性并计入存档<br/>例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0<br/>id: 敌人id<br/>name: 属性的英文缩写<br/>value: 属性的新值，可选<br/>operator: 运算操作符如+=，可选<br/>prefix: 独立开关前缀，一般不需要，下同", 
           "!type": "fn(id: string, name: string, value: ?, operator?: string, prefix?: string)"
         }, 
+        "setEnemyOnPoint": {
+          "!doc": "设置某个点的敌人属性。如果该点不是怪物，则忽略此函数。<br/>例如：core.setEnemyOnPoint(3, 5, null, 'atk', 100, '+='); // 仅将(3,5)点怪物的攻击力加100。",
+          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: ?, operator?: string, prefix?: string)"
+        },
+        "resetEnemyOnPoint": {
+          "!doc": "重置某个点的怪物属性",
+          "!type": "fn(x: number, y: number, floorId?: string)"
+        },
+        "moveEnemyOnPoint": {
+          "!doc": "将某个点已经设置的敌人属性移动到其他点",
+          "!type": "fn(fromX: number, fromY: number, toX: number, toY: number, floorId?: string)"
+        },
         "autoEventExecuting": {
           "!doc": "当前是否在执行某个自动事件", 
           "!type": "fn(symbol?: string, value?: ?) -> bool"

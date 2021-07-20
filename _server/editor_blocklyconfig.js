@@ -117,6 +117,9 @@ editor_blocklyconfig=(function(){
         MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
+      MotaActionBlocks['setEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['resetEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['moveEnemyOnPoint_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
       MotaActionBlocks['setGlobalValue_s'].xmlText(),

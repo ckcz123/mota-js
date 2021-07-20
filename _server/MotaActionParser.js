@@ -628,6 +628,22 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
         MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
       break;
+    case "setEnemyOnPoint":
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
+        data.loc[0], data.loc[1], data.floorId||'', data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+      break;
+    case "resetEnemyOnPoint":
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
+        data.loc[0], data.loc[1], data.floorId||'',this.next]);
+      break;
+    case "moveEnemyOnPoint":
+      data.from=data.from||['','']
+      data.to=data.to||['','']
+      this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
+        data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+      break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
         data.name, data.floorId||null, JSON.stringify(data.value), this.next]);

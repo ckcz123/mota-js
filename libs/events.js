@@ -1198,7 +1198,7 @@ events.prototype.__precompile_getArray = function () {
         "show", "hide", "setBlock", "showFloorImg", "hideFloorImg", "showBgFgMap",
         "hideBgFgMap", "setBgFgBlock", "animate", "setViewport", "move", "jumoHero",
         "changeFloor", "changePos", "showTextImage", "showGif", "openDoor",
-        "closeDoor", "battle", "trigger", "insert"
+        "closeDoor", "battle", "trigger", "insert", "setEnemyOnPoint", "resetEnemyOnPoint"
     ];
     var values = [
         "setValue", "setEnemy", "setFloor", "setGlobalValue",
@@ -1750,6 +1750,31 @@ events.prototype._action_addValue = function (data, x, y, prefix) {
 
 events.prototype._action_setEnemy = function (data, x, y, prefix) {
     this.setEnemy(data.id, data.name, data.value, data.operator, prefix);
+    core.doAction();
+}
+
+events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    this.setEnemyOnPoint(loc[0], loc[1], data.floorId, data.name, data.value, data.operator, prefix);
+    core.doAction();
+}
+
+events.prototype._action_resetEnemyOnPoint = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    this.resetEnemyOnPoint(loc[0], loc[1], data.floorId);
+    core.doAction();
+}
+
+events.prototype._precompile_moveEnemyOnPoint = function (data) {
+    data.from = this.__precompile_array(data.from);
+    data.to = this.__precompile_array(data.to);
+    return data;
+}
+
+events.prototype._action_moveEnemyOnPoint = function (data, x, y, prefix) {
+    var from = this.__action_getLoc(data.from, x, y, prefix);
+    var to = this.__action_getLoc(data.to, x, y, prefix);
+    this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId);
     core.doAction();
 }
 
@@ -2727,6 +2752,38 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix) {
     enemyInfo[id][name] = value;
     (core.material.enemys[id]||{})[name] = core.clone(value);
     core.updateStatusBar();
+}
+
+////// 设置某个点上的怪物属性 //////
+events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operator, prefix) {
+    floorId = floorId || core.status.floorId;
+    var block = core.getBlock(x, y, floorId);
+    if (block == null) return;
+    if (block.event.cls.indexOf('enemy') != 0) return;
+    var enemy = core.material.enemys[block.event.id];
+    if (enemy == null) return;
+    value = this._updateValueByOperator(core.calValue(value, prefix), enemy[name], operator);
+    flags.enemyOnPoint = flags.enemyOnPoint || {};
+    flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
+    flags.enemyOnPoint[floorId][x+","+y] = flags.enemyOnPoint[floorId][x+","+y] || {};
+    flags.enemyOnPoint[floorId][x+","+y][name] = value;
+    core.updateStatusBar();
+}
+
+////// 重置某个点上的怪物属性 //////
+events.prototype.resetEnemyOnPoint = function (x, y, floorId) {
+    delete ((flags.enemyOnPoint||{})[floorId||core.status.floorId]||{})[x+","+y];
+    core.updateStatusBar();
+}
+
+////// 将某个点上已经设置的怪物属性移动到其他点 //////
+events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId) {
+    floorId = floorId || core.status.floorId;
+    if (((flags.enemyOnPoint||{})[floorId]||{})[fromX+","+fromY]) {
+        flags.enemyOnPoint[floorId][toX+","+toY] = flags.enemyOnPoint[floorId][fromX+","+fromY];
+        delete flags.enemyOnPoint[floorId][fromX+","+fromY];
+        core.updateStatusBar();
+    }
 }
 
 ////// 设置楼层属性 //////

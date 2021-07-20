@@ -111,6 +111,8 @@ editor_blockly = function () {
 
     editor_blockly.id = '';
 
+    var _lastOpenPosition = {};
+
     editor_blockly.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
         if (!thisTr) return false;
@@ -123,6 +125,8 @@ editor_blockly = function () {
         editor_blockly.entryType = type;
         editor_blockly.parse();
         editor_blockly.show();
+        var _offsetIndex = [editor_blockly.entryType, editor.pos.x, editor.pos.y, editor.currentFloorId].join(":");
+        editor_blockly.workspace.scroll(0, _lastOpenPosition[_offsetIndex] || 0)
         return true;
     }
 
@@ -152,6 +156,9 @@ editor_blockly = function () {
     }
 
     editor_blockly.cancel = function () {
+        var _offsetIndex = [editor_blockly.entryType, editor.pos.x, editor.pos.y, editor.currentFloorId].join(":");
+        _lastOpenPosition[_offsetIndex] = editor_blockly.workspace.scrollY;
+
         editor_blockly.id = '';
         editor_blockly.hide();
     }
@@ -194,6 +201,9 @@ editor_blockly = function () {
         eval('var obj=' + code);
         if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
             "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
+
+        var _offsetIndex = [editor_blockly.entryType, editor.pos.x, editor.pos.y, editor.currentFloorId].join(":");
+        _lastOpenPosition[_offsetIndex] = editor_blockly.workspace.scrollY;
         setvalue(JSON.stringify(obj));
     }
 

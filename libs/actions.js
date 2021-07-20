@@ -759,8 +759,9 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 怪物手册
     if (core.status.lockControl && core.status.event.id == 'book') {
-        if (direct == 1) core.ui.drawBook(core.status.event.data - this.HSIZE);
-        if (direct == -1) core.ui.drawBook(core.status.event.data + this.HSIZE);
+        var pageinfo = core.ui._drawBook_pageinfo();
+        if (direct == 1) core.ui.drawBook(core.status.event.data - pageinfo.per_page);
+        if (direct == -1) core.ui.drawBook(core.status.event.data + pageinfo.per_page);
         return;
     }
 
@@ -1139,14 +1140,15 @@ actions.prototype._keyUpAction = function (keycode) {
 
 ////// 怪物手册界面的点击操作 //////
 actions.prototype._clickBook = function (x, y) {
+    var pageinfo = core.ui._drawBook_pageinfo();
     // 上一页
     if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
-        core.ui.drawBook(core.status.event.data - this.HSIZE);
+        core.ui.drawBook(core.status.event.data - pageinfo.per_page);
         return;
     }
     // 下一页
     if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
-        core.ui.drawBook(core.status.event.data + this.HSIZE);
+        core.ui.drawBook(core.status.event.data + pageinfo.per_page);
         return;
     }
     // 返回
@@ -1164,7 +1166,6 @@ actions.prototype._clickBook = function (x, y) {
     // 怪物信息
     var data = core.status.event.data;
     if (data != null && y < this.LAST) {
-        var pageinfo = core.ui._drawBook_pageinfo();
         var per_page = pageinfo.per_page, page = parseInt(data / per_page);
         var u = this.LAST / per_page;
         for (var i = 0; i < per_page; ++i) {
@@ -1182,12 +1183,13 @@ actions.prototype._clickBook = function (x, y) {
 
 ////// 怪物手册界面时，按下某个键的操作 //////
 actions.prototype._keyDownBook = function (keycode) {
-    if (keycode == 37) core.ui.drawBook(core.status.event.data - this.HSIZE);
+    var pageinfo = core.ui._drawBook_pageinfo();
+    if (keycode == 37) core.ui.drawBook(core.status.event.data - pageinfo.per_page);
     if (keycode == 38) core.ui.drawBook(core.status.event.data - 1);
-    if (keycode == 39) core.ui.drawBook(core.status.event.data + this.HSIZE);
+    if (keycode == 39) core.ui.drawBook(core.status.event.data + pageinfo.per_page);
     if (keycode == 40) core.ui.drawBook(core.status.event.data + 1);
-    if (keycode == 33) core.ui.drawBook(core.status.event.data - this.HSIZE);
-    if (keycode == 34) core.ui.drawBook(core.status.event.data + this.HSIZE);
+    if (keycode == 33) core.ui.drawBook(core.status.event.data - pageinfo.per_page);
+    if (keycode == 34) core.ui.drawBook(core.status.event.data + pageinfo.per_page);
     return;
 }
 

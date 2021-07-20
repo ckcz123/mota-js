@@ -1110,5 +1110,6 @@ Blockly.BlockSvg.prototype.generateContextMenu = function() {
     }
   
     menuOptions.push(Blockly.ContextMenu.blockHelpOption(block));  
+    if (this.customContextMenu) this.customContextMenu(menuOptions);
     return menuOptions;
 };

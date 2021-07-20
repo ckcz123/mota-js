@@ -2250,7 +2250,7 @@ ui.prototype._drawBookDetail_getTexts = function (enemy, floorId, texts) {
     // --- 模仿临界计算器
     this._drawBookDetail_mofang(enemy, texts);
     // --- 吸血怪最低生命值
-    this._drawBookDetail_vampire(enemy, texts);
+    this._drawBookDetail_vampire(enemy, floorId, texts);
     // --- 仇恨伤害
     this._drawBookDetail_hatred(enemy, texts);
     // --- 战斗回合数，临界表
@@ -2261,6 +2261,9 @@ ui.prototype._drawBookDetail_origin = function (enemy, texts) {
     // 怪物数值和原始值不一样时，在详细信息页显示原始数值
     var originEnemy = core.enemys._getCurrentEnemys_getEnemy(enemy.id);
     var content = [];
+    if (enemy.x != null && enemy.y != null) {
+        texts.push("\r[#FF6A6A]\\d怪物坐标：\\d\r[][" + enemy.x + ", " + enemy.y + ']');
+    }
     ["hp", "atk", "def", "point", "money", "exp"].forEach(function (one) {
         if (enemy[one] == null || originEnemy[one] == null) return;
         if (enemy[one] != originEnemy[one]) {
@@ -2314,7 +2317,7 @@ ui.prototype._drawBookDetail_mofang_getArray = function (hp) {
     return arr;
 }
 
-ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
+ui.prototype._drawBookDetail_vampire = function (enemy, floorId, texts) {
     if (core.enemys.hasSpecial(enemy.special, 11)) {
         var damage = core.getDamage(enemy.id);
         if (damage != null) {
@@ -2324,7 +2327,7 @@ ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
             while (start<end) {
                 var mid = Math.floor((start+end)/2);
                 core.status.hero.hp = mid;
-                if (core.canBattle(enemy.id)) end = mid;
+                if (core.canBattle(enemy.id, enemy.x, enemy.y, floorId)) end = mid;
                 else start = mid+1;
             }
             core.status.hero.hp = start;
@@ -2343,10 +2346,10 @@ ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
 }
 
 ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
-    var damageInfo = core.getDamageInfo(enemy.id, null, null, null, floorId);
+    var damageInfo = core.getDamageInfo(enemy.id, null, enemy.x, enemy.y, floorId);
     texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]"+((damageInfo||{}).turn||0));
     // 临界表
-    var criticals = core.enemys.nextCriticals(enemy.id, 8, null, null, floorId).map(function (v) {
+    var criticals = core.enemys.nextCriticals(enemy.id, 8, enemy.x, enemy.y, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();

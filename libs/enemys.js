@@ -355,7 +355,7 @@ enemys.prototype.getCurrentEnemys = function (floorId) {
     core.extractBlocks(floorId);
     core.status.maps[floorId].blocks.forEach(function (block) {
         if (!block.disable && block.event.cls.indexOf('enemy') == 0) {
-            this._getCurrentEnemys_addEnemy(block.event.id, enemys, used, floorId);
+            this._getCurrentEnemys_addEnemy(block.event.id, enemys, used, block.x, block.y, floorId);
         }
     }, this);
     return this._getCurrentEnemys_sort(enemys);
@@ -369,29 +369,46 @@ enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
     return core.material.enemys[enemy.displayIdInBook] || enemy;
 }
 
-enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, floorId) {
+enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x, y, floorId) {
     var enemy = this._getCurrentEnemys_getEnemy(enemyId);
-    if (enemy == null || used[enemy.id]) return;
+    if (enemy == null) return;
+
+    var id = enemy.id;
 
     var enemyInfo = this.getEnemyInfo(enemy, null, null, null, floorId);
+    var locEnemyInfo = this.getEnemyInfo(enemy, null, x, y, floorId);
+
+    if (locEnemyInfo.atk == enemyInfo.atk && locEnemyInfo.def == enemyInfo.def && locEnemyInfo.hp == enemyInfo.hp) {
+        x = null;
+        y = null;
+    } else {
+        enemyInfo = locEnemyInfo;
+    }
+    var id = enemy.id + ":" + x + ":" + y;
+    if (used[id]) return;
+    used[id] = true;
+
     var specialText = core.enemys.getSpecialText(enemy);
     var specialColor = core.enemys.getSpecialColor(enemy);
 
-    var critical = this.nextCriticals(enemy, 1, null, null, floorId);
+    var critical = this.nextCriticals(enemy, 1, x, y, floorId);
     if (critical.length > 0) critical = critical[0];
 
     var e = core.clone(enemy);
-    for (var x in enemyInfo) {
-        e[x] = enemyInfo[x];
+    for (var v in enemyInfo) {
+        e[v] = enemyInfo[v];
+    }
+    if (x != null && y != null) {
+        e.x = x;
+        e.y = y;
     }
     e.specialText = specialText;
     e.specialColor = specialColor;
-    e.damage = this.getDamage(enemy, null, null, floorId);
+    e.damage = this.getDamage(enemy, x, y, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];
-    e.defDamage = this.getDefDamage(enemy, 1, null, null, floorId);
+    e.defDamage = this.getDefDamage(enemy, 1, x, y, floorId);
     enemys.push(e);
-    used[enemy.id] = true;
 }
 
 enemys.prototype._getCurrentEnemys_sort = function (enemys) {

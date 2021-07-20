@@ -627,7 +627,10 @@ editor.prototype.drawInitData = function (icons) {
     editor.uivalues.foldPerCol = editor.config.get('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     editor.setLastUsedType(editor.config.get('lastUsedType', 'recent'));
-    editor.uivalues.lastUsed = editor.config.get("lastUsed", []);
+    var ids = editor.ids.map(function (x) {return x.id || "";});
+    editor.uivalues.lastUsed = editor.config.get("lastUsed", []).filter(function (one) {
+        return ids.indexOf(one.id) >= 0;
+    });
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
     for (var ii = 0; ii < imgNames.length; ii++) {

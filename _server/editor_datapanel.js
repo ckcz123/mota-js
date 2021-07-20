@@ -334,6 +334,14 @@ editor_datapanel_wrapper = function (editor) {
                     printe('不得使用保留关键字作为id！');
                     return;
                 }
+                if (editor_mode.info.images == 'autotile') {
+                    printe('自动元件不可修改id！');
+                    return;
+                }
+                if (editor_mode.info.idnum >= 10000) {
+                    printe('额外素材不可修改id！');
+                    return;
+                }
                 editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {
                     if (err) {
                         printe(err);

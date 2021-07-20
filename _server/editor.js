@@ -481,6 +481,7 @@ editor.prototype._updateMap_bigmap = function () {
     editor.uivalues.bigmapInfo.left = core.__PIXELS__ * Math.max(0, (1 - width / height) / 2);
     editor.uivalues.bigmapInfo.size = core.__PIXELS__ / Math.max(width, height);
     this.drawEventBlock();
+    this.updateLastUsedMap();
 }
 
 editor.prototype.updateMap = function () {

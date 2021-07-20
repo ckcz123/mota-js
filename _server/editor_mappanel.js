@@ -35,11 +35,10 @@ editor_mappanel_wrapper = function (editor) {
         if (editor.uivalues.bigmap) {
             var info = editor.uivalues.bigmapInfo;
             var size = loc.size / 32 * info.size;
-            editor.pos = {
+            return {
                 x: core.clamp(Math.floor((loc.x - info.left) / size), 0, editor.currentFloorData.width - 1),
                 y: core.clamp(Math.floor((loc.y - info.top) / size), 0, editor.currentFloorData.height - 1),
             }
-            return editor.pos;
         }
 
         var offsetX = 0, offsetY = 0;
@@ -47,8 +46,7 @@ editor_mappanel_wrapper = function (editor) {
             offsetX = core.bigmap.offsetX / 32;
             offsetY = core.bigmap.offsetY / 32;
         }
-        editor.pos = { 'x': ~~(loc.x / loc.size) + offsetX, 'y': ~~(loc.y / loc.size) + offsetY }
-        return editor.pos;
+        return { 'x': ~~(loc.x / loc.size) + offsetX, 'y': ~~(loc.y / loc.size) + offsetY }
     }
 
     /**
@@ -90,9 +88,10 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
+        editor.pos = pos;
 
         if (editor.uivalues.bindSpecialDoor.loc != null) {
-            var x = editor.pos.x, y = editor.pos.y, id = (editor.map[y][x] || {}).id;
+            var x = pos.x, y = pos.y, id = (editor.map[y][x] || {}).id;
             // 检测是否是怪物
             if (id && editor.game.getEnemy(id)) {
                 var locstr = x + "," + y, index = editor.uivalues.bindSpecialDoor.enemys.indexOf(locstr);

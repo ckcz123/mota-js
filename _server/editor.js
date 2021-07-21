@@ -638,7 +638,7 @@ editor.prototype.drawInitData = function (icons) {
         if (img == 'autotile') {
             var autotiles = images[img];
             for (var im in autotiles) {
-                tempy += autotiles[im].height;
+                tempy += editor.uivalues.folded ? 32 : autotiles[im].height;
             }
             var tempx = editor.uivalues.folded ? 32 : 3 * 32;
             editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + tempx) / 32, tempy];
@@ -748,9 +748,10 @@ editor.prototype.drawInitData = function (icons) {
             var autotiles = images[img];
             var tempx = editor.uivalues.folded ? 32 : 96;
             for (var im in autotiles) {
-                var subimgs = core.splitImage(autotiles[im], tempx, autotiles[im].height);
+                var tempy = editor.uivalues.folded ? 32 : autotiles[im].height;
+                var subimgs = core.splitImage(autotiles[im], tempx, tempy);
                 drawImage(subimgs[0], nowx, nowy, img);
-                nowy += autotiles[im].height;
+                nowy += tempy;
             }
             nowx += tempx;
             continue;

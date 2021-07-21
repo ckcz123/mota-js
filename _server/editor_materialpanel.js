@@ -132,13 +132,18 @@ editor_materialpanel_wrapper = function (editor) {
                 var autotiles = core.material.images['autotile'];
                 if (pos.images == 'autotile') {
                     var imNames = Object.keys(autotiles);
-                    if ((pos.y + 1) * ysize > editor.widthsX[spriter][3])
-                        pos.y = ~~(editor.widthsX[spriter][3] / ysize) - 4;
-                    else {
-                        for (var i = 0; i < imNames.length; i++) {
-                            if (pos.y >= 4 * i && pos.y < 4 * (i + 1)) {
-                                pos.images = imNames[i];
-                                pos.y = 4 * i;
+                    if (editor.uivalues.folded) {
+                        pos.y = Math.min(pos.y, imNames.length - 1);
+                        pos.images = imNames[pos.y];
+                    } else {
+                        if ((pos.y + 1) * ysize > editor.widthsX[spriter][3])
+                            pos.y = ~~(editor.widthsX[spriter][3] / ysize) - 4;
+                        else {
+                            for (var i = 0; i < imNames.length; i++) {
+                                if (pos.y >= 4 * i && pos.y < 4 * (i + 1)) {
+                                    pos.images = imNames[i];
+                                    pos.y = 4 * i;
+                                }
                             }
                         }
                     }

@@ -59,6 +59,7 @@ editor_blocklyconfig=(function(){
         "commonEvent": "回收钥匙商店",
         "args": ""
       }],'shop'),
+      MotaActionBlocks['common_m'].xmlText(),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
@@ -374,10 +375,15 @@ var workspace = Blockly.inject(blocklyDiv,{
   trashcan: false,
 });
 
+editor_blockly.isCommonEntry = function () {
+  var commonEntries = ['afterBattle', 'afterOpenDoor', 'firstArrive', 'eachArrive', 'commonEvent', 'item'];
+  return commonEntries.indexOf(editor_blockly.entryType) >= 0;
+}
+
 editor_blockly.entranceCategoryCallback = function(workspace) {
   var list=toolboxObj['入口方块']
   var xmlList = [];
-  var eventType = editor_blockly.entryType+'_m';
+  var eventType = (editor_blockly.isCommonEntry() ? 'common' : editor_blockly.entryType)+'_m';
   for(var ii=0,blockText;blockText=list[ii];ii++){
     if(new RegExp('<block type="'+eventType+'">').exec(blockText)){
       var block = Blockly.Xml.textToDom('<xml>'+blockText+'</xml>').firstChild;
@@ -452,7 +458,7 @@ function omitedcheckUpdateFunction(event) {
   var eventType = editor_blockly.entryType;
   if(editor_blockly.workspace.topBlocks_.length==1){
     var blockType = editor_blockly.workspace.topBlocks_[0].type;
-    if(blockType!==eventType+'_m'){
+    if(blockType!==eventType+'_m' && !(editor_blockly.isCommonEntry() && blockType == 'common_m')){
       editor_blockly.setValue('入口方块类型错误');
       return;
     }

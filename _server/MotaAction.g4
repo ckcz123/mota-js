@@ -28,6 +28,18 @@ grammar MotaAction;
 //===============parser===============
 //===blockly语句===
 
+common_m
+    :   '编辑事件' BGNL? Newline action+ BEND
+    
+
+/* common_m
+tooltip : 编辑事件
+helpUrl : /_docs/#/instruction
+var code = '[\n'+action_0+']\n';
+return code;
+*/;
+
+
 //事件 事件编辑器入口之一
 event_m
     :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool BGNL? Newline action+ BEND

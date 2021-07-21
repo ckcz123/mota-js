@@ -105,7 +105,7 @@ editor_blockly = function () {
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
             }).replace(/\\(r|f|i|c|d|e|g|z)/g,'\\\\$1')),
-            editor_blockly.entryType
+            editor_blockly.isCommonEntry() ? 'common' : editor_blockly.entryType
         );
     }
 
@@ -179,7 +179,7 @@ editor_blockly = function () {
         var eventType = editor_blockly.entryType;
         if(editor_blockly.workspace.topBlocks_.length==1){
           var blockType = editor_blockly.workspace.topBlocks_[0].type;
-          if(blockType!==eventType+'_m'){
+          if(blockType!==eventType+'_m' && !(editor_blockly.isCommonEntry() && blockType == 'common_m')){
             editor_blockly.setValue('入口方块类型错误');
             return;
           }

@@ -3274,6 +3274,9 @@ var ops = {
     '**': 'Math.pow('+expression_0+','+expression_1+')',
     'min': 'Math.min('+expression_0+','+expression_1+')',
     'max': 'Math.max('+expression_0+','+expression_1+')',
+    'blockId': 'core.getBlockId('+expression_0+','+expression_1+')',
+    'blockNum': 'core.getBlockNum('+expression_0+','+expression_1+')',
+    'blockCls': 'core.getBlockCls('+expression_0+','+expression_1+')',
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -3296,6 +3299,9 @@ var orders = {
     '^': Blockly.JavaScript.ORDER_BITWISE_XOR,
     'min': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     'max': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'blockId': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'blockNum': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'blockCls': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -3522,8 +3528,8 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'
-    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=']*/;
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'|'图块id'|'图块数字'|'图块类型'
+    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=','blockId','blockNum','blockCls']*/;
 
 AssignOperator_List
     :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'|'设为不小于'|'设为不大于'

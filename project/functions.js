@@ -214,7 +214,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.route.push("fly:" + toId);
 	// 传送
 	core.ui.closePanel();
-	core.changeFloor(toId, stair, loc, null, callback);
+	core.setFlag('__isFlying__', true);
+	core.changeFloor(toId, stair, loc, null, function () {
+		core.removeFlag("__isFlying__");
+		if (callback) callback();
+	});
 
 	return true;
 },

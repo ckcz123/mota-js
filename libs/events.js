@@ -560,7 +560,6 @@ events.prototype._sys_getItem = function (data, callback) {
 ////// 获得某个物品 //////
 events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
     if (num == null) num = 1;
-    num = num || 1;
     var itemCls = core.material.items[id].cls;
     core.removeBlock(x, y);
     core.items.getItemEffect(id, num);

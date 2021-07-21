@@ -756,12 +756,20 @@ editor_ui_wrapper = function (editor) {
                 if (callback) callback(list);
             }
 
+            var _isTileset = directory.indexOf('project/tilesets') >= 0;
+
             // 显示每一项内容
             var html = "<p style='margin-left: 10px; line-height: 25px'>";
             html += "<button onclick='editor.uievent._selectAllMaterial(true)'>全选</button>"+
                     "<button style='margin-left: 10px' onclick='editor.uievent._selectAllMaterial(false)'>全不选</button><br/>";
+            if (_isTileset) {
+                html += "<b style='margin-top: 5px;'>警告！额外素材一旦注册成功将不可删除，否则可能会导致素材错位风险！如果你不再想用某个额外素材，"
+                    +"但又不想让它出现在素材区，可以考虑使用空气墙同名替换该额外素材文件。</b><br/>"
+            }
             data.forEach(function (one) {
-                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${value.indexOf(one) >= 0? 'checked' : ''} /> ${one}`;
+                var checked = value.indexOf(one) >= 0? 'checked' : '';
+                var disabled = _isTileset && value.indexOf(one) >= 0 ? 'disabled' : ''
+                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${checked} ${disabled}/> ${one}`;
                 // 预览图片
                 if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
                     html += "<button onclick='editor.uievent._previewMaterialImage(this)' style='margin-left: 10px'>预览</button>";
@@ -789,7 +797,7 @@ editor_ui_wrapper = function (editor) {
 
     uievent._selectAllMaterial = function (checked) {
         Array.from(document.getElementsByClassName('materialCheckbox')).forEach(function (one) {
-            one.checked = checked;
+            if (!one.disabled) one.checked = checked;
         })
     }
 

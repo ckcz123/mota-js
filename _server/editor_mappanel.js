@@ -529,6 +529,7 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions._extraEvent_bindStartPoint = function (thisevent) {
         if (thisevent != 0) return false;
+        if (!confirm('再次确认，你想绑定此点为出生点吗？')) return false;
         editor.mode.onmode('tower');
         editor.mode.addAction(["change", "['firstData']['floorId']", editor.currentFloorId]);
         editor.mode.addAction(["change", "['firstData']['hero']['loc']['x']", editor.pos.x]);

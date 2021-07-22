@@ -2281,6 +2281,14 @@ maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, call
 maps.prototype._moveBlock_updateDirection = function (blockInfo, moveInfo) {
     moveInfo.offset = 1;
     var curr = moveInfo.moveSteps[0];
+    // 展开forward和backward
+    if ((curr[0] == 'backward' || curr[0] == 'forward') && curr[1] > 1) {
+        moveInfo.moveSteps.shift();
+        for (var i = 0; i < curr[1]; ++i) {
+            moveInfo.moveSteps.unshift([curr[0], 1]);
+        }
+        return this._moveBlock_updateDirection(blockInfo, moveInfo);
+    }
     if (moveInfo.lastDirection == null) {
         for (var d in blockInfo.faceIds) {
             if (blockInfo.faceIds[d] == blockInfo.id) {

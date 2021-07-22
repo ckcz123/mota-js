@@ -1893,29 +1893,26 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
-                if (index != 'none') {
-                    var timeout = Math.floor(index / 100) || 0;
-                    core.setFlag('timeout', timeout);
-                    index %= 100;
-                } else core.setFlag('timeout', 0);
-                core.status.event.selection = index;
-                setTimeout(function () {
-                    core.status.route.push("choices:"+index);
-                    if (index != 'none') {
-                        // 检查
-                        var choice = data.choices[index];
-                        if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
-                            // 无法选择此项：直接忽略
-                        } else {
-                            core.insertAction(choice.action);
-                        }
-                    }
-                    core.doAction();
-                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+                this.__action_choices_replaying(data, index);
+            } else {
+                core.control._replay_error(action);
+                return;
             }
         } else {
-            core.control._replay_error(action);
-            return;
+            // 容错录像
+            if (main.replayChecking) {
+                core.control._replay_error(action);
+                return;
+            }
+			core.myprompt('录像回放出错！当前需要执行选择项但录像中未记录。\n如需修复请输入您要选的项（从0起），点击取消将不会修复。', 0, function (value) {
+                if (value == null) {
+                    core.control._replay_error(action);
+                    return;
+                }
+                core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                value = core.clamp(parseInt(value), 0, data.choices.length - 1);
+                core.events.__action_choices_replaying(data, core.clamp(value, 0, data.choices.length - 1))
+            });
         }
     } else {
         if (data.timeout) {
@@ -1935,6 +1932,28 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices);
 }
 
+events.prototype.__action_choices_replaying = function (data, index) {
+    if (index != 'none') {
+        var timeout = Math.floor(index / 100) || 0;
+        core.setFlag('timeout', timeout);
+        index %= 100;
+    } else core.setFlag('timeout', 0);
+    core.status.event.selection = index;
+    setTimeout(function () {
+        core.status.route.push("choices:"+index);
+        if (index != 'none') {
+            // 检查
+            var choice = data.choices[index];
+            if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
+                // 无法选择此项：直接忽略
+            } else {
+                core.insertAction(choice.action);
+            }
+        }
+        core.doAction();
+    }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+}
+
 events.prototype._precompile_choices = function (data) {
     if (!(data.choices instanceof Array)) return data;
     for (var i = 0; i < data.choices.length; ++i) {
@@ -1952,24 +1971,15 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < 2) {
-                if (index != 'none') {
-                    var timeout = Math.floor(index / 100) || 0;
-                    core.setFlag('timeout', timeout);
-                    index %= 100;
-                } else core.setFlag('timeout', 0);
-                core.status.event.selection = index;
-                setTimeout(function () {
-                    core.status.route.push("choices:"+index);
-                    if (index != 'none') {
-                        if (index == 0) core.insertAction(data.yes);
-                        else core.insertAction(data.no);
-                    }
-                    core.doAction();
-                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+                this.__action_confirm_replaying(data, index);
+            } else {
+                core.control._replay_error(action);
+                return;
             }
         } else {
-            core.control._replay_error(action);
-            return;
+            // 录像中未记录选了哪个，则选默认值，而不是直接报错
+            core.status.replay.toReplay.unshift(action);
+            this.__action_confirm_replaying(data, data["default"] ? 0 : 1);
         }
     }
     else {
@@ -1984,6 +1994,23 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
         core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
     core.ui.drawConfirmBox(data.text);
+}
+
+events.prototype.__action_confirm_replaying = function (data, index) {
+    if (index != 'none') {
+        var timeout = Math.floor(index / 100) || 0;
+        core.setFlag('timeout', timeout);
+        index %= 100;
+    } else core.setFlag('timeout', 0);
+    core.status.event.selection = index;
+    setTimeout(function () {
+        core.status.route.push("choices:"+index);
+        if (index != 'none') {
+            if (index == 0) core.insertAction(data.yes);
+            else core.insertAction(data.no);
+        }
+        core.doAction();
+    }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
 }
 
 events.prototype._precompile_confirm = function (data) {

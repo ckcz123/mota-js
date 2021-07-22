@@ -15,6 +15,16 @@ function utils() {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
+    this.scan2 = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0},
+        'leftup': {'x': -1, 'y': -1},
+        'leftdown': {'x': -1, 'y': 1},
+        'rightup': {'x': 1, 'y': -1},
+        'rightdown': {'x': 1, 'y': 1}
+    };
 }
 
 utils.prototype._init = function () {

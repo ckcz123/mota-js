@@ -3068,8 +3068,10 @@ events.prototype._vibrate_update = function (shakeInfo) {
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 events.prototype.eventMoveHero = function(steps, time, callback) {
     time = time || core.values.moveSpeed;
-    var step = 0, moveSteps = (steps||[]).filter(function (t) {
-        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+    var step = 0, moveSteps = (steps||[]).map(function (t) {
+        return [t.split(':')[0], parseInt(t.split(':')[1]||"1")];
+    }).filter(function (t) {
+        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown'].indexOf(t[0])>=0;
     });
     core.status.heroMoving = -1;
     var animate=window.setInterval(function() {
@@ -3090,11 +3092,20 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
 }
 
 events.prototype._eventMoveHero_moving = function (step, moveSteps) {
-    var direction = moveSteps[0], x = core.getHeroLoc('x'), y = core.getHeroLoc('y');
+    var curr = moveSteps[0];
+    var direction = curr[0], x = core.getHeroLoc('x'), y = core.getHeroLoc('y');
     // ------ 前进/后退
     var o = direction == 'backward' ? -1 : 1;
     if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+    var faceDirection = direction;
+    if (direction == 'leftup' || direction == 'leftdown') faceDirection = 'left';
+    if (direction == 'rightup' || direction == 'rightdown') faceDirection = 'right';
     core.setHeroLoc('direction', direction);
+    if (curr[1] <= 0) {
+        core.setHeroLoc('direction', faceDirection);
+        moveSteps.shift();
+        return true;
+    }
     if (step <= 4) {
         core.drawHero('leftFoot', 4 * o * step);
     }
@@ -3102,10 +3113,12 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         core.drawHero('rightFoot', 4 * o * step);
     }
     if (step == 8) {
-        core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
-        core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+        core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);
+        core.setHeroLoc('y', y + o * core.utils.scan2[direction].y, true);
         core.updateFollowers();
-        moveSteps.shift();
+        curr[1]--;
+        if (curr[1] <= 0) moveSteps.shift();
+        core.setHeroLoc('direction', faceDirection);
         return true;
     }
     return false;

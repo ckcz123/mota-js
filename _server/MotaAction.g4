@@ -2121,13 +2121,13 @@ return code;
 */;
 
 move_s
-    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool BGNL? moveDirection+ Newline
     
 
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : /_docs/#/instruction
-default : ["","",500,true,false,"上右3下2后4左前2"]
+default : ["","",500,true,false,null]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.mapColor
 var floorstr = '';
@@ -2137,8 +2137,19 @@ if (PosString_0 && PosString_1) {
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "keep": true':'';
 Bool_1 = Bool_1?', "async": true':'';
-var code = '{"type": "move"'+floorstr+IntString_0+Bool_0+Bool_1+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "move"'+floorstr+IntString_0+Bool_0+Bool_1+', "steps": ['+moveDirection_0.trim().substring(2)+']},\n';
 return code;
+*/;
+
+moveDirection
+    :   '移动方向' Move_List '格数' Int Newline
+
+/* moveDirection
+tooltip : 移动方向
+helpUrl : /_docs/#/instruction
+default : ["up", 0]
+colour : this.subColor
+return ', "' + Move_List_0 + ':' + Int_0 + '"';
 */;
 
 moveAction_s
@@ -2155,7 +2166,7 @@ return '{"type": "moveAction"},\n';
 
 
 moveHero_s
-    :   '无视地形移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '无视地形移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? moveDirection+ Newline
     
 
 /* moveHero_s
@@ -2165,7 +2176,7 @@ default : ["",false,"上右3下2后4左前2"]
 colour : this.mapColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "moveHero"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "moveHero"'+IntString_0+Bool_0+', "steps": ['+moveDirection_0.trim().substring(2)+']},\n';
 return code;
 */;
 
@@ -3663,6 +3674,10 @@ Equip_List
 Key_List
     :   '黄钥匙'|'蓝钥匙'|'红钥匙'|'绿钥匙'|'铁门钥匙'
     /*Key_List ['yellowKey','blueKey','redKey','greenKey','steelKey']*/;
+
+Move_List
+    :   '上'|'下'|'左'|'右'|'前'|'后'|'左上'|'左下'|'右上'|'右下'
+    /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown']*/;
 
 //转blockly后不保留需要加"
 EvalString

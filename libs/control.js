@@ -795,7 +795,7 @@ control.prototype.drawHero = function (status, offset, frame) {
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
     offset = offset || 0;
-    var way = core.utils.scan[direction];
+    var way = core.utils.scan2[direction];
     var dx = way.x, dy = way.y, offsetX = dx * offset, offsetY = dy * offset;
     core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
     core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
@@ -871,8 +871,8 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
         "width": core.material.icons.hero.width || 32,
         "height": core.material.icons.hero.height,
         "heroIcon": heroIconArr[direction],
-        "posx": x * 32 - core.bigmap.offsetX + core.utils.scan[direction].x * offset,
-        "posy": y * 32 - core.bigmap.offsetY + core.utils.scan[direction].y * offset,
+        "posx": x * 32 - core.bigmap.offsetX + core.utils.scan2[direction].x * offset,
+        "posy": y * 32 - core.bigmap.offsetY + core.utils.scan2[direction].y * offset,
         "status": status,
         "index": index++,
     });
@@ -882,8 +882,8 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
             "width": core.material.images.images[t.name].width/4,
             "height": core.material.images.images[t.name].height/4,
             "heroIcon": heroIconArr[t.direction],
-            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan[t.direction].x*Math.abs(offset)),
-            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan[t.direction].y*Math.abs(offset)),
+            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan2[t.direction].x*Math.abs(offset)),
+            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan2[t.direction].y*Math.abs(offset)),
             "status": t.stop?"stop":status,
             "index": index++
         });
@@ -1028,8 +1028,8 @@ control.prototype.gatherFollowers = function () {
 control.prototype.updateFollowers = function () {
     core.status.hero.followers.forEach(function (t) {
         if (!t.stop) {
-            t.x += core.utils.scan[t.direction].x;
-            t.y += core.utils.scan[t.direction].y;
+            t.x += core.utils.scan2[t.direction].x;
+            t.y += core.utils.scan2[t.direction].y;
         }
     })
 
@@ -1037,8 +1037,8 @@ control.prototype.updateFollowers = function () {
     core.status.hero.followers.forEach(function (t) {
         t.stop = true;
         var dx = nowx - t.x, dy = nowy - t.y;
-        for (var dir in core.utils.scan) {
-            if (core.utils.scan[dir].x == dx && core.utils.scan[dir].y == dy) {
+        for (var dir in core.utils.scan2) {
+            if (core.utils.scan2[dir].x == dx && core.utils.scan2[dir].y == dy) {
                 t.stop = false;
                 t.direction = dir;
             }

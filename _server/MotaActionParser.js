@@ -399,15 +399,33 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "move": // 移动事件
       data.loc=data.loc||['',''];
+      var buildMoveDirection= function (obj) {
+        obj = MotaActionFunctions.processMoveDirections(obj||[]);
+        var res = null;
+        for(var ii=obj.length-1,one;one=obj[ii];ii--) {
+          var v = one.split(':');
+          res=MotaActionBlocks['moveDirection'].xmlText([v[0], parseInt(v[1]), res]);
+        }
+        return res;
+      }
       this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
+        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,buildMoveDirection(data.steps),this.next]);
       break;
     case "moveAction": // 前进一格或撞击
       this.next = MotaActionBlocks['moveAction_s'].xmlText([this.next]);
       break;
     case "moveHero": // 无视地形移动勇士
+      var buildMoveDirection= function (obj) {
+        obj = MotaActionFunctions.processMoveDirections(obj||[]);
+        var res = null;
+        for(var ii=obj.length-1,one;one=obj[ii];ii--) {
+          var v = one.split(':');
+          res=MotaActionBlocks['moveDirection'].xmlText([v[0], parseInt(v[1]), res]);
+        }
+        return res;
+      }
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
-        data.time,data.async||false,this.StepString(data.steps),this.next]);
+        data.time,data.async||false,buildMoveDirection(data.steps),this.next]);
       break;
     case "jump": // 跳跃事件
       data.from=data.from||['',''];
@@ -1271,6 +1289,24 @@ MotaActionFunctions.PosString_pre = function(PosString){
   var comma = PosString.indexOf(',');
   if (comma >= 0 && PosString.substring(0, comma).ifndexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
+}
+
+MotaActionFunctions.processMoveDirections = function (steps) {
+  var curr = null, num = null;
+  var result = [];
+  steps.forEach(function (one) {
+    var v = one.split(':');
+    if (v.length == 1) v.push("1");
+    if (v[0] != curr) {
+      if (curr != null) result.push(curr+":"+num);
+      curr = v[0];
+      num = parseInt(v[1]);
+    } else {
+      num += parseInt(v[1]);
+    }
+  });
+  if (curr != null) result.push(curr+":"+num);
+  return result;
 }
 
 MotaActionFunctions.StepString_pre = function(StepString){

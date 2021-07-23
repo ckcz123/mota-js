@@ -123,6 +123,23 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.selectColor, 'rgba(' + obj.selectColor + ')', obj.font
       ]);
 
+    case 'nameMap':
+      if (!obj) obj={};
+      var items = Object.keys(obj);
+      var result = null;
+      for (var ii=items.length,one;one=items[ii];ii--) {
+        var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];})
+        if (knownItems.indexOf(one) >= 0) {
+          result = MotaActionBlocks['nameMapSound1'].xmlText([
+            
+          ])
+        }
+        var value = obj[ii];
+
+
+      }
+
+
     case 'shop':
       var buildsub = function(obj,parser,next){
         var text_choices = null;

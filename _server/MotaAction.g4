@@ -639,6 +639,93 @@ var code = {
 return JSON.stringify(code);
 */;
 
+nameMap_m
+    : '文件别名设置 此项可对每个素材（背景音乐、音效、使用图片、使用动画）进行一个别名设置，然后可以游戏中使用此别名代替原始文件名。' BGNL? Newline nameMapList+ BEND
+
+/* nameMap_m
+tooltip : 文件别名设置
+helpUrl : /_docs/#/instruction
+var value = doorKeyList_0.trim();
+if (value.startsWith(',')) value = value.substring(1);
+return '{'+value+'}';
+*/;
+
+nameMapList
+    :   nameMapBgm
+    |   nameMapSoundKnown
+    |   nameMapSoundUnknown
+    |   nameMapImage
+    |   nameMapAnimate
+    |   nameMapUnknown
+    |   nameMapEmpty;
+
+nameMapBgm
+    : '映射背景音乐' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapBgm
+tooltip : 映射背景音乐
+default : ['背景音乐', 'bgm.mp3']
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapSound1
+    : '映射系统音效' '名称' NameMap_List '映射到文件' EvalString BEND
+
+/* nameMapSound1
+tooltip : 映射系统音效
+default : ['确定', 'confirm.mp3']
+helpUrl : /_docs/#/instruction
+return ',"'+NameMap_List_0+'":"'+EvalString_0+'"';
+*/;
+
+nameMapSound2
+    : '映射音效' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapSound2
+tooltip : 映射音效
+default : ['攻击', 'attack.mp3']
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapImage
+    : '映射图片' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapImage
+tooltip : 映射图片
+default : ['背景图', 'bg.jpg']
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapImage
+    : '映射动画' '名称' EvalString '映射到文件' IdString BEND
+
+/* nameMapImage
+tooltip : 映射图片
+default : ['剑技', 'jianji']
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+IdString_0+'"';
+*/;
+
+nameMapUnknown
+    : '未知映射' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapUnknown
+tooltip : 未知映射
+default : ['文件名', 'test.jpg']
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapEmpty
+    :   Newline
+    
+/* nameMapEmpty
+return '';
+*/;
+
 //为了避免关键字冲突,全部加了_s
 //动作
 action
@@ -1903,11 +1990,11 @@ return code;
 */;
 
 animate_1_s
-    :   '显示角色动画' IdString '不等待执行完毕' Bool Newline
+    :   '显示动画并跟随角色' IdString '不等待执行完毕' Bool Newline
     
 
 /* animate_1_s
-tooltip : animate：显示角色动画
+tooltip : animate：显示动画并跟随角色
 helpUrl : /_docs/#/instruction
 default : ["zone",false]
 allAnimates : ['IdString_0']
@@ -3685,6 +3772,10 @@ Key_List
 Move_List
     :   '上'|'下'|'左'|'右'|'前'|'后'|'左上'|'左下'|'右上'|'右下'
     /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown']*/;
+
+NameMap_List
+    :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'阻激夹域'|'穿脱装备'
+    /*NameMap_List ['确定','取消','操作失败','光标移动','打开界面','读档','存档','获得道具','回血','炸弹','飞行器','开关门','上下楼','跳跃','破墙镐','阻激夹域','穿脱装备']*/;
 
 //转blockly后不保留需要加"
 EvalString

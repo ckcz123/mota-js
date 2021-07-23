@@ -87,6 +87,9 @@ editor_blocklyconfig=(function(){
       }, 'doorInfo'),
       MotaActionBlocks['faceIds_m'].xmlText(),
       MotaActionBlocks['mainStyle_m'].xmlText(),
+      MotaActionFunctions.actionParser.parse({
+        "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "剑技": "jianji"
+      }, 'nameMap')
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),

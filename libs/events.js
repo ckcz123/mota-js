@@ -252,13 +252,13 @@ events.prototype._gameOver_askRate = function (ending) {
         return;
     }
 
-    core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
+    core.ui.drawConfirmBox("恭喜通关！你想进行评分吗？", function () {
         if (core.platform.isPC) {
-            window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
+            window.open("/score.php?name=" + core.firstData.name, "_blank");
             core.restart();
         }
         else {
-            window.location.href = "/score.php?name=" + core.firstData.name + "&num=10";
+            window.location.href = "/score.php?name=" + core.firstData.name;
         }
     }, function () {
         core.restart();
@@ -273,11 +273,14 @@ events.prototype.restart = function() {
 
 ////// 询问是否需要重新开始 //////
 events.prototype.confirmRestart = function () {
+    core.playSound('打开界面');
     core.status.event.selection = 1;
     core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
+        core.playSound('确定');
         core.ui.closePanel();
         core.restart();
     }, function () {
+        core.playSound('取消');
         core.ui.closePanel();
     });
 }
@@ -410,7 +413,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!id) return core.clearContinueAutomaticRoute(callback);
     // 非强制战斗
     if (!core.enemys.canBattle(id, x, y) && !force && !core.status.event.id) {
-        core.drawTip("你打不过此怪物！");
+        core.playSound('操作失败');
+        core.drawTip("你打不过此怪物！", id);
         return core.clearContinueAutomaticRoute(callback);
     }
     // 自动存档
@@ -491,10 +495,14 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
 
             // --- 如果是一个不存在的道具，则直接认为无法开启
             if (!core.material.items[keyName]) {
+                core.stopSound();
+                core.playSound('操作失败');
                 core.drawTip("无法开启此门");
                 return clearAndReturn();
             }
             if (core.itemCount(keyName) < keyValue) {
+                core.stopSound();
+                core.playSound('操作失败');
                 core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", null, true);
                 return false;
             }
@@ -1616,6 +1624,7 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
         core.useItem(data.id, true, core.doAction);
     }
     else {
+        core.playSound('操作失败');
         core.drawTip("当前无法使用" + ((core.material.items[data.id] || {}).name || "未知道具"));
         core.doAction();
     }
@@ -1901,18 +1910,20 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         } else {
             // 容错录像
             if (main.replayChecking) {
-                core.control._replay_error(action);
-                return;
-            }
-			core.myprompt('录像回放出错！当前需要执行选择项但录像中未记录。\n如需修复请输入您要选的项（从0起），点击取消将不会修复。', 0, function (value) {
-                if (value == null) {
-                    core.control._replay_error(action);
-                    return;
-                }
+                // 录像验证系统中选择第一项
                 core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
-                value = core.clamp(parseInt(value), 0, data.choices.length - 1);
-                core.events.__action_choices_replaying(data, core.clamp(value, 0, data.choices.length - 1))
-            });
+                core.events.__action_choices_replaying(data, 0)
+            } else {
+                // 正常游戏中弹窗选择
+                core.myprompt('录像回放出错！当前需要执行选择项但录像中未记录。\n如需修复请输入您要选的项（从0起），点击取消将不会修复。', 0, function (value) {
+                    if (value == null) {
+                        core.control._replay_error(action);
+                        return;
+                    }
+                    core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                    core.events.__action_choices_replaying(data, core.clamp(parseInt(value), 0, data.choices.length - 1))
+                });
+            }
         }
     } else {
         if (data.timeout) {
@@ -2517,10 +2528,12 @@ events.prototype._checkStatus = function (name, fromUserAction, checkItem) {
     }
     if (fromUserAction && core.status.lockControl) return false;
     if (checkItem && !core.hasItem(name)) {
-        core.drawTip("你没有" + core.material.items[name].name);
+        core.playSound('操作失败');
+        core.drawTip("你没有" + core.material.items[name].name, name);
         return false;
     }
     if (core.isMoving()) {
+        core.playSound('操作失败');
         core.drawTip("请先停止勇士行动");
         return false;
     }
@@ -2547,6 +2560,7 @@ events.prototype.openBook = function (fromUserAction) {
         core.status.event.ui = core.status.event.data;
     }
     if (!this._checkStatus('book', fromUserAction, true)) return;
+    core.playSound('打开界面');
     core.useItem('book', true);
 }
 
@@ -2555,19 +2569,22 @@ events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
-        core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name);
+        core.playSound('操作失败');
+        core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name, 'fly');
         core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
     if (!core.canUseItem('fly')) {
-        core.drawTip(core.material.items['fly'].name + "好像失效了");
+        core.playSound('操作失败');
+        core.drawTip(core.material.items['fly'].name + "好像失效了", 'fly');
         core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
+    core.playSound('打开界面');
     core.useItem('fly', true);
     return;
 }
@@ -2580,6 +2597,7 @@ events.prototype.flyTo = function (toId, callback) {
 events.prototype.openEquipbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('equipbox', fromUserAction)) return;
+    core.playSound('打开界面');
     core.ui._drawEquipbox();
 }
 
@@ -2587,6 +2605,7 @@ events.prototype.openEquipbox = function (fromUserAction) {
 events.prototype.openToolbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('toolbox', fromUserAction)) return;
+    core.playSound('打开界面');
     core.ui._drawToolbox();
 }
 
@@ -2595,7 +2614,8 @@ events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
 
     if (Object.keys(core.status.shops).length == 0) {
-        core.drawTip("本塔没有快捷商店！");
+        core.playSound('操作失败');
+        core.drawTip("本游戏没有快捷商店！");
         return;
     }
 
@@ -2604,11 +2624,13 @@ events.prototype.openQuickShop = function (fromUserAction) {
         var shopId = Object.keys(core.status.shops)[0];
         if (core.status.event.id != null) return;
         if (!core.canOpenShop(shopId)) {
+            core.playSound('操作失败');
             core.drawTip("当前无法打开快捷商店！");
             return;
         }
         var message = core.canUseQuickShop(shopId);
         if (message != null) {
+            core.playSound('操作失败');
             core.drawTip(message);
             return;
         }
@@ -2630,6 +2652,7 @@ events.prototype.openKeyBoard = function (fromUserAction) {
 events.prototype.save = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (core.hasFlag('__forbidSave__')) {
+        core.playSound('操作失败');
         core.drawTip('当前禁止存档');
         return;
     }
@@ -2638,6 +2661,7 @@ events.prototype.save = function (fromUserAction) {
     if (!this._checkStatus('save', fromUserAction)) return;
     var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+    core.playSound('打开界面');
     core.ui._drawSLPanel(10*page+offset);
 }
 
@@ -2653,12 +2677,14 @@ events.prototype.load = function (fromUserAction) {
         core.clearMap('all');
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
+        core.playSound('打开界面');
         core.ui._drawSLPanel(10*page+offset);
         return;
     }
     if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval))
         return;
     if (!this._checkStatus('load', fromUserAction)) return;
+    core.playSound('打开界面');
     core.ui._drawSLPanel(10*page+offset);
 }
 
@@ -2667,6 +2693,7 @@ events.prototype.openSettings = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('settings', fromUserAction))
         return;
+    core.playSound('打开界面');
     core.ui._drawSettings();
 }
 
@@ -3264,6 +3291,7 @@ events.prototype.tryUseItem = function (itemId) {
         core.ui.closePanel();
         core.useItem(itemId);
     } else {
+        core.playSound('操作失败');
         core.drawTip("当前无法使用" + core.material.items[itemId].name);
     }
 }

@@ -1928,7 +1928,7 @@ ui.prototype._drawReplay = function () {
 ui.prototype._drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
-        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
+        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于游戏","下载离线版本", "返回主菜单"
     ]);
 }
 
@@ -2226,7 +2226,7 @@ ui.prototype._drawBookDetail = function (index) {
     core.setAlpha('data', 1);
     core.strokeRect('data', left - 1, top - 1, width + 1, height + 1,
         core.arrayToRGBA(core.status.globalAttribute.borderColor), 2);
-
+    core.playSound('确定');
     this._drawBookDetail_drawContent(enemy, content, {top: top, content_left: content_left, bottom: bottom, validWidth: validWidth});
 }
 
@@ -2428,6 +2428,7 @@ ui.prototype._drawCenterFly = function () {
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
+    core.playSound('打开界面');
     core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置");
     return;
 }
@@ -3015,6 +3016,7 @@ ui.prototype.drawStatusBar = function () {
 
 ////// 绘制“数据统计”界面 //////
 ui.prototype._drawStatistics = function (floorIds) {
+    core.playSound('打开界面');
     var obj = this._drawStatistics_buildObj();
     if (typeof floorIds == 'string') floorIds = [floorIds];
     (floorIds || core.floorIds).forEach(function (floorId) {
@@ -3189,6 +3191,7 @@ ui.prototype._drawAbout = function () {
 
 ////// 绘制帮助页面 //////
 ui.prototype._drawHelp = function () {
+    core.playSound('打开界面');
     core.clearUI();
     if (core.material.images.keyboard) {
         core.status.event.id = 'help';

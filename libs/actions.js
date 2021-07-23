@@ -910,10 +910,12 @@ actions.prototype._selectChoices = function (length, keycode, callback) {
 actions.prototype._keyDownChoices = function (keycode) {
     if (keycode == 38) {
         core.status.event.selection--;
+        core.playSound('光标移动');
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
     if (keycode == 40) {
         core.status.event.selection++;
+        core.playSound('光标移动');
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -929,6 +931,7 @@ actions.prototype._onMoveChoices = function (x, y) {
         var selection = y - topIndex;
         if (selection == core.status.event.selection) return;
         core.status.event.selection = selection;
+        core.playSound('光标移动');
         core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
     }
 }
@@ -942,6 +945,7 @@ actions.prototype._clickCenterFly = function (x, y) {
             core.useItem('centerFly');
         }
         else {
+            core.playSound('操作失败');
             core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
@@ -954,6 +958,7 @@ actions.prototype._keyUpCenterFly = function (keycode) {
             core.useItem('centerFly');
         }
         else {
+            core.playSound('操作失败');
             core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
         }
     }
@@ -969,18 +974,12 @@ actions.prototype._clickConfirmBox = function (x, y) {
 
 ////// 键盘操作确认框时 //////
 actions.prototype._keyUpConfirmBox = function (keycode) {
-    if (keycode == 37) {
-        core.status.event.selection = 0;
+    if (keycode == 37 || keycode == 39) {
+        core.status.event.selection = 1 - core.status.event.selection;
+        core.playSound('光标移动');
         core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
         return;
     }
-
-    if (keycode == 39) {
-        core.status.event.selection = 1;
-        core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
-        return;
-    }
-
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         if (core.status.event.selection == 0 && core.status.event.data.yes) {
             core.status.event.selection = null;
@@ -999,13 +998,19 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
 actions.prototype._onMoveConfirmBox = function (x, y) {
     if (y == this.HSIZE + 1) {
         if (x == this.HSIZE - 2 || x == this.HSIZE - 1) {
-            core.status.event.selection = 0;
-            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            if (core.status.event.selection != 0) {
+                core.status.event.selection = 0;
+                core.playSound('光标移动');
+                core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            }
             return;
         }
         if (x == this.HSIZE + 2 || x == this.HSIZE + 1) {
-            core.status.event.selection = 1;
-            core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            if (core.status.event.selection != 1) {
+                core.status.event.selection = 1;
+                core.playSound('光标移动');
+                core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+            }
             return;
         }
     }
@@ -1039,6 +1044,7 @@ actions.prototype._clickAction = function (x, y) {
             if (y >= topIndex && y < topIndex + choices.length) {
                 var choice = choices[y - topIndex];
                 if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
+                    core.playSound('操作失败');
                     core.drawTip("无法选择此项");
                     return;
                 }
@@ -1085,6 +1091,7 @@ actions.prototype._keyDownAction = function (keycode) {
     }
     if (core.status.event.data.type == 'confirm' && (keycode == 37 || keycode == 39)) {
         core.status.event.selection = 1 - core.status.event.selection;
+        core.playSound('光标移动');
         core.drawConfirmBox(core.status.event.ui.text);
         return;
     }
@@ -1143,16 +1150,19 @@ actions.prototype._clickBook = function (x, y) {
     var pageinfo = core.ui._drawBook_pageinfo();
     // 上一页
     if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
+        core.playSound('光标移动');
         core.ui.drawBook(core.status.event.data - pageinfo.per_page);
         return;
     }
     // 下一页
     if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
+        core.playSound('光标移动');
         core.ui.drawBook(core.status.event.data + pageinfo.per_page);
         return;
     }
     // 返回
     if (x >= this.LAST-2 && y == this.LAST) {
+        core.playSound('取消');
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -1184,18 +1194,19 @@ actions.prototype._clickBook = function (x, y) {
 ////// 怪物手册界面时，按下某个键的操作 //////
 actions.prototype._keyDownBook = function (keycode) {
     var pageinfo = core.ui._drawBook_pageinfo();
-    if (keycode == 37) core.ui.drawBook(core.status.event.data - pageinfo.per_page);
-    if (keycode == 38) core.ui.drawBook(core.status.event.data - 1);
-    if (keycode == 39) core.ui.drawBook(core.status.event.data + pageinfo.per_page);
-    if (keycode == 40) core.ui.drawBook(core.status.event.data + 1);
-    if (keycode == 33) core.ui.drawBook(core.status.event.data - pageinfo.per_page);
-    if (keycode == 34) core.ui.drawBook(core.status.event.data + pageinfo.per_page);
+    if (keycode == 37) { core.playSound('光标移动'); core.ui.drawBook(core.status.event.data - pageinfo.per_page); }
+    if (keycode == 38) { core.playSound('光标移动'); core.ui.drawBook(core.status.event.data - 1); }
+    if (keycode == 39) { core.playSound('光标移动'); core.ui.drawBook(core.status.event.data + pageinfo.per_page); }
+    if (keycode == 40) { core.playSound('光标移动'); core.ui.drawBook(core.status.event.data + 1); }
+    if (keycode == 33) { core.playSound('光标移动'); core.ui.drawBook(core.status.event.data - pageinfo.per_page); }
+    if (keycode == 34) { core.playSound('光标移动'); core.ui.drawBook(core.status.event.data + pageinfo.per_page); }
     return;
 }
 
 ////// 怪物手册界面时，放开某个键的操作 //////
 actions.prototype._keyUpBook = function (keycode) {
     if (keycode == 27 || keycode == 88) {
+        core.playSound('取消');
         if (core.events.recoverEvents(core.status.event.interval)) {
             return;
         }
@@ -1218,16 +1229,17 @@ actions.prototype._keyUpBook = function (keycode) {
 ////// 怪物手册属性显示界面时的点击操作 //////
 actions.prototype._clickBookDetail = function () {
     core.clearMap('data');
+    core.playSound('取消');
     core.status.event.id = 'book';
 }
 
 ////// 楼层传送器界面时的点击操作 //////
 actions.prototype._clickFly = function (x, y) {
-    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE+3) core.ui.drawFly(this._getNextFlyFloor(-1));
-    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE-1) core.ui.drawFly(this._getNextFlyFloor(1));
-    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE+4) core.ui.drawFly(this._getNextFlyFloor(-10));
-    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE-2) core.ui.drawFly(this._getNextFlyFloor(10));
-    if (x >= this.HSIZE-1 && x <= this.HSIZE+1 && y == this.LAST) core.ui.closePanel();
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE+3) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(-1)); }
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE-1) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(1)); }
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE+4) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(-10)); }
+    if ((x == this.SIZE-2 || x == this.SIZE-3) && y == this.HSIZE-2) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(10)); }
+    if (x >= this.HSIZE-1 && x <= this.HSIZE+1 && y == this.LAST) { core.playSound('取消'); core.ui.closePanel(); }
     if (x >= 0 && x <= this.HSIZE+3 && y >= 3 && y <= this.LAST - 1)
         core.flyTo(core.floorIds[core.status.event.data]);
     return;
@@ -1235,10 +1247,10 @@ actions.prototype._clickFly = function (x, y) {
 
 ////// 楼层传送器界面时，按下某个键的操作 //////
 actions.prototype._keyDownFly = function (keycode) {
-    if (keycode == 37) core.ui.drawFly(this._getNextFlyFloor(-10));
-    else if (keycode == 38) core.ui.drawFly(this._getNextFlyFloor(1));
-    else if (keycode == 39) core.ui.drawFly(this._getNextFlyFloor(10));
-    else if (keycode == 40) core.ui.drawFly(this._getNextFlyFloor(-1));
+    if (keycode == 37) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(-10)); }
+    else if (keycode == 38) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(1)); }
+    else if (keycode == 39) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(10)); }
+    else if (keycode == 40) { core.playSound('光标移动'); core.ui.drawFly(this._getNextFlyFloor(-1)); }
     return;
 }
 
@@ -1263,8 +1275,10 @@ actions.prototype._getNextFlyFloor = function (delta, index) {
 
 ////// 楼层传送器界面时，放开某个键的操作 //////
 actions.prototype._keyUpFly = function (keycode) {
-    if (keycode == 71 || keycode == 27 || keycode == 88)
+    if (keycode == 71 || keycode == 27 || keycode == 88) {
+        core.playSound('取消');
         core.ui.closePanel();
+    }
     if (keycode == 13 || keycode == 32 || keycode == 67)
         this._clickFly(this.HSIZE-1, this.HSIZE-1);
     return;
@@ -1284,39 +1298,47 @@ actions.prototype._clickViewMaps = function (x, y) {
 
     if (x <= per - 2 && y <= per - 2) {
         core.status.event.data.damage = !core.status.event.data.damage;
+        core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
     if (x <= per - 2 && y >= this.SIZE + 1 - per) {
         if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
         else core.markedFloorIds[floorId] = true;
+        core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
     if (x >= this.SIZE + 1 - per && y <= per - 2) {
         core.status.event.data.all = !core.status.event.data.all;
+        core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
 
     if (x >= per && x <= this.LAST - per && y <= per - 1 && (!core.status.event.data.all && mh > this.SIZE)) {
+        core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy - 1);
         return;
     }
     if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && (!core.status.event.data.all && mh > this.SIZE)) {
+        core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy + 1);
         return;
     }
     if (x <= per - 1 && y >= per && y <= this.LAST - per) {
+        core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx - 1, cy);
         return;
     }
     if (x >= this.SIZE - per && y >= per && y <= this.LAST - per) {
+        core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx + 1, cy);
         return;
     }
 
     if (y <= this.HSIZE - 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+        core.playSound('光标移动');
         index++;
         while (index < core.floorIds.length && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index++;
@@ -1325,6 +1347,7 @@ actions.prototype._clickViewMaps = function (x, y) {
         return;
     }
     if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+        core.playSound('光标移动');
         index--;
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
             index--;
@@ -1334,6 +1357,7 @@ actions.prototype._clickViewMaps = function (x, y) {
     }
     if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
         core.clearMap('data');
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -1364,22 +1388,26 @@ actions.prototype._keyUpViewMaps = function (keycode) {
 
     if (keycode == 27 || keycode == 13 || keycode == 32 || (!core.isReplaying() && keycode == 67)) {
         core.clearMap('data');
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
     if (keycode == 86) {
         core.status.event.data.damage = !core.status.event.data.damage;
+        core.playSound('光标移动');
         core.ui._drawViewMaps(core.status.event.data);
         return;
     }
     if (keycode == 90) {
         core.status.event.data.all = !core.status.event.data.all;
+        core.playSound('光标移动');
         core.ui._drawViewMaps(core.status.event.data);
         return;
     }
     if (keycode == 66) {
         if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
         else core.markedFloorIds[floorId] = true;
+        core.playSound('光标移动');
         core.ui._drawViewMaps(core.status.event.data);
         return;
     }
@@ -1403,6 +1431,7 @@ actions.prototype._clickQuickShop = function (x, y) {
         if (y >= topIndex && y < topIndex + shopIds.length) {
             var shopId = shopIds[y - topIndex];
             if (!core.canOpenShop(shopId)) {
+                core.playSound('操作失败');
                 core.drawTip('当前项尚未开启');
                 return;
             }
@@ -1411,12 +1440,15 @@ actions.prototype._clickQuickShop = function (x, y) {
                 // core.ui.closePanel();
                 core.openShop(shopIds[y - topIndex], false);
             } else {
+                core.playSound('操作失败');
                 core.drawTip(message);
             }
         }
         // 离开
-        else if (y == topIndex + shopIds.length)
+        else if (y == topIndex + shopIds.length) {
+            core.playSound('取消');
             core.ui.closePanel();
+        }
         return;
     }
     return;
@@ -1425,6 +1457,7 @@ actions.prototype._clickQuickShop = function (x, y) {
 ////// 快捷商店界面时，放开某个键的操作 //////
 actions.prototype._keyUpQuickShop = function (keycode) {
     if (keycode == 27 || keycode == 75 || keycode == 88 || keycode == 86) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -1447,6 +1480,7 @@ actions.prototype._clickToolbox = function (x, y) {
         return;
     }
     if (x >= this.LAST - 2 && y == this.LAST) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -1457,10 +1491,12 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x == this.HSIZE-2 || x == this.HSIZE-3) {
         if (y == this.LAST - 5 && toolsPage > 1) {
             core.status.event.data.toolsPage--;
+            core.playSound('光标移动');
             core.ui._drawToolbox(core.status.event.selection);
         }
         if (y == this.LAST && constantsPage > 1) {
             core.status.event.data.constantsPage--;
+            core.playSound('光标移动');
             core.ui._drawToolbox(core.status.event.selection);
         }
     }
@@ -1468,10 +1504,12 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x == this.HSIZE+2 || x == this.HSIZE+3) {
         if (y == this.LAST - 5 && toolsPage < Math.ceil(tools.length / this.LAST)) {
             core.status.event.data.toolsPage++;
+            core.playSound('光标移动');
             core.ui._drawToolbox(core.status.event.selection);
         }
         if (y == this.LAST && constantsPage < Math.ceil(constants.length / this.LAST)) {
             core.status.event.data.constantsPage++;
+            core.playSound('光标移动');
             core.ui._drawToolbox(core.status.event.selection);
         }
     }
@@ -1533,6 +1571,7 @@ actions.prototype._keyDownToolbox = function (keycode) {
         if (index == 0) { // 处理向前翻页
             if (toolsPage > 1) {
                 core.status.event.data.toolsPage--;
+                core.playSound('光标移动');
                 index = last_index;
             }
             else return; // 第一页不向前翻
@@ -1545,6 +1584,7 @@ actions.prototype._keyDownToolbox = function (keycode) {
             }
             else {
                 core.status.event.data.constantsPage--;
+                core.playSound('光标移动');
                 index = 2 * this.LAST - 1;
             }
         }
@@ -1566,10 +1606,12 @@ actions.prototype._keyDownToolbox = function (keycode) {
     if (keycode == 39) { // right
         if (toolsPage < toolsTotalPage && index == last_index) {
             core.status.event.data.toolsPage++;
+            core.playSound('光标移动');
             index = 0;
         }
         else if (constantsPage < constantsTotalPage && index == 2 * this.LAST - 1) {
             core.status.event.data.constantsPage++;
+            core.playSound('光标移动');
             index = this.LAST;
         }
         else if (index == toolsLastIndex) {
@@ -1615,6 +1657,7 @@ actions.prototype._keyUpToolbox = function (keycode) {
         return;
     }
     if (keycode == 84 || keycode == 27 || keycode == 88) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -1639,6 +1682,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     }
     // 返回
     if (x >= this.LAST - 2 && y == this.LAST) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -1647,6 +1691,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
         if (core.status.event.data.page > 1) {
             core.status.event.data.page--;
+            core.playSound('光标移动');
             core.ui._drawEquipbox(core.status.event.selection);
         }
         return;
@@ -1656,6 +1701,7 @@ actions.prototype._clickEquipbox = function (x, y) {
         var lastPage = Math.ceil(core.getToolboxItems('equips').length / this.LAST);
         if (core.status.event.data.page < lastPage) {
             core.status.event.data.page++;
+            core.playSound('光标移动');
             core.ui._drawEquipbox(core.status.event.selection);
         }
         return;
@@ -1718,6 +1764,7 @@ actions.prototype._keyDownEquipbox = function (keycode) {
         if (index == this.LAST) {
             if (page > 1) {
                 core.status.event.data.page--;
+                core.playSound('光标移动');
                 index = this.LAST + last_index;
             }
             else if (page == 1)
@@ -1743,6 +1790,7 @@ actions.prototype._keyDownEquipbox = function (keycode) {
     if (keycode == 39) { // right
         if (page < totalPage && index == this.LAST + last_index) {
             core.status.event.data.page++;
+            core.playSound('光标移动');
             index = this.LAST;
         }
         else if (index == equipCapacity - 1) {
@@ -1790,6 +1838,7 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
         return;
     }
     if (keycode == 81 || keycode == 27 || keycode == 88) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -1808,16 +1857,19 @@ actions.prototype._clickSL = function (x, y) {
 
     // 上一页
     if ((x == this.HSIZE-2 || x == this.HSIZE-3) && y == this.LAST) {
+        core.playSound('光标移动');
         core.ui._drawSLPanel(10 * (page - 1) + offset);
         return;
     }
     // 下一页
     if ((x == this.HSIZE+2 || x == this.HSIZE+3) && y == this.LAST) {
+        core.playSound('光标移动');
         core.ui._drawSLPanel(10 * (page + 1) + offset);
         return;
     }
     // 返回
     if (x >= this.LAST-2 && y == this.LAST) {
+        core.playSound('取消');
         if (core.events.recoverEvents(core.status.event.interval))
             return;
         core.ui.closePanel();
@@ -1870,9 +1922,10 @@ actions.prototype._clickSL = function (x, y) {
     }
     if (id != null) {
         if (core.status.event.selection) {
-            if (id == 'autoSave')
+            if (id == 'autoSave') {
+                core.playSound('操作失败');
                 core.drawTip("无法删除自动存档！");
-            else {
+            } else {
                 core.removeSave(id, function () {
                     core.ui._drawSLPanel(index, true);
                 });
@@ -1909,6 +1962,7 @@ actions.prototype._clickSL_favorite = function (page, offset) {
         else if (core.hasSave(index)) { // 存在存档则进行收藏
             core.saves.favorite.push(index);
             core.saves.favorite = core.saves.favorite.sort(function (a,b) {return a-b;}); // 保证有序
+            core.playSound('确定');
             core.drawTip("收藏成功！");
         }
         core.control._updateFavoriteSaves();
@@ -1924,6 +1978,7 @@ actions.prototype._keyDownSL = function (keycode) {
     var index = page*10 + offset;
 
     if (keycode == 37) { // left
+        core.playSound('光标移动');
         if (offset == 0) {
             core.ui._drawSLPanel(10 * (page - 1) + 5);
         }
@@ -1933,6 +1988,7 @@ actions.prototype._keyDownSL = function (keycode) {
         return;
     }
     if (keycode == 38) { // up
+        core.playSound('光标移动');
         if (offset < 3) {
             core.ui._drawSLPanel(10 * (page - 1) + offset + 3);
         }
@@ -1942,6 +1998,7 @@ actions.prototype._keyDownSL = function (keycode) {
         return;
     }
     if (keycode == 39) { // right
+        core.playSound('光标移动');
         if (offset == 5) {
             core.ui._drawSLPanel(10 * (page + 1) + 1);
         }
@@ -1951,6 +2008,7 @@ actions.prototype._keyDownSL = function (keycode) {
         return;
     }
     if (keycode == 40) { // down
+        core.playSound('光标移动');
         if (offset >= 3) {
             core.ui._drawSLPanel(10 * (page + 1) + offset - 3);
         }
@@ -1960,10 +2018,12 @@ actions.prototype._keyDownSL = function (keycode) {
         return;
     }
     if (keycode == 33) { // PAGEUP
+        core.playSound('光标移动');
         core.ui._drawSLPanel(10 * (page - 1) + offset);
         return;
     }
     if (keycode == 34) { // PAGEDOWN
+        core.playSound('光标移动');
         core.ui._drawSLPanel(10 * (page + 1) + offset);
         return;
     }
@@ -2000,6 +2060,7 @@ actions.prototype._keyUpSL = function (keycode) {
     }
     if (keycode == 46) {
         if (offset == 0) {
+            core.playSound('操作失败');
             core.drawTip("无法删除自动存档！");
         }
         else {
@@ -2027,15 +2088,19 @@ actions.prototype._clickSwitchs = function (x, y) {
         switch (selection) {
             case 0:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 return core.ui._drawSwitchs_sounds();
             case 1:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 return core.ui._drawSwitchs_display();
             case 2:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 return core.ui._drawSwitchs_action();
             case 3:
                 core.status.event.selection = 0;
+                core.playSound('取消');
                 return core.ui._drawSettings();
         }
     }
@@ -2045,6 +2110,7 @@ actions.prototype._clickSwitchs = function (x, y) {
 actions.prototype._keyUpSwitchs = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
+        core.playSound('取消');
         core.ui._drawSettings();
         return;
     }
@@ -2074,6 +2140,7 @@ actions.prototype._clickSwitchs_sounds = function (x, y) {
                 return;
             case 3:
                 core.status.event.selection = 0;
+                core.playSound('取消');
                 core.ui._drawSwitchs();
                 return;
         }
@@ -2082,12 +2149,14 @@ actions.prototype._clickSwitchs_sounds = function (x, y) {
 
 actions.prototype._clickSwitchs_sounds_bgm = function () {
     core.triggerBgm();
+    core.playSound('确定');
     core.ui._drawSwitchs_sounds();
 }
 
 actions.prototype._clickSwitchs_sounds_se = function () {
     core.musicStatus.soundStatus = !core.musicStatus.soundStatus;
     core.setLocalStorage('soundStatus', core.musicStatus.soundStatus);
+    core.playSound('确定');
     core.ui._drawSwitchs_sounds();
 }
 
@@ -2099,22 +2168,24 @@ actions.prototype._clickSwitchs_sounds_userVolume = function (delta) {
     if (core.musicStatus.gainNode != null) core.musicStatus.gainNode.gain.value = core.musicStatus.userVolume;
     if (core.musicStatus.playingBgm) core.material.bgms[core.musicStatus.playingBgm].volume = core.musicStatus.userVolume * core.musicStatus.designVolume;
     core.setLocalStorage('userVolume', core.musicStatus.userVolume);
+    core.playSound('确定');
     core.ui._drawSwitchs_sounds();
 }
 
 actions.prototype._keyUpSwitchs_sounds = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
+        core.playSound('取消');
         core.ui._drawSwitchs();
         return;
     }
     if (keycode == 37) {
         switch (core.status.event.selection) {
-            case 2: return this._clickSwitchs_sounds_userVolume(-1);
+            case 2: core.playSound('确定'); return this._clickSwitchs_sounds_userVolume(-1);
         }
     } else if (keycode == 39) {
         switch (core.status.event.selection) {
-            case 2: return this._clickSwitchs_sounds_userVolume(1);
+            case 2: core.playSound('确定'); return this._clickSwitchs_sounds_userVolume(1);
         }
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs_sounds);
@@ -2138,17 +2209,23 @@ actions.prototype._clickSwitchs_display = function (x, y) {
                 if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_display_setSize(1);
                 return;
             case 1:
+                core.playSound('确定');
                 return this._clickSwitchs_display_enableHDCanvas();
             case 2:
+                core.playSound('确定');
                 return this._clickSwitchs_display_enemyDamage();
             case 3:
+                core.playSound('确定');
                 return this._clickSwitchs_display_critical();
             case 4:
+                core.playSound('确定');
                 return this._clickSwitchs_display_extraDamage();
             case 5:
+                core.playSound('确定');
                 return this._clickSwitchs_display_extraDamageType();
             case 6:
                 core.status.event.selection = 1;
+                core.playSound('取消');
                 core.ui._drawSwitchs();
                 return;
         }
@@ -2208,16 +2285,17 @@ actions.prototype._clickSwitchs_display_extraDamageType = function () {
 actions.prototype._keyUpSwitchs_display = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
+        core.playSound('取消');
         core.ui._drawSwitchs();
         return;
     }
     if (keycode == 37) {
         switch (core.status.event.selection) {
-            case 0: return this._clickSwitchs_display_setSize(-1);
+            case 0: core.playSound('确定'); return this._clickSwitchs_display_setSize(-1);
         }
     } else if (keycode == 39) {
         switch (core.status.event.selection) {
-            case 0: return this._clickSwitchs_display_setSize(1);
+            case 0: core.playSound('确定'); return this._clickSwitchs_display_setSize(1);
         }
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs_display);
@@ -2237,20 +2315,24 @@ actions.prototype._clickSwitchs_action = function (x, y) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
-                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_action_moveSpeed(-10);
-                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_action_moveSpeed(10);
+                if (x == leftGrid || x == leftGrid + 1) { core.playSound('确定'); return this._clickSwitchs_action_moveSpeed(-10); }
+                if (x == rightGrid || x == rightGrid + 1) { core.playSound('确定'); return this._clickSwitchs_action_moveSpeed(10); }
                 return;
             case 1:
-                if (x == leftGrid || x == leftGrid + 1) return this._clickSwitchs_action_floorChangeTime(-100);
-                if (x == rightGrid || x == rightGrid + 1) return this._clickSwitchs_action_floorChangeTime(100);
+                if (x == leftGrid || x == leftGrid + 1) { core.playSound('确定'); return this._clickSwitchs_action_floorChangeTime(-100); }
+                if (x == rightGrid || x == rightGrid + 1) { core.playSound('确定'); return this._clickSwitchs_action_floorChangeTime(100); }
             case 2:
+                core.playSound('确定');
                 return this._clickSwitchs_action_potionNoRouting();
             case 3:
+                core.playSound('确定');
                 return this._clickSwitchs_action_clickMove();
             case 4:
+                core.playSound('确定');
                 return this._clickSwitchs_action_leftHandPrefer();
             case 5:
                 core.status.event.selection = 2;
+                core.playSound('取消');
                 core.ui._drawSwitchs();
                 return;
         }
@@ -2293,18 +2375,19 @@ actions.prototype._clickSwitchs_action_leftHandPrefer = function () {
 actions.prototype._keyUpSwitchs_action = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
+        core.playSound('取消');
         core.ui._drawSwitchs();
         return;
     }
     if (keycode == 37) {
         switch (core.status.event.selection) {
-            case 0: return this._clickSwitchs_action_moveSpeed(-10);
-            case 1: return this._clickSwitchs_action_floorChangeTime(-100);
+            case 0: core.playSound('确定'); return this._clickSwitchs_action_moveSpeed(-10);
+            case 1: core.playSound('确定'); return this._clickSwitchs_action_floorChangeTime(-100);
         }
     } else if (keycode == 39) {
         switch (core.status.event.selection) {
-            case 0: return this._clickSwitchs_action_moveSpeed(10);
-            case 1: return this._clickSwitchs_action_floorChangeTime(100);
+            case 0: core.playSound('确定'); return this._clickSwitchs_action_moveSpeed(10);
+            case 1: core.playSound('确定'); return this._clickSwitchs_action_floorChangeTime(100);
         }
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSwitchs_action);
@@ -2321,30 +2404,37 @@ actions.prototype._clickSettings = function (x, y) {
         switch (selection) {
             case 0:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 core.ui._drawSwitchs();
                 break;
             case 1:
+                core.playSound('确定');
                 core.ui._drawKeyBoard();
                 break;
             case 2:
+                core.playSound('确定');
                 core.clearUI();
                 core.ui._drawViewMaps();
                 break;
             case 3:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 core.ui._drawNotes();
                 break;
             case 4:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 core.ui._drawSyncSave();
                 break;
             case 5:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 core.ui._drawGameInfo();
                 break;
             case 6:
                 return core.confirmRestart();
             case 7:
+                core.playSound('取消');
                 core.ui.closePanel();
                 break;
         }
@@ -2355,6 +2445,7 @@ actions.prototype._clickSettings = function (x, y) {
 ////// 系统菜单栏界面时，放开某个键的操作 //////
 actions.prototype._keyUpSettings = function (keycode) {
     if (keycode == 27 || keycode == 88) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -2372,12 +2463,15 @@ actions.prototype._clickNotes = function (x, y) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
+                core.playSound('确定');
                 this._clickNotes_new();
                 break;
             case 1:
+                core.playSound('确定');
                 this._clickNotes_show();
                 break;
             case 2:
+                core.playSound('确定');
                 this._clickNotes_edit();
                 break;
             case 3:
@@ -2385,6 +2479,7 @@ actions.prototype._clickNotes = function (x, y) {
                 break;
             case 4:
                 core.status.event.selection = 3;
+                core.playSound('取消');
                 core.ui._drawSettings();
                 break;
         }
@@ -2456,6 +2551,7 @@ actions.prototype._clickNotes_edit = function () {
 actions.prototype._clickNotes_delete = function () {
     core.status.hero.notes = core.status.hero.notes || [];
     if (core.status.hero.notes.length == 0) {
+        core.playSound('操作失败');
         core.drawText("当前没有存档笔记，无法删除！");
     } else {
         core.myprompt("请输入要删除的所有存档笔记编号，以逗号分隔。不填则代表删除全部笔记。", null, function (data) {
@@ -2487,6 +2583,7 @@ actions.prototype._clickNotes_delete = function () {
 actions.prototype._keyUpNotes = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 3;
+        core.playSound('取消');
         core.ui._drawSettings();
         return;
     }
@@ -2504,25 +2601,32 @@ actions.prototype._clickSyncSave = function (x, y) {
         switch (selection) {
             case 0:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 core.ui._drawSyncSelect();
                 break;
             case 1:
+                core.playSound('确定');
                 core.syncLoad();
                 break;
             case 2:
+                core.playSound('确定');
                 core.status.event.selection = 0;
                 core.ui._drawLocalSaveSelect();
                 break;
             case 3:
+                core.playSound('确定');
                 return this._clickSyncSave_readFile();
             case 4:
+                core.playSound('确定');
                 return this._clickSyncSave_replay();
             case 5:
                 core.status.event.selection = 0;
+                core.playSound('确定');
                 core.ui._drawStorageRemove();
                 break;
             case 6:
                 core.status.event.selection = 4;
+                core.playSound('取消');
                 core.ui._drawSettings();
                 break;
 
@@ -2547,7 +2651,8 @@ actions.prototype._clickSyncSave_replay = function () {
 ////// 同步存档界面时，放开某个键的操作 //////
 actions.prototype._keyUpSyncSave = function (keycode) {
     if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 2;
+        core.status.event.selection = 4;
+        core.playSound('取消');
         core.ui._drawSettings();
         return;
     }
@@ -2565,15 +2670,18 @@ actions.prototype._clickSyncSelect = function (x, y) {
         core.status.event.selection = selection;
         switch (selection) {
             case 0:
+                core.playSound('确定');
                 core.myconfirm('你确定要同步全部存档么？\n这可能在存档较多的时候比较慢。', function () {
                     core.syncSave('all');
                 });
                 break;
             case 1:
+                core.playSound('确定');
                 core.syncSave();
                 break;
             case 2:
                 core.status.event.selection = 0;
+                core.playSound('取消');
                 core.ui._drawSyncSave();
                 break;
         }
@@ -2584,7 +2692,8 @@ actions.prototype._clickSyncSelect = function (x, y) {
 actions.prototype._keyUpSyncSelect = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 0;
-        core.ui._drawSettings();
+        core.playSound('取消');
+        core.ui._drawSyncSave();
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickSyncSelect);
@@ -2616,6 +2725,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
         }
 
         core.status.event.selection = 2;
+        core.playSound('取消');
         core.ui._drawSyncSave();
     }
 }
@@ -2623,8 +2733,9 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
 ////// 存档下载界面时，放开某个键的操作 //////
 actions.prototype._keyUpLocalSaveSelect = function (keycode) {
     if (keycode == 27 || keycode == 88) {
-        core.status.event.selection = 0;
-        core.ui._drawSettings();
+        core.status.event.selection = 2;
+        core.playSound('取消');
+        core.ui._drawSyncSave();
         return;
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickLocalSaveSelect);
@@ -2647,6 +2758,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
                 return this._clickStorageRemove_current();
             case 2:
                 core.status.event.selection = 6;
+                core.playSound('取消');
                 core.ui._drawSyncSave();
                 break;
         }
@@ -2654,7 +2766,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
 }
 
 actions.prototype._clickStorageRemove_all = function () {
-    core.myconfirm("你确定要清除【全部塔】的所有本地存档？\n此行为不可逆！！！", function () {
+    core.myconfirm("你确定要清除【全部游戏】的所有本地存档？\n此行为不可逆！！！", function () {
         var done = function () {
             core.saves.ids = {};
             core.saves.autosave.data = null;
@@ -2680,7 +2792,7 @@ actions.prototype._clickStorageRemove_all = function () {
 }
 
 actions.prototype._clickStorageRemove_current = function () {
-    core.myconfirm("你确定要清除本塔的所有本地存档？\n此行为不可逆！！！", function () {
+    core.myconfirm("你确定要清除本游戏的所有本地存档？\n此行为不可逆！！！", function () {
         var done = function () {
             core.saves.ids = {};
             core.saves.autosave.data = null;
@@ -2715,6 +2827,7 @@ actions.prototype._clickStorageRemove_current = function () {
 actions.prototype._keyUpStorageRemove = function (keycode) {
     if (keycode == 27 || keycode == 88) {
         core.status.event.selection = 5;
+        core.playSound('取消');
         core.ui._drawSyncSave();
         return;
     }
@@ -2732,12 +2845,12 @@ actions.prototype._clickReplay = function (x, y) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
         switch (selection) {
-            case 0: return this._clickReplay_fromBeginning();
-            case 1: return this._clickReplay_fromLoad();
-            case 2: return this._clickReplay_replayRemain();
-            case 3: return core.chooseReplayFile();
-            case 4: return this._clickReplay_download();
-            case 5: return core.ui.closePanel();
+            case 0: core.playSound('确定'); return this._clickReplay_fromBeginning();
+            case 1: core.playSound('确定'); return this._clickReplay_fromLoad();
+            case 2: core.playSound('确定'); return this._clickReplay_replayRemain();
+            case 3: core.playSound('确定'); return core.chooseReplayFile();
+            case 4: core.playSound('确定'); return this._clickReplay_download();
+            case 5: core.playSound('取消'); return core.ui.closePanel();
         }
     }
 }
@@ -2786,6 +2899,7 @@ actions.prototype._clickReplay_download = function () {
 ////// 回放选择界面时，放开某个键的操作 //////
 actions.prototype._keyUpReplay = function (keycode) {
     if (keycode == 27 || keycode == 88) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
@@ -2811,6 +2925,7 @@ actions.prototype._clickGameInfo = function (x, y) {
             case 5: return this._clickGameInfo_download();
             case 6:
                 core.status.event.selection = 5;
+                core.playSound('取消');
                 core.ui._drawSettings();
                 break;
         }
@@ -2821,7 +2936,7 @@ actions.prototype._clickGameInfo_openProject = function () {
     if (core.platform.isPC)
         window.open("editor.html", "_blank");
     else {
-        core.myconfirm("即将离开本塔，跳转至本塔工程页面，确认？", function () {
+        core.myconfirm("即将离开本游戏，跳转至工程页面，确认？", function () {
             window.location.href = "editor-mobile.html";
         });
     }
@@ -2829,11 +2944,11 @@ actions.prototype._clickGameInfo_openProject = function () {
 
 actions.prototype._clickGameInfo_openComments = function () {
     if (core.platform.isPC) {
-        window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
+        window.open("/score.php?name=" + core.firstData.name, "_blank");
     }
     else {
-        core.myconfirm("即将离开本塔，跳转至本塔评论页面，确认？", function () {
-            window.location.href = "/score.php?name=" + core.firstData.name + "&num=10";
+        core.myconfirm("即将离开本游戏，跳转至评论页面，确认？", function () {
+            window.location.href = "/score.php?name=" + core.firstData.name;
         });
     }
 }
@@ -2848,8 +2963,9 @@ actions.prototype._clickGameInfo_download = function () {
 ////// 游戏信息界面时，放开某个键的操作 //////
 actions.prototype._keyUpGameInfo = function (keycode) {
     if (keycode == 27 || keycode == 88) {
-        core.ui.closePanel();
-        return;
+        core.status.event.selection = 5;
+        core.playSound('取消');
+        return core.ui._drawSettings();
     }
     this._selectChoices(core.status.event.ui.choices.length, keycode, this._clickGameInfo);
 }
@@ -2861,6 +2977,7 @@ actions.prototype._clickKeyBoard = function (x, y) {
         core.ui.closePanel();
         core.keyUp(112 + x + 5 - m);
     }
+    /*
     if (y == m - 3 && x == m + 6) {
         var val = prompt();
         if (val != null) {
@@ -2871,6 +2988,7 @@ actions.prototype._clickKeyBoard = function (x, y) {
             }
         }
     }
+    */
     if (y == m - 2 && x >= m - 5 && x <= m + 4) {
         core.ui.closePanel();
         core.keyUp(x == m + 4 ? 48 : 49 + x + 5 - m); // 1-9: 49-57; 0: 48
@@ -2940,21 +3058,25 @@ actions.prototype._clickCursor = function (x, y) {
 actions.prototype._keyDownCursor = function (keycode) {
     if (keycode == 37) { // left
         core.status.automaticRoute.cursorX--;
+        core.playSound('确定');
         core.ui._drawCursor();
         return;
     }
     if (keycode == 38) { // up
         core.status.automaticRoute.cursorY--;
+        core.playSound('确定');
         core.ui._drawCursor();
         return;
     }
     if (keycode == 39) { // right
         core.status.automaticRoute.cursorX++;
+        core.playSound('确定');
         core.ui._drawCursor();
         return;
     }
     if (keycode == 40) { // down
         core.status.automaticRoute.cursorY++;
+        core.playSound('确定');
         core.ui._drawCursor();
         return;
     }
@@ -2963,10 +3085,12 @@ actions.prototype._keyDownCursor = function (keycode) {
 ////// 光标界面时，放开某个键的操作 //////
 actions.prototype._keyUpCursor = function (keycode) {
     if (keycode == 27 || keycode == 88) {
+        core.playSound('取消');
         core.ui.closePanel();
         return;
     }
     if (keycode == 13 || keycode == 32 || keycode == 67 || keycode == 69) {
+        core.playSound('确定');
         core.ui.closePanel();
         core.onclick(core.status.automaticRoute.cursorX, core.status.automaticRoute.cursorY, []);
         return;

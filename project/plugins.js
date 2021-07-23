@@ -108,6 +108,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			if (core.openItemShop) {
 				core.openItemShop(shopId);
 			} else {
+				core.playSound('操作失败');
 				core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
 			}
 			return;
@@ -145,6 +146,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 								"condition": shop.disablePreview,
 								"true": [
 									// 不可预览，提示并退出
+									{ "type": "playSound", "name": "操作失败" },
 									"当前无法访问该商店！",
 									{ "type": "break" },
 								],
@@ -173,7 +175,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				"text": choice.text,
 				"icon": choice.icon,
 				"color": ableToBuy && !previewMode ? choice.color : [153, 153, 153, 1],
-				"action": ableToBuy && !previewMode ? choice.action : [
+				"action": ableToBuy && !previewMode ? [{ "type": "playSound", "name": "确定" }].concat(choice.action) : [
+					{ "type": "playSound", "name": "操作失败" },
 					{ "type": "tip", "text": previewMode ? "预览模式下不可购买" : "购买条件不足" }
 				]
 			};
@@ -636,11 +639,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (type == 0) {
 			core.status.hero[use] -= totalMoney;
 			core.getItem(item.id, selectCount);
+			core.stopSound();
+			core.playSound('确定');
 			if (item.number != null) item.number -= selectCount;
 			item.money_count = (item.money_count || 0) + selectCount;
 		} else {
 			core.status.hero[use] += totalMoney;
 			core.removeItem(item.id, selectCount);
+			core.playSound('确定');
 			core.drawTip("成功卖出" + selectCount + "个" + core.material.items[item.id].name, item.id);
 			if (item.number != null) item.number += selectCount;
 			item.sell_count = (item.sell_count || 0) + selectCount;

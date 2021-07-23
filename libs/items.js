@@ -233,13 +233,19 @@ items.prototype.canEquip = function (equipId, hint) {
     // 装备是否合法
     var equip = core.material.items[equipId] || {};
     if (!equip.equip) {
-        if (hint) core.drawTip("不合法的装备！");
+        if (hint) {
+            core.playSound('操作失败');
+            core.drawTip("不合法的装备！");
+        }
         return false;
     }
 
     // 是否拥有该装备
     if (!core.hasItem(equipId) && !core.hasEquip(equipId)) {
-        if (hint) core.drawTip("你当前没有" + equip.name + "，无法换装");
+        if (hint) {
+            core.playSound('操作失败');
+            core.drawTip("你当前没有" + equip.name + "，无法换装");
+        }
         return false;
     }
 
@@ -248,7 +254,10 @@ items.prototype.canEquip = function (equipId, hint) {
     if (canUseItemEffect) {
         try {
             if (!eval(canUseItemEffect)) {
-                if (hint) core.drawTip("当前不可换上" + equip.name);
+                if (hint) {
+                    core.playSound('操作失败');
+                    core.drawTip("当前不可换上" + equip.name);
+                }
                 return false;
             }
         }
@@ -270,6 +279,7 @@ items.prototype.loadEquip = function (equipId, callback) {
     var loadEquip = core.material.items[equipId] || {};
     var type = this.getEquipTypeById(equipId);
     if (type < 0) {
+        core.playSound('操作失败');
         core.drawTip("当前没有" + loadEquip.equip.type + "的空位！");
         if (callback) callback();
         return;
@@ -341,7 +351,7 @@ items.prototype._realLoadEquip = function (type, loadId, unloadId, callback) {
 items.prototype._realLoadEquip_playSound = function () {
     if (core.hasFlag("__quickLoadEquip__")) return;
     core.stopSound();
-    core.playSound('equip.mp3');
+    core.playSound('穿脱装备');
 }
 
 ////// 保存装备 //////
@@ -357,6 +367,7 @@ items.prototype.quickSaveEquip = function (index) {
 items.prototype.quickLoadEquip = function (index) {
     var current = core.getFlag("saveEquips", [])[index];
     if (!current) {
+        core.playSound('操作失败');
         core.drawTip(index + "号套装不存在");
         return;
     }

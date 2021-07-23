@@ -35,12 +35,36 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"jump.mp3",
 			"pickaxe.mp3",
 			"bomb.mp3",
-			"centerFly.mp3"
+			"centerFly.mp3",
+			"error.mp3",
+			"cancel.mp3",
+			"cursor.mp3",
+			"confirm.mp3",
+			"open_ui.mp3",
+			"load.mp3",
+			"recovery.mp3",
+			"save.mp3"
 		],
 		"fonts": [],
 		"nameMap": {
-			"背景图.jpg": "bg.jpg",
-			"背景音乐.mp3": "bgm.mp3"
+			"普攻": "attack.mp3",
+			"炸弹": "bomb.mp3",
+			"飞行器": "centerFly.mp3",
+			"开关门": "door.mp3",
+			"上下楼": "floor.mp3",
+			"获得道具": "item.mp3",
+			"跳跃": "jump.mp3",
+			"破墙镐": "pickaxe.mp3",
+			"阻激夹域": "zone.mp3",
+			"操作失败": "error.mp3",
+			"取消": "cancel.mp3",
+			"光标移动": "cursor.mp3",
+			"确定": "confirm.mp3",
+			"穿脱装备": "equip.mp3",
+			"打开界面": "open_ui.mp3",
+			"读档": "load.mp3",
+			"回血": "recovery.mp3",
+			"存档": "save.mp3"
 		},
 		"levelChoose": [
 			{

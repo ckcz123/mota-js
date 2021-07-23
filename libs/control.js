@@ -1310,8 +1310,10 @@ control.prototype.pauseReplay = function () {
 ////// 恢复播放 //////
 control.prototype.resumeReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
+    }
     core.status.replay.pausing = false;
     core.updateStatusBar();
     core.drawTip("恢复播放");
@@ -1321,9 +1323,14 @@ control.prototype.resumeReplay = function () {
 ////// 单步播放 //////
 control.prototype.stepReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
-    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+    if (!core.status.replay.pausing) {
+        core.playSound('操作失败');
+        return core.drawTip("请先暂停录像");
+    }
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
+    }
     core.replay(true);
 }
 
@@ -1379,11 +1386,18 @@ control.prototype.stopReplay = function (force) {
 ////// 回退 //////
 control.prototype.rewindReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
-    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+    if (!core.status.replay.pausing) {
+        core.playSound('操作失败');
+        return core.drawTip("请先暂停录像");
+    }
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
-    if (core.status.replay.save.length==0)
+    }
+    if (core.status.replay.save.length==0) {
+        core.playSound('操作失败');
         return core.drawTip("无法再回到上一个节点");
+    }
     var save = core.status.replay.save, data = save.pop();
     core.loadData(data.data, function () {
         core.removeFlag('__fromLoad__');
@@ -1408,10 +1422,18 @@ control.prototype.rewindReplay = function () {
 ////// 回放时存档 //////
 control.prototype._replay_SL = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
-    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+    if (!core.status.replay.pausing) {
+        core.playSound('操作失败');
+        return core.drawTip("请先暂停录像");
+    }
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
-    if (core.hasFlag('__forbidSave__')) return core.drawTip('当前禁止存档');
+    }
+    if (core.hasFlag('__forbidSave__')) {
+        core.playSound('操作失败');
+        return core.drawTip('当前禁止存档');
+    }
     this._replay_hideProgress();
 
     core.lockControl();
@@ -1425,11 +1447,18 @@ control.prototype._replay_SL = function () {
 ////// 回放时查看怪物手册 //////
 control.prototype._replay_book = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
-    if (core.isMoving() || core.status.replay.animate
-        || (core.status.event.id && core.status.event.id != 'viewMaps'))
+    if (!core.status.replay.pausing) {
+        core.playSound('操作失败');
+        return core.drawTip("请先暂停录像");
+    }
+    if (core.isMoving() || core.status.replay.animate || (core.status.event.id && core.status.event.id != 'viewMaps')) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
-    if (!core.hasItem('book')) return core.drawTip('你没有'+core.material.items['book'].name);
+    }
+    if (!core.hasItem('book')) {
+        core.playSound('操作失败');
+        return core.drawTip('你没有'+core.material.items['book'].name, 'book');
+    }
     this._replay_hideProgress();
 
     // 从“浏览地图”页面打开
@@ -1444,9 +1473,14 @@ control.prototype._replay_book = function () {
 ////// 回放录像时浏览地图 //////
 control.prototype._replay_viewMap = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
-    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+    if (!core.status.replay.pausing) {
+        core.playSound('操作失败'); 
+        return core.drawTip("请先暂停录像");
+    }
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
+    }
     this._replay_hideProgress();
 
     core.lockControl();
@@ -1456,9 +1490,14 @@ control.prototype._replay_viewMap = function () {
 
 control.prototype._replay_toolbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
-    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+    if (!core.status.replay.pausing) {
+        core.playSound('操作失败');
+        return core.drawTip("请先暂停录像");
+    }
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
+    }
     this._replay_hideProgress();
 
     core.lockControl();
@@ -1468,9 +1507,14 @@ control.prototype._replay_toolbox = function () {
 
 control.prototype._replay_equipbox = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
-    if (!core.status.replay.pausing) return core.drawTip("请先暂停录像");
-    if (core.isMoving() || core.status.replay.animate || core.status.event.id)
+    if (!core.status.replay.pausing) {
+        core.playSound('操作失败');
+        return core.drawTip("请先暂停录像");
+    }
+    if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
+        core.playSound('操作失败');
         return core.drawTip("请等待当前事件的处理结束");
+    }
     this._replay_hideProgress();
 
     core.lockControl();
@@ -1574,6 +1618,7 @@ control.prototype._replay_error = function (action) {
             core.rewindReplay();
         }
         else {
+            core.playSound('操作失败');
             core.drawTip("无法回到上一个节点");
             core.stopReplay(true);
         }
@@ -1841,7 +1886,10 @@ control.prototype.doSL = function (id, type) {
 }
 
 control.prototype._doSL_save = function (id) {
-    if (id=='autoSave') return core.drawTip('不能覆盖自动存档！');
+    if (id=='autoSave') {
+        core.playSound('操作失败'); 
+        return core.drawTip('不能覆盖自动存档！');
+    }
     // 在事件中的存档
     if (core.status.event.interval != null)
         core.setFlag("__events__", core.status.event.interval);
@@ -1851,6 +1899,7 @@ control.prototype._doSL_save = function (id) {
         // 恢复事件
         if (!core.events.recoverEvents(core.status.event.interval))
             core.ui.closePanel();
+        core.playSound('存档');
         core.drawTip('存档成功！');
     }, function(err) {
         main.log(err);
@@ -1932,14 +1981,27 @@ control.prototype._doSL_load_afterGet = function (id, data) {
 }
 
 control.prototype._doSL_replayLoad_afterGet = function (id, data) {
-    if (!data) return core.drawTip("无效的存档");
-    if (data.version != core.firstData.version) return core.drawTip("存档版本不匹配");
-    if (data.hard != core.status.hard) return core.drawTip("游戏难度不匹配！");
-    if (data.hero.flags.__events__ && data.guid != core.getGuid())
+    if (!data) {
+        core.playSound('操作失败');
+        return core.drawTip("无效的存档");
+    }
+    if (data.version != core.firstData.version) {
+        core.playSound('操作失败');
+        return core.drawTip("存档版本不匹配");
+    }
+    if (data.hard != core.status.hard) {
+        core.playSound('操作失败');
+        return core.drawTip("游戏难度不匹配！");
+    }
+    if (data.hero.flags.__events__ && data.guid != core.getGuid()) {
+        core.playSound('操作失败');
         return core.drawTip("此存档可能存在风险，无法读档");
+    }
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-    if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__'))
-        return core.drawTip("无法从此存档回放录像");
+    if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__')) {
+        core.playSound('操作失败');
+        return core.drawTip("种子不一致，无法从此存档回放录像");
+    }
     core.loadData(data, function () {
         core.removeFlag('__fromLoad__');
         core.startReplay(route);
@@ -1949,8 +2011,10 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
 }
 
 control.prototype._doSL_replayRemain_afterGet = function (id, data) {
-    if (!data) return core.drawTip("无效的存档");
-
+    if (!data) {
+        core.playSound('操作失败');
+        return core.drawTip("无效的存档");
+    }
     var route = core.decodeRoute(data.route);
     if (core.status.tempRoute) {
         var remainRoute = core.subarray(route, core.status.tempRoute);
@@ -2185,6 +2249,7 @@ control.prototype.removeSave = function (index, callback) {
         core.control._updateFavoriteSaves();
         if (callback) callback();
     }, function () {
+        core.playSound('操作失败');
         core.drawTip("无法删除存档！");
         if (callback) callback();
     });

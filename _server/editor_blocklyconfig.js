@@ -189,6 +189,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
+      MotaActionBlocks['animate_1_s'].xmlText(),
       MotaActionBlocks['setViewport_s'].xmlText(),
       MotaActionBlocks['setViewport_1_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),

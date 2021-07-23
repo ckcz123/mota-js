@@ -697,6 +697,7 @@ action
     |   follow_s
     |   unfollow_s
     |   animate_s
+    |   animate_1_s
     |   vibrate_s
     |   showImage_s
     |   showImage_1_s
@@ -1883,31 +1884,37 @@ return code;
 */;
 
 animate_s
-    :   '显示动画' IdString '位置' EvalString? '相对窗口坐标' Bool '不等待执行完毕' Bool Newline
+    :   '显示动画' IdString '位置' 'x' PosString? 'y' PosString? '相对窗口坐标' Bool '不等待执行完毕' Bool Newline
     
 
 /* animate_s
 tooltip : animate：显示动画,位置填hero或者1,2形式的位置,或者不填代表当前事件点
 helpUrl : /_docs/#/instruction
-default : ["zone","hero",false,false]
+default : ["zone","","",false,false]
 allAnimates : ['IdString_0']
 material : ["./project/animates/", "IdString_0"]
-menu : [['选择位置','editor_blockly.selectPoint(block,["EvalString_0","EvalString_0"])']]
+selectPoint : ["PosString_0", "PosString_1"]
 colour : this.soundColor
-if (EvalString_0) {
-  if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {
-    EvalString_0=', "loc": ["'+EvalString_0.split(',').join('","')+'"]';
-  } else if (/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
-    if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
-    else EvalString_0='"'+EvalString_0+'"';
-    EvalString_0 = ', "loc": '+EvalString_0;
-  } else {
-    throw new Error('此处只能填hero或者1,2形式的位置,或者不填代表当前事件点');
-  }
-}
+var loc = PosString_0&&PosString_1?(', "loc": ['+PosString_0+','+PosString_1+']'):'';
 Bool_0 = Bool_0?', "alignWindow": true':'';
-var async = Bool_1?', "async": true':'';
-var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+Bool_0+async+'},\n';
+Bool_1 = Bool_1?', "async": true':'';
+var code = '{"type": "animate", "name": "'+IdString_0+'"'+loc+Bool_0+Bool_1+'},\n';
+return code;
+*/;
+
+animate_1_s
+    :   '显示角色动画' IdString '不等待执行完毕' Bool Newline
+    
+
+/* animate_1_s
+tooltip : animate：显示角色动画
+helpUrl : /_docs/#/instruction
+default : ["zone",false]
+allAnimates : ['IdString_0']
+material : ["./project/animates/", "IdString_0"]
+colour : this.soundColor
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "animate", "name": "'+IdString_0+'", "loc": "hero"'+Bool_0+'},\n';
 return code;
 */;
 

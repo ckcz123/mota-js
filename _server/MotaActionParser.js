@@ -473,10 +473,14 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['unfollow_s'].xmlText([data.name||"", this.next]);
       break;
     case "animate": // 显示动画
-      var animate_loc = data.loc||'';
-      if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
-      this.next = MotaActionBlocks['animate_s'].xmlText([
-        data.name,animate_loc,data.alignWindow||false,data.async||false,this.next]);
+      if (data.loc == 'hero') {
+        this.next = MotaActionBlocks['animate_1_s'].xmlText([
+          data.name,data.async||false,this.next]);
+      } else {
+        data.loc=data.loc||['',''];
+        this.next = MotaActionBlocks['animate_s'].xmlText([
+          data.name,data.loc[0],data.loc[1],data.alignWindow||false,data.async||false,this.next]);
+      }
       break;
     case "setViewport": // 设置视角
       if (data.dxy) {

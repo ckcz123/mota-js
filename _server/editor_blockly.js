@@ -343,14 +343,28 @@ editor_blockly = function () {
     }
 
     editor_blockly.selectMaterial = function(b,material){
-        editor.uievent.selectMaterial([b.getFieldValue(material[1])], '请选择素材', material[0], function (one) {
-            if (b.type == 'animate_s' || b.type == 'animate_1_s') {
+        var value = b.getFieldValue(material[1]);
+        value = main.nameMap[value] || value;
+        editor.uievent.selectMaterial([value], '请选择素材', material[0], function (one) {
+            if (b.type == 'animate_s' || b.type == 'animate_1_s' || b.type == 'nameMapAnimate') {
                 return /^[-A-Za-z0-9_.]+\.animate$/.test(one) ? one.substring(0, one.length - 8) : null;
             }
             return /^[-A-Za-z0-9_.]+$/.test(one) ? one : null;
         }, function (value) {
             if (value instanceof Array && value.length > 0) {
-                b.setFieldValue(value[0], material[1]);
+                value = value[0];
+                // 检测是否别名替换
+                for (var name in main.nameMap) {
+                    if (main.nameMap[name] == value) {
+                        if (confirm("检测到该文件存在别名："+name+"\n是否使用别名进行替换？")) {
+                            b.setFieldValue(name, material[1]);
+                            return;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                b.setFieldValue(value, material[1]);
             }
         });
     }
@@ -650,7 +664,8 @@ editor_blockly = function () {
         namesObj.allIconIds = namesObj.allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
           return core.statusBar.icons[x] instanceof Image;
         }));
-        namesObj.allImages = Object.keys(core.material.images.images);
+        namesObj.allImages = Object.keys(core.material.images.images)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.images.images[main.nameMap[one]];}));
         namesObj.allEnemys = Object.keys(core.material.enemys);
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
             namesObj.allEnemys = namesObj.allEnemys.concat(MotaActionFunctions.pattern.replaceEnemyList.map(function (x) {
@@ -663,9 +678,12 @@ editor_blockly = function () {
             return x[1];
           }))
         }
-        namesObj.allAnimates = Object.keys(core.material.animates);
-        namesObj.allBgms = Object.keys(core.material.bgms);
-        namesObj.allSounds = Object.keys(core.material.sounds);
+        namesObj.allAnimates = Object.keys(core.material.animates)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.animates[main.nameMap[one]];}));
+        namesObj.allBgms = Object.keys(core.material.bgms)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.bgms[main.nameMap[one]];}));
+        namesObj.allSounds = Object.keys(core.material.sounds)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.sounds[main.nameMap[one]];}));;
         namesObj.allShops = Object.keys(core.status.shops);
         namesObj.allFloorIds = core.floorIds;
         namesObj.allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",

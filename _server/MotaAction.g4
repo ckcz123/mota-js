@@ -640,12 +640,12 @@ return JSON.stringify(code);
 */;
 
 nameMap_m
-    : '文件别名设置 此项可对每个素材（背景音乐、音效、使用图片、使用动画）进行一个别名设置，然后可以游戏中使用此别名代替原始文件名。' BGNL? Newline nameMapList+ BEND
+    : '文件别名设置' '（可以游戏中使用此别名代替原始文件名）' BGNL? Newline nameMapList+ BEND
 
 /* nameMap_m
 tooltip : 文件别名设置
 helpUrl : /_docs/#/instruction
-var value = doorKeyList_0.trim();
+var value = nameMapList_0.trim();
 if (value.startsWith(',')) value = value.substring(1);
 return '{'+value+'}';
 */;
@@ -665,26 +665,32 @@ nameMapBgm
 /* nameMapBgm
 tooltip : 映射背景音乐
 default : ['背景音乐', 'bgm.mp3']
+allBgms : ['EvalString_1']
+material : ["./project/bgms/", "EvalString_1"]
 helpUrl : /_docs/#/instruction
 return ',"'+EvalString_0+'":"'+EvalString_1+'"';
 */;
 
-nameMapSound1
+nameMapSoundKnown
     : '映射系统音效' '名称' NameMap_List '映射到文件' EvalString BEND
 
-/* nameMapSound1
+/* nameMapSoundKnown
 tooltip : 映射系统音效
 default : ['确定', 'confirm.mp3']
+allSounds : ['EvalString_0']
+material : ["./project/sounds/", "EvalString_0"]
 helpUrl : /_docs/#/instruction
 return ',"'+NameMap_List_0+'":"'+EvalString_0+'"';
 */;
 
-nameMapSound2
+nameMapSoundUnknown
     : '映射音效' '名称' EvalString '映射到文件' EvalString BEND
 
-/* nameMapSound2
+/* nameMapSoundUnknown
 tooltip : 映射音效
 default : ['攻击', 'attack.mp3']
+allSounds : ['EvalString_1']
+material : ["./project/sounds/", "EvalString_1"]
 helpUrl : /_docs/#/instruction
 return ',"'+EvalString_0+'":"'+EvalString_1+'"';
 */;
@@ -695,16 +701,20 @@ nameMapImage
 /* nameMapImage
 tooltip : 映射图片
 default : ['背景图', 'bg.jpg']
+allImages : ['EvalString_1']
+material : ["./project/images/", "EvalString_1"]
 helpUrl : /_docs/#/instruction
 return ',"'+EvalString_0+'":"'+EvalString_1+'"';
 */;
 
-nameMapImage
+nameMapAnimate
     : '映射动画' '名称' EvalString '映射到文件' IdString BEND
 
-/* nameMapImage
+/* nameMapAnimate
 tooltip : 映射图片
-default : ['剑技', 'jianji']
+default : ['领域', 'zone']
+allAnimates : ['IdString_0']
+material : ["./project/animates/", "IdString_0"]
 helpUrl : /_docs/#/instruction
 return ',"'+EvalString_0+'":"'+IdString_0+'"';
 */;
@@ -714,7 +724,7 @@ nameMapUnknown
 
 /* nameMapUnknown
 tooltip : 未知映射
-default : ['文件名', 'test.jpg']
+default : ['文件名', 'file.jpg']
 helpUrl : /_docs/#/instruction
 return ',"'+EvalString_0+'":"'+EvalString_1+'"';
 */;
@@ -723,7 +733,7 @@ nameMapEmpty
     :   Newline
     
 /* nameMapEmpty
-return '';
+return ' \n';
 */;
 
 //为了避免关键字冲突,全部加了_s
@@ -809,6 +819,7 @@ action
     |   loadBgm_s
     |   freeBgm_s
     |   playSound_s
+    |   playSound_1_s
     |   stopSound_s
     |   setVolume_s
     |   win_s
@@ -2448,6 +2459,20 @@ allSounds : ['EvalString_0']
 material : ["./project/sounds/", "EvalString_0"]
 Bool_0 = Bool_0 ? ', "stop": true' : '';
 var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
+return code;
+*/;
+
+playSound_1_s
+    :   '播放系统音效' NameMap_List '停止之前音效' Bool? Newline
+    
+
+/* playSound_1_s
+tooltip : playSound: 播放系统音效
+helpUrl : /_docs/#/instruction
+default : ["确认",false]
+colour : this.soundColor
+Bool_0 = Bool_0 ? ', "stop": true' : '';
+var code = '{"type": "playSound", "name": "'+NameMap_List_0+'"'+Bool_0+'},\n';
 return code;
 */;
 

@@ -88,8 +88,8 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['faceIds_m'].xmlText(),
       MotaActionBlocks['mainStyle_m'].xmlText(),
       MotaActionFunctions.actionParser.parse({
-        "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "剑技": "jianji"
-      }, 'nameMap')
+        "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "领域": "zone", "文件名": "file.jpg"
+      }, 'nameMap'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -209,6 +209,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['loadBgm_s'].xmlText(),
       MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
+      MotaActionBlocks['playSound_1_s'].xmlText(),
       MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
       MotaActionBlocks['callBook_s'].xmlText(),

@@ -63,7 +63,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"跳跃": "jump.mp3",
 			"破墙镐": "pickaxe.mp3",
 			"阻激夹域": "zone.mp3",
-			"穿脱装备": "equip.mp3"
+			"穿脱装备": "equip.mp3",
+			"背景音乐": "bgm.mp3",
+			"攻击": "attack.mp3",
+			"背景图": "bg.jpg",
+			"领域": "zone"
 		},
 		"levelChoose": [
 			{

@@ -76,7 +76,16 @@ utils.prototype._init = function () {
             return this;
         }
     }
-
+    if (typeof Array.prototype.includes != "function") {
+        Array.prototype.includes = function (value) {
+            return this.indexOf(value) >= 0;
+        }
+    }
+    if (typeof Object.values != "function") {
+        Object.values = function (obj) {
+            return Object.keys(obj).map(function (one) { return obj[one]; });
+        }
+    }
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////

@@ -127,18 +127,32 @@ ActionParser.prototype.parse = function (obj,type) {
       if (!obj) obj={};
       var items = Object.keys(obj);
       var result = null;
-      for (var ii=items.length,one;one=items[ii];ii--) {
+      for (var ii=items.length-1,one;one=items[ii];ii--) {
+        var value = obj[one];
         var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];})
         if (knownItems.indexOf(one) >= 0) {
-          result = MotaActionBlocks['nameMapSound1'].xmlText([
-            
-          ])
+          result = MotaActionBlocks['nameMapSoundKnown'].xmlText([one, value, result]);
+          continue;
         }
-        var value = obj[ii];
-
-
+        if (main.bgms.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapBgm'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.sounds.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapSoundUnknown'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.images.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapImage'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.animates.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapAnimate'].xmlText([one, value, result]);
+          continue;
+        }
+        result = MotaActionBlocks['nameMapUnknown'].xmlText([one, value, result]);
       }
-
+      return MotaActionBlocks['nameMap_m'].xmlText([result]);
 
     case 'shop':
       var buildsub = function(obj,parser,next){
@@ -625,8 +639,14 @@ ActionParser.prototype.parseAction = function() {
       }
       break;
     case "playSound":
-      this.next = MotaActionBlocks['playSound_s'].xmlText([
-        data.name,data.stop,this.next]);
+      var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];});
+      if (knownItems.indexOf(data.name) >= 0) {
+        this.next = MotaActionBlocks['playSound_1_s'].xmlText([
+          data.name,data.stop,this.next]);
+      } else {
+        this.next = MotaActionBlocks['playSound_s'].xmlText([
+          data.name,data.stop,this.next]);
+      }
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([

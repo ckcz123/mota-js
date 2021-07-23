@@ -460,31 +460,14 @@ actions.prototype.ondown = function (loc) {
 actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
     if (core.status.played && !core.status.lockControl) return false;
 
-    // --- wait事件也要提供px和py
-    if (core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
-        clearTimeout(core.status.event.interval);
-        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
-        delete core.status.event.timeout;
-        core.setFlag('type', 1);
-        core.setFlag('x', x);
-        core.setFlag('y', y);
-        core.setFlag('px', px);
-        core.setFlag('py', py);
-        core.setFlag('timeout', timeout);
-        core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
-        core.events.__action_wait_afterGet(core.status.event.data.current);
-        core.doAction();
-    }
-    else {
-        core.actions.onclick(x, y, []);
-    }
+    core.actions.onclick(x, y, px, py, []);
 
     // --- 长按判定
     if (core.timeout.onDownTimeout == null) {
         core.timeout.onDownTimeout = setTimeout(function () {
             if (core.interval.onDownInterval == null) {
                 core.interval.onDownInterval = setInterval(function () {
-                    if (!core.actions.longClick(x, y, true)) {
+                    if (!core.actions.longClick(x, y, px, py, true)) {
                         clearInterval(core.interval.onDownInterval);
                         core.interval.onDownInterval = null;
                     }
@@ -599,11 +582,11 @@ actions.prototype._sys_onup = function () {
 
     // 长按
     if (!core.status.lockControl && stepPostfix.length == 0 && core.status.downTime != null && new Date() - core.status.downTime >= 1000) {
-        core.actions.longClick(posx, posy);
+        core.actions.longClick(posx, posy, 32 * posx + 16, 32 * posy + 16);
     }
     else {
         //posx,posy是寻路的目标点,stepPostfix是后续的移动
-        core.actions.onclick(posx, posy, stepPostfix);
+        core.actions.onclick(posx, posy, 32 * posx + 16, 32 * posy + 16, stepPostfix);
     }
     core.status.downTime = null;
     return true;
@@ -632,94 +615,94 @@ actions.prototype._getClickLoc = function (x, y) {
 }
 
 ////// 具体点击屏幕上(x,y)点时，执行的操作 //////
-actions.prototype.onclick = function (x, y, stepPostfix) {
+actions.prototype.onclick = function (x, y, px, py, stepPostfix) {
     // console.log("Click: (" + x + "," + y + ")");
-    return this.doRegisteredAction('onclick', x, y, stepPostfix || []);
+    return this.doRegisteredAction('onclick', x, y, px, py, stepPostfix || []);
 }
 
-actions.prototype._sys_onclick_lockControl = function (x, y) {
+actions.prototype._sys_onclick_lockControl = function (x, y, px, py) {
     if (!core.status.lockControl) return false;
     switch (core.status.event.id) {
         case 'centerFly':
-            this._clickCenterFly(x, y);
+            this._clickCenterFly(x, y, px, py);
             break;
         case 'book':
-            this._clickBook(x, y);
+            this._clickBook(x, y, px, py);
             break;
         case 'book-detail':
-            this._clickBookDetail(x, y);
+            this._clickBookDetail(x, y, px, py);
             break;
         case 'fly':
-            this._clickFly(x, y);
+            this._clickFly(x, y, px, py);
             break;
         case 'viewMaps':
-            this._clickViewMaps(x, y);
+            this._clickViewMaps(x, y, px, py);
             break;
         case 'switchs':
-            this._clickSwitchs(x, y);
+            this._clickSwitchs(x, y, px, py);
             break;
         case 'switchs-sounds':
-            this._clickSwitchs_sounds(x, y);
+            this._clickSwitchs_sounds(x, y, px, py);
             break;
         case 'switchs-display':
-            this._clickSwitchs_display(x, y);
+            this._clickSwitchs_display(x, y, px, py);
             break;
         case 'switchs-action':
-            this._clickSwitchs_action(x, y);
+            this._clickSwitchs_action(x, y, px, py);
             break;
         case 'settings':
-            this._clickSettings(x, y);
+            this._clickSettings(x, y, px, py);
             break;
         case 'selectShop':
-            this._clickQuickShop(x, y);
+            this._clickQuickShop(x, y, px, py);
             break;
         case 'equipbox':
-            this._clickEquipbox(x, y);
+            this._clickEquipbox(x, y, px, py);
             break;
         case 'toolbox':
-            this._clickToolbox(x, y);
+            this._clickToolbox(x, y, px, py);
             break;
         case 'save':
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
-            this._clickSL(x, y);
+            this._clickSL(x, y, px, py);
             break;
         case 'confirmBox':
-            this._clickConfirmBox(x, y);
+            this._clickConfirmBox(x, y, px, py);
             break;
         case 'keyBoard':
-            this._clickKeyBoard(x, y);
+            this._clickKeyBoard(x, y, px, py);
             break;
         case 'action':
-            this._clickAction(x, y);
+            this._clickAction(x, y, px, py);
             break;
         case 'text':
             core.drawText();
             break;
         case 'notes':
-            this._clickNotes(x, y);
+            this._clickNotes(x, y, px, py);
             break;
         case 'syncSave':
-            this._clickSyncSave(x, y);
+            this._clickSyncSave(x, y, px, py);
             break;
         case 'syncSelect':
-            this._clickSyncSelect(x, y);
+            this._clickSyncSelect(x, y, px, py);
             break;
         case 'localSaveSelect':
-            this._clickLocalSaveSelect(x, y);
+            this._clickLocalSaveSelect(x, y, px, py);
             break;
         case 'storageRemove':
-            this._clickStorageRemove(x, y);
+            this._clickStorageRemove(x, y, px, py);
             break;
         case 'cursor':
-            this._clickCursor(x, y);
+            this._clickCursor(x, y, px, py);
             break;
         case 'replay':
-            this._clickReplay(x, y);
+            this._clickReplay(x, y, px, py);
             break;
         case 'gameInfo':
-            this._clickGameInfo(x, y);
+            this._clickGameInfo(x, y, px, py);
             break;
         case 'about':
         case 'help':
@@ -729,7 +712,7 @@ actions.prototype._sys_onclick_lockControl = function (x, y) {
     return true;
 }
 
-actions.prototype._sys_onclick = function (x, y, stepPostfix) {
+actions.prototype._sys_onclick = function (x, y, px, py, stepPostfix) {
     // 寻路
     core.setAutomaticRoute(x + parseInt(core.bigmap.offsetX / 32), y + parseInt(core.bigmap.offsetY / 32), stepPostfix);
     return true;
@@ -823,12 +806,12 @@ actions.prototype._sys_keyDownCtrl = function () {
 }
 
 ////// 长按 //////
-actions.prototype.longClick = function (x, y, fromEvent) {
+actions.prototype.longClick = function (x, y, px, py, fromEvent) {
     if (!core.isPlaying()) return false;
-    return this.doRegisteredAction('longClick', x, y, fromEvent);
+    return this.doRegisteredAction('longClick', x, y, px, py, fromEvent);
 }
 
-actions.prototype._sys_longClick_lockControl = function (x, y) {
+actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
     if (!core.status.lockControl) return false;
     if (core.status.event.id == 'text') {
         core.drawText();
@@ -865,7 +848,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y) {
     return false;
 }
 
-actions.prototype._sys_longClick = function (x, y, fromEvent) {
+actions.prototype._sys_longClick = function (x, y, px, py, fromEvent) {
     if (!core.status.lockControl && !fromEvent) {
         // 虚拟键盘
         core.waitHeroToStop(function () {
@@ -1017,7 +1000,7 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
 }
 
 ////// 自定义事件时的点击操作 //////
-actions.prototype._clickAction = function (x, y) {
+actions.prototype._clickAction = function (x, y, px, py) {
     if (core.status.event.data.type == 'text') {
         // 正在淡入淡出的话不执行
         if (core.status.event.animateUI) return;
@@ -1031,6 +1014,22 @@ actions.prototype._clickAction = function (x, y) {
 
         // 文字
         core.ui._animateUI('hide', core.doAction);
+        return;
+    }
+
+    if (core.status.event.data.type == 'wait') {
+        clearTimeout(core.status.event.interval);
+        var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
+        delete core.status.event.timeout;
+        core.setFlag('type', 1);
+        core.setFlag('x', x);
+        core.setFlag('y', y);
+        core.setFlag('px', px);
+        core.setFlag('py', py);
+        core.setFlag('timeout', timeout);
+        core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
+        core.events.__action_wait_afterGet(core.status.event.data.current);
+        core.doAction();
         return;
     }
 
@@ -3043,10 +3042,10 @@ actions.prototype._clickKeyBoard = function (x, y) {
 }
 
 ////// 光标界面时的点击操作 //////
-actions.prototype._clickCursor = function (x, y) {
+actions.prototype._clickCursor = function (x, y, px, py) {
     if (x == core.status.automaticRoute.cursorX && y == core.status.automaticRoute.cursorY) {
         core.ui.closePanel();
-        core.onclick(x, y, []);
+        core.onclick(x, y, px, py, []);
         return;
     }
     core.status.automaticRoute.cursorX = x;
@@ -3092,7 +3091,9 @@ actions.prototype._keyUpCursor = function (keycode) {
     if (keycode == 13 || keycode == 32 || keycode == 67 || keycode == 69) {
         core.playSound('确定');
         core.ui.closePanel();
-        core.onclick(core.status.automaticRoute.cursorX, core.status.automaticRoute.cursorY, []);
+        var x = core.status.automaticRoute.cursorX;
+        var y = core.status.automaticRoute.cursorY;
+        core.onclick(x, y, 32 * x + 16, 32 * y + 16, []);
         return;
     }
 }

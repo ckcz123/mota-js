@@ -184,13 +184,13 @@ keyDownCtrl: fn() -> bool
 keyUp: fn(keyCode: number, altKey?: bool, fromReplay?: bool)
 根据放开键的code来执行一系列操作
 
-longClick: fn(x: number, y: number, fromEvent?: bool)
+longClick: fn(x: number, y: number, px: number, py: number, fromEvent?: bool)
 长按
 
 onStatusBarClick: fn(e?: Event)
 点击自绘状态栏时
 
-onclick: fn(x: number, y: number, stepPostfix?: ?)
+onclick: fn(x: number, y: number, px: number, py: number, stepPostfix?: [?])
 具体点击屏幕上(x,y)点时，执行的操作
 
 ondown: fn(loc: {x: number, y: number, size: number})

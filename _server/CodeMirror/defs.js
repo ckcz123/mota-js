@@ -2981,7 +2981,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "longClick": {
           "!doc": "长按", 
-          "!type": "fn(x: number, y: number, fromEvent?: bool)"
+          "!type": "fn(x: number, y: number, px: number, py: number, fromEvent?: bool)"
         }, 
         "unregisterAction": {
           "!doc": "注销一个用户交互行为", 
@@ -2993,7 +2993,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "onclick": {
           "!doc": "具体点击屏幕上(x,y)点时，执行的操作", 
-          "!type": "fn(x: number, y: number, stepPostfix?: ?)"
+          "!type": "fn(x: number, y: number, px: number, py: number, stepPostfix?: [?])"
         }, 
         "doRegisteredAction": {
           "!doc": "执行一个用户交互行为", 

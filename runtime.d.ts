@@ -1271,7 +1271,7 @@ declare class actions {
     onup(loc: number[]): void
 
     /** 具体点击屏幕上(x,y)点时，执行的操作 */
-    onclick(x: number, y: number, stepPostfix?: any): void
+    onclick(x: number, y: number, px: number, py: number, stepPostfix?: any): void
 
     /** 滑动鼠标滚轮时的操作 */
     onmousewheel(direct: 1 | -1): void
@@ -1280,7 +1280,7 @@ declare class actions {
     keyDownCtrl(): void
 
     /** 长按 */
-    longClick(x: number, y: number, fromEvent?: boolean): void
+    longClick(x: number, y: number, px: number, py: number, fromEvent?: boolean): void
 
     /** 点击自绘状态栏时 */
     onStatusBarClick(e?: MouseEvent): void

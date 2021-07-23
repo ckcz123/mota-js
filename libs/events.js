@@ -1806,6 +1806,11 @@ events.prototype._action_setGlobalFlag = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_setNameMap = function (data, x, y, floorId) {
+    this.setNameMap(data.name, data.value);
+    core.doAction();
+}
+
 events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
     this.setHeroIcon(data.name, data.noDraw);
     core.doAction();
@@ -2881,6 +2886,12 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.resize();
     if (name == 'blurFg')
         core.drawMap();
+}
+
+////// 设置文件别名 //////
+events.prototype.setNameMap = function (name, value) {
+    if (!core.hasFlag('__nameMap__')) core.setFlag('__nameMap__', {});
+    flags.__nameMap__[name] = value;
 }
 
 events.prototype.closeDoor = function (x, y, id, callback) {

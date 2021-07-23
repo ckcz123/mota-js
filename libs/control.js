@@ -2513,7 +2513,7 @@ control.prototype.checkRouteFolding = function () {
 // ------ 天气，色调，BGM ------ //
 
 control.prototype.getMappedName = function (name) {
-    return (main.nameMap || {})[name] || name;
+    return core.getFlag('__nameMap__', {})[name] || (main.nameMap || {})[name] || name;
 }
 
 ////// 更改天气效果 //////

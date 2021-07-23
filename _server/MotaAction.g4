@@ -756,6 +756,7 @@ action
     |   setGlobalAttribute_s
     |   setGlobalValue_s
     |   setGlobalFlag_s
+    |   setNameMap_s
     |   show_s
     |   hide_s
     |   trigger_s
@@ -1260,6 +1261,20 @@ var code = '{"type": "setGlobalFlag", "name": "'+Global_Flag_List_0+'", "value":
 return code;
 */;
 
+
+setNameMap_s
+    :   '设置文件别名' ':' EvalString '为' EvalString? Newline
+
+
+/* setNameMap_s
+tooltip : setNameMap：设置文件别名
+helpUrl : /_docs/#/instruction
+default : ["背景音乐",""]
+colour : this.dataColor
+EvalString_1 = EvalString_1 ? (', "value": "' + EvalString_1 + '"') : '';
+var code = '{"type": "setNameMap", "name": "'+EvalString_0+'"'+EvalString_1+'},\n';
+return code;
+*/;
 
 show_s
     :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool? Newline

@@ -128,6 +128,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
       MotaActionBlocks['setGlobalValue_s'].xmlText(),
       MotaActionBlocks['setGlobalFlag_s'].xmlText(),
+      MotaActionBlocks['setNameMap_s'].xmlText(),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),

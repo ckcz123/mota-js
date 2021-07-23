@@ -719,6 +719,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setGlobalFlag_s'].xmlText([
         data.name, data.value, this.next]);
       break;
+    case "setNameMap":
+      this.next = MotaActionBlocks['setNameMap_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
     case "input":
       this.next = MotaActionBlocks['input_s'].xmlText([
         data.text,this.next]);

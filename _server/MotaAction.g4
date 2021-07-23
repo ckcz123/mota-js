@@ -3406,6 +3406,10 @@ expression
     |   blockNumber_e
     |   blockCls_e
     |   equip_e
+    |   nextXY_e
+    |   isReplaying_e
+    |   hasVisitedFloor_e
+    |   isShopVisited_e
     |   evalString_e
     
 
@@ -3562,6 +3566,47 @@ blockCls_e
 /* blockCls_e
 default : [0,0]
 var code = 'blockCls:'+Int_0+','+Int_1;
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+nextXY_e
+    :   '前方' Int '格的' NextXY_List
+
+/* nextXY_e
+default : [1, 'nextX']
+var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+Int_0+')') : ('core.nextX('+Int_0+')');
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+isReplaying_e
+    :   '录像播放中'
+
+/* isReplaying_e
+var code = 'core.isReplaying()';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];;
+*/;
+
+
+hasVisitedFloor_e
+    :   '访问过楼层' IdString
+
+/* hasVisitedFloor_e
+default : ['MT0']
+allFloorIds : ['IdString_0']    
+var code = 'core.hasVisitedFloor(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+isShopVisited_e
+    :   '开启过商店' IdString
+
+/* isShopVisited_e
+default : ['shop1']
+allFloorIds : ['IdString_0']    
+var code = 'core.isShopVisited(\'' + IdString_0 + '\')';
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -3729,6 +3774,10 @@ Global_Value_List
 Global_Flag_List
     :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'|'虚化前景层'
     /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage', 'blurFg']*/;
+
+NextXY_List
+    :   '横坐标'|'纵坐标'
+    /*NextXY_List ['nextX','nextY']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则

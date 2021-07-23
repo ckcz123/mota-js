@@ -265,6 +265,10 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['blockNumber_e'].xmlText(),
       MotaActionBlocks['blockCls_e'].xmlText(),
       MotaActionBlocks['equip_e'].xmlText(),
+      MotaActionBlocks['nextXY_e'].xmlText(),
+      MotaActionBlocks['isReplaying_e'].xmlText(),
+      MotaActionBlocks['hasVisitedFloor_e'].xmlText(),
+      MotaActionBlocks['isShopVisited_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[

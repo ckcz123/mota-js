@@ -77,11 +77,13 @@ editor_datapanel_wrapper = function (editor) {
     }
     importMap.onclick= function () {
         var sy=editor.map.length,sx=editor.map[0].length;
-        var mapArray;
-        try {
-            mapArray = JSON.parse('[' + pout.value + ']');
-            if (mapArray.length != sy || mapArray[0].length != sx) throw '';
-        } catch (e) {
+        var mapArray = null;
+        var value = pout.value.trim();
+        // 去除可能末尾的 ','
+        if (value.endsWith(',')) value = value.substring(0, value.length - 1);
+        try { mapArray = JSON.parse(value); } catch (e) {console.log(e)}
+        try { mapArray = mapArray || JSON.parse('[' + value + ']'); } catch (e) {console.log(e)}
+        if (mapArray == null || mapArray.length != sy || mapArray[0].length != sx) {
             printe('格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)');
             return;
         }

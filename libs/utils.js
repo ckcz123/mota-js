@@ -97,17 +97,17 @@ utils.prototype.replaceText = function (text, prefix) {
 }
 
 utils.prototype.replaceValue = function (value) {
-    if (typeof value == "string" && value.indexOf(":") >= 0) {
+    if (typeof value == "string" && (value.indexOf(":") >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0)) {
         if (value.indexOf('status:') >= 0)
             value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
         if (value.indexOf('item:') >= 0)
             value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
-        if (value.indexOf('flag:') >= 0)
-            value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
+        if (value.indexOf('flag:') >= 0 || value.indexOf('flag：') >= 0)
+            value = value.replace(/flag[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B]+)/g, "core.getFlag('$1', 0)");
         //if (value.indexOf('switch:' >= 0))
         //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
-        if (value.indexOf('global:') >= 0)
-            value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+        if (value.indexOf('global:') >= 0 || value.indexOf('global：') >= 0)
+            value = value.replace(/global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B]+)/g, "core.getGlobal('$1', 0)");
         if (value.indexOf('enemy:')>=0)
             value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
@@ -128,7 +128,7 @@ utils.prototype.replaceValue = function (value) {
 utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        if (value.indexOf(':') >= 0) {
+        if (value.indexOf(':') >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0) {
             if (value.indexOf('switch:' >= 0))
                 value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
             value = this.replaceValue(value);

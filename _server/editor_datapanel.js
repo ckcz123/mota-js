@@ -321,6 +321,17 @@ editor_datapanel_wrapper = function (editor) {
                 printe('该列所有剩余项全部自动注册成功,请F5刷新编辑器');
             })
         }
+        newIdIdnum.children[5].onclick = function () {
+            if (!confirm("警告！你确定要删除此素材吗？此过程不可逆！")) return;
+            editor.file.removeMaterial(editor_mode.info, function (err) {
+                if (err) {
+                    printe(err);
+                    throw err;
+                }
+                alert('删除此素材成功！');
+                window.location.reload();
+            });
+        }
     }
 
     editor.uifunctions.changeId_func = function () {
@@ -354,6 +365,21 @@ editor_datapanel_wrapper = function (editor) {
             } else {
                 printe('请输入要修改到的ID');
             }
+        }
+        changeId.children[2].onclick = function () {
+            if (editor_mode.info.isTile) {
+                printe("额外素材不可删除！");
+                return;
+            }
+            if (!confirm("警告！你确定要删除此素材吗？此过程不可逆！\n请务必首先进行备份操作，并保证此素材没有在地图的任何位置使用，否则可能会出现不可知的后果！")) return;
+            editor.file.removeMaterial(editor_mode.info, function (err) {
+                if (err) {
+                    printe(err);
+                    return;
+                }
+                alert('删除此素材成功！');
+                window.location.reload();
+            });
         }
     }
 

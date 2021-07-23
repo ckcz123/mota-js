@@ -490,6 +490,62 @@ editor_file = function (editor, callback) {
             
         }
     }
+
+    editor.file.removeMaterial = function (info, callback) {
+        console.log(info);
+
+        // Step 1: 尝试删除图片
+        var _deleteMaterialImage = function (cb) {
+            if (info.images == 'autotile') return cb();
+            var img = core.material.images[info.images];
+            if (img == null) return callback('该素材不存在！');
+
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = false;
+
+            var width = img.width, height = img.height, per_height = info.images.endsWith('48') ? 48 : 32
+            if (height == per_height) return callback('该素材图片只有一个素材，无法删除');
+            canvas.width = width;
+            canvas.height = height - per_height;
+            ctx.drawImage(img, 0, 0, width, info.y * per_height, 0, 0, width, info.y * per_height);
+            ctx.drawImage(img, 0, (info.y + 1) * per_height, width, height - (info.y + 1) * per_height, 0, info.y * per_height, width, height - (info.y + 1) * per_height);
+            var imgbase64 = canvas.toDataURL('image/png');
+            fs.writeFile('./project/materials/' + info.images + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
+                if (err) return callback(err);
+                cb();
+            });
+        }
+
+        _deleteMaterialImage(function () {
+            // Step 2: 删除图块信息
+            if (info.id) {
+                delete icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[info.images][info.id];
+                delete maps_90f36752_8815_4be8_b32b_d7fad1d0542e[info.idnum];
+                if (info.images == 'items') {
+                    delete items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[info.id];
+                }
+                if (info.images == 'enemys' || info.images == 'enemy48') {
+                    delete enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[info.id];
+                }
+            }
+
+            // Step 3: 将所有素材向下移动一格
+            if (info.images != 'autotile') {
+                var value = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[info.images];
+                Object.keys(value).forEach(function (one) {
+                    if (value[one] > info.y) value[one]--;
+                });
+            }
+
+            // Step 4: 保存并删除成功！
+            editor.file.save_icons_maps_items_enemys(callback);
+        });
+    }
+
     //callback(err:String)
     editor.file.editItem = function (id, actionList, callback) {
         /*actionList:[

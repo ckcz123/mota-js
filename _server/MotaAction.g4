@@ -1893,7 +1893,7 @@ helpUrl : /_docs/#/instruction
 default : ["zone","","",false,false]
 allAnimates : ['IdString_0']
 material : ["./project/animates/", "IdString_0"]
-selectPoint : ["PosString_0", "PosString_1"]
+menu : [['选择位置', 'editor_blockly.selectPoint(block, ["PosString_0", "PosString_1"])']]
 colour : this.soundColor
 var loc = PosString_0&&PosString_1?(', "loc": ['+PosString_0+','+PosString_1+']'):'';
 Bool_0 = Bool_0?', "alignWindow": true':'';

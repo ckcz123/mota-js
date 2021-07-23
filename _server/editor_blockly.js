@@ -344,7 +344,7 @@ editor_blockly = function () {
 
     editor_blockly.selectMaterial = function(b,material){
         editor.uievent.selectMaterial([b.getFieldValue(material[1])], '请选择素材', material[0], function (one) {
-            if (b.type == 'animate_s') {
+            if (b.type == 'animate_s' || b.type == 'animate_1_s') {
                 return /^[-A-Za-z0-9_.]+\.animate$/.test(one) ? one.substring(0, one.length - 8) : null;
             }
             return /^[-A-Za-z0-9_.]+$/.test(one) ? one : null;
@@ -485,10 +485,6 @@ editor_blockly = function () {
         var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
 
         var xv = block.getFieldValue(arr[0]), yv = block.getFieldValue(arr[1]);
-        if (arr[0] === arr[1]) {
-            var v = block.getFieldValue(arr[0]).split(",");
-            xv = parseInt(v[0]); yv = parseInt(v[1]);
-        }
         if (xv != null) x = xv;
         if (yv != null) y = yv;
         if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
@@ -499,13 +495,8 @@ editor_blockly = function () {
                 if (fv != editor.currentFloorId || editor_blockly.entryType == 'commonEvent') block.setFieldValue(fv, arr[2]);
                 else block.setFieldValue(arr[3] ? fv : "", arr[2]);
             }
-            if (arr[0] === arr[1]) {
-                block.setFieldValue(xv+","+yv, arr[0]);
-            }
-            else {
-                block.setFieldValue(xv+"", arr[0]);
-                block.setFieldValue(yv+"", arr[1]);
-            }
+            block.setFieldValue(xv+"", arr[0]);
+            block.setFieldValue(yv+"", arr[1]);
             if (block.type == 'changeFloor_m' || block.type == 'changeFloor_s') {
                 block.setFieldValue("floorId", "Floor_List_0");
                 block.setFieldValue("loc", "Stair_List_0");

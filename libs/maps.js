@@ -2247,7 +2247,8 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     var moveSteps = (steps||[]).map(function (t) {
         return [t.split(':')[0], parseInt(t.split(':')[1]||"1")];
     }).filter(function (t) {
-        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown'].indexOf(t[0])>=0;
+        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed'].indexOf(t[0])>=0
+            && !(t[0] == 'speed' && t[1] < 16)
     });
     var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
@@ -2261,21 +2262,38 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
     var animateTotal = core.icons._getAnimateFrames(blockInfo.cls), animateTime = 0;
-    var animate = window.setInterval(function () {
-        if (blockInfo.cls != 'tileset') {
-            animateTime += moveInfo.per_time;
-            if (animateTime > core.values.animateSpeed) {
-                animateTime = 0;
-                blockInfo.posX = (blockInfo.posX + 1) % animateTotal;
+    var _run = function () {
+        var animate = window.setInterval(function () {
+            if (blockInfo.cls != 'tileset') {
+                animateTime += moveInfo.per_time;
+                if (animateTime > core.values.animateSpeed) {
+                    animateTime = 0;
+                    blockInfo.posX = (blockInfo.posX + 1) % animateTotal;
+                }
             }
-        }
-        if (moveInfo.moveSteps.length != 0)
-            core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
-        else
-            core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
-    }, moveInfo.per_time);
+            if (moveInfo.moveSteps.length != 0) {
+                if (core.maps._moveBlock_updateSpeed(moveInfo)) {
+                    clearInterval(animate);
+                    delete core.animateFrame.asyncId[animate];
+                    _run();
+                }
+                else core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
+            }
+            else
+                core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
+        }, moveInfo.per_time);
+        core.animateFrame.asyncId[animate] = true;
+    }
+    _run();
+}
 
-    core.animateFrame.asyncId[animate] = true;
+maps.prototype._moveBlock_updateSpeed = function (moveInfo) {
+    if (moveInfo.step == 0 && moveInfo.moveSteps[0][0] == 'speed' && moveInfo.moveSteps[0][1] >= 16) {
+        moveInfo.per_time = moveInfo.moveSteps[0][1] / 16 / core.status.replay.speed;
+        moveInfo.moveSteps.shift();
+        return true;
+    }
+    return false;
 }
 
 maps.prototype._moveBlock_updateDirection = function (blockInfo, moveInfo) {

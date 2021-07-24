@@ -2290,6 +2290,7 @@ tooltip : 移动方向
 helpUrl : /_docs/#/instruction
 default : ["up", 0]
 colour : this.subColor
+if (Move_List_0 == 'speed' && Int_0 < 16) throw '设置的移动速度值不得小于16';
 return ', "' + Move_List_0 + ':' + Int_0 + '"';
 */;
 
@@ -3915,8 +3916,8 @@ Key_List
     /*Key_List ['yellowKey','blueKey','redKey','greenKey','steelKey']*/;
 
 Move_List
-    :   '上'|'下'|'左'|'右'|'前'|'后'|'左上'|'左下'|'右上'|'右下'
-    /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown']*/;
+    :   '上'|'下'|'左'|'右'|'前'|'后'|'左上'|'左下'|'右上'|'右下'|'设置速度'
+    /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed']*/;
 
 NameMap_List
     :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'阻激夹域'|'穿脱装备'

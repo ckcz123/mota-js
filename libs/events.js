@@ -3150,24 +3150,35 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
     var step = 0, moveSteps = (steps||[]).map(function (t) {
         return [t.split(':')[0], parseInt(t.split(':')[1]||"1")];
     }).filter(function (t) {
-        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown'].indexOf(t[0])>=0;
+        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed'].indexOf(t[0])>=0
+            && !(t[0] == 'speed' && t[1] < 16);
     });
     core.status.heroMoving = -1;
-    var animate=window.setInterval(function() {
-        if (moveSteps.length==0) {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            core.status.heroMoving = 0;
-            core.drawHero();
-            if (callback) callback();
-        }
-        else {
-            if (core.events._eventMoveHero_moving(++step, moveSteps))
-                step = 0;
-        }
-    }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
-
-    core.animateFrame.asyncId[animate] = true;
+    var _run = function () {
+        var animate=window.setInterval(function() {
+            if (moveSteps.length==0) {
+                delete core.animateFrame.asyncId[animate];
+                clearInterval(animate);
+                core.status.heroMoving = 0;
+                core.drawHero();
+                if (callback) callback();
+            }
+            else {
+                if (step == 0 && moveSteps[0][0] == 'speed' && moveSteps[0][1] >= 16) {
+                    time = moveSteps[0][1];
+                    moveSteps.shift();
+                    clearInterval(animate);
+                    delete core.animateFrame.asyncId[animate];
+                    _run();
+                }
+                else if (core.events._eventMoveHero_moving(++step, moveSteps))
+                    step = 0;
+            }
+        }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
+    
+        core.animateFrame.asyncId[animate] = true;
+    }
+    _run();
 }
 
 events.prototype._eventMoveHero_moving = function (step, moveSteps) {

@@ -256,6 +256,19 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return false;
 	}, 60);
 
+	// 允许长按屏幕连续执行操作
+	core.registerAction('longClick', 'shops', function (x, y, px, py) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		if (x >= core.actions.CHOICES_LEFT && x <= core.actions.CHOICES_RIGHT && y >= topIndex && y < topIndex + choices.length) {
+			core.actions._clickAction(x, y);
+			return true;
+		}
+		return false;
+	}, 60);
 },
     "removeMap": function () {
 	// 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。

@@ -64,6 +64,8 @@ function core() {
         'playingSounds': {}, // 正在播放的SE
         'userVolume': 1.0, // 用户音量
         'designVolume': 1.0, //设计音量
+        'bgmSpeed': 100, // 背景音乐速度
+        'bgmUsePitch': null, // 是否同时修改音调
         'cachedBgms': [], // 缓存BGM内容
         'cachedBgmCount': 8, // 缓存的bgm数量
     }
@@ -209,6 +211,8 @@ function core() {
             "textfont": 16,
             "bold": false,
             "time": 0,
+            "letterSpacing": 0,
+            "animateTime": 0,
         },
         "globalAttribute": {
             'equipName': main.equipName || [],
@@ -338,6 +342,10 @@ core.prototype._init_platform = function () {
     core.platform.isOnline = location.protocol.indexOf("http") == 0;
     if (!core.platform.isOnline) alert("请勿直接打开html文件！使用启动服务或者APP进行离线游戏。");
     window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
+    core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
+    core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
+    //新增 userVolume 默认值0.7
+    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 0.7);
     try {
         core.musicStatus.audioContext = new window.AudioContext();
         core.musicStatus.gainNode = core.musicStatus.audioContext.createGain();
@@ -347,10 +355,6 @@ core.prototype._init_platform = function () {
         console.log("该浏览器不支持AudioContext");
         core.musicStatus.audioContext = null;
     }
-    core.musicStatus.bgmStatus = core.getLocalStorage('bgmStatus', true);
-    core.musicStatus.soundStatus = core.getLocalStorage('soundStatus', true);
-    //新增 userVolume 默认值0.7
-    core.musicStatus.userVolume = core.getLocalStorage('userVolume', 0.7);
     ["Android", "iPhone", "SymbianOS", "Windows Phone", "iPad", "iPod"].forEach(function (t) {
         if (navigator.userAgent.indexOf(t) >= 0) {
             if (t == 'iPhone' || t == 'iPad' || t == 'iPod') core.platform.isIOS = true;

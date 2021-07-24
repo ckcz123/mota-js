@@ -116,9 +116,10 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				},
 				"nameMap": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_docs": "文件映射",
-					"_data": "文件名映射，目前仅对images, animates, bgms, sounds有效。\n例如定义 {\"精灵石.mp3\":\"jinglingshi.mp3\"} 就可以使用\ncore.playBgm(\"精灵石.mp3\") 或对应的事件来播放该bgm。"
+					"_type": "event",
+					"_event": "nameMap",
+					"_docs": "文件别名",
+					"_data": "文件别名设置，目前仅对images, animates, bgms, sounds有效。"
 				},
 				"levelChoose": {
 					"_leaf": true,

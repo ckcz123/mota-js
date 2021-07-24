@@ -184,13 +184,13 @@ keyDownCtrl: fn() -> bool
 keyUp: fn(keyCode: number, altKey?: bool, fromReplay?: bool)
 根据放开键的code来执行一系列操作
 
-longClick: fn(x: number, y: number, fromEvent?: bool)
+longClick: fn(x: number, y: number, px: number, py: number, fromEvent?: bool)
 长按
 
 onStatusBarClick: fn(e?: Event)
 点击自绘状态栏时
 
-onclick: fn(x: number, y: number, stepPostfix?: ?)
+onclick: fn(x: number, y: number, px: number, py: number, stepPostfix?: [?])
 具体点击屏幕上(x,y)点时，执行的操作
 
 ondown: fn(loc: {x: number, y: number, size: number})
@@ -262,7 +262,7 @@ addStatus: fn(name: string, value: number)
 name: 属性的英文名
 value: 属性的增量
 
-addSwitch: fn(x: number, y: number, floorId?: string, name: string, value: number)
+addSwitch: fn(x: number, y: number, floorId: string, name: string, value: number)
 增加某个独立开关的值
 
 autosave: fn(removeLast?: bool)
@@ -388,7 +388,7 @@ getStatusLabel: fn(name: string) -> string
 getStatusOrDefault: fn(status?: ?, name?: string)
 从status中获得属性，如果不存在则从勇士属性中获取
 
-getSwitch: fn(x: number, y: number, floorId?: string, name: string, defaultValue?: ?)
+getSwitch: fn(x: number, y: number, floorId: string, name: string, defaultValue?: ?)
 获得某个独立开关的值
 
 hasFlag: fn(name: string) -> bool
@@ -400,7 +400,7 @@ name: 变量名，支持中文
 hasSave: fn(index?: number) -> bool
 判断某个存档位是否存在存档
 
-hasSwitch: fn(x: number, y: number, floorId?: string, name: string) -> bool
+hasSwitch: fn(x: number, y: number, floorId: string, name: string) -> bool
 判定某个独立开关的值
 
 hideStartAnimate: fn(callback?: fn())
@@ -478,8 +478,12 @@ playBgm: fn(bgm: string, startTime?: number)
 bgm: 背景音乐的文件名，支持全塔属性中映射前的中文名
 startTime: 跳过前多少秒，不填则不跳过
 
-playSound: fn(sound: string)
+playSound: fn(sound: string, pitch?: number, callback?: fn()) -> number
 播放一个音效
+sound: 音效名；可以使用文件别名。
+pitch: 播放的音调；可选，如果设置则为30-300之间的数值；100为正常音调。
+callback: 可选，播放完毕后执行的回调函数。
+返回：一个数字，可用于core.stopSound的参数来只停止该音效。
 
 registerAnimationFrame: fn(name: string, needPlaying: bool, func?: fn(timestamp: number))
 注册一个 animationFrame
@@ -505,7 +509,7 @@ removeFlag: fn(name: string)
 removeSave: fn(index?: number, callback?: fn())
 删除某个存档
 
-removeSwitch: fn(x: number, y: number, floorId?: string, name: string)
+removeSwitch: fn(x: number, y: number, floorId: string, name: string)
 删除某个独立开关
 
 replay: fn()
@@ -549,6 +553,11 @@ setAutomaticRoute: fn(destX: number, destY: number, stepPostfix: [{x: number, y:
 destX: 鼠标或手指的起拖点横坐标
 destY: 鼠标或手指的起拖点纵坐标
 stepPostfix: 拖动轨迹的数组表示，每项为一步的方向和目标点。
+
+setBgmSpeed: fn(speed: number, usePitch?: bool)
+设置背景音乐的播放速度和音调
+speed: 播放速度，必须为30-300中间的值。100为正常速度。
+usePitch: 是否同时改变音调（部分设备可能不支持）
 
 setBuff: fn(name: string, value: number)
 设置主角某个属性的百分比修正倍率，初始值为1，
@@ -597,7 +606,7 @@ setStatus: fn(name: string, value: number)
 name: 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.setHeroLoc(name, value)，其他的会直接对 core.status.hero[name] 赋值
 value: 属性的新值
 
-setSwitch: fn(x: number, y: number, floorId?: string, name: string, value?: ?)
+setSwitch: fn(x: number, y: number, floorId: string, name: string, value?: ?)
 设置某个独立开关的值
 
 setToolbarButton: fn(useButton?: bool)
@@ -640,8 +649,8 @@ stopAutomaticRoute: fn()
 stopReplay: fn(force?: bool)
 停止播放
 
-stopSound: fn()
-停止所有SE
+stopSound: fn(id?: number)
+停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。
 
 syncLoad: fn()
 从服务器加载存档
@@ -779,6 +788,9 @@ hero: 可选，此时的勇士属性
 getEnemys: fn()
 获得所有怪物原始数据的一个副本。
 请使用core.material.enemys获得当前各项怪物属性。
+
+getEnemyValue: fn(enemy?: string|enemy, name: string, x?: number, y?: number, floorId?: string)
+获得某个点上怪物的某个属性值
 
 getSpecialColor: fn(enemy: string|enemy) -> [string]
 获得某个怪物所有特殊属性的颜色
@@ -998,6 +1010,9 @@ load: fn(fromUserAction?: bool)
 lose: fn(reason?: string)
 游戏失败事件
 
+moveEnemyOnPoint: fn(fromX: number, fromY: number, toX: number, toY: number, floorId?: string)
+将某个点已经设置的敌人属性移动到其他点
+
 moveImage: fn(code: number, to?: [number], opacityVal?: number, time?: number, callback?: fn())
 移动一张图片并/或改变其透明度
 例如：core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
@@ -1063,6 +1078,9 @@ registerSystemEvent: fn(type: string, func: fn(data?: ?, callback?: fn()))
 type: 事件名
 func: 为事件的处理函数，可接受(data,callback)参数
 
+resetEnemyOnPoint: fn(x: number, y: number, floorId?: string)
+重置某个点的怪物属性
+
 resetGame: fn(hero?: ?, hard?: ?, floorId?: string, maps?: ?, values?: ?)
 初始化游戏
 
@@ -1080,6 +1098,10 @@ name: 属性的英文缩写
 value: 属性的新值，可选
 operator: 运算操作符，可选
 prefix: 独立开关前缀，一般不需要，下同
+
+setEnemyOnPoint: fn(x: number, y: number, floorId?: string, name: string, value: ?, operator?: string, prefix?: string)
+设置某个点的敌人属性。如果该点不是怪物，则忽略此函数。
+例如：core.setEnemyOnPoint(3, 5, null, 'atk', 100, '+='); // 仅将(3,5)点怪物的攻击力加100。
 
 setEvents: fn(list?: [?], x?: number, y?: number, callback?: fn())
 直接设置事件列表
@@ -1297,6 +1319,16 @@ index: 套装编号，自然数
 
 removeItem: fn(itemId?: string, itemNum?: number)
 删除某个物品
+
+setEquip: fn(equipId: string, valueType: string, name: string, value: ?, operator?: string, prefix?: string)
+设置某个装备的属性并计入存档
+例如：core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300
+equipId: 装备id
+valueType: 增幅类型，只能是value（数值）或percentage（百分比）
+name: 要修改的属性名称，如atk
+value: 要修改到的属性数值
+operator: 操作符，可选，如+=表示在原始值上增加
+prefix: 独立开关前缀，一般不需要
 
 setItem: fn(itemId: string, itemNum?: number)
 设置某种道具的持有量

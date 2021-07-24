@@ -15,7 +15,10 @@ icons.prototype._init = function () {
 }
 
 icons.prototype.getIcons = function () {
-    return core.clone(this.icons);
+    var icons = core.clone(this.icons);
+    icons.hero.leftup = icons.hero.leftdown = icons.hero.left;
+    icons.hero.rightup = icons.hero.rightdown = icons.hero.right;
+    return icons;
 }
 
 ////// 根据道具ID获得其cls //////

@@ -2189,12 +2189,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, value: ?)"
         },
         "playSound": {
-          "!doc": "播放一个音效",
-          "!type": "fn(sound: string)"
+          "!doc": "播放一个音效<br/>sound: 音效名；可以使用文件别名。<br/>pitch: 播放的音调；可选，如果设置则为30-300之间的数值。<br/>callback: 可选，播放完毕后执行的回调函数。<br/>返回：一个数字，可用于core.stopSound的参数来只停止该音效。",
+          "!type": "fn(sound: string, pitch?: number, callback?: fn()) -> number"
         },
         "stopSound": {
-          "!doc": "停止所有SE", 
-          "!type": "fn()"
+          "!doc": "停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。", 
+          "!type": "fn(id?: number)"
         }, 
         "addGameCanvasTranslate": {
           "!doc": "加减画布偏移", 
@@ -2212,6 +2212,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "暂停背景音乐的播放", 
           "!type": "fn()"
         }, 
+        "setBgmSpeed": {
+          "!doc": "设置背景音乐的播放速度和音调<br/>speed: 播放速度，必须为30-300中间的值。100为正常速度。<br/>usePitch: 是否同时改变音调（部分设备可能不支持）",
+          "!type": "fn(speed: number, usePitch?: bool)"
+        },
         "setReplaySpeed": {
           "!doc": "设置播放速度", 
           "!type": "fn(speed: number)"
@@ -2590,23 +2594,23 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "setSwitch": {
           "!doc": "设置某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: ?)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, value: ?)"
         },
         "getSwitch": {
           "!doc": "获得某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, defaultValue?: ?)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, defaultValue?: ?)"
         },
         "addSwitch": {
           "!doc": "增加某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: number)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, value: number)"
         },
         "removeSwitch": {
           "!doc": "删除某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string)"
         },
         "removeSwitch": {
           "!doc": "判定某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string) -> bool"
+          "!type": "fn(x: number, y: number, floorId: string, name: string) -> bool"
         }
       }, 
       "icons": {
@@ -2709,6 +2713,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "canEquip": {
           "!doc": "检查能否穿上某件装备<br/>例如：core.canEquip('sword5', true) // 主角可以装备神圣剑吗，如果不能会有提示<br/>equipId: 装备id<br/>hint: 无法穿上时是否提示（比如是因为未持有还是别的什么原因）<br/>返回值：true表示可以穿上，false表示无法穿上", 
           "!type": "fn(equipId: string, hint?: bool) -> bool"
+        },
+        "setEquip": {
+          "!doc": "设置某个装备的属性并计入存档<br/>例如：core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300<br/>equipId: 装备id<br/>valueType: 增幅类型，只能是value（数值）或percentage（百分比）<br/>name: 要修改的属性名称，如atk<br/>value: 要修改到的属性数值<br/>operator: 操作符，可选，如+=表示在原始值上增加<br/>prefix: 独立开关前缀，一般不需要",
+          "!type": "fn(equipId: string, valueType: string, name: string, value: ?, operator?: string, prefix?: string)"
         }
       }, 
       "utils": {
@@ -2981,7 +2989,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "longClick": {
           "!doc": "长按", 
-          "!type": "fn(x: number, y: number, fromEvent?: bool)"
+          "!type": "fn(x: number, y: number, px: number, py: number, fromEvent?: bool)"
         }, 
         "unregisterAction": {
           "!doc": "注销一个用户交互行为", 
@@ -2993,7 +3001,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "onclick": {
           "!doc": "具体点击屏幕上(x,y)点时，执行的操作", 
-          "!type": "fn(x: number, y: number, stepPostfix?: ?)"
+          "!type": "fn(x: number, y: number, px: number, py: number, stepPostfix?: [?])"
         }, 
         "doRegisteredAction": {
           "!doc": "执行一个用户交互行为", 
@@ -3605,6 +3613,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "获得所有怪物原始数据的一个副本。<br/>请使用core.material.enemys获得当前各项怪物属性。",
           "!type": "fn()"
         },
+        "getEnemyValue": {
+          "!doc": "获得某个点上怪物的某个属性值",
+          "!type": "fn(enemy?: string|enemy, name: string, x?: number, y?: number, floorId?: string)"
+        },
         "getSpecials": {
           "!doc": "获得所有特殊属性的定义",
           "!type": "fn() -> [[?]]"
@@ -3908,6 +3920,18 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置一项敌人属性并计入存档<br/>例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0<br/>id: 敌人id<br/>name: 属性的英文缩写<br/>value: 属性的新值，可选<br/>operator: 运算操作符如+=，可选<br/>prefix: 独立开关前缀，一般不需要，下同", 
           "!type": "fn(id: string, name: string, value: ?, operator?: string, prefix?: string)"
         }, 
+        "setEnemyOnPoint": {
+          "!doc": "设置某个点的敌人属性。如果该点不是怪物，则忽略此函数。<br/>例如：core.setEnemyOnPoint(3, 5, null, 'atk', 100, '+='); // 仅将(3,5)点怪物的攻击力加100。",
+          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: ?, operator?: string, prefix?: string)"
+        },
+        "resetEnemyOnPoint": {
+          "!doc": "重置某个点的怪物属性",
+          "!type": "fn(x: number, y: number, floorId?: string)"
+        },
+        "moveEnemyOnPoint": {
+          "!doc": "将某个点已经设置的敌人属性移动到其他点",
+          "!type": "fn(fromX: number, fromY: number, toX: number, toY: number, floorId?: string)"
+        },
         "autoEventExecuting": {
           "!doc": "当前是否在执行某个自动事件", 
           "!type": "fn(symbol?: string, value?: ?) -> bool"

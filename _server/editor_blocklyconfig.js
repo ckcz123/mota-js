@@ -59,6 +59,7 @@ editor_blocklyconfig=(function(){
         "commonEvent": "回收钥匙商店",
         "args": ""
       }],'shop'),
+      MotaActionBlocks['common_m'].xmlText(),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
@@ -86,6 +87,9 @@ editor_blocklyconfig=(function(){
       }, 'doorInfo'),
       MotaActionBlocks['faceIds_m'].xmlText(),
       MotaActionBlocks['mainStyle_m'].xmlText(),
+      MotaActionFunctions.actionParser.parse({
+        "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "领域": "zone", "文件名": "file.jpg"
+      }, 'nameMap'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -117,10 +121,15 @@ editor_blocklyconfig=(function(){
         MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
+      MotaActionBlocks['setEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['resetEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['moveEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['setEquip_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
       MotaActionBlocks['setGlobalValue_s'].xmlText(),
       MotaActionBlocks['setGlobalFlag_s'].xmlText(),
+      MotaActionBlocks['setNameMap_s'].xmlText(),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
@@ -185,6 +194,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
+      MotaActionBlocks['animate_1_s'].xmlText(),
       MotaActionBlocks['setViewport_s'].xmlText(),
       MotaActionBlocks['setViewport_1_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
@@ -201,8 +211,10 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['loadBgm_s'].xmlText(),
       MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
+      MotaActionBlocks['playSound_1_s'].xmlText(),
       MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
+      MotaActionBlocks['setBgmSpeed_s'].xmlText(),
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
       MotaActionBlocks['autoSave_s'].xmlText(),
@@ -256,6 +268,10 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['blockNumber_e'].xmlText(),
       MotaActionBlocks['blockCls_e'].xmlText(),
       MotaActionBlocks['equip_e'].xmlText(),
+      MotaActionBlocks['nextXY_e'].xmlText(),
+      MotaActionBlocks['isReplaying_e'].xmlText(),
+      MotaActionBlocks['hasVisitedFloor_e'].xmlText(),
+      MotaActionBlocks['isShopVisited_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
@@ -371,10 +387,15 @@ var workspace = Blockly.inject(blocklyDiv,{
   trashcan: false,
 });
 
+editor_blockly.isCommonEntry = function () {
+  var commonEntries = ['afterBattle', 'afterOpenDoor', 'firstArrive', 'eachArrive', 'commonEvent', 'item'];
+  return commonEntries.indexOf(editor_blockly.entryType) >= 0;
+}
+
 editor_blockly.entranceCategoryCallback = function(workspace) {
   var list=toolboxObj['入口方块']
   var xmlList = [];
-  var eventType = editor_blockly.entryType+'_m';
+  var eventType = (editor_blockly.isCommonEntry() ? 'common' : editor_blockly.entryType)+'_m';
   for(var ii=0,blockText;blockText=list[ii];ii++){
     if(new RegExp('<block type="'+eventType+'">').exec(blockText)){
       var block = Blockly.Xml.textToDom('<xml>'+blockText+'</xml>').firstChild;
@@ -449,7 +470,7 @@ function omitedcheckUpdateFunction(event) {
   var eventType = editor_blockly.entryType;
   if(editor_blockly.workspace.topBlocks_.length==1){
     var blockType = editor_blockly.workspace.topBlocks_[0].type;
-    if(blockType!==eventType+'_m'){
+    if(blockType!==eventType+'_m' && !(editor_blockly.isCommonEntry() && blockType == 'common_m')){
       editor_blockly.setValue('入口方块类型错误');
       return;
     }

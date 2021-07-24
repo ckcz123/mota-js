@@ -147,13 +147,15 @@
             <div id='newIdIdnum'><!-- id and idnum -->
                 <input placeholder="新id（唯一标识符）"/>
                 <input placeholder="新idnum（10000以内数字）"/>
-                <button>save</button>
+                <button>确定</button>
                 <br/>
                 <button style="margin-top: 10px">自动注册</button>
+                <button style="margin-top: 10px; margin-left: 10px">删除此素材</button>
             </div>
             <div id='changeId'><!-- id and idnum -->
                 <input placeholder="修改图块id为"/>
-                <button>save</button>
+                <button>确定</button>
+                <button style="margin-left: 10px">删除此素材</button>
             </div>
         </div>
     </div>
@@ -174,12 +176,12 @@
             </div>
             <div id='changeFloorId'><!-- id and idnum -->
                 <input placeholder="修改floorId为"/>
-                <button>save</button>
+                <button>确定</button>
             </div>
             <div id='changeFloorSize' style="font-size: 13px;">
                 修改地图大小：宽<input style="width: 25px;" value="13" />，高<input style="width: 25px;" value="13" />，
                 偏移x<input style="width: 25px;" value="0" /> y<input style="width: 25px;" value="0" /> 
-                <button>save</button>
+                <button>确定</button>
             </div>
         </div>
     </div>
@@ -381,6 +383,7 @@
                 <select id="selectFloor" style="clear:left"></select>
                 <input type="button" value="保存地图" id='saveFloor'/>
                 <input type="button" value="后退" id="undoFloor" />
+                <input type="button" value="查看帮助文档" id="openDoc" />
                 <span id='mobileeditdata' style="display:none">
                     <input type="button" value="编辑"/>
                     <input type="button" value="显示完整名称" style="display: none;"/>

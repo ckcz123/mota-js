@@ -108,6 +108,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			if (core.openItemShop) {
 				core.openItemShop(shopId);
 			} else {
+				core.playSound('操作失败');
 				core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
 			}
 			return;
@@ -145,6 +146,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 								"condition": shop.disablePreview,
 								"true": [
 									// 不可预览，提示并退出
+									{ "type": "playSound", "name": "操作失败" },
 									"当前无法访问该商店！",
 									{ "type": "break" },
 								],
@@ -173,7 +175,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				"text": choice.text,
 				"icon": choice.icon,
 				"color": ableToBuy && !previewMode ? choice.color : [153, 153, 153, 1],
-				"action": ableToBuy && !previewMode ? choice.action : [
+				"action": ableToBuy && !previewMode ? [{ "type": "playSound", "name": "确定" }].concat(choice.action) : [
+					{ "type": "playSound", "name": "操作失败" },
 					{ "type": "tip", "text": previewMode ? "预览模式下不可购买" : "购买条件不足" }
 				]
 			};
@@ -235,8 +238,37 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
 			return true;
 		}
+		if (keycode == 13 || keycode == 32) return true;
+		return false;
 	}, 60);
 
+	/// 允许长按空格或回车连续执行操作
+	core.registerAction('keyDown', 'shops', function (keycode) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		if (keycode == 13 || keycode == 32) { // Space, Enter
+			core.actions._clickAction(core.actions.HSIZE, topIndex + core.status.event.selection);
+			return true;
+		}
+		return false;
+	}, 60);
+
+	// 允许长按屏幕连续执行操作
+	core.registerAction('longClick', 'shops', function (x, y, px, py) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		if (x >= core.actions.CHOICES_LEFT && x <= core.actions.CHOICES_RIGHT && y >= topIndex && y < topIndex + choices.length) {
+			core.actions._clickAction(x, y);
+			return true;
+		}
+		return false;
+	}, 60);
 },
     "removeMap": function () {
 	// 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。
@@ -620,11 +652,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (type == 0) {
 			core.status.hero[use] -= totalMoney;
 			core.getItem(item.id, selectCount);
+			core.stopSound();
+			core.playSound('确定');
 			if (item.number != null) item.number -= selectCount;
 			item.money_count = (item.money_count || 0) + selectCount;
 		} else {
 			core.status.hero[use] += totalMoney;
 			core.removeItem(item.id, selectCount);
+			core.playSound('确定');
 			core.drawTip("成功卖出" + selectCount + "个" + core.material.items[item.id].name, item.id);
 			if (item.number != null) item.number += selectCount;
 			item.sell_count = (item.sell_count || 0) + selectCount;
@@ -1318,12 +1353,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 本插件仅在全塔属性的 "startCanvas" 生效；进入 "startText" 时将会离开居中状态，回归正常界面。
 
 	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
-	var __enable = true;
+	var __enable = false;
 	if (!__enable) return;
 
 	// 检查【标题开启事件化】是否开启
 	if (!core.flags.startUsingCanvas || main.mode != 'play') return;
-
 
 	var _isTitleCanvasEnabled = false;
 	var _getClickLoc = core.actions._getClickLoc;

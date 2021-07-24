@@ -2,7 +2,7 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.7.3.1"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.8"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -186,8 +186,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.7.3.1";
-    this.__VERSION_CODE__ = 273;
+    this.__VERSION__ = "2.8";
+    this.__VERSION_CODE__ = 387;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -681,42 +681,51 @@ main.dom.hard.onclick = function () {
 ////// 手机端的按钮1-7 //////
 main.statusBar.image.btn1.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 49});
+    main.core.onkeyUp({"keyCode": 49, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn2.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 50});
+    main.core.onkeyUp({"keyCode": 50, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn3.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 51});
+    main.core.onkeyUp({"keyCode": 51, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn4.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 52});
+    main.core.onkeyUp({"keyCode": 52, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn5.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 53});
+    main.core.onkeyUp({"keyCode": 53, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn6.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 54});
+    main.core.onkeyUp({"keyCode": 54, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn7.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 55});
+    main.core.onkeyUp({"keyCode": 55, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn8.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 56});
+    if (core.getLocalStorage('altKey')) {
+        core.removeLocalStorage('altKey');
+        core.drawTip("Alt模式已关闭。");
+        main.statusBar.image.btn8.style.filter = '';
+    }
+    else {
+        core.setLocalStorage('altKey', true);
+        core.drawTip("Alt模式已开启；此模式下1~7按钮视为Alt+1~7。");
+        main.statusBar.image.btn8.style.filter = 'sepia(1) contrast(1.5)';
+    }
 };
 
 ////// 点击“开始游戏”时 //////

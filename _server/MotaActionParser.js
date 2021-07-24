@@ -123,6 +123,37 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.selectColor, 'rgba(' + obj.selectColor + ')', obj.font
       ]);
 
+    case 'nameMap':
+      if (!obj) obj={};
+      var items = Object.keys(obj);
+      var result = null;
+      for (var ii=items.length-1,one;one=items[ii];ii--) {
+        var value = obj[one];
+        var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];})
+        if (knownItems.indexOf(one) >= 0) {
+          result = MotaActionBlocks['nameMapSoundKnown'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.bgms.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapBgm'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.sounds.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapSoundUnknown'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.images.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapImage'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.animates.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapAnimate'].xmlText([one, value, result]);
+          continue;
+        }
+        result = MotaActionBlocks['nameMapUnknown'].xmlText([one, value, result]);
+      }
+      return MotaActionBlocks['nameMap_m'].xmlText([result]);
+
     case 'shop':
       var buildsub = function(obj,parser,next){
         var text_choices = null;
@@ -277,9 +308,9 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=this.Colour(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.align,data.title,'rgba('+data.title+')',
+        data.position,data.offset,data.align,data.title,data.bold,'rgba('+data.title+')',
         data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
-        data.bold,data.titlefont,data.textfont,data.lineHeight,data.time,data.interval,this.next]);
+        data.titlefont,data.textfont,data.lineHeight,data.time,data.letterSpacing,data.animateTime,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
@@ -399,15 +430,33 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "move": // 移动事件
       data.loc=data.loc||['',''];
+      var buildMoveDirection= function (obj) {
+        obj = MotaActionFunctions.processMoveDirections(obj||[]);
+        var res = null;
+        for(var ii=obj.length-1,one;one=obj[ii];ii--) {
+          var v = one.split(':');
+          res=MotaActionBlocks['moveDirection'].xmlText([v[0], parseInt(v[1]), res]);
+        }
+        return res;
+      }
       this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
+        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,buildMoveDirection(data.steps),this.next]);
       break;
     case "moveAction": // 前进一格或撞击
       this.next = MotaActionBlocks['moveAction_s'].xmlText([this.next]);
       break;
     case "moveHero": // 无视地形移动勇士
+      var buildMoveDirection= function (obj) {
+        obj = MotaActionFunctions.processMoveDirections(obj||[]);
+        var res = null;
+        for(var ii=obj.length-1,one;one=obj[ii];ii--) {
+          var v = one.split(':');
+          res=MotaActionBlocks['moveDirection'].xmlText([v[0], parseInt(v[1]), res]);
+        }
+        return res;
+      }
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
-        data.time,data.async||false,this.StepString(data.steps),this.next]);
+        data.time,data.async||false,buildMoveDirection(data.steps),this.next]);
       break;
     case "jump": // 跳跃事件
       data.from=data.from||['',''];
@@ -455,10 +504,14 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['unfollow_s'].xmlText([data.name||"", this.next]);
       break;
     case "animate": // 显示动画
-      var animate_loc = data.loc||'';
-      if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
-      this.next = MotaActionBlocks['animate_s'].xmlText([
-        data.name,animate_loc,data.alignWindow||false,data.async||false,this.next]);
+      if (data.loc == 'hero') {
+        this.next = MotaActionBlocks['animate_1_s'].xmlText([
+          data.name,data.async||false,this.next]);
+      } else {
+        data.loc=data.loc||['',''];
+        this.next = MotaActionBlocks['animate_s'].xmlText([
+          data.name,data.loc[0],data.loc[1],data.alignWindow||false,data.async||false,this.next]);
+      }
       break;
     case "setViewport": // 设置视角
       if (data.dxy) {
@@ -586,8 +639,14 @@ ActionParser.prototype.parseAction = function() {
       }
       break;
     case "playSound":
-      this.next = MotaActionBlocks['playSound_s'].xmlText([
-        data.name,data.stop,this.next]);
+      var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];});
+      if (knownItems.indexOf(data.name) >= 0) {
+        this.next = MotaActionBlocks['playSound_1_s'].xmlText([
+          data.name,data.stop,data.pitch||"",data.sync,this.next]);
+      } else {
+        this.next = MotaActionBlocks['playSound_s'].xmlText([
+          data.name,data.stop,data.pitch||"",data.sync,this.next]);
+      }
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
@@ -617,6 +676,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
         data.value, data.time, data.async||false, this.next]);
       break
+    case "setBgmSpeed":
+      this.next = MotaActionBlocks['setBgmSpeed_s'].xmlText([
+        data.value, data.pitch||false, this.next]);
+      break;
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
         this.expandIdBlock([data.name]), data["operator"]||'=',
@@ -627,6 +690,26 @@ ActionParser.prototype.parseAction = function() {
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
         MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+      break;
+    case "setEnemyOnPoint":
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
+        data.loc[0], data.loc[1], data.floorId||'', data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+      break;
+    case "resetEnemyOnPoint":
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
+        data.loc[0], data.loc[1], data.floorId||'',this.next]);
+      break;
+    case "moveEnemyOnPoint":
+      data.from=data.from||['','']
+      data.to=data.to||['','']
+      this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
+        data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+      break;
+    case "setEquip":
+      this.next = MotaActionBlocks['setEquip_s'].xmlText([
+        MotaActionFunctions.replaceToName_token(data.id), data.valueType||'value', data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
       break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
@@ -642,6 +725,10 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setGlobalFlag":
       this.next = MotaActionBlocks['setGlobalFlag_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
+    case "setNameMap":
+      this.next = MotaActionBlocks['setNameMap_s'].xmlText([
         data.name, data.value, this.next]);
       break;
     case "input":
@@ -1129,6 +1216,26 @@ ActionParser.prototype.matchEvalAtom = function(args) {
     args[0]=match[1]
     return rt(MotaActionBlocks['equip_e'].xmlText, args);
   }
+  match=/^core\.isReplaying\(\)$/.exec(args[0]);
+  if (match) {
+    return rt(MotaActionBlocks['isReplaying_e'].xmlText, args);
+  }
+  match=/^core\.(nextX|nextY)\((-?\d*)\)$/.exec(args[0]);
+  if (match) {
+    if (match[2] == null) match[2] = 1;
+    args=[match[2], match[1]];
+    return rt(MotaActionBlocks['nextXY_e'].xmlText, args);
+  }
+  match=/^core\.hasVisitedFloor\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['hasVisitedFloor_e'].xmlText, args);
+  }
+  match=/^core\.isShopVisited\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['isShopVisited_e'].xmlText, args);
+  }
   return {ret:false}
 }
 
@@ -1255,6 +1362,24 @@ MotaActionFunctions.PosString_pre = function(PosString){
   var comma = PosString.indexOf(',');
   if (comma >= 0 && PosString.substring(0, comma).ifndexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
+}
+
+MotaActionFunctions.processMoveDirections = function (steps) {
+  var curr = null, num = null;
+  var result = [];
+  steps.forEach(function (one) {
+    var v = one.split(':');
+    if (v.length == 1) v.push("1");
+    if (v[0] != curr) {
+      if (curr != null) result.push(curr+":"+num);
+      curr = v[0];
+      num = parseInt(v[1]);
+    } else {
+      num += parseInt(v[1]);
+    }
+  });
+  if (curr != null) result.push(curr+":"+num);
+  return result;
 }
 
 MotaActionFunctions.StepString_pre = function(StepString){

@@ -77,11 +77,13 @@ editor_datapanel_wrapper = function (editor) {
     }
     importMap.onclick= function () {
         var sy=editor.map.length,sx=editor.map[0].length;
-        var mapArray;
-        try {
-            mapArray = JSON.parse('[' + pout.value + ']');
-            if (mapArray.length != sy || mapArray[0].length != sx) throw '';
-        } catch (e) {
+        var mapArray = null;
+        var value = pout.value.trim();
+        // 去除可能末尾的 ','
+        if (value.endsWith(',')) value = value.substring(0, value.length - 1);
+        try { mapArray = JSON.parse(value); } catch (e) {console.log(e)}
+        try { mapArray = mapArray || JSON.parse('[' + value + ']'); } catch (e) {console.log(e)}
+        if (mapArray == null || mapArray.length != sy || mapArray[0].length != sx) {
             printe('格式错误！请使用正确格式(请使用地图生成器进行生成，且需要和本地图宽高完全一致)');
             return;
         }
@@ -319,6 +321,17 @@ editor_datapanel_wrapper = function (editor) {
                 printe('该列所有剩余项全部自动注册成功,请F5刷新编辑器');
             })
         }
+        newIdIdnum.children[5].onclick = function () {
+            if (!confirm("警告！你确定要删除此素材吗？此过程不可逆！")) return;
+            editor.file.removeMaterial(editor_mode.info, function (err) {
+                if (err) {
+                    printe(err);
+                    throw err;
+                }
+                alert('删除此素材成功！');
+                window.location.reload();
+            });
+        }
     }
 
     editor.uifunctions.changeId_func = function () {
@@ -334,6 +347,14 @@ editor_datapanel_wrapper = function (editor) {
                     printe('不得使用保留关键字作为id！');
                     return;
                 }
+                if (editor_mode.info.images == 'autotile') {
+                    printe('自动元件不可修改id！');
+                    return;
+                }
+                if (editor_mode.info.idnum >= 10000) {
+                    printe('额外素材不可修改id！');
+                    return;
+                }
                 editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {
                     if (err) {
                         printe(err);
@@ -344,6 +365,21 @@ editor_datapanel_wrapper = function (editor) {
             } else {
                 printe('请输入要修改到的ID');
             }
+        }
+        changeId.children[2].onclick = function () {
+            if (editor_mode.info.isTile) {
+                printe("额外素材不可删除！");
+                return;
+            }
+            if (!confirm("警告！你确定要删除此素材吗？此过程不可逆！\n请务必首先进行备份操作，并保证此素材没有在地图的任何位置使用，否则可能会出现不可知的后果！")) return;
+            editor.file.removeMaterial(editor_mode.info, function (err) {
+                if (err) {
+                    printe(err);
+                    return;
+                }
+                alert('删除此素材成功！');
+                window.location.reload();
+            });
         }
     }
 
@@ -1005,24 +1041,39 @@ editor_datapanel_wrapper = function (editor) {
                     return printe("只有长宽都是32的倍数的道具图才可以快速导入！");
                 }
             } else {
-                if (sw != 128 || sh != 4 * ysize) {
-                    return printe("只有 4*4 的素材图片才可以快速导入！");
+                if ((sw != 128 && sw != 96) || sh != 4 * ysize) {
+                    return printe("只有 3*4 或 4*4 的素材图片才可以快速导入！");
                 }
             }
             sw = sw / 32;
+            sh = sh / ysize;
 
             var dt = editor.dom.appendSpriteCtx.getImageData(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);
-            var appendSize = value == 'items' ? (4 * sw - 1) : 3;
+            var appendSize = value == 'items' ? (sw * sh - 1) : 3;
             editor.dom.appendSprite.style.height = (editor.dom.appendSprite.height = (editor.dom.appendSprite.height + appendSize * ysize)) + "px";
             editor.dom.appendSpriteCtx.putImageData(dt, 0, 0);
             if (editor.dom.appendSprite.width == 32) { // 1帧：道具
-                for (var i = 0; i < 4 * sw; ++i) {
-                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32 * (i % sw), 32 * parseInt(i / sw), 32, 32, 0, editor.dom.appendSprite.height - (sw * 4 - i) * ysize, 32, 32);
+                for (var i = 0; i < sw * sh; ++i) {
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32 * (i % sw), 32 * parseInt(i / sw), 32, 32, 0, editor.dom.appendSprite.height - (sw * sh - i) * ysize, 32, 32);
                 }
             } else if (editor.dom.appendSprite.width == 64) { // 两帧
-                editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32, 0, 64, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 64, 4 * ysize);
+                if (sw == 3) {
+                    // 3*4的规格使用13帧
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 0, 0, 32, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 32, 4 * ysize);
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 64, 0, 32, 4 * ysize, 32, editor.dom.appendSprite.height - 4 * ysize, 32, 4 * ysize);
+                } else {
+                    // 4*4的规格使用23帧
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32, 0, 64, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 64, 4 * ysize);
+                }             
             } else { // 四帧
-                editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 0, 0, 128, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 128, 4 * ysize);
+                if (sw == 3) {
+                    // 3*4的规格使用2123帧
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 32, 0, 32, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 32, 4 * ysize);
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 0, 0, 96, 4 * ysize, 32, editor.dom.appendSprite.height - 4 * ysize, 96, 4 * ysize);
+                } else {
+                    // 4*4的规格使用1234帧
+                    editor.dom.appendSpriteCtx.drawImage(editor.dom.appendSourceCtx.canvas, 0, 0, 128, 4 * ysize, 0, editor.dom.appendSprite.height - 4 * ysize, 128, 4 * ysize);
+                }
             }
 
             dt = editor.dom.appendSpriteCtx.getImageData(0, 0, editor.dom.appendSprite.width, editor.dom.appendSprite.height);

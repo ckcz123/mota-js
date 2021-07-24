@@ -28,6 +28,18 @@ grammar MotaAction;
 //===============parser===============
 //===blockly语句===
 
+common_m
+    :   '编辑事件' BGNL? Newline action+ BEND
+    
+
+/* common_m
+tooltip : 编辑事件
+helpUrl : /_docs/#/instruction
+var code = '[\n'+action_0+']\n';
+return code;
+*/;
+
+
 //事件 事件编辑器入口之一
 event_m
     :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool BGNL? Newline action+ BEND
@@ -627,6 +639,103 @@ var code = {
 return JSON.stringify(code);
 */;
 
+nameMap_m
+    : '文件别名设置' '（可以游戏中使用此别名代替原始文件名）' BGNL? Newline nameMapList+ BEND
+
+/* nameMap_m
+tooltip : 文件别名设置
+helpUrl : /_docs/#/instruction
+var value = nameMapList_0.trim();
+if (value.startsWith(',')) value = value.substring(1);
+return '{'+value+'}';
+*/;
+
+nameMapList
+    :   nameMapBgm
+    |   nameMapSoundKnown
+    |   nameMapSoundUnknown
+    |   nameMapImage
+    |   nameMapAnimate
+    |   nameMapUnknown
+    |   nameMapEmpty;
+
+nameMapBgm
+    : '映射背景音乐' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapBgm
+tooltip : 映射背景音乐
+default : ['背景音乐', 'bgm.mp3']
+allBgms : ['EvalString_1']
+material : ["./project/bgms/", "EvalString_1"]
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapSoundKnown
+    : '映射系统音效' '名称' NameMap_List '映射到文件' EvalString BEND
+
+/* nameMapSoundKnown
+tooltip : 映射系统音效
+default : ['确定', 'confirm.mp3']
+allSounds : ['EvalString_0']
+material : ["./project/sounds/", "EvalString_0"]
+helpUrl : /_docs/#/instruction
+return ',"'+NameMap_List_0+'":"'+EvalString_0+'"';
+*/;
+
+nameMapSoundUnknown
+    : '映射音效' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapSoundUnknown
+tooltip : 映射音效
+default : ['攻击', 'attack.mp3']
+allSounds : ['EvalString_1']
+material : ["./project/sounds/", "EvalString_1"]
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapImage
+    : '映射图片' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapImage
+tooltip : 映射图片
+default : ['背景图', 'bg.jpg']
+allImages : ['EvalString_1']
+material : ["./project/images/", "EvalString_1"]
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapAnimate
+    : '映射动画' '名称' EvalString '映射到文件' IdString BEND
+
+/* nameMapAnimate
+tooltip : 映射图片
+default : ['领域', 'zone']
+allAnimates : ['IdString_0']
+material : ["./project/animates/", "IdString_0"]
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+IdString_0+'"';
+*/;
+
+nameMapUnknown
+    : '未知映射' '名称' EvalString '映射到文件' EvalString BEND
+
+/* nameMapUnknown
+tooltip : 未知映射
+default : ['文件名', 'file.jpg']
+helpUrl : /_docs/#/instruction
+return ',"'+EvalString_0+'":"'+EvalString_1+'"';
+*/;
+
+nameMapEmpty
+    :   Newline
+    
+/* nameMapEmpty
+return ' \n';
+*/;
+
 //为了避免关键字冲突,全部加了_s
 //动作
 action
@@ -640,10 +749,15 @@ action
     |   tip_s
     |   setValue_s
     |   setEnemy_s
+    |   setEnemyOnPoint_s
+    |   resetEnemyOnPoint_s
+    |   moveEnemyOnPoint_s
+    |   setEquip_s
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
     |   setGlobalFlag_s
+    |   setNameMap_s
     |   show_s
     |   hide_s
     |   trigger_s
@@ -682,6 +796,7 @@ action
     |   follow_s
     |   unfollow_s
     |   animate_s
+    |   animate_1_s
     |   vibrate_s
     |   showImage_s
     |   showImage_1_s
@@ -706,8 +821,10 @@ action
     |   loadBgm_s
     |   freeBgm_s
     |   playSound_s
+    |   playSound_1_s
     |   stopSound_s
     |   setVolume_s
+    |   setBgmSpeed_s
     |   win_s
     |   lose_s
     |   restart_s
@@ -948,13 +1065,13 @@ return code;
 */;
 
 setText_s
-    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' IntString? '对齐' TextAlign_List? BGNL? '标题颜色' ColorString? Colour '正文颜色' ColorString? Colour '背景色' EvalString? Colour BGNL? '粗体' B_1_List '标题字体大小' IntString? '正文字体大小' IntString? '行距' IntString? '打字间隔' IntString? '字符间距' IntString? Newline
+    :   '设置剧情文本的属性' '位置' SetTextPosition_List '偏移像素' IntString? '对齐' TextAlign_List? '粗体' B_1_List? BGNL? '标题颜色' ColorString? Colour '正文颜色' ColorString? Colour '背景色' EvalString? Colour BGNL? '标题大小' IntString? '正文大小' IntString? '行距' IntString? '打字间隔' IntString? '字符间距' IntString? '淡入淡出时间' IntString? Newline
     
 
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
 helpUrl : /_docs/#/instruction
-default : [null,"",null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',null,"","","","",""]
+default : [null,"",null,null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","","","","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
 var colorRe = MotaActionFunctions.pattern.colorRe;
@@ -976,9 +1093,10 @@ IntString_1 = IntString_1 ? (', "titlefont": '+IntString_1) : '';
 IntString_2 = IntString_2 ? (', "textfont": '+IntString_2) : '';
 IntString_3 = IntString_3 ? (', "lineHeight": '+IntString_3) : '';
 IntString_4 = IntString_4 ? (', "time": '+IntString_4) : '';
-IntString_5 = IntString_5 ? (', "interval": '+IntString_5) : '';
+IntString_5 = IntString_5 ? (', "letterSpacing": '+IntString_5) : '';
+IntString_6 = IntString_6 ? (', "animateTime": ' + IntString_6) : '';
 B_1_List_0 = B_1_List_0==='null'?'':', "bold": '+B_1_List_0;
-var code = '{"type": "setText"'+SetTextPosition_List_0+IntString_0+TextAlign_List_0+ColorString_0+ColorString_1+B_1_List_0+EvalString_0+IntString_1+IntString_2+IntString_3+IntString_4+IntString_5+'},\n';
+var code = '{"type": "setText"'+SetTextPosition_List_0+IntString_0+TextAlign_List_0+B_1_List_0+ColorString_0+ColorString_1+EvalString_0+IntString_1+IntString_2+IntString_3+IntString_4+IntString_5+IntString_6+'},\n';
 return code;
 */;
 
@@ -1021,7 +1139,7 @@ setEnemy_s
 /* setEnemy_s
 tooltip : setEnemy：设置某个怪物的属性
 helpUrl : /_docs/#/instruction
-default : ["greenSlime", "atk", "0"]
+default : ["greenSlime", "atk", "="]
 allEnemys : ['IdString_0']
 colour : this.dataColor
 if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
@@ -1031,6 +1149,81 @@ var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List
 return code;
 */;
 
+
+setEquip_s
+    :   '设置装备属性' ':' '装备ID' IdString EquipValueType_List '的' EvalString AssignOperator_List expression Newline
+
+
+/* setEquip_s
+tooltip : setEquip：设置某个怪物的属性
+helpUrl : /_docs/#/instruction
+default : ["sword1", "value", "atk", "="]
+allEquips : ['IdString_0']
+colour : this.dataColor
+EquipValueType_List_0 = EquipValueType_List_0 == 'percentage' ? ', "valueType": "percentage"' : ', "valueType": "value"';
+if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
+  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
+} else AssignOperator_List_0 = '';
+var code = '{"type": "setEquip", "id": "'+IdString_0+'"'+EquipValueType_List_0+', "name": "'+EvalString_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
+return code;
+*/;
+
+
+setEnemyOnPoint_s
+    :   '设置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '的' EnemyId_List AssignOperator_List expression Newline
+
+
+/* setEnemyOnPoint_s
+tooltip : setEnemyOnPoint：设置某个点上怪物的属性
+helpUrl : /_docs/#/instruction
+default : ["", "", "", "atk", "="]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.dataColor
+if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
+  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
+} else AssignOperator_List_0 = '';
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
+var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
+return code;
+*/;
+
+resetEnemyOnPoint_s
+    :   '重置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+
+
+/* resetEnemyOnPoint_s
+tooltip : resetEnemyOnPoint：重置某个点上怪物的属性
+helpUrl : /_docs/#/instruction
+default : ["", "", ""]
+selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.dataColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
+var code = '{"type": "resetEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+return code;
+*/;
+
+moveEnemyOnPoint_s
+    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '终点' 'x' PosString? 'y' PosString? '楼层' IdString? Newline
+
+
+/* moveEnemyOnPoint_s
+tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
+helpUrl : /_docs/#/instruction
+default : ["", "", "", "", ""]
+allFloorIds : ['IdString_0']
+selectPoint : ["PosString_2", "PosString_3"]
+menu : [['选择起点位置','editor_blockly.selectPoint(block,["PosString_0", "PosString_1"])']]
+colour : this.dataColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
+if (PosString_2 && PosString_3) floorstr += ', "to": ['+PosString_2+','+PosString_3+']'
+var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+return code;
+*/;
 
 setFloor_s
     :   '设置楼层属性' ':' Floor_Meta_List '楼层名' IdString? '为' JsonEvalString Newline
@@ -1089,6 +1282,20 @@ var code = '{"type": "setGlobalFlag", "name": "'+Global_Flag_List_0+'", "value":
 return code;
 */;
 
+
+setNameMap_s
+    :   '设置文件别名' ':' EvalString '为' EvalString? Newline
+
+
+/* setNameMap_s
+tooltip : setNameMap：设置文件别名
+helpUrl : /_docs/#/instruction
+default : ["背景音乐",""]
+colour : this.dataColor
+EvalString_1 = EvalString_1 ? (', "value": "' + EvalString_1 + '"') : '';
+var code = '{"type": "setNameMap", "name": "'+EvalString_0+'"'+EvalString_1+'},\n';
+return code;
+*/;
 
 show_s
     :   '显示事件' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '动画时间' IntString? '不等待执行完毕' Bool? Newline
@@ -1717,7 +1924,7 @@ tooltip : loadEquip: 装上装备
 helpUrl : /_docs/#/instruction
 colour : this.dataColor
 default : ["sword1"]
-allItems : ['IdString_0']
+allEquips : ['IdString_0']
 var code = '{"type": "loadEquip", "id": "'+IdString_0+'"},\n';
 return code;
 */;
@@ -1811,31 +2018,37 @@ return code;
 */;
 
 animate_s
-    :   '显示动画' IdString '位置' EvalString? '相对窗口坐标' Bool '不等待执行完毕' Bool Newline
+    :   '显示动画' IdString '位置' 'x' PosString? 'y' PosString? '相对窗口坐标' Bool '不等待执行完毕' Bool Newline
     
 
 /* animate_s
 tooltip : animate：显示动画,位置填hero或者1,2形式的位置,或者不填代表当前事件点
 helpUrl : /_docs/#/instruction
-default : ["zone","hero",false,false]
+default : ["zone","","",false,false]
 allAnimates : ['IdString_0']
 material : ["./project/animates/", "IdString_0"]
-menu : [['选择位置','editor_blockly.selectPoint(block,["EvalString_0","EvalString_0"])']]
+menu : [['选择位置', 'editor_blockly.selectPoint(block, ["PosString_0", "PosString_1"])']]
 colour : this.soundColor
-if (EvalString_0) {
-  if(MotaActionFunctions.pattern.id2.test(EvalString_0)) {
-    EvalString_0=', "loc": ["'+EvalString_0.split(',').join('","')+'"]';
-  } else if (/hero|([+-]?\d+),([+-]?\d+)/.test(EvalString_0)) {
-    if(EvalString_0.indexOf(',')!==-1)EvalString_0='['+EvalString_0+']';
-    else EvalString_0='"'+EvalString_0+'"';
-    EvalString_0 = ', "loc": '+EvalString_0;
-  } else {
-    throw new Error('此处只能填hero或者1,2形式的位置,或者不填代表当前事件点');
-  }
-}
+var loc = PosString_0&&PosString_1?(', "loc": ['+PosString_0+','+PosString_1+']'):'';
 Bool_0 = Bool_0?', "alignWindow": true':'';
-var async = Bool_1?', "async": true':'';
-var code = '{"type": "animate", "name": "'+IdString_0+'"'+EvalString_0+Bool_0+async+'},\n';
+Bool_1 = Bool_1?', "async": true':'';
+var code = '{"type": "animate", "name": "'+IdString_0+'"'+loc+Bool_0+Bool_1+'},\n';
+return code;
+*/;
+
+animate_1_s
+    :   '显示动画并跟随角色' IdString '不等待执行完毕' Bool Newline
+    
+
+/* animate_1_s
+tooltip : animate：显示动画并跟随角色
+helpUrl : /_docs/#/instruction
+default : ["zone",false]
+allAnimates : ['IdString_0']
+material : ["./project/animates/", "IdString_0"]
+colour : this.soundColor
+Bool_0 = Bool_0?', "async": true':'';
+var code = '{"type": "animate", "name": "'+IdString_0+'", "loc": "hero"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -2049,13 +2262,13 @@ return code;
 */;
 
 move_s
-    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '移动事件' 'x' PosString? ',' 'y' PosString? '动画时间' IntString? '不消失' Bool '不等待执行完毕' Bool BGNL? moveDirection+ Newline
     
 
 /* move_s
 tooltip : move: 让某个NPC/怪物移动,位置可不填代表当前事件
 helpUrl : /_docs/#/instruction
-default : ["","",500,true,false,"上右3下2后4左前2"]
+default : ["","",500,true,false,null]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.mapColor
 var floorstr = '';
@@ -2065,8 +2278,20 @@ if (PosString_0 && PosString_1) {
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "keep": true':'';
 Bool_1 = Bool_1?', "async": true':'';
-var code = '{"type": "move"'+floorstr+IntString_0+Bool_0+Bool_1+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "move"'+floorstr+IntString_0+Bool_0+Bool_1+', "steps": ['+moveDirection_0.trim().substring(2)+']},\n';
 return code;
+*/;
+
+moveDirection
+    :   '移动方向' Move_List '格数' Int Newline
+
+/* moveDirection
+tooltip : 移动方向
+helpUrl : /_docs/#/instruction
+default : ["up", 0]
+colour : this.subColor
+if (Move_List_0 == 'speed' && Int_0 < 16) throw '设置的移动速度值不得小于16';
+return ', "' + Move_List_0 + ':' + Int_0 + '"';
 */;
 
 moveAction_s
@@ -2083,7 +2308,7 @@ return '{"type": "moveAction"},\n';
 
 
 moveHero_s
-    :   '无视地形移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? StepString Newline
+    :   '无视地形移动勇士' '动画时间' IntString? '不等待执行完毕' Bool BGNL? moveDirection+ Newline
     
 
 /* moveHero_s
@@ -2093,7 +2318,7 @@ default : ["",false,"上右3下2后4左前2"]
 colour : this.mapColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "moveHero"'+IntString_0+Bool_0+', "steps": '+JSON.stringify(StepString_0)+'},\n';
+var code = '{"type": "moveHero"'+IntString_0+Bool_0+', "steps": ['+moveDirection_0.trim().substring(2)+']},\n';
 return code;
 */;
 
@@ -2259,18 +2484,42 @@ return code;
 */;
 
 playSound_s
-    :   '播放音效' EvalString '停止之前音效' Bool? Newline
+    :   '播放音效' EvalString '停止之前音效' Bool? '音调' IntString? '等待播放完毕' Bool? Newline
     
 
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : /_docs/#/instruction
-default : ["item.mp3",false]
+default : ["item.mp3",false,"",false]
 colour : this.soundColor
 allSounds : ['EvalString_0']
 material : ["./project/sounds/", "EvalString_0"]
+if (IntString_0) {
+    if (parseInt(IntString_0) < 30 || parseInt(IntString_0) > 300) throw '音调设置只能在30-300之间；100为正常音调。';
+    IntString_0 = ', "pitch": ' + IntString_0;
+} else IntString_0 = '';
 Bool_0 = Bool_0 ? ', "stop": true' : '';
-var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
+Bool_1 = Bool_1 ? ', "sync": true' : '';
+var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+IntString_0+Bool_1+'},\n';
+return code;
+*/;
+
+playSound_1_s
+    :   '播放系统音效' NameMap_List '停止之前音效' Bool? '音调' IntString? '等待播放完毕' Bool? Newline
+    
+
+/* playSound_1_s
+tooltip : playSound: 播放系统音效
+helpUrl : /_docs/#/instruction
+default : ["确认",false,"",false]
+colour : this.soundColor
+if (IntString_0) {
+    if (parseInt(IntString_0) < 30 || parseInt(IntString_0) > 300) throw '音调设置只能在30-300之间；100为正常音调。';
+    IntString_0 = ', "pitch": ' + IntString_0;
+} else IntString_0 = '';
+Bool_0 = Bool_0 ? ', "stop": true' : '';
+Bool_1 = Bool_1 ? ', "sync": true' : '';
+var code = '{"type": "playSound", "name": "'+NameMap_List_0+'"'+Bool_0+IntString_0+Bool_1+'},\n';
 return code;
 */;
 
@@ -2298,6 +2547,21 @@ colour : this.soundColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "setVolume", "value": '+Int_0+IntString_0+async+'},\n';
+return code;
+*/;
+
+setBgmSpeed_s
+    :   '设置背景音乐播放速度' Int '同时改变音调' Bool Newline
+    
+
+/* setBgmSpeed_s
+tooltip : setSpeed: 设置背景音乐播放速度
+helpUrl : /_docs/#/instruction
+default : [100, true]
+colour : this.soundColor
+if (Int_0 < 30 || Int_0 > 300) throw '速度只能设置只能在30-300之间；100为正常速度。';
+Bool_0 = Bool_0?', "pitch": true':'';
+var code = '{"type": "setBgmSpeed", "value": '+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -3204,6 +3468,10 @@ expression
     |   blockNumber_e
     |   blockCls_e
     |   equip_e
+    |   nextXY_e
+    |   isReplaying_e
+    |   hasVisitedFloor_e
+    |   isShopVisited_e
     |   evalString_e
     
 
@@ -3214,6 +3482,12 @@ var ops = {
     '**': 'Math.pow('+expression_0+','+expression_1+')',
     'min': 'Math.min('+expression_0+','+expression_1+')',
     'max': 'Math.max('+expression_0+','+expression_1+')',
+    'blockId': 'core.getBlockId('+expression_0+','+expression_1+')',
+    'blockNum': 'core.getBlockNum('+expression_0+','+expression_1+')',
+    'blockCls': 'core.getBlockCls('+expression_0+','+expression_1+')',
+    'startsWith': expression_0+'.startsWith('+expression_1+')',
+    'endsWith': expression_0+'.endsWith('+expression_1+')',
+    'includes': expression_0+'.includes('+expression_1+')',
 }
 if (ops[Arithmetic_List_0])code = ops[Arithmetic_List_0];
 var orders = {
@@ -3236,6 +3510,12 @@ var orders = {
     '^': Blockly.JavaScript.ORDER_BITWISE_XOR,
     'min': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     'max': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'startsWith': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'endsWith': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'includes': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'blockId': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'blockNum': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
+    'blockCls': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -3358,6 +3638,47 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
+nextXY_e
+    :   '前方' Int '格的' NextXY_List
+
+/* nextXY_e
+default : [1, 'nextX']
+var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+Int_0+')') : ('core.nextX('+Int_0+')');
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+isReplaying_e
+    :   '录像播放中'
+
+/* isReplaying_e
+var code = 'core.isReplaying()';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];;
+*/;
+
+
+hasVisitedFloor_e
+    :   '访问过楼层' IdString
+
+/* hasVisitedFloor_e
+default : ['MT0']
+allFloorIds : ['IdString_0']    
+var code = 'core.hasVisitedFloor(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+isShopVisited_e
+    :   '开启过商店' IdString
+
+/* isShopVisited_e
+default : ['shop1']
+allFloorIds : ['IdString_0']    
+var code = 'core.isShopVisited(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
 equip_e
     :   '装备孔:' Int
 
@@ -3462,8 +3783,8 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'
-    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=']*/;
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'|'开始于'|'结束于'|'包含'|'图块id'|'图块数字'|'图块类型'
+    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=','startsWith','endsWith','includes','blockId','blockNum','blockCls']*/;
 
 AssignOperator_List
     :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'|'设为不小于'|'设为不大于'
@@ -3521,6 +3842,14 @@ Global_Value_List
 Global_Flag_List
     :   '显示当前楼层'|'显示勇士图标'|'显示当前等级'|'启用生命上限'|'显示生命值'|'显示魔力值'|'显示攻击力'|'显示防御力'|'显示护盾值'|'显示金币值'|'显示经验值'|'允许等级提升'|'升级扣除模式'|'显示钥匙数量'|'显示绿钥匙'|'显示破炸飞'|'显示毒衰咒'|'显示当前技能'|'楼梯边才能楼传'|'楼传平面塔模式'|'铁门不需要钥匙'|'开启加点'|'开启负伤'|'夹击不超伤害值'|'循环计算临界'|'允许轻按'|'允许走到将死领域'|'允许瞬间移动'|'阻激夹域后禁用快捷商店'|'虚化前景层'
     /*Global_Flag_List ['s:enableFloor','s:enableName','s:enableLv', 's:enableHPMax', 's:enableHP', 's:enableMana', 's:enableAtk', 's:enableDef', 's:enableMDef', 's:enableMoney', 's:enableExp', 's:enableLevelUp', 's:levelUpLeftMode', 's:enableKeys', 's:enableGreenKey', 's:enablePZF', 's:enableDebuff', 's:enableSkill', 'flyNearStair', 'flyRecordPosition', 'steelDoorWithoutKey', 'enableAddPoint', 'enableNegativeDamage', 'betweenAttackMax', 'useLoop', 'enableGentleClick', 'canGoDeadZone', 'enableMoveDirectly', 'disableShopOnDamage', 'blurFg']*/;
+
+NextXY_List
+    :   '横坐标'|'纵坐标'
+    /*NextXY_List ['nextX','nextY']*/;
+
+EquipValueType_List
+    :   '数值项'|'百分比项'
+    /*EquipValueType_List ['value','percentage']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -3585,6 +3914,14 @@ Equip_List
 Key_List
     :   '黄钥匙'|'蓝钥匙'|'红钥匙'|'绿钥匙'|'铁门钥匙'
     /*Key_List ['yellowKey','blueKey','redKey','greenKey','steelKey']*/;
+
+Move_List
+    :   '上'|'下'|'左'|'右'|'前'|'后'|'左上'|'左下'|'右上'|'右下'|'设置速度'
+    /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed']*/;
+
+NameMap_List
+    :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'阻激夹域'|'穿脱装备'
+    /*NameMap_List ['确定','取消','操作失败','光标移动','打开界面','读档','存档','获得道具','回血','炸弹','飞行器','开关门','上下楼','跳跃','破墙镐','阻激夹域','穿脱装备']*/;
 
 //转blockly后不保留需要加"
 EvalString

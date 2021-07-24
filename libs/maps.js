@@ -2244,14 +2244,17 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
         return;
     }
     var block = blockArr[0], blockInfo = blockArr[1];
-    var moveSteps = (steps||[]).filter(function (t) {
-        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+    var moveSteps = (steps||[]).map(function (t) {
+        return [t.split(':')[0], parseInt(t.split(':')[1]||"1")];
+    }).filter(function (t) {
+        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed'].indexOf(t[0])>=0
+            && !(t[0] == 'speed' && t[1] < 16)
     });
     var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
     this._moveDetachedBlock(blockInfo, 32 * x, 32 * y, 1, canvases);
 
     var moveInfo = {
-        x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep, lastDirection: null, offset: 1,
+        sx: x, sy: y, x: x, y: y, px: 32 * x, py: 32 * y, opacity: 1, keep: keep, lastDirection: null, offset: 1,
         moveSteps: moveSteps, step: 0, per_time: time / 16 / core.status.replay.speed
     }
     this._moveBlock_doMove(blockInfo, canvases, moveInfo, callback);
@@ -2259,26 +2262,51 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
     var animateTotal = core.icons._getAnimateFrames(blockInfo.cls), animateTime = 0;
-    var animate = window.setInterval(function () {
-        if (blockInfo.cls != 'tileset') {
-            animateTime += moveInfo.per_time;
-            if (animateTime > core.values.animateSpeed) {
-                animateTime = 0;
-                blockInfo.posX = (blockInfo.posX + 1) % animateTotal;
+    var _run = function () {
+        var animate = window.setInterval(function () {
+            if (blockInfo.cls != 'tileset') {
+                animateTime += moveInfo.per_time;
+                if (animateTime > core.values.animateSpeed) {
+                    animateTime = 0;
+                    blockInfo.posX = (blockInfo.posX + 1) % animateTotal;
+                }
             }
-        }
-        if (moveInfo.moveSteps.length != 0)
-            core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
-        else
-            core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
-    }, moveInfo.per_time);
+            if (moveInfo.moveSteps.length != 0) {
+                if (core.maps._moveBlock_updateSpeed(moveInfo)) {
+                    clearInterval(animate);
+                    delete core.animateFrame.asyncId[animate];
+                    _run();
+                }
+                else core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
+            }
+            else
+                core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
+        }, moveInfo.per_time);
+        core.animateFrame.asyncId[animate] = true;
+    }
+    _run();
+}
 
-    core.animateFrame.asyncId[animate] = true;
+maps.prototype._moveBlock_updateSpeed = function (moveInfo) {
+    if (moveInfo.step == 0 && moveInfo.moveSteps[0][0] == 'speed' && moveInfo.moveSteps[0][1] >= 16) {
+        moveInfo.per_time = moveInfo.moveSteps[0][1] / 16 / core.status.replay.speed;
+        moveInfo.moveSteps.shift();
+        return true;
+    }
+    return false;
 }
 
 maps.prototype._moveBlock_updateDirection = function (blockInfo, moveInfo) {
     moveInfo.offset = 1;
-    var direction = moveInfo.moveSteps[0];
+    var curr = moveInfo.moveSteps[0];
+    // 展开forward和backward
+    if ((curr[0] == 'backward' || curr[0] == 'forward') && curr[1] > 1) {
+        moveInfo.moveSteps.shift();
+        for (var i = 0; i < curr[1]; ++i) {
+            moveInfo.moveSteps.unshift([curr[0], 1]);
+        }
+        return this._moveBlock_updateDirection(blockInfo, moveInfo);
+    }
     if (moveInfo.lastDirection == null) {
         for (var d in blockInfo.faceIds) {
             if (blockInfo.faceIds[d] == blockInfo.id) {
@@ -2287,24 +2315,36 @@ maps.prototype._moveBlock_updateDirection = function (blockInfo, moveInfo) {
             }
         }
     }
-    if (direction == 'forward' || direction == 'backward') {
+    if (curr[0] == 'forward' || curr[0] == 'backward') {
         if (moveInfo.lastDirection == null) {
             moveInfo.moveSteps.shift();
             return false;
         }
-        if (direction == 'backward')
+        if (curr[0] == 'backward')
             moveInfo.offset = -1;
-        direction = moveInfo.lastDirection;
+        curr[0] = moveInfo.lastDirection;
     }
-    moveInfo.lastDirection = moveInfo.moveSteps[0] = direction;
-    moveInfo.x += core.utils.scan[direction].x * moveInfo.offset;
-    moveInfo.y += core.utils.scan[direction].y * moveInfo.offset;
+    moveInfo.lastDirection = curr[0];
+
     // 根据faceIds修改朝向
-    var currid = blockInfo.faceIds[direction];
+    var faceDirection = curr[0];
+    if (faceDirection == 'leftup' || faceDirection == 'leftdown') faceDirection = 'left';
+    if (faceDirection == 'rightup' || faceDirection == 'rightdown') faceDirection = 'right';
+    var currid = blockInfo.faceIds[faceDirection];
     if (currid) {
         var posY = core.material.icons[blockInfo.cls][currid];
-        if (posY != null) blockInfo.posY = posY;
+        if (posY != null) {
+            blockInfo.number = core.getNumberById(currid) || blockInfo.number;
+            blockInfo.posY = posY;
+        }
     }
+    // 处理 left:0 的情况，仅转向
+    if (curr[1] <= 0) {
+        moveInfo.moveSteps.shift();
+        return false;
+    }
+    moveInfo.x += core.utils.scan2[curr[0]].x * moveInfo.offset;
+    moveInfo.y += core.utils.scan2[curr[0]].y * moveInfo.offset;
     return true;
 }
 
@@ -2312,14 +2352,17 @@ maps.prototype._moveBlock_moving = function (blockInfo, canvases, moveInfo) {
     if (moveInfo.step == 0) {
         if (!this._moveBlock_updateDirection(blockInfo, moveInfo)) return;
     }
-    var direction = moveInfo.moveSteps[0];
+    var curr = moveInfo.moveSteps[0];
     moveInfo.step++;
-    moveInfo.px += core.utils.scan[direction].x * 2 * moveInfo.offset;
-    moveInfo.py += core.utils.scan[direction].y * 2 * moveInfo.offset;
+    moveInfo.px += core.utils.scan2[curr[0]].x * 2 * moveInfo.offset;
+    moveInfo.py += core.utils.scan2[curr[0]].y * 2 * moveInfo.offset;
     this._moveDetachedBlock(blockInfo, moveInfo.px, moveInfo.py, moveInfo.opacity, canvases);
     if (moveInfo.step == 16) {
         moveInfo.step = 0;
-        moveInfo.moveSteps.shift();
+        moveInfo.moveSteps[0][1]--;
+        if (moveInfo.moveSteps[0][1]<=0) {
+            moveInfo.moveSteps.shift();
+        }
     }
 }
 
@@ -2345,7 +2388,7 @@ maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
     var jump_peak = 6 + distance, jump_count = jump_peak * 2;
     time /= Math.max(core.status.replay.speed, 1)
     return {
-        x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
+        sx: sx, sy: sy, x: sx, y: sy, ex: ex, ey: ey, px: 32 * sx, py: 32 * sy, opacity: 1,
         jump_peak: jump_peak, jump_count: jump_count,
         step: 0, per_time: time / jump_count
     };
@@ -2387,6 +2430,7 @@ maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, an
         if (info.keep) {
             core.setBlock(blockInfo.number, info.x, info.y);
             core.showBlock(info.x, info.y);
+            core.moveEnemyOnPoint(info.sx, info.sy, info.x, info.y);
         }
         if (callback) callback();
     }

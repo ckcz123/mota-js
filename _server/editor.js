@@ -481,6 +481,7 @@ editor.prototype._updateMap_bigmap = function () {
     editor.uivalues.bigmapInfo.left = core.__PIXELS__ * Math.max(0, (1 - width / height) / 2);
     editor.uivalues.bigmapInfo.size = core.__PIXELS__ / Math.max(width, height);
     this.drawEventBlock();
+    this.updateLastUsedMap();
 }
 
 editor.prototype.updateMap = function () {
@@ -626,7 +627,10 @@ editor.prototype.drawInitData = function (icons) {
     editor.uivalues.foldPerCol = editor.config.get('foldPerCol', 50);
     // var imgNames = Object.keys(images);  //还是固定顺序吧；
     editor.setLastUsedType(editor.config.get('lastUsedType', 'recent'));
-    editor.uivalues.lastUsed = editor.config.get("lastUsed", []);
+    var ids = editor.ids.map(function (x) {return x.id || "";});
+    editor.uivalues.lastUsed = editor.config.get("lastUsed", []).filter(function (one) {
+        return ids.indexOf(one.id) >= 0;
+    });
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
     for (var ii = 0; ii < imgNames.length; ii++) {
@@ -634,7 +638,7 @@ editor.prototype.drawInitData = function (icons) {
         if (img == 'autotile') {
             var autotiles = images[img];
             for (var im in autotiles) {
-                tempy += autotiles[im].height;
+                tempy += editor.uivalues.folded ? 32 : autotiles[im].height;
             }
             var tempx = editor.uivalues.folded ? 32 : 3 * 32;
             editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + tempx) / 32, tempy];
@@ -744,9 +748,10 @@ editor.prototype.drawInitData = function (icons) {
             var autotiles = images[img];
             var tempx = editor.uivalues.folded ? 32 : 96;
             for (var im in autotiles) {
-                var subimgs = core.splitImage(autotiles[im], tempx, autotiles[im].height);
+                var tempy = editor.uivalues.folded ? 32 : autotiles[im].height;
+                var subimgs = core.splitImage(autotiles[im], tempx, tempy);
                 drawImage(subimgs[0], nowx, nowy, img);
-                nowy += autotiles[im].height;
+                nowy += tempy;
             }
             nowx += tempx;
             continue;

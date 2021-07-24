@@ -100,7 +100,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// ---------- 此时还没有进行切换，当前floorId还是原来的 ---------- //
 	var currentId = core.status.floorId || null; // 获得当前的floorId，可能为null
 	var fromLoad = core.hasFlag('__fromLoad__'); // 是否是读档造成的切换
-	if (!fromLoad) {
+	var isFlying = core.hasFlag('__isFlying__'); // 是否是楼传造成的切换
+	if (!fromLoad && !(isFlying && currentId == floorId)) {
 		if (!core.hasFlag("__leaveLoc__")) core.setFlag("__leaveLoc__", {});
 		if (currentId != null) core.getFlag("__leaveLoc__")[currentId] = core.clone(core.status.hero.loc);
 	}
@@ -111,7 +112,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// }
 
 	// 播放换层音效
-    core.playSound('floor.mp3');
+	if (fromLoad)
+		core.playSound('读档');
+	else if (isFlying)
+		core.playSound('飞行器');
+	else if (currentId)
+	    core.playSound('上下楼');
 
 	// 根据分区信息自动砍层与恢复
 	if (core.autoRemoveMaps) core.autoRemoveMaps(floorId);
@@ -140,7 +146,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 切换楼层BGM
 	if (core.status.maps[floorId].bgm) {
 		var bgm = core.status.maps[floorId].bgm;
-		if (bgm instanceof Array) bgm = bgm[0];
+		if (bgm instanceof Array) bgm = bgm[Math.floor(Math.random() * bgm.length)]; // 多个bgm则随机播放一个
 		if (!core.hasFlag("__bgm__")) core.playBgm(bgm);
 	}
 	// 更改画面色调
@@ -188,6 +194,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 检查能否飞行
 	if (!core.status.maps[fromId].canFlyFrom || !core.status.maps[toId].canFlyTo || !core.hasVisitedFloor(toId)) {
+		core.playSound('操作失败');
 		core.drawTip("无法飞往" + core.status.maps[toId].title + "！");
 		return false;
 	}
@@ -199,9 +206,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		loc = core.getFlag("__leaveLoc__", {})[toId] || null;
 	}
 	if (core.status.maps[toId].flyPoint != null && core.status.maps[toId].flyPoint.length == 2) {
-		loc = { x: core.status.maps[toId].flyPoint[0], y: core.status.maps[toId].flyPoint[1] };
+		stair = 'flyPoint';
 	}
-	if (loc == null) {
+	if (stair == null && loc == null) {
 		// 获得两个楼层的索引，以决定是上楼梯还是下楼梯
 		var fromIndex = core.floorIds.indexOf(fromId),
 			toIndex = core.floorIds.indexOf(toId);
@@ -214,7 +221,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.route.push("fly:" + toId);
 	// 传送
 	core.ui.closePanel();
-	core.changeFloor(toId, stair, loc, null, callback);
+	core.setFlag('__isFlying__', true);
+	core.changeFloor(toId, stair, loc, null, function () {
+		core.removeFlag("__isFlying__");
+		if (callback) callback();
+	});
 
 	return true;
 },
@@ -232,7 +243,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (guards.length > 0) {
 			// 记录flag，当前要参与支援的怪物
 			core.setFlag("__guards__" + x + "_" + y, guards);
-			var actions = [{ "type": "playSound", "name": "jump.mp3" }];
+			var actions = [{ "type": "playSound", "name": "跳跃" }];
 			// 增加支援的特效动画（图块跳跃）
 			guards.forEach(function (g) {
 				core.push(actions, { "type": "jump", "from": [g[0], g[1]], "to": [x, y], "time": 300, "keep": false, "async": true });
@@ -318,8 +329,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.hero.statistics.exp += exp;
 
 	var hint = "打败 " + enemy.name;
-	if (core.flags.statusBarItems.indexOf('enableMoney') >= 0) hint += "，金币+" + money;
-	if (core.flags.statusBarItems.indexOf('enableExp') >= 0) hint += "，经验+" + exp;
+	if (core.flags.statusBarItems.indexOf('enableMoney') >= 0)
+		hint += ',' + core.getStatusLabel('money') + '+' + money; // hint += "，金币+" + money;
+	if (core.flags.statusBarItems.indexOf('enableExp') >= 0)
+		hint += ',' + core.getStatusLabel('exp') + '+' + exp; // hint += "，经验+" + exp;
 	core.drawTip(hint, enemy.id);
 
 	// 中毒
@@ -395,6 +408,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 如果事件不为空，将其插入
 	if (todo.length > 0) core.insertAction(todo, x, y);
 
+	// 删除该点设置的怪物信息
+	delete ((flags.enemyOnPoint||{})[core.status.floorId]||{})[x+","+y];
+
 	// 因为removeBlock和hideBlock都会刷新状态栏，因此将删除部分移动到这里并保证刷新只执行一次，以提升效率
 	if (core.getBlock(x, y) != null) {
 		// 检查是否是重生怪物；如果是则仅隐藏不删除
@@ -434,7 +450,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 获得一个道具后触发的事件
 	// itemId：获得的道具ID；x和y是该道具所在的坐标
 	// isGentleClick：是否是轻按触发的
-	core.playSound('item.mp3');
+	if (itemId.endsWith('Potion') && core.material.items[itemId].cls == 'items')
+		core.playSound('回血');
+	else
+		core.playSound('获得道具');
 
 	var todo = [];
 	// 检查该点的获得道具后事件。
@@ -513,13 +532,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		hero_def = core.getRealStatusOrDefault(hero, 'def'),
 		hero_mdef = core.getRealStatusOrDefault(hero, 'mdef');
 
-	var mon_hp = enemy.hp,
-		mon_atk = enemy.atk,
-		mon_def = enemy.def,
-		mon_special = enemy.special;
-	var mon_money = enemy.money,
-		mon_exp = enemy.exp,
-		mon_point = enemy.point;
+	var mon_hp = core.getEnemyValue(enemy, 'hp', x, y, floorId),
+		mon_atk = core.getEnemyValue(enemy, 'atk', x, y, floorId),
+		mon_def = core.getEnemyValue(enemy, 'def', x, y, floorId),
+		mon_special = core.getEnemyValue(enemy, 'special', x, y, floorId);
+	var mon_money = core.getEnemyValue(enemy, 'money', x, y, floorId),
+		mon_exp = core.getEnemyValue(enemy, 'exp', x, y, floorId),
+		mon_point = core.getEnemyValue(enemy, 'point', x, y, floorId);
 	// 模仿
 	if (core.hasSpecial(mon_special, 10)) {
 		mon_atk = hero_atk;
@@ -1252,7 +1271,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 如需调用当前楼层的ratio可使用  core.status.maps[floorId].ratio
 		if (id == 'lavaNet' && !core.hasItem('amulet')) {
 			damage[loc] = (damage[loc] || 0) + core.values.lavaDamage;
-			type[loc]["血网伤害"] = true;
+			type[loc][(block.event.name || "血网") + "伤害"] = true;
 		}
 
 		// 领域
@@ -1696,6 +1715,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
 	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top + 112 + 32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
+	core.playSound('打开界面');
 }
     }
 }

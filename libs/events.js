@@ -252,13 +252,13 @@ events.prototype._gameOver_askRate = function (ending) {
         return;
     }
 
-    core.ui.drawConfirmBox("恭喜通关本塔，你想进行评分吗？", function () {
+    core.ui.drawConfirmBox("恭喜通关！你想进行评分吗？", function () {
         if (core.platform.isPC) {
-            window.open("/score.php?name=" + core.firstData.name + "&num=10", "_blank");
+            window.open("/score.php?name=" + core.firstData.name, "_blank");
             core.restart();
         }
         else {
-            window.location.href = "/score.php?name=" + core.firstData.name + "&num=10";
+            window.location.href = "/score.php?name=" + core.firstData.name;
         }
     }, function () {
         core.restart();
@@ -273,11 +273,14 @@ events.prototype.restart = function() {
 
 ////// 询问是否需要重新开始 //////
 events.prototype.confirmRestart = function () {
+    core.playSound('打开界面');
     core.status.event.selection = 1;
     core.ui.drawConfirmBox("你确定要返回标题页面吗？", function () {
+        core.playSound('确定');
         core.ui.closePanel();
         core.restart();
     }, function () {
+        core.playSound('取消');
         core.ui.closePanel();
     });
 }
@@ -410,7 +413,8 @@ events.prototype.battle = function (id, x, y, force, callback) {
     if (!id) return core.clearContinueAutomaticRoute(callback);
     // 非强制战斗
     if (!core.enemys.canBattle(id, x, y) && !force && !core.status.event.id) {
-        core.drawTip("你打不过此怪物！");
+        core.playSound('操作失败');
+        core.drawTip("你打不过此怪物！", id);
         return core.clearContinueAutomaticRoute(callback);
     }
     // 自动存档
@@ -491,10 +495,14 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
 
             // --- 如果是一个不存在的道具，则直接认为无法开启
             if (!core.material.items[keyName]) {
+                core.stopSound();
+                core.playSound('操作失败');
                 core.drawTip("无法开启此门");
                 return clearAndReturn();
             }
             if (core.itemCount(keyName) < keyValue) {
+                core.stopSound();
+                core.playSound('操作失败');
                 core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", null, true);
                 return false;
             }
@@ -560,7 +568,6 @@ events.prototype._sys_getItem = function (data, callback) {
 ////// 获得某个物品 //////
 events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
     if (num == null) num = 1;
-    num = num || 1;
     var itemCls = core.material.items[id].cls;
     core.removeBlock(x, y);
     core.items.getItemEffect(id, num);
@@ -927,10 +934,12 @@ events.prototype.startEvents = function (list, x, y, callback) {
 ////// 执行当前自定义事件列表中的下一个事件 //////
 events.prototype.doAction = function () {
     // 清空boxAnimate和UI层
-    core.clearUI();
     clearInterval(core.status.event.interval);
     clearTimeout(core.status.event.interval);
+    clearInterval(core.status.event.animateUI);
     core.status.event.interval = null;
+    delete core.status.event.aniamteUI;
+    core.clearUI();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
     var floorId = core.status.event.data.floorId || core.status.floorId;
@@ -1196,10 +1205,10 @@ events.prototype.__precompile_getArray = function () {
         "show", "hide", "setBlock", "showFloorImg", "hideFloorImg", "showBgFgMap",
         "hideBgFgMap", "setBgFgBlock", "animate", "setViewport", "move", "jumoHero",
         "changeFloor", "changePos", "showTextImage", "showGif", "openDoor",
-        "closeDoor", "battle", "trigger", "insert"
+        "closeDoor", "battle", "trigger", "insert", "setEnemyOnPoint", "resetEnemyOnPoint"
     ];
     var values = [
-        "setValue", "setEnemy", "setFloor", "setGlobalValue",
+        "setValue", "setEnemy", "setEnemyOnPoint", "setEquip", "setFloor", "setGlobalValue",
     ];
     var uievents = [
         "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "fillEllipse", "strokeEllipse",
@@ -1289,6 +1298,7 @@ events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
     core.ui.drawTextBox(data.text, data.showAll);
+    if (!data.showAll) core.ui._animateUI('show');
 }
 
 events.prototype._action_autoText = function (data, x, y, prefix) {
@@ -1313,7 +1323,7 @@ events.prototype._action__label = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setText = function (data, x, y, prefix) {
-    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "interval"].forEach(function (t) {
+    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "letterSpacing", "animateTime"].forEach(function (t) {
         if (data[t] != null) core.status.textAttribute[t] = data[t];
     });
     ["background", "title", "text"].forEach(function (t) {
@@ -1614,6 +1624,7 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
         core.useItem(data.id, true, core.doAction);
     }
     else {
+        core.playSound('操作失败');
         core.drawTip("当前无法使用" + ((core.material.items[data.id] || {}).name || "未知道具"));
         core.doAction();
     }
@@ -1711,8 +1722,12 @@ events.prototype._action_freeBgm = function (data, x, y, prefix) {
 
 events.prototype._action_playSound = function (data, x, y, prefix) {
     if (data.stop) core.stopSound();
-    core.playSound(data.name);
-    core.doAction();
+    if (data.sync) {
+        core.playSound(data.name, data.pitch, core.doAction);
+    } else {
+        core.playSound(data.name, data.pitch);
+        core.doAction();
+    }
 }
 
 events.prototype._action_stopSound = function (data, x, y, prefix) {
@@ -1724,6 +1739,11 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
     data.value = core.clamp(parseInt(data.value) / 100, 0, 1);
     core.setFlag("__volume__", data.value);
     this.__action_doAsyncFunc(data.async, core.setVolume, data.value, data.time || 0);
+}
+
+events.prototype._action_setBgmSpeed = function (data, x, y, prefix) {
+    core.setBgmSpeed(data.value, data.pitch || false);
+    core.doAction();
 }
 
 events.prototype._action_setValue = function (data, x, y, prefix) {
@@ -1750,6 +1770,36 @@ events.prototype._action_setEnemy = function (data, x, y, prefix) {
     core.doAction();
 }
 
+events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    this.setEnemyOnPoint(loc[0], loc[1], data.floorId, data.name, data.value, data.operator, prefix);
+    core.doAction();
+}
+
+events.prototype._action_resetEnemyOnPoint = function (data, x, y, prefix) {
+    var loc = this.__action_getLoc(data.loc, x, y, prefix);
+    this.resetEnemyOnPoint(loc[0], loc[1], data.floorId);
+    core.doAction();
+}
+
+events.prototype._precompile_moveEnemyOnPoint = function (data) {
+    data.from = this.__precompile_array(data.from);
+    data.to = this.__precompile_array(data.to);
+    return data;
+}
+
+events.prototype._action_moveEnemyOnPoint = function (data, x, y, prefix) {
+    var from = this.__action_getLoc(data.from, x, y, prefix);
+    var to = this.__action_getLoc(data.to, x, y, prefix);
+    this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId);
+    core.doAction();
+}
+
+events.prototype._action_setEquip = function (data, x, y, prefix) {
+    core.setEquip(data.id, data.valueType, data.name, data.value, data.operator, prefix);
+    core.doAction();
+}
+
 events.prototype._action_setFloor = function (data, x, y, prefix) {
     this.setFloorInfo(data.name, data.value, data.floorId, prefix);
     core.doAction();
@@ -1767,6 +1817,11 @@ events.prototype._action_setGlobalValue = function (data, x, y, prefix) {
 
 events.prototype._action_setGlobalFlag = function (data, x, y, prefix) {
     this.setGlobalFlag(data.name, data.value);
+    core.doAction();
+}
+
+events.prototype._action_setNameMap = function (data, x, y, floorId) {
+    this.setNameMap(data.name, data.value);
     core.doAction();
 }
 
@@ -1866,29 +1921,28 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
-                if (index != 'none') {
-                    var timeout = Math.floor(index / 100) || 0;
-                    core.setFlag('timeout', timeout);
-                    index %= 100;
-                } else core.setFlag('timeout', 0);
-                core.status.event.selection = index;
-                setTimeout(function () {
-                    core.status.route.push("choices:"+index);
-                    if (index != 'none') {
-                        // 检查
-                        var choice = data.choices[index];
-                        if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
-                            // 无法选择此项：直接忽略
-                        } else {
-                            core.insertAction(choice.action);
-                        }
-                    }
-                    core.doAction();
-                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+                this.__action_choices_replaying(data, index);
+            } else {
+                core.control._replay_error(action);
+                return;
             }
         } else {
-            core.control._replay_error(action);
-            return;
+            // 容错录像
+            if (main.replayChecking) {
+                // 录像验证系统中选择第一项
+                core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                core.events.__action_choices_replaying(data, 0)
+            } else {
+                // 正常游戏中弹窗选择
+                core.myprompt('录像回放出错！当前需要执行选择项但录像中未记录。\n如需修复请输入您要选的项（从0起），点击取消将不会修复。', 0, function (value) {
+                    if (value == null) {
+                        core.control._replay_error(action);
+                        return;
+                    }
+                    core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                    core.events.__action_choices_replaying(data, core.clamp(parseInt(value), 0, data.choices.length - 1))
+                });
+            }
         }
     } else {
         if (data.timeout) {
@@ -1900,7 +1954,34 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         }
         core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
+    for (var i = 0; i < data.choices.length; i++) {
+        if (typeof data.choices[i] === 'string')
+            data.choices[i] = {"text": data.choices[i]};
+        data.choices[i].text = core.replaceText(data.choices[i].text, prefix);
+    }
     core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices);
+}
+
+events.prototype.__action_choices_replaying = function (data, index) {
+    if (index != 'none') {
+        var timeout = Math.floor(index / 100) || 0;
+        core.setFlag('timeout', timeout);
+        index %= 100;
+    } else core.setFlag('timeout', 0);
+    core.status.event.selection = index;
+    setTimeout(function () {
+        core.status.route.push("choices:"+index);
+        if (index != 'none') {
+            // 检查
+            var choice = data.choices[index];
+            if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
+                // 无法选择此项：直接忽略
+            } else {
+                core.insertAction(choice.action);
+            }
+        }
+        core.doAction();
+    }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
 }
 
 events.prototype._precompile_choices = function (data) {
@@ -1920,24 +2001,15 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
         if (action.indexOf('choices:') == 0) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < 2) {
-                if (index != 'none') {
-                    var timeout = Math.floor(index / 100) || 0;
-                    core.setFlag('timeout', timeout);
-                    index %= 100;
-                } else core.setFlag('timeout', 0);
-                core.status.event.selection = index;
-                setTimeout(function () {
-                    core.status.route.push("choices:"+index);
-                    if (index != 'none') {
-                        if (index == 0) core.insertAction(data.yes);
-                        else core.insertAction(data.no);
-                    }
-                    core.doAction();
-                }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+                this.__action_confirm_replaying(data, index);
+            } else {
+                core.control._replay_error(action);
+                return;
             }
         } else {
-            core.control._replay_error(action);
-            return;
+            // 录像中未记录选了哪个，则选默认值，而不是直接报错
+            core.status.replay.toReplay.unshift(action);
+            this.__action_confirm_replaying(data, data["default"] ? 0 : 1);
         }
     }
     else {
@@ -1952,6 +2024,23 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
         core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
     core.ui.drawConfirmBox(data.text);
+}
+
+events.prototype.__action_confirm_replaying = function (data, index) {
+    if (index != 'none') {
+        var timeout = Math.floor(index / 100) || 0;
+        core.setFlag('timeout', timeout);
+        index %= 100;
+    } else core.setFlag('timeout', 0);
+    core.status.event.selection = index;
+    setTimeout(function () {
+        core.status.route.push("choices:"+index);
+        if (index != 'none') {
+            if (index == 0) core.insertAction(data.yes);
+            else core.insertAction(data.no);
+        }
+        core.doAction();
+    }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
 }
 
 events.prototype._precompile_confirm = function (data) {
@@ -2458,10 +2547,12 @@ events.prototype._checkStatus = function (name, fromUserAction, checkItem) {
     }
     if (fromUserAction && core.status.lockControl) return false;
     if (checkItem && !core.hasItem(name)) {
-        core.drawTip("你没有" + core.material.items[name].name);
+        core.playSound('操作失败');
+        core.drawTip("你没有" + core.material.items[name].name, name);
         return false;
     }
     if (core.isMoving()) {
+        core.playSound('操作失败');
         core.drawTip("请先停止勇士行动");
         return false;
     }
@@ -2488,6 +2579,7 @@ events.prototype.openBook = function (fromUserAction) {
         core.status.event.ui = core.status.event.data;
     }
     if (!this._checkStatus('book', fromUserAction, true)) return;
+    core.playSound('打开界面');
     core.useItem('book', true);
 }
 
@@ -2496,19 +2588,22 @@ events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
-        core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name);
+        core.playSound('操作失败');
+        core.drawTip("只有在楼梯边才能使用" + core.material.items['fly'].name, 'fly');
         core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
     if (!core.canUseItem('fly')) {
-        core.drawTip(core.material.items['fly'].name + "好像失效了");
+        core.playSound('操作失败');
+        core.drawTip(core.material.items['fly'].name + "好像失效了", 'fly');
         core.unlockControl();
         core.status.event.data = null;
         core.status.event.id = null;
         return;
     }
+    core.playSound('打开界面');
     core.useItem('fly', true);
     return;
 }
@@ -2521,6 +2616,7 @@ events.prototype.flyTo = function (toId, callback) {
 events.prototype.openEquipbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('equipbox', fromUserAction)) return;
+    core.playSound('打开界面');
     core.ui._drawEquipbox();
 }
 
@@ -2528,6 +2624,7 @@ events.prototype.openEquipbox = function (fromUserAction) {
 events.prototype.openToolbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('toolbox', fromUserAction)) return;
+    core.playSound('打开界面');
     core.ui._drawToolbox();
 }
 
@@ -2536,7 +2633,8 @@ events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
 
     if (Object.keys(core.status.shops).length == 0) {
-        core.drawTip("本塔没有快捷商店！");
+        core.playSound('操作失败');
+        core.drawTip("本游戏没有快捷商店！");
         return;
     }
 
@@ -2545,11 +2643,13 @@ events.prototype.openQuickShop = function (fromUserAction) {
         var shopId = Object.keys(core.status.shops)[0];
         if (core.status.event.id != null) return;
         if (!core.canOpenShop(shopId)) {
+            core.playSound('操作失败');
             core.drawTip("当前无法打开快捷商店！");
             return;
         }
         var message = core.canUseQuickShop(shopId);
         if (message != null) {
+            core.playSound('操作失败');
             core.drawTip(message);
             return;
         }
@@ -2571,6 +2671,7 @@ events.prototype.openKeyBoard = function (fromUserAction) {
 events.prototype.save = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (core.hasFlag('__forbidSave__')) {
+        core.playSound('操作失败');
         core.drawTip('当前禁止存档');
         return;
     }
@@ -2579,6 +2680,7 @@ events.prototype.save = function (fromUserAction) {
     if (!this._checkStatus('save', fromUserAction)) return;
     var saveIndex = core.saves.saveIndex;
     var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+    core.playSound('打开界面');
     core.ui._drawSLPanel(10*page+offset);
 }
 
@@ -2594,12 +2696,14 @@ events.prototype.load = function (fromUserAction) {
         core.clearMap('all');
         core.status.event = {'id': 'load', 'data': null};
         core.status.lockControl = true;
+        core.playSound('打开界面');
         core.ui._drawSLPanel(10*page+offset);
         return;
     }
     if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval))
         return;
     if (!this._checkStatus('load', fromUserAction)) return;
+    core.playSound('打开界面');
     core.ui._drawSLPanel(10*page+offset);
 }
 
@@ -2608,6 +2712,7 @@ events.prototype.openSettings = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('settings', fromUserAction))
         return;
+    core.playSound('打开界面');
     core.ui._drawSettings();
 }
 
@@ -2721,6 +2826,38 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix) {
     core.updateStatusBar();
 }
 
+////// 设置某个点上的怪物属性 //////
+events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operator, prefix) {
+    floorId = floorId || core.status.floorId;
+    var block = core.getBlock(x, y, floorId);
+    if (block == null) return;
+    if (block.event.cls.indexOf('enemy') != 0) return;
+    var enemy = core.material.enemys[block.event.id];
+    if (enemy == null) return;
+    value = this._updateValueByOperator(core.calValue(value, prefix), enemy[name], operator);
+    flags.enemyOnPoint = flags.enemyOnPoint || {};
+    flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
+    flags.enemyOnPoint[floorId][x+","+y] = flags.enemyOnPoint[floorId][x+","+y] || {};
+    flags.enemyOnPoint[floorId][x+","+y][name] = value;
+    core.updateStatusBar();
+}
+
+////// 重置某个点上的怪物属性 //////
+events.prototype.resetEnemyOnPoint = function (x, y, floorId) {
+    delete ((flags.enemyOnPoint||{})[floorId||core.status.floorId]||{})[x+","+y];
+    core.updateStatusBar();
+}
+
+////// 将某个点上已经设置的怪物属性移动到其他点 //////
+events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId) {
+    floorId = floorId || core.status.floorId;
+    if (((flags.enemyOnPoint||{})[floorId]||{})[fromX+","+fromY]) {
+        flags.enemyOnPoint[floorId][toX+","+toY] = flags.enemyOnPoint[floorId][fromX+","+fromY];
+        delete flags.enemyOnPoint[floorId][fromX+","+fromY];
+        core.updateStatusBar();
+    }
+}
+
 ////// 设置楼层属性 //////
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
     floorId = floorId || core.status.floorId;
@@ -2763,6 +2900,12 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.resize();
     if (name == 'blurFg')
         core.drawMap();
+}
+
+////// 设置文件别名 //////
+events.prototype.setNameMap = function (name, value) {
+    if (!core.hasFlag('__nameMap__')) core.setFlag('__nameMap__', {});
+    flags.__nameMap__[name] = value;
 }
 
 events.prototype.closeDoor = function (x, y, id, callback) {
@@ -3004,33 +3147,55 @@ events.prototype._vibrate_update = function (shakeInfo) {
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
 events.prototype.eventMoveHero = function(steps, time, callback) {
     time = time || core.values.moveSpeed;
-    var step = 0, moveSteps = (steps||[]).filter(function (t) {
-        return ['up','down','left','right','forward','backward'].indexOf(t)>=0;
+    var step = 0, moveSteps = (steps||[]).map(function (t) {
+        return [t.split(':')[0], parseInt(t.split(':')[1]||"1")];
+    }).filter(function (t) {
+        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed'].indexOf(t[0])>=0
+            && !(t[0] == 'speed' && t[1] < 16);
     });
     core.status.heroMoving = -1;
-    var animate=window.setInterval(function() {
-        if (moveSteps.length==0) {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            core.status.heroMoving = 0;
-            core.drawHero();
-            if (callback) callback();
-        }
-        else {
-            if (core.events._eventMoveHero_moving(++step, moveSteps))
-                step = 0;
-        }
-    }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
-
-    core.animateFrame.asyncId[animate] = true;
+    var _run = function () {
+        var animate=window.setInterval(function() {
+            if (moveSteps.length==0) {
+                delete core.animateFrame.asyncId[animate];
+                clearInterval(animate);
+                core.status.heroMoving = 0;
+                core.drawHero();
+                if (callback) callback();
+            }
+            else {
+                if (step == 0 && moveSteps[0][0] == 'speed' && moveSteps[0][1] >= 16) {
+                    time = moveSteps[0][1];
+                    moveSteps.shift();
+                    clearInterval(animate);
+                    delete core.animateFrame.asyncId[animate];
+                    _run();
+                }
+                else if (core.events._eventMoveHero_moving(++step, moveSteps))
+                    step = 0;
+            }
+        }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
+    
+        core.animateFrame.asyncId[animate] = true;
+    }
+    _run();
 }
 
 events.prototype._eventMoveHero_moving = function (step, moveSteps) {
-    var direction = moveSteps[0], x = core.getHeroLoc('x'), y = core.getHeroLoc('y');
+    var curr = moveSteps[0];
+    var direction = curr[0], x = core.getHeroLoc('x'), y = core.getHeroLoc('y');
     // ------ 前进/后退
     var o = direction == 'backward' ? -1 : 1;
     if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
+    var faceDirection = direction;
+    if (direction == 'leftup' || direction == 'leftdown') faceDirection = 'left';
+    if (direction == 'rightup' || direction == 'rightdown') faceDirection = 'right';
     core.setHeroLoc('direction', direction);
+    if (curr[1] <= 0) {
+        core.setHeroLoc('direction', faceDirection);
+        moveSteps.shift();
+        return true;
+    }
     if (step <= 4) {
         core.drawHero('leftFoot', 4 * o * step);
     }
@@ -3038,10 +3203,12 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         core.drawHero('rightFoot', 4 * o * step);
     }
     if (step == 8) {
-        core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
-        core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+        core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);
+        core.setHeroLoc('y', y + o * core.utils.scan2[direction].y, true);
         core.updateFollowers();
-        moveSteps.shift();
+        curr[1]--;
+        if (curr[1] <= 0) moveSteps.shift();
+        core.setHeroLoc('direction', faceDirection);
         return true;
     }
     return false;
@@ -3160,6 +3327,7 @@ events.prototype.tryUseItem = function (itemId) {
         core.ui.closePanel();
         core.useItem(itemId);
     } else {
+        core.playSound('操作失败');
         core.drawTip("当前无法使用" + core.material.items[itemId].name);
     }
 }

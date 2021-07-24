@@ -15,6 +15,16 @@ function utils() {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
+    this.scan2 = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0},
+        'leftup': {'x': -1, 'y': -1},
+        'leftdown': {'x': -1, 'y': 1},
+        'rightup': {'x': 1, 'y': -1},
+        'rightdown': {'x': 1, 'y': 1}
+    };
 }
 
 utils.prototype._init = function () {
@@ -66,7 +76,21 @@ utils.prototype._init = function () {
             return this;
         }
     }
-
+    if (typeof Array.prototype.includes != "function") {
+        Array.prototype.includes = function (value) {
+            return this.indexOf(value) >= 0;
+        }
+    }
+    if (typeof String.prototype.includes != "function") {
+        String.prototype.includes = function (value) {
+            return this.indexOf(value) >= 0;
+        }
+    }
+    if (typeof Object.values != "function") {
+        Object.values = function (obj) {
+            return Object.keys(obj).map(function (one) { return obj[one]; });
+        }
+    }
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
@@ -78,17 +102,17 @@ utils.prototype.replaceText = function (text, prefix) {
 }
 
 utils.prototype.replaceValue = function (value) {
-    if (typeof value == "string" && value.indexOf(":") >= 0) {
+    if (typeof value == "string" && (value.indexOf(":") >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0)) {
         if (value.indexOf('status:') >= 0)
             value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
         if (value.indexOf('item:') >= 0)
             value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
-        if (value.indexOf('flag:') >= 0)
-            value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
+        if (value.indexOf('flag:') >= 0 || value.indexOf('flag：') >= 0)
+            value = value.replace(/flag[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B]+)/g, "core.getFlag('$1', 0)");
         //if (value.indexOf('switch:' >= 0))
         //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
-        if (value.indexOf('global:') >= 0)
-            value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+        if (value.indexOf('global:') >= 0 || value.indexOf('global：') >= 0)
+            value = value.replace(/global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B]+)/g, "core.getGlobal('$1', 0)");
         if (value.indexOf('enemy:')>=0)
             value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
@@ -109,7 +133,7 @@ utils.prototype.replaceValue = function (value) {
 utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        if (value.indexOf(':') >= 0) {
+        if (value.indexOf(':') >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0) {
             if (value.indexOf('switch:' >= 0))
                 value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
             value = this.replaceValue(value);

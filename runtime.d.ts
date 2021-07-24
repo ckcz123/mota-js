@@ -215,6 +215,8 @@ type gameStatus = {
         textfont: number
         bold: boolean
         time: number
+        letterSpacing: number
+        animateTime: number
     },
     globalAttribute: {
         equipName: string[]
@@ -278,19 +280,19 @@ declare class control {
     removeFlag(name: string): void
 
     /** 设置某个独立开关 */
-    setSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+    setSwitch(x: number, y: number, floorId: string, name: string, value: any): void
 
     /** 获得某个独立开关 */
-    getSwitch(x: number, y: number, floorId?: string, name: string, defaultValue: any): any
+    getSwitch(x: number, y: number, floorId: string, name: string, defaultValue: any): any
 
     /** 增加某个独立开关 */
-    addSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+    addSwitch(x: number, y: number, floorId: string, name: string, value: any): void
 
     /** 判定某个独立开关 */
-    hasSwitch(x: number, y: number, floorId?: string, name: string): boolean
+    hasSwitch(x: number, y: number, floorId: string, name: string): boolean
 
     /** 删除独立开关 */
-    removeSwitch(x: number, y: number, floorId?: string, name: string): boolean
+    removeSwitch(x: number, y: number, floorId: string, name: string): boolean
 
     /** 设置大地图的偏移量 */
     setGameCanvasTranslate(canvasId: string, x: number, y: number): void
@@ -772,6 +774,9 @@ declare class control {
     /** 恢复背景音乐的播放 */
     resumeBgm(resumeTime?: number): void
 
+    /** 设置背景音乐的播放速度和音调 */
+    setBgmSpeed(speed: number, usePitch?: bool): void
+
     /** 设置音乐图标的显隐状态 */
     setMusicBtn(): void
 
@@ -779,10 +784,10 @@ declare class control {
     triggerBgm(): void
 
     /** 播放一个音效 */
-    playSound(sound: string): void
+    playSound(sound: string, pitch?: number, callback?: () => any): number
 
-    /** 停止所有音频 */
-    stopSound(): void
+    /** 停止（所有）音频 */
+    stopSound(id?: number): void
 
     /** 检查bgm状态 */
     checkBgm(): void
@@ -910,6 +915,15 @@ declare class events {
      */
     setEnemy<K extends keyof Enemy>(id: string, name: K, value?: Enemy[K], operator?: string, prefix?: string): void
     
+    /** 设置某个点的敌人属性 */
+    setEnemyOnPoint<K extends keyof Enemy>(x: number, y: number, floorId: string, name: K, value?: Enemy[K], operator?: string, prefix?: string): void
+
+    /** 重置某个点的敌人属性 */
+    resetEnemyOnPoint(x: number, y: number, floorId?: string): void
+
+    /** 将某个点已经设置的敌人属性移动到其他点 */
+    moveEnemyOnPoint(fromX: number, fromY: number, toX: number, toY: number, floorId?: string): void
+
     /**
      * 设置一项楼层属性并刷新状态栏
      * @example core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
@@ -1260,7 +1274,7 @@ declare class actions {
     onup(loc: number[]): void
 
     /** 具体点击屏幕上(x,y)点时，执行的操作 */
-    onclick(x: number, y: number, stepPostfix?: any): void
+    onclick(x: number, y: number, px: number, py: number, stepPostfix?: any): void
 
     /** 滑动鼠标滚轮时的操作 */
     onmousewheel(direct: 1 | -1): void
@@ -1269,7 +1283,7 @@ declare class actions {
     keyDownCtrl(): void
 
     /** 长按 */
-    longClick(x: number, y: number, fromEvent?: boolean): void
+    longClick(x: number, y: number, px: number, py: number, fromEvent?: boolean): void
 
     /** 点击自绘状态栏时 */
     onStatusBarClick(e?: MouseEvent): void
@@ -1303,6 +1317,9 @@ declare class enemys {
      * @returns 属性的介绍，以属性名加中文冒号开头
      */
     getSpecialHint(enemy: string | Enemy, special: number): string
+
+    /** 获得某个敌人的某项属性值 */
+    getEnemyValue(enemy: string | Enemy, name: string, x?: number, y?: number, floorId?: string): any
 
     /**
      * 判定主角当前能否打败某只敌人
@@ -2015,6 +2032,18 @@ declare class items {
 
     /** 根据类型获得一个可用的装备孔 */
     getEquipTypeByName(name?: string): void
+
+    /**
+     * 设置某个装备的属性并计入存档
+     * @example core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300
+     * @param equipId 装备id
+     * @param valueType 增幅类型，只能是value（数值）或percentage（百分比）
+     * @param name 要修改的属性名称，如atk
+     * @param value 要修改到的属性数值
+     * @param operator 操作符，可选，如+=表示在原始值上增加
+     * @param prefix 独立开关前缀，一般不需要
+     */
+     setEquip(equipId: string, valueType: string, name: string, value: any, operator?: string, prefix?: string): void
 }
 
 /** @file ui.js 主要用来进行UI窗口的绘制，如对话框、怪物手册、楼传器、存读档界面等等。*/

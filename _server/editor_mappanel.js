@@ -949,6 +949,18 @@ editor_mappanel_wrapper = function (editor) {
         saveFloor.onclick = editor_mode.saveFloor;
     }
 
+    editor.uifunctions.openDoc_func = function () {
+        var openDoc = document.getElementById('openDoc');
+        openDoc.onclick = function () {
+            if (editor.isMobile) {
+                if (!confirm('你确定要打开帮助文档吗？')) return;
+                window.location='/_docs/';
+            } else {
+                window.open('/_docs/', '_blank');
+            }
+        }
+    }
+
     editor.uifunctions.lastUsed_click = function (e) {
         e.preventDefault();
         e.stopImmediatePropagation();

@@ -752,6 +752,7 @@ action
     |   setEnemyOnPoint_s
     |   resetEnemyOnPoint_s
     |   moveEnemyOnPoint_s
+    |   setEquip_s
     |   setFloor_s
     |   setGlobalAttribute_s
     |   setGlobalValue_s
@@ -1145,6 +1146,25 @@ if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
   AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
 } else AssignOperator_List_0 = '';
 var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
+return code;
+*/;
+
+
+setEquip_s
+    :   '设置装备属性' ':' '装备ID' IdString EquipValueType_List '的' EvalString AssignOperator_List expression Newline
+
+
+/* setEquip_s
+tooltip : setEquip：设置某个怪物的属性
+helpUrl : /_docs/#/instruction
+default : ["sword1", "value", "atk", "="]
+allEquips : ['IdString_0']
+colour : this.dataColor
+EquipValueType_List_0 = EquipValueType_List_0 == 'percentage' ? ', "valueType": "percentage"' : ', "valueType": "value"';
+if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
+  AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
+} else AssignOperator_List_0 = '';
+var code = '{"type": "setEquip", "id": "'+IdString_0+'"'+EquipValueType_List_0+', "name": "'+EvalString_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
 return code;
 */;
 
@@ -1904,7 +1924,7 @@ tooltip : loadEquip: 装上装备
 helpUrl : /_docs/#/instruction
 colour : this.dataColor
 default : ["sword1"]
-allItems : ['IdString_0']
+allEquips : ['IdString_0']
 var code = '{"type": "loadEquip", "id": "'+IdString_0+'"},\n';
 return code;
 */;
@@ -3825,6 +3845,10 @@ Global_Flag_List
 NextXY_List
     :   '横坐标'|'纵坐标'
     /*NextXY_List ['nextX','nextY']*/;
+
+EquipValueType_List
+    :   '数值项'|'百分比项'
+    /*EquipValueType_List ['value','percentage']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则

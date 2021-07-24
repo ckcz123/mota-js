@@ -707,6 +707,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
         data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
       break;
+    case "setEquip":
+      this.next = MotaActionBlocks['setEquip_s'].xmlText([
+        MotaActionFunctions.replaceToName_token(data.id), data.valueType||'value', data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+      break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
         data.name, data.floorId||null, JSON.stringify(data.value), this.next]);

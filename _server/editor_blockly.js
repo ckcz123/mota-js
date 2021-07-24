@@ -669,14 +669,18 @@ editor_blockly = function () {
         namesObj.allEnemys = Object.keys(core.material.enemys);
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
             namesObj.allEnemys = namesObj.allEnemys.concat(MotaActionFunctions.pattern.replaceEnemyList.map(function (x) {
-            return x[1];
-          }))
+                return x[1];
+            }))
         }
         namesObj.allItems = Object.keys(core.material.items);
+        namesObj.allEquips = namesObj.allItems.filter(function (one) { return core.material.items[one].cls == 'equips' });
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
             namesObj.allItems = namesObj.allItems.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
-            return x[1];
-          }))
+                return x[1];
+            }))
+            namesObj.allEquips = namesObj.allEquips.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
+                return x[1];
+            }))
         }
         namesObj.allAnimates = Object.keys(core.material.animates)
             .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.animates[main.nameMap[one]];}));
@@ -710,7 +714,7 @@ editor_blockly = function () {
         // 对音效进行补全
         // 对全局商店进行补全
         // 对楼层名进行补全
-        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
+        for(var ii=0,names;names=['allIds','allEnemys','allItems','allEquips','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
             if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
                 return filter(namesObj[names], content);
             }

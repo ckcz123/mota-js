@@ -2032,6 +2032,18 @@ declare class items {
 
     /** 根据类型获得一个可用的装备孔 */
     getEquipTypeByName(name?: string): void
+
+    /**
+     * 设置某个装备的属性并计入存档
+     * @example core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300
+     * @param equipId 装备id
+     * @param valueType 增幅类型，只能是value（数值）或percentage（百分比）
+     * @param name 要修改的属性名称，如atk
+     * @param value 要修改到的属性数值
+     * @param operator 操作符，可选，如+=表示在原始值上增加
+     * @param prefix 独立开关前缀，一般不需要
+     */
+     setEquip(equipId: string, valueType: string, name: string, value: any, operator?: string, prefix?: string): void
 }
 
 /** @file ui.js 主要用来进行UI窗口的绘制，如对话框、怪物手册、楼传器、存读档界面等等。*/

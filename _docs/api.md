@@ -1320,6 +1320,16 @@ index: 套装编号，自然数
 removeItem: fn(itemId?: string, itemNum?: number)
 删除某个物品
 
+setEquip: fn(equipId: string, valueType: string, name: string, value: ?, operator?: string, prefix?: string)
+设置某个装备的属性并计入存档
+例如：core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300
+equipId: 装备id
+valueType: 增幅类型，只能是value（数值）或percentage（百分比）
+name: 要修改的属性名称，如atk
+value: 要修改到的属性数值
+operator: 操作符，可选，如+=表示在原始值上增加
+prefix: 独立开关前缀，一般不需要
+
 setItem: fn(itemId: string, itemNum?: number)
 设置某种道具的持有量
 例如：core.setItem('yellowKey', 3) // 设置黄钥匙为3把

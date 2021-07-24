@@ -16,7 +16,14 @@ items.prototype._init = function () {
 
 ////// 获得所有道具 //////
 items.prototype.getItems = function () {
-    return core.clone(this.items);
+    var items = core.clone(this.items);
+    var equipInfo = core.getFlag('equipInfo');
+    if (equipInfo) {
+        for (var id in equipInfo) {
+            items[id].equip = core.clone(equipInfo[id]);
+        }
+    }
+    return items;
 }
 
 ////// “即捡即用类”道具的使用效果 //////
@@ -403,4 +410,26 @@ items.prototype.quickLoadEquip = function (index) {
     this._realLoadEquip_playSound();
 
     core.drawTip("成功换上" + index + "号套装");
+}
+
+////// 设置装备属性 //////
+items.prototype.setEquip = function (equipId, valueType, name, value, operator, prefix) {
+    var equip = core.material.items[equipId];
+    if (!equip || equip.cls != 'equips') return; 
+    var equipInfo = equip.equip || {};
+    if (!equipInfo[valueType]) equipInfo[valueType] = {};
+    var toEquipInfo = core.clone(equipInfo);
+    toEquipInfo[valueType][name] = core.events._updateValueByOperator(core.calValue(value, prefix), equipInfo[valueType][name], operator);
+    // 如果是穿上状态，则还需要直接修改当前数值
+    if (core.hasEquip(equipId)) {
+        // 设置一个临时装备，然后模拟换装操作
+        var tempId = 'temp:' + equipId;
+        core.material.items[tempId] = {'cls': 'equips', 'equip': core.clone(toEquipInfo)};
+        this._loadEquipEffect(tempId, equipId);
+        delete core.material.items[tempId];
+        core.updateStatusBar();
+    }
+    equip.equip = core.clone(toEquipInfo);
+    flags.equipInfo = flags.equipInfo || {};
+    flags.equipInfo[equipId] = core.clone(toEquipInfo);
 }

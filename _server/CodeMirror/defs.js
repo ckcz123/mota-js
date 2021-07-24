@@ -2212,6 +2212,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "暂停背景音乐的播放", 
           "!type": "fn()"
         }, 
+        "setBgmSpeed": {
+          "!doc": "设置背景音乐的播放速度和音调<br/>speed: 播放速度，必须为30-300中间的值。100为正常速度。<br/>usePitch: 是否同时改变音调（部分设备可能不支持）",
+          "!type": "fn(speed: number, usePitch?: bool)"
+        },
         "setReplaySpeed": {
           "!doc": "设置播放速度", 
           "!type": "fn(speed: number)"
@@ -2709,6 +2713,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "canEquip": {
           "!doc": "检查能否穿上某件装备<br/>例如：core.canEquip('sword5', true) // 主角可以装备神圣剑吗，如果不能会有提示<br/>equipId: 装备id<br/>hint: 无法穿上时是否提示（比如是因为未持有还是别的什么原因）<br/>返回值：true表示可以穿上，false表示无法穿上", 
           "!type": "fn(equipId: string, hint?: bool) -> bool"
+        },
+        "setEquip": {
+          "!doc": "设置某个装备的属性并计入存档<br/>例如：core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300<br/>equipId: 装备id<br/>valueType: 增幅类型，只能是value（数值）或percentage（百分比）<br/>name: 要修改的属性名称，如atk<br/>value: 要修改到的属性数值<br/>operator: 操作符，可选，如+=表示在原始值上增加<br/>prefix: 独立开关前缀，一般不需要",
+          "!type": "fn(equipId: string, valueType: string, name: string, value: ?, operator?: string, prefix?: string)"
         }
       }, 
       "utils": {

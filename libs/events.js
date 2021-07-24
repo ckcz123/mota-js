@@ -1208,7 +1208,7 @@ events.prototype.__precompile_getArray = function () {
         "closeDoor", "battle", "trigger", "insert", "setEnemyOnPoint", "resetEnemyOnPoint"
     ];
     var values = [
-        "setValue", "setEnemy", "setFloor", "setGlobalValue",
+        "setValue", "setEnemy", "setEnemyOnPoint", "setEquip", "setFloor", "setGlobalValue",
     ];
     var uievents = [
         "clearMap", "fillText", "fillBoldText", "fillRect", "strokeRect", "fillEllipse", "strokeEllipse",
@@ -1792,6 +1792,11 @@ events.prototype._action_moveEnemyOnPoint = function (data, x, y, prefix) {
     var from = this.__action_getLoc(data.from, x, y, prefix);
     var to = this.__action_getLoc(data.to, x, y, prefix);
     this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId);
+    core.doAction();
+}
+
+events.prototype._action_setEquip = function (data, x, y, prefix) {
+    core.setEquip(data.id, data.valueType, data.name, data.value, data.operator, prefix);
     core.doAction();
 }
 

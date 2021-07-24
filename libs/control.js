@@ -2695,6 +2695,25 @@ control.prototype._playBgm_play = function (bgm, startTime) {
     core.material.bgms[bgm].play();
     core.musicStatus.playingBgm = bgm;
     core.musicStatus.lastBgm = bgm;
+    core.setBgmSpeed(100);
+}
+
+///// 设置当前背景音乐的播放速度 //////
+control.prototype.setBgmSpeed = function (speed, usePitch) {
+    var bgm = core.musicStatus.playingBgm;
+    if (main.mode!='play' || !core.material.bgms[bgm]) return;
+    bgm = core.material.bgms[bgm];
+    if (speed < 30 || speed > 300) return;
+    bgm.playbackRate = speed / 100;
+    core.musicStatus.bgmSpeed = speed;
+
+    if (bgm.preservesPitch != null) {
+        if (bgm.__preservesPitch == null) bgm.__preservesPitch = bgm.preservesPitch;
+        if (usePitch == null)  bgm.preservesPitch = bgm.__preservesPitch;
+        else if (usePitch) bgm.preservesPitch = false;
+        else bgm.preservesPitch = true;
+        core.musicStatus.bgmUsePitch = usePitch;
+    }
 }
 
 ////// 暂停背景音乐的播放 //////
@@ -2718,8 +2737,13 @@ control.prototype.pauseBgm = function () {
 control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode!='play')return;
     try {
+        var speed = core.musicStatus.bgmSpeed;
+        var usePitch = core.musicStatus.bgmUsePitch;
         core.playBgm(core.musicStatus.playingBgm || core.musicStatus.lastBgm || main.startBgm,
             resumeTime ? core.musicStatus.pauseTime : 0);
+        if (resumeTime) {
+            core.setBgmSpeed(speed, usePitch);
+        }
     }
     catch (e) {
         console.log("无法恢复BGM");
@@ -2748,7 +2772,7 @@ control.prototype.triggerBgm = function () {
 }
 
 ////// 播放音频 //////
-control.prototype.playSound = function (sound) {
+control.prototype.playSound = function (sound, pitch, callback) {
     sound = core.getMappedName(sound);
     if (main.mode!='play' || !core.musicStatus.soundStatus || !core.material.sounds[sound]) return;
     try {
@@ -2757,16 +2781,22 @@ control.prototype.playSound = function (sound) {
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
             var id = setTimeout(null);
+            if (pitch && pitch >= 30 && pitch <= 300) {
+                source.playbackRate.setValueAtTime(pitch / 100, 0);
+            } 
             source.onended = function () {
                 delete core.musicStatus.playingSounds[id];
+                if (callback) callback();
             }
+            core.musicStatus.playingSounds[id] = source;
             if (source.start) source.start(0);
             else if (source.noteOn) source.noteOn(0);
-            core.musicStatus.playingSounds[id] = source;
+            return id;
         }
         else {
             core.material.sounds[sound].volume = core.musicStatus.userVolume;
             core.material.sounds[sound].play();
+            if (callback) callback();
         }
     }
     catch (e) {
@@ -2776,18 +2806,23 @@ control.prototype.playSound = function (sound) {
 }
 
 ////// 停止所有音频 //////
-control.prototype.stopSound = function () {
-    for (var i in core.musicStatus.playingSounds) {
-        var source = core.musicStatus.playingSounds[i];
-        try {
-            if (source.stop) source.stop();
-            else if (source.noteOff) source.noteOff();
-        }
-        catch (e) {
-            main.log(e);
-        }
+control.prototype.stopSound = function (id) {
+    if (id == null) {
+        Object.keys(core.musicStatus.playingSounds).forEach(function (id) {
+            core.control.stopSound(id);
+        });
+        return;
     }
-    core.musicStatus.playingSounds = {};
+    var source = core.musicStatus.playingSounds[id];
+    if (!source) return;
+    try {
+        if (source.stop) source.stop();
+        else if (source.noteOff) source.noteOff();
+    }
+    catch (e) {
+        main.log(e);
+    }
+    delete core.musicStatus.playingSounds[id];
 }
 
 ////// 检查bgm状态 //////

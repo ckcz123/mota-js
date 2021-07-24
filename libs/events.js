@@ -1722,8 +1722,12 @@ events.prototype._action_freeBgm = function (data, x, y, prefix) {
 
 events.prototype._action_playSound = function (data, x, y, prefix) {
     if (data.stop) core.stopSound();
-    core.playSound(data.name);
-    core.doAction();
+    if (data.sync) {
+        core.playSound(data.name, data.pitch, core.doAction);
+    } else {
+        core.playSound(data.name, data.pitch);
+        core.doAction();
+    }
 }
 
 events.prototype._action_stopSound = function (data, x, y, prefix) {
@@ -1735,6 +1739,11 @@ events.prototype._action_setVolume = function (data, x, y, prefix) {
     data.value = core.clamp(parseInt(data.value) / 100, 0, 1);
     core.setFlag("__volume__", data.value);
     this.__action_doAsyncFunc(data.async, core.setVolume, data.value, data.time || 0);
+}
+
+events.prototype._action_setBgmSpeed = function (data, x, y, prefix) {
+    core.setBgmSpeed(data.value, data.pitch || false);
+    core.doAction();
 }
 
 events.prototype._action_setValue = function (data, x, y, prefix) {

@@ -2189,12 +2189,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, value: ?)"
         },
         "playSound": {
-          "!doc": "播放一个音效",
-          "!type": "fn(sound: string)"
+          "!doc": "播放一个音效<br/>sound: 音效名；可以使用文件别名。<br/>pitch: 播放的音调；可选，如果设置则为30-300之间的数值。<br/>callback: 可选，播放完毕后执行的回调函数。<br/>返回：一个数字，可用于core.stopSound的参数来只停止该音效。",
+          "!type": "fn(sound: string, pitch?: number, callback?: fn()) -> number"
         },
         "stopSound": {
-          "!doc": "停止所有SE", 
-          "!type": "fn()"
+          "!doc": "停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。", 
+          "!type": "fn(id?: number)"
         }, 
         "addGameCanvasTranslate": {
           "!doc": "加减画布偏移", 

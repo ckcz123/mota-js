@@ -478,8 +478,12 @@ playBgm: fn(bgm: string, startTime?: number)
 bgm: 背景音乐的文件名，支持全塔属性中映射前的中文名
 startTime: 跳过前多少秒，不填则不跳过
 
-playSound: fn(sound: string)
+playSound: fn(sound: string, pitch?: number, callback?: fn()) -> number
 播放一个音效
+sound: 音效名；可以使用文件别名。
+pitch: 播放的音调；可选，如果设置则为30-300之间的数值；100为正常音调。
+callback: 可选，播放完毕后执行的回调函数。
+返回：一个数字，可用于core.stopSound的参数来只停止该音效。
 
 registerAnimationFrame: fn(name: string, needPlaying: bool, func?: fn(timestamp: number))
 注册一个 animationFrame
@@ -549,6 +553,11 @@ setAutomaticRoute: fn(destX: number, destY: number, stepPostfix: [{x: number, y:
 destX: 鼠标或手指的起拖点横坐标
 destY: 鼠标或手指的起拖点纵坐标
 stepPostfix: 拖动轨迹的数组表示，每项为一步的方向和目标点。
+
+setBgmSpeed: fn(speed: number, usePitch?: bool)
+设置背景音乐的播放速度和音调
+speed: 播放速度，必须为30-300中间的值。100为正常速度。
+usePitch: 是否同时改变音调（部分设备可能不支持）
 
 setBuff: fn(name: string, value: number)
 设置主角某个属性的百分比修正倍率，初始值为1，
@@ -640,8 +649,8 @@ stopAutomaticRoute: fn()
 stopReplay: fn(force?: bool)
 停止播放
 
-stopSound: fn()
-停止所有SE
+stopSound: fn(id?: number)
+停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。
 
 syncLoad: fn()
 从服务器加载存档

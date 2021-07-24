@@ -823,6 +823,7 @@ action
     |   playSound_1_s
     |   stopSound_s
     |   setVolume_s
+    |   setBgmSpeed_s
     |   win_s
     |   lose_s
     |   restart_s
@@ -2462,32 +2463,42 @@ return code;
 */;
 
 playSound_s
-    :   '播放音效' EvalString '停止之前音效' Bool? Newline
+    :   '播放音效' EvalString '停止之前音效' Bool? '音调' IntString? '等待播放完毕' Bool? Newline
     
 
 /* playSound_s
 tooltip : playSound: 播放音效
 helpUrl : /_docs/#/instruction
-default : ["item.mp3",false]
+default : ["item.mp3",false,"",false]
 colour : this.soundColor
 allSounds : ['EvalString_0']
 material : ["./project/sounds/", "EvalString_0"]
+if (IntString_0) {
+    if (parseInt(IntString_0) < 30 || parseInt(IntString_0) > 300) throw '音调设置只能在30-300之间；100为正常音调。';
+    IntString_0 = ', "pitch": ' + IntString_0;
+} else IntString_0 = '';
 Bool_0 = Bool_0 ? ', "stop": true' : '';
-var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+'},\n';
+Bool_1 = Bool_1 ? ', "sync": true' : '';
+var code = '{"type": "playSound", "name": "'+EvalString_0+'"'+Bool_0+IntString_0+Bool_1+'},\n';
 return code;
 */;
 
 playSound_1_s
-    :   '播放系统音效' NameMap_List '停止之前音效' Bool? Newline
+    :   '播放系统音效' NameMap_List '停止之前音效' Bool? '音调' IntString? '等待播放完毕' Bool? Newline
     
 
 /* playSound_1_s
 tooltip : playSound: 播放系统音效
 helpUrl : /_docs/#/instruction
-default : ["确认",false]
+default : ["确认",false,"",false]
 colour : this.soundColor
+if (IntString_0) {
+    if (parseInt(IntString_0) < 30 || parseInt(IntString_0) > 300) throw '音调设置只能在30-300之间；100为正常音调。';
+    IntString_0 = ', "pitch": ' + IntString_0;
+} else IntString_0 = '';
 Bool_0 = Bool_0 ? ', "stop": true' : '';
-var code = '{"type": "playSound", "name": "'+NameMap_List_0+'"'+Bool_0+'},\n';
+Bool_1 = Bool_1 ? ', "sync": true' : '';
+var code = '{"type": "playSound", "name": "'+NameMap_List_0+'"'+Bool_0+IntString_0+Bool_1+'},\n';
 return code;
 */;
 
@@ -2515,6 +2526,21 @@ colour : this.soundColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "setVolume", "value": '+Int_0+IntString_0+async+'},\n';
+return code;
+*/;
+
+setBgmSpeed_s
+    :   '设置背景音乐播放速度' Int '同时改变音调' Bool Newline
+    
+
+/* setBgmSpeed_s
+tooltip : setSpeed: 设置背景音乐播放速度
+helpUrl : /_docs/#/instruction
+default : [100, true]
+colour : this.soundColor
+if (Int_0 < 30 || Int_0 > 300) throw '速度只能设置只能在30-300之间；100为正常速度。';
+Bool_0 = Bool_0?', "pitch": true':'';
+var code = '{"type": "setBgmSpeed", "value": '+Int_0+Bool_0+'},\n';
 return code;
 */;
 

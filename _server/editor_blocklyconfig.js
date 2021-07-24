@@ -213,6 +213,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['playSound_1_s'].xmlText(),
       MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
+      MotaActionBlocks['setBgmSpeed_s'].xmlText(),
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
       MotaActionBlocks['autoSave_s'].xmlText(),

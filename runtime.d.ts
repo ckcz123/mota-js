@@ -774,6 +774,9 @@ declare class control {
     /** 恢复背景音乐的播放 */
     resumeBgm(resumeTime?: number): void
 
+    /** 设置背景音乐的播放速度和音调 */
+    setBgmSpeed(speed: number, usePitch?: bool): void
+
     /** 设置音乐图标的显隐状态 */
     setMusicBtn(): void
 
@@ -781,10 +784,10 @@ declare class control {
     triggerBgm(): void
 
     /** 播放一个音效 */
-    playSound(sound: string): void
+    playSound(sound: string, pitch?: number, callback?: () => any): number
 
-    /** 停止所有音频 */
-    stopSound(): void
+    /** 停止（所有）音频 */
+    stopSound(id?: number): void
 
     /** 检查bgm状态 */
     checkBgm(): void

@@ -64,6 +64,8 @@ function core() {
         'playingSounds': {}, // 正在播放的SE
         'userVolume': 1.0, // 用户音量
         'designVolume': 1.0, //设计音量
+        'bgmSpeed': 100, // 背景音乐速度
+        'bgmUsePitch': null, // 是否同时修改音调
         'cachedBgms': [], // 缓存BGM内容
         'cachedBgmCount': 8, // 缓存的bgm数量
     }

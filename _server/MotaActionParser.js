@@ -642,10 +642,10 @@ ActionParser.prototype.parseAction = function() {
       var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];});
       if (knownItems.indexOf(data.name) >= 0) {
         this.next = MotaActionBlocks['playSound_1_s'].xmlText([
-          data.name,data.stop,this.next]);
+          data.name,data.stop,data.pitch||"",data.sync,this.next]);
       } else {
         this.next = MotaActionBlocks['playSound_s'].xmlText([
-          data.name,data.stop,this.next]);
+          data.name,data.stop,data.pitch||"",data.sync,this.next]);
       }
       break;
     case "playBgm":
@@ -676,6 +676,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
         data.value, data.time, data.async||false, this.next]);
       break
+    case "setBgmSpeed":
+      this.next = MotaActionBlocks['setBgmSpeed_s'].xmlText([
+        data.value, data.pitch||false, this.next]);
+      break;
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
         this.expandIdBlock([data.name]), data["operator"]||'=',

@@ -677,10 +677,10 @@ editor_blockly = function () {
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
             namesObj.allItems = namesObj.allItems.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
                 return x[1];
-            }))
-            namesObj.allEquips = namesObj.allEquips.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
-                return x[1];
-            }))
+            }));
+            namesObj.allEquips = namesObj.allEquips.concat(MotaActionFunctions.pattern.replaceItemList.filter(function (x) {
+                return namesObj.allEquips.includes(x[0]);
+            }).map(function (x) { return x[1]; }));
         }
         namesObj.allAnimates = Object.keys(core.material.animates)
             .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.animates[main.nameMap[one]];}));

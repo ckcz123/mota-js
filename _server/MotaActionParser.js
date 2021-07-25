@@ -1222,7 +1222,7 @@ ActionParser.prototype.matchEvalAtom = function(args) {
   }
   match=/^core\.(nextX|nextY)\((-?\d*)\)$/.exec(args[0]);
   if (match) {
-    if (match[2] == null) match[2] = 1;
+    if (match[2] == "") match[2] = "1";
     args=[match[2], match[1]];
     return rt(MotaActionBlocks['nextXY_e'].xmlText, args);
   }
@@ -1235,6 +1235,21 @@ ActionParser.prototype.matchEvalAtom = function(args) {
   if (match) {
     args[0]=match[1];
     return rt(MotaActionBlocks['isShopVisited_e'].xmlText, args);
+  }
+  match=/^core\.hasEquip\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['hasEquip_e'].xmlText, args);
+  }
+  match=/^core\.canBattle\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['canBattle_e'].xmlText, args);
+  }
+  match=/^core\.rand\((\d+)\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['rand_e'].xmlText, args);
   }
   return {ret:false}
 }
@@ -1433,8 +1448,7 @@ MotaActionFunctions.FontString_pre = function (FontString) {
 }
 
 MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
-MotaActionFunctions.pattern.id=/^(flag|global):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
-MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id=/^(flag|global|temp):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
 MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/;
 MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;

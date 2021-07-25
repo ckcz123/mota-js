@@ -284,32 +284,69 @@ editor_blocklyconfig=(function(){
         ],
         "false": []
       }),
-      '<label text="商店购买属性/钥匙"></label>',
+      '<label text="仿新新魔塔一次性商人"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "while", "condition": "true", "data": [
-          {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
-          "choices": [
-              {"text": "黄钥匙（${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
-                  {"type": "if", "condition": "status:money>=9+flag:shop_times",
-                      "true": [
-                          {"type": "setValue", "name": "status:money", "operator": "-=", "value": "9+flag:shop_times"},
-                          {"type": "setValue", "name": "item:yellowKey", "operator": "+=", "value": "1"},
-                      ],
-                      "false": [
-                          "\t[老人,man]你的金钱不足！",
-                          {"type": "continue"}
-                      ]
-                  }
-              ]},
-              {"text": "蓝钥匙（${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
-              ]},
-              {"text": "离开", "action": [
-                  {"type": "break"}
-              ]}
+        {
+          "type": "if",
+          "condition": "switch:A",
+          "true": [
+            "\t[行商,trader]\b[this]这是购买我的道具后我给玩家的提示。",
+            {
+              "type": "comment",
+              "text": "下一条指令可视情况使用或不使用"
+            },
+            {
+              "type": "hide",
+              "remove": true,
+              "time": 250
+            }
+          ],
+          "false": [
+            {
+              "type": "confirm",
+              "text": "我有3把黄钥匙，\n你出50金币就卖给你。",
+              "yes": [
+                {
+                  "type": "if",
+                  "condition": "status:money>=50",
+                  "true": [
+                    {
+                      "type": "setValue",
+                      "name": "status:money",
+                      "operator": "-=",
+                      "value": "50"
+                    },
+                    {
+                      "type": "setValue",
+                      "name": "item:yellowKey",
+                      "operator": "+=",
+                      "value": "3"
+                    },
+                    {
+                      "type": "playSound",
+                      "name": "确定",
+                      "stop": true
+                    },
+                    {
+                      "type": "setValue",
+                      "name": "switch:A",
+                      "value": "true"
+                    }
+                  ],
+                  "false": [
+                    {
+                      "type": "playSound",
+                      "name": "操作失败"
+                    },
+                    "\t[行商,trader]\b[this]你的金币不足！"
+                  ]
+                }
+              ],
+              "no": []
+            }
           ]
-        },
-        {"type": "setValue", "name": "flag:shop_times", "operator": "+=", "value": "1"}
-      ]}], 'event'),  
+      }
+      ], 'event'),  
       '<label text="战前剧情"></label>',
       MotaActionFunctions.actionParser.parse({ 
         "trigger": "action", 
@@ -322,41 +359,146 @@ editor_blocklyconfig=(function(){
           {"type": "hide"},
         ]
       },'event'),
-      '<label text="打怪掉落道具"></label>',
-      MotaActionFunctions.actionParser.parse([
-        '怪物变成了黄钥匙(黄钥匙idnum是21)',
-        '打怪变成可对话的NPC: https://ckcz123.github.io/mota-js/#/event?id=%e6%89%93%e6%80%aa%e5%8f%98%e6%88%90%e5%8f%af%e5%af%b9%e8%af%9d%e7%9a%84npc%ef%bc%88%e6%80%aa%e7%89%a9-gtnpc%ef%bc%89',
-        {"type": "setBlock", "number": 21}
-      ],'afterBattle'),
-      '<label text="打怪开门"></label>',
-      MotaActionFunctions.actionParser.parse([
-        {"type": "setValue", "name": "flag:__door__", "operator": "+=", "value": "1"},
-        {"type": "if", "condition": "flag:__door__===2", 
-          "true": [
-            {"type": "openDoor", "loc": [10,5]}
-          ],
-          "false": [] 
-        },
-      ],'afterBattle'),
       '<label text="杀死魔龙后隐藏其余图块"></label>',
       MotaActionFunctions.actionParser.parse([
         {"type": "function", "function": "function(){var x=core.status.event.data.x,y=core.status.event.data.y;if(core.isset(x)&&core.isset(y)){core.insertAction([{type:'hide',loc:[[x-1,y-2],[x,y-2],[x+1,y-2],[x-1,y-1],[x,y-1],[x+1,y-1],[x-1,y],[x+1,y]]}]);}}"},
       ],'afterBattle'),
-      '<label text="获得圣水后变成墙"></label>',
-      MotaActionFunctions.actionParser.parse({
-        "trigger": "action", 
-        "noPass": true, 
-        "data": [
-          {"type": "if", "condition": "flag:hasSuperPotion", 
-            "true": [], 
-            "false": [
-              {"type":"setValue", "name":"status:hp", "operator": "*=", "value": "2"}, 
-              {"type":"setBlock", "number": 1}, 
-              {"type":"setValue", "name":"flag:hasSuperPotion", "value": "true"} 
-            ]
-          }
-        ]
-      },'event'),
+      '<label text="全地图选中一个点"></label>',
+      MotaActionFunctions.actionParser.parse([
+        {
+          "type": "comment",
+          "text": "全地图选中一个点，需要用鼠标或触屏操作"
+        },
+        {
+          "type": "setValue",
+          "name": "temp:X",
+          "value": "status:x"
+        },
+        {
+          "type": "setValue",
+          "name": "temp:Y",
+          "value": "status:y"
+        },
+        {
+          "type": "tip",
+          "text": "再次点击闪烁位置确认"
+        },
+        {
+          "type": "while",
+          "condition": "true",
+          "data": [
+            {
+              "type": "drawSelector",
+              "image": "winskin.png",
+              "code": 1,
+              "x": "32*temp:X",
+              "y": "32*temp:Y",
+              "width": 32,
+              "height": 32
+            },
+            {
+              "type": "wait"
+            },
+            {
+              "type": "if",
+              "condition": "(flag:type === 1)",
+              "true": [
+                {
+                  "type": "if",
+                  "condition": "((temp:X===flag:x)&&(temp:Y===flag:y))",
+                  "true": [
+                    {
+                      "type": "break",
+                      "n": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "setValue",
+                  "name": "temp:X",
+                  "value": "flag:x"
+                },
+                {
+                  "type": "setValue",
+                  "name": "temp:Y",
+                  "value": "flag:y"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "drawSelector",
+          "code": 1
+        },
+        {
+          "type": "comment",
+          "text": "流程进行到这里可以对[X,Y]点进行处理，比如"
+        },
+        {
+          "type": "closeDoor",
+          "id": "yellowDoor",
+          "loc": [
+            "temp:X",
+            "temp:Y"
+          ]
+        }
+      ],'event'),
+      '<label text="多阶段Boss战斗"></label>',
+      MotaActionFunctions.actionParser.parse([
+        {
+          "type": "comment",
+          "text": "多阶段boss，请直接作为战后事件使用"
+        },
+        {
+          "type": "setValue",
+          "name": "switch:A",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "type": "switch",
+          "condition": "switch:A",
+          "caseList": [
+            {
+              "case": "1",
+              "action": [
+                {
+                  "type": "setBlock",
+                  "number": "redSlime"
+                },
+                "\t[2阶段boss,redSlime]\b[this]你以为你已经打败我了吗？没听说过史莱姆有九条命吗？"
+              ]
+            },
+            {
+              "case": "2",
+              "action": [
+                {
+                  "type": "setBlock",
+                  "number": "blackSlime"
+                },
+                "\t[3阶段boss,blackSlime]\b[this]不能消灭我的，只会让我更强大！"
+              ]
+            },
+            {
+              "case": "3",
+              "action": [
+                {
+                  "type": "setBlock",
+                  "number": "slimelord"
+                },
+                "\t[4阶段boss,slimelord]\b[this]我还能打！"
+              ]
+            },
+            {
+              "case": "4",
+              "action": [
+                "\t[4阶段boss,slimelord]我一定会回来的！"
+              ]
+            }
+          ]
+        }
+      ],'afterBattle'),
     ],
     '最近使用事件':[
       '<label text="此处只是占位符,实际定义在editor_blockly.searchBlockCategoryCallback中"></label>',

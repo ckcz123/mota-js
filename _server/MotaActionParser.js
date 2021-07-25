@@ -1448,8 +1448,7 @@ MotaActionFunctions.FontString_pre = function (FontString) {
 }
 
 MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
-MotaActionFunctions.pattern.id=/^(flag|global):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
-MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id=/^(flag|global|temp):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
 MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/;
 MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;

@@ -65,7 +65,7 @@ return code;
 
 //自动事件 事件编辑器入口之一
 autoEvent_m
-    :   '自动事件：' '触发条件' EvalString '优先级' Int BGNL? Newline '仅在本层检测' Bool '事件流中延迟执行' Bool '允许多次执行' Bool BGNL? Newline action+ BEND
+    :   '自动事件：' '触发条件' EvalString_Multi '优先级' Int BGNL? Newline '仅在本层检测' Bool '事件流中延迟执行' Bool '允许多次执行' Bool BGNL? Newline action+ BEND
     
 
 /* autoEvent_m
@@ -73,14 +73,14 @@ tooltip : 自动事件
 helpUrl : /_docs/#/instruction
 default : ["flag:__door__===2",0,true,false,false,null]
 var code = {
-    "condition": EvalString_0, // 条件不可为null
+    "condition": 'autoEvent_condition', // 条件不可为null
     "currentFloor": Bool_0, // 是否仅在本层检测
     "priority": Int_0, // 优先级
     "delayExecute": Bool_1, // 延迟执行
     "multiExecute": Bool_2, // 是否允许多次执行
     "data": 'autoEvent_asdfefw', // 事件列表
 };
-code=JSON.stringify(code,null,2).split('"autoEvent_asdfefw"').join('[\n'+action_0+']\n');
+code=JSON.stringify(code,null,2).replace('autoEvent_condition', EvalString_Multi_0).split('"autoEvent_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */;
 
@@ -2511,7 +2511,7 @@ playSound_1_s
 /* playSound_1_s
 tooltip : playSound: 播放系统音效
 helpUrl : /_docs/#/instruction
-default : ["确认",false,"",false]
+default : ["确定",false,"",false]
 colour : this.soundColor
 if (IntString_0) {
     if (parseInt(IntString_0) < 30 || parseInt(IntString_0) > 300) throw '音调设置只能在30-300之间；100为正常音调。';
@@ -3758,12 +3758,12 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 
 
 evalString_e
-    :   EvalString
+    :   EvalString_Multi
     
 
 /* evalString_e
 default : ["值"]
-var code = EvalString_0;
+var code = EvalString_Multi_0;
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 

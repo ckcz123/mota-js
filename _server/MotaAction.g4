@@ -3456,7 +3456,6 @@ expression
     :   expression Arithmetic_List expression
     |   negate_e
     |   unaryOperation_e
-    |   utilOperation_e
     |   bool_e
     |   idFixedList_e
     |   idFlag_e
@@ -3472,6 +3471,9 @@ expression
     |   isReplaying_e
     |   hasVisitedFloor_e
     |   isShopVisited_e
+    |   hasEquip_e
+    |   canBattle_e
+    |   rand_e
     |   evalString_e
     
 
@@ -3482,9 +3484,6 @@ var ops = {
     '**': 'Math.pow('+expression_0+','+expression_1+')',
     'min': 'Math.min('+expression_0+','+expression_1+')',
     'max': 'Math.max('+expression_0+','+expression_1+')',
-    'blockId': 'core.getBlockId('+expression_0+','+expression_1+')',
-    'blockNum': 'core.getBlockNum('+expression_0+','+expression_1+')',
-    'blockCls': 'core.getBlockCls('+expression_0+','+expression_1+')',
     'startsWith': expression_0+'.startsWith('+expression_1+')',
     'endsWith': expression_0+'.endsWith('+expression_1+')',
     'includes': expression_0+'.includes('+expression_1+')',
@@ -3513,9 +3512,6 @@ var orders = {
     'startsWith': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     'endsWith': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
     'includes': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
-    'blockId': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
-    'blockNum': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
-    'blockCls': Blockly.JavaScript.ORDER_MEMBER, //recieveOrder : ORDER_COMMA
 }
 return [code, orders[Arithmetic_List_0]];
 */;
@@ -3536,15 +3532,6 @@ unaryOperation_e
 
 /* unaryOperation_e
 var code = UnaryOperator_List_0 + '(' + expression_0 + ')';
-return [code, Blockly.JavaScript.ORDER_MEMBER];
-*/;
-
-utilOperation_e
-    :   UtilOperator_List expression
-    
-
-/* utilOperation_e
-var code = UtilOperator_List_0 + '(' + expression_0 + ')';
 return [code, Blockly.JavaScript.ORDER_MEMBER];
 */;
 
@@ -3606,13 +3593,21 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 
 
 blockId_e
-    :   '图块ID:' Int ',' Int
+    :   '图块ID:' PosString ',' PosString
 
 
 /* blockId_e
 default : [0,0]
-var code = 'blockId:'+Int_0+','+Int_1;
-return [code, Blockly.JavaScript.ORDER_ATOMIC];
+if (/^\d+$/.test(PosString_0) && /^\d+$/.test(PosString_1)) {
+    return ['blockId:'+PosString_0+','+PosString_1, Blockly.JavaScript.ORDER_ATOMIC];
+}
+if (PosString_0.startsWith('"')) {
+    PosString_0 = PosString_0.substring(1, PosString_0.length - 1);
+}
+if (PosString_1.startsWith('"')) {
+    PosString_1 = PosString_1.substring(1, PosString_1.length - 1);
+}
+return ['core.getBlockId('+PosString_0+','+PosString_1+')', Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
@@ -3622,8 +3617,16 @@ blockNumber_e
 
 /* blockNumber_e
 default : [0,0]
-var code = 'blockNumber:'+Int_0+','+Int_1;
-return [code, Blockly.JavaScript.ORDER_ATOMIC];
+if (/^\d+$/.test(PosString_0) && /^\d+$/.test(PosString_1)) {
+    return ['blockNumber:'+PosString_0+','+PosString_1, Blockly.JavaScript.ORDER_ATOMIC];
+}
+if (PosString_0.startsWith('"')) {
+    PosString_0 = PosString_0.substring(1, PosString_0.length - 1);
+}
+if (PosString_1.startsWith('"')) {
+    PosString_1 = PosString_1.substring(1, PosString_1.length - 1);
+}
+return ['core.getBlockNumber('+PosString_0+','+PosString_1+')', Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
@@ -3633,8 +3636,16 @@ blockCls_e
 
 /* blockCls_e
 default : [0,0]
-var code = 'blockCls:'+Int_0+','+Int_1;
-return [code, Blockly.JavaScript.ORDER_ATOMIC];
+if (/^\d+$/.test(PosString_0) && /^\d+$/.test(PosString_1)) {
+    return ['blockCls:'+PosString_0+','+PosString_1, Blockly.JavaScript.ORDER_ATOMIC];
+}
+if (PosString_0.startsWith('"')) {
+    PosString_0 = PosString_0.substring(1, PosString_0.length - 1);
+}
+if (PosString_1.startsWith('"')) {
+    PosString_1 = PosString_1.substring(1, PosString_1.length - 1);
+}
+return ['core.getBlockCls('+PosString_0+','+PosString_1+')', Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
 
@@ -3673,8 +3684,40 @@ isShopVisited_e
 
 /* isShopVisited_e
 default : ['shop1']
-allFloorIds : ['IdString_0']    
+allShops : ['IdString_0']    
 var code = 'core.isShopVisited(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+hasEquip_e
+    :   '当前正在装备' IdString
+
+/* hasEquip_e
+default : ['sword1']
+allEquips : ['IdString_0']    
+var code = 'core.hasEquip(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+canBattle_e
+    :   '当前能否战斗' IdString
+
+/* canBattle_e
+default : ['greenSlime']
+allEnemys : ['IdString_0']
+var code = 'core.canBattle(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+rand_e
+    :   '随机数 [0, ' Int ')'
+
+/* rand_e
+default : ['10']
+var code = 'core.rand(' + Int_0 + ')';
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -3783,8 +3826,8 @@ ShopUse_List
     /*ShopUse_List ['money','exp']*/;
 
 Arithmetic_List
-    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'|'开始于'|'结束于'|'包含'|'图块id'|'图块数字'|'图块类型'
-    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=','startsWith','endsWith','includes','blockId','blockNum','blockCls']*/;
+    :   '加'|'减'|'乘'|'除'|'取余'|'乘方'|'等于'|'不等于'|'大于'|'小于'|'大于等于'|'小于等于'|'且'|'或'|'异或'|'取较大'|'取较小'|'弱相等'|'弱不相等'|'开始于'|'结束于'|'包含'
+    /*Arithmetic_List ['+','-','*','/','%','**','===','!==','>','<','>=','<=','&&','||','^','max','min','==','!=','startsWith','endsWith','includes']*/;
 
 AssignOperator_List
     :   '设为'|'增加'|'减少'|'乘以'|'除以'|'乘方'|'除以并取商'|'除以并取余'|'设为不小于'|'设为不大于'
@@ -3793,10 +3836,6 @@ AssignOperator_List
 UnaryOperator_List
     :   '向下取整'|'向上取整'|'四舍五入'|'整数截断'|'绝对值'|'开方'|'变量类型'
     /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt', 'typeof']*/;
-
-UtilOperator_List
-    :   '大数字格式化'|'哈希值'|'base64编码'|'base64解码'|'不可SL的随机'|'可以SL的随机'|'深拷贝'|'日期格式化'|'时间格式化'|'获得cookie'|'字符串字节数'
-    /*UtilOperator_List ['core.formatBigNumber', 'core.hashCode', 'core.encodeBase64', 'core.decodeBase64', 'core.rand', 'core.rand2', 'core.clone', 'core.formatDate', 'core.formatTime', 'core.getCookie', 'core.strlen']*/;
 
 Weather_List
     :   '无'|'雨'|'雪'|'雾'|'云'

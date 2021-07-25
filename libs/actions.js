@@ -965,11 +965,13 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
     }
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         if (core.status.event.selection == 0 && core.status.event.data.yes) {
+            core.playSound('确定');
             core.status.event.selection = null;
             core.status.event.data.yes();
             return;
         }
         if (core.status.event.selection == 1 && core.status.event.data.no) {
+            core.playSound('确定');
             core.status.event.selection = null;
             core.status.event.data.no();
             return;
@@ -1546,6 +1548,7 @@ actions.prototype._clickToolboxIndex = function (index) {
         core.events.tryUseItem(itemId);
     }
     else {
+        core.playSound('光标移动');
         core.ui._drawToolbox(index);
     }
 }
@@ -1570,7 +1573,6 @@ actions.prototype._keyDownToolbox = function (keycode) {
         if (index == 0) { // 处理向前翻页
             if (toolsPage > 1) {
                 core.status.event.data.toolsPage--;
-                core.playSound('光标移动');
                 index = last_index;
             }
             else return; // 第一页不向前翻
@@ -1583,7 +1585,6 @@ actions.prototype._keyDownToolbox = function (keycode) {
             }
             else {
                 core.status.event.data.constantsPage--;
-                core.playSound('光标移动');
                 index = 2 * this.LAST - 1;
             }
         }
@@ -1605,12 +1606,10 @@ actions.prototype._keyDownToolbox = function (keycode) {
     if (keycode == 39) { // right
         if (toolsPage < toolsTotalPage && index == last_index) {
             core.status.event.data.toolsPage++;
-            core.playSound('光标移动');
             index = 0;
         }
         else if (constantsPage < constantsTotalPage && index == 2 * this.LAST - 1) {
             core.status.event.data.constantsPage++;
-            core.playSound('光标移动');
             index = this.LAST;
         }
         else if (index == toolsLastIndex) {
@@ -1648,6 +1647,7 @@ actions.prototype._keyDownToolbox = function (keycode) {
 ////// 工具栏界面时，放开某个键的操作 //////
 actions.prototype._keyUpToolbox = function (keycode) {
     if (keycode == 81) {
+        core.playSound('确定');
         core.ui.closePanel();
         if (core.isReplaying())
             core.control._replay_equipbox();
@@ -1672,6 +1672,7 @@ actions.prototype._keyUpToolbox = function (keycode) {
 actions.prototype._clickEquipbox = function (x, y) {
     // 道具栏
     if (x >= this.LAST - 2 && y == 0) {
+        core.playSound('确定');
         core.ui.closePanel();
         if (core.isReplaying())
             core.control._replay_toolbox();
@@ -1731,7 +1732,7 @@ actions.prototype._clickEquipboxIndex = function (index) {
             if (core.isReplaying()) return;
             core.unloadEquip(index);
             core.status.route.push("unEquip:" + index);
-        }
+        } else core.playSound('光标移动');
     }
     else {
         var equips = core.getToolboxItems('equips');
@@ -1740,7 +1741,7 @@ actions.prototype._clickEquipboxIndex = function (index) {
             var equipId = equips[index - this.LAST + (core.status.event.data.page - 1) * this.LAST];
             core.loadEquip(equipId);
             core.status.route.push("equip:" + equipId);
-        }
+        } else core.playSound('光标移动');
     }
     core.ui._drawEquipbox(index);
 }
@@ -1829,6 +1830,7 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
         return;
     }
     if (keycode == 84) {
+        core.playSound('确定');
         core.ui.closePanel();
         if (core.isReplaying())
             core.control._replay_toolbox();
@@ -1954,6 +1956,7 @@ actions.prototype._clickSL_favorite = function (page, offset) {
         });
     } else {
         var v = core.saves.favorite.indexOf(index);
+        core.playSound('确定');
         if (v >= 0) { // 已经处于收藏状态：取消收藏
             core.saves.favorite.splice(v, 1);
             delete core.saves.favoriteName[index];
@@ -1961,7 +1964,6 @@ actions.prototype._clickSL_favorite = function (page, offset) {
         else if (core.hasSave(index)) { // 存在存档则进行收藏
             core.saves.favorite.push(index);
             core.saves.favorite = core.saves.favorite.sort(function (a,b) {return a-b;}); // 保证有序
-            core.playSound('确定');
             core.drawTip("收藏成功！");
         }
         core.control._updateFavoriteSaves();
@@ -1972,7 +1974,6 @@ actions.prototype._clickSL_favorite = function (page, offset) {
 ////// 存读档界面时，按下某个键的操作 //////
 actions.prototype._keyDownSL = function (keycode) {
 
-//    var index = core.status.event.data;
     var page = core.status.event.data.page, offset = core.status.event.data.offset;
     var index = page*10 + offset;
 

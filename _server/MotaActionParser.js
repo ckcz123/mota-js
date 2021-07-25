@@ -1222,7 +1222,7 @@ ActionParser.prototype.matchEvalAtom = function(args) {
   }
   match=/^core\.(nextX|nextY)\((-?\d*)\)$/.exec(args[0]);
   if (match) {
-    if (match[2] == null) match[2] = 1;
+    if (match[2] == "") match[2] = "1";
     args=[match[2], match[1]];
     return rt(MotaActionBlocks['nextXY_e'].xmlText, args);
   }
@@ -1235,6 +1235,21 @@ ActionParser.prototype.matchEvalAtom = function(args) {
   if (match) {
     args[0]=match[1];
     return rt(MotaActionBlocks['isShopVisited_e'].xmlText, args);
+  }
+  match=/^core\.hasEquip\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['hasEquip_e'].xmlText, args);
+  }
+  match=/^core\.canBattle\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['canBattle_e'].xmlText, args);
+  }
+  match=/^core\.rand\((\d+)\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['rand_e'].xmlText, args);
   }
   return {ret:false}
 }

@@ -2213,17 +2213,20 @@ actions.prototype._clickSwitchs_display = function (x, y) {
                 return this._clickSwitchs_display_enableHDCanvas();
             case 2:
                 core.playSound('确定');
-                return this._clickSwitchs_display_enemyDamage();
+                return this._clickSwitchs_display_enableEnemyPoint();
             case 3:
                 core.playSound('确定');
-                return this._clickSwitchs_display_critical();
+                return this._clickSwitchs_display_enemyDamage();
             case 4:
                 core.playSound('确定');
-                return this._clickSwitchs_display_extraDamage();
+                return this._clickSwitchs_display_critical();
             case 5:
                 core.playSound('确定');
-                return this._clickSwitchs_display_extraDamageType();
+                return this._clickSwitchs_display_extraDamage();
             case 6:
+                core.playSound('确定');
+                return this._clickSwitchs_display_extraDamageType();
+            case 7:
                 core.status.event.selection = 1;
                 core.playSound('取消');
                 core.ui._drawSwitchs();
@@ -2251,6 +2254,12 @@ actions.prototype._clickSwitchs_display_enableHDCanvas = function () {
     core.flags.enableHDCanvas = !core.flags.enableHDCanvas;
     core.setLocalStorage('enableHDCanvas', core.flags.enableHDCanvas);
     core.drawTip("开关高清UI，需刷新页面方可生效");
+    core.ui._drawSwitchs_display();
+}
+
+actions.prototype._clickSwitchs_display_enableEnemyPoint = function () {
+    core.flags.enableEnemyPoint = !core.flags.enableEnemyPoint;
+    core.setLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.ui._drawSwitchs_display();
 }
 

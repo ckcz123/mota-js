@@ -336,6 +336,7 @@ core.prototype._init_sys_flags = function () {
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
+    core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', true);
 }
 
 core.prototype._init_platform = function () {

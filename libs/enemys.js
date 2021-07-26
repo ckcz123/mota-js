@@ -378,7 +378,8 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     var enemyInfo = this.getEnemyInfo(enemy, null, null, null, floorId);
     var locEnemyInfo = this.getEnemyInfo(enemy, null, x, y, floorId);
 
-    if (locEnemyInfo.atk == enemyInfo.atk && locEnemyInfo.def == enemyInfo.def && locEnemyInfo.hp == enemyInfo.hp) {
+    if (!core.flags.enableEnemyPoint ||
+        (locEnemyInfo.atk == enemyInfo.atk && locEnemyInfo.def == enemyInfo.def && locEnemyInfo.hp == enemyInfo.hp)) {
         x = null;
         y = null;
     } else {
@@ -402,6 +403,9 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
         e.x = x;
         e.y = y;
     }
+    ["name", "money", "exp", "point"].forEach(function (one) {
+        e[one] = core.getEnemyValue(enemy, one, x, y, floorId);
+    });
     e.specialText = specialText;
     e.specialColor = specialColor;
     e.damage = this.getDamage(enemy, x, y, floorId);

@@ -314,7 +314,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 获得金币
 	var money = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].money;
-	}, enemy.money);
+	}, core.getEnemyValue(enemy, "money", x, y));
 	if (core.hasItem('coin')) money *= 2; // 幸运金币：双倍
 	if (core.hasFlag('curse')) money = 0; // 诅咒效果
 	core.status.hero.money += money;
@@ -323,12 +323,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 获得经验
 	var exp = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].exp;
-	}, enemy.exp);
+	}, core.getEnemyValue(enemy, "exp", x, y));
 	if (core.hasFlag('curse')) exp = 0;
 	core.status.hero.exp += exp;
 	core.status.hero.statistics.exp += exp;
 
-	var hint = "打败 " + enemy.name;
+	var hint = "打败 " + core.getEnemyValue(enemy, "name", x, y);
 	if (core.flags.statusBarItems.indexOf('enableMoney') >= 0)
 		hint += ',' + core.getStatusLabel('money') + '+' + money; // hint += "，金币+" + money;
 	if (core.flags.statusBarItems.indexOf('enableExp') >= 0)
@@ -385,7 +385,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 加点事件
 	var point = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].point;
-	}, enemy.point) || 0;
+	}, core.getEnemyValue(enemy, "point", x, y)) || 0;
 	if (core.flags.enableAddPoint && point > 0) {
 		core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 	}

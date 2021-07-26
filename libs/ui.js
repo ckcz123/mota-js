@@ -1833,6 +1833,7 @@ ui.prototype._drawSwitchs_display = function () {
     var choices = [
         " <   放缩：" + Math.max(core.domStyle.scale, 1) + "x   > ",
         "高清画面： " + (core.flags.enableHDCanvas ? "[ON]" : "[OFF]"),
+        "定点怪显： " + (core.flags.enableEnemyPoint ? "[ON]" : "[OFF]"),
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： " + (core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),

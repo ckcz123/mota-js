@@ -2530,7 +2530,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "moveViewport": {
           "!doc": "移动视野范围", 
-          "!type": "fn(x: number, y: number, time?: number, callback?: fn())"
+          "!type": "fn(x: number, y: number, moveMode?: string, time?: number, callback?: fn())"
         }, 
         "syncLoad": {
           "!doc": "从服务器加载存档", 
@@ -2739,6 +2739,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
             "x": "number",
             "y": "number"
           }
+        },
+        "applyEasing": {
+          "!doc": "获得变速移动曲线",
+          "!type": "fn(mode?: string) -> fn(t: number) -> number"
         },
         "clamp": {
           "!doc": "将x限定在[a,b]区间内，注意a和b可交换<br/>例如：core.clamp(1200, 1, 1000); // 1000<br/>x: 原始值，!x为true时x一律视为0<br/>a: 下限值，大于b将导致与b交换<br/>b: 上限值，小于a将导致与a交换", 
@@ -3802,7 +3806,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "moveImage": {
           "!doc": "移动一张图片并/或改变其透明度<br/>例如：core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明<br/>code: 图片编号<br/>to: 新的左上角坐标，省略表示原地改变透明度<br/>opacityVal: 新的透明度，省略表示不变<br/>time: 移动用时，单位为毫秒。不填视为1秒<br/>callback: 图片移动完毕后的回调函数，可选", 
-          "!type": "fn(code: number, to?: [number], opacityVal?: number, time?: number, callback?: fn())"
+          "!type": "fn(code: number, to?: [number], opacityVal?: number, moveMode?: string, time?: number, callback?: fn())"
         }, 
         "openSettings": {
           "!doc": "点击设置按钮时的操作", 

@@ -516,11 +516,11 @@ ActionParser.prototype.parseAction = function() {
     case "setViewport": // 设置视角
       if (data.dxy) {
         this.next = MotaActionBlocks['setViewport_1_s'].xmlText([
-          data.dxy[0],data.dxy[1],data.time||0,data.async||false,this.next]);
+          data.dxy[0],data.dxy[1],data.moveMode||'', data.time||0,data.async||false,this.next]);
       } else {
         data.loc = data.loc||['',''];
         this.next = MotaActionBlocks['setViewport_s'].xmlText([
-          data.loc[0],data.loc[1],data.time||0,data.async||false,this.next]);
+          data.loc[0],data.loc[1],data.moveMode||'', data.time||0,data.async||false,this.next]);
       }
       break;
     case "vibrate": // 画面震动
@@ -551,7 +551,7 @@ ActionParser.prototype.parseAction = function() {
     case "moveImage": // 移动图片
       data.to=data.to||['','']
       this.next = MotaActionBlocks['moveImage_s'].xmlText([
-        data.code, data.to[0], data.to[1], data.opacity, data.time||0, data.async||false, this.next]);
+        data.code, data.to[0], data.to[1], data.opacity, data.moveMode||'', data.time||0, data.async||false, this.next]);
       break;
     case "showGif": // 显示动图
       data.loc=data.loc||['','']

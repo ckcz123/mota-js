@@ -2053,13 +2053,13 @@ return code;
 */;
 
 setViewport_s
-    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
+    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
 
 
 /* setViewport_s
 tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : ["","",0,false]
+default : ["","","",0,false]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.soundColor
 var loc = '';
@@ -2068,18 +2068,19 @@ if (PosString_0 && PosString_1) {
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+var code = '{"type": "setViewport"'+loc+MoveMode_List_0+Int_0+Bool_0+'},\n';
 return code;
 */;
 
 setViewport_1_s
-    :   '设置视角' '增量坐标' 'dx' PosString? ',' 'dy' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
+    :   '设置视角' '增量坐标' 'dx' PosString? ',' 'dy' PosString? '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
 
 
 /* setViewport_1_s
 tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : ["0","0",0,false]
+default : ["0","0","",0,false]
 colour : this.soundColor
 var loc = '';
 if (PosString_0 && PosString_1) {
@@ -2087,7 +2088,8 @@ if (PosString_0 && PosString_1) {
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+var code = '{"type": "setViewport"'+loc+MoveMode_List_0+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -2182,19 +2184,20 @@ return code;
 
 moveImage_s
     :   '图片移动' '图片编号' NInt '终点像素位置' 'x' PosString? 'y' PosString? BGNL?
-        '不透明度' EvalString? '移动时间' Int '不等待执行完毕' Bool Newline
+        '不透明度' EvalString? '移动方式' MoveMode_List '移动时间' Int '不等待执行完毕' Bool Newline
     
 
 /* moveImage_s
 tooltip : moveImage：图片移动
 helpUrl : /_docs/#/instruction
-default : [1,'','','',500,false]
+default : [1,'','','','',500,false]
 var toloc = '';
 if (PosString_0 && PosString_1)
   toloc = ', "to": ['+PosString_0+','+PosString_1+']';
 EvalString_0 = (EvalString_0!=='') ? (', "opacity": '+EvalString_0):'';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "moveImage", "code": '+NInt_0+toloc+EvalString_0+',"time": '+Int_0+async+'},\n';
+var code = '{"type": "moveImage", "code": '+NInt_0+toloc+MoveMode_List_0+EvalString_0+',"time": '+Int_0+async+'},\n';
 return code;
 */;
 
@@ -3961,6 +3964,10 @@ Key_List
 Move_List
     :   '上'|'下'|'左'|'右'|'前'|'后'|'左上'|'左下'|'右上'|'右下'|'设置速度'
     /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed']*/;
+
+MoveMode_List
+    :   '匀速移动'|'缓入快出'|'快入缓出'|'缓入缓出'
+    /*MoveMode_List ['', 'easeIn', 'easeOut', 'easeInOut']*/;
 
 NameMap_List
     :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'阻激夹域'|'穿脱装备'

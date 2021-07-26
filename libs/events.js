@@ -1449,7 +1449,7 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
         data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     }
     console.log(data.loc);
-    this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.time);
+    this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.moveMode, data.time);
 }
 
 events.prototype._action_move = function (data, x, y, prefix) {
@@ -1567,7 +1567,7 @@ events.prototype._action_showGif = function (data, x, y, prefix) {
 
 events.prototype._action_moveImage = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, core.moveImage, data.code, data.to, data.opacity, data.time);
+    this.__action_doAsyncFunc(data.async, core.moveImage, data.code, data.to, data.opacity, data.moveMode, data.time);
 }
 
 events.prototype._precompile_moveImage = function (data) {
@@ -2988,7 +2988,7 @@ events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time,
         return;
     }
     core.setOpacity(name, 0);
-    this.moveImage(code, null, opacityVal, time, callback);
+    this.moveImage(code, null, opacityVal, null, time, callback);
 }
 
 ////// 隐藏图片 //////
@@ -3000,14 +3000,14 @@ events.prototype.hideImage = function (code, time, callback) {
         if (callback) callback();
         return;
     }
-    this.moveImage(code, null, 0, time, function () {
+    this.moveImage(code, null, 0, null, time, function () {
         core.deleteCanvas(name);
         if (callback) callback();
     });
 }
 
 ////// 移动图片 //////
-events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
+events.prototype.moveImage = function (code, to, opacityVal, moveMode, time, callback) {
     time = time || 1000;
     to = to || [];
     var name = "image" + (code + 100);
@@ -3028,21 +3028,22 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
 
     this._moveImage_moving(name, {
         fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity,
-        time: time / Math.max(core.status.replay.speed, 1)
+        moveMode: moveMode, time: time / Math.max(core.status.replay.speed, 1)
     }, callback)
 }
 
 events.prototype._moveImage_moving = function (name, moveInfo, callback) {
-    var per_time = 10, step = 0, steps = parseInt(moveInfo.time / 10);
+    var per_time = 10, step = 0, steps = parseInt(moveInfo.time / per_time);
     if (steps <= 0) steps = 1;
     var fromX = moveInfo.fromX, fromY = moveInfo.fromY, toX = moveInfo.toX, toY = moveInfo.toY,
         opacity = moveInfo.opacity, toOpacity = moveInfo.toOpacity;
     var currX = fromX, currY = fromY, currOpacity = opacity;
+    var moveFunc = core.applyEasing(moveInfo.moveMode);
     var animate = setInterval(function () {
         step++;
         currOpacity = opacity + (toOpacity - opacity) * step / steps;
-        currX = parseInt(fromX + (toX - fromX) * step / steps);
-        currY = parseInt(fromY + (toY - fromY) * step / steps);
+        currX = parseInt(fromX + (toX - fromX) * moveFunc(step / steps));
+        currY = parseInt(fromY + (toY - fromY) * moveFunc(step / steps));
         core.setOpacity(name, currOpacity);
         core.relocateCanvas(name, currX, currY);
         if (step == steps) {

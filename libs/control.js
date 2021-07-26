@@ -968,23 +968,25 @@ control.prototype.setViewport = function (px, py) {
 }
 
 ////// 移动视野范围 //////
-control.prototype.moveViewport = function (x, y, time, callback) {
+control.prototype.moveViewport = function (x, y, moveMode, time, callback) {
     time = time || 0;
     time /= Math.max(core.status.replay.speed, 1)
-    var per_time = 10, step = parseInt(time / per_time);
-    if (step <= 0) {
+    var per_time = 10, step = 0, steps = parseInt(time / per_time);
+    if (steps <= 0) {
         this.setViewport(32 * x, 32 * y);
         if (callback) callback();
         return;
-    }
+    }    
     var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core.__PIXELS__);
     var py = core.clamp(32 * y, 0, 32 * core.bigmap.height - core.__PIXELS__);
-    var dx = (px - core.bigmap.offsetX) / step, dy = (py - core.bigmap.offsetY) / step;
+    var cx = core.bigmap.offsetX;
+    var cy = core.bigmap.offsetY;
+    var moveFunc = core.applyEasing(moveMode);
 
     var animate=window.setInterval(function() {
-        core.setViewport(core.bigmap.offsetX + dx, core.bigmap.offsetY + dy);
-        step--;
-        if (step <= 0) {
+        step++;
+        core.setViewport(cx + moveFunc(step / steps) * (px - cx), cy + moveFunc(step / steps) * (py - cy));
+        if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.setViewport(px, py);

@@ -480,6 +480,27 @@ utils.prototype.formatBigNumber = function (x, onMap) {
     return c + x;
 }
 
+////// 变速移动 //////
+utils.prototype.applyEasing = function(name) {
+    var list = {
+        "easeIn": function(t) {
+            return Math.pow(t, 3);
+        },
+        "easeOut": function(t) {
+            return 1 - Math.pow(1 - t, 3);
+        },
+        "easeInOut": function(t) {
+            // easeInOut试了一下感觉二次方效果明显点
+            if (t < 0.5) return Math.pow(t, 2) * 2;
+            else return 1 - Math.pow(1 - t, 2) * 2;
+        },
+        "linear": function(t) {
+            return t
+        }
+    }
+    return list[name] || list.linear;
+}
+
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
     if (!(color instanceof Array)) return color;

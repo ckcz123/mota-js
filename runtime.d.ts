@@ -646,7 +646,7 @@ declare class control {
     setViewport(px?: number, py?: number): void
 
     /** 移动视野范围 */
-    moveViewport(x: number, y: number, time?: number, callback?: () => any): void
+    moveViewport(x: number, y: number, moveMode?: string, time?: number, callback?: () => any): void
 
     /** 更新跟随者坐标 */
     updateFollowers(): void
@@ -976,14 +976,15 @@ declare class events {
     
     /**
      * 移动一张图片并/或改变其透明度
-     * @example core.moveImage(1, undefined, 0.5); // 1秒内把1号图片变为50%透明
+     * @example core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
      * @param code 图片编号
      * @param to 新的左上角坐标，省略表示原地改变透明度
      * @param opacityVal 新的透明度，省略表示不变
+     * @param moveMode 移动模式
      * @param time 移动用时，单位为毫秒。不填视为1秒
      * @param callback 图片移动完毕后的回调函数，可选
      */
-    moveImage(code: number, to?: [number?, number?], opacityVal?: number, time?: number, callback?: () => void): void
+    moveImage(code: number, to?: [number?, number?], opacityVal?: number, moveMode?: string, time?: number, callback?: () => void): void
     
     /**
      * 绘制一张动图或擦除所有动图
@@ -2380,6 +2381,9 @@ declare class utils {
      * @returns 格式化结果
      */
     formatBigNumber(x: number, onMap?: boolean): string
+
+    /** 变速移动 */
+    applyEasing(mode?: string): (number) => number;
 
     /**
      * 颜色数组转十六进制

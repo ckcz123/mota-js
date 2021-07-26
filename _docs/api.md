@@ -1013,12 +1013,13 @@ lose: fn(reason?: string)
 moveEnemyOnPoint: fn(fromX: number, fromY: number, toX: number, toY: number, floorId?: string)
 将某个点已经设置的敌人属性移动到其他点
 
-moveImage: fn(code: number, to?: [number], opacityVal?: number, time?: number, callback?: fn())
+moveImage: fn(code: number, to?: [number], opacityVal?: number, moveMode?: string, time?: number, callback?: fn())
 移动一张图片并/或改变其透明度
 例如：core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
 code: 图片编号
 to: 新的左上角坐标，省略表示原地改变透明度
 opacityVal: 新的透明度，省略表示不变
+moveMode: 移动模式
 time: 移动用时，单位为毫秒。不填视为1秒
 callback: 图片移动完毕后的回调函数，可选
 
@@ -2012,6 +2013,9 @@ textImage: fn(content: string, lineHeight?: number) -> image
 工具函数库，里面有各个样板中使用到的工具函数。
 
 ```text
+applyEasing: fn(mode?: string) -> fn(t: number) -> number
+获得变速移动曲线
+
 arrayToRGB: fn(color: [number]) -> string
 颜色数组转字符串
 例如：core.arrayToRGB([102, 204, 255]); // "#66ccff"

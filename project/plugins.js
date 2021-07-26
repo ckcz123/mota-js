@@ -1326,12 +1326,20 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	core.registerAnimationFrame('heroMoving', true, heroMoving);
 
 	core.events._eventMoveHero_moving = function (step, moveSteps) {
-		var direction = moveSteps[0],
-			x = core.getHeroLoc('x'),
-			y = core.getHeroLoc('y'); // ------ 前进/后退
+		var curr = moveSteps[0];
+		var direction = curr[0], x = core.getHeroLoc('x'), y = core.getHeroLoc('y');
+		// ------ 前进/后退
 		var o = direction == 'backward' ? -1 : 1;
 		if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
-		core.setHeroLoc('direction', direction); // if (step <= 4) core.drawHero('leftFoot', 4 * o * step); else if (step <= 8) core.drawHero('rightFoot', 4 * o * step);
+		var faceDirection = direction;
+		if (direction == 'leftup' || direction == 'leftdown') faceDirection = 'left';
+		if (direction == 'rightup' || direction == 'rightdown') faceDirection = 'right';
+		core.setHeroLoc('direction', direction);
+		if (curr[1] <= 0) {
+			core.setHeroLoc('direction', faceDirection);
+			moveSteps.shift();
+			return true;
+		}
 		if (step <= 4) core.drawHero('stop', 4 * o * step);
 		else if (step <= 8) core.drawHero('leftFoot', 4 * o * step);
 		else if (step <= 12) core.drawHero('midFoot', 4 * o * (step - 8));
@@ -1340,7 +1348,9 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
 			core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
 			core.updateFollowers();
-			moveSteps.shift(); // return true;
+			curr[1]--;
+			if (curr[1] <= 0) moveSteps.shift();
+			core.setHeroLoc('direction', faceDirection);
 			return step == 16;
 		}
 		return false;

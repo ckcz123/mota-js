@@ -2618,7 +2618,7 @@ ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     if (!info.selectId) return;
     var item=core.material.items[info.selectId];
     var name = item.name || "未知道具";
-    try { name = core.replateText(name); } catch (e) {}
+    try { name = core.replaceText(name); } catch (e) {}
     core.fillText('ui', name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     var text = item.text || "该道具暂无描述。";
     try { text = core.replaceText(text); } catch (e) {}

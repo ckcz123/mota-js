@@ -153,6 +153,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['show_s'].xmlText(),
       MotaActionBlocks['hide_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
+      MotaActionBlocks['setBlockOpacity_s'].xmlText(),
       MotaActionBlocks['turnBlock_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),

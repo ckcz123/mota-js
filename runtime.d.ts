@@ -2268,8 +2268,8 @@ declare class ui {
     /** 设置某个canvas的线宽度 */
     setLineWidth(name: string | CanvasRenderingContext2D, lineWidth: number): void
 
-    /** 设置某个canvas的alpha值 */
-    setAlpha(name: string | CanvasRenderingContext2D, alpha: number): void
+    /** 设置某个canvas的alpha值；返回设置之前画布的不透明度。 */
+    setAlpha(name: string | CanvasRenderingContext2D, alpha: number): number
 
     /** 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 */
     setOpacity(name: string | CanvasRenderingContext2D, opacity: number): void

@@ -3161,6 +3161,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个点图块的强制启用或禁用状态",
           "!type": "fn(floorId?: string, x?: number, y?: number, disabled?: bool)"
         },
+        "getMapBlockOpacity": {
+          "!doc": "获得某个点图块的不透明度",
+          "!type": "fn(floorId?: string, x?: number, y?: number, flags?: ?) -> number"
+        },
+        "setMapBlockOpacity": {
+          "!doc": "设置某个点图块的不透明度",
+          "!type": "fn(floorId?: string, x?: number, y?: number, opacity?: number)"
+        },
         "decompressMap": {
           "!doc": "解压缩地图", 
           "!type": "fn(mapArr: [[number]], floorId?: string) -> [[number]]"
@@ -3299,7 +3307,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "animateBlock": {
           "!doc": "显示/隐藏某个块时的动画效果", 
-          "!type": "fn(loc?: [number]|[[number]], type?: string, time?: number, callback?: fn())"
+          "!type": "fn(loc?: [number]|[[number]], type?: string|number, time?: number, callback?: fn())"
         }, 
         "loadMap": {
           "!doc": "将存档中的地图信息重新读取出来", 
@@ -3466,9 +3474,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string)"
         }, 
         "setAlpha": {
-          "!doc": "设置某个canvas接下来绘制的不透明度；不会影响已经绘制的内容<br/>如果需要修改画布本身的不透明度请使用setOpacity", 
+          "!doc": "设置某个canvas接下来绘制的不透明度；不会影响已经绘制的内容<br/>返回设置之前画布的不透明度<br/>如果需要修改画布本身的不透明度请使用setOpacity", 
           "!url": "https://www.w3school.com.cn/tags/canvas_globalalpha.asp",
-          "!type": "fn(name: string|CanvasRenderingContext2D, alpha: number)"
+          "!type": "fn(name: string|CanvasRenderingContext2D, alpha: number) -> number"
         }, 
         "setLineWidth": {
           "!doc": "设置某个canvas的线宽度", 

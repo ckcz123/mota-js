@@ -1393,7 +1393,7 @@ loadOneSound: fn(name: string)
 addGlobalAnimate: fn(block?: block)
 添加一个全局动画
 
-animateBlock: fn(loc?: [number]|[[number]], type?: string, time?: number, callback?: fn())
+animateBlock: fn(loc?: [number]|[[number]], type?: string|number, time?: number, callback?: fn())
 显示/隐藏某个块时的动画效果
 
 animateSetBlock: fn(number: number|string, x: number, y: number, floorId?: string, time?: number, callback?: fn())
@@ -1581,6 +1581,9 @@ floorId: 地图id，不填视为当前地图
 showDisable: 可选，true表示隐藏的图块也会被表示出来
 返回值：事件层矩阵，注意对其阵元的访问是[y][x]
 
+getMapBlockOpacity: fn(floorId?: string, x?: number, y?: number, flags?: ?) -> bool
+获得某个点的不透明度
+
 getMapBlocksObj: fn(floorId?: string, noCache?: bool)
 以x,y的形式返回每个点的事件
 
@@ -1726,6 +1729,9 @@ floorId: 地图id，不填视为当前地图
 
 setMapBlockDisabled: fn(floorId?: string, x?: number, y?: number, disabled?: bool)
 设置某个点图块的强制启用或禁用状态
+
+setMapBlockOpacity: fn(floorId?: string, x?: number, y?: number, opacity?: bool)
+设置某个点图块的不透明度
 
 showBgFgMap: fn(name?: string, loc?: [number]|[[number]], floorId?: string, callback?: fn())
 显示前景/背景地图
@@ -1940,8 +1946,9 @@ resizeCanvas: fn(name: string, x: number, y: number)
 saveCanvas: fn(name: string|CanvasRenderingContext2D)
 保存某个canvas状态
 
-setAlpha: fn(name: string|CanvasRenderingContext2D, alpha: number)
+setAlpha: fn(name: string|CanvasRenderingContext2D, alpha: number) -> number
 设置某个canvas接下来绘制的不透明度；不会影响已经绘制的内容
+返回设置之前画布的不透明度。
 如果需要修改画布本身的不透明度请使用setOpacity
 参考资料：https://www.w3school.com.cn/tags/canvas_globalalpha.asp
 

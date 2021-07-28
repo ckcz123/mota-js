@@ -1249,10 +1249,9 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;         
         }
-        var alpha = cacheCtx.globalAlpha;
-        cacheCtx.globalAlpha = one.alpha;
+        var alpha = core.setAlpha(cacheCtx, one.alpha);
         core.fillBoldText(cacheCtx, one.text, px, py, one.color);
-        cacheCtx.globalAlpha = alpha;
+        core.setAlpha(cacheCtx, alpha);
     });
     cacheCtx.translate(0, 0);
 

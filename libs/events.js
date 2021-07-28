@@ -1202,7 +1202,7 @@ events.prototype.__precompile_getArray = function () {
         "choices", "confirm", "fillText", "fillBoldText", "drawTextContent"
     ];
     var locs = [
-        "show", "hide", "setBlock", "showFloorImg", "hideFloorImg", "showBgFgMap",
+        "show", "hide", "setBlock", "setBlockOpacity", "showFloorImg", "hideFloorImg", "showBgFgMap",
         "hideBgFgMap", "setBgFgBlock", "animate", "setViewport", "move", "jumoHero",
         "changeFloor", "changePos", "showTextImage", "showGif", "openDoor",
         "closeDoor", "battle", "trigger", "insert", "setEnemyOnPoint", "resetEnemyOnPoint"
@@ -1384,6 +1384,19 @@ events.prototype._action_setBlock = function (data, x, y, prefix) {
     } else {
         data.loc.forEach(function (loc) {
             core.setBlock(data.number, loc[0], loc[1], data.floorId);
+        });
+        core.doAction();
+    }
+}
+
+events.prototype._action_setBlockOpacity = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    if (data.time > 0 && data.floorId == core.status.floorId) {
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, data.opacity, data.time);
+    }
+    else {
+        data.loc.forEach(function (t) {
+            core.setMapBlockOpacity(data.floorId, t[0], t[1], data.opacity);
         });
         core.doAction();
     }

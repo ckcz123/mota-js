@@ -129,7 +129,13 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
                 var event = (floor.events || {})[j + "," + i];
                 if (event != null && event.enable === false) continue;
             }
-            map.blocks.push(Object.assign({}, this.getBlockByNumber(number), {x: j, y: i}));
+            var opacity = this.getMapBlockOpacity(floorId, j, i, flags);
+            if (opacity == null) {
+                // 检查初始不透明度
+                var event = (floor.events || {})[j + "," + i];
+                if (event != null && event.opacity != null) opacity = event.opacity;
+            }
+            map.blocks.push(Object.assign({}, this.getBlockByNumber(number), {x: j, y: i, opacity: opacity}));
         }
     }
 }
@@ -177,11 +183,14 @@ maps.prototype.getIdOfThis = function (id) {
 ////// 数字和ID的对应关系 //////
 maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable = null;
+    var opacity = null;
     if (eventFloor != null) {
         disable = this.isMapBlockDisabled(eventFloor.floorId, x, y);
+        opacity = this.getMapBlockOpacity(eventFloor.floorId, x, y);
     }
     var block = {'x': x, 'y': y, 'id': id};
     if (disable != null) block.disable = disable;
+    if (opacity != null) block.opacity = opacity;
 
     if (id == 17) block.event = {"cls": "terrains", "id": "airwall", "cannotIn":["up", "down", "left", "right"]};
     else if (id in this.blocksInfo) block.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
@@ -238,6 +247,10 @@ maps.prototype._addEvent = function (block, x, y, event) {
     // 覆盖enable
     if (block.disable == null && event.enable != null) {
         block.disable = !event.enable;
+    }
+    // 覆盖opacity
+    if (block.opacity == null && event.opacity != null) {
+        block.opacity = event.opacity;
     }
     // 覆盖animate
     if (event.animate === false) {
@@ -303,6 +316,46 @@ maps.prototype._processInvalidMap = function (mapArr, width, height) {
         }
     }
     return map;
+}
+
+////// 获得某个点的不透明度 //////
+maps.prototype.getMapBlockOpacity = function (floorId, x, y, flags) {
+    if (flags == null) flags = (core.status.hero || {}).flags;
+    if (flags == null) return null;
+    var __opacity__ = flags.__opacity__ || {};
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return null;
+    if ((flags.__removed__ || []).indexOf(floorId) >= 0) return null;
+    var index = x + y * core.floors[floorId].width;
+    return (__opacity__[floorId]||{})[index];
+}
+
+////// 设置某个点的不透明度 //////
+maps.prototype.setMapBlockOpacity = function (floorId, x, y, opacity) {
+    if (window.flags == null) return;
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return;
+    if (!window.flags.__opacity__) window.flags.__opacity__ = {};
+    if ((window.flags.__removed__ || []).indexOf(floorId) >= 0) return;
+    var index = x + y * core.floors[floorId].width;
+    var __opacity__ = window.flags.__opacity__;
+    if (!__opacity__[floorId]) __opacity__[floorId] = {};
+    if (opacity == null) delete __opacity__[floorId][index];
+    else __opacity__[floorId][index] = opacity;
+
+    ////// 重绘该点图块
+    var block = core.getBlock(x, y, floorId, true);
+    if (block != null) {
+        block.opacity = opacity;
+        if (floorId == core.status.floorId && !block.disable) {
+            if (block.event.cls == 'autotile') {
+                core.drawMap();
+            } else {
+                core.drawBlock(block);
+                core.addGlobalAnimate(block);
+            }
+        }
+    }
 }
 
 ////// 某个点图块是否被强制启用或禁用
@@ -855,6 +908,7 @@ maps.prototype.drawBlock = function (block, animate, ctx) {
     var blockInfo = this.getBlockInfo(block);
     if (blockInfo == null) return;
     if (blockInfo.cls != 'tileset') blockInfo.posX = animate % block.event.animate;
+    blockInfo.opacity = block.opacity;
     if (!block.name)
         this._drawBlockInfo(blockInfo, block.x, block.y, ctx);
     else
@@ -867,11 +921,17 @@ maps.prototype._drawBlockInfo = function (blockInfo, x, y, ctx) {
     var py = 32 * y - 32 * core.bigmap.posY;
     if (ctx == null) ctx = 'event';
 
+    var alpha = null;
+    if (blockInfo.opacity != null) alpha = core.setAlpha(ctx, blockInfo.opacity);
     core.clearMap(ctx, px, py, 32, 32);
     core.drawImage(ctx, image, posX * 32, posY * height + height - 32, 32, 32, px, py, 32, 32);
+    if (alpha != null) core.setAlpha(ctx, alpha);
     if (height > 32) {
+        alpha = null;
+        if (blockInfo.opacity != null) alpha = core.setAlpha('event2', block.opacity);
         core.clearMap('event2', px, py + 32 - height, 32, height - 32)
         core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, px, py + 32 - height, 32, height - 32);
+        if (alpha != null) core.setAlpha('event2', alpha);
     }
 }
 
@@ -890,11 +950,8 @@ maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y, ctx) {
         core.drawImage(ctx, core.material.groundCanvas.canvas, px, py);
     }
     var alpha = null;
-    if (name == 'fg' && this._drawBlockInfo_shouldBlurFg(x, y)) {
-        ctx = core.getContextByName(ctx);
-        alpha = ctx.globalAlpha;
-        core.setAlpha(ctx, 0.6);
-    }
+    if (blockInfo.opacity != null) alpha = core.setAlpha(ctx, blockInfo.opacity);
+    else if (name == 'fg' && this._drawBlockInfo_shouldBlurFg(x, y)) alpha = core.setAlpha(ctx, 0.6);
     core.drawImage(ctx, image, posX * 32, posY * height, 32, height, px, py + 32 - height, 32, height);
     if (alpha != null) core.setAlpha(ctx, alpha);
 }
@@ -967,13 +1024,19 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
     }
 
     if (blockInfo.cls == 'autotile') { // Autotile单独处理
+        var alpha = null;
+        if (block.opacity != null) alpha = core.setAlpha(ctx, block.opacity);
         this._drawAutotile(ctx, arr, block, 32, 0, 0, 0, onMap);
+        if (alpha != null) core.setAlpha(ctx, alpha);
         if (onMap) this.addGlobalAnimate(block);
         return;
     }
     if (!onMap) {
         var height = blockInfo.height;
+        var alpha = null;
+        if (block.opacity != null) alpha = core.setAlpha(ctx, block.opacity);
         core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
+        if (alpha != null) core.setAlpha(ctx, alpha);
         return;
     }
     this.drawBlock(block, null, ctx);
@@ -1398,12 +1461,18 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
     var cv = block.name?core.canvas[block.name]:core.canvas.event;
     cv.clearRect(32 * x - 32 * core.bigmap.posX, 32 * y - 32 * core.bigmap.posY, 32, 32);
     if (block.name) {
+        var alpha = null;
+        if (block.opacity != null) alpha = core.setAlpha(cv, block.opacity);
         if (block.name == 'bg')
             core.drawImage('bg', core.material.groundCanvas.canvas, 32 * x - 32 * core.bigmap.posX, 32 * y - 32 * core.bigmap.posY);
         this._drawAutotile(cv, this._getBgFgMapArray(block.name), block, 32, 0, 0, animate, true);
+        if (alpha != null) core.setAlpha(cv, alpha);
     }
     else {
+        var alpha = null;
+        if (block.opacity != null) alpha = core.setAlpha(cv, block.opacity);
         this._drawAutotile(cv, this.getMapArray(), block, 32, 0, 0, animate, true);
+        if (alpha != null) core.setAlpha(cv, alpha);
     }
 }
 
@@ -2444,23 +2513,26 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
     if (core.status.replay.speed == 24) time = 1;
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
         loc = [loc];
+    if (type != 'show' && type != 'hide' && type != 'remove' && typeof type != 'number') {
+        if (callback) callback();
+    }
     // --- 检测所有是0的点
     var list = this._animateBlock_getList(loc, type);
     if (list.length == 0) {
         if (callback) callback();
         return;
     }
-    this._animateBlock_drawList(list, type != 'show' ? 1 : 0);
+    this._animateBlock_drawList(list, 0);
     time /= Math.max(core.status.replay.speed, 1)
-    this._animateBlock_doAnimate(loc, list, type, 10 / time, callback);
+    this._animateBlock_doAnimate(loc, list, type, time, callback);
 }
 
-maps.prototype._animateBlock_doAnimate = function (loc, list, type, delta, callback) {
-    var opacity = type != 'show' ? 1 : 0;
+maps.prototype._animateBlock_doAnimate = function (loc, list, type, time, callback) {
+    var step = 0, steps = Math.max(parseInt(time / 10), 1);
     var animate = setInterval(function () {
-        opacity += type != 'show' ? -delta : delta;
-        core.maps._animateBlock_drawList(list, opacity);
-        if (opacity >= 1 || opacity <= 0) {
+        step++;
+        core.maps._animateBlock_drawList(list, step / steps);
+        if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             list.forEach(function (t) {
@@ -2471,6 +2543,10 @@ maps.prototype._animateBlock_doAnimate = function (loc, list, type, delta, callb
                 if (type == 'show') core.showBlock(t[0], t[1]);
                 else if (type == 'hide') core.hideBlock(t[0], t[1]);
                 else if (type == 'remove') core.removeBlock(t[0], t[1]);
+                else {
+                    core.setMapBlockOpacity(null, t[0], t[1], type);
+                    core.showBlock(t[0], t[1]);
+                }
             });
             if (callback) callback();
         }
@@ -2483,6 +2559,8 @@ maps.prototype._animateBlock_getList = function (loc, type) {
     var list = [];
     loc.forEach(function (t) {
         var block = core.getBlock(t[0], t[1], null, true);
+        var fromOpacity = block.opacity;
+        if (fromOpacity == null) fromOpacity = 1.0;
         if (block == null) return;
 
         var blockInfo = core.maps.getBlockInfo(block);
@@ -2490,30 +2568,41 @@ maps.prototype._animateBlock_getList = function (loc, type) {
             list.push({ 'x': t[0], 'y': t[1] });
             return;
         }
+        if (typeof type == 'number' && block.disable) return;
         // 该点是否已经被启用/删除
         if ((type == 'show' && !block.disable) || ((type == 'hide' || type == 'remove') && block.disable)) {
             list.push({ 'x': t[0], 'y': t[1] });
             return;
         }
 
-        if (type == 'hide' || type == 'remove') {
+        var toOpacity = type;
+        if (type == 'show') {
+            toOpacity = fromOpacity;
+            fromOpacity = 0.0;
+        }
+        else if (type == 'hide' || type == 'remove') {
+            core.hideBlock(t[0], t[1]); // 暂时先隐藏
+            toOpacity = 0.0;
+        }
+        else {
             core.hideBlock(t[0], t[1]); // 暂时先隐藏
         }
 
         var canvases = core.maps._initDetachedBlock(blockInfo, t[0], t[1], block.event.displayDamage !== false);
 
         list.push({
-            'x': t[0], 'y': t[1], 'blockInfo': blockInfo, 'canvases': canvases
+            'x': t[0], 'y': t[1], 'blockInfo': blockInfo, 'canvases': canvases,
+            'fromOpacity': fromOpacity, 'toOpacity': toOpacity,
         });
 
     });
     return list;
 }
 
-maps.prototype._animateBlock_drawList = function (list, opacity) {
+maps.prototype._animateBlock_drawList = function (list, progress) {
     list.forEach(function (t) {
         if (t.blockInfo)
-            core.maps._moveDetachedBlock(t.blockInfo, t.x * 32, t.y * 32, opacity, t.canvases);
+            core.maps._moveDetachedBlock(t.blockInfo, t.x * 32, t.y * 32, t.fromOpacity + progress * (t.toOpacity - t.fromOpacity), t.canvases);
     });
 }
 

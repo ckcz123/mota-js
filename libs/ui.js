@@ -447,10 +447,13 @@ ui.prototype.loadCanvas = function (name) {
     if (ctx) ctx.restore();
 }
 
-////// 设置某个canvas的alpha值 //////
+////// 设置某个canvas的alpha值，并返回设置之前的alpha值 //////
 ui.prototype.setAlpha = function (name, alpha) {
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.globalAlpha = alpha;
+    if (!ctx) return null;
+    var previousAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = alpha;
+    return previousAlpha;
 }
 
 ////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////

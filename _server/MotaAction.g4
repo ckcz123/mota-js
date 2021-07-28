@@ -42,22 +42,24 @@ return code;
 
 //事件 事件编辑器入口之一
 event_m
-    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool BGNL? Newline action+ BEND
+    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool '不透明度' Number BGNL? Newline action+ BEND
     
 
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : /_docs/#/instruction
-default : [false,null,null,null,null]
+default : [false,true,null,true,1.0,null]
 B_0_List_0=eval(B_0_List_0);
+if (Number_0 < 0 || Number_0 > 1) throw '不透明度需要在0~1之间';
 var code = {
     'trigger': Bool_0?'action':null,
     'enable': Bool_1,
     'noPass': B_0_List_0,
     'displayDamage': Bool_2,
+    'opacity': Number_0,
     'data': 'data_asdfefw'
 }
-if (!Bool_0 && Bool_1 && (B_0_List_0===null) && Bool_2) code = 'data_asdfefw';
+if (!Bool_0 && Bool_1 && (B_0_List_0===null) && Bool_2 && Number_0 == 1.0) code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */;
@@ -760,6 +762,7 @@ action
     |   setNameMap_s
     |   show_s
     |   hide_s
+    |   setBlockOpacity_s
     |   trigger_s
     |   insert_1_s
     |   insert_2_s
@@ -1365,6 +1368,42 @@ IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "remove": true':'';
 Bool_1 = Bool_1 ?', "async": true':'';
 var code = '{"type": "hide"'+floorstr+IdString_0+Bool_0+IntString_0+Bool_1+'},\n';
+return code;
+*/;
+
+setBlockOpacity_s
+    :   '设置图块不透明度' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '不透明度' Number '动画时间' IntString? '不等待执行完毕' Bool? Newline
+    
+
+/* setBlockOpacity_s
+tooltip : setBlockOpacity: 设置图块不透明度
+helpUrl : /_docs/#/instruction
+default : ["","","",1.0,"",false]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.mapColor
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+if (Number_0 < 0 || Number_0 > 1) throw new Error('不透明度需要在0~1之间');
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+Bool_0 = Bool_0 ?', "async": true':'';
+var code = '{"type": "setBlockOpacity"'+floorstr+IdString_0+', "opacity": '+Number_0+IntString_0+Bool_0+'},\n';
 return code;
 */;
 

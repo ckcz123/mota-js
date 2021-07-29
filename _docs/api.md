@@ -15,7 +15,7 @@ core.js中只有很少的几个函数，主要是游戏开始前的初始化等�
 但是，core中定义了很多游戏运行时的状态，这些状态很多都会被使用到。
 
 ```text
-<b>core.__SIZE__, core.__PIXELS__</b>
+core.__SIZE__, core.__PIXELS__
 游戏窗口大小；对于13x13的游戏而言这两个值分别是13和416，15x15来说分别是15和480。
 
 
@@ -73,7 +73,7 @@ core.bigmap
 core.bigmap.width    （当前地图的宽度）
 core.bigmap.height    （当前地图的高度）
 core.bigmap.offsetX    （当前地图针对窗口左上角的偏移像素x）
-core.bigmap.offsetX    （当前地图针对窗口左上角的偏移像素y）
+core.bigmap.offsetY    （当前地图针对窗口左上角的偏移像素y）
 core.bigmap.tempCanvas    （一个临时画布，可以用来临时绘制很多东西）
 
 
@@ -1557,6 +1557,9 @@ floorId: 地图id，不填视为当前地图
 showDisable: 隐藏点是否不返回null，true表示不返回null
 返回值：图块数字，该点无图块则返回null
 
+getBlockOpacity: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number
+判定某个点的不透明度。如果该点无图块则返回null。
+
 getFgMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 生成前景层矩阵
 例如：core.getFgMapArray('MT0'); // 生成主塔0层的前景层矩阵，使用缓存
@@ -1580,9 +1583,6 @@ getMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 floorId: 地图id，不填视为当前地图
 showDisable: 可选，true表示隐藏的图块也会被表示出来
 返回值：事件层矩阵，注意对其阵元的访问是[y][x]
-
-getMapBlockOpacity: fn(floorId?: string, x?: number, y?: number, flags?: ?) -> bool
-获得某个点的不透明度
 
 getMapBlocksObj: fn(floorId?: string, noCache?: bool)
 以x,y的形式返回每个点的事件
@@ -1727,11 +1727,11 @@ x: 横坐标
 y: 纵坐标
 floorId: 地图id，不填视为当前地图
 
+setBlockOpacity: fn(opacity?: number, x?: number, y?: number, floorId?: string)
+设置某个点图块的不透明度
+
 setMapBlockDisabled: fn(floorId?: string, x?: number, y?: number, disabled?: bool)
 设置某个点图块的强制启用或禁用状态
-
-setMapBlockOpacity: fn(floorId?: string, x?: number, y?: number, opacity?: bool)
-设置某个点图块的不透明度
 
 showBgFgMap: fn(name?: string, loc?: [number]|[[number]], floorId?: string, callback?: fn())
 显示前景/背景地图

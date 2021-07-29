@@ -3161,13 +3161,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个点图块的强制启用或禁用状态",
           "!type": "fn(floorId?: string, x?: number, y?: number, disabled?: bool)"
         },
-        "getMapBlockOpacity": {
-          "!doc": "获得某个点图块的不透明度",
-          "!type": "fn(floorId?: string, x?: number, y?: number, flags?: ?) -> number"
-        },
-        "setMapBlockOpacity": {
+        "setBlockOpacity": {
           "!doc": "设置某个点图块的不透明度",
-          "!type": "fn(floorId?: string, x?: number, y?: number, opacity?: number)"
+          "!type": "fn(opacity?: number, x?: number, y?: number, floorId?: string)"
         },
         "decompressMap": {
           "!doc": "解压缩地图", 
@@ -3237,6 +3233,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "判定某个点的图块数字<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块数字，该点无图块则返回null", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number"
         }, 
+        "getBlockOpacity": {
+          "!doc": "获得某个点图块的不透明度",
+          "!type": "fn(x?: number, y?: number, floorId?: string, showDisable?: bool) -> number"
+        },
         "loadFloor": {
           "!doc": "从文件或存档中加载某个楼层", 
           "!type": "fn(floorId?: string, map?: ?)"

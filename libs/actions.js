@@ -499,7 +499,15 @@ actions.prototype._sys_onmove_choices = function (x, y) {
 
     switch (core.status.event.id) {
         case 'action':
-            if (core.status.event.data.type != 'choices') break;
+            if (core.status.event.data.tyoe == 'choices') {
+                this._onMoveChoices(x, y); 
+                return true;
+            }
+            if (core.status.event.data.type == 'confirm') {
+                this._onMoveConfirmBox(x, y);
+                return true;
+            }
+            break;
         case 'selectShop':
         case 'switchs':
         case 'switchs-sounds':
@@ -986,7 +994,11 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
             if (core.status.event.selection != 0) {
                 core.status.event.selection = 0;
                 core.playSound('光标移动');
-                core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                if (core.status.event.id == 'action') {
+                    core.ui.drawConfirmBox(core.status.event.ui.text);
+                } else {
+                    core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                }
             }
             return;
         }
@@ -994,7 +1006,11 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
             if (core.status.event.selection != 1) {
                 core.status.event.selection = 1;
                 core.playSound('光标移动');
-                core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                if (core.status.event.id == 'action') {
+                    core.ui.drawConfirmBox(core.status.event.ui.text);
+                } else {
+                    core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                }
             }
             return;
         }

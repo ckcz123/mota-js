@@ -1174,7 +1174,7 @@ ActionParser.prototype.matchId = function(args) {
   }
   // id列表
   var Id_List = MotaActionBlocks['Id_List'].options; // [["变量", "flag"], ...]
-  match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
+  match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]+)$').exec(args[0])
   if(match){
     if (match[1] == 'status' || match[1] == 'item') {
       match[2] = MotaActionFunctions.replaceToName_token(match[2]);
@@ -1460,7 +1460,7 @@ MotaActionFunctions.FontString_pre = function (FontString) {
 }
 
 MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
-MotaActionFunctions.pattern.id=/^(flag|global|temp):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id=/^(flag|global|temp):([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)$/;
 MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/;
 MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
@@ -1488,7 +1488,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   MotaActionFunctions.pattern.replaceItemList = [];
   for (var id in core.material.items) {
     var name = core.material.items[id].name;
-    if (id && name && name != '新物品' && /^[a-zA-Z0-9_\u4E00-\u9FCC]+$/.test(name)) {
+    if (id && name && name != '新物品' && /^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+$/.test(name)) {
       MotaActionFunctions.pattern.replaceItemList.push([id, name]);
     }
   }
@@ -1496,7 +1496,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   MotaActionFunctions.pattern.replaceEnemyList = [];
   for (var id in core.material.enemys) {
     var name = core.material.enemys[id].name;
-    if (id && name && name != '新敌人' && /^[a-zA-Z0-9_\u4E00-\u9FCC]+$/.test(name)) {
+    if (id && name && name != '新敌人' && /^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+$/.test(name)) {
       MotaActionFunctions.pattern.replaceEnemyList.push([id, name]);
     }
   }
@@ -1592,14 +1592,14 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
+  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b) {
     return map[b] ? ("status:" + map[b]) : b;
   }).replace(/状态[:：]/g, "status:");
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
+  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
   str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
@@ -1608,7 +1608,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("(enemy:|怪物[:：])(" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b, c, d) {
+  str = str.replace(new RegExp("(enemy:|怪物[:：])(" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b, c, d) {
     return map[c] ? ("enemy:" + map[c]) : c;
   }).replace(/怪物[:：]/g, "enemy:");
 
@@ -1616,7 +1616,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b, c, d) {
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b, c, d) {
     return map[c] ? ("enemy:" + b + ":" + map[c]) : c;
   }).replace(/(enemy:[a-zA-Z0-9_]+)[:：]/g, '$1:');
 

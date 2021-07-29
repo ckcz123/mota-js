@@ -689,7 +689,7 @@ editor_ui_wrapper = function (editor) {
         while (true) {
             index = obj.indexOf(flag, index + 1);
             if (index < 0) return false;
-            if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(obj.charAt(index + length))) return true;
+            if (!/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]$/.test(obj.charAt(index + length))) return true;
         }
     }
 

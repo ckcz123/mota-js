@@ -40,6 +40,7 @@ control.prototype._init = function () {
     this.registerReplayAction("moveDirectly", this._replayAction_moveDirectly);
     this.registerReplayAction("key", this._replayAction_key);
     this.registerReplayAction("click", this._replayAction_click);
+    this.registerReplayAction("ignoreInput", this._replayAction_ignoreInput);
     // --- 注册系统的resize
     this.registerResize("gameGroup", this._resize_gameGroup);
     this.registerResize("canvas", this._resize_canvas);
@@ -1827,6 +1828,15 @@ control.prototype._replayAction_click = function (action) {
     core.actions.doRegisteredAction("onStatusBarClick", parseInt(p[2]), parseInt(p[3]), parseInt(p[1]));
     core.replay();
     return true;
+}
+
+control.prototype._replayAction_ignoreInput = function (action) {
+    if (action.indexOf('input:') == 0 || action.indexOf('input2:') == 0 || action.indexOf('choices:') == 0 || action.indexOf('random:') == 0) {
+        console.warn('警告！录像播放中出现了未知的 ' + action + '！');
+        core.replay();
+        return true;
+    }
+    return false;
 }
 
 // ------ 存读档相关 ------ //

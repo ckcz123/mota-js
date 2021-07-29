@@ -528,7 +528,7 @@ editor_blockly = function () {
         if (index >= 0) {
             var ch = content.charAt(index);
             var before = content.substring(0, index), token = content.substring(index+1);
-            if (/^[a-zA-Z0-9_\u4E00-\u9FCC]*$/.test(token)) {
+            if (/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]*$/.test(token)) {
                 if (before.endsWith("状态") || (ch == ':' && before.endsWith("status"))) {
                     var list = Object.keys(core.status.hero);
                     if (before.endsWith("状态") && MotaActionFunctions) {
@@ -871,7 +871,7 @@ editor_blockly = function () {
                 awesomplete.prefix = value;
                 for (var i = index - 1; i>=0; i--) {
                     var c = value.charAt(i);
-                    if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
+                    if (!/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]$/.test(c)) {
                         awesomplete.prefix = value.substring(i+1);
                         break;
                     }

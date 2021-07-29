@@ -1396,7 +1396,7 @@ events.prototype._action_setBlockOpacity = function (data, x, y, prefix) {
     }
     else {
         data.loc.forEach(function (t) {
-            core.setMapBlockOpacity(data.floorId, t[0], t[1], data.opacity);
+            core.setBlockOpacity(data.opacity, t[0], t[1], data.floorId);
         });
         core.doAction();
     }

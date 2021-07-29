@@ -129,7 +129,7 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
                 var event = (floor.events || {})[j + "," + i];
                 if (event != null && event.enable === false) continue;
             }
-            var opacity = this.getMapBlockOpacity(floorId, j, i, flags);
+            var opacity = this._getBlockOpacityFromFlag(floorId, j, i, flags);
             if (opacity == null) {
                 // 检查初始不透明度
                 var event = (floor.events || {})[j + "," + i];
@@ -186,7 +186,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var opacity = null;
     if (eventFloor != null) {
         disable = this.isMapBlockDisabled(eventFloor.floorId, x, y);
-        opacity = this.getMapBlockOpacity(eventFloor.floorId, x, y);
+        opacity = this._getBlockOpacityFromFlag(eventFloor.floorId, x, y);
     }
     var block = {'x': x, 'y': y, 'id': id};
     if (disable != null) block.disable = disable;
@@ -318,8 +318,7 @@ maps.prototype._processInvalidMap = function (mapArr, width, height) {
     return map;
 }
 
-////// 获得某个点的不透明度 //////
-maps.prototype.getMapBlockOpacity = function (floorId, x, y, flags) {
+maps.prototype._getBlockOpacityFromFlag = function (floorId, x, y, flags) {
     if (flags == null) flags = (core.status.hero || {}).flags;
     if (flags == null) return null;
     var __opacity__ = flags.__opacity__ || {};
@@ -331,7 +330,7 @@ maps.prototype.getMapBlockOpacity = function (floorId, x, y, flags) {
 }
 
 ////// 设置某个点的不透明度 //////
-maps.prototype.setMapBlockOpacity = function (floorId, x, y, opacity) {
+maps.prototype.setBlockOpacity = function (opacity, x, y, floorId) {
     if (window.flags == null) return;
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -1716,6 +1715,14 @@ maps.prototype.getBlockCls = function (x, y, floorId, showDisable) {
     return block == null ? null : block.event.cls;
 }
 
+////// 获得某个点的不透明度 //////
+maps.prototype.getBlockOpacity = function (x, y, floorId, showDisable) {
+    var block = core.getBlock(x, y, floorId, showDisable);
+    if (block == null) return null;
+    if (block.opacity == null) return 1.0;
+    return block.opacity == null ? 1.0 : block.opacity;
+}
+
 ////// 获得某个图块或素材的信息，包括 ID，cls，图片，坐标，faceIds 等等 //////
 maps.prototype.getBlockInfo = function (block) {
     if (!block) return null;
@@ -2544,7 +2551,7 @@ maps.prototype._animateBlock_doAnimate = function (loc, list, type, time, callba
                 else if (type == 'hide') core.hideBlock(t[0], t[1]);
                 else if (type == 'remove') core.removeBlock(t[0], t[1]);
                 else {
-                    core.setMapBlockOpacity(null, t[0], t[1], type);
+                    core.setBlockOpacity(type, t[0], t[1]);
                     core.showBlock(t[0], t[1]);
                 }
             });

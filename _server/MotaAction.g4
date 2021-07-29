@@ -3654,7 +3654,7 @@ return ['core.getBlockId('+PosString_0+','+PosString_1+')', Blockly.JavaScript.O
 
 
 blockNumber_e
-    :   '图块数字:' Int ',' Int
+    :   '图块数字:' PosString ',' PosString
 
 
 /* blockNumber_e
@@ -3673,7 +3673,7 @@ return ['core.getBlockNumber('+PosString_0+','+PosString_1+')', Blockly.JavaScri
 
 
 blockCls_e
-    :   '图块类别:' Int ',' Int
+    :   '图块类别:' PosString ',' PosString
 
 
 /* blockCls_e

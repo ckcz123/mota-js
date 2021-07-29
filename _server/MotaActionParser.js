@@ -8,8 +8,10 @@ ActionParser.prototype.parse = function (obj,type) {
       if(!obj)obj={};
       if(typeof(obj)===typeof('')) obj={'data':[obj]};
       if(obj instanceof Array) obj={'data':obj};
+      if (!obj.filter) obj.filter={};
       return MotaActionBlocks['event_m'].xmlText([
-        obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,obj.opacity,this.parseList(obj.data)
+        obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,obj.opacity,
+          obj.filter.blur,obj.filter.hue,obj.filter.grayscale,obj.filter.invert,obj.filter.shadow,this.parseList(obj.data)
       ]);
     
     case 'autoEvent':
@@ -363,6 +365,18 @@ ActionParser.prototype.parseAction = function() {
       })
       this.next = MotaActionBlocks['setBlockOpacity_s'].xmlText([
         x_str.join(','),y_str.join(','),data.floorId||'',data.opacity,data.time,data.async||false,this.next]);
+      break;
+    case "setBlockFilter": // 设置图块不透明度
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['setBlockFilter_s'].xmlText([
+        x_str.join(','),y_str.join(','),data.floorId||'',data.blur,data.hue,data.grayscale,data.invert||false,data.shadow,this.next]);
       break;
     case "turnBlock": // 事件转向
       data.loc=data.loc||[];

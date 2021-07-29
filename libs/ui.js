@@ -462,6 +462,24 @@ ui.prototype.setOpacity = function (name, opacity) {
     if (ctx) ctx.canvas.style.opacity = opacity;
 }
 
+////// 设置某个canvas的filter //////
+ui.prototype.setFilter = function (name, filter) {
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (!filter) ctx.filter = 'none';
+    else if (typeof filter === 'string') ctx.filter = filter;
+    else {
+        var x = [];
+        if (filter.blur > 0) x.push('blur(' + filter.blur +'px)');
+        if (filter.hue > 0) x.push('hue-rotate(' + filter.hue + 'deg)');
+        if (filter.grayscale > 0) x.push('grayscale(' + filter.grayscale + ')');
+        if (filter.invert) x.push('invert(1)');
+        if (filter.shadow > 0) x.push('drop-shadow(0 0 ' + filter.shadow + 'px black)');
+        if (x.length == 0) ctx.filter = 'none';
+        else ctx.filter = x.join(' ');
+    }
+}
+
 ////// 设置某个canvas的绘制属性（如颜色等） //////
 ui.prototype.setFillStyle = function (name, style) {
     var ctx = this.getContextByName(name);

@@ -3165,6 +3165,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个点图块的不透明度",
           "!type": "fn(opacity?: number, x?: number, y?: number, floorId?: string)"
         },
+        "setBlockFilter": {
+          "!doc": "设置某个点图块的特效",
+          "!type": "fn(filter?: ?, x?: number, y?: number, floorId?: string)"
+        },
         "decompressMap": {
           "!doc": "解压缩地图", 
           "!type": "fn(mapArr: [[number]], floorId?: string) -> [[number]]"
@@ -3236,6 +3240,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "getBlockOpacity": {
           "!doc": "获得某个点图块的不透明度",
           "!type": "fn(x?: number, y?: number, floorId?: string, showDisable?: bool) -> number"
+        },
+        "getBlockFilter": {
+          "!doc": "获得某个点图块的特效",
+          "!type": "fn(x?: number, y?: number, floorId?: string, showDisable?: bool) -> ?"
         },
         "loadFloor": {
           "!doc": "从文件或存档中加载某个楼层", 
@@ -3478,6 +3486,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!url": "https://www.w3school.com.cn/tags/canvas_globalalpha.asp",
           "!type": "fn(name: string|CanvasRenderingContext2D, alpha: number) -> number"
         }, 
+        "setFilter": {
+          "!doc": "设置某个canvas接下来绘制的filter",
+          "!type": "fn(name: string|CanvasRenderingContext2D, style: string)"
+        },
         "setLineWidth": {
           "!doc": "设置某个canvas的线宽度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_linewidth.asp",

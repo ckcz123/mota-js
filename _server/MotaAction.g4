@@ -42,24 +42,36 @@ return code;
 
 //事件 事件编辑器入口之一
 event_m
-    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool '不透明度' Number BGNL? Newline action+ BEND
+    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool '不透明度' Number BGNL? Newline '该点特效' '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number BGNL? Newline action+ BEND
     
 
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : /_docs/#/instruction
-default : [false,true,null,true,1.0,null]
+default : [false,true,null,true,1,0,0,0,false,0,null]
 B_0_List_0=eval(B_0_List_0);
 if (Number_0 < 0 || Number_0 > 1) throw '不透明度需要在0~1之间';
+if (Number_1 < 0) throw '虚化不得小于0；0为完全没有虚化';
+if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
+if (Number_2 < 0 || Number_2 > 1) throw '灰度需要在0~1之间';
+if (Number_3 < 0) throw '阴影不得小于0；0为完全没有阴影';
 var code = {
     'trigger': Bool_0?'action':null,
     'enable': Bool_1,
     'noPass': B_0_List_0,
     'displayDamage': Bool_2,
     'opacity': Number_0,
+    'filter': {
+        'blur': Number_1,
+        'hue': Int_0,
+        'grayscale': Number_2,
+        'invert': Bool_3,
+        'shadow': Number_3
+    },
     'data': 'data_asdfefw'
 }
-if (!Bool_0 && Bool_1 && (B_0_List_0===null) && Bool_2 && Number_0 == 1.0) code = 'data_asdfefw';
+if (!Bool_0 && Bool_1 && B_0_List_0===null && Bool_2 && Number_0==1.0 && Number_1==0 && Int_0==0 && Number_2==0 && !Bool_3 && Number_3==0) 
+    code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */;
@@ -763,6 +775,7 @@ action
     |   show_s
     |   hide_s
     |   setBlockOpacity_s
+    |   setBlockFilter_s
     |   trigger_s
     |   insert_1_s
     |   insert_2_s
@@ -1406,6 +1419,44 @@ Bool_0 = Bool_0 ?', "async": true':'';
 var code = '{"type": "setBlockOpacity"'+floorstr+IdString_0+', "opacity": '+Number_0+IntString_0+Bool_0+'},\n';
 return code;
 */;
+
+setBlockFilter_s
+    :   '设置图块特效' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number Newline
+    
+
+/* setBlockFilter_s
+tooltip : setBlockFilter: 设置图块特效
+helpUrl : /_docs/#/instruction
+default : ["","","",0,0,0,false,0]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.mapColor
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var pattern1 = MotaActionFunctions.pattern.id;
+  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
+    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
+    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
+    EvalString_0=[EvalString_0,EvalString_1]
+  } else {
+    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
+    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    EvalString_0=EvalString_0.split(',');
+    EvalString_1=EvalString_1.split(',');
+    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
+    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  }
+  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+}
+if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
+if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
+if (Number_1 < 0 || Number_1 > 1) throw '灰度需要在0~1之间';
+if (Number_2 < 0) throw '阴影不得小于0；0为完全没有阴影';
+
+var code = '{"type": "setBlockFilter"'+floorstr+IdString_0+', "blur": '+Number_0+', "hue": '+Int_0+', "grayscale": '+Number_1+', "invert": '+Bool_0+', "shadow": '+Number_2+'},\n';
+return code;
+*/;
+
 
 trigger_s
     :   '触发系统事件' 'x' PosString? ',' 'y' PosString? Newline

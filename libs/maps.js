@@ -135,7 +135,13 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
                 var event = (floor.events || {})[j + "," + i];
                 if (event != null && event.opacity != null) opacity = event.opacity;
             }
-            map.blocks.push(Object.assign({}, this.getBlockByNumber(number), {x: j, y: i, opacity: opacity}));
+            var filter = this._getBlockFilterFromFlag(floorId, j, i, flags);
+            if (filter == null) {
+                // 检查初始filter
+                var event = (floor.events || {})[j + "," + i];
+                if (event != null && event.filter != null) filter = core.clone(event.filter);
+            }
+            map.blocks.push(Object.assign({}, this.getBlockByNumber(number), {x: j, y: i, opacity: opacity, filter: filter}));
         }
     }
 }
@@ -184,13 +190,16 @@ maps.prototype.getIdOfThis = function (id) {
 maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable = null;
     var opacity = null;
+    var filter = null;
     if (eventFloor != null) {
         disable = this.isMapBlockDisabled(eventFloor.floorId, x, y);
         opacity = this._getBlockOpacityFromFlag(eventFloor.floorId, x, y);
+        filter = this._getBlockFilterFromFlag(eventFloor.floorId, x, y);
     }
     var block = {'x': x, 'y': y, 'id': id};
     if (disable != null) block.disable = disable;
     if (opacity != null) block.opacity = opacity;
+    if (filter != null) block.filter = filter;
 
     if (id == 17) block.event = {"cls": "terrains", "id": "airwall", "cannotIn":["up", "down", "left", "right"]};
     else if (id in this.blocksInfo) block.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
@@ -252,13 +261,16 @@ maps.prototype._addEvent = function (block, x, y, event) {
     if (block.opacity == null && event.opacity != null) {
         block.opacity = event.opacity;
     }
+    if (block.filter == null && event.filter != null) {
+        block.filter = core.clone(event.filter);
+    }
     // 覆盖animate
     if (event.animate === false) {
         block.event.animate = 1;
     }
     // 覆盖所有属性
     for (var key in event) {
-        if (key != "enable" && key != "animate" && event[key] != null) {
+        if (key != "enable" && key != "animate" && key != "opacity" && key != "filter" && event[key] != null) {
             block.event[key] = core.clone(event[key]);
         }
     }
@@ -329,6 +341,17 @@ maps.prototype._getBlockOpacityFromFlag = function (floorId, x, y, flags) {
     return (__opacity__[floorId]||{})[index];
 }
 
+maps.prototype._getBlockFilterFromFlag = function (floorId, x, y, flags) {
+    if (flags == null) flags = (core.status.hero || {}).flags;
+    if (flags == null) return null;
+    var __filter__ = flags.__filter__ || {};
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return null;
+    if ((flags.__removed__ || []).indexOf(floorId) >= 0) return null;
+    var index = x + y * core.floors[floorId].width;
+    return core.clone((__filter__[floorId]||{})[index]);
+}
+
 ////// 设置某个点的不透明度 //////
 maps.prototype.setBlockOpacity = function (opacity, x, y, floorId) {
     if (window.flags == null) return;
@@ -346,6 +369,37 @@ maps.prototype.setBlockOpacity = function (opacity, x, y, floorId) {
     var block = core.getBlock(x, y, floorId, true);
     if (block != null) {
         block.opacity = opacity;
+        if (floorId == core.status.floorId && !block.disable) {
+            if (block.event.cls == 'autotile') {
+                core.drawMap();
+            } else {
+                core.drawBlock(block);
+                core.addGlobalAnimate(block);
+            }
+        }
+    }
+}
+
+maps.prototype.setBlockFilter = function (filter, x, y, floorId) {
+    if (window.flags == null) return;
+    floorId = floorId || core.status.floorId;
+    if (!floorId) return;
+    if (!window.flags.__filter__) window.flags.__filter__ = {};
+    if ((window.flags.__removed__ || []).indexOf(floorId) >= 0) return;
+    var index = x + y * core.floors[floorId].width;
+    var __filter__ = window.flags.__filter__;
+    if (!__filter__[floorId]) __filter__[floorId] = {};
+    if (filter == null) delete __filter__[floorId][index];
+    else {
+        if (!filter.blur && !filter.hue && !filter.shadow && !filter.grayscale && !filter.invert)
+            delete __filter__[floorId][index];
+        else __filter__[floorId][index] = core.clone(filter);
+    }
+
+    ////// 重绘该点图块
+    var block = core.getBlock(x, y, floorId, true);
+    if (block != null) {
+        block.filter = core.clone(filter);
         if (floorId == core.status.floorId && !block.disable) {
             if (block.event.cls == 'autotile') {
                 core.drawMap();
@@ -908,6 +962,7 @@ maps.prototype.drawBlock = function (block, animate, ctx) {
     if (blockInfo == null) return;
     if (blockInfo.cls != 'tileset') blockInfo.posX = animate % block.event.animate;
     blockInfo.opacity = block.opacity;
+    blockInfo.filter = block.filter;
     if (!block.name)
         this._drawBlockInfo(blockInfo, block.x, block.y, ctx);
     else
@@ -922,14 +977,18 @@ maps.prototype._drawBlockInfo = function (blockInfo, x, y, ctx) {
 
     var alpha = null;
     if (blockInfo.opacity != null) alpha = core.setAlpha(ctx, blockInfo.opacity);
+    core.setFilter(ctx, blockInfo.filter);
     core.clearMap(ctx, px, py, 32, 32);
     core.drawImage(ctx, image, posX * 32, posY * height + height - 32, 32, 32, px, py, 32, 32);
+    core.setFilter(ctx, null);
     if (alpha != null) core.setAlpha(ctx, alpha);
     if (height > 32) {
         alpha = null;
         if (blockInfo.opacity != null) alpha = core.setAlpha('event2', blockInfo.opacity);
+        core.setFilter('event2', blockInfo.filter);
         core.clearMap('event2', px, py + 32 - height, 32, height - 32)
         core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, px, py + 32 - height, 32, height - 32);
+        core.setFilter('event2', null);
         if (alpha != null) core.setAlpha('event2', alpha);
     }
 }
@@ -951,7 +1010,9 @@ maps.prototype._drawBlockInfo_bgfg = function (blockInfo, name, x, y, ctx) {
     var alpha = null;
     if (blockInfo.opacity != null) alpha = core.setAlpha(ctx, blockInfo.opacity);
     else if (name == 'fg' && this._drawBlockInfo_shouldBlurFg(x, y)) alpha = core.setAlpha(ctx, 0.6);
+    core.setFilter(ctx, blockInfo.filter);
     core.drawImage(ctx, image, posX * 32, posY * height, 32, height, px, py + 32 - height, 32, height);
+    core.setFilter(ctx, null);
     if (alpha != null) core.setAlpha(ctx, alpha);
 }
 
@@ -1025,7 +1086,9 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
     if (blockInfo.cls == 'autotile') { // Autotile单独处理
         var alpha = null;
         if (block.opacity != null) alpha = core.setAlpha(ctx, block.opacity);
+        core.setFilter(ctx, block.filter);
         this._drawAutotile(ctx, arr, block, 32, 0, 0, 0, onMap);
+        core.setFilter(ctx, null);
         if (alpha != null) core.setAlpha(ctx, alpha);
         if (onMap) this.addGlobalAnimate(block);
         return;
@@ -1034,7 +1097,9 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
         var height = blockInfo.height;
         var alpha = null;
         if (block.opacity != null) alpha = core.setAlpha(ctx, block.opacity);
+        core.setFilter(ctx, block.filter);
         core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
+        core.setFilter(ctx, null);
         if (alpha != null) core.setAlpha(ctx, alpha);
         return;
     }
@@ -1459,20 +1524,19 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
 
     var cv = block.name?core.canvas[block.name]:core.canvas.event;
     cv.clearRect(32 * x - 32 * core.bigmap.posX, 32 * y - 32 * core.bigmap.posY, 32, 32);
+    var alpha = null;
+    if (block.opacity != null) alpha = core.setAlpha(cv, block.opacity);
+    core.setFilter(cv, block.filter);
     if (block.name) {
-        var alpha = null;
-        if (block.opacity != null) alpha = core.setAlpha(cv, block.opacity);
         if (block.name == 'bg')
             core.drawImage('bg', core.material.groundCanvas.canvas, 32 * x - 32 * core.bigmap.posX, 32 * y - 32 * core.bigmap.posY);
         this._drawAutotile(cv, this._getBgFgMapArray(block.name), block, 32, 0, 0, animate, true);
-        if (alpha != null) core.setAlpha(cv, alpha);
     }
     else {
-        var alpha = null;
-        if (block.opacity != null) alpha = core.setAlpha(cv, block.opacity);
         this._drawAutotile(cv, this.getMapArray(), block, 32, 0, 0, animate, true);
-        if (alpha != null) core.setAlpha(cv, alpha);
     }
+    core.setFilter(cv, null);
+    if (alpha != null) core.setAlpha(cv, alpha);
 }
 
 ////// 为autotile判定边界 ////// 
@@ -1721,6 +1785,14 @@ maps.prototype.getBlockOpacity = function (x, y, floorId, showDisable) {
     if (block == null) return null;
     if (block.opacity == null) return 1.0;
     return block.opacity == null ? 1.0 : block.opacity;
+}
+
+////// 获得某个点的filter //////
+maps.prototype.getBlockFilter = function (x, y, floorId, showDisable) {
+    var block = core.getBlock(x, y, floorId, showDisable);
+    if (block == null) return null;
+    if (block.filter == null) return {blur: 0, hue: 0, grayscale: 0, invert: false, shadow: 0};
+    return core.clone(block.filter);
 }
 
 ////// 获得某个图块或素材的信息，包括 ID，cls，图片，坐标，faceIds 等等 //////

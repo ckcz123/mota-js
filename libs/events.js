@@ -1402,6 +1402,14 @@ events.prototype._action_setBlockOpacity = function (data, x, y, prefix) {
     }
 }
 
+events.prototype._action_setBlockFilter = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBlockFilter(data, t[0], t[1], data.floorId);
+    });
+    core.doAction();
+}
+
 events.prototype._action_turnBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
@@ -2833,7 +2841,7 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix) {
     }
     var enemyInfo = core.getFlag('enemyInfo');
     if (!enemyInfo[id]) enemyInfo[id] = {};
-    if (typeof value === 'string' && name == 'name') value = value.replaceAll('\r', '\\r');
+    if (typeof value === 'string' && name == 'name') value = value.replace(/\r/g, '\\r');
     value = this._updateValueByOperator(core.calValue(value, prefix), (core.material.enemys[id]||{})[name], operator);
     enemyInfo[id][name] = value;
     (core.material.enemys[id]||{})[name] = core.clone(value);
@@ -2848,7 +2856,7 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
     if (block.event.cls.indexOf('enemy') != 0) return;
     var enemy = core.material.enemys[block.event.id];
     if (enemy == null) return;
-    if (typeof value === 'string' && name == 'name') value = value.replaceAll('\r', '\\r');
+    if (typeof value === 'string' && name == 'name') value = value.replaceAll(/\r/g, '\\r');
     value = this._updateValueByOperator(core.calValue(value, prefix), enemy[name], operator);
     flags.enemyOnPoint = flags.enemyOnPoint || {};
     flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 

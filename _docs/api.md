@@ -1537,6 +1537,9 @@ floorId: 地图id，不填视为当前地图
 showDisable: 隐藏点是否不返回null，true表示不返回null
 返回值：图块类型，即“地形、四帧动画、矮敌人、高敌人、道具、矮npc、高npc、自动元件、额外地形”之一
 
+getBlockFilter: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> ?
+获得某个点的图块特效
+
 getBlockId: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string
 判定某个点的图块id
 例如：if(core.getBlockId(x1, y1) != 'greenSlime' && core.getBlockId(x2, y2) != 'redSlime') core.openDoor(x3, y3); // 一个简单的机关门事件，打败或炸掉这一对绿头怪和红头怪就开门
@@ -1726,6 +1729,9 @@ number: 新图块的数字（也支持纯数字字符串如'1'）或id
 x: 横坐标
 y: 纵坐标
 floorId: 地图id，不填视为当前地图
+
+setBlockFilter: fn(filter?: ?, x?: number, y?: number, floorId?: string)
+设置某个点图块的特效
 
 setBlockOpacity: fn(opacity?: number, x?: number, y?: number, floorId?: string)
 设置某个点图块的不透明度
@@ -1955,6 +1961,9 @@ setAlpha: fn(name: string|CanvasRenderingContext2D, alpha: number) -> number
 setFillStyle: fn(name: string|CanvasRenderingContext2D, style: string)
 设置某个canvas的绘制属性（如颜色等）
 参考资料：https://www.w3school.com.cn/tags/canvas_fillstyle.asp
+
+setFilter: fn(name: string|CanvasRenderingContext2D, filter: any)
+设置某个canvas接下来绘制的filter
 
 setFont: fn(name: string|CanvasRenderingContext2D, font: string)
 设置某个canvas的文字字体

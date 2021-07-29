@@ -927,7 +927,7 @@ maps.prototype._drawBlockInfo = function (blockInfo, x, y, ctx) {
     if (alpha != null) core.setAlpha(ctx, alpha);
     if (height > 32) {
         alpha = null;
-        if (blockInfo.opacity != null) alpha = core.setAlpha('event2', block.opacity);
+        if (blockInfo.opacity != null) alpha = core.setAlpha('event2', blockInfo.opacity);
         core.clearMap('event2', px, py + 32 - height, 32, height - 32)
         core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, px, py + 32 - height, 32, height - 32);
         if (alpha != null) core.setAlpha('event2', alpha);

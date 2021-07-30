@@ -227,6 +227,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['previewUI_s'].xmlText(),
       MotaActionBlocks['clearMap_s'].xmlText(),
       MotaActionBlocks['setAttribute_s'].xmlText(),
+      MotaActionBlocks['setFilter_s'].xmlText(),
       MotaActionBlocks['fillText_s'].xmlText(),
       MotaActionBlocks['fillBoldText_s'].xmlText(),
       MotaActionBlocks['drawTextContent_s'].xmlText(),

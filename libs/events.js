@@ -1072,9 +1072,10 @@ events.prototype.checkAutoEvents = function () {
     var todo = [], delay = [];
     core.status.autoEvents.forEach(function (autoEvent) {
         var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;
-        // 不在当前楼层 or 已经执行过 or 正在执行中
+        // 不在当前楼层 or 已经执行过 or 已被分区 or 正在执行中
         if (autoEvent.currentFloor && floorId != core.status.floorId) return;
         if (!autoEvent.multiExecute && core.autoEventExecuted(symbol)) return;
+        if ((flags.__removed__||[]).indexOf(floorId) >= 0) return;
         if (core.autoEventExecuting(symbol)) return;
         var prefix = floorId + "@" + x + "@" + y;
         try {
@@ -2262,7 +2263,7 @@ events.prototype._action_hideHero = function (data, x, y, prefix) {
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {
-    this.__action_doAsyncFunc(data.async, core.vibrate, data.time);
+    this.__action_doAsyncFunc(data.async, core.vibrate, data.direction, data.time, data.speed, data.power);
 }
 
 events.prototype._action_sleep = function (data, x, y, prefix) {
@@ -2534,6 +2535,10 @@ events.prototype._action_drawArrow = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setAttribute = function (data, x, y, prefix) {
+    this.__action_doUIEvent(data);
+}
+
+events.prototype._action_setFilter = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
@@ -3125,41 +3130,45 @@ events.prototype.setVolume = function (value, time, callback) {
 }
 
 ////// 画面震动 //////
-events.prototype.vibrate = function (time, callback) {
+events.prototype.vibrate = function (direction, time, speed, power, callback) {
     if (core.isReplaying()) {
         if (callback) callback();
         return;
     }
-    if (!time || time < 1000) time = 1000;
-    // --- 将time调整为500的倍数（上整），不然会出错
-    time /= Math.max(core.status.replay.speed, 1)
-    time = Math.ceil(time / 500) * 500;
-    var shakeInfo = {duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0};
+    if (!time) time = 1000;
+    speed = speed || 10;
+    power = power || 10;
+    var shakeInfo = {duration: parseInt(time / 10), speed: speed, power: power, direction: 1, shake: 0};
     var animate = setInterval(function () {
         core.events._vibrate_update(shakeInfo);
-        core.control.addGameCanvasTranslate(shakeInfo.shake, 0);
-        if (shakeInfo.duration === 0) {
+        switch (direction) {
+            case 'vertical': core.addGameCanvasTranslate(0, shakeInfo.shake); break;
+            case 'diagonal1': core.addGameCanvasTranslate(shakeInfo.shake, shakeInfo.shake); break;
+            case 'diagonal2': core.addGameCanvasTranslate(-shakeInfo.shake, shakeInfo.shake); break;
+            default: core.addGameCanvasTranslate(shakeInfo.shake, 0);
+        }
+        if (shakeInfo.duration === 0 && shakeInfo.shake == 0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             if (callback) callback();
         }
-    }, 50 / 3);
+    }, 10);
 
     core.animateFrame.asyncId[animate] = true;
 }
 
 events.prototype._vibrate_update = function (shakeInfo) {
     if (shakeInfo.duration >= 1 || shakeInfo.shake != 0) {
-        var delta = (shakeInfo.power * shakeInfo.speed * shakeInfo.direction) / 10.0;
+        var delta = shakeInfo.speed * shakeInfo.direction / 6;
         if (shakeInfo.duration <= 1 && shakeInfo.shake * (shakeInfo.shake + delta) < 0) {
             shakeInfo.shake = 0;
         } else {
             shakeInfo.shake += delta;
         }
-        if (shakeInfo.shake > shakeInfo.power * 2) {
+        if (shakeInfo.shake > shakeInfo.power) {
             shakeInfo.direction = -1;
         }
-        if (shakeInfo.shake < -shakeInfo.power * 2) {
+        if (shakeInfo.shake < -shakeInfo.power) {
             shakeInfo.direction = 1;
         }
         if (shakeInfo.duration >= 1) {

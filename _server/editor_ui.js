@@ -374,6 +374,7 @@ editor_ui_wrapper = function (editor) {
     uievent.drawPreviewUI = function () {
         core.setAlpha('uievent', 1);
         core.clearMap('uievent');
+        core.setFilter('uievent', null);
 
         // 绘制UI
         var background = uievent.elements.selectBackground.value;

@@ -1192,10 +1192,13 @@ unregisterSystemEvent: fn(type: string)
 useFly: fn(fromUserAction?: bool)
 点击楼层传送器时的打开操作
 
-vibrate: fn(time?: number, callback?: fn())
-视野左右抖动
+vibrate: fn(direction?: string, time?: number, speed?: number, power?: number, callback?: fn())
+视野抖动
 例如：core.vibrate(); // 视野左右抖动1秒
-time: 抖动时长，单位为毫秒。必须为半秒的倍数，不填或小于1秒都视为1秒
+direction: 抖动方向；可填 horizontal(左右)，vertical（上下），diagonal1（左上右下），diagonal2（左下右上）
+time: 抖动时长，单位为毫秒
+speed: 抖动速度
+power: 抖动幅度
 callback: 抖动平息后的回调函数，可选
 
 visitFloor: fn(floorId?: string)

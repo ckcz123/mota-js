@@ -550,7 +550,8 @@ ActionParser.prototype.parseAction = function() {
       }
       break;
     case "vibrate": // 画面震动
-      this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
+      this.next = MotaActionBlocks['vibrate_s'].xmlText([data.direction||'horizontal', 
+        data.time||0, data.speed, data.power, data.async||false, this.next]);
       break;
     case "showImage": // 显示图片
       data.loc=data.loc||['','']
@@ -953,6 +954,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setAttribute_s'].xmlText([
         data.font,data.fillStyle,'rgba('+data.fillStyle+')',data.strokeStyle,'rgba('+data.strokeStyle+')',
         data.lineWidth,data.alpha,data.align,data.baseline,data.z,this.next]);
+      break;
+    case "setFilter":
+      this.next = MotaActionBlocks['setFilter_s'].xmlText([
+        data.blur, data.hue, data.grayscale, data.invert||false, data.shadow, this.next]);
       break;
     case "fillText": // 绘制一行文本
       data.style = this.Colour(data.style);

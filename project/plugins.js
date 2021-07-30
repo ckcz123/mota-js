@@ -1345,8 +1345,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		else if (step <= 12) core.drawHero('midFoot', 4 * o * (step - 8));
 		else if (step <= 16) core.drawHero('rightFoot', 4 * o * (step - 8)); // if (step == 8) {
 		if (step == 8 || step == 16) {
-			core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
-			core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+			core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);
+			core.setHeroLoc('y', y + o * core.utils.scan2[direction].y, true);
 			core.updateFollowers();
 			curr[1]--;
 			if (curr[1] <= 0) moveSteps.shift();

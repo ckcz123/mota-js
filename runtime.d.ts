@@ -1005,12 +1005,15 @@ declare class events {
     setVolume(value: number, time?: number, callback?: () => void): void
     
     /**
-     * 视野左右抖动
+     * 视野抖动
      * @example core.vibrate(); // 视野左右抖动1秒
-     * @param time 抖动时长，单位为毫秒。必须为半秒的倍数，不填或小于1秒都视为1秒
+     * @param direction 抖动方向
+     * @param time 抖动时长，单位为毫秒
+     * @param speed 抖动速度
+     * @param power 抖动幅度
      * @param callback 抖动平息后的回调函数，可选
      */
-    vibrate(time?: number, callback?: () => void): void
+    vibrate(direction?: string, time?: number, speed?: number, power?: number, callback?: () => void): void
 
     /**
      * 强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了

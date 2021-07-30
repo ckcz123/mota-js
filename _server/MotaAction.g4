@@ -865,6 +865,7 @@ action
     |   previewUI_s
     |   clearMap_s
     |   setAttribute_s
+    |   setFilter_s
     |   fillText_s
     |   fillBoldText_s
     |   drawTextContent_s
@@ -2093,17 +2094,16 @@ return code;
 */;
 
 vibrate_s
-    :   '画面震动' '时间' Int '不等待执行完毕' Bool Newline
+    :   '画面震动' '方向' Vibrate_List '时间' Int '速度' Int '振幅' Int '不等待执行完毕' Bool Newline
 
 
 /* vibrate_s
 tooltip : vibrate: 画面震动
 helpUrl : /_docs/#/instruction
-default : [2000,false]
+default : ["horizontal",2000,10,10,false]
 colour : this.soundColor
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':''
-var code = '{"type": "vibrate"' + Int_0 + async + '},\n';
+var code = '{"type": "vibrate", "direction": "'+Vibrate_List_0+'", "time": '+Int_0+', "speed": '+Int_1+', "power": '+Int_2+async+'},\n';
 return code;
 */;
 
@@ -3170,6 +3170,26 @@ var code = '{"type": "setAttribute"'+FontString_0+ColorString_0+ColorString_1+In
 return code;
 */;
 
+
+setFilter_s
+    :   '设置画布特效' '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number Newline
+    
+
+/* setFilter_s
+tooltip : setFilter: 设置画布特效
+helpUrl : /_docs/#/instruction
+default : [0,0,0,false,0]
+previewBlock : true
+colour : this.uiColor
+if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
+if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
+if (Number_1 < 0 || Number_1 > 1) throw '灰度需要在0~1之间';
+if (Number_2 < 0) throw '阴影不得小于0；0为完全没有阴影';
+var code = '{"type": "setFilter", "blur": '+Number_0+', "hue": '+Int_0+', "grayscale": '+Number_1+', "invert": '+Bool_0+', "shadow": '+Number_2+'},\n';
+return code;
+*/;
+
+
 fillText_s
     :   '绘制文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '字体' FontString? '最大宽度' IntString? BGNL? EvalString Newline
 
@@ -3982,6 +4002,10 @@ NextXY_List
 EquipValueType_List
     :   '数值项'|'百分比项'
     /*EquipValueType_List ['value','percentage']*/;
+
+Vibrate_List
+    :   '左右'|'上下'|'左上-右下'|'左下-右上'
+    /*Vibrate_List ['horizontal','vertical','diagonal1','diagonal2']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则

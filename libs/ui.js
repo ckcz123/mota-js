@@ -521,6 +521,11 @@ ui.prototype._uievent_setAttribute = function (data) {
     }
 }
 
+ui.prototype._uievent_setFilter = function (data) {
+    this._createUIEvent();
+    this.setFilter('uievent',data);
+}
+
 ////// 计算某段文字的宽度 //////
 ui.prototype.calWidth = function (name, text, font) {
     var ctx = this.getContextByName(name);

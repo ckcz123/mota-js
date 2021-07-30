@@ -3757,8 +3757,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(data?: ?)"
         }, 
         "vibrate": {
-          "!doc": "视野左右抖动<br/>例如：core.vibrate(); // 视野左右抖动1秒<br/>time: 抖动时长，单位为毫秒。必须为半秒的倍数，不填或小于1秒都视为1秒<br/>callback: 抖动平息后的回调函数，可选", 
-          "!type": "fn(time?: number, callback?: fn())"
+          "!doc": "视野抖动<br/>例如：core.vibrate(); // 视野抖动1秒<br/>direction: 抖动方向；可填 horizontal(左右)，vertical（上下），diagonal1（左上右下），diagonal2（左下右上）<br/>time: 抖动时长<br/>speed: 抖动速度<br/>power: 抖动幅度<br/>callback: 抖动平息后的回调函数，可选", 
+          "!type": "fn(direction?: string, time?: number, speed?: number, power?: number, callback?: fn())"
         }, 
         "confirmRestart": {
           "!doc": "询问是否需要重新开始", 

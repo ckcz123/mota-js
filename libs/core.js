@@ -46,9 +46,12 @@ function core() {
         'weather': {
             'time': 0,
             'type': null,
+            'level': 1,
             'nodes': [],
             'data': null,
             'fog': null,
+            'cloud': null,
+            'sun': null
         },
         "tip": null,
         "asyncId": {}
@@ -429,6 +432,7 @@ core.prototype._init_others = function () {
     core.bigmap.cacheCanvas = document.createElement('canvas').getContext('2d');
     core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
     core.loadImage("materials", "cloud", function (name, img) { core.animateFrame.weather.cloud = img; })
+    core.loadImage("materials", "sun", function (name, img) { core.animateFrame.weather.sun = img; })
     core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);

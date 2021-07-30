@@ -411,7 +411,8 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     e.damage = this.getDamage(enemy, x, y, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];
-    e.defDamage = this.getDefDamage(enemy, 1, x, y, floorId);
+    var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
+    e.defDamage = this.getDefDamage(enemy, ratio, x, y, floorId);
     enemys.push(e);
 }
 

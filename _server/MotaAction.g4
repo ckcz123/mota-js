@@ -3963,8 +3963,8 @@ UnaryOperator_List
     /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt', 'typeof']*/;
 
 Weather_List
-    :   '无'|'雨'|'雪'|'雾'|'云'
-    /*Weather_List ['null','rain','snow','fog','cloud']*/;
+    :   '无'|'雨'|'雪'|'晴'|'雾'|'云'
+    /*Weather_List ['null','rain','snow','sun','fog','cloud']*/;
 
 B_0_List
     :   '不改变'|'不可通行'|'可以通行'

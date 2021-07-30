@@ -515,7 +515,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_leaf": true,
 							"_type": "textarea",
 							"_docs": "天气",
-							"_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"，\"snow\"或\"fog\"代表雨雪雾，第二项为1-10之间的数代表强度。\n如[\"rain\", 8]代表8级雨天。"
+							"_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"，\"snow\", \"sun\", \"fog\", \"cloud\“代表对应的天气，第二项为1-10之间的数代表强度。\n如[\"rain\", 8]代表8级雨天。"
 						},
 						"bgm": {
 							"_leaf": true,
@@ -528,7 +528,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							}).toString(),
 							"_onconfirm": (function (previous, current) {
 								if (current.length == 0) return null;
-								return current[0];
+								if (current.length == 1) return current[0];
+								return current;
 							}).toString(),
 							"_docs": "背景音乐",
 							"_data": "到达该层后默认播放的BGM"

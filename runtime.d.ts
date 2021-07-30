@@ -554,10 +554,10 @@ declare class control {
     /**
      * 设置天气，不计入存档。如需长期生效请使用core.events._action_setWeather()函数
      * @example core.setWeather('fog', 10); // 设置十级大雾天
-     * @param type 新天气的类型，不填视为晴天
+     * @param type 新天气的类型，不填视为无天气
      * @param level 新天气（晴天除外）的级别，必须为不大于10的正整数，不填视为5
      */
-    setWeather(type?: 'rain' | 'snow' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
+    setWeather(type?: 'rain' | 'snow' | 'sun' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
     
     /**
      * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数

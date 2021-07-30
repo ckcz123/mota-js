@@ -193,6 +193,7 @@ editor_blocklyconfig=(function(){
       MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
         {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件\n超时剩余时间会写入flag:timeout"}]},
         {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件\n超时剩余时间会写入flag:timeout"}]},
+        {"case": "condition", "condition": "flag:type==0\n&&flag:keycode==13", "action": [{"type": "comment", "text": "当满足自定义条件时会执行此事件\n超时剩余时间会写入flag:timeout"}]},
         {"case": "timeout", "action": [{"type": "comment", "text": "当超时未操作时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),

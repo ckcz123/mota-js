@@ -164,6 +164,11 @@ editor_ui_wrapper = function (editor) {
         // PGUP和PGDOWN切换楼层
         if (e.keyCode == 33 || e.keyCode == 34) {
             e.preventDefault();
+            var saveFloor = document.getElementById('saveFloor');
+            if (saveFloor && saveFloor.classList.contains('highlight')) {
+                return;
+            }
+
             var index = editor.core.floorIds.indexOf(editor.currentFloorId);
             var nextIndex = index + (e.keyCode == 33 ? 1 : -1);
             if (nextIndex >= 0 && nextIndex < editor.core.floorIds.length) {

@@ -2371,7 +2371,7 @@ events.prototype.__action_wait_getValue = function (value) {
 }
 
 events.prototype.__action_wait_afterGet = function (data) {
-    if (!data.data) return;
+    if (!data.data) return false;
     var todo = [];
     var stop = false;
     data.data.forEach(function (one) {
@@ -2396,20 +2396,32 @@ events.prototype.__action_wait_afterGet = function (data) {
                 if (one["break"]) stop = true;
             }
         }
+        if (one["case"] == "condition") {
+            var condition = false;
+            try { condition = core.calValue(one.condition); } catch (e) {}
+            if (condition) {
+                core.push(todo, one.action);
+                if (one["break"]) stop = true;
+            }
+        }
         if (one["case"] == "timeout" && core.getFlag("type") == -1) {
             core.push(todo, one.action);
             if (one["break"]) stop = true;
         }
     })
-    if (todo.length > 0)
+    if (todo.length > 0) {
         core.insertAction(todo);
+        return true;
+    }
+    return false;
 }
 
 events.prototype._precompile_wait = function (data) {
     if (data.data) {
         data.data.forEach(function (v) {
-            if (v.px) v.px = this.__precompile_array(v.px);
-            if (v.py) v.py = this.__precompile_array(v.py);
+            if (v.px != null) v.px = this.__precompile_array(v.px);
+            if (v.py != null) v.py = this.__precompile_array(v.py);
+            if (v.condition != null) v.condition = this.__precompile_array(v.condition);
             v.action = this.precompile(v.action);
         }, this);
     }

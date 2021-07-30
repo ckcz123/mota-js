@@ -2800,6 +2800,7 @@ events.prototype._updateValueByOperator = function (value, originValue, operator
 events.prototype.setValue = function (name, operator, value, prefix) {
     value = this._updateValueByOperator(core.calValue(value, prefix), core.calValue(name, prefix), operator);
     this._setValue_setStatus(name, value);
+    this._setValue_setBuff(name, value);
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
@@ -2810,6 +2811,11 @@ events.prototype.setValue = function (name, operator, value, prefix) {
 events.prototype._setValue_setStatus = function (name, value) {
     if (name.indexOf("status:") !== 0) return;
     core.setStatus(name.substring(7), value);
+}
+
+events.prototype._setValue_setBuff = function (name, value) {
+    if (name.indexOf('buff:') !== 0) return;
+    core.setBuff(name.substring(5), value);
 }
 
 events.prototype._setValue_setItem = function (name, value) {

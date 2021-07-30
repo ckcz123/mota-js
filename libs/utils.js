@@ -105,6 +105,8 @@ utils.prototype.replaceValue = function (value) {
     if (typeof value == "string" && (value.indexOf(":") >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0)) {
         if (value.indexOf('status:') >= 0)
             value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
+        if (value.indexOf('buff:') >= 0)
+            value = value.replace(/buff:([a-zA-Z0-9_]+)/g, "core.getBuff('$1')");
         if (value.indexOf('item:') >= 0)
             value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
         if (value.indexOf('flag:') >= 0 || value.indexOf('flag：') >= 0)

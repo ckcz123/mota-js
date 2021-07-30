@@ -4052,12 +4052,12 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'
-    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax']*/;
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'生命增益'|'攻击增益'|'防御增益'|'护盾增益'
+    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax','buff:hp','buff:atk','buff:def','buff:mdef']*/;
 
 Id_List
-    :   '变量' | '状态' | '物品' | '独立开关' | '临时变量' |'全局存储'
-    /*Id_List ['flag','status','item', 'switch', 'temp', 'global']*/;
+    :   '变量' | '状态' | '物品' | '增益' | '独立开关' | '临时变量' |'全局存储'
+    /*Id_List ['flag','status','item', 'buff', 'switch', 'temp', 'global']*/;
 
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'属性值'|'退化扣攻'|'退化扣防'|'不可炸'|'九宫格领域'|'领域范围'|'连击数'|'吸血到自身'|'固伤值'

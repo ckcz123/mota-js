@@ -1195,7 +1195,7 @@ ActionParser.prototype.matchId = function(args) {
   var Id_List = MotaActionBlocks['Id_List'].options; // [["变量", "flag"], ...]
   match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]+)$').exec(args[0])
   if(match){
-    if (match[1] == 'status' || match[1] == 'item') {
+    if (match[1] == 'status' || match[1] == 'item' || match[1] == 'buff') {
       match[2] = MotaActionFunctions.replaceToName_token(match[2]);
     }
     args=[match[1],match[2]]
@@ -1576,6 +1576,9 @@ MotaActionFunctions.replaceToName = function (str) {
   str = str.replace(new RegExp("status:(" + list.join("|") + ")\\b", "g"), function (a, b) {
     return map[b] ? ("状态：" + map[b]) : b;
   }).replace(/status:/g, "状态：");
+  str = str.replace(new RegExp("buff:(" + list.join("|") + ")\\b", "g"), function (a, b) {
+    return map[b] ? ("增益：" + map[b]) : b;
+  }).replace(/buff:/g, "增益：");
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
@@ -1614,6 +1617,9 @@ MotaActionFunctions.replaceFromName = function (str) {
   str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b) {
     return map[b] ? ("status:" + map[b]) : b;
   }).replace(/状态[:：]/g, "status:");
+  str = str.replace(new RegExp("增益[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b) {
+    return map[b] ? ("buff:" + map[b]) : b;
+  }).replace(/增益[:：]/g, "buff:");
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);

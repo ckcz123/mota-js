@@ -3009,13 +3009,14 @@ waitContext
 
 
 waitContext_1
-    : '按键的场合：' '键值' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+    : '按键的场合：' '键值（右键查表）' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_1
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
 colour : this.subColor
 default : ["",false]
+menu : [["查询键值表", "editor_blockly.showKeyCodes()"]]
 if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
   throw new Error('键值必须是正整数，可以以逗号分隔');
 }

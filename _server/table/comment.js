@@ -320,6 +320,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "碰触脚本",
 					"_data": "触碰到该图块时自动执行的脚本内容；此脚本会在该点的触发器执行前执行"
 				},
+				"event": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "item",
+					"_docs": "碰触事件",
+					"_data": "触碰到该图块时自动执行的事件内容；如果存在本事件则不会执行默认触发器"
+				},
 				"cannotOut": {
 					"_leaf": true,
 					"_type": "checkboxSet",

@@ -414,6 +414,12 @@ editor_blockly = function () {
         }
     }
 
+    editor_blockly.showKeyCodes = function () {
+        alert('键值查询表：\nA65 B66 C67 D68 E69 F70 G71 H72 I73 J74 K75 L76 M77\n'
+            +'N78 O79 P80 Q81 R82 S83 T84 U85 V86 W87 X88 Y89 Z90\n0:48 1:49 2:50 3:51 4:52 5:53 6:54 7:55 8:56 9:57\n'
+            +'空格:13 回车:32 ESC:27 后退:8 Tab:9 Shift:16 Ctrl:17 Alt:18\nPgUp:33 PgDn:34 左:37 上:38 右:39 下:40\n更多键值请自行百度查表')
+    }
+
     editor_blockly.lastUsedType=[
         'text_0_s',
         'comment_s',

@@ -344,6 +344,14 @@ events.prototype.trigger = function (x, y, callback) {
         } catch (e) { main.log(e); }
     }
 
+    // 碰触事件
+    if (block.event.event) {
+        core.clearRouteFolding();
+        core.insertAction(block.event.event, block.x, block.y);
+        // 不再执行该点的系统事件
+        return _executeCallback();
+    }
+
     if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
@@ -367,6 +375,14 @@ events.prototype._trigger_inAction = function (x, y) {
     try {
         eval(block.event.script);
     } catch (e) { main.log(e); }
+
+    // 碰触事件
+    if (block.event.event) {
+        core.clearRouteFolding();
+        core.insertAction(block.event.event, block.x, block.y);
+        // 不再执行该点的系统事件
+        return core.doAction();
+    }
 
     if (block.event.trigger && block.event.trigger != 'null') {
         this.setEvents(null, x, y);

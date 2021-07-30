@@ -269,7 +269,7 @@ core.registerAction('keyDown', 'my_shop', function (keycode) {
     // 获得当前“显示选择项”的各个选项
     var choices = core.status.event.data.current.choices;
     // 获得当前选项第一项在屏幕上的y坐标
-    var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = core.actions._getChoicesTopIndex(choices.length);
     // 检查按键的键值，是否是空格或者回车
     if (keycode == 13 || keycode == 32) {
         // 如果是，则视为直接点击屏幕上的选项

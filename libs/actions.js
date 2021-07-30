@@ -499,7 +499,7 @@ actions.prototype._sys_onmove_choices = function (x, y) {
 
     switch (core.status.event.id) {
         case 'action':
-            if (core.status.event.data.tyoe == 'choices') {
+            if (core.status.event.data.type == 'choices') {
                 this._onMoveChoices(x, y); 
                 return true;
             }
@@ -884,9 +884,13 @@ actions.prototype._sys_onStatusBarClick = function (px, py, vertical) {
 
 /////////////////// 在某个界面时的按键点击效果 ///////////////////
 
+actions.prototype._getChoicesTopIndex = function (length) {
+    return this.HSIZE - parseInt((length - 1) / 2) + (core.status.event.ui.offset || 0);
+}
+
 // 数字键快速选择选项
 actions.prototype._selectChoices = function (length, keycode, callback) {
-    var topIndex = this.HSIZE - parseInt((length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(length);
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
@@ -917,9 +921,7 @@ actions.prototype._keyDownChoices = function (keycode) {
 actions.prototype._onMoveChoices = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
-
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         if (selection == core.status.event.selection) return;
@@ -1059,7 +1061,7 @@ actions.prototype._clickAction = function (x, y, px, py) {
         var choices = data.choices;
         if (choices.length == 0) return;
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-            var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+            var topIndex = this._getChoicesTopIndex(choices.length);
             if (y >= topIndex && y < topIndex + choices.length) {
                 var choice = choices[y - topIndex];
                 if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
@@ -2098,7 +2100,7 @@ actions.prototype._keyUpSL = function (keycode) {
 ////// 系统设置界面时的点击操作 //////
 actions.prototype._clickSwitchs = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     if (selection >= 0 && selection < choices.length) {
@@ -2137,7 +2139,7 @@ actions.prototype._keyUpSwitchs = function (keycode) {
 
 actions.prototype._clickSwitchs_sounds = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 2) return;
@@ -2211,7 +2213,7 @@ actions.prototype._keyUpSwitchs_sounds = function (keycode) {
 
 actions.prototype._clickSwitchs_display = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 0) return;
@@ -2330,7 +2332,7 @@ actions.prototype._keyUpSwitchs_display = function (keycode) {
 
 actions.prototype._clickSwitchs_action = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 0 && selection != 1) return;
@@ -2424,7 +2426,7 @@ actions.prototype._keyUpSwitchs_action = function (keycode) {
 actions.prototype._clickSettings = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2484,7 +2486,7 @@ actions.prototype._clickNotes = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2621,7 +2623,7 @@ actions.prototype._keyUpNotes = function (keycode) {
 actions.prototype._clickSyncSave = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2691,7 +2693,7 @@ actions.prototype._clickSyncSelect = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2731,7 +2733,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2773,7 +2775,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2866,7 +2868,7 @@ actions.prototype._clickReplay = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2938,7 +2940,7 @@ actions.prototype._clickGameInfo = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;

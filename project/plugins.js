@@ -233,7 +233,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (core.status.event.data.type != 'choices') return false;
 		var data = core.status.event.data.current;
 		var choices = data.choices;
-		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (keycode == 88 || keycode == 27) { // X, ESC
 			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
 			return true;
@@ -248,7 +248,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (core.status.event.data.type != 'choices') return false;
 		var data = core.status.event.data.current;
 		var choices = data.choices;
-		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (keycode == 13 || keycode == 32) { // Space, Enter
 			core.actions._clickAction(core.actions.HSIZE, topIndex + core.status.event.selection);
 			return true;
@@ -262,7 +262,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (core.status.event.data.type != 'choices') return false;
 		var data = core.status.event.data.current;
 		var choices = data.choices;
-		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (x >= core.actions.CHOICES_LEFT && x <= core.actions.CHOICES_RIGHT && y >= topIndex && y < topIndex + choices.length) {
 			core.actions._clickAction(x, y);
 			return true;
@@ -1270,7 +1270,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		if (x < core.actions.CHOICES_LEFT || x > core.actions.CHOICES_RIGHT) return false;
 		var choices = core.status.event.ui.choices;
-		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (y >= topIndex && y < topIndex + choices.length) {
 			_selectCategory(y - topIndex);
 		}

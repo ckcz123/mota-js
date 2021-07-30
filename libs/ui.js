@@ -2289,8 +2289,8 @@ ui.prototype._drawBookDetail_origin = function (enemy, texts) {
     // 怪物数值和原始值不一样时，在详细信息页显示原始数值
     var originEnemy = core.enemys._getCurrentEnemys_getEnemy(enemy.id);
     var content = [];
-    if (enemy.x != null && enemy.y != null) {
-        texts.push("\r[#FF6A6A]\\d怪物坐标：\\d\r[][" + enemy.x + ", " + enemy.y + ']');
+    if (enemy.locs != null && enemy.locs.length >= 0) {
+        texts.push("\r[#FF6A6A]\\d怪物坐标：\\d\r[]" + JSON.stringify(enemy.locs));
     }
     ["hp", "atk", "def", "point", "money", "exp"].forEach(function (one) {
         if (enemy[one] == null || originEnemy[one] == null) return;

@@ -383,6 +383,15 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
         x = null;
         y = null;
     } else {
+        // 检查enemys里面是否使用了存在的内容
+        for (var i = 0; i < enemys.length; ++i) {
+            var one = enemys[i];
+            if (id == one.id && one.locs != null &&
+                locEnemyInfo.atk == one.atk && locEnemyInfo.def == one.def && locEnemyInfo.hp == one.hp) {
+                one.locs.push([x, y]);
+                return;
+            }
+        }
         enemyInfo = locEnemyInfo;
     }
     var id = enemy.id + ":" + x + ":" + y;
@@ -400,8 +409,7 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
         e[v] = enemyInfo[v];
     }
     if (x != null && y != null) {
-        e.x = x;
-        e.y = y;
+        e.locs = [[x, y]];
     }
     ["name", "money", "exp", "point"].forEach(function (one) {
         e[one] = core.getEnemyValue(enemy, one, x, y, floorId);

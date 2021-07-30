@@ -1488,7 +1488,6 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
     } else {
         data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     }
-    console.log(data.loc);
     this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.moveMode, data.time);
 }
 

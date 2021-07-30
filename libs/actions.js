@@ -467,7 +467,7 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
         core.timeout.onDownTimeout = setTimeout(function () {
             if (core.interval.onDownInterval == null) {
                 core.interval.onDownInterval = setInterval(function () {
-                    if (!core.actions.longClick(x, y, px, py, true)) {
+                    if (!core.actions.longClick(x, y, px, py)) {
                         clearInterval(core.interval.onDownInterval);
                         core.interval.onDownInterval = null;
                     }
@@ -590,6 +590,10 @@ actions.prototype._sys_onup = function () {
 
     // 长按
     if (!core.status.lockControl && stepPostfix.length == 0 && core.status.downTime != null && new Date() - core.status.downTime >= 1000) {
+        clearTimeout(core.interval.onDownTimeout);
+        core.interval.onDownTimeout = null;
+        clearInterval(core.interval.onDownInterval);
+        core.interval.onDownInterval = null;
         core.actions.longClick(posx, posy, 32 * posx + 16, 32 * posy + 16);
     }
     else {
@@ -857,14 +861,12 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
 }
 
 actions.prototype._sys_longClick = function (x, y, px, py, fromEvent) {
-    if (!core.status.lockControl && !fromEvent) {
-        // 虚拟键盘
-        core.waitHeroToStop(function () {
-            core.ui._drawKeyBoard();
-        });
-        return true;
-    }
-    return false;
+    if (core.status.lockControl) return false;
+    // 虚拟键盘
+    core.waitHeroToStop(function () {
+        core.ui._drawKeyBoard();
+    });
+    return true;
 }
 
 actions.prototype.onStatusBarClick = function (e) {

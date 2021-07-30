@@ -466,11 +466,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			parent.appendChild(input2);
 		}
 	}
+
+	var _loadFloor_doNotCopy = core.maps._loadFloor_doNotCopy;
 	core.maps._loadFloor_doNotCopy = function () {
-		return [
-			"firstArrive", "eachArrive", "blocks", "parallelDo", "map", "bgmap", "fgmap", "bg2map", "fg2map",
-			"events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
-		];
+		return ["bg2map", "fg2map"].concat(_loadFloor_doNotCopy());
 	}
 	////// 绘制背景和前景层 //////
 	core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {

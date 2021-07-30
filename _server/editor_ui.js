@@ -696,7 +696,7 @@ editor_ui_wrapper = function (editor) {
 
     uievent._searchUsedFlags = function (flag) {
         var list = [];
-        var events = ["events", "autoEvent", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor"]
+        var events = ["events", "autoEvent", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor"]
         for (var floorId in core.floors) {
             var floor = core.floors[floorId];
             if (hasUsedFlags(floor.firstArrive, flag)) list.push([floorId, "firstArrive"]);

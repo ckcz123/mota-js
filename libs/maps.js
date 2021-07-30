@@ -11,15 +11,18 @@ maps.prototype._init = function () {
     //delete(maps_90f36752_8815_4be8_b32b_d7fad1d0542e);
 }
 
-maps.prototype._setFloorSize = function (floorId) {
+maps.prototype._initFloors = function (floorId) {
     if (!floorId) {
         core.floorIds.forEach(function (floorId) {
-            core.maps._setFloorSize(floorId);
+            core.maps._initFloors(floorId);
         });
         return;
     }
     core.floors[floorId].width = core.floors[floorId].width || core.__SIZE__;
     core.floors[floorId].height = core.floors[floorId].height || core.__SIZE__;
+
+    // 战前事件兼容性
+    if (!core.floors[floorId].beforeBattle) core.floors[floorId].beforeBattle = {}
 }
 
 maps.prototype._resetFloorImages = function () {
@@ -71,7 +74,7 @@ maps.prototype.loadFloor = function (floorId, map) {
 maps.prototype._loadFloor_doNotCopy = function () {
     return [
         "firstArrive", "eachArrive", "blocks", "parallelDo", "map", "bgmap", "fgmap",
-        "events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
+        "events", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
     ];
 }
 

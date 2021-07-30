@@ -244,6 +244,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "固伤",
 					"_data": "战前扣血的点数"
 				},
+				"beforeBattle": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "beforeBattle",
+					"_docs": "战前事件",
+					"_data": "和该怪物战斗前触发的事件列表"
+				},
 				"afterBattle": {
 					"_leaf": true,
 					"_type": "event",
@@ -570,6 +577,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_docs": "楼层转换",
 							"_data": "该点楼层转换事件；该事件不能和上面的events同时出现，否则会被覆盖"
 						},
+						"beforeBattle": {
+							"_leaf": true,
+							"_type": "event",
+							"_event": "beforeBattle",
+							"_docs": "战前事件",
+							"_data": "该点战斗前可能触发的事件列表，可以双击进入事件编辑器。"
+						},
 						"afterBattle": {
 							"_leaf": true,
 							"_type": "event",
@@ -630,6 +644,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"parallelDo": "",
 			"events": {},
 			"changeFloor": {},
+			"beforeBattle": {},
 			"afterBattle": {},
 			"afterGetItem": {},
 			"afterOpenDoor": {},

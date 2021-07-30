@@ -252,6 +252,18 @@ code=JSON.stringify(code,null,2)+',\n';
 return code;
 */;
 
+//beforeBattle 事件编辑器入口之一
+beforeBattle_m
+    :   '战斗开始前' BGNL? Newline action+ BEND
+    
+
+/* beforeBattle_m
+tooltip : 战斗开始前
+helpUrl : /_docs/#/instruction
+var code = '[\n'+action_0+']\n';
+return code;
+*/;
+
 //afterBattle 事件编辑器入口之一
 afterBattle_m
     :   '战斗结束后' BGNL? Newline action+ BEND
@@ -3975,8 +3987,8 @@ IgnoreChangeFloor_List
     /*IgnoreChangeFloor_List ['null','true','false']*/;
 
 Event_List
-    :   '普通事件'|'战后事件'|'道具后事件'|'开门后事件'
-    /*Event_List ['null','afterBattle','afterGetItem','afterOpenDoor']*/;
+    :   '普通事件'|'战前事件'|'战后事件'|'道具后事件'|'开门后事件'
+    /*Event_List ['null','beforeBattle','afterBattle','afterGetItem','afterOpenDoor']*/;
 
 Floor_Meta_List
     :   '楼层中文名'|'状态栏名称'|'能否楼传飞到'|'能否楼传飞出'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'楼传落点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
@@ -4052,8 +4064,8 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'生命增益'|'攻击增益'|'防御增益'|'护盾增益'
-    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax','buff:hp','buff:atk','buff:def','buff:mdef']*/;
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'横坐标'|'纵坐标'|'攻击增益'|'防御增益'|'护盾增益'
+    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax','status:x','status:y','buff:atk','buff:def','buff:mdef']*/;
 
 Id_List
     :   '变量' | '状态' | '物品' | '增益' | '独立开关' | '临时变量' |'全局存储'

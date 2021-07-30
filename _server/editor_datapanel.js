@@ -596,7 +596,7 @@ editor_datapanel_wrapper = function (editor) {
             });
 
             // Step 3:更新所有坐标
-            ["events", "afterBattle", "afterGetItem", "afterOpenDoor", "changeFloor", "autoEvent", "cannotMove"].forEach(function (name) {
+            ["events", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor", "changeFloor", "autoEvent", "cannotMove"].forEach(function (name) {
                 newFloorData[name] = {};
                 if (!currentFloorData[name]) return;
                 for (var loc in currentFloorData[name]) {

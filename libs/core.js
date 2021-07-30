@@ -317,7 +317,7 @@ core.prototype._init_flags = function () {
         return e1.index - e2.index;
     })
 
-    core.maps._setFloorSize();
+    core.maps._initFloors();
     // 初始化怪物、道具等
     core.material.enemys = core.enemys.getEnemys();
     core.material.items = core.items.getItems();

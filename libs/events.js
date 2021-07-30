@@ -403,7 +403,26 @@ events.prototype._trigger_ignoreChangeFloor = function (block) {
 }
 
 events.prototype._sys_battle = function (data, callback) {
-    this.battle(data.event.id, data.x, data.y, false, callback);
+    // 检查战前事件
+    var beforeBattle = [];
+    core.push(beforeBattle, core.floors[core.status.floorId].beforeBattle[data.x + "," + data.y]);
+    core.push(beforeBattle, (core.material.enemys[data.event.id]||{}).beforeBattle);
+    if (beforeBattle.length > 0) {
+        core.push(beforeBattle, [{"type": "battle", "x": data.x, "y": data.y}]);
+        core.clearContinueAutomaticRoute();
+
+        // 自动存档
+        var inAction = core.status.event.id == 'action';
+        if (inAction) {
+            core.insertAction(beforeBattle, data.x, data.y);
+            core.doAction();
+        } else {
+            core.autosave(true);
+            core.insertAction(beforeBattle, data.x, data.y, callback);
+        }
+    } else {
+        this.battle(data.event.id, data.x, data.y, false, callback);
+    }
 }
 
 ////// 战斗 //////
@@ -859,8 +878,7 @@ events.prototype._sys_action = function (data, callback) {
 
 events.prototype._sys_custom = function (data, callback) {
     core.insertAction(["请使用\r[yellow]core.registerSystemEvent('custom', func)\r来处理自己添加的系统触发器！"],
-        data.x, data.y);
-    if (callback) callback();
+        data.x, data.y, callback);
 }
 
 // ------ 自定义事件的处理 ------ //

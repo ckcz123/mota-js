@@ -60,6 +60,7 @@ editor_blocklyconfig=(function(){
         "args": ""
       }],'shop'),
       MotaActionBlocks['common_m'].xmlText(),
+      MotaActionBlocks['beforeBattle_m'].xmlText(),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
@@ -535,7 +536,7 @@ var workspace = Blockly.inject(blocklyDiv,{
 });
 
 editor_blockly.isCommonEntry = function () {
-  var commonEntries = ['afterBattle', 'afterOpenDoor', 'firstArrive', 'eachArrive', 'commonEvent', 'item'];
+  var commonEntries = ['beforeBattle', 'afterBattle', 'afterOpenDoor', 'firstArrive', 'eachArrive', 'commonEvent', 'item'];
   return commonEntries.indexOf(editor_blockly.entryType) >= 0;
 }
 

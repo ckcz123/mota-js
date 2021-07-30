@@ -326,6 +326,7 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.events = {};
     editor.currentFloorData.autoEvent = {};
     editor.currentFloorData.changeFloor = {};
+    editor.currentFloorData.beforeBattle = {};
     editor.currentFloorData.afterBattle = {};
     editor.currentFloorData.afterGetItem = {};
     editor.currentFloorData.afterOpenDoor = {};
@@ -442,6 +443,8 @@ editor.prototype._drawEventBlock_getColor = function (loc) {
             }
         }
     }
+    if (editor.currentFloorData.beforeBattle[loc])
+        color.push('#009090');
     if (editor.currentFloorData.afterBattle[loc])
         color.push('#FFFF00');
     if (editor.currentFloorData.changeFloor[loc])

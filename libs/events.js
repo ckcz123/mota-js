@@ -1104,15 +1104,25 @@ events.prototype.checkAutoEvents = function () {
 
         core.autoEventExecuting(symbol, true);
         core.autoEventExecuted(symbol, true);
-
-        var event = [
-            {"type": "function", "function":
-                    "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
-            // 用do-while(0)包一层防止break影响事件流
-            {"type": "dowhile", "condition": "false", "data": autoEvent.data},
-            {"type": "function", "function":
-                    "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
-        ];
+        
+        var event;
+        if (x == null && y == null) {
+            event = [
+                // 用do-while(0)包一层防止break影响事件流
+                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
+                {"type": "function", "function":
+                        "function() { core.autoEventExecuting('" + symbol + "', false); }"}
+            ];
+        } else {
+            event = [
+                {"type": "function", "function":
+                        "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
+                // 用do-while(0)包一层防止break影响事件流
+                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
+                {"type": "function", "function":
+                        "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
+            ];
+        }
 
         if (autoEvent.delayExecute)
             delay.push(event);

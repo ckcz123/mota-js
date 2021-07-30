@@ -82,7 +82,8 @@ ActionParser.prototype.parse = function (obj,type) {
         })
         return text_choices;
       }
-      return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage)]);
+      return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage),
+        this.parseList(obj.equipEvent), this.parseList(obj.unequipEvent)]);
 
       case 'doorInfo':
         if(!obj) obj={};

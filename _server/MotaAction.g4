@@ -456,7 +456,7 @@ return code;
 
 // equip 事件编辑器入口之一
 equip_m 
-    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '此道具cls须为equips并设置canUseItemEffect' BEND
+    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '穿上时事件' action+ '脱下时事件' action+ '此道具cls须为equips并设置canUseItemEffect' BEND
 
 
 /* equip_m
@@ -468,7 +468,9 @@ if (!/^\d+$/.test(EvalString_0)) {
     EvalString_0 = '"' + EvalString_0 + '"';
 }
 IdString_0 = IdString_0 && (', "animate": "'+IdString_0+'"');
-var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}}';
+if (action_0.trim()) action_0 = ', "equipEvent": [\n' + action_0 + ']';
+if (action_1.trim()) action_1 = ', "unequipEvent": [\n' + action_1 + ']';
+var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}'+action_0+action_1+'}';
 return code;
 */;
 
@@ -2034,7 +2036,7 @@ return code;
 */;
 
 unloadEquip_s
-    :   '卸下装备孔' Int '的装备' Newline
+    :   '卸下第' Int '格装备孔的装备' Newline
 
 
 /* unloadEquip_s
@@ -3868,7 +3870,7 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 
 
 equip_e
-    :   '装备孔:' Int
+    :   '第' Int '格装备孔'
 
 
 /* equip_e

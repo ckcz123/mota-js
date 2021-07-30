@@ -3503,6 +3503,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "重新定位一个自定义画布", 
           "!type": "fn(name: string, x: number, y: number)"
         }, 
+        "rotateCanvas": {
+          "!doc": "设置一个自定义画布的旋转角度<br/>centerX, centerY: 旋转中心（以屏幕像素为基准）；不填视为图片正中心。",
+          "!type": "fn(name: string, angle: number, centerX?: number, centerY?: number)"
+        },
         "closePanel": {
           "!doc": "结束一切事件和绘制，关闭UI窗口，返回游戏进程", 
           "!type": "fn()"
@@ -3828,6 +3832,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "移动一张图片并/或改变其透明度<br/>例如：core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明<br/>code: 图片编号<br/>to: 新的左上角坐标，省略表示原地改变透明度<br/>opacityVal: 新的透明度，省略表示不变<br/>time: 移动用时，单位为毫秒。不填视为1秒<br/>callback: 图片移动完毕后的回调函数，可选", 
           "!type": "fn(code: number, to?: [number], opacityVal?: number, moveMode?: string, time?: number, callback?: fn())"
         }, 
+        "rotateImage": {
+          "!doc": "旋转一张图片<br/>code: 图片编号<br/>center: 旋转中心像素坐标（以屏幕为基准）；不填视为图片本身中心<br/>angle: 旋转角度；正数为顺时针，负数为逆时针<br/>moveMode: 旋转模式<br/>time: 旋转用时，单位为毫秒。不填视为1秒<br/>callback: 图片旋转完毕后的回调函数，可选",
+          "!type": "fn(code: number, center?: [number], angle?: number, moveMode?: string, time?: number, callback?: fn())"
+        },
         "openSettings": {
           "!doc": "点击设置按钮时的操作", 
           "!type": "fn(fromUserAction?: bool)"

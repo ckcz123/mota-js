@@ -1615,6 +1615,16 @@ events.prototype._precompile_moveImage = function (data) {
     return data;
 }
 
+events.prototype._action_rotateImage = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    this.__action_doAsyncFunc(data.async, core.rotateImage, data.code, data.center, data.angle, data.moveMode, data.time);
+}
+
+events.prototype._precompile_rotateImage = function (data) {
+    data.center = this.__precompile_array(data.center);
+    return data;
+}
+
 events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
         core.setCurtain(data.color, data.time);
@@ -3091,7 +3101,7 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
     var moveFunc = core.applyEasing(moveInfo.moveMode);
     var animate = setInterval(function () {
         step++;
-        currOpacity = opacity + (toOpacity - opacity) * step / steps;
+        currOpacity = opacity + (toOpacity - opacity) * moveFunc(step / steps);
         currX = parseInt(fromX + (toX - fromX) * moveFunc(step / steps));
         currY = parseInt(fromY + (toY - fromY) * moveFunc(step / steps));
         core.setOpacity(name, currOpacity);
@@ -3104,6 +3114,44 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
         }
     }, per_time);
     core.animateFrame.asyncId[animate] = true;
+}
+
+////// 旋转图片 //////
+events.prototype.rotateImage = function (code, center, angle, moveMode, time, callback) {
+    time = time || 1000;
+    center = center || [];
+    var name = "image" + (code + 100);
+    if (!core.dymCanvas[name]) {
+        if (callback) callback();
+        return;
+    }
+    var canvas = core.dymCanvas[name].canvas;
+    var centerX = core.calValue(center[0]), centerY = core.calValue(center[1]);
+
+    var fromAngle = parseFloat(canvas.getAttribute('_angle')) || 0;
+    var rotateInfo = {
+        fromAngle: fromAngle, angle: angle, centerX: centerX, centerY: centerY,
+        moveMode: moveMode, time: time / Math.max(core.status.replay.speed, 1)
+    }
+    this._rotateImage_rotating(name, rotateInfo, callback);
+}
+
+events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
+    var per_time = 10, step = 0, steps = parseInt(rotateInfo.time / per_time);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(rotateInfo.moveMode);
+    var animate = setInterval(function () {
+        step++;
+        var currAngle = rotateInfo.fromAngle + rotateInfo.angle * moveFunc(step / steps);
+        core.rotateCanvas(name, currAngle, rotateInfo.centerX, rotateInfo.centerY);
+        if (step == steps) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+    }, per_time);
+    core.animateFrame.asyncId[animate] = true;
+
 }
 
 ////// 绘制或取消一张gif图片 //////

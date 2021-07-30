@@ -831,6 +831,7 @@ action
     |   hideImage_s
     |   showTextImage_s
     |   moveImage_s
+    |   rotateImage_s
     |   showGif_s
     |   setCurtain_0_s
     |   setCurtain_1_s
@@ -2205,6 +2206,7 @@ tooltip : showImage：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
+menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/", "EvalString_0"])']]
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -2225,6 +2227,7 @@ tooltip : showImage_1：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
+menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/", "EvalString_0"])']]
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -2299,7 +2302,24 @@ if (PosString_0 && PosString_1)
 EvalString_0 = (EvalString_0!=='') ? (', "opacity": '+EvalString_0):'';
 MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "moveImage", "code": '+NInt_0+toloc+MoveMode_List_0+EvalString_0+',"time": '+Int_0+async+'},\n';
+var code = '{"type": "moveImage", "code": '+NInt_0+toloc+MoveMode_List_0+EvalString_0+', "time": '+Int_0+async+'},\n';
+return code;
+*/;
+
+rotateImage_s
+    :   '图片旋转' '图片编号' NInt '中心点像素' 'x' PosString? 'y' PosString? '移动方式' MoveMode_List BGNL? '旋转度数（正数顺时针，负数逆时针）' NInt '旋转时间' Int '不等待执行完毕' Bool Newline
+    
+
+/* rotateImage_s
+tooltip : rotateImage：图片旋转
+helpUrl : /_docs/#/instruction
+default : [1,'','','',90,500,false]
+var loc = '';
+if (PosString_0 && PosString_1)
+  loc = ', "center": ['+PosString_0+','+PosString_1+']';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "rotateImage", "code": '+NInt_0+loc+', "angle": '+NInt_1+MoveMode_List_0+', "time": '+Int_0+async+'},\n';
 return code;
 */;
 

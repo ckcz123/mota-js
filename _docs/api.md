@@ -1088,6 +1088,15 @@ resetGame: fn(hero?: ?, hard?: ?, floorId?: string, maps?: ?, values?: ?)
 restart: fn()
 重新开始游戏；此函数将回到标题页面
 
+rotateImage: fn(code: number, center?: [number], angle?: number, moveMode?: string, time?: number, callback?: fn())
+旋转一张图片
+code: 图片编号
+center: 旋转中心像素坐标（以屏幕为基准）；不填视为图片本身中心
+angle: 旋转角度；正数为顺时针，负数为逆时针
+moveMode: 旋转模式
+time: 旋转用时，单位为毫秒。不填视为1秒
+callback: 图片旋转完毕后的回调函数，可选
+
 save: fn(fromUserAction?: bool)
 点击存档按钮时的打开操作
 
@@ -1951,6 +1960,10 @@ relocateCanvas: fn(name: string, x: number, y: number)
 
 resizeCanvas: fn(name: string, x: number, y: number)
 重新设置一个自定义画布的大小
+
+rotateCanvas: fn(name: string, angle: number, centerX?: number, centerY?: number)
+设置一个自定义画布的旋转角度
+centerX, centerY: 旋转中心（以屏幕像素为基准）；不填视为图片正中心。
 
 saveCanvas: fn(name: string|CanvasRenderingContext2D)
 保存某个canvas状态

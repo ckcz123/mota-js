@@ -105,6 +105,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['hideImage_s'].xmlText(),
       MotaActionBlocks['showTextImage_s'].xmlText(),
       MotaActionBlocks['moveImage_s'].xmlText(),
+      MotaActionBlocks['rotateImage_s'].xmlText(),
       MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),

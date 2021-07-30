@@ -3149,8 +3149,11 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
     if (obj.cls[id]=='items' && id!='superPotion') {
         var temp = core.clone(core.status.hero);
         core.setFlag("__statistics__", true);
+        var ratio = core.status.thisMap.ratio;
+        core.status.thisMap.ratio = core.clone(core.status.maps[floorId].ratio);
         try { eval(core.material.items[id].itemEffect); }
         catch (e) {}
+        core.status.thisMap.ratio = ratio;
         hp = core.status.hero.hp - temp.hp;
         atk = core.status.hero.atk - temp.atk;
         def = core.status.hero.def - temp.def;
@@ -3297,6 +3300,27 @@ ui.prototype.relocateCanvas = function (name, x, y) {
         ctx.canvas.setAttribute("_top", y);
     }
     return ctx;
+}
+
+////// canvas旋转 //////
+ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return null;
+    var canvas = ctx.canvas;
+    angle = angle || 0;
+    if (centerX == null || centerY == null) {
+        canvas.style.transformOrigin = '';
+    } else {
+        var left = parseFloat(canvas.getAttribute("_left"));
+        var top = parseFloat(canvas.getAttribute("_top"));
+        canvas.style.transformOrigin = (centerX - left) * core.domStyle.scale + 'px ' + (centerY - top) * core.domStyle.scale + 'px';
+    }
+    if (angle == 0) {
+        canvas.style.transform = '';
+    } else {
+        canvas.style.transform = 'rotate(' + angle +'deg)';
+    }
+    canvas.setAttribute('_angle', angle);
 }
 
 ////// canvas重置 //////

@@ -985,7 +985,18 @@ declare class events {
      * @param callback 图片移动完毕后的回调函数，可选
      */
     moveImage(code: number, to?: [number?, number?], opacityVal?: number, moveMode?: string, time?: number, callback?: () => void): void
-    
+
+    /**
+     * 旋转一张图片
+     * @param code 图片编号
+     * @param center 旋转中心像素（以屏幕为基准）；不填视为图片本身中心
+     * @param angle 旋转角度；正数为顺时针，负数为逆时针
+     * @param moveMode 旋转模式
+     * @param time 移动用时，单位为毫秒。不填视为1秒
+     * @param callback 图片移动完毕后的回调函数，可选
+     */
+    rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
+
     /**
      * 绘制一张动图或擦除所有动图
      * @example core.showGif(); // 擦除所有动图
@@ -2109,6 +2120,9 @@ declare class ui {
 
     /** 重新设置一个自定义画布的大小 */
     resizeCanvas(name: string, x: number, y: number): void
+
+    /** 设置一个自定义画布的旋转角度 */
+    rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
     deleteCanvas(name: string): void

@@ -185,12 +185,13 @@ editor_multi = function () {
     var ternServer = new CodeMirror.TernServer({
         defs: terndefs_f6783a0a_522d_417e_8407_94c67b692e50,
         plugins: {
-            doc_comments: true,
+            doc_comment: true,
             complete_strings: true,
         },
         useWorker: false
     });
 
+    editor_multi.ternServer = ternServer;
     editor_multi.codeEditor = codeEditor;
 
     codeEditor.on("cursorActivity", function (cm) {

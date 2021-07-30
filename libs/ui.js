@@ -2439,7 +2439,7 @@ ui.prototype.drawFly = function(page) {
     }
     var size = this.PIXEL - 143;
     core.strokeRect('ui', 20, 100, size, size, '#FFFFFF', 2);
-    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size});
+    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size, damage: true});
 }
 
 ////// 绘制中心对称飞行器

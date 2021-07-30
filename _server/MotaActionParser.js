@@ -82,7 +82,8 @@ ActionParser.prototype.parse = function (obj,type) {
         })
         return text_choices;
       }
-      return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage)]);
+      return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage),
+        this.parseList(obj.equipEvent), this.parseList(obj.unequipEvent)]);
 
       case 'doorInfo':
         if(!obj) obj={};
@@ -905,15 +906,19 @@ ActionParser.prototype.parseAction = function() {
             case_waitList = MotaActionFunctions.xmlText('waitContext_2',[
               caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
-          } else if (caseNow["case"] == "timeout") {
+          } else if (caseNow["case"] == "condition") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_3',[
+              this.expandEvalBlock([caseNow.condition]), caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
+          } else if (caseNow["case"] == "timeout") {
+            case_waitList = MotaActionFunctions.xmlText('waitContext_4',[
               caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
             ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
           }
         }
       }
       this.next = MotaActionFunctions.xmlText('wait_s',[
-        data.timeout||0,case_waitList, this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+        data.forceChild||false,data.timeout||0,case_waitList, this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
@@ -1333,6 +1338,7 @@ ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
 ActionParser.prototype.expandEvalBlock = function(args, isShadow, comment) {
   args[0]=MotaActionFunctions.replaceFromName(args[0])
   var xml=MotaActionBlocks['evalString_e'].xmlText
+  if (args[0].indexOf('\n') >= 0 || args[0].indexOf('\\n') >= 0) return xml(args, isShadow, comment);
   var ret=this.matchId(args)
   if (ret.ret){
     xml=ret.xml;

@@ -456,7 +456,7 @@ return code;
 
 // equip 事件编辑器入口之一
 equip_m 
-    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '此道具cls须为equips并设置canUseItemEffect' BEND
+    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '穿上时事件' action+ '脱下时事件' action+ '此道具cls须为equips并设置canUseItemEffect' BEND
 
 
 /* equip_m
@@ -468,7 +468,9 @@ if (!/^\d+$/.test(EvalString_0)) {
     EvalString_0 = '"' + EvalString_0 + '"';
 }
 IdString_0 = IdString_0 && (', "animate": "'+IdString_0+'"');
-var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}}';
+if (action_0.trim()) action_0 = ', "equipEvent": [\n' + action_0 + ']';
+if (action_1.trim()) action_1 = ', "unequipEvent": [\n' + action_1 + ']';
+var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}'+action_0+action_1+'}';
 return code;
 */;
 
@@ -2034,7 +2036,7 @@ return code;
 */;
 
 unloadEquip_s
-    :   '卸下装备孔' Int '的装备' Newline
+    :   '卸下第' Int '格装备孔的装备' Newline
 
 
 /* unloadEquip_s
@@ -2980,19 +2982,20 @@ return code;
 
 
 wait_s
-    :   '等待用户操作并获得按键或点击信息' '超时毫秒数' Int BGNL? Newline waitContext* BEND Newline
+    :   '等待用户操作并获得按键或点击信息' '仅检测子块' Bool '超时毫秒数' Int BGNL? Newline waitContext* BEND Newline
 
 
 /* wait_s
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
-default : [0]
+default : [true,0]
 colour : this.soundColor
+Bool_0 = Bool_0?(', "forceChild": true'):'';
 Int_0 = Int_0?(', "timeout": ' + Int_0):'';
 waitContext_0 = waitContext_0 ? (', "data": [\n' + waitContext_0 + ']') : '';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
 var disabled=block.isEnabled()?'':', "_disabled": true';
-var code = '{"type": "wait"' + Int_0 + collapsed + disabled + waitContext_0 + '},\n';
+var code = '{"type": "wait"' + Bool_0 + Int_0 + collapsed + disabled + waitContext_0 + '},\n';
 return code;
 */;
 
@@ -3001,17 +3004,19 @@ waitContext
     : waitContext_1
     | waitContext_2
     | waitContext_3
+    | waitContext_4
     | waitContext_empty;
 
 
 waitContext_1
-    : '按键的场合' '键值' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+    : '按键的场合：' '键值（右键查表）' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_1
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
 colour : this.subColor
 default : ["",false]
+menu : [["查询键值表", "editor_blockly.showKeyCodes()"]]
 if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
   throw new Error('键值必须是正整数，可以以逗号分隔');
 }
@@ -3024,7 +3029,7 @@ return code;
 
 
 waitContext_2
-    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+    : '点击的场合：' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_2
 tooltip : wait: 等待用户操作并获得按键或点击信息
@@ -3040,9 +3045,24 @@ return code;
 */;
 
 waitContext_3
-    : '超时的场合' '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+    : '自定义条件的场合：' expression '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_3
+tooltip : wait: 等待用户操作并获得按键或点击信息
+helpUrl : /_docs/#/instruction
+default : ["true",false]
+colour : this.subColor
+Bool_0 = Bool_0?', "break": true':'';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var disabled=block.isEnabled()?'':', "_disabled": true';
+var code = '{"case": "condition", "condition": "'+expression_0+'"'+Bool_0+collapsed+disabled+', "action": [\n' + action_0 + ']},\n';
+return code;
+*/;
+
+waitContext_4
+    : '超时的场合：' '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+
+/* waitContext_4
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
 colour : this.subColor
@@ -3868,7 +3888,7 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 
 
 equip_e
-    :   '装备孔:' Int
+    :   '第' Int '格装备孔'
 
 
 /* equip_e

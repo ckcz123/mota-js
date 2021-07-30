@@ -777,16 +777,18 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // wait事件
     if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
-        clearTimeout(core.status.event.interval);
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
-        delete core.status.event.timeout;
         core.setFlag('type', 0);
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
         core.setFlag('timeout', timeout);
-        core.status.route.push("input:" + (1e8 * timeout + keycode));
-        core.events.__action_wait_afterGet(core.status.event.data.current);
-        core.doAction();
+        var executed = core.events.__action_wait_afterGet(core.status.event.data.current);
+        if (executed || !core.status.event.data.current.forceChild) {
+            core.status.route.push("input:" + (1e8 * timeout + keycode));
+            clearTimeout(core.status.event.interval);
+            delete core.status.event.timeout;
+            core.doAction();
+        }
         return;
     }
 
@@ -1040,18 +1042,20 @@ actions.prototype._clickAction = function (x, y, px, py) {
     }
 
     if (core.status.event.data.type == 'wait') {
-        clearTimeout(core.status.event.interval);
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
-        delete core.status.event.timeout;
         core.setFlag('type', 1);
         core.setFlag('x', x);
         core.setFlag('y', y);
         core.setFlag('px', px);
         core.setFlag('py', py);
         core.setFlag('timeout', timeout);
-        core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
-        core.events.__action_wait_afterGet(core.status.event.data.current);
-        core.doAction();
+        var executed = core.events.__action_wait_afterGet(core.status.event.data.current);
+        if (executed || !core.status.event.data.current.forceChild) {
+            core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
+            clearTimeout(core.status.event.interval);
+            delete core.status.event.timeout;
+            core.doAction();
+        }
         return;
     }
 
@@ -1134,15 +1138,17 @@ actions.prototype._keyUpAction = function (keycode) {
         return;
     }
     if (core.status.event.data.type == 'wait') {
-        clearTimeout(core.status.event.interval);
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
-        delete core.status.event.timeout;
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
         core.setFlag('timeout', timeout);
-        core.status.route.push("input:" + (1e8 * timeout + keycode));
-        core.events.__action_wait_afterGet(core.status.event.data.current);
-        core.doAction();
+        var executed = core.events.__action_wait_afterGet(core.status.event.data.current);
+        if (executed || !core.status.event.data.current.forceChild) {
+            core.status.route.push("input:" + (1e8 * timeout + keycode));
+            clearTimeout(core.status.event.interval);
+            delete core.status.event.timeout;
+            core.doAction();
+        }
         return;
     }
     if (core.status.event.data.type == 'choices') {
@@ -1503,6 +1509,7 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x >= this.LAST - 2 && y == this.LAST) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
 
@@ -1678,6 +1685,7 @@ actions.prototype._keyUpToolbox = function (keycode) {
     if (keycode == 84 || keycode == 27 || keycode == 88) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
     if (core.status.event.data == null) return;
@@ -1704,6 +1712,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     if (x >= this.LAST - 2 && y == this.LAST) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
 
@@ -1861,6 +1870,7 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
     if (keycode == 81 || keycode == 27 || keycode == 88) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
     if (!core.status.event.data.selectId) return;

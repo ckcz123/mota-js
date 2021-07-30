@@ -344,6 +344,14 @@ events.prototype.trigger = function (x, y, callback) {
         } catch (e) { main.log(e); }
     }
 
+    // 碰触事件
+    if (block.event.event) {
+        core.clearRouteFolding();
+        core.insertAction(block.event.event, block.x, block.y);
+        // 不再执行该点的系统事件
+        return _executeCallback();
+    }
+
     if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
@@ -367,6 +375,14 @@ events.prototype._trigger_inAction = function (x, y) {
     try {
         eval(block.event.script);
     } catch (e) { main.log(e); }
+
+    // 碰触事件
+    if (block.event.event) {
+        core.clearRouteFolding();
+        core.insertAction(block.event.event, block.x, block.y);
+        // 不再执行该点的系统事件
+        return core.doAction();
+    }
 
     if (block.event.trigger && block.event.trigger != 'null') {
         this.setEvents(null, x, y);
@@ -1104,15 +1120,25 @@ events.prototype.checkAutoEvents = function () {
 
         core.autoEventExecuting(symbol, true);
         core.autoEventExecuted(symbol, true);
-
-        var event = [
-            {"type": "function", "function":
-                    "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
-            // 用do-while(0)包一层防止break影响事件流
-            {"type": "dowhile", "condition": "false", "data": autoEvent.data},
-            {"type": "function", "function":
-                    "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
-        ];
+        
+        var event;
+        if (x == null && y == null) {
+            event = [
+                // 用do-while(0)包一层防止break影响事件流
+                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
+                {"type": "function", "function":
+                        "function() { core.autoEventExecuting('" + symbol + "', false); }"}
+            ];
+        } else {
+            event = [
+                {"type": "function", "function":
+                        "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
+                // 用do-while(0)包一层防止break影响事件流
+                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
+                {"type": "function", "function":
+                        "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
+            ];
+        }
 
         if (autoEvent.delayExecute)
             delay.push(event);
@@ -2361,7 +2387,7 @@ events.prototype.__action_wait_getValue = function (value) {
 }
 
 events.prototype.__action_wait_afterGet = function (data) {
-    if (!data.data) return;
+    if (!data.data) return false;
     var todo = [];
     var stop = false;
     data.data.forEach(function (one) {
@@ -2386,20 +2412,32 @@ events.prototype.__action_wait_afterGet = function (data) {
                 if (one["break"]) stop = true;
             }
         }
+        if (one["case"] == "condition") {
+            var condition = false;
+            try { condition = core.calValue(one.condition); } catch (e) {}
+            if (condition) {
+                core.push(todo, one.action);
+                if (one["break"]) stop = true;
+            }
+        }
         if (one["case"] == "timeout" && core.getFlag("type") == -1) {
             core.push(todo, one.action);
             if (one["break"]) stop = true;
         }
     })
-    if (todo.length > 0)
+    if (todo.length > 0) {
         core.insertAction(todo);
+        return true;
+    }
+    return false;
 }
 
 events.prototype._precompile_wait = function (data) {
     if (data.data) {
         data.data.forEach(function (v) {
-            if (v.px) v.px = this.__precompile_array(v.px);
-            if (v.py) v.py = this.__precompile_array(v.py);
+            if (v.px != null) v.px = this.__precompile_array(v.px);
+            if (v.py != null) v.py = this.__precompile_array(v.py);
+            if (v.condition != null) v.condition = this.__precompile_array(v.condition);
             v.action = this.precompile(v.action);
         }, this);
     }

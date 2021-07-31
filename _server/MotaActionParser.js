@@ -115,7 +115,7 @@ ActionParser.prototype.parse = function (obj,type) {
 
     case 'faceIds':
       if(!obj) obj={};
-      return MotaActionBlocks['faceIds_m'].xmlText([obj.up||"", obj.down||"", obj.left||"", obj.right||""]);
+      return MotaActionBlocks['faceIds_m'].xmlText([obj.down||"", obj.left||"", obj.right||"", obj.up||""]);
 
     case 'mainStyle':
       if(!obj) obj={};

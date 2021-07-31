@@ -617,7 +617,7 @@ return code;
 
 
 faceIds_m
-    : '行走图朝向:' BGNL? Newline '向上ID' IdString? '向下ID' IdString? '向左ID' IdString? '向右ID' IdString? BEND
+    : '行走图朝向:' BGNL? Newline '向下ID' IdString? '向左ID' IdString? '向右ID' IdString? '向上ID' IdString?  BEND
 
 
 /* faceIds_m
@@ -626,10 +626,10 @@ default : ["","","",""]
 allIds : ['IdString_0','IdString_1','IdString_2','IdString_3']
 helpUrl : /_docs/#/instruction
 return '{' + [
-    IdString_0 && ('"up": "' + IdString_0 +'"'),
-    IdString_1 && ('"down": "' + IdString_1 +'"'),
-    IdString_2 && ('"left": "' + IdString_2 +'"'),
-    IdString_3 && ('"right": "' + IdString_3 +'"'),
+    IdString_0 && ('"down": "' + IdString_0 +'"'),
+    IdString_1 && ('"left": "' + IdString_1 +'"'),
+    IdString_2 && ('"right": "' + IdString_2 +'"'),
+    IdString_3 && ('"up": "' + IdString_3 +'"'),
 ].filter(function (x) { return x; }).join(', ') + '}\n';
 */;
 

@@ -218,6 +218,14 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     }
     delete block.event.canPass;
 
+    // 增加怪物的faceIds
+    if (block.event.cls.indexOf("enemy") ==0 ) {
+        var enemy = core.material.enemys[block.event.id];
+        if (enemy && enemy.faceIds) {
+            block.event.faceIds = enemy.faceIds;
+        }
+    }
+
     if (addInfo) this._addInfo(block);
     if (eventFloor) {
         this._addEvent(block, x, y, (eventFloor.events || {})[x + "," + y]);
@@ -1881,6 +1889,12 @@ maps.prototype.searchBlockWithFilter = function (blockFilter, floorId, showDisab
         }
     }
     return result;
+}
+
+////// 获得某个图块，其行走图朝向朝下的图块ID //////
+maps.prototype.getFaceDownId = function (block) {
+    if (block == null || !block.event) return null;
+    return (block.event.faceIds || {}).down || block.event.id;
 }
 
 // -------- 启用/禁用图块，楼层贴图 -------- //

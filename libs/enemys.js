@@ -30,6 +30,16 @@ enemys.prototype.getEnemys = function () {
             }
         }
     }
+    // 将所有怪物的各项属性映射到朝下的
+    for (var id in enemys) {
+        if (enemys[id].faceIds) {
+            var downId = enemys[id].faceIds.down;
+            if (downId != null && downId != id && enemys[downId]) {
+                enemys[id] = core.clone(enemys[downId]);
+                enemys[id].id = id;
+            }
+        }
+    }
     return enemys;
 }
 
@@ -365,8 +375,8 @@ enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
     var enemy = core.material.enemys[enemyId];
     if (!enemy) return null;
 
-    // 检查displayIdInBook
-    return core.material.enemys[enemy.displayIdInBook] || enemy;
+    // 检查朝向；displayIdInBook
+    return core.material.enemys[(enemy.faceIds || {}).down] || core.material.enemys[enemy.displayIdInBook] || enemy;
 }
 
 enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x, y, floorId) {

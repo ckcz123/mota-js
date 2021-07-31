@@ -1827,7 +1827,7 @@ declare class maps {
     getBlockInfo(block?: any): any
 
     /** 获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id */
-    getFaceDownIds(block?: any): string
+    getFaceDownId(block?: any): string
 
     /** 根据图块的索引来隐藏图块 */
     hideBlockByIndex(index?: any, floorId?: string): void

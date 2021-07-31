@@ -461,7 +461,7 @@ enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
         var mapBlocks = core.status.maps[floorId[i]].blocks;
         for (var b = 0; b < mapBlocks.length; b++) {
             if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') === 0) {
-                if (enemyMap === null || enemyMap[mapBlocks[b].event.id]) return true;
+                if (enemyMap === null || enemyMap[core.getFaceDownId(mapBlocks[b])]) return true;
             }
         }
     }

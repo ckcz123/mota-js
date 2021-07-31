@@ -187,7 +187,7 @@ function main() {
     this.canvas = {};
 
     this.__VERSION__ = "2.8";
-    this.__VERSION_CODE__ = 387;
+    this.__VERSION_CODE__ = 402;
 }
 
 main.prototype.init = function (mode, callback) {

@@ -108,6 +108,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			if (core.openItemShop) {
 				core.openItemShop(shopId);
 			} else {
+				core.playSound('操作失败');
 				core.insertAction("道具商店插件不存在！请检查是否存在该插件！");
 			}
 			return;
@@ -145,6 +146,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 								"condition": shop.disablePreview,
 								"true": [
 									// 不可预览，提示并退出
+									{ "type": "playSound", "name": "操作失败" },
 									"当前无法访问该商店！",
 									{ "type": "break" },
 								],
@@ -173,7 +175,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				"text": choice.text,
 				"icon": choice.icon,
 				"color": ableToBuy && !previewMode ? choice.color : [153, 153, 153, 1],
-				"action": ableToBuy && !previewMode ? choice.action : [
+				"action": ableToBuy && !previewMode ? [{ "type": "playSound", "name": "确定" }].concat(choice.action) : [
+					{ "type": "playSound", "name": "操作失败" },
 					{ "type": "tip", "text": previewMode ? "预览模式下不可购买" : "购买条件不足" }
 				]
 			};
@@ -230,13 +233,42 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (core.status.event.data.type != 'choices') return false;
 		var data = core.status.event.data.current;
 		var choices = data.choices;
-		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (keycode == 88 || keycode == 27) { // X, ESC
 			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
 			return true;
 		}
+		if (keycode == 13 || keycode == 32) return true;
+		return false;
 	}, 60);
 
+	/// 允许长按空格或回车连续执行操作
+	core.registerAction('keyDown', 'shops', function (keycode) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
+		if (keycode == 13 || keycode == 32) { // Space, Enter
+			core.actions._clickAction(core.actions.HSIZE, topIndex + core.status.event.selection);
+			return true;
+		}
+		return false;
+	}, 60);
+
+	// 允许长按屏幕连续执行操作
+	core.registerAction('longClick', 'shops', function (x, y, px, py) {
+		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (core.status.event.data.type != 'choices') return false;
+		var data = core.status.event.data.current;
+		var choices = data.choices;
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
+		if (x >= core.actions.CHOICES_LEFT && x <= core.actions.CHOICES_RIGHT && y >= topIndex && y < topIndex + choices.length) {
+			core.actions._clickAction(x, y);
+			return true;
+		}
+		return false;
+	}, 60);
 },
     "removeMap": function () {
 	// 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。
@@ -434,11 +466,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			parent.appendChild(input2);
 		}
 	}
+
+	var _loadFloor_doNotCopy = core.maps._loadFloor_doNotCopy;
 	core.maps._loadFloor_doNotCopy = function () {
-		return [
-			"firstArrive", "eachArrive", "blocks", "parallelDo", "map", "bgmap", "fgmap", "bg2map", "fg2map",
-			"events", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
-		];
+		return ["bg2map", "fg2map"].concat(_loadFloor_doNotCopy());
 	}
 	////// 绘制背景和前景层 //////
 	core.maps._drawBg_draw = function (floorId, toDrawCtx, cacheCtx, config) {
@@ -620,11 +651,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		if (type == 0) {
 			core.status.hero[use] -= totalMoney;
 			core.getItem(item.id, selectCount);
+			core.stopSound();
+			core.playSound('确定');
 			if (item.number != null) item.number -= selectCount;
 			item.money_count = (item.money_count || 0) + selectCount;
 		} else {
 			core.status.hero[use] += totalMoney;
 			core.removeItem(item.id, selectCount);
+			core.playSound('确定');
 			core.drawTip("成功卖出" + selectCount + "个" + core.material.items[item.id].name, item.id);
 			if (item.number != null) item.number += selectCount;
 			item.sell_count = (item.sell_count || 0) + selectCount;
@@ -1049,87 +1083,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.setFlag("heroId", toHeroId); // 保存切换到的角色ID
 	}
 },
-    "flyHideFloors": function () {
-	// 此插件可以让用户在楼传页面手动隐藏某些楼层	
-	// 原作：一桶天下
-
-	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
-	var __enable = false;
-	if (!__enable) return;
-
-	var _drawFly = core.ui.drawFly;
-	core.ui.drawFly = function (page) {
-		_drawFly.call(core.ui, page);
-		// 绘制「显示本层」和「显示全部」
-		var __hideFloors__ = core.getFlag('__hideFloors__', {});
-		var __showAllFloor__ = core.getFlag('__showAllFloor__', false);
-		var floorId = core.floorIds[page];
-		core.fillText('ui', '显示该层', this.HPIXEL - 120, 60, __hideFloors__[floorId] ? '#FFFFFF' : 'yellow', this._buildFont(20, false));
-		core.fillText('ui', '显示全部', this.HPIXEL + 120, 60, !__showAllFloor__ ? '#FFFFFF' : 'yellow', this._buildFont(20, false));
-	}
-
-	var _clickFly = core.actions._clickFly;
-	core.actions._clickFly = function (x, y) {
-		_clickFly.call(core.actions, x, y);
-
-		var __hideFloors__ = core.getFlag('__hideFloors__', {})
-		var __showAllFloor__ = core.getFlag('__showAllFloor__', false)
-		var _floorId = core.floorIds[core.status.event.data]
-
-		if (y == 1 && x >= this.HSIZE - 5 && x <= this.HSIZE - 2) {
-			__hideFloors__[_floorId] = !__hideFloors__[_floorId]
-			core.setFlag('__hideFloors__', __hideFloors__)
-			core.ui.drawFly(this._getNextFlyFloor(0))
-		}
-		if (y == 1 && x >= this.HSIZE + 2 && x <= this.HSIZE + 5) {
-			core.setFlag('__showAllFloor__', !__showAllFloor__)
-			core.ui.drawFly(this._getNextFlyFloor(0))
-		}
-	}
-
-	var _keyUpFly = core.actions._keyUpFly;
-	core.actions._keyUpFly = function (keycode) {
-		_keyUpFly.call(core.actions, keycode);
-
-		var __hideFloors__ = core.getFlag('__hideFloors__', {})
-		var __showAllFloor__ = core.getFlag('__showAllFloor__', false)
-		var _floorId = core.floorIds[core.status.event.data]
-
-		// Q
-		if (keycode == 81) {
-			__hideFloors__[_floorId] = !__hideFloors__[_floorId]
-			core.setFlag('__hideFloors__', __hideFloors__)
-			core.ui.drawFly(this._getNextFlyFloor(0));
-		} else if (keycode == 69) {
-			// E			
-			core.setFlag('__showAllFloor__', !__showAllFloor__)
-			core.ui.drawFly(this._getNextFlyFloor(0))
-		}
-	}
-
-	core.actions._getNextFlyFloor = function (delta, index) {
-		var __hideFloors__ = core.getFlag('__hideFloors__', {})
-		var __showAllFloor__ = core.getFlag('__showAllFloor__', false)
-		if (index == null) index = core.status.event.data;
-		if (delta == 0) return index;
-		var sign = Math.sign(delta);
-		delta = Math.abs(delta);
-		var ans = index;
-		while (true) {
-			index += sign;
-			if (index < 0 || index >= core.floorIds.length) break;
-			var floorId = core.floorIds[index];
-			if (core.status.maps[floorId].canFlyTo && core.hasVisitedFloor(floorId) && (__showAllFloor__ || !__hideFloors__[floorId])) {
-				delta--;
-				ans = index;
-			}
-			if (delta == 0) break;
-		}
-		return ans;
-	}
-
-
-},
     "itemCategory": function () {
 	// 物品分类插件。此插件允许你对消耗道具和永久道具进行分类，比如标记「宝物类」「剧情道具」「药品」等等。
 	// 使用方法：
@@ -1236,7 +1189,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 		if (x < core.actions.CHOICES_LEFT || x > core.actions.CHOICES_RIGHT) return false;
 		var choices = core.status.event.ui.choices;
-		var topIndex = core.actions.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (y >= topIndex && y < topIndex + choices.length) {
 			_selectCategory(y - topIndex);
 		}
@@ -1291,24 +1244,120 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	core.registerAnimationFrame('heroMoving', true, heroMoving);
 
 	core.events._eventMoveHero_moving = function (step, moveSteps) {
-		var direction = moveSteps[0],
-			x = core.getHeroLoc('x'),
-			y = core.getHeroLoc('y'); // ------ 前进/后退
+		var curr = moveSteps[0];
+		var direction = curr[0], x = core.getHeroLoc('x'), y = core.getHeroLoc('y');
+		// ------ 前进/后退
 		var o = direction == 'backward' ? -1 : 1;
 		if (direction == 'forward' || direction == 'backward') direction = core.getHeroLoc('direction');
-		core.setHeroLoc('direction', direction); // if (step <= 4) core.drawHero('leftFoot', 4 * o * step); else if (step <= 8) core.drawHero('rightFoot', 4 * o * step);
+		var faceDirection = direction;
+		if (direction == 'leftup' || direction == 'leftdown') faceDirection = 'left';
+		if (direction == 'rightup' || direction == 'rightdown') faceDirection = 'right';
+		core.setHeroLoc('direction', direction);
+		if (curr[1] <= 0) {
+			core.setHeroLoc('direction', faceDirection);
+			moveSteps.shift();
+			return true;
+		}
 		if (step <= 4) core.drawHero('stop', 4 * o * step);
 		else if (step <= 8) core.drawHero('leftFoot', 4 * o * step);
 		else if (step <= 12) core.drawHero('midFoot', 4 * o * (step - 8));
 		else if (step <= 16) core.drawHero('rightFoot', 4 * o * (step - 8)); // if (step == 8) {
 		if (step == 8 || step == 16) {
-			core.setHeroLoc('x', x + o * core.utils.scan[direction].x, true);
-			core.setHeroLoc('y', y + o * core.utils.scan[direction].y, true);
+			core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);
+			core.setHeroLoc('y', y + o * core.utils.scan2[direction].y, true);
 			core.updateFollowers();
-			moveSteps.shift(); // return true;
+			curr[1]--;
+			if (curr[1] <= 0) moveSteps.shift();
+			core.setHeroLoc('direction', faceDirection);
 			return step == 16;
 		}
 		return false;
+	}
+},
+    "startCanvas": function () {
+	// 使用本插件可以将自绘的标题界面居中。仅在【标题开启事件化】后才有效。
+	// 由于一些技术性的原因，标题界面事件化无法应用到覆盖状态栏的整个界面。
+	// 这是一个较为妥协的插件，会在自绘标题界面时隐藏状态栏、工具栏和边框，并将画布进行居中。
+	// 本插件仅在全塔属性的 "startCanvas" 生效；进入 "startText" 时将会离开居中状态，回归正常界面。
+
+	// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
+	var __enable = false;
+	if (!__enable) return;
+
+	// 检查【标题开启事件化】是否开启
+	if (!core.flags.startUsingCanvas || main.mode != 'play') return;
+
+	var _isTitleCanvasEnabled = false;
+	var _getClickLoc = core.actions._getClickLoc;
+	this._setTitleCanvas = function () {
+		if (_isTitleCanvasEnabled) return;
+		_isTitleCanvasEnabled = true;
+
+		// 禁用窗口resize
+		window.onresize = function () {};
+		core.resize = function () {}
+
+		// 隐藏状态栏
+		core.dom.statusBar.style.display = 'none';
+		core.dom.statusCanvas.style.display = 'none';
+		core.dom.toolBar.style.display = 'none';
+		// 居中画布
+		if (core.domStyle.isVertical) {
+			core.dom.gameDraw.style.top =
+				(parseInt(core.dom.gameGroup.style.height) - parseInt(core.dom.gameDraw.style.height)) / 2 + "px";
+		} else {
+			core.dom.gameDraw.style.right =
+				(parseInt(core.dom.gameGroup.style.width) - parseInt(core.dom.gameDraw.style.width)) / 2 + "px";
+		}
+		core.dom.gameDraw.style.border = '3px transparent solid';
+		core.actions._getClickLoc = function (x, y) {
+			var left = core.dom.gameGroup.offsetLeft + core.dom.gameDraw.offsetLeft + 3;
+			var top = core.dom.gameGroup.offsetTop + core.dom.gameDraw.offsetTop + 3;
+			var loc = { 'x': Math.max(x - left, 0), 'y': Math.max(y - top, 0), 'size': 32 * core.domStyle.scale };
+			return loc;
+		}
+	}
+
+	this._resetTitleCanvas = function () {
+		if (!_isTitleCanvasEnabled) return;
+		_isTitleCanvasEnabled = false;
+		window.onresize = function () { try { main.core.resize(); } catch (e) { main.log(e); } }
+		core.resize = function () { return core.control.resize(); }
+		core.resize();
+		core.actions._getClickLoc = _getClickLoc;
+	}
+
+	// 复写“开始游戏”
+	core.events._startGame_start = function (hard, seed, route, callback) {
+		console.log('开始游戏');
+		core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
+		core.setHeroLoc('x', -1);
+		core.setHeroLoc('y', -1);
+
+		if (seed != null) {
+			core.setFlag('__seed__', seed);
+			core.setFlag('__rand__', seed);
+		} else core.utils.__init_seed();
+
+		core.clearStatusBar();
+		core.plugin._setTitleCanvas();
+
+		var todo = [];
+		core.hideStatusBar();
+		core.push(todo, core.firstData.startCanvas);
+		core.push(todo, { "type": "function", "function": "function() { core.plugin._resetTitleCanvas(); core.events._startGame_setHard(); }" })
+		core.push(todo, core.firstData.startText);
+		this.insertAction(todo, null, null, function () {
+			core.events._startGame_afterStart(callback);
+		});
+
+		if (route != null) core.startReplay(route);
+	}
+
+	var _loadData = core.control.loadData;
+	core.control.loadData = function (data, callback) {
+		core.plugin._resetTitleCanvas();
+		_loadData.call(core.control, data, callback);
 	}
 }
 }

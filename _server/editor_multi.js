@@ -185,12 +185,13 @@ editor_multi = function () {
     var ternServer = new CodeMirror.TernServer({
         defs: terndefs_f6783a0a_522d_417e_8407_94c67b692e50,
         plugins: {
-            doc_comments: true,
+            doc_comment: true,
             complete_strings: true,
         },
         useWorker: false
     });
 
+    editor_multi.ternServer = ternServer;
     editor_multi.codeEditor = codeEditor;
 
     codeEditor.on("cursorActivity", function (cm) {
@@ -221,6 +222,8 @@ editor_multi = function () {
     editor_multi.isString = false;
     editor_multi.lintAutocomplete = false;
 
+    var lastOffset = {};
+
     editor_multi.show = function () {
         if (typeof (selectBox) !== typeof (undefined)) selectBox.isSelected(false);
         var valueNow = codeEditor.getValue();
@@ -249,11 +252,13 @@ editor_multi = function () {
 
     var _format = function () {
         if (!editor_multi.lintAutocomplete) return;
+        var offset = (codeEditor.getScrollInfo() || {}).top || 0;
         _setValue(js_beautify(codeEditor.getValue(), {
             brace_style: "collapse-preserve-inline",
             indent_with_tabs: true,
             jslint_happy: true
         }));
+        codeEditor.scrollTo(0, offset);
     }
 
     var _setValue = function (val) {
@@ -313,10 +318,14 @@ editor_multi = function () {
             _setValue(tstr || '');
         }
         editor_multi.show();
+        codeEditor.scrollTo(0, lastOffset[id_] || 0);
         return true;
     }
 
     editor_multi.cancel = function () {
+        if (editor_multi.id && editor_multi.id != 'callFromBlockly' && editor_multi.id != 'importFile') {
+            lastOffset[editor_multi.id] = (codeEditor.getScrollInfo() || {}).top;
+        }
         editor_multi.hide();
         editor_multi.id = '';
         multiLineArgs = [null, null, null];
@@ -372,6 +381,7 @@ editor_multi = function () {
             editor_multi.hide();
             input.onchange();
         }
+        lastOffset[editor_multi.id] = (codeEditor.getScrollInfo() || {}).top;
         // ----- 自动格式化
         _format();
         setvalue(codeEditor.getValue() || '');

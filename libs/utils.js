@@ -15,6 +15,16 @@ function utils() {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
+    this.scan2 = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0},
+        'leftup': {'x': -1, 'y': -1},
+        'leftdown': {'x': -1, 'y': 1},
+        'rightup': {'x': 1, 'y': -1},
+        'rightdown': {'x': 1, 'y': 1}
+    };
 }
 
 utils.prototype._init = function () {
@@ -66,7 +76,21 @@ utils.prototype._init = function () {
             return this;
         }
     }
-
+    if (typeof Array.prototype.includes != "function") {
+        Array.prototype.includes = function (value) {
+            return this.indexOf(value) >= 0;
+        }
+    }
+    if (typeof String.prototype.includes != "function") {
+        String.prototype.includes = function (value) {
+            return this.indexOf(value) >= 0;
+        }
+    }
+    if (typeof Object.values != "function") {
+        Object.values = function (obj) {
+            return Object.keys(obj).map(function (one) { return obj[one]; });
+        }
+    }
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
@@ -78,17 +102,19 @@ utils.prototype.replaceText = function (text, prefix) {
 }
 
 utils.prototype.replaceValue = function (value) {
-    if (typeof value == "string" && value.indexOf(":") >= 0) {
+    if (typeof value == "string" && (value.indexOf(":") >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0)) {
         if (value.indexOf('status:') >= 0)
             value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
+        if (value.indexOf('buff:') >= 0)
+            value = value.replace(/buff:([a-zA-Z0-9_]+)/g, "core.getBuff('$1')");
         if (value.indexOf('item:') >= 0)
             value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
-        if (value.indexOf('flag:') >= 0)
-            value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
+        if (value.indexOf('flag:') >= 0 || value.indexOf('flag：') >= 0)
+            value = value.replace(/flag[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, "core.getFlag('$1', 0)");
         //if (value.indexOf('switch:' >= 0))
         //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
-        if (value.indexOf('global:') >= 0)
-            value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+        if (value.indexOf('global:') >= 0 || value.indexOf('global：') >= 0)
+            value = value.replace(/global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, "core.getGlobal('$1', 0)");
         if (value.indexOf('enemy:')>=0)
             value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
@@ -109,7 +135,7 @@ utils.prototype.replaceValue = function (value) {
 utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        if (value.indexOf(':') >= 0) {
+        if (value.indexOf(':') >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0) {
             if (value.indexOf('switch:' >= 0))
                 value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
             value = this.replaceValue(value);
@@ -306,16 +332,21 @@ utils.prototype.getGlobal = function (key, defaultValue) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("input2:") == 0) {
             value = JSON.parse(core.decodeBase64(action.substring(7)));
+            core.setFlag('__global__' + key, value);
+            core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
         }
         else {
-            core.control._replay_error(action);
-            return core.getLocalStorage(key, defaultValue);
+            // 录像兼容性：尝试从flag和localStorage获得
+            // 注意这里不再二次记录 input2: 到录像
+            core.status.replay.toReplay.unshift(action);
+            value = core.getFlag('__global__' + key, core.getLocalStorage(key, defaultValue));
         }
     }
     else {
         value = core.getLocalStorage(key, defaultValue);
+        core.setFlag('__global__' + key, value);
+        core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
     }
-    core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
     return value;
 }
 
@@ -456,6 +487,27 @@ utils.prototype.formatBigNumber = function (x, onMap) {
     return c + x;
 }
 
+////// 变速移动 //////
+utils.prototype.applyEasing = function(name) {
+    var list = {
+        "easeIn": function(t) {
+            return Math.pow(t, 3);
+        },
+        "easeOut": function(t) {
+            return 1 - Math.pow(1 - t, 3);
+        },
+        "easeInOut": function(t) {
+            // easeInOut试了一下感觉二次方效果明显点
+            if (t < 0.5) return Math.pow(t, 2) * 2;
+            else return 1 - Math.pow(1 - t, 2) * 2;
+        },
+        "linear": function(t) {
+            return t
+        }
+    }
+    return list[name] || list.linear;
+}
+
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
     if (!(color instanceof Array)) return color;
@@ -514,6 +566,10 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "u" + t.substring(8);
     else if (t.indexOf('equip:') == 0)
         return "e" + this._encodeRoute_id2number(t.substring(6)) + ":";
+    else if (t.indexOf('saveEquip:') == 0)
+        return "s" + t.substring(10);
+    else if (t.indexOf('loadEquip:') == 0)
+        return "l" + t.substring(10);
     else if (t.indexOf('fly:') == 0)
         return "F" + t.substring(4) + ":";
     else if (t == 'choices:none')
@@ -540,6 +596,8 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "M" + t.substring(5);
     else if (t.indexOf('key:') == 0)
         return 'K' + t.substring(4);
+    else if (t.indexOf('click:') == 0)
+        return 'k' + t.substring(6);
     else if (t.indexOf('random:') == 0)
         return 'X' + t.substring(7);
     return '('+t+')';
@@ -623,6 +681,12 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "e":
             decodeObj.ans.push("equip:" + this._decodeRoute_number2id(nxt));
             break;
+        case "s":
+            decodeObj.ans.push("saveEquip:" + nxt);
+            break;
+        case "l":
+            decodeObj.ans.push("loadEquip:" + nxt);
+            break;
         case "F":
             decodeObj.ans.push("fly:" + nxt);
             break;
@@ -662,6 +726,13 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "K":
             decodeObj.ans.push("key:" + nxt);
+            break;
+        case "k":
+            ++decodeObj.index;
+            var px = this._decodeRoute_getNumber(decodeObj);
+            ++decodeObj.index;
+            var py = this._decodeRoute_getNumber(decodeObj);
+            decodeObj.ans.push("click:"+nxt+":"+px+":"+py);
             break;
         case "X":
             decodeObj.ans.push("random:" + nxt);

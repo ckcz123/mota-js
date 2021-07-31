@@ -8,8 +8,10 @@ ActionParser.prototype.parse = function (obj,type) {
       if(!obj)obj={};
       if(typeof(obj)===typeof('')) obj={'data':[obj]};
       if(obj instanceof Array) obj={'data':obj};
+      if (!obj.filter) obj.filter={};
       return MotaActionBlocks['event_m'].xmlText([
-        obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,this.parseList(obj.data)
+        obj.trigger==='action',obj.enable,obj.noPass,obj.displayDamage,obj.opacity,
+          obj.filter.blur,obj.filter.hue,obj.filter.grayscale,obj.filter.invert,obj.filter.shadow,this.parseList(obj.data)
       ]);
     
     case 'autoEvent':
@@ -80,7 +82,8 @@ ActionParser.prototype.parse = function (obj,type) {
         })
         return text_choices;
       }
-      return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage)]);
+      return MotaActionBlocks['equip_m'].xmlText([obj.type, obj.animate, buildEquip(obj.value), buildEquip(obj.percentage),
+        this.parseList(obj.equipEvent), this.parseList(obj.unequipEvent)]);
 
       case 'doorInfo':
         if(!obj) obj={};
@@ -112,7 +115,7 @@ ActionParser.prototype.parse = function (obj,type) {
 
     case 'faceIds':
       if(!obj) obj={};
-      return MotaActionBlocks['faceIds_m'].xmlText([obj.up||"", obj.down||"", obj.left||"", obj.right||""]);
+      return MotaActionBlocks['faceIds_m'].xmlText([obj.down||"", obj.left||"", obj.right||"", obj.up||""]);
 
     case 'mainStyle':
       if(!obj) obj={};
@@ -122,6 +125,37 @@ ActionParser.prototype.parse = function (obj,type) {
         obj.statusBarColor, 'rgba('+obj.statusBarColor+')', obj.borderColor, 'rgba('+obj.borderColor+')', 
         obj.selectColor, 'rgba(' + obj.selectColor + ')', obj.font
       ]);
+
+    case 'nameMap':
+      if (!obj) obj={};
+      var items = Object.keys(obj);
+      var result = null;
+      for (var ii=items.length-1,one;one=items[ii];ii--) {
+        var value = obj[one];
+        var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];})
+        if (knownItems.indexOf(one) >= 0) {
+          result = MotaActionBlocks['nameMapSoundKnown'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.bgms.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapBgm'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.sounds.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapSoundUnknown'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.images.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapImage'].xmlText([one, value, result]);
+          continue;
+        }
+        if (main.animates.indexOf(value) >= 0) {
+          result = MotaActionBlocks['nameMapAnimate'].xmlText([one, value, result]);
+          continue;
+        }
+        result = MotaActionBlocks['nameMapUnknown'].xmlText([one, value, result]);
+      }
+      return MotaActionBlocks['nameMap_m'].xmlText([result]);
 
     case 'shop':
       var buildsub = function(obj,parser,next){
@@ -249,14 +283,14 @@ ActionParser.prototype.parseAction = function() {
         }
         this.next = MotaActionFunctions.xmlText('text_2_s', [
           info[0], info[1], info[2], info[3], buildTextDrawing(textDrawing), this.next
-        ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       } else if (info[0] || info[1] || info[2]) {
         this.next = MotaActionFunctions.xmlText('text_1_s',[
-          info[0], info[1], info[2], info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+          info[0], info[1], info[2], info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('text_0_s', [info[3],this.next],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+           /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       break;
     case "autoText": // 自动剧情文本
@@ -277,9 +311,9 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=this.Colour(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.align,data.title,'rgba('+data.title+')',
+        data.position,data.offset,data.align,data.title,data.bold,'rgba('+data.title+')',
         data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
-        data.bold,data.titlefont,data.textfont,data.lineHeight,data.time,data.interval,this.next]);
+        data.titlefont,data.textfont,data.lineHeight,data.time,data.letterSpacing,data.animateTime,this.next]);
       break;
     case "tip":
       this.next = MotaActionBlocks['tip_s'].xmlText([
@@ -320,6 +354,30 @@ ActionParser.prototype.parseAction = function() {
       })
       this.next = MotaActionBlocks['setBlock_s'].xmlText([
         data.number||0,x_str.join(','),y_str.join(','),data.floorId||'',data.time,data.async||false,this.next]);
+      break;
+    case "setBlockOpacity": // 设置图块不透明度
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['setBlockOpacity_s'].xmlText([
+        x_str.join(','),y_str.join(','),data.floorId||'',data.opacity,data.time,data.async||false,this.next]);
+      break;
+    case "setBlockFilter": // 设置图块不透明度
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
+      this.next = MotaActionBlocks['setBlockFilter_s'].xmlText([
+        x_str.join(','),y_str.join(','),data.floorId||'',data.blur,data.hue,data.grayscale,data.invert||false,data.shadow,this.next]);
       break;
     case "turnBlock": // 事件转向
       data.loc=data.loc||[];
@@ -399,15 +457,33 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "move": // 移动事件
       data.loc=data.loc||['',''];
+      var buildMoveDirection= function (obj) {
+        obj = MotaActionFunctions.processMoveDirections(obj||[]);
+        var res = null;
+        for(var ii=obj.length-1,one;one=obj[ii];ii--) {
+          var v = one.split(':');
+          res=MotaActionBlocks['moveDirection'].xmlText([v[0], parseInt(v[1]), res]);
+        }
+        return res;
+      }
       this.next = MotaActionBlocks['move_s'].xmlText([
-        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,this.StepString(data.steps),this.next]);
+        data.loc[0],data.loc[1],data.time,data.keep||false,data.async||false,buildMoveDirection(data.steps),this.next]);
       break;
     case "moveAction": // 前进一格或撞击
       this.next = MotaActionBlocks['moveAction_s'].xmlText([this.next]);
       break;
     case "moveHero": // 无视地形移动勇士
+      var buildMoveDirection= function (obj) {
+        obj = MotaActionFunctions.processMoveDirections(obj||[]);
+        var res = null;
+        for(var ii=obj.length-1,one;one=obj[ii];ii--) {
+          var v = one.split(':');
+          res=MotaActionBlocks['moveDirection'].xmlText([v[0], parseInt(v[1]), res]);
+        }
+        return res;
+      }
       this.next = MotaActionBlocks['moveHero_s'].xmlText([
-        data.time,data.async||false,this.StepString(data.steps),this.next]);
+        data.time,data.async||false,buildMoveDirection(data.steps),this.next]);
       break;
     case "jump": // 跳跃事件
       data.from=data.from||['',''];
@@ -455,23 +531,28 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['unfollow_s'].xmlText([data.name||"", this.next]);
       break;
     case "animate": // 显示动画
-      var animate_loc = data.loc||'';
-      if(animate_loc && animate_loc!=='hero')animate_loc = animate_loc[0]+','+animate_loc[1];
-      this.next = MotaActionBlocks['animate_s'].xmlText([
-        data.name,animate_loc,data.alignWindow||false,data.async||false,this.next]);
+      if (data.loc == 'hero') {
+        this.next = MotaActionBlocks['animate_1_s'].xmlText([
+          data.name,data.async||false,this.next]);
+      } else {
+        data.loc=data.loc||['',''];
+        this.next = MotaActionBlocks['animate_s'].xmlText([
+          data.name,data.loc[0],data.loc[1],data.alignWindow||false,data.async||false,this.next]);
+      }
       break;
     case "setViewport": // 设置视角
       if (data.dxy) {
         this.next = MotaActionBlocks['setViewport_1_s'].xmlText([
-          data.dxy[0],data.dxy[1],data.time||0,data.async||false,this.next]);
+          data.dxy[0],data.dxy[1],data.moveMode||'', data.time||0,data.async||false,this.next]);
       } else {
         data.loc = data.loc||['',''];
         this.next = MotaActionBlocks['setViewport_s'].xmlText([
-          data.loc[0],data.loc[1],data.time||0,data.async||false,this.next]);
+          data.loc[0],data.loc[1],data.moveMode||'', data.time||0,data.async||false,this.next]);
       }
       break;
     case "vibrate": // 画面震动
-      this.next = MotaActionBlocks['vibrate_s'].xmlText([data.time||0, data.async||false, this.next]);
+      this.next = MotaActionBlocks['vibrate_s'].xmlText([data.direction||'horizontal', 
+        data.time||0, data.speed, data.power, data.async||false, this.next]);
       break;
     case "showImage": // 显示图片
       data.loc=data.loc||['','']
@@ -498,7 +579,12 @@ ActionParser.prototype.parseAction = function() {
     case "moveImage": // 移动图片
       data.to=data.to||['','']
       this.next = MotaActionBlocks['moveImage_s'].xmlText([
-        data.code, data.to[0], data.to[1], data.opacity, data.time||0, data.async||false, this.next]);
+        data.code, data.to[0], data.to[1], data.opacity, data.moveMode||'', data.time||0, data.async||false, this.next]);
+      break;
+    case "rotateImage": // 旋转图片
+      data.center=data.center||['','']
+      this.next = MotaActionBlocks['rotateImage_s'].xmlText([
+        data.code, data.center[0], data.center[1], data.moveMode||'',  data.angle||0, data.time||0, data.async||false, this.next]);
       break;
     case "showGif": // 显示动图
       data.loc=data.loc||['','']
@@ -586,8 +672,14 @@ ActionParser.prototype.parseAction = function() {
       }
       break;
     case "playSound":
-      this.next = MotaActionBlocks['playSound_s'].xmlText([
-        data.name,data.stop,this.next]);
+      var knownItems = MotaActionBlocks['NameMap_List'].options.map(function (one) {return one[1];});
+      if (knownItems.indexOf(data.name) >= 0) {
+        this.next = MotaActionBlocks['playSound_1_s'].xmlText([
+          data.name,data.stop,data.pitch||"",data.sync,this.next]);
+      } else {
+        this.next = MotaActionBlocks['playSound_s'].xmlText([
+          data.name,data.stop,data.pitch||"",data.sync,this.next]);
+      }
       break;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
@@ -617,6 +709,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setVolume_s'].xmlText([
         data.value, data.time, data.async||false, this.next]);
       break
+    case "setBgmSpeed":
+      this.next = MotaActionBlocks['setBgmSpeed_s'].xmlText([
+        data.value, data.pitch||false, this.next]);
+      break;
     case "setValue":
       this.next = MotaActionBlocks['setValue_s'].xmlText([
         this.expandIdBlock([data.name]), data["operator"]||'=',
@@ -626,7 +722,27 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        MotaActionFunctions.replaceToName_token(data.id), data.name, this.expandEvalBlock([data.value]), this.next]);
+        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+      break;
+    case "setEnemyOnPoint":
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
+        data.loc[0], data.loc[1], data.floorId||'', data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+      break;
+    case "resetEnemyOnPoint":
+      data.loc=data.loc||['','']
+      this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
+        data.loc[0], data.loc[1], data.floorId||'',this.next]);
+      break;
+    case "moveEnemyOnPoint":
+      data.from=data.from||['','']
+      data.to=data.to||['','']
+      this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
+        data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+      break;
+    case "setEquip":
+      this.next = MotaActionBlocks['setEquip_s'].xmlText([
+        MotaActionFunctions.replaceToName_token(data.id), data.valueType||'value', data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
       break;
     case "setFloor":
       this.next = MotaActionBlocks['setFloor_s'].xmlText([
@@ -644,6 +760,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setGlobalFlag_s'].xmlText([
         data.name, data.value, this.next]);
       break;
+    case "setNameMap":
+      this.next = MotaActionBlocks['setNameMap_s'].xmlText([
+        data.name, data.value, this.next]);
+      break;
     case "input":
       this.next = MotaActionBlocks['input_s'].xmlText([
         data.text,this.next]);
@@ -658,13 +778,13 @@ ActionParser.prototype.parseAction = function() {
           this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
           this.insertActionList(data["false"]),
-          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('if_1_s', [
           this.expandEvalBlock([data.condition]),
           this.insertActionList(data["true"]),
-          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+          this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       break;
     case "confirm": // 显示确认框
@@ -672,18 +792,18 @@ ActionParser.prototype.parseAction = function() {
         this.EvalString_Multi(data.text), data.timeout||0, data["default"],
         this.insertActionList(data["yes"]),
         this.insertActionList(data["no"]),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "switch": // 多重条件分歧
       var case_caseList = null;
       for(var ii=data.caseList.length-1,caseNow;caseNow=data.caseList[ii];ii--) {
         case_caseList=MotaActionFunctions.xmlText('switchCase', [
           this.isset(caseNow.case)?this.expandEvalBlock([caseNow.case]):"值",caseNow.nobreak,this.insertActionList(caseNow.action),case_caseList],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+           /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
       }
       this.next = MotaActionFunctions.xmlText('switch_s', [
         this.expandEvalBlock([data.condition]),
-        case_caseList,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        case_caseList,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "choices": // 提供选项
       var text_choices = null;
@@ -691,38 +811,38 @@ ActionParser.prototype.parseAction = function() {
         choice.color = this.Colour(choice.color);
         text_choices=MotaActionFunctions.xmlText('choicesContext', [
           choice.text,choice.icon,choice.color,'rgba('+choice.color+')',choice.need||'',choice.condition||'',this.insertActionList(choice.action),text_choices],
-           /* isShadow */false, /*comment*/ null, /*collapsed*/ choice._collapsed);
+           /* isShadow */false, /*comment*/ null, /*collapsed*/ choice._collapsed, /*disabled*/ choice._disabled);
       }
       if (!this.isset(data.text)) data.text = '';
       var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionFunctions.xmlText('choices_s', [
-        info[3],info[0],info[1],data.timeout||0,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        info[3],info[0],info[1],data.timeout||0,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "for": // 循环遍历
       this.next = MotaActionFunctions.xmlText('for_s',[
         this.expandEvalBlock([data.name]),
         data.from || 0, data.to || 0, data.step || 0,
         this.insertActionList(data.data),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "forEach": // 循环遍历列表
       this.next = MotaActionFunctions.xmlText('forEach_s',[
         this.expandEvalBlock([data.name]),
         JSON.stringify(data.list),
         this.insertActionList(data.data),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "while": // 前置条件循环处理
       this.next = MotaActionFunctions.xmlText('while_s',[
         this.expandEvalBlock([data.condition]),
         this.insertActionList(data.data),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "dowhile": // 后置条件循环处理
       this.next = MotaActionFunctions.xmlText('dowhile_s',[
         this.insertActionList(data.data),
         this.expandEvalBlock([data.condition]),
-        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "break": // 跳出循环
       this.next = MotaActionBlocks['break_s'].xmlText([
@@ -781,20 +901,24 @@ ActionParser.prototype.parseAction = function() {
           if (caseNow["case"] == "keyboard") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_1',[
               caseNow.keycode || "0", caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
-            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
           } else if (caseNow["case"] == "mouse") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_2',[
               caseNow.px[0], caseNow.px[1], caseNow.py[0], caseNow.py[1], caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
-            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
-          } else if (caseNow["case"] == "timeout") {
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
+          } else if (caseNow["case"] == "condition") {
             case_waitList = MotaActionFunctions.xmlText('waitContext_3',[
+              this.expandEvalBlock([caseNow.condition]), caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
+          } else if (caseNow["case"] == "timeout") {
+            case_waitList = MotaActionFunctions.xmlText('waitContext_4',[
               caseNow["break"] || false, this.insertActionList(caseNow.action), case_waitList
-            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed);
+            ], /* isShadow */false, /*comment*/ null, /*collapsed*/ caseNow._collapsed, /*disabled*/ caseNow._disabled);
           }
         }
       }
       this.next = MotaActionFunctions.xmlText('wait_s',[
-        data.timeout||0,case_waitList, this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+        data.forceChild||false,data.timeout||0,case_waitList, this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
@@ -827,7 +951,7 @@ ActionParser.prototype.parseAction = function() {
     case "previewUI": // UI绘制预览
       this.next = MotaActionFunctions.xmlText('previewUI_s',[
         this.insertActionList(data.action), this.next
-      ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed);
+      ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "clearMap": // 清除画布
       this.next = MotaActionBlocks['clearMap_s'].xmlText([
@@ -840,6 +964,10 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['setAttribute_s'].xmlText([
         data.font,data.fillStyle,'rgba('+data.fillStyle+')',data.strokeStyle,'rgba('+data.strokeStyle+')',
         data.lineWidth,data.alpha,data.align,data.baseline,data.z,this.next]);
+      break;
+    case "setFilter":
+      this.next = MotaActionBlocks['setFilter_s'].xmlText([
+        data.blur, data.hue, data.grayscale, data.invert||false, data.shadow, this.next]);
       break;
     case "fillText": // 绘制一行文本
       data.style = this.Colour(data.style);
@@ -1075,9 +1203,9 @@ ActionParser.prototype.matchId = function(args) {
   }
   // id列表
   var Id_List = MotaActionBlocks['Id_List'].options; // [["变量", "flag"], ...]
-  match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC]+)$').exec(args[0])
+  match=new RegExp('^('+Id_List.map(function(v){return v[1]}).join('|')+'):([a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]+)$').exec(args[0])
   if(match){
-    if (match[1] == 'status' || match[1] == 'item') {
+    if (match[1] == 'status' || match[1] == 'item' || match[1] == 'buff') {
       match[2] = MotaActionFunctions.replaceToName_token(match[2]);
     }
     args=[match[1],match[2]]
@@ -1129,6 +1257,41 @@ ActionParser.prototype.matchEvalAtom = function(args) {
     args[0]=match[1]
     return rt(MotaActionBlocks['equip_e'].xmlText, args);
   }
+  match=/^core\.isReplaying\(\)$/.exec(args[0]);
+  if (match) {
+    return rt(MotaActionBlocks['isReplaying_e'].xmlText, args);
+  }
+  match=/^core\.(nextX|nextY)\((-?\d*)\)$/.exec(args[0]);
+  if (match) {
+    if (match[2] == "") match[2] = "1";
+    args=[match[2], match[1]];
+    return rt(MotaActionBlocks['nextXY_e'].xmlText, args);
+  }
+  match=/^core\.hasVisitedFloor\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['hasVisitedFloor_e'].xmlText, args);
+  }
+  match=/^core\.isShopVisited\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['isShopVisited_e'].xmlText, args);
+  }
+  match=/^core\.hasEquip\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['hasEquip_e'].xmlText, args);
+  }
+  match=/^core\.canBattle\(['"](.*?)['"']\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['canBattle_e'].xmlText, args);
+  }
+  match=/^core\.rand\((\d+)\)$/.exec(args[0]);
+  if (match) {
+    args[0]=match[1];
+    return rt(MotaActionBlocks['rand_e'].xmlText, args);
+  }
   return {ret:false}
 }
 
@@ -1175,6 +1338,7 @@ ActionParser.prototype.expandIdBlock = function(args, isShadow, comment) {
 ActionParser.prototype.expandEvalBlock = function(args, isShadow, comment) {
   args[0]=MotaActionFunctions.replaceFromName(args[0])
   var xml=MotaActionBlocks['evalString_e'].xmlText
+  if (args[0].indexOf('\n') >= 0 || args[0].indexOf('\\n') >= 0) return xml(args, isShadow, comment);
   var ret=this.matchId(args)
   if (ret.ret){
     xml=ret.xml;
@@ -1253,8 +1417,26 @@ MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
   //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   var comma = PosString.indexOf(',');
-  if (comma >= 0 && PosString.substring(0, comma).indexOf('(') < 0) throw '此处不可写多点坐标';
+  if (comma >= 0 && PosString.substring(0, comma).ifndexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
+}
+
+MotaActionFunctions.processMoveDirections = function (steps) {
+  var curr = null, num = null;
+  var result = [];
+  steps.forEach(function (one) {
+    var v = one.split(':');
+    if (v.length == 1) v.push("1");
+    if (v[0] != curr) {
+      if (curr != null) result.push(curr+":"+num);
+      curr = v[0];
+      num = parseInt(v[1]);
+    } else {
+      num += parseInt(v[1]);
+    }
+  });
+  if (curr != null) result.push(curr+":"+num);
+  return result;
 }
 
 MotaActionFunctions.StepString_pre = function(StepString){
@@ -1308,8 +1490,7 @@ MotaActionFunctions.FontString_pre = function (FontString) {
 }
 
 MotaActionFunctions.pattern=MotaActionFunctions.pattern||{};
-MotaActionFunctions.pattern.id=/^(flag|global):([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
-MotaActionFunctions.pattern.id2=/^flag:([a-zA-Z0-9_\u4E00-\u9FCC]+),flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
+MotaActionFunctions.pattern.id=/^(flag|global|temp):([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)$/;
 MotaActionFunctions.pattern.idWithoutFlag=/^[0-9a-zA-Z_][0-9a-zA-Z_\-:]*$/;
 MotaActionFunctions.pattern.colorRe=/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/;
 MotaActionFunctions.pattern.fontRe=/^(italic )?(bold )?(\d+)px ([a-zA-Z0-9_\u4E00-\u9FCC]+)$/;
@@ -1337,7 +1518,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   MotaActionFunctions.pattern.replaceItemList = [];
   for (var id in core.material.items) {
     var name = core.material.items[id].name;
-    if (id && name && name != '新物品' && /^[a-zA-Z0-9_\u4E00-\u9FCC]+$/.test(name)) {
+    if (id && name && name != '新物品' && /^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+$/.test(name)) {
       MotaActionFunctions.pattern.replaceItemList.push([id, name]);
     }
   }
@@ -1345,7 +1526,7 @@ MotaActionFunctions.pattern.replaceStatusList = [
   MotaActionFunctions.pattern.replaceEnemyList = [];
   for (var id in core.material.enemys) {
     var name = core.material.enemys[id].name;
-    if (id && name && name != '新敌人' && /^[a-zA-Z0-9_\u4E00-\u9FCC]+$/.test(name)) {
+    if (id && name && name != '新敌人' && /^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+$/.test(name)) {
       MotaActionFunctions.pattern.replaceEnemyList.push([id, name]);
     }
   }
@@ -1406,6 +1587,9 @@ MotaActionFunctions.replaceToName = function (str) {
   str = str.replace(new RegExp("status:(" + list.join("|") + ")\\b", "g"), function (a, b) {
     return map[b] ? ("状态：" + map[b]) : b;
   }).replace(/status:/g, "状态：");
+  str = str.replace(new RegExp("buff:(" + list.join("|") + ")\\b", "g"), function (a, b) {
+    return map[b] ? ("增益：" + map[b]) : b;
+  }).replace(/buff:/g, "增益：");
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[0]] = v[1]; list.push(v[0]);
@@ -1441,14 +1625,17 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceStatusList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
+  str = str.replace(new RegExp("状态[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b) {
     return map[b] ? ("status:" + map[b]) : b;
   }).replace(/状态[:：]/g, "status:");
+  str = str.replace(new RegExp("增益[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b) {
+    return map[b] ? ("buff:" + map[b]) : b;
+  }).replace(/增益[:：]/g, "buff:");
   map = {}; list = [];
   MotaActionFunctions.pattern.replaceItemList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b) {
+  str = str.replace(new RegExp("物品[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b) {
     return map[b] ? ("item:" + map[b]) : b;
   }).replace(/物品[:：]/g, "item:");
   str = str.replace(/变量[:：]/g, "flag:").replace(/独立开关[:：]/g, "switch:").replace(/全局存储[:：]/g, "global:");
@@ -1457,7 +1644,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("(enemy:|怪物[:：])(" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b, c, d) {
+  str = str.replace(new RegExp("(enemy:|怪物[:：])(" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b, c, d) {
     return map[c] ? ("enemy:" + map[c]) : c;
   }).replace(/怪物[:：]/g, "enemy:");
 
@@ -1465,7 +1652,7 @@ MotaActionFunctions.replaceFromName = function (str) {
   MotaActionFunctions.pattern.replaceEnemyValueList.forEach(function (v) {
     map[v[1]] = v[0]; list.push(v[1]);
   });
-  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")(?:$|(?=[^\\w\\u4e00-\\u9fa5]))", "g"), function (a, b, c, d) {
+  str = str.replace(new RegExp("enemy:([a-zA-Z0-9_]+)[:：](" + list.join("|") + ")(?:$|(?=[^a-zA-Z0-9_\\u4E00-\\u9FCC\\u3040-\\u30FF\\u2160-\\u216B\\u0391-\\u03C9]))", "g"), function (a, b, c, d) {
     return map[c] ? ("enemy:" + b + ":" + map[c]) : c;
   }).replace(/(enemy:[a-zA-Z0-9_]+)[:：]/g, '$1:');
 

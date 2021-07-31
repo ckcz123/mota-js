@@ -2189,12 +2189,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, value: ?)"
         },
         "playSound": {
-          "!doc": "播放一个音效",
-          "!type": "fn(sound: string)"
+          "!doc": "播放一个音效<br/>sound: 音效名；可以使用文件别名。<br/>pitch: 播放的音调；可选，如果设置则为30-300之间的数值。<br/>callback: 可选，播放完毕后执行的回调函数。<br/>返回：一个数字，可用于core.stopSound的参数来只停止该音效。",
+          "!type": "fn(sound: string, pitch?: number, callback?: fn()) -> number"
         },
         "stopSound": {
-          "!doc": "停止所有SE", 
-          "!type": "fn()"
+          "!doc": "停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。", 
+          "!type": "fn(id?: number)"
         }, 
         "addGameCanvasTranslate": {
           "!doc": "加减画布偏移", 
@@ -2212,6 +2212,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "暂停背景音乐的播放", 
           "!type": "fn()"
         }, 
+        "setBgmSpeed": {
+          "!doc": "设置背景音乐的播放速度和音调<br/>speed: 播放速度，必须为30-300中间的值。100为正常速度。<br/>usePitch: 是否同时改变音调（部分设备可能不支持）",
+          "!type": "fn(speed: number, usePitch?: bool)"
+        },
         "setReplaySpeed": {
           "!doc": "设置播放速度", 
           "!type": "fn(speed: number)"
@@ -2252,6 +2256,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "根据级别的数字获取对应的名称，后者定义在全塔属性<br/>例如：core.getLvName(); // 获取主角当前级别的名称，如“下级佣兵”<br/>lv: 级别的数字，不填则视为主角当前的级别<br/>返回值：级别的名称，如果不存在就还是返回数字", 
           "!type": "fn(lv?: number) -> string|number"
         }, 
+        "getNextLvUpNeed": {
+          "!doc": "获得下次升级需要的经验值。<br/>升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。<br/>如果无法进行下次升级，返回null。",
+          "!type": "fn() -> number"
+        },
         "addStatus": {
           "!doc": "增减主角的某个属性，等价于core.setStatus(name, core.getStatus(name) + value)<br/>例如：core.addStatus('atk', 100'); // 给主角攻击力加100<br/>name: 属性的英文名<br/>value: 属性的增量", 
           "!type": "fn(name: string, value: number)"
@@ -2522,7 +2530,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "moveViewport": {
           "!doc": "移动视野范围", 
-          "!type": "fn(x: number, y: number, time?: number, callback?: fn())"
+          "!type": "fn(x: number, y: number, moveMode?: string, time?: number, callback?: fn())"
         }, 
         "syncLoad": {
           "!doc": "从服务器加载存档", 
@@ -2586,23 +2594,23 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         },
         "setSwitch": {
           "!doc": "设置某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: ?)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, value: ?)"
         },
         "getSwitch": {
           "!doc": "获得某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, defaultValue?: ?)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, defaultValue?: ?)"
         },
         "addSwitch": {
           "!doc": "增加某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: number)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string, value: number)"
         },
         "removeSwitch": {
           "!doc": "删除某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string)"
+          "!type": "fn(x: number, y: number, floorId: string, name: string)"
         },
         "removeSwitch": {
           "!doc": "判定某个独立开关",
-          "!type": "fn(x: number, y: number, floorId?: string, name: string) -> bool"
+          "!type": "fn(x: number, y: number, floorId: string, name: string) -> bool"
         }
       }, 
       "icons": {
@@ -2705,6 +2713,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "canEquip": {
           "!doc": "检查能否穿上某件装备<br/>例如：core.canEquip('sword5', true) // 主角可以装备神圣剑吗，如果不能会有提示<br/>equipId: 装备id<br/>hint: 无法穿上时是否提示（比如是因为未持有还是别的什么原因）<br/>返回值：true表示可以穿上，false表示无法穿上", 
           "!type": "fn(equipId: string, hint?: bool) -> bool"
+        },
+        "setEquip": {
+          "!doc": "设置某个装备的属性并计入存档<br/>例如：core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300<br/>equipId: 装备id<br/>valueType: 增幅类型，只能是value（数值）或percentage（百分比）<br/>name: 要修改的属性名称，如atk<br/>value: 要修改到的属性数值<br/>operator: 操作符，可选，如+=表示在原始值上增加<br/>prefix: 独立开关前缀，一般不需要",
+          "!type": "fn(equipId: string, valueType: string, name: string, value: ?, operator?: string, prefix?: string)"
         }
       }, 
       "utils": {
@@ -2727,6 +2739,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
             "x": "number",
             "y": "number"
           }
+        },
+        "applyEasing": {
+          "!doc": "获得变速移动曲线",
+          "!type": "fn(mode?: string) -> fn(t: number) -> number"
         },
         "clamp": {
           "!doc": "将x限定在[a,b]区间内，注意a和b可交换<br/>例如：core.clamp(1200, 1, 1000); // 1000<br/>x: 原始值，!x为true时x一律视为0<br/>a: 下限值，大于b将导致与b交换<br/>b: 上限值，小于a将导致与a交换", 
@@ -2977,7 +2993,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "longClick": {
           "!doc": "长按", 
-          "!type": "fn(x: number, y: number, fromEvent?: bool)"
+          "!type": "fn(x: number, y: number, px: number, py: number, fromEvent?: bool)"
         }, 
         "unregisterAction": {
           "!doc": "注销一个用户交互行为", 
@@ -2989,7 +3005,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "onclick": {
           "!doc": "具体点击屏幕上(x,y)点时，执行的操作", 
-          "!type": "fn(x: number, y: number, stepPostfix?: ?)"
+          "!type": "fn(x: number, y: number, px: number, py: number, stepPostfix?: [?])"
         }, 
         "doRegisteredAction": {
           "!doc": "执行一个用户交互行为", 
@@ -3145,6 +3161,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置某个点图块的强制启用或禁用状态",
           "!type": "fn(floorId?: string, x?: number, y?: number, disabled?: bool)"
         },
+        "setBlockOpacity": {
+          "!doc": "设置某个点图块的不透明度",
+          "!type": "fn(opacity?: number, x?: number, y?: number, floorId?: string)"
+        },
+        "setBlockFilter": {
+          "!doc": "设置某个点图块的特效",
+          "!type": "fn(filter?: ?, x?: number, y?: number, floorId?: string)"
+        },
         "decompressMap": {
           "!doc": "解压缩地图", 
           "!type": "fn(mapArr: [[number]], floorId?: string) -> [[number]]"
@@ -3174,8 +3198,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(id?: string) -> string"
         }, 
         "searchBlock": {
-          "!doc": "搜索图块, 支持通配符和正则表达式<br/>例如：core.searchBlock('*Door'); // 搜索当前地图的所有门<br/>id: 图块id，支持星号表示任意多个（0个起）字符<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否计入，true表示计入<br/>返回值：一个详尽的数组，一般只用到其长度", 
-          "!type": "fn(id: string, floorId?: string, showDisable?: bool) -> [{floorId: string, index: number, x: number, y: number, block: block}]"
+          "!doc": "搜索图块, 支持通配符和正则表达式<br/>例如：core.searchBlock('*Door'); // 搜索当前地图的所有门<br/>id: 图块id，支持星号表示任意多个（0个起）字符<br/>floorId: 地图id或数组，不填视为当前地图<br/>showDisable: 隐藏点是否计入，true表示计入<br/>返回值：一个详尽的数组，一般只用到其长度", 
+          "!type": "fn(id: string, floorId?: string|[string], showDisable?: bool) -> [{floorId: string, index: number, x: number, y: number, block: block}]"
+        },
+        "searchBlockWithFilter": {
+          "!doc": "根据给定的筛选函数搜索全部满足条件的图块<br/>例如：core.searchBlockWithFilter(function (block) { return block.event.id.endsWith('Door'); }); // 搜索当前地图的所有门<br/>blockFilter: 筛选函数，可接受block输入，应当返回一个boolean值<br/>floorId: 地图id或数组，不填视为当前地图<br/>showDisable: 隐藏点是否计入，true表示计入<br/>返回值：一个详尽的数组",
+          "!type": "fn(blockFilter: fn(block: block) -> bool, floorId?: string|[string], showDisable?: bool): [{floorId: string, index: number, x: number, y: number, block: block}]"
         },
         "hideBgFgMap": {
           "!doc": "隐藏前景/背景地图", 
@@ -3185,6 +3213,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等", 
           "!type": "fn(block?: number|string|block) -> blockInfo"
         }, 
+        "getFaceDownId": {
+          "!doc": "获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id。",
+          "!type": "fn(block?: string|number|block) -> string"
+        },
         "canMoveDirectlyArray": {
           "!doc": "获得某些点可否通行的信息", 
           "!type": "fn(locs?: [[number]])"
@@ -3209,6 +3241,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "判定某个点的图块数字<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块数字，该点无图块则返回null", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number"
         }, 
+        "getBlockOpacity": {
+          "!doc": "获得某个点图块的不透明度",
+          "!type": "fn(x?: number, y?: number, floorId?: string, showDisable?: bool) -> number"
+        },
+        "getBlockFilter": {
+          "!doc": "获得某个点图块的特效",
+          "!type": "fn(x?: number, y?: number, floorId?: string, showDisable?: bool) -> ?"
+        },
         "loadFloor": {
           "!doc": "从文件或存档中加载某个楼层", 
           "!type": "fn(floorId?: string, map?: ?)"
@@ -3279,7 +3319,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "animateBlock": {
           "!doc": "显示/隐藏某个块时的动画效果", 
-          "!type": "fn(loc?: [number]|[[number]], type?: string, time?: number, callback?: fn())"
+          "!type": "fn(loc?: [number]|[[number]], type?: string|number, time?: number, callback?: fn())"
         }, 
         "loadMap": {
           "!doc": "将存档中的地图信息重新读取出来", 
@@ -3446,10 +3486,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, text: string, maxWidth?: number, font?: string)"
         }, 
         "setAlpha": {
-          "!doc": "设置某个canvas接下来绘制的不透明度；不会影响已经绘制的内容<br/>如果需要修改画布本身的不透明度请使用setOpacity", 
+          "!doc": "设置某个canvas接下来绘制的不透明度；不会影响已经绘制的内容<br/>返回设置之前画布的不透明度<br/>如果需要修改画布本身的不透明度请使用setOpacity", 
           "!url": "https://www.w3school.com.cn/tags/canvas_globalalpha.asp",
-          "!type": "fn(name: string|CanvasRenderingContext2D, alpha: number)"
+          "!type": "fn(name: string|CanvasRenderingContext2D, alpha: number) -> number"
         }, 
+        "setFilter": {
+          "!doc": "设置某个canvas接下来绘制的filter",
+          "!type": "fn(name: string|CanvasRenderingContext2D, style: string)"
+        },
         "setLineWidth": {
           "!doc": "设置某个canvas的线宽度", 
           "!url": "https://www.w3school.com.cn/tags/canvas_linewidth.asp",
@@ -3463,6 +3507,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "重新定位一个自定义画布", 
           "!type": "fn(name: string, x: number, y: number)"
         }, 
+        "rotateCanvas": {
+          "!doc": "设置一个自定义画布的旋转角度<br/>centerX, centerY: 旋转中心（以屏幕像素为基准）；不填视为图片正中心。",
+          "!type": "fn(name: string, angle: number, centerX?: number, centerY?: number)"
+        },
         "closePanel": {
           "!doc": "结束一切事件和绘制，关闭UI窗口，返回游戏进程", 
           "!type": "fn()"
@@ -3574,8 +3622,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string|CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number, style?: string, angle?: number)"
         }, 
         "fillBoldText": {
-          "!doc": "在某个画布上绘制一个描边文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>strokeStyle: 要绘制的描边颜色<br/>font: 绘制的字体", 
-          "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string)"
+          "!doc": "在某个画布上绘制一个描边文字<br/>text: 要绘制的文本<br/>style: 绘制的样式<br/>strokeStyle: 要绘制的描边颜色<br/>font: 绘制的字体<br/>maxWidth: 最大宽度，超过此宽度会自动放缩", 
+          "!type": "fn(name: string|CanvasRenderingContext2D, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number)"
         },
         "saveCanvas": {
           "!doc": "保存某个canvas状态", 
@@ -3596,6 +3644,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "getEnemys": {
           "!doc": "获得所有怪物原始数据的一个副本。<br/>请使用core.material.enemys获得当前各项怪物属性。",
           "!type": "fn()"
+        },
+        "getEnemyValue": {
+          "!doc": "获得某个点上怪物的某个属性值",
+          "!type": "fn(enemy?: string|enemy, name: string, x?: number, y?: number, floorId?: string)"
         },
         "getSpecials": {
           "!doc": "获得所有特殊属性的定义",
@@ -3713,8 +3765,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(data?: ?)"
         }, 
         "vibrate": {
-          "!doc": "视野左右抖动<br/>例如：core.vibrate(); // 视野左右抖动1秒<br/>time: 抖动时长，单位为毫秒。必须为半秒的倍数，不填或小于1秒都视为1秒<br/>callback: 抖动平息后的回调函数，可选", 
-          "!type": "fn(time?: number, callback?: fn())"
+          "!doc": "视野抖动<br/>例如：core.vibrate(); // 视野抖动1秒<br/>direction: 抖动方向；可填 horizontal(左右)，vertical（上下），diagonal1（左上右下），diagonal2（左下右上）<br/>time: 抖动时长<br/>speed: 抖动速度<br/>power: 抖动幅度<br/>callback: 抖动平息后的回调函数，可选", 
+          "!type": "fn(direction?: string, time?: number, speed?: number, power?: number, callback?: fn())"
         }, 
         "confirmRestart": {
           "!doc": "询问是否需要重新开始", 
@@ -3745,8 +3797,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(id?: string, x?: number, y?: number, isGentleClick?: bool)"
         }, 
         "doAction": {
-          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果<br/>keepUI: true表示不清除UI画布和选择光标", 
-          "!type": "fn(keepUI?: true)"
+          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果", 
+          "!type": "fn()"
         }, 
         "openBook": {
           "!doc": "点击怪物手册时的打开操作", 
@@ -3782,8 +3834,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "moveImage": {
           "!doc": "移动一张图片并/或改变其透明度<br/>例如：core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明<br/>code: 图片编号<br/>to: 新的左上角坐标，省略表示原地改变透明度<br/>opacityVal: 新的透明度，省略表示不变<br/>time: 移动用时，单位为毫秒。不填视为1秒<br/>callback: 图片移动完毕后的回调函数，可选", 
-          "!type": "fn(code: number, to?: [number], opacityVal?: number, time?: number, callback?: fn())"
+          "!type": "fn(code: number, to?: [number], opacityVal?: number, moveMode?: string, time?: number, callback?: fn())"
         }, 
+        "rotateImage": {
+          "!doc": "旋转一张图片<br/>code: 图片编号<br/>center: 旋转中心像素坐标（以屏幕为基准）；不填视为图片本身中心<br/>angle: 旋转角度；正数为顺时针，负数为逆时针<br/>moveMode: 旋转模式<br/>time: 旋转用时，单位为毫秒。不填视为1秒<br/>callback: 图片旋转完毕后的回调函数，可选",
+          "!type": "fn(code: number, center?: [number], angle?: number, moveMode?: string, time?: number, callback?: fn())"
+        },
         "openSettings": {
           "!doc": "点击设置按钮时的操作", 
           "!type": "fn(fromUserAction?: bool)"
@@ -3897,9 +3953,21 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(x: number, y: number, needKey?: bool, callback?: fn())"
         }, 
         "setEnemy": {
-          "!doc": "设置一项敌人属性并计入存档<br/>例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0<br/>id: 敌人id<br/>name: 属性的英文缩写<br/>value: 属性的新值，可选<br/>prefix: 独立开关前缀，一般不需要，下同", 
-          "!type": "fn(id: string, name: string, value: ?, prefix?: string)"
+          "!doc": "设置一项敌人属性并计入存档<br/>例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0<br/>id: 敌人id<br/>name: 属性的英文缩写<br/>value: 属性的新值，可选<br/>operator: 运算操作符如+=，可选<br/>prefix: 独立开关前缀，一般不需要，下同", 
+          "!type": "fn(id: string, name: string, value: ?, operator?: string, prefix?: string)"
         }, 
+        "setEnemyOnPoint": {
+          "!doc": "设置某个点的敌人属性。如果该点不是怪物，则忽略此函数。<br/>例如：core.setEnemyOnPoint(3, 5, null, 'atk', 100, '+='); // 仅将(3,5)点怪物的攻击力加100。",
+          "!type": "fn(x: number, y: number, floorId?: string, name: string, value: ?, operator?: string, prefix?: string)"
+        },
+        "resetEnemyOnPoint": {
+          "!doc": "重置某个点的怪物属性",
+          "!type": "fn(x: number, y: number, floorId?: string)"
+        },
+        "moveEnemyOnPoint": {
+          "!doc": "将某个点已经设置的敌人属性移动到其他点",
+          "!type": "fn(fromX: number, fromY: number, toX: number, toY: number, floorId?: string)"
+        },
         "autoEventExecuting": {
           "!doc": "当前是否在执行某个自动事件", 
           "!type": "fn(symbol?: string, value?: ?) -> bool"

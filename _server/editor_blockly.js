@@ -105,11 +105,13 @@ editor_blockly = function () {
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
                 return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
             }).replace(/\\(r|f|i|c|d|e|g|z)/g,'\\\\$1')),
-            editor_blockly.entryType
+            editor_blockly.isCommonEntry() ? 'common' : editor_blockly.entryType
         );
     }
 
     editor_blockly.id = '';
+
+    var _lastOpenPosition = {};
 
     editor_blockly.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
@@ -123,6 +125,8 @@ editor_blockly = function () {
         editor_blockly.entryType = type;
         editor_blockly.parse();
         editor_blockly.show();
+        var _offsetIndex = [editor_blockly.entryType, editor.pos.x, editor.pos.y, editor.currentFloorId].join(":");
+        editor_blockly.workspace.scroll(0, _lastOpenPosition[_offsetIndex] || 0)
         return true;
     }
 
@@ -152,6 +156,9 @@ editor_blockly = function () {
     }
 
     editor_blockly.cancel = function () {
+        var _offsetIndex = [editor_blockly.entryType, editor.pos.x, editor.pos.y, editor.currentFloorId].join(":");
+        _lastOpenPosition[_offsetIndex] = editor_blockly.workspace.scrollY;
+
         editor_blockly.id = '';
         editor_blockly.hide();
     }
@@ -172,7 +179,7 @@ editor_blockly = function () {
         var eventType = editor_blockly.entryType;
         if(editor_blockly.workspace.topBlocks_.length==1){
           var blockType = editor_blockly.workspace.topBlocks_[0].type;
-          if(blockType!==eventType+'_m'){
+          if(blockType!==eventType+'_m' && !(editor_blockly.isCommonEntry() && blockType == 'common_m')){
             editor_blockly.setValue('入口方块类型错误');
             return;
           }
@@ -194,6 +201,9 @@ editor_blockly = function () {
         eval('var obj=' + code);
         if (this.checkAsync(obj) && confirm("警告！存在不等待执行完毕的事件但却没有用【等待所有异步事件处理完毕】来等待" +
             "它们执行完毕，这样可能会导致录像检测系统出问题。\n你要返回修改么？")) return;
+
+        var _offsetIndex = [editor_blockly.entryType, editor.pos.x, editor.pos.y, editor.currentFloorId].join(":");
+        _lastOpenPosition[_offsetIndex] = editor_blockly.workspace.scrollY;
         setvalue(JSON.stringify(obj));
     }
 
@@ -333,14 +343,28 @@ editor_blockly = function () {
     }
 
     editor_blockly.selectMaterial = function(b,material){
-        editor.uievent.selectMaterial([b.getFieldValue(material[1])], '请选择素材', material[0], function (one) {
-            if (b.type == 'animate_s') {
+        var value = b.getFieldValue(material[1]);
+        value = main.nameMap[value] || value;
+        editor.uievent.selectMaterial([value], '请选择素材', material[0], function (one) {
+            if (b.type == 'animate_s' || b.type == 'animate_1_s' || b.type == 'nameMapAnimate') {
                 return /^[-A-Za-z0-9_.]+\.animate$/.test(one) ? one.substring(0, one.length - 8) : null;
             }
             return /^[-A-Za-z0-9_.]+$/.test(one) ? one : null;
         }, function (value) {
             if (value instanceof Array && value.length > 0) {
-                b.setFieldValue(value[0], material[1]);
+                value = value[0];
+                // 检测是否别名替换
+                for (var name in main.nameMap) {
+                    if (main.nameMap[name] == value) {
+                        if (confirm("检测到该文件存在别名："+name+"\n是否使用别名进行替换？")) {
+                            b.setFieldValue(name, material[1]);
+                            return;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                b.setFieldValue(value, material[1]);
             }
         });
     }
@@ -388,6 +412,12 @@ editor_blockly = function () {
         } else {
             editor.uievent.selectPoint();
         }
+    }
+
+    editor_blockly.showKeyCodes = function () {
+        alert('键值查询表：\nA65 B66 C67 D68 E69 F70 G71 H72 I73 J74 K75 L76 M77\n'
+            +'N78 O79 P80 Q81 R82 S83 T84 U85 V86 W87 X88 Y89 Z90\n0:48 1:49 2:50 3:51 4:52 5:53 6:54 7:55 8:56 9:57\n'
+            +'空格:13 回车:32 ESC:27 后退:8 Tab:9 Shift:16 Ctrl:17 Alt:18\nPgUp:33 PgDn:34 左:37 上:38 右:39 下:40\n更多键值请自行百度查表')
     }
 
     editor_blockly.lastUsedType=[
@@ -475,10 +505,6 @@ editor_blockly = function () {
         var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
 
         var xv = block.getFieldValue(arr[0]), yv = block.getFieldValue(arr[1]);
-        if (arr[0] === arr[1]) {
-            var v = block.getFieldValue(arr[0]).split(",");
-            xv = parseInt(v[0]); yv = parseInt(v[1]);
-        }
         if (xv != null) x = xv;
         if (yv != null) y = yv;
         if (arr[2] != null) floorId = block.getFieldValue(arr[2]) || floorId;
@@ -489,13 +515,8 @@ editor_blockly = function () {
                 if (fv != editor.currentFloorId || editor_blockly.entryType == 'commonEvent') block.setFieldValue(fv, arr[2]);
                 else block.setFieldValue(arr[3] ? fv : "", arr[2]);
             }
-            if (arr[0] === arr[1]) {
-                block.setFieldValue(xv+","+yv, arr[0]);
-            }
-            else {
-                block.setFieldValue(xv+"", arr[0]);
-                block.setFieldValue(yv+"", arr[1]);
-            }
+            block.setFieldValue(xv+"", arr[0]);
+            block.setFieldValue(yv+"", arr[1]);
             if (block.type == 'changeFloor_m' || block.type == 'changeFloor_s') {
                 block.setFieldValue("floorId", "Floor_List_0");
                 block.setFieldValue("loc", "Stair_List_0");
@@ -513,7 +534,7 @@ editor_blockly = function () {
         if (index >= 0) {
             var ch = content.charAt(index);
             var before = content.substring(0, index), token = content.substring(index+1);
-            if (/^[a-zA-Z0-9_\u4E00-\u9FCC]*$/.test(token)) {
+            if (/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]*$/.test(token)) {
                 if (before.endsWith("状态") || (ch == ':' && before.endsWith("status"))) {
                     var list = Object.keys(core.status.hero);
                     if (before.endsWith("状态") && MotaActionFunctions) {
@@ -649,22 +670,30 @@ editor_blockly = function () {
         namesObj.allIconIds = namesObj.allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
           return core.statusBar.icons[x] instanceof Image;
         }));
-        namesObj.allImages = Object.keys(core.material.images.images);
+        namesObj.allImages = Object.keys(core.material.images.images)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.images.images[main.nameMap[one]];}));
         namesObj.allEnemys = Object.keys(core.material.enemys);
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
             namesObj.allEnemys = namesObj.allEnemys.concat(MotaActionFunctions.pattern.replaceEnemyList.map(function (x) {
-            return x[1];
-          }))
+                return x[1];
+            }))
         }
         namesObj.allItems = Object.keys(core.material.items);
+        namesObj.allEquips = namesObj.allItems.filter(function (one) { return core.material.items[one].cls == 'equips' });
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
             namesObj.allItems = namesObj.allItems.concat(MotaActionFunctions.pattern.replaceItemList.map(function (x) {
-            return x[1];
-          }))
+                return x[1];
+            }));
+            namesObj.allEquips = namesObj.allEquips.concat(MotaActionFunctions.pattern.replaceItemList.filter(function (x) {
+                return namesObj.allEquips.includes(x[0]);
+            }).map(function (x) { return x[1]; }));
         }
-        namesObj.allAnimates = Object.keys(core.material.animates);
-        namesObj.allBgms = Object.keys(core.material.bgms);
-        namesObj.allSounds = Object.keys(core.material.sounds);
+        namesObj.allAnimates = Object.keys(core.material.animates)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.animates[main.nameMap[one]];}));
+        namesObj.allBgms = Object.keys(core.material.bgms)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.bgms[main.nameMap[one]];}));
+        namesObj.allSounds = Object.keys(core.material.sounds)
+            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.sounds[main.nameMap[one]];}));;
         namesObj.allShops = Object.keys(core.status.shops);
         namesObj.allFloorIds = core.floorIds;
         namesObj.allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
@@ -691,7 +720,7 @@ editor_blockly = function () {
         // 对音效进行补全
         // 对全局商店进行补全
         // 对楼层名进行补全
-        for(var ii=0,names;names=['allIds','allEnemys','allItems','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
+        for(var ii=0,names;names=['allIds','allEnemys','allItems','allEquips','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
             if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
                 return filter(namesObj[names], content);
             }
@@ -848,7 +877,7 @@ editor_blockly = function () {
                 awesomplete.prefix = value;
                 for (var i = index - 1; i>=0; i--) {
                     var c = value.charAt(i);
-                    if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
+                    if (!/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]$/.test(c)) {
                         awesomplete.prefix = value.substring(i+1);
                         break;
                     }
@@ -868,6 +897,15 @@ editor_blockly = function () {
 
             window.awesomplete = awesomplete;
         }
+    }
+
+    editor_blockly.isBlockCollapsedSupported = function (block) {
+        var supportedDisabledBlocks = [
+            'text_0_s', 'text_1_s', 'text_2_s', 'if_s', 'if_1_s', 'confirm_s', 'switch_s', 'choices_s', 
+            'for_s', 'forEach_s', 'while_s', 'dowhile_s', 'wait_s', 'previewUI_s',
+            'waitContext_1', 'waitContext_2', 'waitContext_3', 'switchCase', 'choicesContext'
+        ];
+        return supportedDisabledBlocks.indexOf(block.type || "") >= 0;
     }
 
     return editor_blockly;
@@ -1007,4 +1045,100 @@ Blockly.WorkspaceSvg.prototype.paste = function(xmlBlock) {
         }
         this.pasteBlock_(xmlBlock);
     }
+};
+
+// -- Support showing disabled blocks
+
+Blockly.Generator.prototype.blockToCode = function(block, opt_thisOnly) {
+    if (this.isInitialized === false) {
+        console.warn(
+            'Generator init was not called before blockToCode was called.');
+    }
+    if (!block) {
+        return '';
+    }
+    if (!block.isEnabled() && !editor_blockly.isBlockCollapsedSupported(block)) {
+        // Skip past this block if it is disabled.
+        return opt_thisOnly ? '' : this.blockToCode(block.getNextBlock());
+    }
+    if (block.isInsertionMarker()) {
+        // Skip past insertion markers.
+        return opt_thisOnly ? '' : this.blockToCode(block.getChildren(false)[0]);
+    }
+
+    var func = this[block.type];
+    if (typeof func != 'function') {
+        throw Error('Language "' + this.name_ + '" does not know how to generate ' +
+            'code for block type "' + block.type + '".');
+    }
+    // First argument to func.call is the value of 'this' in the generator.
+    // Prior to 24 September 2013 'this' was the only way to access the block.
+    // The current preferred method of accessing the block is through the second
+    // argument to func.call, which becomes the first parameter to the generator.
+    var code = func.call(block, block);
+    if (Array.isArray(code)) {
+        // Value blocks return tuples of code and operator order.
+        if (!block.outputConnection) {
+            throw TypeError('Expecting string from statement block: ' + block.type);
+        }
+        return [this.scrub_(block, code[0], opt_thisOnly), code[1]];
+    } else if (typeof code == 'string') {
+        if (this.STATEMENT_PREFIX && !block.suppressPrefixSuffix) {
+            code = this.injectId(this.STATEMENT_PREFIX, block) + code;
+        }
+        if (this.STATEMENT_SUFFIX && !block.suppressPrefixSuffix) {
+            code = code + this.injectId(this.STATEMENT_SUFFIX, block);
+        }
+        return this.scrub_(block, code, opt_thisOnly);
+    } else if (code === null) {
+        // Block has handled code generation itself.
+        return '';
+    }
+    throw SyntaxError('Invalid code generated: ' + code);
+};
+
+Blockly.BlockSvg.prototype.generateContextMenu = function() {
+    if (this.workspace.options.readOnly || !this.contextMenu) {
+        return null;
+    }
+    // Save the current block in a variable for use in closures.
+    var block = this;
+    var menuOptions = [];
+  
+    if (!this.isInFlyout) {
+        // 删除
+        if (this.isDeletable() && this.isMovable()) {
+            menuOptions.push(Blockly.ContextMenu.blockDuplicateOption(block));
+        }
+
+        if (editor_blockly.isBlockCollapsedSupported(this)) {
+            menuOptions.push({
+                text: this.isCollapsed() ? Blockly.Msg['EXPAND_BLOCK'] : Blockly.Msg['COLLAPSE_BLOCK'],
+                enabled: true,
+                callback: function () { block.setCollapsed(!block.collapsed_); }
+            });
+
+            menuOptions.push({
+                text: this.isEnabled() ? Blockly.Msg['DISABLE_BLOCK'] : Blockly.Msg['ENABLE_BLOCK'],
+                enabled: !this.getInheritedDisabled(),
+                callback: function() {
+                    var group = Blockly.Events.getGroup();
+                    if (!group) {
+                        Blockly.Events.setGroup(true);
+                    }
+                    block.setEnabled(!block.isEnabled());
+                    if (!group) {
+                        Blockly.Events.setGroup(false);
+                    }
+                }
+            });
+        }
+        if (this.isDeletable()) {
+            menuOptions.push(Blockly.ContextMenu.blockDeleteOption(block));
+        }
+    }
+  
+    menuOptions.push(Blockly.ContextMenu.blockHelpOption(block));  
+    if (this.customContextMenu) this.customContextMenu(menuOptions);
+    return menuOptions;
 };

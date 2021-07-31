@@ -55,7 +55,7 @@ main.floors.sample2=
             "stair": "upFloor"
         },
         "7,12": {
-            "floorId": "sample3",
+            "floorId": "sample2",
             "stair": "downFloor"
         }
     },

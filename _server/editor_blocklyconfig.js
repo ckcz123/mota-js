@@ -59,6 +59,8 @@ editor_blocklyconfig=(function(){
         "commonEvent": "回收钥匙商店",
         "args": ""
       }],'shop'),
+      MotaActionBlocks['common_m'].xmlText(),
+      MotaActionBlocks['beforeBattle_m'].xmlText(),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
@@ -86,6 +88,9 @@ editor_blocklyconfig=(function(){
       }, 'doorInfo'),
       MotaActionBlocks['faceIds_m'].xmlText(),
       MotaActionBlocks['mainStyle_m'].xmlText(),
+      MotaActionFunctions.actionParser.parse({
+        "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "领域": "zone", "文件名": "file.jpg"
+      }, 'nameMap'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
@@ -100,6 +105,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['hideImage_s'].xmlText(),
       MotaActionBlocks['showTextImage_s'].xmlText(),
       MotaActionBlocks['moveImage_s'].xmlText(),
+      MotaActionBlocks['rotateImage_s'].xmlText(),
       MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),
@@ -117,10 +123,15 @@ editor_blocklyconfig=(function(){
         MotaActionBlocks['idIdList_e'].xmlText(['status','生命']), '=', '', false
       ]),
       MotaActionBlocks['setEnemy_s'].xmlText(),
+      MotaActionBlocks['setEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['resetEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['moveEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['setEquip_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),
       MotaActionBlocks['setGlobalValue_s'].xmlText(),
       MotaActionBlocks['setGlobalFlag_s'].xmlText(),
+      MotaActionBlocks['setNameMap_s'].xmlText(),
       MotaActionBlocks['input_s'].xmlText(),
       MotaActionBlocks['input2_s'].xmlText(),
       MotaActionBlocks['update_s'].xmlText(),
@@ -144,6 +155,8 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['show_s'].xmlText(),
       MotaActionBlocks['hide_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
+      MotaActionBlocks['setBlockOpacity_s'].xmlText(),
+      MotaActionBlocks['setBlockFilter_s'].xmlText(),
       MotaActionBlocks['turnBlock_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
@@ -180,11 +193,13 @@ editor_blocklyconfig=(function(){
       MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
         {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件\n超时剩余时间会写入flag:timeout"}]},
         {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件\n超时剩余时间会写入flag:timeout"}]},
+        {"case": "condition", "condition": "flag:type==0\n&&flag:keycode==13", "action": [{"type": "comment", "text": "当满足自定义条件时会执行此事件\n超时剩余时间会写入flag:timeout"}]},
         {"case": "timeout", "action": [{"type": "comment", "text": "当超时未操作时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
+      MotaActionBlocks['animate_1_s'].xmlText(),
       MotaActionBlocks['setViewport_s'].xmlText(),
       MotaActionBlocks['setViewport_1_s'].xmlText(),
       MotaActionBlocks['showStatusBar_s'].xmlText(),
@@ -201,8 +216,10 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['loadBgm_s'].xmlText(),
       MotaActionBlocks['freeBgm_s'].xmlText(),
       MotaActionBlocks['playSound_s'].xmlText(),
+      MotaActionBlocks['playSound_1_s'].xmlText(),
       MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
+      MotaActionBlocks['setBgmSpeed_s'].xmlText(),
       MotaActionBlocks['callBook_s'].xmlText(),
       MotaActionBlocks['callSave_s'].xmlText(),
       MotaActionBlocks['autoSave_s'].xmlText(),
@@ -213,6 +230,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['previewUI_s'].xmlText(),
       MotaActionBlocks['clearMap_s'].xmlText(),
       MotaActionBlocks['setAttribute_s'].xmlText(),
+      MotaActionBlocks['setFilter_s'].xmlText(),
       MotaActionBlocks['fillText_s'].xmlText(),
       MotaActionBlocks['fillBoldText_s'].xmlText(),
       MotaActionBlocks['drawTextContent_s'].xmlText(),
@@ -246,7 +264,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['idTemp_e'].xmlText(),
       MotaActionBlocks['negate_e'].xmlText(),
       MotaActionBlocks['unaryOperation_e'].xmlText(),
-      MotaActionBlocks['utilOperation_e'].xmlText(),
       MotaActionBlocks['bool_e'].xmlText(),
       MotaActionBlocks['idString_e'].xmlText(),
       MotaActionBlocks['idIdList_e'].xmlText(),
@@ -255,7 +272,14 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['blockId_e'].xmlText(),
       MotaActionBlocks['blockNumber_e'].xmlText(),
       MotaActionBlocks['blockCls_e'].xmlText(),
+      MotaActionBlocks['hasEquip_e'].xmlText(),
       MotaActionBlocks['equip_e'].xmlText(),
+      MotaActionBlocks['nextXY_e'].xmlText(),
+      MotaActionBlocks['isReplaying_e'].xmlText(),
+      MotaActionBlocks['hasVisitedFloor_e'].xmlText(),
+      MotaActionBlocks['isShopVisited_e'].xmlText(),
+      MotaActionBlocks['canBattle_e'].xmlText(),
+      MotaActionBlocks['rand_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
     '常见事件模板':[
@@ -266,32 +290,69 @@ editor_blocklyconfig=(function(){
         ],
         "false": []
       }),
-      '<label text="商店购买属性/钥匙"></label>',
+      '<label text="仿新新魔塔一次性商人"></label>',
       MotaActionFunctions.actionParser.parse([
-        {"type": "while", "condition": "true", "data": [
-          {"type": "choices", "text": "\t[老人,man]少年，你需要钥匙吗？\n我这里有大把的！",
-          "choices": [
-              {"text": "黄钥匙（${9+flag:shop_times}金币）", "color": [255,255,0,1], "action": [
-                  {"type": "if", "condition": "status:money>=9+flag:shop_times",
-                      "true": [
-                          {"type": "setValue", "name": "status:money", "operator": "-=", "value": "9+flag:shop_times"},
-                          {"type": "setValue", "name": "item:yellowKey", "operator": "+=", "value": "1"},
-                      ],
-                      "false": [
-                          "\t[老人,man]你的金钱不足！",
-                          {"type": "continue"}
-                      ]
-                  }
-              ]},
-              {"text": "蓝钥匙（${18+2*flag:shop_times}金币）", "color": [0,0,255,1], "action": [
-              ]},
-              {"text": "离开", "action": [
-                  {"type": "break"}
-              ]}
+        {
+          "type": "if",
+          "condition": "switch:A",
+          "true": [
+            "\t[行商,trader]\b[this]这是购买我的道具后我给玩家的提示。",
+            {
+              "type": "comment",
+              "text": "下一条指令可视情况使用或不使用"
+            },
+            {
+              "type": "hide",
+              "remove": true,
+              "time": 250
+            }
+          ],
+          "false": [
+            {
+              "type": "confirm",
+              "text": "我有3把黄钥匙，\n你出50金币就卖给你。",
+              "yes": [
+                {
+                  "type": "if",
+                  "condition": "status:money>=50",
+                  "true": [
+                    {
+                      "type": "setValue",
+                      "name": "status:money",
+                      "operator": "-=",
+                      "value": "50"
+                    },
+                    {
+                      "type": "setValue",
+                      "name": "item:yellowKey",
+                      "operator": "+=",
+                      "value": "3"
+                    },
+                    {
+                      "type": "playSound",
+                      "name": "确定",
+                      "stop": true
+                    },
+                    {
+                      "type": "setValue",
+                      "name": "switch:A",
+                      "value": "true"
+                    }
+                  ],
+                  "false": [
+                    {
+                      "type": "playSound",
+                      "name": "操作失败"
+                    },
+                    "\t[行商,trader]\b[this]你的金币不足！"
+                  ]
+                }
+              ],
+              "no": []
+            }
           ]
-        },
-        {"type": "setValue", "name": "flag:shop_times", "operator": "+=", "value": "1"}
-      ]}], 'event'),  
+      }
+      ], 'event'),  
       '<label text="战前剧情"></label>',
       MotaActionFunctions.actionParser.parse({ 
         "trigger": "action", 
@@ -304,41 +365,146 @@ editor_blocklyconfig=(function(){
           {"type": "hide"},
         ]
       },'event'),
-      '<label text="打怪掉落道具"></label>',
-      MotaActionFunctions.actionParser.parse([
-        '怪物变成了黄钥匙(黄钥匙idnum是21)',
-        '打怪变成可对话的NPC: https://ckcz123.github.io/mota-js/#/event?id=%e6%89%93%e6%80%aa%e5%8f%98%e6%88%90%e5%8f%af%e5%af%b9%e8%af%9d%e7%9a%84npc%ef%bc%88%e6%80%aa%e7%89%a9-gtnpc%ef%bc%89',
-        {"type": "setBlock", "number": 21}
-      ],'afterBattle'),
-      '<label text="打怪开门"></label>',
-      MotaActionFunctions.actionParser.parse([
-        {"type": "setValue", "name": "flag:__door__", "operator": "+=", "value": "1"},
-        {"type": "if", "condition": "flag:__door__===2", 
-          "true": [
-            {"type": "openDoor", "loc": [10,5]}
-          ],
-          "false": [] 
-        },
-      ],'afterBattle'),
       '<label text="杀死魔龙后隐藏其余图块"></label>',
       MotaActionFunctions.actionParser.parse([
         {"type": "function", "function": "function(){var x=core.status.event.data.x,y=core.status.event.data.y;if(core.isset(x)&&core.isset(y)){core.insertAction([{type:'hide',loc:[[x-1,y-2],[x,y-2],[x+1,y-2],[x-1,y-1],[x,y-1],[x+1,y-1],[x-1,y],[x+1,y]]}]);}}"},
       ],'afterBattle'),
-      '<label text="获得圣水后变成墙"></label>',
-      MotaActionFunctions.actionParser.parse({
-        "trigger": "action", 
-        "noPass": true, 
-        "data": [
-          {"type": "if", "condition": "flag:hasSuperPotion", 
-            "true": [], 
-            "false": [
-              {"type":"setValue", "name":"status:hp", "operator": "*=", "value": "2"}, 
-              {"type":"setBlock", "number": 1}, 
-              {"type":"setValue", "name":"flag:hasSuperPotion", "value": "true"} 
-            ]
-          }
-        ]
-      },'event'),
+      '<label text="全地图选中一个点"></label>',
+      MotaActionFunctions.actionParser.parse([
+        {
+          "type": "comment",
+          "text": "全地图选中一个点，需要用鼠标或触屏操作"
+        },
+        {
+          "type": "setValue",
+          "name": "temp:X",
+          "value": "status:x"
+        },
+        {
+          "type": "setValue",
+          "name": "temp:Y",
+          "value": "status:y"
+        },
+        {
+          "type": "tip",
+          "text": "再次点击闪烁位置确认"
+        },
+        {
+          "type": "while",
+          "condition": "true",
+          "data": [
+            {
+              "type": "drawSelector",
+              "image": "winskin.png",
+              "code": 1,
+              "x": "32*temp:X",
+              "y": "32*temp:Y",
+              "width": 32,
+              "height": 32
+            },
+            {
+              "type": "wait"
+            },
+            {
+              "type": "if",
+              "condition": "(flag:type === 1)",
+              "true": [
+                {
+                  "type": "if",
+                  "condition": "((temp:X===flag:x)&&(temp:Y===flag:y))",
+                  "true": [
+                    {
+                      "type": "break",
+                      "n": 1
+                    }
+                  ]
+                },
+                {
+                  "type": "setValue",
+                  "name": "temp:X",
+                  "value": "flag:x"
+                },
+                {
+                  "type": "setValue",
+                  "name": "temp:Y",
+                  "value": "flag:y"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "drawSelector",
+          "code": 1
+        },
+        {
+          "type": "comment",
+          "text": "流程进行到这里可以对[X,Y]点进行处理，比如"
+        },
+        {
+          "type": "closeDoor",
+          "id": "yellowDoor",
+          "loc": [
+            "temp:X",
+            "temp:Y"
+          ]
+        }
+      ],'event'),
+      '<label text="多阶段Boss战斗"></label>',
+      MotaActionFunctions.actionParser.parse([
+        {
+          "type": "comment",
+          "text": "多阶段boss，请直接作为战后事件使用"
+        },
+        {
+          "type": "setValue",
+          "name": "switch:A",
+          "operator": "+=",
+          "value": "1"
+        },
+        {
+          "type": "switch",
+          "condition": "switch:A",
+          "caseList": [
+            {
+              "case": "1",
+              "action": [
+                {
+                  "type": "setBlock",
+                  "number": "redSlime"
+                },
+                "\t[2阶段boss,redSlime]\b[this]你以为你已经打败我了吗？没听说过史莱姆有九条命吗？"
+              ]
+            },
+            {
+              "case": "2",
+              "action": [
+                {
+                  "type": "setBlock",
+                  "number": "blackSlime"
+                },
+                "\t[3阶段boss,blackSlime]\b[this]不能消灭我的，只会让我更强大！"
+              ]
+            },
+            {
+              "case": "3",
+              "action": [
+                {
+                  "type": "setBlock",
+                  "number": "slimelord"
+                },
+                "\t[4阶段boss,slimelord]\b[this]我还能打！"
+              ]
+            },
+            {
+              "case": "4",
+              "action": [
+                "\t[4阶段boss,slimelord]我一定会回来的！"
+              ]
+            }
+          ]
+        }
+      ],'afterBattle'),
     ],
     '最近使用事件':[
       '<label text="此处只是占位符,实际定义在editor_blockly.searchBlockCategoryCallback中"></label>',
@@ -371,10 +537,15 @@ var workspace = Blockly.inject(blocklyDiv,{
   trashcan: false,
 });
 
+editor_blockly.isCommonEntry = function () {
+  var commonEntries = ['beforeBattle', 'afterBattle', 'afterOpenDoor', 'firstArrive', 'eachArrive', 'commonEvent', 'item'];
+  return commonEntries.indexOf(editor_blockly.entryType) >= 0;
+}
+
 editor_blockly.entranceCategoryCallback = function(workspace) {
   var list=toolboxObj['入口方块']
   var xmlList = [];
-  var eventType = editor_blockly.entryType+'_m';
+  var eventType = (editor_blockly.isCommonEntry() ? 'common' : editor_blockly.entryType)+'_m';
   for(var ii=0,blockText;blockText=list[ii];ii++){
     if(new RegExp('<block type="'+eventType+'">').exec(blockText)){
       var block = Blockly.Xml.textToDom('<xml>'+blockText+'</xml>').firstChild;
@@ -449,7 +620,7 @@ function omitedcheckUpdateFunction(event) {
   var eventType = editor_blockly.entryType;
   if(editor_blockly.workspace.topBlocks_.length==1){
     var blockType = editor_blockly.workspace.topBlocks_[0].type;
-    if(blockType!==eventType+'_m'){
+    if(blockType!==eventType+'_m' && !(editor_blockly.isCommonEntry() && blockType == 'common_m')){
       editor_blockly.setValue('入口方块类型错误');
       return;
     }
@@ -479,11 +650,11 @@ function omitedcheckUpdateFunction(event) {
   }
 
   // 因为在editor_blockly.parse里已经HTML转义过一次了,所以这里要覆盖掉以避免在注释中出现&lt;等
-  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment,collapsed) {
+  MotaActionFunctions.xmlText = function (ruleName,inputs,isShadow,comment,collapsed,disabled) {
     var rule = MotaActionBlocks[ruleName];
     var blocktext = isShadow?'shadow':'block';
     var xmlText = [];
-    xmlText.push('<'+blocktext+' type="'+ruleName+'"'+(collapsed ? ' collapsed="true"' : '')+'>');
+    xmlText.push('<'+blocktext+' type="'+ruleName+'"'+(collapsed ? ' collapsed="true"' : '')+(disabled ? ' disabled="true"' : '')+'>');
     if(!inputs)inputs=[];
     for (var ii=0,inputType;inputType=rule.argsType[ii];ii++) {
       var input = inputs[ii];

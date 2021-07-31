@@ -35,11 +35,10 @@ editor_mappanel_wrapper = function (editor) {
         if (editor.uivalues.bigmap) {
             var info = editor.uivalues.bigmapInfo;
             var size = loc.size / 32 * info.size;
-            editor.pos = {
+            return {
                 x: core.clamp(Math.floor((loc.x - info.left) / size), 0, editor.currentFloorData.width - 1),
                 y: core.clamp(Math.floor((loc.y - info.top) / size), 0, editor.currentFloorData.height - 1),
             }
-            return editor.pos;
         }
 
         var offsetX = 0, offsetY = 0;
@@ -47,8 +46,7 @@ editor_mappanel_wrapper = function (editor) {
             offsetX = core.bigmap.offsetX / 32;
             offsetY = core.bigmap.offsetY / 32;
         }
-        editor.pos = { 'x': ~~(loc.x / loc.size) + offsetX, 'y': ~~(loc.y / loc.size) + offsetY }
-        return editor.pos;
+        return { 'x': ~~(loc.x / loc.size) + offsetX, 'y': ~~(loc.y / loc.size) + offsetY }
     }
 
     /**
@@ -90,9 +88,10 @@ editor_mappanel_wrapper = function (editor) {
         editor.uivalues.lastMoveE=e;
         var loc = editor.uifunctions.eToLoc(e);
         var pos = editor.uifunctions.locToPos(loc, true);
+        editor.pos = pos;
 
         if (editor.uivalues.bindSpecialDoor.loc != null) {
-            var x = editor.pos.x, y = editor.pos.y, id = (editor.map[y][x] || {}).id;
+            var x = pos.x, y = pos.y, id = (editor.map[y][x] || {}).id;
             // 检测是否是怪物
             if (id && editor.game.getEnemy(id)) {
                 var locstr = x + "," + y, index = editor.uivalues.bindSpecialDoor.enemys.indexOf(locstr);
@@ -277,6 +276,7 @@ editor_mappanel_wrapper = function (editor) {
                 // 后续的处理
             } else {
                 // 左键拖拽: 交换
+                editor.savePreMap();
                 // editor.movePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.exchangePos(editor.uivalues.startPos, editor.uivalues.endPos);
                 editor.uifunctions.unhighlightSaveFloorButton();
@@ -407,6 +407,11 @@ editor_mappanel_wrapper = function (editor) {
             var index = editor.core.floorIds.indexOf(editor.currentFloorId);
             var toId = editor.currentFloorId;
 
+            var saveFloor = document.getElementById('saveFloor');
+            if (saveFloor && saveFloor.classList.contains('highlight')) {
+                return;
+            }
+
             if (direct > 0 && index < editor.core.floorIds.length - 1)
                 toId = editor.core.floorIds[index + 1];
             else if (direct < 0 && index > 0)
@@ -433,6 +438,11 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.uifunctions.undoFloor_click = function () {
+        var saveFloor = document.getElementById('saveFloor');
+        if (saveFloor && saveFloor.classList.contains('highlight')) {
+            return;
+        }
+
         var toId = editor.uivalues.recentFloors.pop();
         if (toId == null || toId == editor.currentFloorId) return;
 
@@ -529,6 +539,7 @@ editor_mappanel_wrapper = function (editor) {
      */
     editor.uifunctions._extraEvent_bindStartPoint = function (thisevent) {
         if (thisevent != 0) return false;
+        if (!confirm('再次确认，你想绑定此点为出生点吗？')) return false;
         editor.mode.onmode('tower');
         editor.mode.addAction(["change", "['firstData']['floorId']", editor.currentFloorId]);
         editor.mode.addAction(["change", "['firstData']['hero']['loc']['x']", editor.pos.x]);
@@ -640,9 +651,9 @@ editor_mappanel_wrapper = function (editor) {
             }
         };
         bindSpecialDoor.enemys.forEach(function (loc) {
-            editor.currentFloorData.afterBattle[loc] = [
-                {"type": "setValue", "name": doorFlag, "operator": "+=", "value": "1"}
-            ]
+            if (!editor.currentFloorData.afterBattle[loc])
+                editor.currentFloorData.afterBattle[loc] = [];
+            editor.currentFloorData.afterBattle[loc].push({"type": "setValue", "name": doorFlag, "operator": "+=", "value": "1"});
         });
         editor.file.saveFloorFile(function (err) {
             if (err) {
@@ -946,6 +957,18 @@ editor_mappanel_wrapper = function (editor) {
             });
         }
         saveFloor.onclick = editor_mode.saveFloor;
+    }
+
+    editor.uifunctions.openDoc_func = function () {
+        var openDoc = document.getElementById('openDoc');
+        openDoc.onclick = function () {
+            if (editor.isMobile) {
+                if (!confirm('你确定要打开帮助文档吗？')) return;
+                window.location='/_docs/';
+            } else {
+                window.open('/_docs/', '_blank');
+            }
+        }
     }
 
     editor.uifunctions.lastUsed_click = function (e) {

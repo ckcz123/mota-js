@@ -215,6 +215,8 @@ type gameStatus = {
         textfont: number
         bold: boolean
         time: number
+        letterSpacing: number
+        animateTime: number
     },
     globalAttribute: {
         equipName: string[]
@@ -278,19 +280,19 @@ declare class control {
     removeFlag(name: string): void
 
     /** 设置某个独立开关 */
-    setSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+    setSwitch(x: number, y: number, floorId: string, name: string, value: any): void
 
     /** 获得某个独立开关 */
-    getSwitch(x: number, y: number, floorId?: string, name: string, defaultValue: any): any
+    getSwitch(x: number, y: number, floorId: string, name: string, defaultValue: any): any
 
     /** 增加某个独立开关 */
-    addSwitch(x: number, y: number, floorId?: string, name: string, value: any): void
+    addSwitch(x: number, y: number, floorId: string, name: string, value: any): void
 
     /** 判定某个独立开关 */
-    hasSwitch(x: number, y: number, floorId?: string, name: string): boolean
+    hasSwitch(x: number, y: number, floorId: string, name: string): boolean
 
     /** 删除独立开关 */
-    removeSwitch(x: number, y: number, floorId?: string, name: string): boolean
+    removeSwitch(x: number, y: number, floorId: string, name: string): boolean
 
     /** 设置大地图的偏移量 */
     setGameCanvasTranslate(canvasId: string, x: number, y: number): void
@@ -511,6 +513,13 @@ declare class control {
     getLvName(lv?: number): string | number
     
     /**
+     * 获得下次升级需要的经验值。
+     * 升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
+     * 如果无法进行下次升级，返回null。
+     */
+    getNextLvUpNeed() : number
+
+    /**
      * 设置一个flag变量
      * @example core.setFlag('poison', true); // 令主角中毒
      * @param name 变量名，支持中文
@@ -545,10 +554,10 @@ declare class control {
     /**
      * 设置天气，不计入存档。如需长期生效请使用core.events._action_setWeather()函数
      * @example core.setWeather('fog', 10); // 设置十级大雾天
-     * @param type 新天气的类型，不填视为晴天
+     * @param type 新天气的类型，不填视为无天气
      * @param level 新天气（晴天除外）的级别，必须为不大于10的正整数，不填视为5
      */
-    setWeather(type?: 'rain' | 'snow' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
+    setWeather(type?: 'rain' | 'snow' | 'sun' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
     
     /**
      * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
@@ -637,7 +646,7 @@ declare class control {
     setViewport(px?: number, py?: number): void
 
     /** 移动视野范围 */
-    moveViewport(x: number, y: number, time?: number, callback?: () => any): void
+    moveViewport(x: number, y: number, moveMode?: string, time?: number, callback?: () => any): void
 
     /** 更新跟随者坐标 */
     updateFollowers(): void
@@ -765,6 +774,9 @@ declare class control {
     /** 恢复背景音乐的播放 */
     resumeBgm(resumeTime?: number): void
 
+    /** 设置背景音乐的播放速度和音调 */
+    setBgmSpeed(speed: number, usePitch?: bool): void
+
     /** 设置音乐图标的显隐状态 */
     setMusicBtn(): void
 
@@ -772,10 +784,10 @@ declare class control {
     triggerBgm(): void
 
     /** 播放一个音效 */
-    playSound(sound: string): void
+    playSound(sound: string, pitch?: number, callback?: () => any): number
 
-    /** 停止所有音频 */
-    stopSound(): void
+    /** 停止（所有）音频 */
+    stopSound(id?: number): void
 
     /** 检查bgm状态 */
     checkBgm(): void
@@ -898,10 +910,20 @@ declare class events {
      * @param id 敌人id
      * @param name 属性的英文缩写
      * @param value 属性的新值，可选
+     * @param operator 操作符，可选
      * @param prefix 独立开关前缀，一般不需要，下同
      */
-    setEnemy<K extends keyof Enemy>(id: string, name: K, value?: Enemy[K], prefix?: string): void
+    setEnemy<K extends keyof Enemy>(id: string, name: K, value?: Enemy[K], operator?: string, prefix?: string): void
     
+    /** 设置某个点的敌人属性 */
+    setEnemyOnPoint<K extends keyof Enemy>(x: number, y: number, floorId: string, name: K, value?: Enemy[K], operator?: string, prefix?: string): void
+
+    /** 重置某个点的敌人属性 */
+    resetEnemyOnPoint(x: number, y: number, floorId?: string): void
+
+    /** 将某个点已经设置的敌人属性移动到其他点 */
+    moveEnemyOnPoint(fromX: number, fromY: number, toX: number, toY: number, floorId?: string): void
+
     /**
      * 设置一项楼层属性并刷新状态栏
      * @example core.setFloorInfo('ratio', 2, 'MT0'); // 把主塔0层的血瓶和宝石变为双倍效果
@@ -954,15 +976,27 @@ declare class events {
     
     /**
      * 移动一张图片并/或改变其透明度
-     * @example core.moveImage(1, undefined, 0.5); // 1秒内把1号图片变为50%透明
+     * @example core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
      * @param code 图片编号
      * @param to 新的左上角坐标，省略表示原地改变透明度
      * @param opacityVal 新的透明度，省略表示不变
+     * @param moveMode 移动模式
      * @param time 移动用时，单位为毫秒。不填视为1秒
      * @param callback 图片移动完毕后的回调函数，可选
      */
-    moveImage(code: number, to?: [number?, number?], opacityVal?: number, time?: number, callback?: () => void): void
-    
+    moveImage(code: number, to?: [number?, number?], opacityVal?: number, moveMode?: string, time?: number, callback?: () => void): void
+
+    /**
+     * 旋转一张图片
+     * @param code 图片编号
+     * @param center 旋转中心像素（以屏幕为基准）；不填视为图片本身中心
+     * @param angle 旋转角度；正数为顺时针，负数为逆时针
+     * @param moveMode 旋转模式
+     * @param time 移动用时，单位为毫秒。不填视为1秒
+     * @param callback 图片移动完毕后的回调函数，可选
+     */
+    rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
+
     /**
      * 绘制一张动图或擦除所有动图
      * @example core.showGif(); // 擦除所有动图
@@ -982,12 +1016,15 @@ declare class events {
     setVolume(value: number, time?: number, callback?: () => void): void
     
     /**
-     * 视野左右抖动
+     * 视野抖动
      * @example core.vibrate(); // 视野左右抖动1秒
-     * @param time 抖动时长，单位为毫秒。必须为半秒的倍数，不填或小于1秒都视为1秒
+     * @param direction 抖动方向
+     * @param time 抖动时长，单位为毫秒
+     * @param speed 抖动速度
+     * @param power 抖动幅度
      * @param callback 抖动平息后的回调函数，可选
      */
-    vibrate(time?: number, callback?: () => void): void
+    vibrate(direction?: string, time?: number, speed?: number, power?: number, callback?: () => void): void
 
     /**
      * 强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了
@@ -1252,7 +1289,7 @@ declare class actions {
     onup(loc: number[]): void
 
     /** 具体点击屏幕上(x,y)点时，执行的操作 */
-    onclick(x: number, y: number, stepPostfix?: any): void
+    onclick(x: number, y: number, px: number, py: number, stepPostfix?: any): void
 
     /** 滑动鼠标滚轮时的操作 */
     onmousewheel(direct: 1 | -1): void
@@ -1261,7 +1298,7 @@ declare class actions {
     keyDownCtrl(): void
 
     /** 长按 */
-    longClick(x: number, y: number, fromEvent?: boolean): void
+    longClick(x: number, y: number, px: number, py: number, fromEvent?: boolean): void
 
     /** 点击自绘状态栏时 */
     onStatusBarClick(e?: MouseEvent): void
@@ -1295,6 +1332,9 @@ declare class enemys {
      * @returns 属性的介绍，以属性名加中文冒号开头
      */
     getSpecialHint(enemy: string | Enemy, special: number): string
+
+    /** 获得某个敌人的某项属性值 */
+    getEnemyValue(enemy: string | Enemy, name: string, x?: number, y?: number, floorId?: string): any
 
     /**
      * 判定主角当前能否打败某只敌人
@@ -1575,8 +1615,18 @@ declare class maps {
      * @param showDisable 隐藏点是否计入，true表示计入
      * @returns 一个详尽的数组，一般只用到其长度
      */
-    searchBlock(id: string, floorId?: string, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
+    searchBlock(id: string, floorId?: string|Array<string>, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
     
+    /**
+     * 根据给定的筛选函数搜索全部满足条件的图块
+     * @example core.searchBlockWithFilter(function (block) { return block.event.id.endsWith('Door'); }); // 搜索当前地图的所有门
+     * @param blockFilter 筛选函数，可接受block输入，应当返回一个boolean值
+     * @param floorId 地图id，不填视为当前地图
+     * @param showDisable 隐藏点是否计入，true表示计入
+     * @returns 一个详尽的数组
+     */
+    searchBlockWithFilter(blockFilter: (Block) => boolean, floorId?: string|Array<string>, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
+
     /**
      * 显示（隐藏或显示的）图块，此函数将被“显示事件”指令和勾选了“不消失”的“移动/跳跃事件”指令（如阻击怪）的终点调用
      * @example core.showBlock(0, 0); // 显示地图左上角的图块
@@ -1775,6 +1825,9 @@ declare class maps {
 
     /** 获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等 */
     getBlockInfo(block?: any): any
+
+    /** 获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id */
+    getFaceDownId(block?: any): string
 
     /** 根据图块的索引来隐藏图块 */
     hideBlockByIndex(index?: any, floorId?: string): void
@@ -1997,6 +2050,18 @@ declare class items {
 
     /** 根据类型获得一个可用的装备孔 */
     getEquipTypeByName(name?: string): void
+
+    /**
+     * 设置某个装备的属性并计入存档
+     * @example core.setEquip('sword1', 'value', 'atk', 300, '+='); // 设置铁剑的攻击力数值再加300
+     * @param equipId 装备id
+     * @param valueType 增幅类型，只能是value（数值）或percentage（百分比）
+     * @param name 要修改的属性名称，如atk
+     * @param value 要修改到的属性数值
+     * @param operator 操作符，可选，如+=表示在原始值上增加
+     * @param prefix 独立开关前缀，一般不需要
+     */
+     setEquip(equipId: string, valueType: string, name: string, value: any, operator?: string, prefix?: string): void
 }
 
 /** @file ui.js 主要用来进行UI窗口的绘制，如对话框、怪物手册、楼传器、存读档界面等等。*/
@@ -2021,7 +2086,7 @@ declare class ui {
      * @param style 绘制的样式
      * @param font 绘制的字体
      */
-    fillText(name: CtxRefer, text: string, x: number, y: number, style: string, font: string): void
+    fillText(name: CtxRefer, text: string, x: number, y: number, style?: string, font?: string, maxWidth?: number): void
 
     /**
      * 在某个画布上绘制一个描黑边的文字
@@ -2030,7 +2095,7 @@ declare class ui {
      * @param strokeStyle 绘制的描边颜色
      * @param font 绘制的字体
      */
-    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style: string, strokeStyle: string, font: string): void
+    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number): void
 
     /**
      * 绘制一个矩形。style可选为绘制样式
@@ -2058,6 +2123,9 @@ declare class ui {
 
     /** 重新设置一个自定义画布的大小 */
     resizeCanvas(name: string, x: number, y: number): void
+
+    /** 设置一个自定义画布的旋转角度 */
+    rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
     deleteCanvas(name: string): void
@@ -2220,8 +2288,11 @@ declare class ui {
     /** 设置某个canvas的线宽度 */
     setLineWidth(name: string | CanvasRenderingContext2D, lineWidth: number): void
 
-    /** 设置某个canvas的alpha值 */
-    setAlpha(name: string | CanvasRenderingContext2D, alpha: number): void
+    /** 设置某个canvas的alpha值；返回设置之前画布的不透明度。 */
+    setAlpha(name: string | CanvasRenderingContext2D, alpha: number): number
+
+    /** 设置某个canvas的filter属性 */
+    setFilter(name: string | CanvasRenderingContext2D, filter: any): void
 
     /** 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 */
     setOpacity(name: string | CanvasRenderingContext2D, opacity: number): void
@@ -2333,6 +2404,9 @@ declare class utils {
      * @returns 格式化结果
      */
     formatBigNumber(x: number, onMap?: boolean): string
+
+    /** 变速移动 */
+    applyEasing(mode?: string): (number) => number;
 
     /**
      * 颜色数组转十六进制

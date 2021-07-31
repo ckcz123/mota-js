@@ -306,18 +306,17 @@ editor_file = function (editor, callback) {
             callback('不能对自动元件进行自动注册！');
             return;
         }
-        if (image=='npc48' && confirm("你想绑定npc48的朝向么？\n如果是，则会将最后四个npc48的faceIds进行自动绑定。")) {
+        if ((image=='npcs' || image=='npc48' || image == 'enemys' || image == 'enemy48')
+                && confirm("你想绑定图块的朝向么？\n如果是，则会将最后四个注册图块的faceIds进行自动绑定。")) {
             bindFaceIds = true;
         }
         var c=image.toUpperCase().charAt(0);
 
-        // terrains id
-        var terrainsId = [];
-        Object.keys(core.material.icons.terrains).forEach(function (id) {
-            terrainsId[core.material.icons.terrains[id]]=id;
-        })
-
         var allIds = [];
+        Object.keys(icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[image] || {}).forEach(function (v) {
+            allIds[icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[image][v]] = v;
+        });
+
         editor.ids.forEach(function (v) {
             if (v.images==image) {
                 allIds[v.y]=v;
@@ -339,12 +338,7 @@ editor_file = function (editor, callback) {
             // get id num
             var id = c+idnum;
 
-            if (image=='terrains' && terrainsId[y] != null) {
-                id=terrainsId[y];
-            }
-            else {
-                iconActions.push(["add", "['" + image + "']['" + id + "']", y])
-            }
+            iconActions.push(["add", "['" + image + "']['" + id + "']", y])
             mapActions.push(["add", "['" + idnum + "']", {'cls': image, 'id': id}]);
             faceIds.push({idnum: idnum, id: id});
             if (image=='items')
@@ -360,10 +354,17 @@ editor_file = function (editor, callback) {
                 var i = faceIds.length - 4;
                 var down = faceIds[i], left = faceIds[i+1], right = faceIds[i+2], up = faceIds[i+3];
                 var obj = {down: down.id, left: left.id, right: right.id, up: up.id};
-                mapActions.push(["add", "['" + down.idnum + "']['faceIds']", obj]);
-                mapActions.push(["add", "['" + left.idnum + "']['faceIds']", obj]);
-                mapActions.push(["add", "['" + right.idnum + "']['faceIds']", obj]);
-                mapActions.push(["add", "['" + up.idnum + "']['faceIds']", obj]);
+                if (image.indexOf('enemy')==0) {
+                    templateActions.push(["add", "['" + down.id + "']['faceIds']", obj]);
+                    templateActions.push(["add", "['" + left.id + "']['faceIds']", obj]);
+                    templateActions.push(["add", "['" + right.id + "']['faceIds']", obj]);
+                    templateActions.push(["add", "['" + up.id + "']['faceIds']", obj]);
+                } else {
+                    mapActions.push(["add", "['" + down.idnum + "']['faceIds']", obj]);
+                    mapActions.push(["add", "['" + left.idnum + "']['faceIds']", obj]);
+                    mapActions.push(["add", "['" + right.idnum + "']['faceIds']", obj]);
+                    mapActions.push(["add", "['" + up.idnum + "']['faceIds']", obj]);
+                }
             }
         }
 
@@ -497,6 +498,62 @@ editor_file = function (editor, callback) {
             
         }
     }
+
+    editor.file.removeMaterial = function (info, callback) {
+        console.log(info);
+
+        // Step 1: 尝试删除图片
+        var _deleteMaterialImage = function (cb) {
+            if (info.images == 'autotile') return cb();
+            var img = core.material.images[info.images];
+            if (img == null) return callback('该素材不存在！');
+
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+            ctx.mozImageSmoothingEnabled = false;
+            ctx.webkitImageSmoothingEnabled = false;
+            ctx.msImageSmoothingEnabled = false;
+            ctx.imageSmoothingEnabled = false;
+
+            var width = img.width, height = img.height, per_height = info.images.endsWith('48') ? 48 : 32
+            if (height == per_height) return callback('该素材图片只有一个素材，无法删除');
+            canvas.width = width;
+            canvas.height = height - per_height;
+            ctx.drawImage(img, 0, 0, width, info.y * per_height, 0, 0, width, info.y * per_height);
+            ctx.drawImage(img, 0, (info.y + 1) * per_height, width, height - (info.y + 1) * per_height, 0, info.y * per_height, width, height - (info.y + 1) * per_height);
+            var imgbase64 = canvas.toDataURL('image/png');
+            fs.writeFile('./project/materials/' + info.images + '.png', imgbase64.split(',')[1], 'base64', function (err, data) {
+                if (err) return callback(err);
+                cb();
+            });
+        }
+
+        _deleteMaterialImage(function () {
+            // Step 2: 删除图块信息
+            if (info.id) {
+                delete icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[info.images][info.id];
+                delete maps_90f36752_8815_4be8_b32b_d7fad1d0542e[info.idnum];
+                if (info.images == 'items') {
+                    delete items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[info.id];
+                }
+                if (info.images == 'enemys' || info.images == 'enemy48') {
+                    delete enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[info.id];
+                }
+            }
+
+            // Step 3: 将所有素材向下移动一格
+            if (info.images != 'autotile') {
+                var value = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1[info.images];
+                Object.keys(value).forEach(function (one) {
+                    if (value[one] > info.y) value[one]--;
+                });
+            }
+
+            // Step 4: 保存并删除成功！
+            editor.file.save_icons_maps_items_enemys(callback);
+        });
+    }
+
     //callback(err:String)
     editor.file.editItem = function (id, actionList, callback) {
         /*actionList:[

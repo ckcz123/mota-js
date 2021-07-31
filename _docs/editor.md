@@ -259,7 +259,8 @@ json类型的文本使用JsonEvalString
 首先注册成名为'meteorite'的事件, 在插件编写的init中添加以下内容
 ```js
 core.registerEvent('meteorite', function(data){
-    core.insertAction({"type": "insert", "name": "陨石坠落", "args": [data.color,data.loc,data.range]})
+    core.insertAction({"type": "insert", "name": "陨石坠落", "args": [data.color, data.loc, data.range]});
+	core.doAction();
 })
 ```
 
@@ -302,11 +303,12 @@ return code;
     case "playBgm":
       this.next = MotaActionBlocks['playBgm_s'].xmlText([
         data.name,data.startTime||0,data.keep||false,this.next]);
-      break<b style='color:green'>
+      break;<b style='color:green'>
     case "meteorite":
       data.color = this.Colour(data.color)
       this.next = MotaActionBlocks['meteorite_s'].xmlText([
         data.color,'rgba('+data.color+')',data.loc[0],data.loc[1],data.range,this.next]);
+      break;
     </b>case "pauseBgm":</code></pre>
 
 最后在editor_blocklyconfig.js中将其加入到工具栏中

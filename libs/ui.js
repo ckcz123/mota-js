@@ -130,7 +130,7 @@ ui.prototype.setFontForMaxWidth = function (name, text, maxWidth, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font) {
+ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font, maxWidth) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (font) ctx.font = font;
@@ -138,6 +138,9 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font
     style = core.arrayToRGBA(style);
     if (!strokeStyle) strokeStyle = '#000000';
     strokeStyle = core.arrayToRGBA(strokeStyle);
+    if (maxWidth != null) {
+        this.setFontForMaxWidth(ctx, text, maxWidth);
+    }
     ctx.strokeStyle = strokeStyle;
     ctx.lineWidth = 2;
     ctx.strokeText(text, x, y);
@@ -444,16 +447,37 @@ ui.prototype.loadCanvas = function (name) {
     if (ctx) ctx.restore();
 }
 
-////// 设置某个canvas的alpha值 //////
+////// 设置某个canvas的alpha值，并返回设置之前的alpha值 //////
 ui.prototype.setAlpha = function (name, alpha) {
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.globalAlpha = alpha;
+    if (!ctx) return null;
+    var previousAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = alpha;
+    return previousAlpha;
 }
 
 ////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////
 ui.prototype.setOpacity = function (name, opacity) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.canvas.style.opacity = opacity;
+}
+
+////// 设置某个canvas的filter //////
+ui.prototype.setFilter = function (name, filter) {
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (!filter) ctx.filter = 'none';
+    else if (typeof filter === 'string') ctx.filter = filter;
+    else {
+        var x = [];
+        if (filter.blur > 0) x.push('blur(' + filter.blur +'px)');
+        if (filter.hue > 0) x.push('hue-rotate(' + filter.hue + 'deg)');
+        if (filter.grayscale > 0) x.push('grayscale(' + filter.grayscale + ')');
+        if (filter.invert) x.push('invert(1)');
+        if (filter.shadow > 0) x.push('drop-shadow(0 0 ' + filter.shadow + 'px black)');
+        if (x.length == 0) ctx.filter = 'none';
+        else ctx.filter = x.join(' ');
+    }
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
@@ -495,6 +519,11 @@ ui.prototype._uievent_setAttribute = function (data) {
         if (core.dymCanvas._uievent_selector)
             core.dymCanvas._uievent_selector.canvas.style.zIndex = z + 1;
     }
+}
+
+ui.prototype._uievent_setFilter = function (data) {
+    this._createUIEvent();
+    this.setFilter('uievent',data);
 }
 
 ////// 计算某段文字的宽度 //////
@@ -650,8 +679,10 @@ ui.prototype.clearUI = function () {
     core.status.boxAnimateObjs = [];
     if (core.dymCanvas._selector) core.deleteCanvas("_selector");
     main.dom.next.style.display = 'none';
+    main.dom.next.style.opacity = 1;
     core.clearMap('ui');
     core.setAlpha('ui', 1);
+    core.setOpacity('ui', 1);
 }
 
 ////// 左上角绘制一段提示 //////
@@ -1040,7 +1071,7 @@ ui.prototype._buildFont = function (fontSize, bold, italic, font) {
 // content：要绘制的内容；转义字符目前只允许留 \n, \r[...], \i[...], \c[...], \d, \e
 // config：绘制配置项，目前暂时包含如下内容（均为可选）
 //         left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
-//         fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体类型
+//         fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体类型；letterSpacing：字符间距
 ui.prototype.drawTextContent = function (ctx, content, config) {
     ctx = core.getContextByName(ctx);
     // 设置默认配置项
@@ -1058,7 +1089,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
     config.defaultFont = config.font = config.font || globalAttribute.font;
     config.time = config.time || 0;
-    config.interval = config.interval == null ? (textAttribute.interval || 0) : config.interval;
+    config.letterSpacing = config.letterSpacing == null ? (textAttribute.letterSpacing || 0) : config.letterSpacing;
 
     config.index = 0;
     config.currcolor = config.color;
@@ -1180,7 +1211,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
         if (c == 'z') return this._drawTextContent_emptyChar(tempCtx, content, config);
     }
     // 检查是不是自动换行
-    var charwidth = core.calWidth(tempCtx, ch) + config.interval;
+    var charwidth = core.calWidth(tempCtx, ch) + config.letterSpacing;
     if (config.maxWidth != null) {
         if (config.offsetX + charwidth > config.maxWidth) {
             // --- 当前应当换行，然而还是检查一下是否是forbidStart
@@ -1197,7 +1228,7 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
             // 确认不是手动换行
             if (nextch != '\n' && !(nextch == '\\' && content.charAt(config.index+1) == 'n')) {
                 // 检查是否会换行
-                var nextchwidth = core.calWidth(tempCtx, nextch) + config.interval;
+                var nextchwidth = core.calWidth(tempCtx, nextch) + config.letterSpacing;
                 if (config.offsetX + charwidth + nextchwidth > config.maxWidth) {
                     // 下一项会换行，因此在此处换行
                     this._drawTextContent_newLine(tempCtx, config);
@@ -1340,6 +1371,34 @@ ui.prototype.getTextContentHeight = function (content, config) {
 
 ui.prototype._getRealContent = function (content) {
     return content.replace(/(\r|\\(r|c|d|e|g|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
+}
+
+ui.prototype._animateUI = function (type, callback) {
+    var time = core.status.textAttribute.animateTime || 0;
+    if (!core.status.event || !time || core.isReplaying() || (type != 'show' && type != 'hide')) {
+        if (callback) callback();
+        return;
+    }
+    clearInterval(core.status.event.animateUI);
+    var opacity = 0;
+    if (type == 'show') {
+        opacity = 0;
+    } else if (type == 'hide') {
+        opacity = 1;
+    }
+    core.setOpacity('ui', opacity);
+    core.dom.next.style.opacity = opacity;
+    core.status.event.animateUI = setInterval(function () {
+        if (type == 'show') opacity += 0.05;
+        else opacity -= 0.05;
+        core.setOpacity('ui', opacity);
+        core.dom.next.style.opacity = opacity;
+        if (opacity >= 1 || opacity <= 0) {
+            clearInterval(core.status.event.animateUI);
+            delete core.status.event.animateUI;
+            if (callback) callback();
+        }
+    }, time / 20);
 }
 
 ////// 绘制一个对话框 //////
@@ -1800,6 +1859,7 @@ ui.prototype._drawSwitchs_display = function () {
     var choices = [
         " <   放缩：" + Math.max(core.domStyle.scale, 1) + "x   > ",
         "高清画面： " + (core.flags.enableHDCanvas ? "[ON]" : "[OFF]"),
+        "定点怪显： " + (core.flags.enableEnemyPoint ? "[ON]" : "[OFF]"),
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： " + (core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
@@ -1895,7 +1955,7 @@ ui.prototype._drawReplay = function () {
 ui.prototype._drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
-        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于本塔","下载离线版本", "返回主菜单"
+        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于游戏","下载离线版本", "返回主菜单"
     ]);
 }
 
@@ -1993,6 +2053,7 @@ ui.prototype._drawBook_drawEmpty = function () {
 ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, selected) {
     // --- 区域规划：每个区域总高度默认为62，宽度为 PIXEL
     var top = pageinfo.per_height * index + pageinfo.padding_top; // 最上面margin默认是12px
+    enemy.floorId = floorId;
     // 横向规划：
     // 22 + 42 = 64 是头像框
     this._drawBook_drawBox(index, enemy, top, pageinfo);
@@ -2150,7 +2211,7 @@ ui.prototype._drawBook_drawRow3 = function (index, enemy, top, left, width, posi
     core.fillText('ui', core.formatBigNumber(enemy.critical||0), col1 + 30, position, null, b13);
     core.fillText('ui', '减伤', col2, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.criticalDamage||0), col2 + 30, position, null, b13);
-    core.fillText('ui', '1防', col3, position, null, f13);
+    core.fillText('ui', '加防', col3, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.defDamage||0), col3 + 30, position, null, b13);
 }
 
@@ -2193,7 +2254,7 @@ ui.prototype._drawBookDetail = function (index) {
     core.setAlpha('data', 1);
     core.strokeRect('data', left - 1, top - 1, width + 1, height + 1,
         core.arrayToRGBA(core.status.globalAttribute.borderColor), 2);
-
+    core.playSound('确定');
     this._drawBookDetail_drawContent(enemy, content, {top: top, content_left: content_left, bottom: bottom, validWidth: validWidth});
 }
 
@@ -2217,7 +2278,7 @@ ui.prototype._drawBookDetail_getTexts = function (enemy, floorId, texts) {
     // --- 模仿临界计算器
     this._drawBookDetail_mofang(enemy, texts);
     // --- 吸血怪最低生命值
-    this._drawBookDetail_vampire(enemy, texts);
+    this._drawBookDetail_vampire(enemy, floorId, texts);
     // --- 仇恨伤害
     this._drawBookDetail_hatred(enemy, texts);
     // --- 战斗回合数，临界表
@@ -2228,6 +2289,9 @@ ui.prototype._drawBookDetail_origin = function (enemy, texts) {
     // 怪物数值和原始值不一样时，在详细信息页显示原始数值
     var originEnemy = core.enemys._getCurrentEnemys_getEnemy(enemy.id);
     var content = [];
+    if (enemy.locs != null && enemy.locs.length >= 0) {
+        texts.push("\r[#FF6A6A]\\d怪物坐标：\\d\r[]" + JSON.stringify(enemy.locs));
+    }
     ["hp", "atk", "def", "point", "money", "exp"].forEach(function (one) {
         if (enemy[one] == null || originEnemy[one] == null) return;
         if (enemy[one] != originEnemy[one]) {
@@ -2281,7 +2345,7 @@ ui.prototype._drawBookDetail_mofang_getArray = function (hp) {
     return arr;
 }
 
-ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
+ui.prototype._drawBookDetail_vampire = function (enemy, floorId, texts) {
     if (core.enemys.hasSpecial(enemy.special, 11)) {
         var damage = core.getDamage(enemy.id);
         if (damage != null) {
@@ -2291,7 +2355,7 @@ ui.prototype._drawBookDetail_vampire = function (enemy, texts) {
             while (start<end) {
                 var mid = Math.floor((start+end)/2);
                 core.status.hero.hp = mid;
-                if (core.canBattle(enemy.id)) end = mid;
+                if (core.canBattle(enemy.id, enemy.x, enemy.y, floorId)) end = mid;
                 else start = mid+1;
             }
             core.status.hero.hp = start;
@@ -2310,10 +2374,10 @@ ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
 }
 
 ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
-    var damageInfo = core.getDamageInfo(enemy.id, null, null, null, floorId);
+    var damageInfo = core.getDamageInfo(enemy.id, null, enemy.x, enemy.y, floorId);
     texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]"+((damageInfo||{}).turn||0));
     // 临界表
-    var criticals = core.enemys.nextCriticals(enemy.id, 8, null, null, floorId).map(function (v) {
+    var criticals = core.enemys.nextCriticals(enemy.id, 8, enemy.x, enemy.y, floorId).map(function (v) {
         return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
     });
     while (criticals[0]=='0:0') criticals.shift();
@@ -2375,7 +2439,7 @@ ui.prototype.drawFly = function(page) {
     }
     var size = this.PIXEL - 143;
     core.strokeRect('ui', 20, 100, size, size, '#FFFFFF', 2);
-    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size});
+    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size, damage: true});
 }
 
 ////// 绘制中心对称飞行器
@@ -2392,6 +2456,7 @@ ui.prototype._drawCenterFly = function () {
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
+    core.playSound('打开界面');
     core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置");
     return;
 }
@@ -2580,7 +2645,7 @@ ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     if (!info.selectId) return;
     var item=core.material.items[info.selectId];
     var name = item.name || "未知道具";
-    try { name = core.replateText(name); } catch (e) {}
+    try { name = core.replaceText(name); } catch (e) {}
     core.fillText('ui', name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     var text = item.text || "该道具暂无描述。";
     try { text = core.replaceText(text); } catch (e) {}
@@ -2979,6 +3044,7 @@ ui.prototype.drawStatusBar = function () {
 
 ////// 绘制“数据统计”界面 //////
 ui.prototype._drawStatistics = function (floorIds) {
+    core.playSound('打开界面');
     var obj = this._drawStatistics_buildObj();
     if (typeof floorIds == 'string') floorIds = [floorIds];
     (floorIds || core.floorIds).forEach(function (floorId) {
@@ -3083,8 +3149,11 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
     if (obj.cls[id]=='items' && id!='superPotion') {
         var temp = core.clone(core.status.hero);
         core.setFlag("__statistics__", true);
+        var ratio = core.status.thisMap.ratio;
+        core.status.thisMap.ratio = core.clone(core.status.maps[floorId].ratio);
         try { eval(core.material.items[id].itemEffect); }
         catch (e) {}
+        core.status.thisMap.ratio = ratio;
         hp = core.status.hero.hp - temp.hp;
         atk = core.status.hero.atk - temp.atk;
         def = core.status.hero.def - temp.def;
@@ -3153,6 +3222,7 @@ ui.prototype._drawAbout = function () {
 
 ////// 绘制帮助页面 //////
 ui.prototype._drawHelp = function () {
+    core.playSound('打开界面');
     core.clearUI();
     if (core.material.images.keyboard) {
         core.status.event.id = 'help';
@@ -3230,6 +3300,27 @@ ui.prototype.relocateCanvas = function (name, x, y) {
         ctx.canvas.setAttribute("_top", y);
     }
     return ctx;
+}
+
+////// canvas旋转 //////
+ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return null;
+    var canvas = ctx.canvas;
+    angle = angle || 0;
+    if (centerX == null || centerY == null) {
+        canvas.style.transformOrigin = '';
+    } else {
+        var left = parseFloat(canvas.getAttribute("_left"));
+        var top = parseFloat(canvas.getAttribute("_top"));
+        canvas.style.transformOrigin = (centerX - left) * core.domStyle.scale + 'px ' + (centerY - top) * core.domStyle.scale + 'px';
+    }
+    if (angle == 0) {
+        canvas.style.transform = '';
+    } else {
+        canvas.style.transform = 'rotate(' + angle +'deg)';
+    }
+    canvas.setAttribute('_angle', angle);
 }
 
 ////// canvas重置 //////

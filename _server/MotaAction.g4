@@ -1342,20 +1342,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
@@ -1377,20 +1374,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
@@ -1413,20 +1407,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 if (Number_0 < 0 || Number_0 > 1) throw new Error('不透明度需要在0~1之间');
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
@@ -1449,20 +1440,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
 if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
@@ -1565,20 +1553,17 @@ default : ["yellowDoor","","","","",false]
 selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
 var floorstr = '';
 if (EvalString_1 && EvalString_2) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
-    EvalString_1=[EvalString_1,EvalString_2]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_1=EvalString_1.split(',');
-    EvalString_2=EvalString_2.split(',');
-    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  var x = EvalString_1, y = EvalString_2;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 && (', "time": ' + IntString_0);
@@ -1600,20 +1585,17 @@ default : [null,"","",""]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
@@ -1634,20 +1616,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showFloorImg"'+floorstr+IdString_0+'},\n';
@@ -1666,20 +1645,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideFloorImg"'+floorstr+IdString_0+'},\n';
@@ -1699,20 +1675,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
@@ -1732,20 +1705,17 @@ colour : this.mapColor
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
@@ -1766,20 +1736,17 @@ allFloorIds : ['IdString_0']
 default : ["bg","yellowDoor","","",""]
 var floorstr = '';
 if (EvalString_1 && EvalString_2) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
-    EvalString_1=[EvalString_1,EvalString_2]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_1=EvalString_1.split(',');
-    EvalString_2=EvalString_2.split(',');
-    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  var x = EvalString_1, y = EvalString_2;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
@@ -3815,11 +3782,11 @@ return ['core.getBlockCls('+PosString_0+','+PosString_1+')', Blockly.JavaScript.
 
 
 nextXY_e
-    :   '前方' Int '格的' NextXY_List
+    :   '前方' NInt '格的' NextXY_List
 
 /* nextXY_e
 default : [1, 'nextX']
-var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+Int_0+')') : ('core.nextX('+Int_0+')');
+var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+NInt+')') : ('core.nextX('+NInt+')');
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 

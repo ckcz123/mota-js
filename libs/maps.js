@@ -1893,7 +1893,15 @@ maps.prototype.searchBlockWithFilter = function (blockFilter, floorId, showDisab
 
 ////// 获得某个图块，其行走图朝向朝下的图块ID //////
 maps.prototype.getFaceDownId = function (block) {
-    if (block == null || !block.event) return null;
+    if (block == null) return null;
+    if (typeof block == 'string') { // 参数是ID
+        block = this.getNumberById(block);
+    }
+    if (typeof block == 'number') { // 参数是数字
+        if (block == 0) return null;
+        block = this.getBlockByNumber(block);
+    }
+    if (!block.event) return null;
     return (block.event.faceIds || {}).down || block.event.id;
 }
 

@@ -1575,6 +1575,9 @@ showDisable: 隐藏点是否不返回null，true表示不返回null
 getBlockOpacity: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number
 判定某个点的不透明度。如果该点无图块则返回null。
 
+getFaceDownId: fn(block?: string|number|block) -> string
+获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id。
+
 getFgMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 生成前景层矩阵
 例如：core.getFgMapArray('MT0'); // 生成主塔0层的前景层矩阵，使用缓存

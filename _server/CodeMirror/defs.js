@@ -3213,6 +3213,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等", 
           "!type": "fn(block?: number|string|block) -> blockInfo"
         }, 
+        "getFaceDownId": {
+          "!doc": "获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id。",
+          "!type": "fn(block?: string|number|block) -> string"
+        },
         "canMoveDirectlyArray": {
           "!doc": "获得某些点可否通行的信息", 
           "!type": "fn(locs?: [[number]])"

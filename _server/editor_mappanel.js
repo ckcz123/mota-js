@@ -407,6 +407,11 @@ editor_mappanel_wrapper = function (editor) {
             var index = editor.core.floorIds.indexOf(editor.currentFloorId);
             var toId = editor.currentFloorId;
 
+            var saveFloor = document.getElementById('saveFloor');
+            if (saveFloor && saveFloor.classList.contains('highlight')) {
+                return;
+            }
+
             if (direct > 0 && index < editor.core.floorIds.length - 1)
                 toId = editor.core.floorIds[index + 1];
             else if (direct < 0 && index > 0)
@@ -433,6 +438,11 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     editor.uifunctions.undoFloor_click = function () {
+        var saveFloor = document.getElementById('saveFloor');
+        if (saveFloor && saveFloor.classList.contains('highlight')) {
+            return;
+        }
+
         var toId = editor.uivalues.recentFloors.pop();
         if (toId == null || toId == editor.currentFloorId) return;
 

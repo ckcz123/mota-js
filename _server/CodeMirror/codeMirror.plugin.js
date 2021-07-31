@@ -1836,7 +1836,7 @@
   // Completion
 
   function hint(ts, cm, c) {
-    ts.request(cm, {type: "completions", types: true, docs: true, urls: true}, function(error, data) {
+    ts.request(cm, {type: "completions", types: true, docs: true, urls: true, caseInsensitive: true}, function(error, data) {
       if (error) return showError(ts, cm, error);
       var completions = [], after = "";
       var from = data.start, to = data.end;

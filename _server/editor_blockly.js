@@ -414,6 +414,12 @@ editor_blockly = function () {
         }
     }
 
+    editor_blockly.showKeyCodes = function () {
+        alert('键值查询表：\nA65 B66 C67 D68 E69 F70 G71 H72 I73 J74 K75 L76 M77\n'
+            +'N78 O79 P80 Q81 R82 S83 T84 U85 V86 W87 X88 Y89 Z90\n0:48 1:49 2:50 3:51 4:52 5:53 6:54 7:55 8:56 9:57\n'
+            +'空格:13 回车:32 ESC:27 后退:8 Tab:9 Shift:16 Ctrl:17 Alt:18\nPgUp:33 PgDn:34 左:37 上:38 右:39 下:40\n更多键值请自行百度查表')
+    }
+
     editor_blockly.lastUsedType=[
         'text_0_s',
         'comment_s',
@@ -528,7 +534,7 @@ editor_blockly = function () {
         if (index >= 0) {
             var ch = content.charAt(index);
             var before = content.substring(0, index), token = content.substring(index+1);
-            if (/^[a-zA-Z0-9_\u4E00-\u9FCC]*$/.test(token)) {
+            if (/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]*$/.test(token)) {
                 if (before.endsWith("状态") || (ch == ':' && before.endsWith("status"))) {
                     var list = Object.keys(core.status.hero);
                     if (before.endsWith("状态") && MotaActionFunctions) {
@@ -871,7 +877,7 @@ editor_blockly = function () {
                 awesomplete.prefix = value;
                 for (var i = index - 1; i>=0; i--) {
                     var c = value.charAt(i);
-                    if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(c)) {
+                    if (!/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]$/.test(c)) {
                         awesomplete.prefix = value.substring(i+1);
                         break;
                     }

@@ -164,6 +164,11 @@ editor_ui_wrapper = function (editor) {
         // PGUP和PGDOWN切换楼层
         if (e.keyCode == 33 || e.keyCode == 34) {
             e.preventDefault();
+            var saveFloor = document.getElementById('saveFloor');
+            if (saveFloor && saveFloor.classList.contains('highlight')) {
+                return;
+            }
+
             var index = editor.core.floorIds.indexOf(editor.currentFloorId);
             var nextIndex = index + (e.keyCode == 33 ? 1 : -1);
             if (nextIndex >= 0 && nextIndex < editor.core.floorIds.length) {
@@ -374,6 +379,7 @@ editor_ui_wrapper = function (editor) {
     uievent.drawPreviewUI = function () {
         core.setAlpha('uievent', 1);
         core.clearMap('uievent');
+        core.setFilter('uievent', null);
 
         // 绘制UI
         var background = uievent.elements.selectBackground.value;
@@ -689,13 +695,13 @@ editor_ui_wrapper = function (editor) {
         while (true) {
             index = obj.indexOf(flag, index + 1);
             if (index < 0) return false;
-            if (!/^[a-zA-Z0-9_\u4E00-\u9FCC]$/.test(obj.charAt(index + length))) return true;
+            if (!/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]$/.test(obj.charAt(index + length))) return true;
         }
     }
 
     uievent._searchUsedFlags = function (flag) {
         var list = [];
-        var events = ["events", "autoEvent", "changeFloor", "afterBattle", "afterGetItem", "afterOpenDoor"]
+        var events = ["events", "autoEvent", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor"]
         for (var floorId in core.floors) {
             var floor = core.floors[floorId];
             if (hasUsedFlags(floor.firstArrive, flag)) list.push([floorId, "firstArrive"]);

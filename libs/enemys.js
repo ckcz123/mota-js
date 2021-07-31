@@ -30,6 +30,16 @@ enemys.prototype.getEnemys = function () {
             }
         }
     }
+    // 将所有怪物的各项属性映射到朝下的
+    for (var id in enemys) {
+        if (enemys[id].faceIds) {
+            var downId = enemys[id].faceIds.down;
+            if (downId != null && downId != id && enemys[downId]) {
+                enemys[id] = core.clone(enemys[downId]);
+                enemys[id].id = id;
+            }
+        }
+    }
     return enemys;
 }
 
@@ -365,8 +375,8 @@ enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
     var enemy = core.material.enemys[enemyId];
     if (!enemy) return null;
 
-    // 检查displayIdInBook
-    return core.material.enemys[enemy.displayIdInBook] || enemy;
+    // 检查朝向；displayIdInBook
+    return core.material.enemys[(enemy.faceIds || {}).down] || core.material.enemys[enemy.displayIdInBook] || enemy;
 }
 
 enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x, y, floorId) {
@@ -378,10 +388,20 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     var enemyInfo = this.getEnemyInfo(enemy, null, null, null, floorId);
     var locEnemyInfo = this.getEnemyInfo(enemy, null, x, y, floorId);
 
-    if (locEnemyInfo.atk == enemyInfo.atk && locEnemyInfo.def == enemyInfo.def && locEnemyInfo.hp == enemyInfo.hp) {
+    if (!core.flags.enableEnemyPoint ||
+        (locEnemyInfo.atk == enemyInfo.atk && locEnemyInfo.def == enemyInfo.def && locEnemyInfo.hp == enemyInfo.hp)) {
         x = null;
         y = null;
     } else {
+        // 检查enemys里面是否使用了存在的内容
+        for (var i = 0; i < enemys.length; ++i) {
+            var one = enemys[i];
+            if (id == one.id && one.locs != null &&
+                locEnemyInfo.atk == one.atk && locEnemyInfo.def == one.def && locEnemyInfo.hp == one.hp) {
+                one.locs.push([x, y]);
+                return;
+            }
+        }
         enemyInfo = locEnemyInfo;
     }
     var id = enemy.id + ":" + x + ":" + y;
@@ -399,15 +419,18 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
         e[v] = enemyInfo[v];
     }
     if (x != null && y != null) {
-        e.x = x;
-        e.y = y;
+        e.locs = [[x, y]];
     }
+    ["name", "money", "exp", "point"].forEach(function (one) {
+        e[one] = core.getEnemyValue(enemy, one, x, y, floorId);
+    });
     e.specialText = specialText;
     e.specialColor = specialColor;
     e.damage = this.getDamage(enemy, x, y, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];
-    e.defDamage = this.getDefDamage(enemy, 1, x, y, floorId);
+    var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
+    e.defDamage = this.getDefDamage(enemy, ratio, x, y, floorId);
     enemys.push(e);
 }
 
@@ -438,7 +461,7 @@ enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
         var mapBlocks = core.status.maps[floorId[i]].blocks;
         for (var b = 0; b < mapBlocks.length; b++) {
             if (!mapBlocks[b].disable && mapBlocks[b].event.cls.indexOf('enemy') === 0) {
-                if (enemyMap === null || enemyMap[mapBlocks[b].event.id]) return true;
+                if (enemyMap === null || enemyMap[core.getFaceDownId(mapBlocks[b])]) return true;
             }
         }
     }

@@ -15,7 +15,7 @@ core.js中只有很少的几个函数，主要是游戏开始前的初始化等�
 但是，core中定义了很多游戏运行时的状态，这些状态很多都会被使用到。
 
 ```text
-<b>core.__SIZE__, core.__PIXELS__</b>
+core.__SIZE__, core.__PIXELS__
 游戏窗口大小；对于13x13的游戏而言这两个值分别是13和416，15x15来说分别是15和480。
 
 
@@ -73,7 +73,7 @@ core.bigmap
 core.bigmap.width    （当前地图的宽度）
 core.bigmap.height    （当前地图的高度）
 core.bigmap.offsetX    （当前地图针对窗口左上角的偏移像素x）
-core.bigmap.offsetX    （当前地图针对窗口左上角的偏移像素y）
+core.bigmap.offsetY    （当前地图针对窗口左上角的偏移像素y）
 core.bigmap.tempCanvas    （一个临时画布，可以用来临时绘制很多东西）
 
 
@@ -1013,12 +1013,13 @@ lose: fn(reason?: string)
 moveEnemyOnPoint: fn(fromX: number, fromY: number, toX: number, toY: number, floorId?: string)
 将某个点已经设置的敌人属性移动到其他点
 
-moveImage: fn(code: number, to?: [number], opacityVal?: number, time?: number, callback?: fn())
+moveImage: fn(code: number, to?: [number], opacityVal?: number, moveMode?: string, time?: number, callback?: fn())
 移动一张图片并/或改变其透明度
 例如：core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
 code: 图片编号
 to: 新的左上角坐标，省略表示原地改变透明度
 opacityVal: 新的透明度，省略表示不变
+moveMode: 移动模式
 time: 移动用时，单位为毫秒。不填视为1秒
 callback: 图片移动完毕后的回调函数，可选
 
@@ -1086,6 +1087,15 @@ resetGame: fn(hero?: ?, hard?: ?, floorId?: string, maps?: ?, values?: ?)
 
 restart: fn()
 重新开始游戏；此函数将回到标题页面
+
+rotateImage: fn(code: number, center?: [number], angle?: number, moveMode?: string, time?: number, callback?: fn())
+旋转一张图片
+code: 图片编号
+center: 旋转中心像素坐标（以屏幕为基准）；不填视为图片本身中心
+angle: 旋转角度；正数为顺时针，负数为逆时针
+moveMode: 旋转模式
+time: 旋转用时，单位为毫秒。不填视为1秒
+callback: 图片旋转完毕后的回调函数，可选
 
 save: fn(fromUserAction?: bool)
 点击存档按钮时的打开操作
@@ -1191,10 +1201,13 @@ unregisterSystemEvent: fn(type: string)
 useFly: fn(fromUserAction?: bool)
 点击楼层传送器时的打开操作
 
-vibrate: fn(time?: number, callback?: fn())
-视野左右抖动
+vibrate: fn(direction?: string, time?: number, speed?: number, power?: number, callback?: fn())
+视野抖动
 例如：core.vibrate(); // 视野左右抖动1秒
-time: 抖动时长，单位为毫秒。必须为半秒的倍数，不填或小于1秒都视为1秒
+direction: 抖动方向；可填 horizontal(左右)，vertical（上下），diagonal1（左上右下），diagonal2（左下右上）
+time: 抖动时长，单位为毫秒
+speed: 抖动速度
+power: 抖动幅度
 callback: 抖动平息后的回调函数，可选
 
 visitFloor: fn(floorId?: string)
@@ -1392,7 +1405,7 @@ loadOneSound: fn(name: string)
 addGlobalAnimate: fn(block?: block)
 添加一个全局动画
 
-animateBlock: fn(loc?: [number]|[[number]], type?: string, time?: number, callback?: fn())
+animateBlock: fn(loc?: [number]|[[number]], type?: string|number, time?: number, callback?: fn())
 显示/隐藏某个块时的动画效果
 
 animateSetBlock: fn(number: number|string, x: number, y: number, floorId?: string, time?: number, callback?: fn())
@@ -1536,6 +1549,9 @@ floorId: 地图id，不填视为当前地图
 showDisable: 隐藏点是否不返回null，true表示不返回null
 返回值：图块类型，即“地形、四帧动画、矮敌人、高敌人、道具、矮npc、高npc、自动元件、额外地形”之一
 
+getBlockFilter: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> ?
+获得某个点的图块特效
+
 getBlockId: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string
 判定某个点的图块id
 例如：if(core.getBlockId(x1, y1) != 'greenSlime' && core.getBlockId(x2, y2) != 'redSlime') core.openDoor(x3, y3); // 一个简单的机关门事件，打败或炸掉这一对绿头怪和红头怪就开门
@@ -1555,6 +1571,12 @@ y: 纵坐标
 floorId: 地图id，不填视为当前地图
 showDisable: 隐藏点是否不返回null，true表示不返回null
 返回值：图块数字，该点无图块则返回null
+
+getBlockOpacity: fn(x: number, y: number, floorId?: string, showDisable?: bool) -> number
+判定某个点的不透明度。如果该点无图块则返回null。
+
+getFaceDownId: fn(block?: string|number|block) -> string
+获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id。
 
 getFgMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 生成前景层矩阵
@@ -1722,6 +1744,12 @@ number: 新图块的数字（也支持纯数字字符串如'1'）或id
 x: 横坐标
 y: 纵坐标
 floorId: 地图id，不填视为当前地图
+
+setBlockFilter: fn(filter?: ?, x?: number, y?: number, floorId?: string)
+设置某个点图块的特效
+
+setBlockOpacity: fn(opacity?: number, x?: number, y?: number, floorId?: string)
+设置某个点图块的不透明度
 
 setMapBlockDisabled: fn(floorId?: string, x?: number, y?: number, disabled?: bool)
 设置某个点图块的强制启用或禁用状态
@@ -1936,17 +1964,25 @@ relocateCanvas: fn(name: string, x: number, y: number)
 resizeCanvas: fn(name: string, x: number, y: number)
 重新设置一个自定义画布的大小
 
+rotateCanvas: fn(name: string, angle: number, centerX?: number, centerY?: number)
+设置一个自定义画布的旋转角度
+centerX, centerY: 旋转中心（以屏幕像素为基准）；不填视为图片正中心。
+
 saveCanvas: fn(name: string|CanvasRenderingContext2D)
 保存某个canvas状态
 
-setAlpha: fn(name: string|CanvasRenderingContext2D, alpha: number)
+setAlpha: fn(name: string|CanvasRenderingContext2D, alpha: number) -> number
 设置某个canvas接下来绘制的不透明度；不会影响已经绘制的内容
+返回设置之前画布的不透明度。
 如果需要修改画布本身的不透明度请使用setOpacity
 参考资料：https://www.w3school.com.cn/tags/canvas_globalalpha.asp
 
 setFillStyle: fn(name: string|CanvasRenderingContext2D, style: string)
 设置某个canvas的绘制属性（如颜色等）
 参考资料：https://www.w3school.com.cn/tags/canvas_fillstyle.asp
+
+setFilter: fn(name: string|CanvasRenderingContext2D, filter: any)
+设置某个canvas接下来绘制的filter
 
 setFont: fn(name: string|CanvasRenderingContext2D, font: string)
 设置某个canvas的文字字体
@@ -2012,6 +2048,9 @@ textImage: fn(content: string, lineHeight?: number) -> image
 工具函数库，里面有各个样板中使用到的工具函数。
 
 ```text
+applyEasing: fn(mode?: string) -> fn(t: number) -> number
+获得变速移动曲线
+
 arrayToRGB: fn(color: [number]) -> string
 颜色数组转字符串
 例如：core.arrayToRGB([102, 204, 255]); // "#66ccff"

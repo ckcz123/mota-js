@@ -105,14 +105,16 @@ utils.prototype.replaceValue = function (value) {
     if (typeof value == "string" && (value.indexOf(":") >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0)) {
         if (value.indexOf('status:') >= 0)
             value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
+        if (value.indexOf('buff:') >= 0)
+            value = value.replace(/buff:([a-zA-Z0-9_]+)/g, "core.getBuff('$1')");
         if (value.indexOf('item:') >= 0)
             value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
         if (value.indexOf('flag:') >= 0 || value.indexOf('flag：') >= 0)
-            value = value.replace(/flag[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B]+)/g, "core.getFlag('$1', 0)");
+            value = value.replace(/flag[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, "core.getFlag('$1', 0)");
         //if (value.indexOf('switch:' >= 0))
         //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
         if (value.indexOf('global:') >= 0 || value.indexOf('global：') >= 0)
-            value = value.replace(/global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B]+)/g, "core.getGlobal('$1', 0)");
+            value = value.replace(/global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, "core.getGlobal('$1', 0)");
         if (value.indexOf('enemy:')>=0)
             value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
         if (value.indexOf('blockId:')>=0)
@@ -330,16 +332,21 @@ utils.prototype.getGlobal = function (key, defaultValue) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("input2:") == 0) {
             value = JSON.parse(core.decodeBase64(action.substring(7)));
+            core.setFlag('__global__' + key, value);
+            core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
         }
         else {
-            core.control._replay_error(action);
-            return core.getLocalStorage(key, defaultValue);
+            // 录像兼容性：尝试从flag和localStorage获得
+            // 注意这里不再二次记录 input2: 到录像
+            core.status.replay.toReplay.unshift(action);
+            value = core.getFlag('__global__' + key, core.getLocalStorage(key, defaultValue));
         }
     }
     else {
         value = core.getLocalStorage(key, defaultValue);
+        core.setFlag('__global__' + key, value);
+        core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
     }
-    core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
     return value;
 }
 
@@ -478,6 +485,27 @@ utils.prototype.formatBigNumber = function (x, onMap) {
     }
 
     return c + x;
+}
+
+////// 变速移动 //////
+utils.prototype.applyEasing = function(name) {
+    var list = {
+        "easeIn": function(t) {
+            return Math.pow(t, 3);
+        },
+        "easeOut": function(t) {
+            return 1 - Math.pow(1 - t, 3);
+        },
+        "easeInOut": function(t) {
+            // easeInOut试了一下感觉二次方效果明显点
+            if (t < 0.5) return Math.pow(t, 2) * 2;
+            else return 1 - Math.pow(1 - t, 2) * 2;
+        },
+        "linear": function(t) {
+            return t
+        }
+    }
+    return list[name] || list.linear;
 }
 
 ////// 数组转RGB //////

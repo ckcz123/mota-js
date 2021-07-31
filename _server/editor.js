@@ -326,6 +326,7 @@ editor.prototype.mapInit = function () {
     editor.currentFloorData.events = {};
     editor.currentFloorData.autoEvent = {};
     editor.currentFloorData.changeFloor = {};
+    editor.currentFloorData.beforeBattle = {};
     editor.currentFloorData.afterBattle = {};
     editor.currentFloorData.afterGetItem = {};
     editor.currentFloorData.afterOpenDoor = {};
@@ -442,6 +443,8 @@ editor.prototype._drawEventBlock_getColor = function (loc) {
             }
         }
     }
+    if (editor.currentFloorData.beforeBattle[loc])
+        color.push('#009090');
     if (editor.currentFloorData.afterBattle[loc])
         color.push('#FFFF00');
     if (editor.currentFloorData.changeFloor[loc])
@@ -874,7 +877,7 @@ editor.prototype.setSelectBoxFromInfo=function(thisevent, scrollTo){
 }
 
 editor.prototype.addUsedFlags = function (s) {
-    s.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, function (s0, s1) {
+    s.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, function (s0, s1) {
         editor.used_flags[s1] = true; return s0;
     });
     s.replace(/flags\.([a-zA-Z_]\w*)/g, function (s0, s1) {

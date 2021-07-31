@@ -447,16 +447,37 @@ ui.prototype.loadCanvas = function (name) {
     if (ctx) ctx.restore();
 }
 
-////// 设置某个canvas的alpha值 //////
+////// 设置某个canvas的alpha值，并返回设置之前的alpha值 //////
 ui.prototype.setAlpha = function (name, alpha) {
     var ctx = this.getContextByName(name);
-    if (ctx) ctx.globalAlpha = alpha;
+    if (!ctx) return null;
+    var previousAlpha = ctx.globalAlpha;
+    ctx.globalAlpha = alpha;
+    return previousAlpha;
 }
 
 ////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////
 ui.prototype.setOpacity = function (name, opacity) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.canvas.style.opacity = opacity;
+}
+
+////// 设置某个canvas的filter //////
+ui.prototype.setFilter = function (name, filter) {
+    var ctx = this.getContextByName(name);
+    if (!ctx) return;
+    if (!filter) ctx.filter = 'none';
+    else if (typeof filter === 'string') ctx.filter = filter;
+    else {
+        var x = [];
+        if (filter.blur > 0) x.push('blur(' + filter.blur +'px)');
+        if (filter.hue > 0) x.push('hue-rotate(' + filter.hue + 'deg)');
+        if (filter.grayscale > 0) x.push('grayscale(' + filter.grayscale + ')');
+        if (filter.invert) x.push('invert(1)');
+        if (filter.shadow > 0) x.push('drop-shadow(0 0 ' + filter.shadow + 'px black)');
+        if (x.length == 0) ctx.filter = 'none';
+        else ctx.filter = x.join(' ');
+    }
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
@@ -498,6 +519,11 @@ ui.prototype._uievent_setAttribute = function (data) {
         if (core.dymCanvas._uievent_selector)
             core.dymCanvas._uievent_selector.canvas.style.zIndex = z + 1;
     }
+}
+
+ui.prototype._uievent_setFilter = function (data) {
+    this._createUIEvent();
+    this.setFilter('uievent',data);
 }
 
 ////// 计算某段文字的宽度 //////
@@ -1833,6 +1859,7 @@ ui.prototype._drawSwitchs_display = function () {
     var choices = [
         " <   放缩：" + Math.max(core.domStyle.scale, 1) + "x   > ",
         "高清画面： " + (core.flags.enableHDCanvas ? "[ON]" : "[OFF]"),
+        "定点怪显： " + (core.flags.enableEnemyPoint ? "[ON]" : "[OFF]"),
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： " + (core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
@@ -2026,6 +2053,7 @@ ui.prototype._drawBook_drawEmpty = function () {
 ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, selected) {
     // --- 区域规划：每个区域总高度默认为62，宽度为 PIXEL
     var top = pageinfo.per_height * index + pageinfo.padding_top; // 最上面margin默认是12px
+    enemy.floorId = floorId;
     // 横向规划：
     // 22 + 42 = 64 是头像框
     this._drawBook_drawBox(index, enemy, top, pageinfo);
@@ -2183,7 +2211,7 @@ ui.prototype._drawBook_drawRow3 = function (index, enemy, top, left, width, posi
     core.fillText('ui', core.formatBigNumber(enemy.critical||0), col1 + 30, position, null, b13);
     core.fillText('ui', '减伤', col2, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.criticalDamage||0), col2 + 30, position, null, b13);
-    core.fillText('ui', '1防', col3, position, null, f13);
+    core.fillText('ui', '加防', col3, position, null, f13);
     core.fillText('ui', core.formatBigNumber(enemy.defDamage||0), col3 + 30, position, null, b13);
 }
 
@@ -2261,8 +2289,8 @@ ui.prototype._drawBookDetail_origin = function (enemy, texts) {
     // 怪物数值和原始值不一样时，在详细信息页显示原始数值
     var originEnemy = core.enemys._getCurrentEnemys_getEnemy(enemy.id);
     var content = [];
-    if (enemy.x != null && enemy.y != null) {
-        texts.push("\r[#FF6A6A]\\d怪物坐标：\\d\r[][" + enemy.x + ", " + enemy.y + ']');
+    if (enemy.locs != null && enemy.locs.length >= 0) {
+        texts.push("\r[#FF6A6A]\\d怪物坐标：\\d\r[]" + JSON.stringify(enemy.locs));
     }
     ["hp", "atk", "def", "point", "money", "exp"].forEach(function (one) {
         if (enemy[one] == null || originEnemy[one] == null) return;
@@ -2411,7 +2439,7 @@ ui.prototype.drawFly = function(page) {
     }
     var size = this.PIXEL - 143;
     core.strokeRect('ui', 20, 100, size, size, '#FFFFFF', 2);
-    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size});
+    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size, damage: true});
 }
 
 ////// 绘制中心对称飞行器
@@ -2617,7 +2645,7 @@ ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     if (!info.selectId) return;
     var item=core.material.items[info.selectId];
     var name = item.name || "未知道具";
-    try { name = core.replateText(name); } catch (e) {}
+    try { name = core.replaceText(name); } catch (e) {}
     core.fillText('ui', name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     var text = item.text || "该道具暂无描述。";
     try { text = core.replaceText(text); } catch (e) {}
@@ -3121,8 +3149,11 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
     if (obj.cls[id]=='items' && id!='superPotion') {
         var temp = core.clone(core.status.hero);
         core.setFlag("__statistics__", true);
+        var ratio = core.status.thisMap.ratio;
+        core.status.thisMap.ratio = core.clone(core.status.maps[floorId].ratio);
         try { eval(core.material.items[id].itemEffect); }
         catch (e) {}
+        core.status.thisMap.ratio = ratio;
         hp = core.status.hero.hp - temp.hp;
         atk = core.status.hero.atk - temp.atk;
         def = core.status.hero.def - temp.def;
@@ -3269,6 +3300,27 @@ ui.prototype.relocateCanvas = function (name, x, y) {
         ctx.canvas.setAttribute("_top", y);
     }
     return ctx;
+}
+
+////// canvas旋转 //////
+ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
+    var ctx = core.getContextByName(name);
+    if (!ctx) return null;
+    var canvas = ctx.canvas;
+    angle = angle || 0;
+    if (centerX == null || centerY == null) {
+        canvas.style.transformOrigin = '';
+    } else {
+        var left = parseFloat(canvas.getAttribute("_left"));
+        var top = parseFloat(canvas.getAttribute("_top"));
+        canvas.style.transformOrigin = (centerX - left) * core.domStyle.scale + 'px ' + (centerY - top) * core.domStyle.scale + 'px';
+    }
+    if (angle == 0) {
+        canvas.style.transform = '';
+    } else {
+        canvas.style.transform = 'rotate(' + angle +'deg)';
+    }
+    canvas.setAttribute('_angle', angle);
 }
 
 ////// canvas重置 //////

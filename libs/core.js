@@ -46,9 +46,12 @@ function core() {
         'weather': {
             'time': 0,
             'type': null,
+            'level': 1,
             'nodes': [],
             'data': null,
             'fog': null,
+            'cloud': null,
+            'sun': null
         },
         "tip": null,
         "asyncId": {}
@@ -289,6 +292,13 @@ core.prototype._init_flags = function () {
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerText = core.firstData.title;
     (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
+
+    core.maps._initFloors();
+    // 初始化怪物、道具等
+    core.material.enemys = core.enemys.getEnemys();
+    core.material.items = core.items.getItems();
+    core.material.icons = core.icons.getIcons();
+
     // 初始化自动事件
     for (var floorId in core.floors) {
         var autoEvents = core.floors[floorId].autoEvent || {};
@@ -309,7 +319,33 @@ core.prototype._init_flags = function () {
             }
         }
     }
+    // 道具的穿上/脱下，视为自动事件
+    for (var equipId in core.material.items) {
+        var equip = core.material.items[equipId];
+        if (equip.cls != 'equips' || !equip.equip) continue;
+        if (!equip.equip.equipEvent && !equip.equip.unequipEvent) continue;
+        var equipFlag = '_equipEvent_' + equipId;
+        var autoEvent1 = {
+            symbol: "_equipEvent_" + equipId,
+            currentFloor: false,
+            multiExecute: true,
+            condition: "core.hasEquip('" + equipId + "') && !core.hasFlag('"+equipFlag+"')",
+            data: core.precompile([{"type": "setValue", "name": "flag:" + equipFlag, "value": "true"}].concat(equip.equip.equipEvent||[])),
+        };
+        var autoEvent2 = {
+            symbol: "_unequipEvent_" + equipId,
+            currentFloor: false,
+            multiExecute: true,
+            condition: "!core.hasEquip('" + equipId + "') && core.hasFlag('"+equipFlag+"')",
+            data: core.precompile([{"type": "setValue", "name": "flag:" + equipFlag, "value": "null"}].concat(equip.equip.unequipEvent||[])),
+        };
+        core.initStatus.autoEvents.push(autoEvent1);
+        core.initStatus.autoEvents.push(autoEvent2);
+    }
+
     core.initStatus.autoEvents.sort(function (e1, e2) {
+        if (e1.floorId == null) return 1;
+        if (e2.floorId == null) return -1;
         if (e1.priority != e2.priority) return e2.priority - e1.priority;
         if (e1.floorId != e2.floorId) return core.floorIds.indexOf(e1.floorId) - core.floorIds.indexOf(e2.floorId);
         if (e1.x != e2.x) return e1.x - e2.x;
@@ -317,11 +353,6 @@ core.prototype._init_flags = function () {
         return e1.index - e2.index;
     })
 
-    core.maps._setFloorSize();
-    // 初始化怪物、道具等
-    core.material.enemys = core.enemys.getEnemys();
-    core.material.items = core.items.getItems();
-    core.material.icons = core.icons.getIcons();
 }
 
 core.prototype._init_sys_flags = function () {
@@ -336,6 +367,7 @@ core.prototype._init_sys_flags = function () {
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
+    core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', true);
 }
 
 core.prototype._init_platform = function () {
@@ -428,6 +460,7 @@ core.prototype._init_others = function () {
     core.bigmap.cacheCanvas = document.createElement('canvas').getContext('2d');
     core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
     core.loadImage("materials", "cloud", function (name, img) { core.animateFrame.weather.cloud = img; })
+    core.loadImage("materials", "sun", function (name, img) { core.animateFrame.weather.sun = img; })
     core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);

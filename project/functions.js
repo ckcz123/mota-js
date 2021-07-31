@@ -250,7 +250,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			});
 			core.push(actions, [
 				{ "type": "waitAsync" }, // 等待所有异步事件执行完毕
-				{ "type": "trigger", "loc": [x, y] } // 重要！重新触发本点事件（即重新触发战斗）
+				{ "type": "battle", "loc": [x, y] } // 重要！重新触发本次战斗
 			]);
 			core.insertAction(actions);
 			return false;
@@ -314,7 +314,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 获得金币
 	var money = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].money;
-	}, enemy.money);
+	}, core.getEnemyValue(enemy, "money", x, y));
 	if (core.hasItem('coin')) money *= 2; // 幸运金币：双倍
 	if (core.hasFlag('curse')) money = 0; // 诅咒效果
 	core.status.hero.money += money;
@@ -323,12 +323,12 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 获得经验
 	var exp = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].exp;
-	}, enemy.exp);
+	}, core.getEnemyValue(enemy, "exp", x, y));
 	if (core.hasFlag('curse')) exp = 0;
 	core.status.hero.exp += exp;
 	core.status.hero.statistics.exp += exp;
 
-	var hint = "打败 " + enemy.name;
+	var hint = "打败 " + core.getEnemyValue(enemy, "name", x, y);
 	if (core.flags.statusBarItems.indexOf('enableMoney') >= 0)
 		hint += ',' + core.getStatusLabel('money') + '+' + money; // hint += "，金币+" + money;
 	if (core.flags.statusBarItems.indexOf('enableExp') >= 0)
@@ -385,7 +385,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 加点事件
 	var point = guards.reduce(function (curr, g) {
 		return curr + core.material.enemys[g[2]].point;
-	}, enemy.point) || 0;
+	}, core.getEnemyValue(enemy, "point", x, y)) || 0;
 	if (core.flags.enableAddPoint && point > 0) {
 		core.push(todo, [{ "type": "insert", "name": "加点事件", "args": [point] }]);
 	}
@@ -1389,16 +1389,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 检查左右夹击
 		var leftBlock = blocks[(x - 1) + "," + y],
 			rightBlock = blocks[(x + 1) + "," + y];
-		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable && leftBlock.id == rightBlock.id) {
-			if (core.hasSpecial(leftBlock.event.id, 16))
-				enemyId1 = leftBlock.event.id;
+		var leftId = core.getFaceDownId(leftBlock),
+			rightId = core.getFaceDownId(rightBlock);
+		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable && leftId == rightId) {
+			if (core.hasSpecial(leftId, 16))
+				enemyId1 = leftId;
 		}
 		// 检查上下夹击
 		var topBlock = blocks[x + "," + (y - 1)],
 			bottomBlock = blocks[x + "," + (y + 1)];
-		if (topBlock && !topBlock.disable && bottomBlock && !bottomBlock.disable && topBlock.id == bottomBlock.id) {
-			if (core.hasSpecial(topBlock.event.id, 16))
-				enemyId2 = topBlock.event.id;
+		var topId = core.getFaceDownId(topBlock),
+			bottomId = core.getFaceDownId(bottomBlock);
+		if (topBlock && !topBlock.disable && bottomBlock && !bottomBlock.disable && topId == bottomId) {
+			if (core.hasSpecial(topId, 16))
+				enemyId2 = topId;
 		}
 
 		if (enemyId1 != null || enemyId2 != null) {

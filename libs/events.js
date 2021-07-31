@@ -344,6 +344,14 @@ events.prototype.trigger = function (x, y, callback) {
         } catch (e) { main.log(e); }
     }
 
+    // 碰触事件
+    if (block.event.event) {
+        core.clearRouteFolding();
+        core.insertAction(block.event.event, block.x, block.y);
+        // 不再执行该点的系统事件
+        return _executeCallback();
+    }
+
     if (block.event.trigger && block.event.trigger != 'null') {
         var noPass = block.event.noPass, trigger = block.event.trigger;
         if (noPass) core.clearAutomaticRouteNode(x, y);
@@ -367,6 +375,14 @@ events.prototype._trigger_inAction = function (x, y) {
     try {
         eval(block.event.script);
     } catch (e) { main.log(e); }
+
+    // 碰触事件
+    if (block.event.event) {
+        core.clearRouteFolding();
+        core.insertAction(block.event.event, block.x, block.y);
+        // 不再执行该点的系统事件
+        return core.doAction();
+    }
 
     if (block.event.trigger && block.event.trigger != 'null') {
         this.setEvents(null, x, y);
@@ -403,7 +419,37 @@ events.prototype._trigger_ignoreChangeFloor = function (block) {
 }
 
 events.prototype._sys_battle = function (data, callback) {
-    this.battle(data.event.id, data.x, data.y, false, callback);
+    // 检查是否需要改变朝向
+    if (data.x == core.nextX() && data.y == core.nextY()) {
+        var dir = core.turnDirection(":back");
+        var id = data.event.id, toId = (data.event.faceIds || {})[dir];
+        if (toId && id != toId) {
+            var number = core.getNumberById(toId);
+            if (number > 0)
+                core.setBlock(number, data.x, data.y);
+        }
+    }
+
+    // 检查战前事件
+    var beforeBattle = [];
+    core.push(beforeBattle, core.floors[core.status.floorId].beforeBattle[data.x + "," + data.y]);
+    core.push(beforeBattle, (core.material.enemys[data.event.id]||{}).beforeBattle);
+    if (beforeBattle.length > 0) {
+        core.push(beforeBattle, [{"type": "battle", "x": data.x, "y": data.y}]);
+        core.clearContinueAutomaticRoute();
+
+        // 自动存档
+        var inAction = core.status.event.id == 'action';
+        if (inAction) {
+            core.insertAction(beforeBattle, data.x, data.y);
+            core.doAction();
+        } else {
+            core.autosave(true);
+            core.insertAction(beforeBattle, data.x, data.y, callback);
+        }
+    } else {
+        this.battle(data.event.id, data.x, data.y, false, callback);
+    }
 }
 
 ////// 战斗 //////
@@ -859,8 +905,7 @@ events.prototype._sys_action = function (data, callback) {
 
 events.prototype._sys_custom = function (data, callback) {
     core.insertAction(["请使用\r[yellow]core.registerSystemEvent('custom', func)\r来处理自己添加的系统触发器！"],
-        data.x, data.y);
-    if (callback) callback();
+        data.x, data.y, callback);
 }
 
 // ------ 自定义事件的处理 ------ //
@@ -1072,9 +1117,10 @@ events.prototype.checkAutoEvents = function () {
     var todo = [], delay = [];
     core.status.autoEvents.forEach(function (autoEvent) {
         var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;
-        // 不在当前楼层 or 已经执行过 or 正在执行中
+        // 不在当前楼层 or 已经执行过 or 已被分区 or 正在执行中
         if (autoEvent.currentFloor && floorId != core.status.floorId) return;
         if (!autoEvent.multiExecute && core.autoEventExecuted(symbol)) return;
+        if ((flags.__removed__||[]).indexOf(floorId) >= 0) return;
         if (core.autoEventExecuting(symbol)) return;
         var prefix = floorId + "@" + x + "@" + y;
         try {
@@ -1085,15 +1131,25 @@ events.prototype.checkAutoEvents = function () {
 
         core.autoEventExecuting(symbol, true);
         core.autoEventExecuted(symbol, true);
-
-        var event = [
-            {"type": "function", "function":
-                    "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
-            // 用do-while(0)包一层防止break影响事件流
-            {"type": "dowhile", "condition": "false", "data": autoEvent.data},
-            {"type": "function", "function":
-                    "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
-        ];
+        
+        var event;
+        if (x == null && y == null) {
+            event = [
+                // 用do-while(0)包一层防止break影响事件流
+                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
+                {"type": "function", "function":
+                        "function() { core.autoEventExecuting('" + symbol + "', false); }"}
+            ];
+        } else {
+            event = [
+                {"type": "function", "function":
+                        "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
+                // 用do-while(0)包一层防止break影响事件流
+                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
+                {"type": "function", "function":
+                        "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
+            ];
+        }
 
         if (autoEvent.delayExecute)
             delay.push(event);
@@ -1202,7 +1258,7 @@ events.prototype.__precompile_getArray = function () {
         "choices", "confirm", "fillText", "fillBoldText", "drawTextContent"
     ];
     var locs = [
-        "show", "hide", "setBlock", "showFloorImg", "hideFloorImg", "showBgFgMap",
+        "show", "hide", "setBlock", "setBlockOpacity", "showFloorImg", "hideFloorImg", "showBgFgMap",
         "hideBgFgMap", "setBgFgBlock", "animate", "setViewport", "move", "jumoHero",
         "changeFloor", "changePos", "showTextImage", "showGif", "openDoor",
         "closeDoor", "battle", "trigger", "insert", "setEnemyOnPoint", "resetEnemyOnPoint"
@@ -1389,6 +1445,27 @@ events.prototype._action_setBlock = function (data, x, y, prefix) {
     }
 }
 
+events.prototype._action_setBlockOpacity = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    if (data.time > 0 && data.floorId == core.status.floorId) {
+        this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, data.opacity, data.time);
+    }
+    else {
+        data.loc.forEach(function (t) {
+            core.setBlockOpacity(data.opacity, t[0], t[1], data.floorId);
+        });
+        core.doAction();
+    }
+}
+
+events.prototype._action_setBlockFilter = function (data, x, y, prefix) {
+    data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    data.loc.forEach(function (t) {
+        core.setBlockFilter(data, t[0], t[1], data.floorId);
+    });
+    core.doAction();
+}
+
 events.prototype._action_turnBlock = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     data.loc.forEach(function (t) {
@@ -1448,8 +1525,7 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
     } else {
         data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     }
-    console.log(data.loc);
-    this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.time);
+    this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.moveMode, data.time);
 }
 
 events.prototype._action_move = function (data, x, y, prefix) {
@@ -1567,11 +1643,21 @@ events.prototype._action_showGif = function (data, x, y, prefix) {
 
 events.prototype._action_moveImage = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, core.moveImage, data.code, data.to, data.opacity, data.time);
+    this.__action_doAsyncFunc(data.async, core.moveImage, data.code, data.to, data.opacity, data.moveMode, data.time);
 }
 
 events.prototype._precompile_moveImage = function (data) {
     data.to = this.__precompile_array(data.to);
+    return data;
+}
+
+events.prototype._action_rotateImage = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    this.__action_doAsyncFunc(data.async, core.rotateImage, data.code, data.center, data.angle, data.moveMode, data.time);
+}
+
+events.prototype._precompile_rotateImage = function (data) {
+    data.center = this.__precompile_array(data.center);
     return data;
 }
 
@@ -1595,7 +1681,7 @@ events.prototype._action_screenFlash = function (data, x, y, prefix) {
 
 events.prototype._action_setWeather = function (data, x, y, prefix) {
     core.setWeather(data.name, data.level);
-    if (data.keep && ['rain', 'snow', 'fog', 'cloud'].indexOf(data.name) >= 0)
+    if (data.keep && ['rain', 'snow', 'sun', 'fog', 'cloud'].indexOf(data.name) >= 0)
         core.setFlag('__weather__', [data.name, data.level]);
     else core.removeFlag('__weather__');
     core.doAction();
@@ -2241,7 +2327,7 @@ events.prototype._action_hideHero = function (data, x, y, prefix) {
 }
 
 events.prototype._action_vibrate = function (data, x, y, prefix) {
-    this.__action_doAsyncFunc(data.async, core.vibrate, data.time);
+    this.__action_doAsyncFunc(data.async, core.vibrate, data.direction, data.time, data.speed, data.power);
 }
 
 events.prototype._action_sleep = function (data, x, y, prefix) {
@@ -2312,7 +2398,7 @@ events.prototype.__action_wait_getValue = function (value) {
 }
 
 events.prototype.__action_wait_afterGet = function (data) {
-    if (!data.data) return;
+    if (!data.data) return false;
     var todo = [];
     var stop = false;
     data.data.forEach(function (one) {
@@ -2337,20 +2423,32 @@ events.prototype.__action_wait_afterGet = function (data) {
                 if (one["break"]) stop = true;
             }
         }
+        if (one["case"] == "condition") {
+            var condition = false;
+            try { condition = core.calValue(one.condition); } catch (e) {}
+            if (condition) {
+                core.push(todo, one.action);
+                if (one["break"]) stop = true;
+            }
+        }
         if (one["case"] == "timeout" && core.getFlag("type") == -1) {
             core.push(todo, one.action);
             if (one["break"]) stop = true;
         }
     })
-    if (todo.length > 0)
+    if (todo.length > 0) {
         core.insertAction(todo);
+        return true;
+    }
+    return false;
 }
 
 events.prototype._precompile_wait = function (data) {
     if (data.data) {
         data.data.forEach(function (v) {
-            if (v.px) v.px = this.__precompile_array(v.px);
-            if (v.py) v.py = this.__precompile_array(v.py);
+            if (v.px != null) v.px = this.__precompile_array(v.px);
+            if (v.py != null) v.py = this.__precompile_array(v.py);
+            if (v.condition != null) v.condition = this.__precompile_array(v.condition);
             v.action = this.precompile(v.action);
         }, this);
     }
@@ -2513,6 +2611,10 @@ events.prototype._action_drawArrow = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setAttribute = function (data, x, y, prefix) {
+    this.__action_doUIEvent(data);
+}
+
+events.prototype._action_setFilter = function (data, x, y, prefix) {
     this.__action_doUIEvent(data);
 }
 
@@ -2774,6 +2876,7 @@ events.prototype._updateValueByOperator = function (value, originValue, operator
 events.prototype.setValue = function (name, operator, value, prefix) {
     value = this._updateValueByOperator(core.calValue(value, prefix), core.calValue(name, prefix), operator);
     this._setValue_setStatus(name, value);
+    this._setValue_setBuff(name, value);
     this._setValue_setItem(name, value);
     this._setValue_setFlag(name, value);
     this._setValue_setSwitch(name, value, prefix);
@@ -2784,6 +2887,11 @@ events.prototype.setValue = function (name, operator, value, prefix) {
 events.prototype._setValue_setStatus = function (name, value) {
     if (name.indexOf("status:") !== 0) return;
     core.setStatus(name.substring(7), value);
+}
+
+events.prototype._setValue_setBuff = function (name, value) {
+    if (name.indexOf('buff:') !== 0) return;
+    core.setBuff(name.substring(5), value);
 }
 
 events.prototype._setValue_setItem = function (name, value) {
@@ -2820,6 +2928,7 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix) {
     }
     var enemyInfo = core.getFlag('enemyInfo');
     if (!enemyInfo[id]) enemyInfo[id] = {};
+    if (typeof value === 'string' && name == 'name') value = value.replace(/\r/g, '\\r');
     value = this._updateValueByOperator(core.calValue(value, prefix), (core.material.enemys[id]||{})[name], operator);
     enemyInfo[id][name] = value;
     (core.material.enemys[id]||{})[name] = core.clone(value);
@@ -2834,6 +2943,7 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
     if (block.event.cls.indexOf('enemy') != 0) return;
     var enemy = core.material.enemys[block.event.id];
     if (enemy == null) return;
+    if (typeof value === 'string' && name == 'name') value = value.replaceAll(/\r/g, '\\r');
     value = this._updateValueByOperator(core.calValue(value, prefix), enemy[name], operator);
     flags.enemyOnPoint = flags.enemyOnPoint || {};
     flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
@@ -2986,7 +3096,7 @@ events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time,
         return;
     }
     core.setOpacity(name, 0);
-    this.moveImage(code, null, opacityVal, time, callback);
+    this.moveImage(code, null, opacityVal, null, time, callback);
 }
 
 ////// 隐藏图片 //////
@@ -2998,14 +3108,14 @@ events.prototype.hideImage = function (code, time, callback) {
         if (callback) callback();
         return;
     }
-    this.moveImage(code, null, 0, time, function () {
+    this.moveImage(code, null, 0, null, time, function () {
         core.deleteCanvas(name);
         if (callback) callback();
     });
 }
 
 ////// 移动图片 //////
-events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
+events.prototype.moveImage = function (code, to, opacityVal, moveMode, time, callback) {
     time = time || 1000;
     to = to || [];
     var name = "image" + (code + 100);
@@ -3026,21 +3136,22 @@ events.prototype.moveImage = function (code, to, opacityVal, time, callback) {
 
     this._moveImage_moving(name, {
         fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity,
-        time: time / Math.max(core.status.replay.speed, 1)
+        moveMode: moveMode, time: time / Math.max(core.status.replay.speed, 1)
     }, callback)
 }
 
 events.prototype._moveImage_moving = function (name, moveInfo, callback) {
-    var per_time = 10, step = 0, steps = parseInt(moveInfo.time / 10);
+    var per_time = 10, step = 0, steps = parseInt(moveInfo.time / per_time);
     if (steps <= 0) steps = 1;
     var fromX = moveInfo.fromX, fromY = moveInfo.fromY, toX = moveInfo.toX, toY = moveInfo.toY,
         opacity = moveInfo.opacity, toOpacity = moveInfo.toOpacity;
     var currX = fromX, currY = fromY, currOpacity = opacity;
+    var moveFunc = core.applyEasing(moveInfo.moveMode);
     var animate = setInterval(function () {
         step++;
-        currOpacity = opacity + (toOpacity - opacity) * step / steps;
-        currX = parseInt(fromX + (toX - fromX) * step / steps);
-        currY = parseInt(fromY + (toY - fromY) * step / steps);
+        currOpacity = opacity + (toOpacity - opacity) * moveFunc(step / steps);
+        currX = parseInt(fromX + (toX - fromX) * moveFunc(step / steps));
+        currY = parseInt(fromY + (toY - fromY) * moveFunc(step / steps));
         core.setOpacity(name, currOpacity);
         core.relocateCanvas(name, currX, currY);
         if (step == steps) {
@@ -3051,6 +3162,44 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
         }
     }, per_time);
     core.animateFrame.asyncId[animate] = true;
+}
+
+////// 旋转图片 //////
+events.prototype.rotateImage = function (code, center, angle, moveMode, time, callback) {
+    time = time || 1000;
+    center = center || [];
+    var name = "image" + (code + 100);
+    if (!core.dymCanvas[name]) {
+        if (callback) callback();
+        return;
+    }
+    var canvas = core.dymCanvas[name].canvas;
+    var centerX = core.calValue(center[0]), centerY = core.calValue(center[1]);
+
+    var fromAngle = parseFloat(canvas.getAttribute('_angle')) || 0;
+    var rotateInfo = {
+        fromAngle: fromAngle, angle: angle, centerX: centerX, centerY: centerY,
+        moveMode: moveMode, time: time / Math.max(core.status.replay.speed, 1)
+    }
+    this._rotateImage_rotating(name, rotateInfo, callback);
+}
+
+events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
+    var per_time = 10, step = 0, steps = parseInt(rotateInfo.time / per_time);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(rotateInfo.moveMode);
+    var animate = setInterval(function () {
+        step++;
+        var currAngle = rotateInfo.fromAngle + rotateInfo.angle * moveFunc(step / steps);
+        core.rotateCanvas(name, currAngle, rotateInfo.centerX, rotateInfo.centerY);
+        if (step == steps) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+    }, per_time);
+    core.animateFrame.asyncId[animate] = true;
+
 }
 
 ////// 绘制或取消一张gif图片 //////
@@ -3101,41 +3250,45 @@ events.prototype.setVolume = function (value, time, callback) {
 }
 
 ////// 画面震动 //////
-events.prototype.vibrate = function (time, callback) {
+events.prototype.vibrate = function (direction, time, speed, power, callback) {
     if (core.isReplaying()) {
         if (callback) callback();
         return;
     }
-    if (!time || time < 1000) time = 1000;
-    // --- 将time调整为500的倍数（上整），不然会出错
-    time /= Math.max(core.status.replay.speed, 1)
-    time = Math.ceil(time / 500) * 500;
-    var shakeInfo = {duration: time * 3 / 50, speed: 5, power: 5, direction: 1, shake: 0};
+    if (!time) time = 1000;
+    speed = speed || 10;
+    power = power || 10;
+    var shakeInfo = {duration: parseInt(time / 10), speed: speed, power: power, direction: 1, shake: 0};
     var animate = setInterval(function () {
         core.events._vibrate_update(shakeInfo);
-        core.control.addGameCanvasTranslate(shakeInfo.shake, 0);
-        if (shakeInfo.duration === 0) {
+        switch (direction) {
+            case 'vertical': core.addGameCanvasTranslate(0, shakeInfo.shake); break;
+            case 'diagonal1': core.addGameCanvasTranslate(shakeInfo.shake, shakeInfo.shake); break;
+            case 'diagonal2': core.addGameCanvasTranslate(-shakeInfo.shake, shakeInfo.shake); break;
+            default: core.addGameCanvasTranslate(shakeInfo.shake, 0);
+        }
+        if (shakeInfo.duration === 0 && shakeInfo.shake == 0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             if (callback) callback();
         }
-    }, 50 / 3);
+    }, 10);
 
     core.animateFrame.asyncId[animate] = true;
 }
 
 events.prototype._vibrate_update = function (shakeInfo) {
     if (shakeInfo.duration >= 1 || shakeInfo.shake != 0) {
-        var delta = (shakeInfo.power * shakeInfo.speed * shakeInfo.direction) / 10.0;
+        var delta = shakeInfo.speed * shakeInfo.direction / 6;
         if (shakeInfo.duration <= 1 && shakeInfo.shake * (shakeInfo.shake + delta) < 0) {
             shakeInfo.shake = 0;
         } else {
             shakeInfo.shake += delta;
         }
-        if (shakeInfo.shake > shakeInfo.power * 2) {
+        if (shakeInfo.shake > shakeInfo.power) {
             shakeInfo.direction = -1;
         }
-        if (shakeInfo.shake < -shakeInfo.power * 2) {
+        if (shakeInfo.shake < -shakeInfo.power) {
             shakeInfo.direction = 1;
         }
         if (shakeInfo.duration >= 1) {

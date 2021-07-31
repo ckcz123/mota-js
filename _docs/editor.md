@@ -259,7 +259,8 @@ json类型的文本使用JsonEvalString
 首先注册成名为'meteorite'的事件, 在插件编写的init中添加以下内容
 ```js
 core.registerEvent('meteorite', function(data){
-    core.insertAction({"type": "insert", "name": "陨石坠落", "args": [data.color,data.loc,data.range]})
+    core.insertAction({"type": "insert", "name": "陨石坠落", "args": [data.color, data.loc, data.range]});
+	core.doAction();
 })
 ```
 

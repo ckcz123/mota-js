@@ -128,12 +128,12 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "怪物描述",
 					"_data": "可在怪物详细信息页面写的怪物描述，支持颜色、字体大小和样式、粗体斜体等转义方式。"
 				},
-				"displayIdInBook": {
+				"faceIds": {
 					"_leaf": true,
-					"_type": "textarea",
-					"_string": true,
-					"_docs": "手册ID",
-					"_data": "在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。常被运用在同一个怪物的多朝向上。"
+					"_type": "event",
+					"_event": "faceIds",
+					"_docs": "行走图朝向",
+					"_data": "行走图朝向。在勇士撞上图块时，或图块在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
 				},
 				"hp": {
 					"_leaf": true,
@@ -244,6 +244,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "固伤",
 					"_data": "战前扣血的点数"
 				},
+				"beforeBattle": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "beforeBattle",
+					"_docs": "战前事件",
+					"_data": "和该怪物战斗前触发的事件列表"
+				},
 				"afterBattle": {
 					"_leaf": true,
 					"_type": "event",
@@ -313,6 +320,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "碰触脚本",
 					"_data": "触碰到该图块时自动执行的脚本内容；此脚本会在该点的触发器执行前执行"
 				},
+				"event": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "item",
+					"_docs": "碰触事件",
+					"_data": "触碰到该图块时自动执行的事件内容；如果存在本事件则不会执行默认触发器"
+				},
 				"cannotOut": {
 					"_leaf": true,
 					"_type": "checkboxSet",
@@ -360,7 +374,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "event",
 					"_event": "faceIds",
 					"_docs": "行走图朝向",
-					"_data": "行走图朝向，仅对npc48有效。在勇士撞上NPC时，或NPC在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
+					"_data": "行走图朝向。在勇士撞上图块时，或图块在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
 				}
 			}
 		},
@@ -508,7 +522,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_leaf": true,
 							"_type": "textarea",
 							"_docs": "天气",
-							"_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"，\"snow\"或\"fog\"代表雨雪雾，第二项为1-10之间的数代表强度。\n如[\"rain\", 8]代表8级雨天。"
+							"_data": "该层的默认天气。本项可忽略表示晴天，如果写则第一项为\"rain\"，\"snow\", \"sun\", \"fog\", \"cloud\“代表对应的天气，第二项为1-10之间的数代表强度。\n如[\"rain\", 8]代表8级雨天。"
 						},
 						"bgm": {
 							"_leaf": true,
@@ -521,7 +535,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							}).toString(),
 							"_onconfirm": (function (previous, current) {
 								if (current.length == 0) return null;
-								return current[0];
+								if (current.length == 1) return current[0];
+								return current;
 							}).toString(),
 							"_docs": "背景音乐",
 							"_data": "到达该层后默认播放的BGM"
@@ -569,6 +584,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 							"_event": "changeFloor",
 							"_docs": "楼层转换",
 							"_data": "该点楼层转换事件；该事件不能和上面的events同时出现，否则会被覆盖"
+						},
+						"beforeBattle": {
+							"_leaf": true,
+							"_type": "event",
+							"_event": "beforeBattle",
+							"_docs": "战前事件",
+							"_data": "该点战斗前可能触发的事件列表，可以双击进入事件编辑器。"
 						},
 						"afterBattle": {
 							"_leaf": true,
@@ -630,6 +652,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"parallelDo": "",
 			"events": {},
 			"changeFloor": {},
+			"beforeBattle": {},
 			"afterBattle": {},
 			"afterGetItem": {},
 			"afterOpenDoor": {},

@@ -60,6 +60,7 @@ editor_blocklyconfig=(function(){
         "args": ""
       }],'shop'),
       MotaActionBlocks['common_m'].xmlText(),
+      MotaActionBlocks['beforeBattle_m'].xmlText(),
       MotaActionBlocks['afterBattle_m'].xmlText(),
       MotaActionBlocks['afterGetItem_m'].xmlText(),
       MotaActionBlocks['afterOpenDoor_m'].xmlText(),
@@ -104,6 +105,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['hideImage_s'].xmlText(),
       MotaActionBlocks['showTextImage_s'].xmlText(),
       MotaActionBlocks['moveImage_s'].xmlText(),
+      MotaActionBlocks['rotateImage_s'].xmlText(),
       MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
       MotaActionBlocks['win_s'].xmlText(),
@@ -153,6 +155,8 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['show_s'].xmlText(),
       MotaActionBlocks['hide_s'].xmlText(),
       MotaActionBlocks['setBlock_s'].xmlText(),
+      MotaActionBlocks['setBlockOpacity_s'].xmlText(),
+      MotaActionBlocks['setBlockFilter_s'].xmlText(),
       MotaActionBlocks['turnBlock_s'].xmlText(),
       MotaActionBlocks['moveHero_s'].xmlText(),
       MotaActionBlocks['move_s'].xmlText(),
@@ -189,6 +193,7 @@ editor_blocklyconfig=(function(){
       MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
         {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件\n超时剩余时间会写入flag:timeout"}]},
         {"case": "mouse", "px": [0,32], "py": [0,32], "action": [{"type": "comment", "text": "当点击地图左上角时执行此事件\n超时剩余时间会写入flag:timeout"}]},
+        {"case": "condition", "condition": "flag:type==0\n&&flag:keycode==13", "action": [{"type": "comment", "text": "当满足自定义条件时会执行此事件\n超时剩余时间会写入flag:timeout"}]},
         {"case": "timeout", "action": [{"type": "comment", "text": "当超时未操作时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),
@@ -225,6 +230,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['previewUI_s'].xmlText(),
       MotaActionBlocks['clearMap_s'].xmlText(),
       MotaActionBlocks['setAttribute_s'].xmlText(),
+      MotaActionBlocks['setFilter_s'].xmlText(),
       MotaActionBlocks['fillText_s'].xmlText(),
       MotaActionBlocks['fillBoldText_s'].xmlText(),
       MotaActionBlocks['drawTextContent_s'].xmlText(),
@@ -532,7 +538,7 @@ var workspace = Blockly.inject(blocklyDiv,{
 });
 
 editor_blockly.isCommonEntry = function () {
-  var commonEntries = ['afterBattle', 'afterOpenDoor', 'firstArrive', 'eachArrive', 'commonEvent', 'item'];
+  var commonEntries = ['beforeBattle', 'afterBattle', 'afterOpenDoor', 'firstArrive', 'eachArrive', 'commonEvent', 'item'];
   return commonEntries.indexOf(editor_blockly.entryType) >= 0;
 }
 

@@ -554,10 +554,10 @@ declare class control {
     /**
      * 设置天气，不计入存档。如需长期生效请使用core.events._action_setWeather()函数
      * @example core.setWeather('fog', 10); // 设置十级大雾天
-     * @param type 新天气的类型，不填视为晴天
+     * @param type 新天气的类型，不填视为无天气
      * @param level 新天气（晴天除外）的级别，必须为不大于10的正整数，不填视为5
      */
-    setWeather(type?: 'rain' | 'snow' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
+    setWeather(type?: 'rain' | 'snow' | 'sun' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
     
     /**
      * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
@@ -646,7 +646,7 @@ declare class control {
     setViewport(px?: number, py?: number): void
 
     /** 移动视野范围 */
-    moveViewport(x: number, y: number, time?: number, callback?: () => any): void
+    moveViewport(x: number, y: number, moveMode?: string, time?: number, callback?: () => any): void
 
     /** 更新跟随者坐标 */
     updateFollowers(): void
@@ -976,15 +976,27 @@ declare class events {
     
     /**
      * 移动一张图片并/或改变其透明度
-     * @example core.moveImage(1, undefined, 0.5); // 1秒内把1号图片变为50%透明
+     * @example core.moveImage(1, null, 0.5); // 1秒内把1号图片变为50%透明
      * @param code 图片编号
      * @param to 新的左上角坐标，省略表示原地改变透明度
      * @param opacityVal 新的透明度，省略表示不变
+     * @param moveMode 移动模式
      * @param time 移动用时，单位为毫秒。不填视为1秒
      * @param callback 图片移动完毕后的回调函数，可选
      */
-    moveImage(code: number, to?: [number?, number?], opacityVal?: number, time?: number, callback?: () => void): void
-    
+    moveImage(code: number, to?: [number?, number?], opacityVal?: number, moveMode?: string, time?: number, callback?: () => void): void
+
+    /**
+     * 旋转一张图片
+     * @param code 图片编号
+     * @param center 旋转中心像素（以屏幕为基准）；不填视为图片本身中心
+     * @param angle 旋转角度；正数为顺时针，负数为逆时针
+     * @param moveMode 旋转模式
+     * @param time 移动用时，单位为毫秒。不填视为1秒
+     * @param callback 图片移动完毕后的回调函数，可选
+     */
+    rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
+
     /**
      * 绘制一张动图或擦除所有动图
      * @example core.showGif(); // 擦除所有动图
@@ -1004,12 +1016,15 @@ declare class events {
     setVolume(value: number, time?: number, callback?: () => void): void
     
     /**
-     * 视野左右抖动
+     * 视野抖动
      * @example core.vibrate(); // 视野左右抖动1秒
-     * @param time 抖动时长，单位为毫秒。必须为半秒的倍数，不填或小于1秒都视为1秒
+     * @param direction 抖动方向
+     * @param time 抖动时长，单位为毫秒
+     * @param speed 抖动速度
+     * @param power 抖动幅度
      * @param callback 抖动平息后的回调函数，可选
      */
-    vibrate(time?: number, callback?: () => void): void
+    vibrate(direction?: string, time?: number, speed?: number, power?: number, callback?: () => void): void
 
     /**
      * 强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了
@@ -1811,6 +1826,9 @@ declare class maps {
     /** 获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等 */
     getBlockInfo(block?: any): any
 
+    /** 获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id */
+    getFaceDownId(block?: any): string
+
     /** 根据图块的索引来隐藏图块 */
     hideBlockByIndex(index?: any, floorId?: string): void
 
@@ -2106,6 +2124,9 @@ declare class ui {
     /** 重新设置一个自定义画布的大小 */
     resizeCanvas(name: string, x: number, y: number): void
 
+    /** 设置一个自定义画布的旋转角度 */
+    rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
+
     /** 删除一个自定义画布 */
     deleteCanvas(name: string): void
 
@@ -2267,8 +2288,11 @@ declare class ui {
     /** 设置某个canvas的线宽度 */
     setLineWidth(name: string | CanvasRenderingContext2D, lineWidth: number): void
 
-    /** 设置某个canvas的alpha值 */
-    setAlpha(name: string | CanvasRenderingContext2D, alpha: number): void
+    /** 设置某个canvas的alpha值；返回设置之前画布的不透明度。 */
+    setAlpha(name: string | CanvasRenderingContext2D, alpha: number): number
+
+    /** 设置某个canvas的filter属性 */
+    setFilter(name: string | CanvasRenderingContext2D, filter: any): void
 
     /** 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 */
     setOpacity(name: string | CanvasRenderingContext2D, opacity: number): void
@@ -2380,6 +2404,9 @@ declare class utils {
      * @returns 格式化结果
      */
     formatBigNumber(x: number, onMap?: boolean): string
+
+    /** 变速移动 */
+    applyEasing(mode?: string): (number) => number;
 
     /**
      * 颜色数组转十六进制

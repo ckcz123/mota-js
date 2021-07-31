@@ -467,7 +467,7 @@ actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
         core.timeout.onDownTimeout = setTimeout(function () {
             if (core.interval.onDownInterval == null) {
                 core.interval.onDownInterval = setInterval(function () {
-                    if (!core.actions.longClick(x, y, px, py, true)) {
+                    if (!core.actions.longClick(x, y, px, py)) {
                         clearInterval(core.interval.onDownInterval);
                         core.interval.onDownInterval = null;
                     }
@@ -499,7 +499,15 @@ actions.prototype._sys_onmove_choices = function (x, y) {
 
     switch (core.status.event.id) {
         case 'action':
-            if (core.status.event.data.type != 'choices') break;
+            if (core.status.event.data.type == 'choices') {
+                this._onMoveChoices(x, y); 
+                return true;
+            }
+            if (core.status.event.data.type == 'confirm') {
+                this._onMoveConfirmBox(x, y);
+                return true;
+            }
+            break;
         case 'selectShop':
         case 'switchs':
         case 'switchs-sounds':
@@ -582,6 +590,10 @@ actions.prototype._sys_onup = function () {
 
     // 长按
     if (!core.status.lockControl && stepPostfix.length == 0 && core.status.downTime != null && new Date() - core.status.downTime >= 1000) {
+        clearTimeout(core.interval.onDownTimeout);
+        core.interval.onDownTimeout = null;
+        clearInterval(core.interval.onDownInterval);
+        core.interval.onDownInterval = null;
         core.actions.longClick(posx, posy, 32 * posx + 16, 32 * posy + 16);
     }
     else {
@@ -765,16 +777,18 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // wait事件
     if (core.status.lockControl && core.status.event.id == 'action' && core.status.event.data.type == 'wait') {
-        clearTimeout(core.status.event.interval);
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
-        delete core.status.event.timeout;
         core.setFlag('type', 0);
         var keycode = direct == 1 ? 33 : 34;
         core.setFlag('keycode', keycode);
         core.setFlag('timeout', timeout);
-        core.status.route.push("input:" + (1e8 * timeout + keycode));
-        core.events.__action_wait_afterGet(core.status.event.data.current);
-        core.doAction();
+        var executed = core.events.__action_wait_afterGet(core.status.event.data.current);
+        if (executed || !core.status.event.data.current.forceChild) {
+            core.status.route.push("input:" + (1e8 * timeout + keycode));
+            clearTimeout(core.status.event.interval);
+            delete core.status.event.timeout;
+            core.doAction();
+        }
         return;
     }
 
@@ -849,14 +863,12 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
 }
 
 actions.prototype._sys_longClick = function (x, y, px, py, fromEvent) {
-    if (!core.status.lockControl && !fromEvent) {
-        // 虚拟键盘
-        core.waitHeroToStop(function () {
-            core.ui._drawKeyBoard();
-        });
-        return true;
-    }
-    return false;
+    if (core.status.lockControl) return false;
+    // 虚拟键盘
+    core.waitHeroToStop(function () {
+        core.ui._drawKeyBoard();
+    });
+    return true;
 }
 
 actions.prototype.onStatusBarClick = function (e) {
@@ -874,9 +886,13 @@ actions.prototype._sys_onStatusBarClick = function (px, py, vertical) {
 
 /////////////////// 在某个界面时的按键点击效果 ///////////////////
 
+actions.prototype._getChoicesTopIndex = function (length) {
+    return this.HSIZE - parseInt((length - 1) / 2) + (core.status.event.ui.offset || 0);
+}
+
 // 数字键快速选择选项
 actions.prototype._selectChoices = function (length, keycode, callback) {
-    var topIndex = this.HSIZE - parseInt((length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(length);
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         callback.apply(this, [this.HSIZE, topIndex + core.status.event.selection]);
     }
@@ -907,9 +923,7 @@ actions.prototype._keyDownChoices = function (keycode) {
 actions.prototype._onMoveChoices = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
-
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         if (selection == core.status.event.selection) return;
@@ -986,7 +1000,11 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
             if (core.status.event.selection != 0) {
                 core.status.event.selection = 0;
                 core.playSound('光标移动');
-                core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                if (core.status.event.id == 'action') {
+                    core.ui.drawConfirmBox(core.status.event.ui.text);
+                } else {
+                    core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                }
             }
             return;
         }
@@ -994,7 +1012,11 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
             if (core.status.event.selection != 1) {
                 core.status.event.selection = 1;
                 core.playSound('光标移动');
-                core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                if (core.status.event.id == 'action') {
+                    core.ui.drawConfirmBox(core.status.event.ui.text);
+                } else {
+                    core.ui.drawConfirmBox(core.status.event.ui, core.status.event.data.yes, core.status.event.data.no);
+                }
             }
             return;
         }
@@ -1020,18 +1042,20 @@ actions.prototype._clickAction = function (x, y, px, py) {
     }
 
     if (core.status.event.data.type == 'wait') {
-        clearTimeout(core.status.event.interval);
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
-        delete core.status.event.timeout;
         core.setFlag('type', 1);
         core.setFlag('x', x);
         core.setFlag('y', y);
         core.setFlag('px', px);
         core.setFlag('py', py);
         core.setFlag('timeout', timeout);
-        core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
-        core.events.__action_wait_afterGet(core.status.event.data.current);
-        core.doAction();
+        var executed = core.events.__action_wait_afterGet(core.status.event.data.current);
+        if (executed || !core.status.event.data.current.forceChild) {
+            core.status.route.push("input:" + (1e8 * timeout + 1000000 + 1000 * px + py));
+            clearTimeout(core.status.event.interval);
+            delete core.status.event.timeout;
+            core.doAction();
+        }
         return;
     }
 
@@ -1041,7 +1065,7 @@ actions.prototype._clickAction = function (x, y, px, py) {
         var choices = data.choices;
         if (choices.length == 0) return;
         if (x >= this.CHOICES_LEFT && x <= this.CHOICES_RIGHT) {
-            var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+            var topIndex = this._getChoicesTopIndex(choices.length);
             if (y >= topIndex && y < topIndex + choices.length) {
                 var choice = choices[y - topIndex];
                 if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
@@ -1114,15 +1138,17 @@ actions.prototype._keyUpAction = function (keycode) {
         return;
     }
     if (core.status.event.data.type == 'wait') {
-        clearTimeout(core.status.event.interval);
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
-        delete core.status.event.timeout;
         core.setFlag('type', 0);
         core.setFlag('keycode', keycode);
         core.setFlag('timeout', timeout);
-        core.status.route.push("input:" + (1e8 * timeout + keycode));
-        core.events.__action_wait_afterGet(core.status.event.data.current);
-        core.doAction();
+        var executed = core.events.__action_wait_afterGet(core.status.event.data.current);
+        if (executed || !core.status.event.data.current.forceChild) {
+            core.status.route.push("input:" + (1e8 * timeout + keycode));
+            clearTimeout(core.status.event.interval);
+            delete core.status.event.timeout;
+            core.doAction();
+        }
         return;
     }
     if (core.status.event.data.type == 'choices') {
@@ -1483,6 +1509,7 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x >= this.LAST - 2 && y == this.LAST) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
 
@@ -1658,6 +1685,7 @@ actions.prototype._keyUpToolbox = function (keycode) {
     if (keycode == 84 || keycode == 27 || keycode == 88) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
     if (core.status.event.data == null) return;
@@ -1684,6 +1712,7 @@ actions.prototype._clickEquipbox = function (x, y) {
     if (x >= this.LAST - 2 && y == this.LAST) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
 
@@ -1841,6 +1870,7 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
     if (keycode == 81 || keycode == 27 || keycode == 88) {
         core.playSound('取消');
         core.ui.closePanel();
+        core.checkAutoEvents();
         return;
     }
     if (!core.status.event.data.selectId) return;
@@ -2080,7 +2110,7 @@ actions.prototype._keyUpSL = function (keycode) {
 ////// 系统设置界面时的点击操作 //////
 actions.prototype._clickSwitchs = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     if (selection >= 0 && selection < choices.length) {
@@ -2119,7 +2149,7 @@ actions.prototype._keyUpSwitchs = function (keycode) {
 
 actions.prototype._clickSwitchs_sounds = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 2) return;
@@ -2193,7 +2223,7 @@ actions.prototype._keyUpSwitchs_sounds = function (keycode) {
 
 actions.prototype._clickSwitchs_display = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 0) return;
@@ -2213,17 +2243,20 @@ actions.prototype._clickSwitchs_display = function (x, y) {
                 return this._clickSwitchs_display_enableHDCanvas();
             case 2:
                 core.playSound('确定');
-                return this._clickSwitchs_display_enemyDamage();
+                return this._clickSwitchs_display_enableEnemyPoint();
             case 3:
                 core.playSound('确定');
-                return this._clickSwitchs_display_critical();
+                return this._clickSwitchs_display_enemyDamage();
             case 4:
                 core.playSound('确定');
-                return this._clickSwitchs_display_extraDamage();
+                return this._clickSwitchs_display_critical();
             case 5:
                 core.playSound('确定');
-                return this._clickSwitchs_display_extraDamageType();
+                return this._clickSwitchs_display_extraDamage();
             case 6:
+                core.playSound('确定');
+                return this._clickSwitchs_display_extraDamageType();
+            case 7:
                 core.status.event.selection = 1;
                 core.playSound('取消');
                 core.ui._drawSwitchs();
@@ -2251,6 +2284,12 @@ actions.prototype._clickSwitchs_display_enableHDCanvas = function () {
     core.flags.enableHDCanvas = !core.flags.enableHDCanvas;
     core.setLocalStorage('enableHDCanvas', core.flags.enableHDCanvas);
     core.drawTip("开关高清UI，需刷新页面方可生效");
+    core.ui._drawSwitchs_display();
+}
+
+actions.prototype._clickSwitchs_display_enableEnemyPoint = function () {
+    core.flags.enableEnemyPoint = !core.flags.enableEnemyPoint;
+    core.setLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.ui._drawSwitchs_display();
 }
 
@@ -2303,7 +2342,7 @@ actions.prototype._keyUpSwitchs_display = function (keycode) {
 
 actions.prototype._clickSwitchs_action = function (x, y) {
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     var selection = y - topIndex;
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) {
         if (selection != 0 && selection != 1) return;
@@ -2397,7 +2436,7 @@ actions.prototype._keyUpSwitchs_action = function (keycode) {
 actions.prototype._clickSettings = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2457,7 +2496,7 @@ actions.prototype._clickNotes = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2594,7 +2633,7 @@ actions.prototype._keyUpNotes = function (keycode) {
 actions.prototype._clickSyncSave = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2664,7 +2703,7 @@ actions.prototype._clickSyncSelect = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
         core.status.event.selection = selection;
@@ -2704,7 +2743,7 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2746,7 +2785,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2839,7 +2878,7 @@ actions.prototype._clickReplay = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;
@@ -2911,7 +2950,7 @@ actions.prototype._clickGameInfo = function (x, y) {
     if (x < this.CHOICES_LEFT || x > this.CHOICES_RIGHT) return;
     var choices = core.status.event.ui.choices;
 
-    var topIndex = this.HSIZE - parseInt((choices.length - 1) / 2) + (core.status.event.ui.offset || 0);
+    var topIndex = this._getChoicesTopIndex(choices.length);
 
     if (y >= topIndex && y < topIndex + choices.length) {
         var selection = y - topIndex;

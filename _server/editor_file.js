@@ -306,7 +306,8 @@ editor_file = function (editor, callback) {
             callback('不能对自动元件进行自动注册！');
             return;
         }
-        if (image=='npc48' && confirm("你想绑定npc48的朝向么？\n如果是，则会将最后四个npc48的faceIds进行自动绑定。")) {
+        if ((image=='npcs' || image=='npc48' || image == 'enemys' || image == 'enemy48')
+                && confirm("你想绑定图块的朝向么？\n如果是，则会将最后四个注册图块的faceIds进行自动绑定。")) {
             bindFaceIds = true;
         }
         var c=image.toUpperCase().charAt(0);
@@ -353,10 +354,17 @@ editor_file = function (editor, callback) {
                 var i = faceIds.length - 4;
                 var down = faceIds[i], left = faceIds[i+1], right = faceIds[i+2], up = faceIds[i+3];
                 var obj = {down: down.id, left: left.id, right: right.id, up: up.id};
-                mapActions.push(["add", "['" + down.idnum + "']['faceIds']", obj]);
-                mapActions.push(["add", "['" + left.idnum + "']['faceIds']", obj]);
-                mapActions.push(["add", "['" + right.idnum + "']['faceIds']", obj]);
-                mapActions.push(["add", "['" + up.idnum + "']['faceIds']", obj]);
+                if (image.indexOf('enemy')==0) {
+                    templateActions.push(["add", "['" + down.id + "']['faceIds']", obj]);
+                    templateActions.push(["add", "['" + left.id + "']['faceIds']", obj]);
+                    templateActions.push(["add", "['" + right.id + "']['faceIds']", obj]);
+                    templateActions.push(["add", "['" + up.id + "']['faceIds']", obj]);
+                } else {
+                    mapActions.push(["add", "['" + down.idnum + "']['faceIds']", obj]);
+                    mapActions.push(["add", "['" + left.idnum + "']['faceIds']", obj]);
+                    mapActions.push(["add", "['" + right.idnum + "']['faceIds']", obj]);
+                    mapActions.push(["add", "['" + up.idnum + "']['faceIds']", obj]);
+                }
             }
         }
 

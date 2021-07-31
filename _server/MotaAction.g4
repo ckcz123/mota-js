@@ -42,22 +42,36 @@ return code;
 
 //事件 事件编辑器入口之一
 event_m
-    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool BGNL? Newline action+ BEND
+    :   '事件' BGNL? Newline '覆盖触发器' Bool '启用' Bool '通行状态' B_0_List '显伤' Bool '不透明度' Number BGNL? Newline '该点特效' '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number BGNL? Newline action+ BEND
     
 
 /* event_m
 tooltip : 编辑魔塔的事件
 helpUrl : /_docs/#/instruction
-default : [false,null,null,null,null]
+default : [false,true,null,true,1,0,0,0,false,0,null]
 B_0_List_0=eval(B_0_List_0);
+if (Number_0 < 0 || Number_0 > 1) throw '不透明度需要在0~1之间';
+if (Number_1 < 0) throw '虚化不得小于0；0为完全没有虚化';
+if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
+if (Number_2 < 0 || Number_2 > 1) throw '灰度需要在0~1之间';
+if (Number_3 < 0) throw '阴影不得小于0；0为完全没有阴影';
 var code = {
     'trigger': Bool_0?'action':null,
     'enable': Bool_1,
     'noPass': B_0_List_0,
     'displayDamage': Bool_2,
+    'opacity': Number_0,
+    'filter': {
+        'blur': Number_1,
+        'hue': Int_0,
+        'grayscale': Number_2,
+        'invert': Bool_3,
+        'shadow': Number_3
+    },
     'data': 'data_asdfefw'
 }
-if (!Bool_0 && Bool_1 && (B_0_List_0===null) && Bool_2) code = 'data_asdfefw';
+if (!Bool_0 && Bool_1 && B_0_List_0===null && Bool_2 && Number_0==1.0 && Number_1==0 && Int_0==0 && Number_2==0 && !Bool_3 && Number_3==0) 
+    code = 'data_asdfefw';
 code=JSON.stringify(code,null,2).split('"data_asdfefw"').join('[\n'+action_0+']\n');
 return code;
 */;
@@ -235,6 +249,18 @@ var code = {
 }
 if (JsonEvalString_0) code.args = JSON.parse(JsonEvalString_0);
 code=JSON.stringify(code,null,2)+',\n';
+return code;
+*/;
+
+//beforeBattle 事件编辑器入口之一
+beforeBattle_m
+    :   '战斗开始前' BGNL? Newline action+ BEND
+    
+
+/* beforeBattle_m
+tooltip : 战斗开始前
+helpUrl : /_docs/#/instruction
+var code = '[\n'+action_0+']\n';
 return code;
 */;
 
@@ -430,7 +456,7 @@ return code;
 
 // equip 事件编辑器入口之一
 equip_m 
-    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '此道具cls须为equips并设置canUseItemEffect' BEND
+    :   '装备' '类型' EvalString '装备动画（第一个装备格有效）' IdString? BGNL? '数值提升项' equipList+ '百分比提升项' equipList+ '穿上时事件' action+ '脱下时事件' action+ '此道具cls须为equips并设置canUseItemEffect' BEND
 
 
 /* equip_m
@@ -442,7 +468,9 @@ if (!/^\d+$/.test(EvalString_0)) {
     EvalString_0 = '"' + EvalString_0 + '"';
 }
 IdString_0 = IdString_0 && (', "animate": "'+IdString_0+'"');
-var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}}';
+if (action_0.trim()) action_0 = ', "equipEvent": [\n' + action_0 + ']';
+if (action_1.trim()) action_1 = ', "unequipEvent": [\n' + action_1 + ']';
+var code = '{"type": '+EvalString_0+IdString_0+', "value": {\n'+equipList_0+'\n}, "percentage": {\n'+equipList_1+'\n}'+action_0+action_1+'}';
 return code;
 */;
 
@@ -589,7 +617,7 @@ return code;
 
 
 faceIds_m
-    : '行走图朝向:' BGNL? Newline '向上ID' IdString? '向下ID' IdString? '向左ID' IdString? '向右ID' IdString? BEND
+    : '行走图朝向:' BGNL? Newline '向下ID' IdString? '向左ID' IdString? '向右ID' IdString? '向上ID' IdString?  BEND
 
 
 /* faceIds_m
@@ -598,10 +626,10 @@ default : ["","","",""]
 allIds : ['IdString_0','IdString_1','IdString_2','IdString_3']
 helpUrl : /_docs/#/instruction
 return '{' + [
-    IdString_0 && ('"up": "' + IdString_0 +'"'),
-    IdString_1 && ('"down": "' + IdString_1 +'"'),
-    IdString_2 && ('"left": "' + IdString_2 +'"'),
-    IdString_3 && ('"right": "' + IdString_3 +'"'),
+    IdString_0 && ('"down": "' + IdString_0 +'"'),
+    IdString_1 && ('"left": "' + IdString_1 +'"'),
+    IdString_2 && ('"right": "' + IdString_2 +'"'),
+    IdString_3 && ('"up": "' + IdString_3 +'"'),
 ].filter(function (x) { return x; }).join(', ') + '}\n';
 */;
 
@@ -760,6 +788,8 @@ action
     |   setNameMap_s
     |   show_s
     |   hide_s
+    |   setBlockOpacity_s
+    |   setBlockFilter_s
     |   trigger_s
     |   insert_1_s
     |   insert_2_s
@@ -803,6 +833,7 @@ action
     |   hideImage_s
     |   showTextImage_s
     |   moveImage_s
+    |   rotateImage_s
     |   showGif_s
     |   setCurtain_0_s
     |   setCurtain_1_s
@@ -849,6 +880,7 @@ action
     |   previewUI_s
     |   clearMap_s
     |   setAttribute_s
+    |   setFilter_s
     |   fillText_s
     |   fillBoldText_s
     |   drawTextContent_s
@@ -1170,7 +1202,7 @@ return code;
 
 
 setEnemyOnPoint_s
-    :   '设置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '的' EnemyId_List AssignOperator_List expression Newline
+    :   '设置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression Newline
 
 
 /* setEnemyOnPoint_s
@@ -1185,7 +1217,7 @@ if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
 } else AssignOperator_List_0 = '';
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
-var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
+var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyPoint_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
 return code;
 */;
 
@@ -1310,20 +1342,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
@@ -1345,20 +1374,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
@@ -1367,6 +1393,74 @@ Bool_1 = Bool_1 ?', "async": true':'';
 var code = '{"type": "hide"'+floorstr+IdString_0+Bool_0+IntString_0+Bool_1+'},\n';
 return code;
 */;
+
+setBlockOpacity_s
+    :   '设置图块不透明度' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '不透明度' Number '动画时间' IntString? '不等待执行完毕' Bool? Newline
+    
+
+/* setBlockOpacity_s
+tooltip : setBlockOpacity: 设置图块不透明度
+helpUrl : /_docs/#/instruction
+default : ["","","",1.0,"",false]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.mapColor
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
+  }
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
+}
+if (Number_0 < 0 || Number_0 > 1) throw new Error('不透明度需要在0~1之间');
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+Bool_0 = Bool_0 ?', "async": true':'';
+var code = '{"type": "setBlockOpacity"'+floorstr+IdString_0+', "opacity": '+Number_0+IntString_0+Bool_0+'},\n';
+return code;
+*/;
+
+setBlockFilter_s
+    :   '设置图块特效' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number Newline
+    
+
+/* setBlockFilter_s
+tooltip : setBlockFilter: 设置图块特效
+helpUrl : /_docs/#/instruction
+default : ["","","",0,0,0,false,0]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
+allFloorIds : ['IdString_0']
+colour : this.mapColor
+var floorstr = '';
+if (EvalString_0 && EvalString_1) {
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
+  }
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
+}
+if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
+if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
+if (Number_1 < 0 || Number_1 > 1) throw '灰度需要在0~1之间';
+if (Number_2 < 0) throw '阴影不得小于0；0为完全没有阴影';
+
+var code = '{"type": "setBlockFilter"'+floorstr+IdString_0+', "blur": '+Number_0+', "hue": '+Int_0+', "grayscale": '+Number_1+', "invert": '+Bool_0+', "shadow": '+Number_2+'},\n';
+return code;
+*/;
+
 
 trigger_s
     :   '触发系统事件' 'x' PosString? ',' 'y' PosString? Newline
@@ -1459,20 +1553,17 @@ default : ["yellowDoor","","","","",false]
 selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
 var floorstr = '';
 if (EvalString_1 && EvalString_2) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
-    EvalString_1=[EvalString_1,EvalString_2]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_1=EvalString_1.split(',');
-    EvalString_2=EvalString_2.split(',');
-    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  var x = EvalString_1, y = EvalString_2;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 && (', "time": ' + IntString_0);
@@ -1494,20 +1585,17 @@ default : [null,"","",""]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
@@ -1528,20 +1616,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showFloorImg"'+floorstr+IdString_0+'},\n';
@@ -1560,20 +1645,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideFloorImg"'+floorstr+IdString_0+'},\n';
@@ -1593,20 +1675,17 @@ allFloorIds : ['IdString_0']
 colour : this.mapColor
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
@@ -1626,20 +1705,17 @@ colour : this.mapColor
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 var floorstr = '';
 if (EvalString_0 && EvalString_1) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_0) || pattern1.test(EvalString_1)){
-    EvalString_0=MotaActionFunctions.PosString_pre(EvalString_0);
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_0=[EvalString_0,EvalString_1]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_0) || !pattern2.test(EvalString_1))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_0=EvalString_0.split(',');
-    EvalString_1=EvalString_1.split(',');
-    if(EvalString_0.length!==EvalString_1.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_0.length;ii++)EvalString_0[ii]='['+EvalString_0[ii]+','+EvalString_1[ii]+']';
+  var x = EvalString_0, y = EvalString_1;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_0.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
@@ -1660,20 +1736,17 @@ allFloorIds : ['IdString_0']
 default : ["bg","yellowDoor","","",""]
 var floorstr = '';
 if (EvalString_1 && EvalString_2) {
-  var pattern1 = MotaActionFunctions.pattern.id;
-  if(pattern1.test(EvalString_1) || pattern1.test(EvalString_2)){
-    EvalString_1=MotaActionFunctions.PosString_pre(EvalString_1);
-    EvalString_2=MotaActionFunctions.PosString_pre(EvalString_2);
-    EvalString_1=[EvalString_1,EvalString_2]
-  } else {
-    var pattern2 = /^([+-]?\d+)(,[+-]?\d+)*$/;
-    if(!pattern2.test(EvalString_1) || !pattern2.test(EvalString_2))throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    EvalString_1=EvalString_1.split(',');
-    EvalString_2=EvalString_2.split(',');
-    if(EvalString_1.length!==EvalString_2.length)throw new Error('坐标格式错误,请右键点击帮助查看格式');
-    for(var ii=0;ii<EvalString_1.length;ii++)EvalString_1[ii]='['+EvalString_1[ii]+','+EvalString_2[ii]+']';
+  var x = EvalString_1, y = EvalString_2;  
+  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+    x=x.split(',');
+    y=y.split(',');
+    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+    floorstr = ', "loc": ['+x.join(',')+']';
   }
-  floorstr = ', "loc": ['+EvalString_1.join(',')+']';
+  if (floorstr == '') {
+      floorstr = ', "loc": ["'+x+'","'+y+'"]';
+  }
 }
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
@@ -1930,7 +2003,7 @@ return code;
 */;
 
 unloadEquip_s
-    :   '卸下装备孔' Int '的装备' Newline
+    :   '卸下第' Int '格装备孔的装备' Newline
 
 
 /* unloadEquip_s
@@ -2003,17 +2076,16 @@ return code;
 */;
 
 vibrate_s
-    :   '画面震动' '时间' Int '不等待执行完毕' Bool Newline
+    :   '画面震动' '方向' Vibrate_List '时间' Int '速度' Int '振幅' Int '不等待执行完毕' Bool Newline
 
 
 /* vibrate_s
 tooltip : vibrate: 画面震动
 helpUrl : /_docs/#/instruction
-default : [2000,false]
+default : ["horizontal",2000,10,10,false]
 colour : this.soundColor
-Int_0 = Int_0 ?(', "time": '+Int_0):'';
 var async = Bool_0?', "async": true':''
-var code = '{"type": "vibrate"' + Int_0 + async + '},\n';
+var code = '{"type": "vibrate", "direction": "'+Vibrate_List_0+'", "time": '+Int_0+', "speed": '+Int_1+', "power": '+Int_2+async+'},\n';
 return code;
 */;
 
@@ -2053,13 +2125,13 @@ return code;
 */;
 
 setViewport_s
-    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
+    :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
 
 
 /* setViewport_s
 tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : ["","",0,false]
+default : ["","","",0,false]
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.soundColor
 var loc = '';
@@ -2068,18 +2140,19 @@ if (PosString_0 && PosString_1) {
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+var code = '{"type": "setViewport"'+loc+MoveMode_List_0+Int_0+Bool_0+'},\n';
 return code;
 */;
 
 setViewport_1_s
-    :   '设置视角' '增量坐标' 'dx' PosString? ',' 'dy' PosString? '动画时间' Int '不等待执行完毕' Bool Newline
+    :   '设置视角' '增量坐标' 'dx' PosString? ',' 'dy' PosString? '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
 
 
 /* setViewport_1_s
 tooltip : setViewport: 设置视角
 helpUrl : /_docs/#/instruction
-default : ["0","0",0,false]
+default : ["0","0","",0,false]
 colour : this.soundColor
 var loc = '';
 if (PosString_0 && PosString_1) {
@@ -2087,7 +2160,8 @@ if (PosString_0 && PosString_1) {
 }
 Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "setViewport"'+loc+Int_0+Bool_0+'},\n';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+var code = '{"type": "setViewport"'+loc+MoveMode_List_0+Int_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -2101,6 +2175,7 @@ tooltip : showImage：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
+menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/", "EvalString_0"])']]
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -2121,6 +2196,7 @@ tooltip : showImage_1：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
+menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/", "EvalString_0"])']]
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -2182,19 +2258,37 @@ return code;
 
 moveImage_s
     :   '图片移动' '图片编号' NInt '终点像素位置' 'x' PosString? 'y' PosString? BGNL?
-        '不透明度' EvalString? '移动时间' Int '不等待执行完毕' Bool Newline
+        '不透明度' EvalString? '移动方式' MoveMode_List '移动时间' Int '不等待执行完毕' Bool Newline
     
 
 /* moveImage_s
 tooltip : moveImage：图片移动
 helpUrl : /_docs/#/instruction
-default : [1,'','','',500,false]
+default : [1,'','','','',500,false]
 var toloc = '';
 if (PosString_0 && PosString_1)
   toloc = ', "to": ['+PosString_0+','+PosString_1+']';
 EvalString_0 = (EvalString_0!=='') ? (', "opacity": '+EvalString_0):'';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "moveImage", "code": '+NInt_0+toloc+EvalString_0+',"time": '+Int_0+async+'},\n';
+var code = '{"type": "moveImage", "code": '+NInt_0+toloc+MoveMode_List_0+EvalString_0+', "time": '+Int_0+async+'},\n';
+return code;
+*/;
+
+rotateImage_s
+    :   '图片旋转' '图片编号' NInt '中心点像素' 'x' PosString? 'y' PosString? '移动方式' MoveMode_List BGNL? '旋转度数（正数顺时针，负数逆时针）' NInt '旋转时间' Int '不等待执行完毕' Bool Newline
+    
+
+/* rotateImage_s
+tooltip : rotateImage：图片旋转
+helpUrl : /_docs/#/instruction
+default : [1,'','','',90,500,false]
+var loc = '';
+if (PosString_0 && PosString_1)
+  loc = ', "center": ['+PosString_0+','+PosString_1+']';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "rotateImage", "code": '+NInt_0+loc+', "angle": '+NInt_1+MoveMode_List_0+', "time": '+Int_0+async+'},\n';
 return code;
 */;
 
@@ -2855,19 +2949,20 @@ return code;
 
 
 wait_s
-    :   '等待用户操作并获得按键或点击信息' '超时毫秒数' Int BGNL? Newline waitContext* BEND Newline
+    :   '等待用户操作并获得按键或点击信息' '仅检测子块' Bool '超时毫秒数' Int BGNL? Newline waitContext* BEND Newline
 
 
 /* wait_s
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
-default : [0]
+default : [true,0]
 colour : this.soundColor
+Bool_0 = Bool_0?(', "forceChild": true'):'';
 Int_0 = Int_0?(', "timeout": ' + Int_0):'';
 waitContext_0 = waitContext_0 ? (', "data": [\n' + waitContext_0 + ']') : '';
 var collapsed=block.isCollapsed()?', "_collapsed": true':'';
 var disabled=block.isEnabled()?'':', "_disabled": true';
-var code = '{"type": "wait"' + Int_0 + collapsed + disabled + waitContext_0 + '},\n';
+var code = '{"type": "wait"' + Bool_0 + Int_0 + collapsed + disabled + waitContext_0 + '},\n';
 return code;
 */;
 
@@ -2876,17 +2971,19 @@ waitContext
     : waitContext_1
     | waitContext_2
     | waitContext_3
+    | waitContext_4
     | waitContext_empty;
 
 
 waitContext_1
-    : '按键的场合' '键值' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+    : '按键的场合：' '键值（右键查表）' EvalString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_1
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
 colour : this.subColor
 default : ["",false]
+menu : [["查询键值表", "editor_blockly.showKeyCodes()"]]
 if (!/^\d+(,\d+)*$/.test(EvalString_0)) {
   throw new Error('键值必须是正整数，可以以逗号分隔');
 }
@@ -2899,7 +2996,7 @@ return code;
 
 
 waitContext_2
-    : '点击的场合' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+    : '点击的场合：' '像素x范围' PosString '~' PosString '; y范围' PosString '~' PosString '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_2
 tooltip : wait: 等待用户操作并获得按键或点击信息
@@ -2915,9 +3012,24 @@ return code;
 */;
 
 waitContext_3
-    : '超时的场合' '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+    : '自定义条件的场合：' expression '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
 
 /* waitContext_3
+tooltip : wait: 等待用户操作并获得按键或点击信息
+helpUrl : /_docs/#/instruction
+default : ["true",false]
+colour : this.subColor
+Bool_0 = Bool_0?', "break": true':'';
+var collapsed=block.isCollapsed()?', "_collapsed": true':'';
+var disabled=block.isEnabled()?'':', "_disabled": true';
+var code = '{"case": "condition", "condition": "'+expression_0+'"'+Bool_0+collapsed+disabled+', "action": [\n' + action_0 + ']},\n';
+return code;
+*/;
+
+waitContext_4
+    : '超时的场合：' '不进行剩余判定' Bool BGNL? Newline action+ BEND Newline
+
+/* waitContext_4
 tooltip : wait: 等待用户操作并获得按键或点击信息
 helpUrl : /_docs/#/instruction
 colour : this.subColor
@@ -3076,6 +3188,26 @@ var code = '{"type": "setAttribute"'+FontString_0+ColorString_0+ColorString_1+In
   EvalString_0+TextAlign_List_0+TextBaseline_List_0+IntString_1+'},\n';
 return code;
 */;
+
+
+setFilter_s
+    :   '设置画布特效' '虚化' Number '色相' Int '灰度' Number '反色' Bool '阴影' Number Newline
+    
+
+/* setFilter_s
+tooltip : setFilter: 设置画布特效
+helpUrl : /_docs/#/instruction
+default : [0,0,0,false,0]
+previewBlock : true
+colour : this.uiColor
+if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
+if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
+if (Number_1 < 0 || Number_1 > 1) throw '灰度需要在0~1之间';
+if (Number_2 < 0) throw '阴影不得小于0；0为完全没有阴影';
+var code = '{"type": "setFilter", "blur": '+Number_0+', "hue": '+Int_0+', "grayscale": '+Number_1+', "invert": '+Bool_0+', "shadow": '+Number_2+'},\n';
+return code;
+*/;
+
 
 fillText_s
     :   '绘制文本' 'x' PosString 'y' PosString '样式' ColorString? Colour '字体' FontString? '最大宽度' IntString? BGNL? EvalString Newline
@@ -3612,7 +3744,7 @@ return ['core.getBlockId('+PosString_0+','+PosString_1+')', Blockly.JavaScript.O
 
 
 blockNumber_e
-    :   '图块数字:' Int ',' Int
+    :   '图块数字:' PosString ',' PosString
 
 
 /* blockNumber_e
@@ -3631,7 +3763,7 @@ return ['core.getBlockNumber('+PosString_0+','+PosString_1+')', Blockly.JavaScri
 
 
 blockCls_e
-    :   '图块类别:' Int ',' Int
+    :   '图块类别:' PosString ',' PosString
 
 
 /* blockCls_e
@@ -3650,11 +3782,11 @@ return ['core.getBlockCls('+PosString_0+','+PosString_1+')', Blockly.JavaScript.
 
 
 nextXY_e
-    :   '前方' Int '格的' NextXY_List
+    :   '前方' NInt '格的' NextXY_List
 
 /* nextXY_e
 default : [1, 'nextX']
-var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+Int_0+')') : ('core.nextX('+Int_0+')');
+var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+NInt+')') : ('core.nextX('+NInt+')');
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -3723,7 +3855,7 @@ return [code, Blockly.JavaScript.ORDER_ATOMIC];
 
 
 equip_e
-    :   '装备孔:' Int
+    :   '第' Int '格装备孔'
 
 
 /* equip_e
@@ -3838,8 +3970,8 @@ UnaryOperator_List
     /*UnaryOperator_List ['Math.floor', 'Math.ceil', 'Math.round', 'Math.trunc', 'Math.abs', 'Math.sqrt', 'typeof']*/;
 
 Weather_List
-    :   '无'|'雨'|'雪'|'雾'|'云'
-    /*Weather_List ['null','rain','snow','fog','cloud']*/;
+    :   '无'|'雨'|'雪'|'晴'|'雾'|'云'
+    /*Weather_List ['null','rain','snow','sun','fog','cloud']*/;
 
 B_0_List
     :   '不改变'|'不可通行'|'可以通行'
@@ -3862,8 +3994,8 @@ IgnoreChangeFloor_List
     /*IgnoreChangeFloor_List ['null','true','false']*/;
 
 Event_List
-    :   '普通事件'|'战后事件'|'道具后事件'|'开门后事件'
-    /*Event_List ['null','afterBattle','afterGetItem','afterOpenDoor']*/;
+    :   '普通事件'|'战前事件'|'战后事件'|'道具后事件'|'开门后事件'
+    /*Event_List ['null','beforeBattle','afterBattle','afterGetItem','afterOpenDoor']*/;
 
 Floor_Meta_List
     :   '楼层中文名'|'状态栏名称'|'能否楼传飞到'|'能否楼传飞出'|'能否打开快捷商店'|'是否不可浏览地图'|'是否不可瞬间移动'|'默认地面ID'|'宝石血瓶效果'|'上楼点坐标'|'下楼点坐标'|'楼传落点坐标'|'背景音乐'|'画面色调'|'天气和强度'|'是否地下层'
@@ -3889,6 +4021,10 @@ NextXY_List
 EquipValueType_List
     :   '数值项'|'百分比项'
     /*EquipValueType_List ['value','percentage']*/;
+
+Vibrate_List
+    :   '左右'|'上下'|'左上-右下'|'左下-右上'
+    /*Vibrate_List ['horizontal','vertical','diagonal1','diagonal2']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -3935,16 +4071,20 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'
-    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax']*/;
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'横坐标'|'纵坐标'|'当前朝向'|'攻击增益'|'防御增益'|'护盾增益'
+    /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax','status:x','status:y','status:direction','buff:atk','buff:def','buff:mdef']*/;
 
 Id_List
-    :   '变量' | '状态' | '物品' | '独立开关' | '临时变量' |'全局存储'
-    /*Id_List ['flag','status','item', 'switch', 'temp', 'global']*/;
+    :   '变量' | '状态' | '物品' | '增益' | '独立开关' | '临时变量' |'全局存储'
+    /*Id_List ['flag','status','item', 'buff', 'switch', 'temp', 'global']*/;
 
 EnemyId_List
     :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'属性值'|'退化扣攻'|'退化扣防'|'不可炸'|'九宫格领域'|'领域范围'|'连击数'|'吸血到自身'|'固伤值'
     /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
+
+EnemyPoint_List
+    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'名称'
+    /*EnemyPoint_List ['hp','atk','def','money','exp','point','name']*/;
 
 Equip_List
     :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'魔力'|'魔力上限'
@@ -3957,6 +4097,10 @@ Key_List
 Move_List
     :   '上'|'下'|'左'|'右'|'前'|'后'|'左上'|'左下'|'右上'|'右下'|'设置速度'
     /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed']*/;
+
+MoveMode_List
+    :   '匀速移动'|'缓入快出'|'快入缓出'|'缓入缓出'
+    /*MoveMode_List ['', 'easeIn', 'easeOut', 'easeInOut']*/;
 
 NameMap_List
     :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'阻激夹域'|'穿脱装备'

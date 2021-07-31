@@ -1389,16 +1389,20 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 检查左右夹击
 		var leftBlock = blocks[(x - 1) + "," + y],
 			rightBlock = blocks[(x + 1) + "," + y];
-		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable && leftBlock.id == rightBlock.id) {
-			if (core.hasSpecial(leftBlock.event.id, 16))
-				enemyId1 = leftBlock.event.id;
+		var leftId = core.getFaceDownId(leftBlock),
+			rightId = core.getFaceDownId(rightBlock);
+		if (leftBlock && !leftBlock.disable && rightBlock && !rightBlock.disable && leftId == rightId) {
+			if (core.hasSpecial(leftId, 16))
+				enemyId1 = leftId;
 		}
 		// 检查上下夹击
 		var topBlock = blocks[x + "," + (y - 1)],
 			bottomBlock = blocks[x + "," + (y + 1)];
-		if (topBlock && !topBlock.disable && bottomBlock && !bottomBlock.disable && topBlock.id == bottomBlock.id) {
-			if (core.hasSpecial(topBlock.event.id, 16))
-				enemyId2 = topBlock.event.id;
+		var topId = core.getFaceDownId(topBlock),
+			bottomId = core.getFaceDownId(bottomBlock);
+		if (topBlock && !topBlock.disable && bottomBlock && !bottomBlock.disable && topId == bottomId) {
+			if (core.hasSpecial(topId, 16))
+				enemyId2 = topId;
 		}
 
 		if (enemyId1 != null || enemyId2 != null) {

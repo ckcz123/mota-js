@@ -1969,7 +1969,8 @@ maps.prototype.hideBlockByIndexes = function (indexes, floorId) {
 
 maps.prototype._removeBlockFromMap = function (floorId, block) {
     if (floorId != core.status.floorId) return;
-    if (block.event.cls == 'autotile') {
+    var filter = block.filter || {};
+    if (block.event.cls == 'autotile' || filter.blur > 0 || filter.shadow > 0) {
         core.drawMap();
     } else {
         var x = block.x, y = block.y;

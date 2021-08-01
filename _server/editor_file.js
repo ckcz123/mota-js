@@ -306,7 +306,7 @@ editor_file = function (editor, callback) {
             callback('不能对自动元件进行自动注册！');
             return;
         }
-        if ((image=='npcs' || image=='npc48' || image == 'enemys' || image == 'enemy48')
+        if ((image=='npc48' || image == 'enemy48')
                 && confirm("你想绑定图块的朝向么？\n如果是，则会将最后四个注册图块的faceIds进行自动绑定。")) {
             bindFaceIds = true;
         }

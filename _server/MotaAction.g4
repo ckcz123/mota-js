@@ -3786,7 +3786,7 @@ nextXY_e
 
 /* nextXY_e
 default : [1, 'nextX']
-var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+NInt+')') : ('core.nextX('+NInt+')');
+var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+NInt_0+')') : ('core.nextX('+NInt_0+')');
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 

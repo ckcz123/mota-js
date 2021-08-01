@@ -360,6 +360,7 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
     core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
     core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 0);
     // 行走速度
@@ -367,7 +368,6 @@ core.prototype._init_sys_flags = function () {
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
-    core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', true);
 }
 
 core.prototype._init_platform = function () {

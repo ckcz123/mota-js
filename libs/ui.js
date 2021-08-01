@@ -687,10 +687,12 @@ ui.prototype.clearUI = function () {
 
 ////// 左上角绘制一段提示 //////
 ui.prototype.drawTip = function (text, id, frame) {
+    text = core.replaceText(text) || "";
+    var realText = this._getRealContent(text);
     var one = {
         text: text,
         textX: 21,
-        width: 26 + core.calWidth('data', text, "16px Arial"),
+        width: 26 + core.calWidth('data', realText, "16px Arial"),
         opacity: 0.1,
         stage: 1,
         frame: frame || 0,
@@ -1998,6 +2000,10 @@ ui.prototype._drawCursor = function () {
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
     var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+    // 清除浏览地图时的光环缓存
+    if (floorId != core.status.floorId && core.status.checkBlock) {
+        core.status.checkBlock.cache = {};
+    }
     var enemys = core.enemys.getCurrentEnemys(floorId);
     core.clearUI();
     core.clearMap('data');
@@ -2260,6 +2266,10 @@ ui.prototype._drawBookDetail = function (index) {
 
 ui.prototype._drawBookDetail_getInfo = function (index) {
     var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+    // 清除浏览地图时的光环缓存
+    if (floorId != core.status.floorId && core.status.checkBlock) {
+        core.status.checkBlock.cache = {};
+    }
     var enemys = core.enemys.getCurrentEnemys(floorId);
     if (enemys.length==0) return [];
     index = core.clamp(index, 0, enemys.length - 1);

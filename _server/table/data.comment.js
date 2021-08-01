@@ -601,6 +601,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "开启自绘状态栏",
 					"_data": "是否状态栏canvas化，即手动自定义绘制状态栏。\n如果此项开启，则可在脚本编辑的drawStatusBar中自定义绘制菜单栏。"
 				},
+				"enableEnemyPoint": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "怪物显伤",
+					"_data": "是否开启怪物的定点显示功能，即属性不同的怪物会在怪物手册单列；用户可以手动在菜单栏中开关"
+				},
 				"displayEnemyDamage": {
 					"_leaf": true,
 					"_type": "checkbox",

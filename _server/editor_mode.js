@@ -60,13 +60,18 @@ editor_mode = function (editor) {
             ; 
             var str = '修改成功！';
             if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name == 'template')
-                str += '\n请注意：全塔属性的name尚未修改，请及时予以设置。';
+                str += '<br/>请注意：全塔属性的name尚未修改，请及时予以设置。';
             if (mode == 'enemyitem') {
                 if (editor.info && editor.info.idnum) {
                     var block = editor.core.maps.blocksInfo[editor.info.idnum];
                     if (block.doorInfo != null && block.doorInfo.keys != null && Object.keys(block.doorInfo.keys).length > 0
                         && block.trigger != 'openDoor') {
-                        str += "\n你修改了门信息，但触发器未改成openDoor，请修改否则无法撞击开门。"
+                        str += "<br/>你修改了门信息，但触发器未改成openDoor，请修改否则无法撞击开门。"
+                    }
+                }
+                if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
+                    if (core.getFaceDownId(editor_mode.info.id) != editor_mode.info.id) {
+                        str += "<br/>绑定行走图朝向后只需要对应设置朝下怪物的属性，会自动同步而无需修改其他朝向的属性。"
                     }
                 }
             }

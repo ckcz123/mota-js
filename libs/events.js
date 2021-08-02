@@ -665,7 +665,7 @@ events.prototype._canGetNextItem = function (direction) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     var block = core.getBlock(nx, ny);
-    return block != null && !block.event.script && block.event.trigger == 'getItem';
+    return block != null && !block.event.script && !block.event.event && block.event.trigger == 'getItem';
 }
 
 events.prototype._getNextItem = function (direction, noRoute) {

@@ -856,7 +856,7 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     var index = x + "," + y;
     var block = blocksObj[index];
     // 该点是否不可通行或有脚本
-    if (block && !block.disable && (block.event.noPass || block.event.script))
+    if (block && !block.disable && (block.event.noPass || block.event.script || block.event.event))
         return false;
     // 该点是否是绿点可触发
     if (block && !block.disable && block.event.trigger) {
@@ -1032,7 +1032,7 @@ maps.prototype._drawBlockInfo_shouldBlurFg = function (x, y) {
     if (main.mode == 'play' && !core.flags.blurFg) return false;
     var block = this.getBlock(x, y);
     if (block == null || block.id == 0) return false;
-    if (block.event.cls == 'autotile' || block.event.cls == 'tileset') return block.event.script;
+    if (block.event.cls == 'autotile' || block.event.cls == 'tileset') return block.event.script || block.event.event;
     return true;
 }
 

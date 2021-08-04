@@ -1857,14 +1857,18 @@ events.prototype._action_setEnemy = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    this.setEnemyOnPoint(loc[0], loc[1], data.floorId, data.name, data.value, data.operator, prefix);
+    var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    loc.forEach(function (one) {
+        core.setEnemyOnPoint(one[0], one[1], data.floorId, data.name, data.value, data.operator, prefix);
+    });
     core.doAction();
 }
 
 events.prototype._action_resetEnemyOnPoint = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    this.resetEnemyOnPoint(loc[0], loc[1], data.floorId);
+    var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    loc.forEach(function (one) {
+        core.resetEnemyOnPoint(one[0], one[1], data.floorId);
+    });
     core.doAction();
 }
 
@@ -2347,7 +2351,8 @@ events.prototype._action_wait = function (data, x, y, prefix) {
                 core.status.route.push("input:none");
                 core.setFlag("type", -1);
                 core.setFlag("timeout", 0);
-                if (this.__action_wait_afterGet(data) || !data.forceChild) return core.doAction();
+                this.__action_wait_afterGet(data);
+                return core.doAction();
             } else {
                 var value = parseInt(code.substring(6));
                 core.status.route.push("input:" + value);
@@ -2355,7 +2360,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
                 if (this.__action_wait_afterGet(data) || !data.forceChild) return core.doAction();
             }
         }
-        core.control._replay_error(action);
+        core.control._replay_error(code);
         return;
     } else if (data.timeout) {
         core.status.event.interval = setTimeout(function() {

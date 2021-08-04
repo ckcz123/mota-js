@@ -1202,38 +1202,38 @@ return code;
 
 
 setEnemyOnPoint_s
-    :   '设置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression Newline
+    :   '设置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression Newline
 
 
 /* setEnemyOnPoint_s
 tooltip : setEnemyOnPoint：设置某个点上怪物的属性
 helpUrl : /_docs/#/instruction
 default : ["", "", "", "atk", "="]
-selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.dataColor
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
   AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
 } else AssignOperator_List_0 = '';
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
 var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyPoint_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
 return code;
 */;
 
 resetEnemyOnPoint_s
-    :   '重置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '重置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
 
 /* resetEnemyOnPoint_s
 tooltip : resetEnemyOnPoint：重置某个点上怪物的属性
 helpUrl : /_docs/#/instruction
 default : ["", "", ""]
-selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.dataColor
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
 var code = '{"type": "resetEnemyOnPoint"'+floorstr+IdString_0+'},\n';
 return code;
 */;
@@ -1340,20 +1340,7 @@ default : ["","","","",false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "async": true':'';
@@ -1372,20 +1359,7 @@ default : ["","","",true,"",false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "remove": true':'';
@@ -1405,20 +1379,7 @@ default : ["","","",1.0,"",false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (Number_0 < 0 || Number_0 > 1) throw new Error('不透明度需要在0~1之间');
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
@@ -1438,20 +1399,7 @@ default : ["","","",0,0,0,false,0]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
 if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
 if (Number_1 < 0 || Number_1 > 1) throw '灰度需要在0~1之间';
@@ -1551,20 +1499,7 @@ allFloorIds : ['IdString_0']
 allIds : ['EvalString_0']
 default : ["yellowDoor","","","","",false]
 selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
-var floorstr = '';
-if (EvalString_1 && EvalString_2) {
-  var x = EvalString_1, y = EvalString_2;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_1, EvalString_2);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 && (', "time": ' + IntString_0);
 Bool_0 = Bool_0 ? (', "async": true') : '';
@@ -1583,20 +1518,7 @@ colour : this.mapColor
 allFloorIds : ['IdString_0']
 default : [null,"","",""]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
@@ -1614,20 +1536,7 @@ helpUrl : /_docs/#/instruction
 default : ["","",""]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showFloorImg"'+floorstr+IdString_0+'},\n';
 return code;
@@ -1643,20 +1552,7 @@ helpUrl : /_docs/#/instruction
 default : ["","",""]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideFloorImg"'+floorstr+IdString_0+'},\n';
 return code;
@@ -1673,20 +1569,7 @@ default : ["bg","","",""]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
 return code;
@@ -1703,20 +1586,7 @@ default : ["bg","","",""]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
 return code;
@@ -1734,20 +1604,7 @@ selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
 allIds : ['EvalString_0']
 allFloorIds : ['IdString_0']
 default : ["bg","yellowDoor","","",""]
-var floorstr = '';
-if (EvalString_1 && EvalString_2) {
-  var x = EvalString_1, y = EvalString_2;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_1, EvalString_2);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
 return code;

@@ -590,10 +590,6 @@ actions.prototype._sys_onup = function () {
 
     // 长按
     if (!core.status.lockControl && stepPostfix.length == 0 && core.status.downTime != null && new Date() - core.status.downTime >= 1000) {
-        clearTimeout(core.interval.onDownTimeout);
-        core.interval.onDownTimeout = null;
-        clearInterval(core.interval.onDownInterval);
-        core.interval.onDownInterval = null;
         core.actions.longClick(posx, posy, 32 * posx + 16, 32 * posy + 16);
     }
     else {

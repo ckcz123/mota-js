@@ -673,6 +673,9 @@ ui.prototype.closePanel = function () {
     core.status.event.selection = null;
     core.status.event.ui = null;
     core.status.event.interval = null;
+    // 清除onDownInterval
+    clearInterval(core.interval.onDownInterval);
+    core.interval.onDownInterval = 'tmp';
 }
 
 ui.prototype.clearUI = function () {

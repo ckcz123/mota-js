@@ -2066,7 +2066,7 @@ events.prototype.__action_choices_replaying = function (data, index) {
             var choice = data.choices[index];
             if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
                 // 无法选择此项
-                core.control._replay_error(action);
+                core.control._replay_error("无法选择项："+index);
                 return;
             } else {
                 core.insertAction(choice.action);

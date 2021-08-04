@@ -3928,7 +3928,7 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'横坐标'|'纵坐标'|'当前朝向'|'攻击增益'|'防御增益'|'护盾增益'
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'当前横坐标'|'当前纵坐标'|'当前朝向'|'攻击增益'|'防御增益'|'护盾增益'
     /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax','status:x','status:y','status:direction','buff:atk','buff:def','buff:mdef']*/;
 
 Id_List

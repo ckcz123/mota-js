@@ -47,7 +47,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 
-    if (seed != null) {
+    if (seed != null && seed > 0) {
         core.setFlag('__seed__', seed);
         core.setFlag('__rand__', seed);
     }
@@ -2004,7 +2004,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        if (action.indexOf('choices:') == 0) {
+        if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
                 this.__action_choices_replaying(data, index);
@@ -2016,7 +2016,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
             // 容错录像
             if (main.replayChecking) {
                 // 录像验证系统中选择第一项
-                core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
                 core.events.__action_choices_replaying(data, 0)
             } else {
                 // 正常游戏中弹窗选择
@@ -2025,7 +2025,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                         core.control._replay_error(action);
                         return;
                     }
-                    core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                    if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
                     core.events.__action_choices_replaying(data, core.clamp(parseInt(value), 0, data.choices.length - 1))
                 });
             }
@@ -2061,7 +2061,9 @@ events.prototype.__action_choices_replaying = function (data, index) {
             // 检查
             var choice = data.choices[index];
             if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
-                // 无法选择此项：直接忽略
+                // 无法选择此项
+                core.control._replay_error(action);
+                return;
             } else {
                 core.insertAction(choice.action);
             }
@@ -2084,7 +2086,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
     core.status.event.ui = {"text": core.replaceText(data.text, prefix), "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        if (action.indexOf('choices:') == 0) {
+        if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < 2) {
                 this.__action_confirm_replaying(data, index);
@@ -2094,7 +2096,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
             }
         } else {
             // 录像中未记录选了哪个，则选默认值，而不是直接报错
-            core.status.replay.toReplay.unshift(action);
+            if (action != 'choices:none') core.status.replay.toReplay.unshift(action);
             this.__action_confirm_replaying(data, data["default"] ? 0 : 1);
         }
     }
@@ -2340,25 +2342,20 @@ events.prototype._action_sleep = function (data, x, y, prefix) {
 events.prototype._action_wait = function (data, x, y, prefix) {
     if (core.isReplaying()) {
         var code = core.status.replay.toReplay.shift();
-        if (code.indexOf("input:") == 0) {
+        if (code.indexOf("input:") == 0 && !(code == "input:none" && !data.timeout)) {
             if (code == "input:none") {
                 core.status.route.push("input:none");
                 core.setFlag("type", -1);
                 core.setFlag("timeout", 0);
-                this.__action_wait_afterGet(data);
+                if (this.__action_wait_afterGet(data) || !data.forceChild) return core.doAction();
             } else {
                 var value = parseInt(code.substring(6));
                 core.status.route.push("input:" + value);
                 this.__action_wait_getValue(value);
-                this.__action_wait_afterGet(data);
+                if (this.__action_wait_afterGet(data) || !data.forceChild) return core.doAction();
             }
         }
-        else {
-            main.log("录像文件出错！当前需要一个 input: 项，实际为 " + code);
-            core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
-        }
-        core.doAction();
+        core.control._replay_error(action);
         return;
     } else if (data.timeout) {
         core.status.event.interval = setTimeout(function() {

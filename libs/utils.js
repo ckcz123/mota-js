@@ -866,20 +866,21 @@ utils.prototype.rand = function (num) {
 ////// 生成随机数（录像方法） //////
 utils.prototype.rand2 = function (num) {
     num = num || 2147483648;
+    if (num <= 0) num = 1;
 
     var value;
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("random:") == 0) {
             value = parseInt(action.substring(7));
-            if (isNaN(value) || value >= num) {
+            if (isNaN(value) || value >= num || value < 0) {
                 core.control._replay_error(action);
                 return 0;
             }
         }
         else {
-            core.control._replay_error(action);
-            return 0;
+            console.warn('错误！当前需要一个random:项。将重新随机生成！');
+            value = Math.floor(Math.random() * num);
         }
     }
     else {

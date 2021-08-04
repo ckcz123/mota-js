@@ -1164,7 +1164,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	// 检查HP上限
 	if (core.flags.statusBarItems.indexOf('enableHPMax') >= 0) {
-		core.setStatus('hp', Math.min(core.getStatus('hpmax'), core.getStatus('hp')));
+		core.setStatus('hp', Math.min(core.getRealStatus('hpmax'), core.getStatus('hp')));
 	}
 
 	// 设置楼层名

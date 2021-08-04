@@ -23,6 +23,7 @@ function main() {
         'gameGroup': document.getElementById('gameGroup'),
         'mainTips': document.getElementById('mainTips'),
         'musicBtn': document.getElementById('musicBtn'),
+        'enlargeBtn': document.getElementById('enlargeBtn'),
         'startPanel': document.getElementById('startPanel'),
         'startTop': document.getElementById('startTop'),
         'startTopProgressBar': document.getElementById('startTopProgressBar'),
@@ -759,6 +760,10 @@ main.dom.musicBtn.onclick = function () {
         if (main.core)
             main.core.triggerBgm();
     } catch (e) {main.log(e);}
+}
+
+main.dom.enlargeBtn.onclick = function () {
+    
 }
 
 window.onblur = function () {

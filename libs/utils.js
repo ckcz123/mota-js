@@ -803,17 +803,20 @@ utils.prototype.strlen = function (str) {
 
 utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
-    var directionList = ["left", "up", "right", "down"];
+    var directionList = ["left", "leftup", "up", "rightup", "right", "rightdown", "down", "leftdown"];
     if (directionList.indexOf(turn) >= 0) return turn;
-    switch (turn) {
-        case ':left': turn = 3; break; // turn left
-        case ':right': turn = 1; break; // turn right
-        case ':back': turn = 2; break; // turn back
-        default: turn = 0; break;
+    if (typeof turn === 'number' && turn % 45 == 0) turn /= 45;
+    else {
+        switch (turn) {
+            case ':left': turn = 6; break; // turn left
+            case ':right': turn = 2; break; // turn right
+            case ':back': turn = 4; break; // turn back
+            default: turn = 0; break;
+        }
     }
     var index = directionList.indexOf(direction);
     if (index < 0) return direction;
-    return directionList[(index + (turn || 0)) % 4];
+    return directionList[(index + (turn || 0)) % directionList.length];
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {

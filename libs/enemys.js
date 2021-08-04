@@ -35,8 +35,18 @@ enemys.prototype.getEnemys = function () {
         if (enemys[id].faceIds) {
             var downId = enemys[id].faceIds.down;
             if (downId != null && downId != id && enemys[downId]) {
-                enemys[id] = core.clone(enemys[downId]);
-                enemys[id].id = id;
+                enemys[id] = {id: id};
+                for (var property in enemys[downId]) {
+                    if (property != 'id' && enemys[downId].hasOwnProperty(property)) {
+                        (function (id, downId, property) {
+                            Object.defineProperty(enemys[id], property, {
+                                get: function () { return enemys[downId][property] },
+                                set: function (v) { enemys[downId][property] = v },
+                                enumerable: true
+                            })
+                        })(id, downId, property);
+                    }
+                } 
             }
         }
     }

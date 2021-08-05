@@ -2858,19 +2858,15 @@ control.prototype.checkBgm = function() {
     core.playBgm(core.musicStatus.playingBgm || main.startBgm);
 }
 
-///// 设置屏幕大小 //////
-control.prototype.setDisplaySize = function (delta) {
+///// 设置屏幕放缩 //////
+control.prototype.setDisplayScale = function (delta) {
     var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
     if (index < 0) return;
     index += delta;
-    if (index < 0 || index >= core.domStyle.availableScale.length);
+    if (index < 0 || index >= core.domStyle.availableScale.length) return;
     core.domStyle.scale = core.domStyle.availableScale[index];
     core.setLocalStorage('scale', core.domStyle.scale);
     core.resize();
-    var currentRatio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
-    if (currentRatio > core.domStyle.ratio && core.isPlaying()) {
-        core.drawTip("需刷新页面以调整UI清晰度");
-    }
 }
 
 // ------ 状态栏，工具栏等相关 ------ //

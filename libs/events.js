@@ -1876,12 +1876,17 @@ events.prototype._action_resetEnemyOnPoint = function (data, x, y, prefix) {
 events.prototype._precompile_moveEnemyOnPoint = function (data) {
     data.from = this.__precompile_array(data.from);
     data.to = this.__precompile_array(data.to);
+    data.dxy = this.__precompile_array(data.dxy);
     return data;
 }
 
 events.prototype._action_moveEnemyOnPoint = function (data, x, y, prefix) {
-    var from = this.__action_getLoc(data.from, x, y, prefix);
-    var to = this.__action_getLoc(data.to, x, y, prefix);
+    var from = this.__action_getLoc(data.from, x, y, prefix), to;
+    if (data.dxy) {
+        to = [from[0] + (core.calValue(data.dxy[0], prefix) || 0), from[1] + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else {
+        to = this.__action_getLoc(data.to, x, y, prefix);
+    }
     this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId);
     core.doAction();
 }
@@ -1944,8 +1949,11 @@ events.prototype.__action_getInput = function (hint, isText, callback) {
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         try {
-            if (action.indexOf(prefix) != 0)
-                throw new Error("录像文件出错！当前需要一个 " + prefix + " 项，实际为 " + action);
+            if (action.indexOf(prefix) != 0) {
+                console.warn("警告！当前需要一个 " + prefix + " 项，实际为 " + action);
+                core.status.replay.toReplay.unshift(action);
+                return callback(isText ? '' : 0);
+            }
             if (isText) value = core.decodeBase64(action.substring(7));
             else value = parseInt(action.substring(6));
             callback(value);
@@ -2404,11 +2412,13 @@ events.prototype.__action_wait_afterGet = function (data) {
     if (!data.data) return false;
     var todo = [];
     var stop = false;
+    var found = false;
     data.data.forEach(function (one) {
         if (one._disabled || stop) return;
         if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
             (one.keycode + "").split(",").forEach(function (keycode) {
                 if (core.getFlag("keycode", 0) == keycode) {
+                    found = true;
                     core.push(todo, one.action);
                     if (one["break"]) stop = true;
                 }
@@ -2422,6 +2432,7 @@ events.prototype.__action_wait_afterGet = function (data) {
             var pymax = core.calValue(one.py[1]);
             var px = core.getFlag("px", 0), py = core.getFlag("py", 0);
             if (px >= pxmin && px <= pxmax && py >= pymin && py <= pymax) {
+                found = true;
                 core.push(todo, one.action);
                 if (one["break"]) stop = true;
             }
@@ -2430,16 +2441,18 @@ events.prototype.__action_wait_afterGet = function (data) {
             var condition = false;
             try { condition = core.calValue(one.condition); } catch (e) {}
             if (condition) {
+                found = true;
                 core.push(todo, one.action);
                 if (one["break"]) stop = true;
             }
         }
         if (one["case"] == "timeout" && core.getFlag("type") == -1) {
+            found = true;
             core.push(todo, one.action);
             if (one["break"]) stop = true;
         }
     })
-    if (todo.length > 0) {
+    if (found) {
         core.insertAction(todo);
         return true;
     }
@@ -2496,7 +2509,10 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
 }
 
 events.prototype._action_autoSave = function (data, x, y, prefix) {
+    var forbidSave = core.hasFlag('__forbidSave__');
+    core.removeFlag('__forbidSave__');
     core.autosave();
+    if (forbidSave) core.setFlag('__forbidSave__', true);
     if (!data.nohint) core.drawTip("已自动存档");
     core.doAction();
 }

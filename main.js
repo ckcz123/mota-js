@@ -763,7 +763,15 @@ main.dom.musicBtn.onclick = function () {
 }
 
 main.dom.enlargeBtn.onclick = function () {
-    
+    try {
+        if (main.core) {
+            main.core.setDisplayScale(1);
+            if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
+                main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
+                main.core.resize();
+            }
+        }
+    } catch (e) {main.log(e)};
 }
 
 window.onblur = function () {

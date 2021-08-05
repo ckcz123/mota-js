@@ -2262,13 +2262,7 @@ actions.prototype._clickSwitchs_display = function (x, y) {
 }
 
 actions.prototype._clickSwitchs_display_setSize = function (delta) {
-    var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
-    if (index < 0) return;
-    index += delta;
-    if (index < 0 || index >= core.domStyle.availableScale.length);
-    core.domStyle.scale = core.domStyle.availableScale[index];
-    core.setLocalStorage('scale', core.domStyle.scale);
-    core.resize();
+    core.setDisplayScale(delta);
     var currentRatio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
     if (currentRatio > core.domStyle.ratio) {
         core.drawTip("需刷新页面以调整UI清晰度");

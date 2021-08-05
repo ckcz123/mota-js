@@ -750,9 +750,14 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "moveEnemyOnPoint":
       data.from=data.from||['','']
-      data.to=data.to||['','']
-      this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
-        data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText([
+          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',this.next]);
+      } else {
+        data.to=data.to||['','']
+        this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
+          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+      }
       break;
     case "setEquip":
       this.next = MotaActionBlocks['setEquip_s'].xmlText([

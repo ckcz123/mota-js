@@ -780,6 +780,7 @@ action
     |   setEnemyOnPoint_s
     |   resetEnemyOnPoint_s
     |   moveEnemyOnPoint_s
+    |   moveEnemyOnPoint_1_s
     |   setEquip_s
     |   setFloor_s
     |   setGlobalAttribute_s
@@ -1253,6 +1254,24 @@ colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
 if (PosString_2 && PosString_3) floorstr += ', "to": ['+PosString_2+','+PosString_3+']'
+var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+return code;
+*/;
+
+moveEnemyOnPoint_1_s
+    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '增量' 'dx' PosString? 'dy' PosString? '楼层' IdString? Newline
+
+
+/* moveEnemyOnPoint_1_s
+tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
+helpUrl : /_docs/#/instruction
+default : ["", "", "", "", ""]
+allFloorIds : ['IdString_0']
+selectPoint : ["PosString_0", "PosString_1"]
+colour : this.dataColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
+if (PosString_2 && PosString_3) floorstr += ', "dxy": ['+PosString_2+','+PosString_3+']'
 var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
 return code;
 */;

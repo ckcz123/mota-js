@@ -435,10 +435,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 开一个门后触发的事件
 
 	var todo = [];
-	// 检查该点的获得开门后事件。
-	if (core.status.floorId == null) return;
-	var event = core.floors[core.status.floorId].afterOpenDoor[x + "," + y];
-	if (event) core.unshift(todo, event);
+	// 检查该点的开门后事件
+	if (core.status.floorId) {
+		core.push(todo, core.floors[core.status.floorId].afterOpenDoor[x + "," + y]);
+	}
+	// 检查批量开门事件
+	var door = core.getBlockById(doorId);
+	if (door && door.event.doorInfo) {
+		core.push(todo, door.event.doorInfo.afterOpenDoor);
+	}
 
 	if (todo.length > 0) core.insertAction(todo, x, y);
 

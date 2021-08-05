@@ -562,7 +562,7 @@ return code;
 
 // doorInfo 事件编辑器入口之一
 doorInfo_m 
-    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ '如需撞到开门还需要把图块触发器改成 openDoor' BEND
+    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ '如需撞到开门还需要把图块触发器改成 openDoor' BGNL? Newline '开门后事件' action+ BEND
 
 
 /* doorInfo_m
@@ -571,7 +571,8 @@ default : [160, 'door.mp3', 'door.mp3']
 helpUrl : /_docs/#/instruction
 EvalString_0 = EvalString_0 && (', "openSound": "' + EvalString_0 + '"');
 EvalString_1 = EvalString_1 && (', "closeSound": "' + EvalString_1 + '"');
-var code = '{"time": '+Int_0+EvalString_0+EvalString_1+', "keys": {\n'+doorKeyList_0+'\n}}';
+if (action_0.trim()) action_0 = ', "afterOpenDoor": [\n' + action_0 + ']';
+var code = '{"time": '+Int_0+EvalString_0+EvalString_1+', "keys": {\n'+doorKeyList_0+'\n}'+action_0.trim()+'}';
 return code;
 */;
 

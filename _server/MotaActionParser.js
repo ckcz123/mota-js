@@ -101,7 +101,7 @@ ActionParser.prototype.parse = function (obj,type) {
           })
           return text_choices;
         }
-        return MotaActionBlocks['doorInfo_m'].xmlText([obj.time || 160, obj.openSound, obj.closeSound, buildKeys(obj.keys)]);
+        return MotaActionBlocks['doorInfo_m'].xmlText([obj.time || 160, obj.openSound, obj.closeSound, buildKeys(obj.keys), this.parseList(obj.afterOpenDoor)]);
 
     case 'floorImage':
       if(!obj) obj=[];

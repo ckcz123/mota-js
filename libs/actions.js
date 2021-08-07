@@ -1024,10 +1024,14 @@ actions.prototype._clickAction = function (x, y, px, py) {
     if (core.status.event.data.type == 'text') {
         // 正在淡入淡出的话不执行
         if (core.status.event.animateUI) return;
+        
+        var data = core.clone(core.status.event.data.current);
+        if (typeof data == 'string') data = { "type": "text", "text": data };
 
         // 打字机效果显示全部文字
         if (core.status.event.interval != null) {
-            core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
+            data.showAll = true;
+            core.insertAction(data);
             core.doAction();
             return;
         }
@@ -1124,10 +1128,13 @@ actions.prototype._keyUpAction = function (keycode) {
         // 正在淡入淡出的话不执行
         if (core.status.event.animateUI) return;
 
+        var data = core.clone(core.status.event.data.current);
+        if (typeof data == 'string') data = { "type": "text", "text": data };
+
         // 打字机效果显示全部文字
         if (core.status.event.interval != null) {
-            core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
-            core.doAction();
+            data.showAll = true;
+            core.insertAction(data);
             return;
         }
         core.ui._animateUI('hide', core.doAction);

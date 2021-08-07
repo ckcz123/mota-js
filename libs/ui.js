@@ -814,7 +814,7 @@ ui.prototype._getPosition = function (content) {
         px = core.status.event.data.x;
         py = core.status.event.data.y;
     }
-    if (editor.mode != 'play') {
+    if (main.mode != 'play') {
         px = editor.pos.x;
         py = editor.pos.y;
     }
@@ -1413,8 +1413,6 @@ ui.prototype._animateUI = function (type, callback) {
 ////// 绘制一个对话框 //////
 ui.prototype.drawTextBox = function(content, config) {
     config = config || {};
-    if (core.status.event && core.status.event.id == 'action')
-        core.status.event.ui = content;
 
     this.clearUI();
 

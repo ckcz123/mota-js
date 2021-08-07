@@ -673,6 +673,9 @@ ui.prototype.closePanel = function () {
     core.status.event.selection = null;
     core.status.event.ui = null;
     core.status.event.interval = null;
+    // 清除onDownInterval
+    clearInterval(core.interval.onDownInterval);
+    core.interval.onDownInterval = 'tmp';
 }
 
 ui.prototype.clearUI = function () {
@@ -1949,6 +1952,7 @@ ui.prototype._drawStorageRemove = function () {
 ui.prototype._drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
+    core.playSound('打开界面');
     this.drawChoices(null, [
         "从头回放录像", "从存档开始回放", "接续播放剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
@@ -2467,7 +2471,7 @@ ui.prototype._drawCenterFly = function () {
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
     core.playSound('打开界面');
-    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置");
+    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置", 'centerFly');
     return;
 }
 
@@ -2476,10 +2480,10 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.lockControl();
     core.status.event.id = 'viewMaps';
     this.clearUI();
-    if (index == null) return this._drawMaps_drawHint();
+    if (index == null) return this._drawViewMaps_drawHint();
     core.animateFrame.tip = null;
     core.status.checkBlock.cache = {};
-    var data = this._drawMaps_buildData(index, x, y);
+    var data = this._drawViewMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.drawThumbnail(data.floorId, null, {damage: data.damage, ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     core.clearMap('data');
@@ -2495,7 +2499,8 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
 }
 
-ui.prototype._drawMaps_drawHint = function () {
+ui.prototype._drawViewMaps_drawHint = function () {
+    core.playSound('打开界面');
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.4)');
     core.setTextAlign('ui', 'center');
     var stroke = function (left, top, width, height, fillStyle, lineWidth) {
@@ -2534,7 +2539,7 @@ ui.prototype._drawMaps_drawHint = function () {
     core.setTextBaseline('ui', 'alphabetic');
 }
 
-ui.prototype._drawMaps_buildData = function (index, x, y) {
+ui.prototype._drawViewMaps_buildData = function (index, x, y) {
     var damage = (core.status.event.data||{}).damage;
     var all = (core.status.event.data||{all: true}).all;
     if (index.damage != null) damage=index.damage;
@@ -3009,6 +3014,7 @@ ui.prototype._drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
     core.clearUI();
+    core.playSound('打开界面');
 
     var width = 384, height = 320;
     var left = (this.PIXEL - width) / 2, right = left + width;
@@ -3078,7 +3084,7 @@ ui.prototype._drawStatistics = function (floorIds) {
         "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 不会计算“不可被浏览地图”的隐藏层的数据。\n" +
         "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n"+
         "4. 在自定义道具（例如其他宝石）后，需在脚本编辑的drawStatistics中注册，不然不会进行统计。\n"+
-        "5. 所有统计信息仅供参考，如有错误，概不负责。"
+        "5. 道具不会统计通过插入事件或useItemEvent实现的效果。\n6. 所有统计信息仅供参考，如有错误，概不负责。"
     ])
     core.removeFlag("__replayText__");
 }

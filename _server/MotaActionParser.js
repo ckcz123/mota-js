@@ -101,7 +101,7 @@ ActionParser.prototype.parse = function (obj,type) {
           })
           return text_choices;
         }
-        return MotaActionBlocks['doorInfo_m'].xmlText([obj.time || 160, obj.openSound, obj.closeSound, buildKeys(obj.keys)]);
+        return MotaActionBlocks['doorInfo_m'].xmlText([obj.time || 160, obj.openSound, obj.closeSound, buildKeys(obj.keys), this.parseList(obj.afterOpenDoor)]);
 
     case 'floorImage':
       if(!obj) obj=[];
@@ -725,20 +725,39 @@ ActionParser.prototype.parseAction = function() {
         MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
       break;
     case "setEnemyOnPoint":
-      data.loc=data.loc||['','']
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
-        data.loc[0], data.loc[1], data.floorId||'', data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
       break;
     case "resetEnemyOnPoint":
-      data.loc=data.loc||['','']
+      data.loc=data.loc||[];
+      if (!(data.loc[0] instanceof Array))
+        data.loc = [data.loc];
+      var x_str=[],y_str=[];
+      data.loc.forEach(function (t) {
+        x_str.push(t[0]);
+        y_str.push(t[1]);
+      })
       this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
-        data.loc[0], data.loc[1], data.floorId||'',this.next]);
+        x_str.join(','),y_str.join(','), data.floorId||'',this.next]);
       break;
     case "moveEnemyOnPoint":
       data.from=data.from||['','']
-      data.to=data.to||['','']
-      this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
-        data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+      if (data.dxy) {
+        this.next = MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText([
+          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',this.next]);
+      } else {
+        data.to=data.to||['','']
+        this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
+          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+      }
       break;
     case "setEquip":
       this.next = MotaActionBlocks['setEquip_s'].xmlText([
@@ -1437,6 +1456,24 @@ MotaActionFunctions.processMoveDirections = function (steps) {
   });
   if (curr != null) result.push(curr+":"+num);
   return result;
+}
+
+MotaActionFunctions.processMultiLoc = function (EvalString_0, EvalString_1) {
+  var floorstr = '';
+  if (EvalString_0 && EvalString_1) {
+    var x = EvalString_0, y = EvalString_1;  
+    var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
+    if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
+      x=x.split(',');
+      y=y.split(',');
+      for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
+      floorstr = ', "loc": ['+x.join(',')+']';
+    }
+    if (floorstr == '') {
+        floorstr = ', "loc": ["'+x+'","'+y+'"]';
+    }
+  }
+  return floorstr;
 }
 
 MotaActionFunctions.StepString_pre = function(StepString){

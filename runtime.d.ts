@@ -792,6 +792,9 @@ declare class control {
     /** 检查bgm状态 */
     checkBgm(): void
 
+    /** 设置屏幕放缩 */
+    setDisplayScale(delta: number): void
+
     /** 清空状态栏 */
     clearStatusBar(): void
 

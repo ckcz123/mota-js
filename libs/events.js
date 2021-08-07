@@ -47,7 +47,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
 
-    if (seed != null) {
+    if (seed != null && seed > 0) {
         core.setFlag('__seed__', seed);
         core.setFlag('__rand__', seed);
     }
@@ -58,6 +58,7 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     if (core.flags.startUsingCanvas) {
         core.hideStatusBar();
         core.dom.musicBtn.style.display = 'block';
+        core.dom.enlargeBtn.style.display = 'block';
         core.push(todo, core.firstData.startCanvas);
     }
     core.push(todo, {"type": "function", "function": "function() { core.events._startGame_setHard(); }"})
@@ -665,7 +666,7 @@ events.prototype._canGetNextItem = function (direction) {
     var nx = core.getHeroLoc('x') + core.utils.scan[direction].x;
     var ny = core.getHeroLoc('y') + core.utils.scan[direction].y;
     var block = core.getBlock(nx, ny);
-    return block != null && !block.event.script && block.event.trigger == 'getItem';
+    return block != null && !block.event.script && !block.event.event && block.event.trigger == 'getItem';
 }
 
 events.prototype._getNextItem = function (direction, noRoute) {
@@ -1857,26 +1858,35 @@ events.prototype._action_setEnemy = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    this.setEnemyOnPoint(loc[0], loc[1], data.floorId, data.name, data.value, data.operator, prefix);
+    var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    loc.forEach(function (one) {
+        core.setEnemyOnPoint(one[0], one[1], data.floorId, data.name, data.value, data.operator, prefix);
+    });
     core.doAction();
 }
 
 events.prototype._action_resetEnemyOnPoint = function (data, x, y, prefix) {
-    var loc = this.__action_getLoc(data.loc, x, y, prefix);
-    this.resetEnemyOnPoint(loc[0], loc[1], data.floorId);
+    var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
+    loc.forEach(function (one) {
+        core.resetEnemyOnPoint(one[0], one[1], data.floorId);
+    });
     core.doAction();
 }
 
 events.prototype._precompile_moveEnemyOnPoint = function (data) {
     data.from = this.__precompile_array(data.from);
     data.to = this.__precompile_array(data.to);
+    data.dxy = this.__precompile_array(data.dxy);
     return data;
 }
 
 events.prototype._action_moveEnemyOnPoint = function (data, x, y, prefix) {
-    var from = this.__action_getLoc(data.from, x, y, prefix);
-    var to = this.__action_getLoc(data.to, x, y, prefix);
+    var from = this.__action_getLoc(data.from, x, y, prefix), to;
+    if (data.dxy) {
+        to = [from[0] + (core.calValue(data.dxy[0], prefix) || 0), from[1] + (core.calValue(data.dxy[1], prefix) || 0)];
+    } else {
+        to = this.__action_getLoc(data.to, x, y, prefix);
+    }
     this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId);
     core.doAction();
 }
@@ -1939,8 +1949,11 @@ events.prototype.__action_getInput = function (hint, isText, callback) {
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         try {
-            if (action.indexOf(prefix) != 0)
-                throw new Error("录像文件出错！当前需要一个 " + prefix + " 项，实际为 " + action);
+            if (action.indexOf(prefix) != 0) {
+                console.warn("警告！当前需要一个 " + prefix + " 项，实际为 " + action);
+                core.status.replay.toReplay.unshift(action);
+                return callback(isText ? '' : 0);
+            }
             if (isText) value = core.decodeBase64(action.substring(7));
             else value = parseInt(action.substring(6));
             callback(value);
@@ -2004,7 +2017,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
     if (data.choices.length == 0) return this.doAction();
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        if (action.indexOf('choices:') == 0) {
+        if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
                 this.__action_choices_replaying(data, index);
@@ -2016,7 +2029,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
             // 容错录像
             if (main.replayChecking) {
                 // 录像验证系统中选择第一项
-                core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
                 core.events.__action_choices_replaying(data, 0)
             } else {
                 // 正常游戏中弹窗选择
@@ -2025,7 +2038,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                         core.control._replay_error(action);
                         return;
                     }
-                    core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
+                    if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
                     core.events.__action_choices_replaying(data, core.clamp(parseInt(value), 0, data.choices.length - 1))
                 });
             }
@@ -2061,7 +2074,9 @@ events.prototype.__action_choices_replaying = function (data, index) {
             // 检查
             var choice = data.choices[index];
             if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
-                // 无法选择此项：直接忽略
+                // 无法选择此项
+                core.control._replay_error("无法选择项："+index);
+                return;
             } else {
                 core.insertAction(choice.action);
             }
@@ -2084,7 +2099,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
     core.status.event.ui = {"text": core.replaceText(data.text, prefix), "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
-        if (action.indexOf('choices:') == 0) {
+        if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
             var index = action.substring(8);
             if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < 2) {
                 this.__action_confirm_replaying(data, index);
@@ -2094,7 +2109,7 @@ events.prototype._action_confirm = function (data, x, y, prefix) {
             }
         } else {
             // 录像中未记录选了哪个，则选默认值，而不是直接报错
-            core.status.replay.toReplay.unshift(action);
+            if (action != 'choices:none') core.status.replay.toReplay.unshift(action);
             this.__action_confirm_replaying(data, data["default"] ? 0 : 1);
         }
     }
@@ -2340,25 +2355,21 @@ events.prototype._action_sleep = function (data, x, y, prefix) {
 events.prototype._action_wait = function (data, x, y, prefix) {
     if (core.isReplaying()) {
         var code = core.status.replay.toReplay.shift();
-        if (code.indexOf("input:") == 0) {
+        if (code.indexOf("input:") == 0 && !(code == "input:none" && !data.timeout)) {
             if (code == "input:none") {
                 core.status.route.push("input:none");
                 core.setFlag("type", -1);
                 core.setFlag("timeout", 0);
                 this.__action_wait_afterGet(data);
+                return core.doAction();
             } else {
                 var value = parseInt(code.substring(6));
                 core.status.route.push("input:" + value);
                 this.__action_wait_getValue(value);
-                this.__action_wait_afterGet(data);
+                if (this.__action_wait_afterGet(data) || !data.forceChild) return core.doAction();
             }
         }
-        else {
-            main.log("录像文件出错！当前需要一个 input: 项，实际为 " + code);
-            core.stopReplay();
-            core.insertAction(["录像文件出错，请在控制台查看报错信息。", {"type": "exit"}]);
-        }
-        core.doAction();
+        core.control._replay_error(code);
         return;
     } else if (data.timeout) {
         core.status.event.interval = setTimeout(function() {
@@ -2401,11 +2412,13 @@ events.prototype.__action_wait_afterGet = function (data) {
     if (!data.data) return false;
     var todo = [];
     var stop = false;
+    var found = false;
     data.data.forEach(function (one) {
         if (one._disabled || stop) return;
         if (one["case"] == "keyboard" && core.getFlag("type") == 0) {
             (one.keycode + "").split(",").forEach(function (keycode) {
                 if (core.getFlag("keycode", 0) == keycode) {
+                    found = true;
                     core.push(todo, one.action);
                     if (one["break"]) stop = true;
                 }
@@ -2419,6 +2432,7 @@ events.prototype.__action_wait_afterGet = function (data) {
             var pymax = core.calValue(one.py[1]);
             var px = core.getFlag("px", 0), py = core.getFlag("py", 0);
             if (px >= pxmin && px <= pxmax && py >= pymin && py <= pymax) {
+                found = true;
                 core.push(todo, one.action);
                 if (one["break"]) stop = true;
             }
@@ -2427,16 +2441,18 @@ events.prototype.__action_wait_afterGet = function (data) {
             var condition = false;
             try { condition = core.calValue(one.condition); } catch (e) {}
             if (condition) {
+                found = true;
                 core.push(todo, one.action);
                 if (one["break"]) stop = true;
             }
         }
         if (one["case"] == "timeout" && core.getFlag("type") == -1) {
+            found = true;
             core.push(todo, one.action);
             if (one["break"]) stop = true;
         }
     })
-    if (todo.length > 0) {
+    if (found) {
         core.insertAction(todo);
         return true;
     }
@@ -2493,7 +2509,10 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
 }
 
 events.prototype._action_autoSave = function (data, x, y, prefix) {
+    var forbidSave = core.hasFlag('__forbidSave__');
+    core.removeFlag('__forbidSave__');
     core.autosave();
+    if (forbidSave) core.setFlag('__forbidSave__', true);
     if (!data.nohint) core.drawTip("已自动存档");
     core.doAction();
 }
@@ -2688,6 +2707,20 @@ events.prototype.openBook = function (fromUserAction) {
 ////// 点击楼层传送器时的打开操作 //////
 events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
+    // 从“浏览地图”页面：尝试直接传送到该层
+    if (core.status.event.id == 'viewMaps') {
+        if (!core.hasItem('fly')) {
+            core.playSound('操作失败');
+            core.drawTip('你没有' + core.material.items['fly'].name, 'fly');
+        } else if (!core.canUseItem('fly')) {
+            core.playSound('操作失败');
+            core.drawTip('无法传送到当前层', 'fly');
+        } else {
+            core.flyTo(core.status.event.data.floorId);
+        }
+        return;
+    }
+
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
         core.playSound('操作失败');
@@ -3481,6 +3514,6 @@ events.prototype.tryUseItem = function (itemId) {
         core.useItem(itemId);
     } else {
         core.playSound('操作失败');
-        core.drawTip("当前无法使用" + core.material.items[itemId].name);
+        core.drawTip("当前无法使用" + core.material.items[itemId].name, itemId);
     }
 }

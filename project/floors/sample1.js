@@ -7,16 +7,7 @@ main.floors.sample1=
     "canFlyFrom": true,
     "canUseQuickShop": true,
     "defaultGround": "grass",
-    "images": [
-        {
-            "name": "bg.jpg",
-            "canvas": "bg",
-            "x": 0,
-            "y": 0,
-            "w": 416,
-            "h": 416
-        }
-    ],
+    "images": null,
     "weather": [
         "snow",
         6

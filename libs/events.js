@@ -1380,23 +1380,7 @@ events.prototype._action__label = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setText = function (data, x, y, prefix) {
-    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "letterSpacing", "animateTime"].forEach(function (t) {
-        if (data[t] != null) core.status.textAttribute[t] = data[t];
-    });
-    ["background", "title", "text"].forEach(function (t) {
-        if ((data[t] instanceof Array) && data[t].length >= 3) {
-            if (data[t].length == 3) data[t].push(1);
-            core.status.textAttribute[t] = data[t];
-        }
-        if (t == 'background') {
-            var name = core.getMappedName(data[t]);
-            var img = core.material.images.images[name];
-            if (img && img.width == 192 && img.height == 128) {
-                core.status.textAttribute[t] = name;
-            }
-        }
-    });
-    core.setFlag('textAttribute', core.status.textAttribute);
+    this.setTextAttribute(data);
     core.doAction();
 }
 
@@ -3049,6 +3033,28 @@ events.prototype.setGlobalFlag = function (name, value) {
 events.prototype.setNameMap = function (name, value) {
     if (!core.hasFlag('__nameMap__')) core.setFlag('__nameMap__', {});
     flags.__nameMap__[name] = value;
+}
+
+////// 设置剧情文本的属性 //////
+events.prototype.setTextAttribute = function (data) {
+    if (!core.isPlaying()) return;
+    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "letterSpacing", "animateTime"].forEach(function (t) {
+        if (data[t] != null) core.status.textAttribute[t] = data[t];
+    });
+    ["background", "title", "text"].forEach(function (t) {
+        if ((data[t] instanceof Array) && data[t].length >= 3) {
+            if (data[t].length == 3) data[t].push(1);
+            core.status.textAttribute[t] = data[t];
+        }
+        if (t == 'background') {
+            var name = core.getMappedName(data[t]);
+            var img = core.material.images.images[name];
+            if (img && img.width == 192 && img.height == 128) {
+                core.status.textAttribute[t] = name;
+            }
+        }
+    });
+    if (main.mode == 'play') core.setFlag('textAttribute', core.status.textAttribute);
 }
 
 events.prototype.closeDoor = function (x, y, id, callback) {

@@ -1245,6 +1245,12 @@ declare class events {
     /** 设置全塔属性 */
     setGlobalAttribute(name: string, value: any): void
 
+    /** 设置剧情文本的属性 */
+    setTextAttribute(data: any): void
+
+    /** 设置文件别名 */
+    setNameMap(name: string, value?: string): void
+
     /** 检查升级事件 */
     checkLvUp(): void
 }

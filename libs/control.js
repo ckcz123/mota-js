@@ -2305,6 +2305,9 @@ control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
         return this.getHeroLoc(name);
+    if (main.mode == 'editor') {
+        return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero[name];
+    }
     return core.status.hero[name];
 }
 
@@ -2389,6 +2392,10 @@ control.prototype.setHeroLoc = function (name, value, noGather) {
 ////// 获得勇士的位置 //////
 control.prototype.getHeroLoc = function (name) {
     if (!core.status.hero) return;
+    if (main.mode == 'editor') {
+        if (name == null) return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero.loc;
+        return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero.loc[name];
+    }
     if (name == null) return core.status.hero.loc;
     return core.status.hero.loc[name];
 }

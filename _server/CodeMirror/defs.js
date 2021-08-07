@@ -3876,6 +3876,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置全塔属性", 
           "!type": "fn(name: string, value: string)"
         }, 
+        "setNameMap": {
+          "!doc": "设置文件别名",
+          "!type": "fn(name: string, value?: string)"
+        },
+        "setTextAttribute": {
+          "!doc": "设置剧情文本的属性",
+          "!type": "fn(data: ?)"
+        },
         "openToolbox": {
           "!doc": "点击工具栏时的打开操作", 
           "!type": "fn(fromUserAction?: bool)"

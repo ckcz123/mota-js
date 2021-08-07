@@ -2751,12 +2751,15 @@ maps.prototype.removeGlobalAnimate = function (x, y, name) {
 
 ////// 绘制UI层的box动画 //////
 maps.prototype.drawBoxAnimate = function () {
+    if (core.status.boxAnimateObjs.length == 0) return;
     core.status.boxAnimateObjs.forEach(function (obj) {
-        core.clearMap('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
-        core.fillRect('ui', obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
-        core.drawImage('ui', obj.image, core.status.globalAnimateStatus % obj.animate * 32, obj.pos,
+        var ctx = obj.ctx || 'ui';
+        core.clearMap(ctx, obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
+        core.fillRect(ctx, obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
+        core.drawImage(ctx, obj.image, core.status.globalAnimateStatus % obj.animate * 32, obj.pos,
             32, obj.height, obj.x, obj.y, obj.dw || 32, obj.dh || obj.height);
     });
+    if (main.mode != 'play') core.status.boxAnimateObjs = [];
 }
 
 ////// 绘制动画 //////

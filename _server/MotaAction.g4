@@ -914,7 +914,7 @@ text_0_s
 /* text_0_s
 tooltip : text：显示一段文字（剧情）
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 default : ["欢迎使用事件编辑器(回车直接多行编辑)"]
 var code = '"'+EvalString_Multi_0+'"';
 if (block.isCollapsed() || !block.isEnabled()) {
@@ -933,7 +933,7 @@ text_1_s
 /* text_1_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 allIds : ['EvalString_1']
 default : ["小妖精","fairy","","","","","欢迎使用事件编辑器(回车直接多行编辑)"]
 var title='';
@@ -973,9 +973,8 @@ text_2_s
 /* text_2_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 allIds : ['EvalString_1']
-menu : [['预览所有立绘','editor_blockly.previewBlock(block)']]
 default : ["小妖精","fairy","","","","","欢迎使用事件编辑器(回车直接多行编辑)",null]
 var title='';
 if (EvalString_0==''){
@@ -1121,6 +1120,7 @@ setText_s
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
 helpUrl : /_docs/#/instruction
+previewBlock : true
 default : [null,"",null,null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","","","","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
@@ -2689,7 +2689,7 @@ choices_s
 /* choices_s
 tooltip : choices: 给用户提供选项
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 default : ["","流浪者","trader",0]
 allIds : ['IdString_0']
 var title='';

@@ -1142,6 +1142,12 @@ setHeroIcon: fn(name: string, noDraw?: bool)
 name: 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入core.status.hero.image
 noDraw: true表示不立即刷新（刷新会导致大地图下视野重置到以主角为中心）
 
+setNameMap: fn(name: string, value?: string)
+设置文件别名
+
+setTextAttribute: fn(data: ?)
+设置剧情文本的属性
+
 setValue: fn(name: string, operator: string, value: ?, prefix?: string)
 数值操作
 

@@ -23,6 +23,7 @@ function main() {
         'gameGroup': document.getElementById('gameGroup'),
         'mainTips': document.getElementById('mainTips'),
         'musicBtn': document.getElementById('musicBtn'),
+        'enlargeBtn': document.getElementById('enlargeBtn'),
         'startPanel': document.getElementById('startPanel'),
         'startTop': document.getElementById('startTop'),
         'startTopProgressBar': document.getElementById('startTopProgressBar'),
@@ -759,6 +760,18 @@ main.dom.musicBtn.onclick = function () {
         if (main.core)
             main.core.triggerBgm();
     } catch (e) {main.log(e);}
+}
+
+main.dom.enlargeBtn.onclick = function () {
+    try {
+        if (main.core) {
+            main.core.setDisplayScale(1);
+            if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
+                main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
+                main.core.resize();
+            }
+        }
+    } catch (e) {main.log(e)};
 }
 
 window.onblur = function () {

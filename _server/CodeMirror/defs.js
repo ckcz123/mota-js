@@ -2560,6 +2560,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "检查bgm状态", 
           "!type": "fn()"
         }, 
+        "setDisplayScale": {
+          "!doc": "设置屏幕放缩",
+          "!type": "fn(delta: number)"
+        },
         "speedDownReplay": {
           "!doc": "减速播放", 
           "!type": "fn()"

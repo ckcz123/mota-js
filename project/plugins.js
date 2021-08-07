@@ -180,7 +180,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					{ "type": "tip", "text": previewMode ? "预览模式下不可购买" : "购买条件不足" }
 				]
 			};
-		}).concat({ "text": "离开", "action": [{ "type": "break" }] });
+		}).concat({ "text": "离开", "action": [{ "type": "playSound", "name": "取消" }, { "type": "break" }] });
 		core.insertAction({ "type": "choices", "text": shop.text, "choices": choices });
 	}
 

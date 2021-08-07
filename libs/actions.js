@@ -1442,6 +1442,10 @@ actions.prototype._keyUpViewMaps = function (keycode) {
         }
         return;
     }
+    if (keycode == 71 && !core.isReplaying()) {
+        core.useFly(false);
+        return;
+    }
     return;
 }
 

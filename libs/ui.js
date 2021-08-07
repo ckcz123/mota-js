@@ -2480,10 +2480,10 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.lockControl();
     core.status.event.id = 'viewMaps';
     this.clearUI();
-    if (index == null) return this._drawMaps_drawHint();
+    if (index == null) return this._drawViewMaps_drawHint();
     core.animateFrame.tip = null;
     core.status.checkBlock.cache = {};
-    var data = this._drawMaps_buildData(index, x, y);
+    var data = this._drawViewMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.drawThumbnail(data.floorId, null, {damage: data.damage, ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     core.clearMap('data');
@@ -2499,7 +2499,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
 }
 
-ui.prototype._drawMaps_drawHint = function () {
+ui.prototype._drawViewMaps_drawHint = function () {
     core.playSound('打开界面');
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.4)');
     core.setTextAlign('ui', 'center');
@@ -2539,7 +2539,7 @@ ui.prototype._drawMaps_drawHint = function () {
     core.setTextBaseline('ui', 'alphabetic');
 }
 
-ui.prototype._drawMaps_buildData = function (index, x, y) {
+ui.prototype._drawViewMaps_buildData = function (index, x, y) {
     var damage = (core.status.event.data||{}).damage;
     var all = (core.status.event.data||{all: true}).all;
     if (index.damage != null) damage=index.damage;

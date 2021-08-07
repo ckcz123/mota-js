@@ -2707,6 +2707,17 @@ events.prototype.openBook = function (fromUserAction) {
 ////// 点击楼层传送器时的打开操作 //////
 events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
+    // 从“浏览地图”页面：尝试直接传送到该层
+    if (core.status.event.id == 'viewMaps') {
+        if (!core.hasItem('fly')) {
+            core.drawTip('你没有' + core.material.items['fly'].name, 'fly');
+        } else if (!core.canUseItem('fly')) {
+            core.drawTip('无法传送到当前层', 'fly');
+        }
+        core.flyTo(core.status.event.data.floorId);
+        return;
+    }
+
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
         core.playSound('操作失败');

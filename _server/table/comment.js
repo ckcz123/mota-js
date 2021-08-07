@@ -128,6 +128,13 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "怪物描述",
 					"_data": "可在怪物详细信息页面写的怪物描述，支持颜色、字体大小和样式、粗体斜体等转义方式。"
 				},
+				"displayIdInBook": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_string": true,
+					"_docs": "手册ID",
+					"_data": "在怪物手册中映射到的怪物ID。如果此项不为null，则在怪物手册中，将用目标ID来替换该怪物原本的ID。常被运用在同一个怪物的多朝向上。"
+				},
 				"faceIds": {
 					"_leaf": true,
 					"_type": "event",
@@ -194,8 +201,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"zoneSquare": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "九宫格领域",
-					"_data": "领域或光环怪是否九宫格"
+					"_docs": "九宫格",
+					"_data": "领域、阻击、光环或捕捉怪是否九宫格"
 				},
 				"range": {
 					"_leaf": true,

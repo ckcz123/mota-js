@@ -573,6 +573,9 @@ color: 一行三列（第四列视为1）或一行四列（第四列若大于1�
 time: 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）
 callback: 更改完毕后的回调函数，可选。事件流中常取core.doAction
 
+setDisplayScale: fn(delta: number)
+设置屏幕放缩
+
 setFlag: fn(name: string, value: ?)
 设置一个flag变量
 例如：core.setFlag('poison', true); // 令主角中毒

@@ -856,7 +856,7 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
     var index = x + "," + y;
     var block = blocksObj[index];
     // 该点是否不可通行或有脚本
-    if (block && !block.disable && (block.event.noPass || block.event.script))
+    if (block && !block.disable && (block.event.noPass || block.event.script || block.event.event))
         return false;
     // 该点是否是绿点可触发
     if (block && !block.disable && block.event.trigger) {
@@ -1032,7 +1032,7 @@ maps.prototype._drawBlockInfo_shouldBlurFg = function (x, y) {
     if (main.mode == 'play' && !core.flags.blurFg) return false;
     var block = this.getBlock(x, y);
     if (block == null || block.id == 0) return false;
-    if (block.event.cls == 'autotile' || block.event.cls == 'tileset') return block.event.script;
+    if (block.event.cls == 'autotile' || block.event.cls == 'tileset') return block.event.script || block.event.event;
     return true;
 }
 
@@ -1744,7 +1744,7 @@ maps.prototype.stairExists = function (x, y, floorId) {
     var blockId = this.getBlockId(x, y, floorId);
     if (blockId == null) return false;
     var ids = ['upFloor','downFloor'];
-    ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal']);
+    ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal','portal','starPortal']);
     return ids.indexOf(blockId)>=0;
 }
 
@@ -1969,7 +1969,8 @@ maps.prototype.hideBlockByIndexes = function (indexes, floorId) {
 
 maps.prototype._removeBlockFromMap = function (floorId, block) {
     if (floorId != core.status.floorId) return;
-    if (block.event.cls == 'autotile') {
+    var filter = block.filter || {};
+    if (block.event.cls == 'autotile' || filter.blur > 0 || filter.shadow > 0) {
         core.drawMap();
     } else {
         var x = block.x, y = block.y;

@@ -562,7 +562,7 @@ return code;
 
 // doorInfo 事件编辑器入口之一
 doorInfo_m 
-    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ '如需撞到开门还需要把图块触发器改成 openDoor' BEND
+    :   '门信息' '开关门时间' Int '开门音效' EvalString? '关门音效' EvalString? BGNL? Newline '需要钥匙' doorKeyList+ '如需撞到开门还需要把图块触发器改成 openDoor' BGNL? Newline '开门后事件' action+ BEND
 
 
 /* doorInfo_m
@@ -571,7 +571,8 @@ default : [160, 'door.mp3', 'door.mp3']
 helpUrl : /_docs/#/instruction
 EvalString_0 = EvalString_0 && (', "openSound": "' + EvalString_0 + '"');
 EvalString_1 = EvalString_1 && (', "closeSound": "' + EvalString_1 + '"');
-var code = '{"time": '+Int_0+EvalString_0+EvalString_1+', "keys": {\n'+doorKeyList_0+'\n}}';
+if (action_0.trim()) action_0 = ', "afterOpenDoor": [\n' + action_0 + ']';
+var code = '{"time": '+Int_0+EvalString_0+EvalString_1+', "keys": {\n'+doorKeyList_0+'\n}'+action_0.trim()+'}';
 return code;
 */;
 
@@ -780,6 +781,7 @@ action
     |   setEnemyOnPoint_s
     |   resetEnemyOnPoint_s
     |   moveEnemyOnPoint_s
+    |   moveEnemyOnPoint_1_s
     |   setEquip_s
     |   setFloor_s
     |   setGlobalAttribute_s
@@ -1202,38 +1204,38 @@ return code;
 
 
 setEnemyOnPoint_s
-    :   '设置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression Newline
+    :   '设置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression Newline
 
 
 /* setEnemyOnPoint_s
 tooltip : setEnemyOnPoint：设置某个点上怪物的属性
 helpUrl : /_docs/#/instruction
 default : ["", "", "", "atk", "="]
-selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.dataColor
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
   AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
 } else AssignOperator_List_0 = '';
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
 var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyPoint_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
 return code;
 */;
 
 resetEnemyOnPoint_s
-    :   '重置某点怪物属性' ':' 'x' PosString? ',' 'y' PosString? '楼层' IdString? Newline
+    :   '重置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
 
 
 /* resetEnemyOnPoint_s
 tooltip : resetEnemyOnPoint：重置某个点上怪物的属性
 helpUrl : /_docs/#/instruction
 default : ["", "", ""]
-selectPoint : ["PosString_0", "PosString_1", "IdString_0"]
+selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.dataColor
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var floorstr = PosString_0 && PosString_1 ? ', "loc": ['+PosString_0+','+PosString_1+']' : '';
 var code = '{"type": "resetEnemyOnPoint"'+floorstr+IdString_0+'},\n';
 return code;
 */;
@@ -1253,6 +1255,24 @@ colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
 if (PosString_2 && PosString_3) floorstr += ', "to": ['+PosString_2+','+PosString_3+']'
+var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+return code;
+*/;
+
+moveEnemyOnPoint_1_s
+    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '增量' 'dx' PosString? 'dy' PosString? '楼层' IdString? Newline
+
+
+/* moveEnemyOnPoint_1_s
+tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
+helpUrl : /_docs/#/instruction
+default : ["", "", "", "", ""]
+allFloorIds : ['IdString_0']
+selectPoint : ["PosString_0", "PosString_1"]
+colour : this.dataColor
+IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
+var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
+if (PosString_2 && PosString_3) floorstr += ', "dxy": ['+PosString_2+','+PosString_3+']'
 var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
 return code;
 */;
@@ -1340,20 +1360,7 @@ default : ["","","","",false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "async": true':'';
@@ -1372,20 +1379,7 @@ default : ["","","",true,"",false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 Bool_0 = Bool_0 ?', "remove": true':'';
@@ -1405,20 +1399,7 @@ default : ["","","",1.0,"",false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (Number_0 < 0 || Number_0 > 1) throw new Error('不透明度需要在0~1之间');
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
@@ -1438,20 +1419,7 @@ default : ["","","",0,0,0,false,0]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (Number_0 < 0) throw '虚化不得小于0；0为完全没有虚化';
 if (Int_0 < 0 || Int_0 >= 360) throw '色相需要在0~359之间';
 if (Number_1 < 0 || Number_1 > 1) throw '灰度需要在0~1之间';
@@ -1551,20 +1519,7 @@ allFloorIds : ['IdString_0']
 allIds : ['EvalString_0']
 default : ["yellowDoor","","","","",false]
 selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
-var floorstr = '';
-if (EvalString_1 && EvalString_2) {
-  var x = EvalString_1, y = EvalString_2;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_1, EvalString_2);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 IntString_0 = IntString_0 && (', "time": ' + IntString_0);
 Bool_0 = Bool_0 ? (', "async": true') : '';
@@ -1583,20 +1538,7 @@ colour : this.mapColor
 allFloorIds : ['IdString_0']
 default : [null,"","",""]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 if (DirectionEx_List_0 == 'null') DirectionEx_List_0 = '';
 DirectionEx_List_0 = DirectionEx_List_0 && (', "direction": "'+DirectionEx_List_0+'"');
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
@@ -1614,20 +1556,7 @@ helpUrl : /_docs/#/instruction
 default : ["","",""]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showFloorImg"'+floorstr+IdString_0+'},\n';
 return code;
@@ -1643,20 +1572,7 @@ helpUrl : /_docs/#/instruction
 default : ["","",""]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideFloorImg"'+floorstr+IdString_0+'},\n';
 return code;
@@ -1673,20 +1589,7 @@ default : ["bg","","",""]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "showBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
 return code;
@@ -1703,20 +1606,7 @@ default : ["bg","","",""]
 allFloorIds : ['IdString_0']
 colour : this.mapColor
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
-var floorstr = '';
-if (EvalString_0 && EvalString_1) {
-  var x = EvalString_0, y = EvalString_1;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "hideBgFgMap", "name": "' + Bg_Fg_List_0 + '"' +floorstr+IdString_0+'},\n';
 return code;
@@ -1734,20 +1624,7 @@ selectPoint : ["EvalString_1", "EvalString_2", "IdString_0"]
 allIds : ['EvalString_0']
 allFloorIds : ['IdString_0']
 default : ["bg","yellowDoor","","",""]
-var floorstr = '';
-if (EvalString_1 && EvalString_2) {
-  var x = EvalString_1, y = EvalString_2;  
-  var pattern = /^([+-]?\d+)(, ?[+-]?\d+)*$/;
-  if (pattern.test(x) && pattern.test(y) && x.split(',').length == y.split(',').length) {
-    x=x.split(',');
-    y=y.split(',');
-    for(var ii=0;ii<x.length;ii++) x[ii]='['+x[ii].trim()+','+y[ii].trim()+']';
-    floorstr = ', "loc": ['+x.join(',')+']';
-  }
-  if (floorstr == '') {
-      floorstr = ', "loc": ["'+x+'","'+y+'"]';
-  }
-}
+var floorstr = MotaActionFunctions.processMultiLoc(EvalString_1, EvalString_2);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var code = '{"type": "setBgFgBlock", "name": "' + Bg_Fg_List_0 + '", "number": "'+EvalString_0+'"'+floorstr+IdString_0+'},\n';
 return code;
@@ -3786,7 +3663,7 @@ nextXY_e
 
 /* nextXY_e
 default : [1, 'nextX']
-var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+NInt+')') : ('core.nextX('+NInt+')');
+var code = NextXY_List_0 == 'nextY' ? ('core.nextY('+NInt_0+')') : ('core.nextX('+NInt_0+')');
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 
@@ -4006,8 +3883,8 @@ Global_Attribute_List
     /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'selectColor', 'floorChangingStyle', 'equipName']*/;
 
 Global_Value_List
-    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'动画时间'
-    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redGem', 'blueGem', 'greenGem', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'animateSpeed']*/;
+    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'图块每帧时间'|'上下楼时间'
+    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redGem', 'blueGem', 'greenGem', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'animateSpeed', 'floorChangeTime']*/;
 
 
 Global_Flag_List
@@ -4071,7 +3948,7 @@ IdString
     ;
 
 FixedId_List
-    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'横坐标'|'纵坐标'|'当前朝向'|'攻击增益'|'防御增益'|'护盾增益'
+    :   '生命'|'生命上限'|'攻击'|'防御'|'护盾'|'黄钥匙'|'蓝钥匙'|'红钥匙'|'金币'|'经验'|'魔力'|'魔力上限'|'当前横坐标'|'当前纵坐标'|'当前朝向'|'攻击增益'|'防御增益'|'护盾增益'
     /*FixedId_List ['status:hp','status:hpmax','status:atk','status:def','status:mdef','item:yellowKey','item:blueKey','item:redKey','status:money','status:exp','status:mana','status:manamax','status:x','status:y','status:direction','buff:atk','buff:def','buff:mdef']*/;
 
 Id_List
@@ -4079,7 +3956,7 @@ Id_List
     /*Id_List ['flag','status','item', 'buff', 'switch', 'temp', 'global']*/;
 
 EnemyId_List
-    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'属性值'|'退化扣攻'|'退化扣防'|'不可炸'|'九宫格领域'|'领域范围'|'连击数'|'吸血到自身'|'固伤值'
+    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'特殊属性'|'名称'|'映射名'|'属性值'|'退化扣攻'|'退化扣防'|'不可炸'|'九宫格领域'|'领域范围'|'连击数'|'吸血到自身'|'固伤值'
     /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
 
 EnemyPoint_List

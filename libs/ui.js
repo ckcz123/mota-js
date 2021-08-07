@@ -743,10 +743,8 @@ ui.prototype.drawText = function (contents, callback) {
     }
 
     var data=core.status.event.data.list.shift();
-    if (typeof data == 'string')
-        core.ui.drawTextBox(data);
-    else
-        core.ui.drawTextBox(data.content, data.id);
+    if (typeof data == 'string') data = { "text": data };
+    core.ui.drawTextBox(data.text, data);
 }
 
 ui.prototype._drawText_setContent = function (contents, callback) {
@@ -1407,7 +1405,8 @@ ui.prototype._animateUI = function (type, callback) {
 }
 
 ////// 绘制一个对话框 //////
-ui.prototype.drawTextBox = function(content, showAll) {
+ui.prototype.drawTextBox = function(content, config) {
+    config = config || {};
     if (core.status.event && core.status.event.id == 'action')
         core.status.event.ui = content;
 
@@ -1422,6 +1421,11 @@ ui.prototype.drawTextBox = function(content, showAll) {
     if (posInfo.position != 'up' && posInfo.position != 'down') posInfo.px = posInfo.py = null;
     if (!posInfo.position) posInfo.position = textAttribute.position;
     content = this._drawTextBox_drawImages(posInfo.content);
+    if (config.pos) {
+        delete posInfo.px;
+        delete posInfo.py;
+        posInfo.pos = config.pos;
+    }
 
     // Step 2: 计算对话框的矩形位置
     var hPos = this._drawTextBox_getHorizontalPosition(content, titleInfo, posInfo);
@@ -1439,7 +1443,7 @@ ui.prototype.drawTextBox = function(content, showAll) {
     // Step 5: 绘制正文
     var config = this.drawTextContent('ui', content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
-        lineHeight: vPos.lineHeight, time: (showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
+        lineHeight: vPos.lineHeight, time: (config.showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
     });
 
     // Step 6: 绘制光标
@@ -1475,22 +1479,32 @@ ui.prototype._drawTextBox_drawImages = function (content) {
 ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, posInfo) {
     var realContent = this._getRealContent(content);
     var paddingLeft = 25, paddingRight = 12;
-    if (posInfo.px != null && posInfo.py != null) paddingLeft = 20;
+    if ((posInfo.px != null && posInfo.py != null) || posInfo.pos) paddingLeft = 20;
     if (titleInfo.icon != null) paddingLeft = 62; // 15 + 32 + 15
     else if (titleInfo.image) paddingLeft = 90; // 10 + 70 + 10
     var left = 7 + 3 * (this.HSIZE - 6), right = this.PIXEL - left,
         width = right - left, validWidth = width - paddingLeft - paddingRight;
     // 对话框效果：改为动态计算
-    if (posInfo.px != null && posInfo.py != null) {
+    if ((posInfo.px != null && posInfo.py != null) || posInfo.pos) {
         var min_width = 220 - paddingLeft, max_width = validWidth;
         // 无行走图或头像，则可以适当缩小min_width
         if (titleInfo.image == null) min_width = 160;
         if (titleInfo.title) {
             min_width = core.clamp(core.calWidth('ui', titleInfo.title, this._buildFont(core.status.textAttribute.titlefont, true)), min_width, max_width);
         }
-        validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
-        width = validWidth + paddingLeft + paddingRight;
-        left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);
+        if (posInfo.pos) {
+            left = core.calValue(posInfo.pos[0]) || 0;
+            max_width = Math.max(min_width, right - left - paddingLeft - paddingRight);
+        } else left = null;
+        if (posInfo.pos && posInfo.pos[2] != null) {
+            width = core.calValue(posInfo.pos[2]) || 0;
+            validWidth = width - paddingLeft - paddingRight;
+        } else validWidth = 0;
+        if (validWidth < min_width) {
+            validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
+            width = validWidth + paddingLeft + paddingRight;
+        }
+        if (left == null) left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);
         right = left + width;
     }
     return { left: left, right: right, width: width, validWidth: validWidth, xoffset: 11, content_left: left + paddingLeft };
@@ -1526,6 +1540,9 @@ ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, po
             else {
                 top = 32 * posInfo.py + 32 + yoffset - core.bigmap.offsetY;
             }
+    }
+    if (posInfo.pos) {
+        top = core.calValue(posInfo.pos[1]) || 0;
     }
 
     return { top: top, height: height, bottom: top + height, yoffset: yoffset, lineHeight: lineHeight };

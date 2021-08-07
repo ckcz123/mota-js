@@ -281,12 +281,14 @@ ActionParser.prototype.parseAction = function() {
           }
           return text_choices;
         }
+        data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_2_s', [
-          info[0], info[1], info[2], info[3], buildTextDrawing(textDrawing), this.next
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], info[3], buildTextDrawing(textDrawing), this.next
         ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
-      } else if (info[0] || info[1] || info[2]) {
+      } else if (info[0] || info[1] || info[2] || data.pos) {
+        data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_1_s',[
-          info[0], info[1], info[2], info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('text_0_s', [info[3],this.next],

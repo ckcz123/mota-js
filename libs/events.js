@@ -1354,7 +1354,7 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
-    core.ui.drawTextBox(data.text, data.showAll);
+    core.ui.drawTextBox(data.text, data);
     if (!data.showAll) core.ui._animateUI('show');
 }
 

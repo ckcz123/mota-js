@@ -2247,7 +2247,7 @@ declare class ui {
     getTextContentHeight(content: string, config?: any): void
 
     /** 绘制一个对话框 */
-    drawTextBox(content: string, showAll?: boolean): void
+    drawTextBox(content: string, config?: any): void
 
     /** 绘制滚动字幕 */
     drawScrollText(content: string, time: number, lineHeight?: number, callback?: () => any): void

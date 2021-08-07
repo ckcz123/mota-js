@@ -126,6 +126,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['setEnemyOnPoint_s'].xmlText(),
       MotaActionBlocks['resetEnemyOnPoint_s'].xmlText(),
       MotaActionBlocks['moveEnemyOnPoint_s'].xmlText(),
+      MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText(),
       MotaActionBlocks['setEquip_s'].xmlText(),
       MotaActionBlocks['setFloor_s'].xmlText(),
       MotaActionBlocks['setGlobalAttribute_s'].xmlText(),

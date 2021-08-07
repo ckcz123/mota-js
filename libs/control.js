@@ -367,6 +367,7 @@ control.prototype._showStartAnimate_resetDom = function () {
     core.clearStatus();
     core.clearMap('all');
     core.dom.musicBtn.style.display = 'block';
+    core.dom.enlargeBtn.style.display = 'block';
     core.setMusicBtn();
     // 重置音量
     core.events.setVolume(1, 0);
@@ -2783,6 +2784,7 @@ control.prototype.setMusicBtn = function () {
         core.dom.musicBtn.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABWVBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL///8AAAC5ubn+/v6xsbEtLS0MDAxmZmZoaGhvb2/c3Nzd3d38/Pz9/f0oKCgpKSl0dHR1dXW6urrb29v7+/v09PTv7+/39/cgICACAgImJibh4eGFhYWGhoaHh4eOjo5paWm7u7vDw8PMzMwyMjI7OztAQEDe3t5FRUVMTEzj4+Pl5eXm5ubp6enr6+tcXFzi4uL19fVeXl74+PgjIyNkZGQGBgaSkpKYmJiampqenp4DAwMwMDBnZ2cICAivr68eHh63t7cLCwsSEhLw8PBhYWEUFBQVFRXNzc3Pz8/Z2dna2toaGhqkpKSlpaWpqamrq6tFOUNAAAAAc3RSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyA0IuUgAAAVdJREFUeF5NkVVbw0AQRTcQrLR4IIEGcidJoaUuQHF3d3d3+P/CkuxCzss8nG++mbnDBJXhNt2CpbeFK1kQpSEKidlc8S9qdATRa6UIdQMoxEpDA0Ov3wUAPfW+qLWACydNv9zMrzkJwPK6FB3oHyOfXfuNxvoBQ+GmBYinhHB77TmiVBxoYUw1AYcEq332AS8OYKosAuTT0nza9uU2USYPRJgGxEiSOFywJ3mNARozgBJJzkfLvfu8JgGDWcC9FEsjWzR+y80gYDEAA8QZ3N6kmP1Fs3fEASB7pob7Hh+Wz5L0ci17Or05J7bH6B6dZv05XWK3rG+myV05Ert592Qo55sPuoIr7hEZHHtieIPWy0RU9DLwc3Mnck/vi8/E8XNrDWQtEVnL/ySKMrv0jPwPp870fprcyYifmiEmqGpHkI5q9ofSFIUk2qiwIGpEMyxYhhZRRcMPz89RJ2s9W8wAAAAASUVORK5CYII=";
     else
         core.dom.musicBtn.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABYlBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL////8/PwAAABmZmZoaGihoaGioqKxsbG5ubnb29vc3Nzd3d3h4eHi4uL9/f3+/v4tLS1nZ2d0dHSUlJSenp66uroMDAz7+/spKSkoKCgUFBRpaWkVFRVvb291dXU7OzuVlZWYmJhkZGQgICAjIyOkpKQCAgK3t7cGBgbv7++pqamrq6seHh4mJiZhYWGamprp6enr6+saGhpeXl7j4+Pl5eXm5uZKSkrw8PD09PT19fW7u7vDw8PMzMwICAgwMDAyMjILCwtAQECGhoaHh4eBgYGFhYUSEhJXV1dZWVlcXFyOjo6SkpLNzc339/fPz8/Z2dna2tqTk5OlpaWxOPeTAAAAdnRSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyNuo+uwAAAWJJREFUeF5NkmV34zAQReUm7WbTuJBNunY3bvXGDjNTkZkZlpn5/9eR5FPfbzr3jGb0RkwRiMQMDm7EIgHmRxtLwMOaHHoQjwz4MUKeCM8AWMrmd7u7f/aXAMyOShHiQD1n04DtN5e5FMBFlSauIsm585dKi4CpuSYKJIv1tBDVmvOSqJgEoowFLSBHaQh10XHWiCgHWEGmAw2blPrvOK/KRJUGoLM4kCVSKrWz7HwgoiwQZyaQJ0+9PvxV23BNATAZB25IqX9b3+jTW9fcApwB6NLgUD5NY3mPXnwmFwBezff1ztzRFzTp94FXMy36HDuCa2RafdnnmZqtL818Gl9/qNnEeyrUk2aTPiKj3qMyWBVi/YSuWq5qiwxkbtX3vYWzdz/l8M0k8ERlvViiB1Ygslb7SbVtJezncj+Cx5bYaeGuonZqhZlieAp+no74/s5EAh6JcY35Cepxk4ObcT3IJPe/1lKsDpFCFQAAAABJRU5ErkJggg==";
+    core.dom.enlargeBtn.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUiIGhlaWdodD0iMjUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiA8Zz4gPHBhdGggc3Ryb2tlPSJudWxsIiBmaWxsPSIjODg4ODg4IiBkPSJtMTQuMDc0NTcsMC4wMDAwMDRhMTAuOTY2ODM5LDEwLjkxODQ1MiAwIDAgMCAtMTAuOTUzNTM4LDEwLjkwNTIxYTEwLjg0ODkzMiwxMC44MDEwNjUgMCAwIDAgMi4yMTE1NzEsNi41MDA0NGwtNC44ODI3MjIsNC44NjExNzlhMS41NjQ2MzUsMS41NTc3MzEgMCAxIDAgMi4yMTI3MTksMi4yMDI5NTZsNC44ODI3MjIsLTQuODYxMTc5YTEwLjg0ODkzMiwxMC44MDEwNjUgMCAwIDAgNi41MjkyNDgsMi4yMDE4MTRhMTAuOTUzNTM4LDEwLjkwNTIxIDAgMCAwIDAsLTIxLjgxMDQyem0wLDE4LjY5NDY0NWE3LjgyMzk1Niw3Ljc4OTQzNiAwIDEgMSA3LjgyMzk1NiwtNy43ODk0MzZhNy44MzIxNzEsNy43OTc2MTQgMCAwIDEgLTcuODIzOTU2LDcuNzg5NDM2eiIvPgogIDxwYXRoIHN0cm9rZT0ibnVsbCIgZmlsbD0iIzg4ODg4OCIgZD0ibTE4LjQ5NDY0NSw4LjgyMjk2NmwtMi4xNjY0NzMsMGwwLC0yLjA1NTI0M2EyLjE2NjQ3MywyLjA1NTI0MyAwIDAgMCAtNC4zMzI5NDYsMGwwLDIuMDU1MjQzbC0yLjE2NjQ3MywwYTIuMTY2NDczLDIuMDU1MjQzIDAgMCAwIDAsNC4xMTA0ODZsMi4xNjY0NzMsMGwwLDIuMDU1MjQzYTIuMTY2NDczLDIuMDU1MjQzIDAgMCAwIDQuMzMyOTQ2LDBsMCwtMi4wNTUyNDNsMi4xNjY0NzMsMGEyLjE2NjQ3MywyLjA1NTI0MyAwIDAgMCAwLC00LjExMDQ4NnoiLz4KIDwvZz4KPC9zdmc+";
 }
 
 ////// 更改背景音乐的播放 //////
@@ -2854,6 +2856,17 @@ control.prototype.stopSound = function (id) {
 ////// 检查bgm状态 //////
 control.prototype.checkBgm = function() {
     core.playBgm(core.musicStatus.playingBgm || main.startBgm);
+}
+
+///// 设置屏幕放缩 //////
+control.prototype.setDisplayScale = function (delta) {
+    var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
+    if (index < 0) return;
+    index += delta;
+    if (index < 0 || index >= core.domStyle.availableScale.length) return;
+    core.domStyle.scale = core.domStyle.availableScale[index];
+    core.setLocalStorage('scale', core.domStyle.scale);
+    core.resize();
 }
 
 // ------ 状态栏，工具栏等相关 ------ //
@@ -3168,10 +3181,14 @@ control.prototype._resize_gameGroup = function (obj) {
     // musicBtn
     if (core.domStyle.isVertical || core.domStyle.scale < 1) {
         core.dom.musicBtn.style.right = core.dom.musicBtn.style.bottom = "3px";
+        core.dom.enlargeBtn.style.right = "34px";
+        core.dom.enlargeBtn.style.bottom = "3px"
     }
     else {
         core.dom.musicBtn.style.right = (obj.clientWidth - totalWidth) / 2 + "px";
         core.dom.musicBtn.style.bottom = (obj.clientHeight - totalHeight) / 2 - 27 + "px";
+        core.dom.enlargeBtn.style.right = (obj.clientWidth - totalWidth) / 2 + 31 + "px";
+        core.dom.enlargeBtn.style.bottom = (obj.clientHeight - totalHeight) / 2 - 27 + "px";
     }
 }
 

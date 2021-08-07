@@ -803,17 +803,20 @@ utils.prototype.strlen = function (str) {
 
 utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
-    var directionList = ["left", "up", "right", "down"];
+    var directionList = ["left", "leftup", "up", "rightup", "right", "rightdown", "down", "leftdown"];
     if (directionList.indexOf(turn) >= 0) return turn;
-    switch (turn) {
-        case ':left': turn = 3; break; // turn left
-        case ':right': turn = 1; break; // turn right
-        case ':back': turn = 2; break; // turn back
-        default: turn = 0; break;
+    if (typeof turn === 'number' && turn % 45 == 0) turn /= 45;
+    else {
+        switch (turn) {
+            case ':left': turn = 6; break; // turn left
+            case ':right': turn = 2; break; // turn right
+            case ':back': turn = 4; break; // turn back
+            default: turn = 0; break;
+        }
     }
     var index = directionList.indexOf(direction);
     if (index < 0) return direction;
-    return directionList[(index + (turn || 0)) % 4];
+    return directionList[(index + (turn || 0)) % directionList.length];
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {
@@ -863,20 +866,21 @@ utils.prototype.rand = function (num) {
 ////// 生成随机数（录像方法） //////
 utils.prototype.rand2 = function (num) {
     num = num || 2147483648;
+    num = Math.abs(num);
 
     var value;
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("random:") == 0) {
             value = parseInt(action.substring(7));
-            if (isNaN(value) || value >= num) {
-                core.control._replay_error(action);
-                return 0;
+            if (isNaN(value) || value >= num || value < 0) {
+                console.warn('错误！当前random:项超过范围。将重新随机生成！');
+                value = Math.floor(Math.random() * num);
             }
         }
         else {
-            core.control._replay_error(action);
-            return 0;
+            console.warn('错误！当前需要一个random:项。将重新随机生成！');
+            value = Math.floor(Math.random() * num);
         }
     }
     else {

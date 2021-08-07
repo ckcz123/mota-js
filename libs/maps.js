@@ -1744,7 +1744,7 @@ maps.prototype.stairExists = function (x, y, floorId) {
     var blockId = this.getBlockId(x, y, floorId);
     if (blockId == null) return false;
     var ids = ['upFloor','downFloor'];
-    ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal']);
+    ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal','portal','starPortal']);
     return ids.indexOf(blockId)>=0;
 }
 

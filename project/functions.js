@@ -196,7 +196,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 检查能否飞行
 	if (!core.status.maps[fromId].canFlyFrom || !core.status.maps[toId].canFlyTo || !core.hasVisitedFloor(toId)) {
 		core.playSound('操作失败');
-		core.drawTip("无法飞往" + core.status.maps[toId].title + "！");
+		core.drawTip("无法飞往" + core.status.maps[toId].title + "！", 'fly');
 		return false;
 	}
 
@@ -510,7 +510,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }, "#c677dd"],
 		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半", "#bb99ee"],
 		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）", "#b0b666"],
-		[18, "阻击", function (enemy) { return "经过怪物的十字领域时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }, "#8888e6"],
+		[18, "阻击", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }, "#8888e6"],
 		[19, "自爆", "战斗后勇士的生命值变成1", "#ff6666"],
 		[20, "无敌", "勇士无法打败怪物，除非拥有十字架", "#aaaaaa"],
 		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }],
@@ -519,7 +519,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }, "#dda0dd"],
 		[25, "光环", function (enemy) { return (enemy.range != null ? ((enemy.zoneSquare ? "该怪物九宫格" : "该怪物十字") + enemy.range + "格范围内") : "同楼层所有" ) + "怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#e6e099", 1],
 		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。", "#77c0b6", 1],
-		[27, "捕捉", "当走到怪物周围十字时会强制进行战斗。", "#c0ddbb"]
+		[27, "捕捉", function (enemy) { return "当走到怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "时会强制进行战斗。"; }, "#c0ddbb"]
 	];
 },
         "getEnemyInfo": function (enemy, hero, x, y, floorId) {
@@ -1308,9 +1308,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 阻击
 		// 如果要防止阻击伤害，可以直接简单的将 flag:no_repulse 设为true
 		if (enemy && core.hasSpecial(enemy.special, 18) && !core.hasFlag('no_repulse')) {
-			for (var dir in core.utils.scan) {
-				var nx = x + core.utils.scan[dir].x,
-					ny = y + core.utils.scan[dir].y,
+			var scan = enemy.zoneSquare ? core.utils.scan2 : core.utils.scan;
+			for (var dir in scan) {
+				var nx = x + scan[dir].x,
+					ny = y + scan[dir].y,
 					currloc = nx + "," + ny;
 				if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
 				damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
@@ -1319,13 +1320,15 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 				var rdir = core.turnDirection(":back", dir);
 				// 检查下一个点是否存在事件（从而判定是否移动）
-				var rnx = x + core.utils.scan[rdir].x,
-					rny = y + core.utils.scan[rdir].y;
-				if (core.canMoveHero(x, y, rdir, floorId) && core.getBlock(rnx, rny, floorId) == null) {
-					repulse[currloc] = (repulse[currloc] || []).concat([
-						[x, y, id, rdir]
-					]);
-				}
+				var rnx = x + scan[rdir].x,
+					rny = y + scan[rdir].y;
+				if (rnx < 0 || rnx >= width || rny < 0 || rny >= height) continue;
+				// 如需禁止阻击被推到已隐藏的事件处（如重生怪处），可将这一句的false改为true
+				if (core.getBlock(rnx, rny, floorId, false) != null) continue;
+				if (core.utils.scan[rdir] && core.canMoveHero(x, y, rdir, floorId)) continue;
+				repulse[currloc] = (repulse[currloc] || []).concat([
+					[x, y, id, rdir]
+				]);
 			}
 		}
 
@@ -1353,12 +1356,13 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		// 捕捉
 		// 如果要防止捕捉效果，可以直接简单的将 flag:no_ambush 设为true
 		if (enemy && core.enemys.hasSpecial(enemy.special, 27) && !core.hasFlag("no_ambush")) {
+			var scan = enemy.zoneSquare ? core.utils.scan2 : core.utils.scan;
 			// 给周围格子加上【捕捉】记号
-			for (var dir in core.utils.scan) {
-				var nx = x + core.utils.scan[dir].x,
-					ny = y + core.utils.scan[dir].y,
+			for (var dir in scan) {
+				var nx = x + scan[dir].x,
+					ny = y + scan[dir].y,
 					currloc = nx + "," + ny;
-				if (nx < 0 || nx >= width || ny < 0 || ny >= height || !core.canMoveHero(x, y, dir, floorId)) continue;
+				if (nx < 0 || nx >= width || ny < 0 || ny >= height || (core.utils.scan[dir] && !core.canMoveHero(x, y, dir, floorId))) continue;
 				ambush[currloc] = (ambush[currloc] || []).concat([
 					[x, y, id, dir]
 				]);

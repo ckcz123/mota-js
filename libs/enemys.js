@@ -431,9 +431,7 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     if (x != null && y != null) {
         e.locs = [[x, y]];
     }
-    ["name", "money", "exp", "point"].forEach(function (one) {
-        e[one] = core.getEnemyValue(enemy, one, x, y, floorId);
-    });
+    e.name = core.getEnemyValue(enemy, 'name', x, y, floorId);
     e.specialText = specialText;
     e.specialColor = specialColor;
     e.damage = this.getDamage(enemy, x, y, floorId);

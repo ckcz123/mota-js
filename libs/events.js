@@ -3500,6 +3500,6 @@ events.prototype.tryUseItem = function (itemId) {
         core.useItem(itemId);
     } else {
         core.playSound('操作失败');
-        core.drawTip("当前无法使用" + core.material.items[itemId].name);
+        core.drawTip("当前无法使用" + core.material.items[itemId].name, itemId);
     }
 }

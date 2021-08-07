@@ -2710,11 +2710,14 @@ events.prototype.useFly = function (fromUserAction) {
     // 从“浏览地图”页面：尝试直接传送到该层
     if (core.status.event.id == 'viewMaps') {
         if (!core.hasItem('fly')) {
+            core.playSound('操作失败');
             core.drawTip('你没有' + core.material.items['fly'].name, 'fly');
         } else if (!core.canUseItem('fly')) {
+            core.playSound('操作失败');
             core.drawTip('无法传送到当前层', 'fly');
+        } else {
+            core.flyTo(core.status.event.data.floorId);
         }
-        core.flyTo(core.status.event.data.floorId);
         return;
     }
 

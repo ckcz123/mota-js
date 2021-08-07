@@ -1325,7 +1325,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				if (rnx < 0 || rnx >= width || rny < 0 || rny >= height) continue;
 				// 如需禁止阻击被推到已隐藏的事件处（如重生怪处），可将这一句的false改为true
 				if (core.getBlock(rnx, rny, floorId, false) != null) continue;
-				if (core.utils.scan[rdir] && core.canMoveHero(x, y, rdir, floorId)) continue;
+				if (core.utils.scan[rdir] && !core.canMoveHero(x, y, rdir, floorId)) continue;
 				repulse[currloc] = (repulse[currloc] || []).concat([
 					[x, y, id, rdir]
 				]);

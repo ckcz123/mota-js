@@ -866,7 +866,7 @@ utils.prototype.rand = function (num) {
 ////// 生成随机数（录像方法） //////
 utils.prototype.rand2 = function (num) {
     num = num || 2147483648;
-    if (num <= 0) num = 1;
+    num = Math.abs(num);
 
     var value;
     if (core.isReplaying()) {
@@ -874,8 +874,8 @@ utils.prototype.rand2 = function (num) {
         if (action.indexOf("random:") == 0) {
             value = parseInt(action.substring(7));
             if (isNaN(value) || value >= num || value < 0) {
-                core.control._replay_error(action);
-                return 0;
+                console.warn('错误！当前random:项超过范围。将重新随机生成！');
+                value = Math.floor(Math.random() * num);
             }
         }
         else {

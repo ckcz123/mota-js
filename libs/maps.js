@@ -23,6 +23,8 @@ maps.prototype._initFloors = function (floorId) {
 
     // 战前事件兼容性
     if (!core.floors[floorId].beforeBattle) core.floors[floorId].beforeBattle = {}
+    // cannotMoveIn兼容性
+    if (!core.floors[floorId].cannotMoveIn) core.floors[floorId].cannotMoveIn = {}
 }
 
 maps.prototype._resetFloorImages = function () {
@@ -74,7 +76,8 @@ maps.prototype.loadFloor = function (floorId, map) {
 maps.prototype._loadFloor_doNotCopy = function () {
     return [
         "firstArrive", "eachArrive", "blocks", "parallelDo", "map", "bgmap", "fgmap",
-        "events", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor", "cannotMove"
+        "events", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor", 
+        "cannotMove", "cannotMoveIn"
     ];
 }
 
@@ -725,15 +728,19 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, arr
     if (nx < 0 || ny < 0 || nx >= core.floors[floorId].width || ny >= core.floors[floorId].height)
         return false;
 
-    // 2. 检查该点素材的 cannotOut 和下一个点的 cannotIn
+    // 2. 检查下个点的 cannotMoveIn
+    if (core.inArray((core.floors[floorId].cannotMoveIn || {})[nx + "," + ny], core.turnDirection(":back", direction)))
+        return false;
+
+    // 3. 检查该点素材的 cannotOut 和下一个点的 cannotIn
     if (this._canMoveHero_checkCannotInOut(Object.keys(arrays).map(function (name) { return arrays[name][y][x]; }), "cannotOut", direction))
         return false;
     if (this._canMoveHero_checkCannotInOut(Object.keys(arrays).map(function (name) { return arrays[name][ny][nx]; }), "cannotIn", direction))
         return false;
 
-    // 3. 检查是否能进将死的领域
+    // 4. 检查是否能进将死的领域
     if (floorId == core.status.floorId && !core.flags.canGoDeadZone && !core.status.lockControl &&
-        Math.max(core.status.hero.hp, 1) <= (core.status.checkBlock.damage[nx + "," + ny]||0) && arrays.eventArray[ny][nx] == 0)
+        Math.max(core.status.hero.hp, 1) <= ((core.status.checkBlock.damage||{})[nx + "," + ny]||0) && arrays.eventArray[ny][nx] == 0)
         return false;
 
     return true;

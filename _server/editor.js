@@ -383,6 +383,30 @@ editor.prototype.drawEventBlock = function () {
         movableArray = core.generateMovableArray() || {};
         fg.fillStyle = "rgba(0,0,0,0.4)";
         fg.fillRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+        for (var i=0;i<core.__SIZE__;i++) {
+            for (var j=0;j<core.__SIZE__;j++) {
+                var x = i+core.bigmap.offsetX/32, y = j+core.bigmap.offsetY/32;
+                var directions = (movableArray[x]||{})[y];
+                if (directions == null) continue;
+                if (!directions.includes('left') && x != 0) {
+                    core.drawLine(fg, 32 * i + 1, 32 * j + 10, 32 * i + 1, 32 * j + 22, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 9, 32 * j + 12], [32 * i + 1, 32 * j + 16], [32 * i + 9, 32 * j + 20]], '#FF0000');
+                }
+                if (!directions.includes('right') && x != editor.currentFloorData.width - 1) {
+                    core.drawLine(fg, 32 * i + 31, 32 * j + 10, 32 * i + 31, 32 * j + 22, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 23, 32 * j + 12], [32 * i + 31, 32 * j + 16], [32 * i + 23, 32 * j + 20]], '#FF0000');
+                }
+                if (!directions.includes('up') && y != 0) {
+                    core.drawLine(fg, 32 * i + 10, 32 * j + 1, 32 * i + 22, 32 * j + 1, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 12, 32 * j + 9], [32 * i + 16, 32 * j + 1], [32 * i + 20, 32 * j + 9]], '#FF0000');
+                }
+                if (!directions.includes('down') && y != editor.currentFloorData.height - 1) {
+                    core.drawLine(fg, 32 * i + 10, 32 * j + 31, 32 * i + 22, 32 * j + 31, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 12, 32 * j + 23], [32 * i + 16, 32 * j + 31], [32 * i + 20, 32 * j + 23]], '#FF0000');
+                }
+            }
+        }
+        return;
     }
     for (var i=0;i<core.__SIZE__;i++) {
         for (var j=0;j<core.__SIZE__;j++) {
@@ -421,29 +445,6 @@ editor.prototype.drawEventBlock = function () {
                 editor.game.doCoreFunc("fillText", fg, "🔃", 32 * i + offset, 32 * j + 8, null, "8px Verdana");
                 offset += 8;
             }
-
-            var directions = (movableArray[x]||{})[y];
-            if (directions == null) continue;
-            if (!directions.includes('left') && x != 0) {
-                core.drawLine(fg, 32 * i + 1, 32 * j + 10, 32 * i + 1, 32 * j + 22, '#FF0000', 2);
-                core.drawLine(fg, 32 * i + 6, 32 * j + 13, 32 * i + 2, 32 * j + 16);
-                core.drawLine(fg, 32 * i + 6, 32 * j + 19, 32 * i + 2, 32 * j + 16);
-            }
-            if (!directions.includes('right') && x != editor.currentFloorData.width - 1) {
-                core.drawLine(fg, 32 * i + 31, 32 * j + 10, 32 * i + 31, 32 * j + 22, '#FF0000', 2);
-                core.drawLine(fg, 32 * i + 26, 32 * j + 13, 32 * i + 30, 32 * j + 16);
-                core.drawLine(fg, 32 * i + 26, 32 * j + 19, 32 * i + 30, 32 * j + 16);
-            }
-            if (!directions.includes('up') && y != 0) {
-                core.drawLine(fg, 32 * i + 10, 32 * j + 1, 32 * i + 22, 32 * j + 1, '#FF0000', 2);
-                core.drawLine(fg, 32 * i + 13, 32 * j + 6, 32 * i + 16, 32 * j + 2);
-                core.drawLine(fg, 32 * i + 19, 32 * j + 6, 32 * i + 16, 32 * j + 2);
-            }
-            if (!directions.includes('down') && y != editor.currentFloorData.height - 1) {
-                core.drawLine(fg, 32 * i + 10, 32 * j + 31, 32 * i + 22, 32 * j + 31, '#FF0000', 2);
-                core.drawLine(fg, 32 * i + 13, 32 * j + 26, 32 * i + 16, 32 * j + 30);
-                core.drawLine(fg, 32 * i + 19, 32 * j + 26, 32 * i + 16, 32 * j + 30);
-            }
         }
     }
 }
@@ -458,6 +459,24 @@ editor.prototype._drawEventBlock_bigmap = function () {
         movableArray = core.generateMovableArray() || {};
         fg.fillStyle = "rgba(0,0,0,0.4)";
         fg.fillRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+        for (var i = 0; i < editor.currentFloorData.width; ++i) {
+            for (var j = 0; j < editor.currentFloorData.height; ++j) {
+                var directions = (movableArray[i]||{})[j];
+                if (directions == null) continue;
+                if (!directions.includes('left') && i != 0) {
+                    core.drawLine(fg, info.left + size * i + 1, info.top + size * j + size / 3, info.left + size * i + 1, info.top + size * j + size * 2 / 3, '#FF0000', 2);
+                }
+                if (!directions.includes('right') && i != editor.currentFloorData.width - 1) {
+                    core.drawLine(fg, info.left + size * i + size - 1, info.top + size * j + size / 3, info.left + size * i + size - 1, info.top + size * j + size * 2 / 3, '#FF0000', 2);
+                }
+                if (!directions.includes('up') && j != 0) {
+                    core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j + 1, info.left + size * i + size * 2 / 3, info.top + size * j + 1, '#FF0000', 2);
+                }
+                if (!directions.includes('down') && j != editor.currentFloorData.height - 1) {
+                    core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j + size - 1, info.left + size * i + size * 2 / 3, info.top + size * j + size - 1, '#FF0000', 2);
+                }
+            }
+        }
     }
 
     for (var i = 0; i < editor.currentFloorData.width; ++i) {
@@ -467,22 +486,6 @@ editor.prototype._drawEventBlock_bigmap = function () {
                 fg.fillStyle = cc;
                 fg.fillRect(info.left + size * i + psize * kk, info.top + size * (j + 1) - psize, psize, psize);
             }
-
-            var directions = (movableArray[i]||{})[j];
-            if (directions == null) continue;
-            if (!directions.includes('left') && i != 0) {
-                core.drawLine(fg, info.left + size * i + 1, info.top + size * j + size / 3, info.left + size * i + 1, info.top + size * j + size * 2 / 3, '#FF0000', 2);
-            }
-            if (!directions.includes('right') && i != editor.currentFloorData.width - 1) {
-                core.drawLine(fg, info.left + size * i + size - 1, info.top + size * j + size / 3, info.left + size * i + size - 1, info.top + size * j + size * 2 / 3, '#FF0000', 2);
-            }
-            if (!directions.includes('up') && j != 0) {
-                core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j + 1, info.left + size * i + size * 2 / 3, info.top + size * j + 1, '#FF0000', 2);
-            }
-            if (!directions.includes('down') && j != editor.currentFloorData.height - 1) {
-                core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j + size - 1, info.left + size * i + size * 2 / 3, info.top + size * j + size - 1, '#FF0000', 2);
-            }
-
         }
     }
 }

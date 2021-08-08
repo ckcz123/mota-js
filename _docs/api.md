@@ -906,6 +906,9 @@ checkAutoEvents: fn()
 checkLvUp: fn()
 检查升级事件
 
+clearTextBox: fn(code: number)
+清除对话框
+
 closeDoor: fn(x: number, y: number, id: string, callback?: fn())
 关门，目标点必须为空地
 例如：core.closeDoor(0, 0, 'yellowWall', core.jumpHero); // 在左上角关掉一堵黄墙，然后主角原地跳跃半秒
@@ -1025,6 +1028,9 @@ opacityVal: 新的透明度，省略表示不变
 moveMode: 移动模式
 time: 移动用时，单位为毫秒。不填视为1秒
 callback: 图片移动完毕后的回调函数，可选
+
+moveTextBox: fn(code: number, loc: [number], relative?: bool, moveMode?: string, time?: number, callback?: fn())
+移动对话框
 
 onSki: fn(number?: number) -> bool
 当前是否在冰上

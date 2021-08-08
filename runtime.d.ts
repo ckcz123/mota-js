@@ -1248,6 +1248,12 @@ declare class events {
     /** 设置剧情文本的属性 */
     setTextAttribute(data: any): void
 
+    /** 清除对话框 */
+    clearTextBox(code: number): void
+
+    /** 移动对话框 */
+    moveTextBox(code: number, loc: [number], relative: bool, moveMode?: string, time?: number, callback?: () => any): void
+
     /** 设置文件别名 */
     setNameMap(name: string, value?: string): void
 

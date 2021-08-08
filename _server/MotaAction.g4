@@ -771,6 +771,8 @@ action
     :   text_0_s
     |   text_1_s
     |   text_2_s
+    |   moveTextBox_s
+    |   clearTextBox_s
     |   comment_s
     |   autoText_s
     |   scrollText_s
@@ -915,7 +917,7 @@ text_0_s
 tooltip : text：显示一段文字（剧情）
 helpUrl : /_docs/#/instruction
 previewBlock : true
-default : ["欢迎使用事件编辑器(回车直接多行编辑)"]
+default : ["欢迎使用事件编辑器(双击方块可直接预览)"]
 var code = '"'+EvalString_Multi_0+'"';
 if (block.isCollapsed() || !block.isEnabled()) {
     code = '{"type": "text", "text": '+code;
@@ -927,7 +929,7 @@ return code+',\n';
 */;
 
 text_1_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? BGNL? Newline EvalString_Multi Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi Newline
     
 
 /* text_1_s
@@ -935,7 +937,7 @@ tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮�
 helpUrl : /_docs/#/instruction
 previewBlock : true
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","","","","欢迎使用事件编辑器(回车直接多行编辑)"]
+default : ["小妖精","fairy","","","","",0,"欢迎使用事件编辑器(双击方块可直接预览)"]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -956,9 +958,10 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
     code = '{"type": "text", "text": '+code;
     if (pos) code += ', "pos": ' + pos;
+    if (Int_0) code += ', "code": ' + Int_0;
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';
@@ -967,7 +970,7 @@ return code+',\n';
 */;
 
 text_2_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString?  BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
     
 
 /* text_2_s
@@ -975,7 +978,7 @@ tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮�
 helpUrl : /_docs/#/instruction
 previewBlock : true
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","","","","欢迎使用事件编辑器(回车直接多行编辑)",null]
+default : ["小妖精","fairy","","","","",0,"欢迎使用事件编辑器(双击方块可直接预览)",null]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -996,9 +999,10 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
     code = '{"type": "text", "text": '+code;
     if (pos) code += ', "pos": ' + pos;
+    if (Int_0) code += ', "code": ' + Int_0;
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';
@@ -1058,6 +1062,32 @@ textDrawingEmpty
 var code = '';
 return code;
 */;
+
+moveTextBox_s
+    :   '移动对话框' ':' Int 'px' PosString 'py' PosString '使用增量' Bool '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
+
+/* moveTextBox_s
+tooltip : 移动对话框
+helpUrl : /_docs/#/instruction
+default : [1,"0","0",false,'',500,false]
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+Bool_0 = Bool_0 ?', "relative": true':'';
+Bool_1 = Bool_1 ?', "async": true':'';
+var code = '{"type": "moveTextBox", "code": '+Int_0+', "loc": ['+PosString_0+','+PosString_1+']'+Bool_0+MoveMode_List_0+', "time": '+Int_1+Bool_1+'},\n';
+return code;
+*/;
+
+clearTextBox_s
+    :   '清除对话框' ':' Int Newline
+
+/* clearTextBox_s
+tooltip : 清除对话框
+helpUrl : /_docs/#/instruction
+default : [1]
+var code = '{"type": "clearTextBox", "code": '+Int_0+'},\n';
+return code;
+*/;
+
 
 comment_s
     :   '添加注释' ':' EvalString_Multi Newline

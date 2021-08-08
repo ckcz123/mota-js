@@ -1354,8 +1354,28 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
+    var ctx = data.code ? '__text__' + data.code : null;;
+    data.ctx = ctx;
+    if (core.getContextByName(ctx) && !data.showAll) {
+        core.ui._animateUI('hide', ctx, function () {
+            core.ui.drawTextBox(data.text, data);
+            core.ui._animateUI('show', ctx);
+        });
+        return;
+    }
     core.ui.drawTextBox(data.text, data);
-    if (!data.showAll) core.ui._animateUI('show');
+    if (!data.showAll) core.ui._animateUI('show', ctx);
+}
+
+events.prototype._action_moveTextBox = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    this.__action_doAsyncFunc(data.async, core.moveTextBox, 
+        data.code, this.__action_getLoc(data.loc, x, y, prefix), data.relative, data.moveMode, data.time);
+}
+
+events.prototype._action_clearTextBox = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    core.clearTextBox(data.code, core.doAction);
 }
 
 events.prototype._action_autoText = function (data, x, y, prefix) {
@@ -3057,6 +3077,67 @@ events.prototype.setTextAttribute = function (data) {
     if (main.mode == 'play') core.setFlag('textAttribute', core.status.textAttribute);
 }
 
+events.prototype.moveTextBox = function (code, loc, relative, moveMode, time, callback) {
+    var ctx = core.getContextByName('__text__' + code);
+    if (!ctx) {
+        if (callback) callback();
+        return;
+    }
+    var sx = parseInt(ctx.canvas.getAttribute('_text_left')) || 0;
+    var sy = parseInt(ctx.canvas.getAttribute('_text_top')) || 0;
+    var dx = relative ? loc[0] : (loc[0] - sx);
+    var dy = relative ? loc[1] : (loc[1] - sy);
+    var ox = parseInt(ctx.canvas.getAttribute('_left')) || 0;
+    var oy = parseInt(ctx.canvas.getAttribute('_top')) || 0;
+
+    if (!time) {
+        core.relocateCanvas(ctx, ox + dx, oy + dy);
+        ctx.canvas.setAttribute('_text_left', loc[0]);
+        ctx.canvas.setAttribute('_text_top', loc[1]);
+        if (callback) callback();
+        return;
+    }
+
+    var moveInfo = {
+        sx: sx, sy: sy, dx: dx, dy: dy, ox: ox, oy: oy,
+        moveMode: moveMode, time: time / Math.max(core.status.replay.speed, 1)
+    };
+    this._moveTextBox_moving(ctx, moveInfo, callback);
+}
+
+events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
+    var step = 0, steps = moveInfo.time / 10;
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(moveInfo.moveMode);
+    var animate = setInterval(function () {
+        step++;
+        var dx = moveInfo.dx * moveFunc(step / steps);
+        var dy = moveInfo.dy * moveFunc(step / steps);
+        core.relocateCanvas(ctx, parseInt(moveInfo.ox + dx), parseInt(moveInfo.oy + dy));
+        ctx.canvas.setAttribute('_text_left', moveInfo.sx + dx);
+        ctx.canvas.setAttribute('_text_top', moveInfo.sy + dy);
+        if (step == steps) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+    }, 10);
+    core.animateFrame.asyncId[animate] = true;
+}
+
+////// 清除对话框 //////
+events.prototype.clearTextBox = function (code, callback) {
+    var ctx = '__text__' + code;
+    if (!core.getContextByName(ctx)) {
+        if (callback) callback();
+    }
+    core.ui._animateUI('hide', ctx, function () {
+        core.deleteCanvas(ctx);
+        if (callback) callback();
+    });
+}
+
+////// 关门 //////
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
     if ((core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null)

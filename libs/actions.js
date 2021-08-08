@@ -1019,26 +1019,33 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
     }
 }
 
+actions.prototype._clickAction_text = function () {
+    // 正在淡入淡出的话不执行
+    if (core.status.event.animateUI) return;
+    
+    var data = core.clone(core.status.event.data.current);
+    if (typeof data == 'string') data = { "type": "text", "text": data };
+
+    // 打字机效果显示全部文字
+    if (core.status.event.interval != null) {
+        data.showAll = true;
+        core.insertAction(data);
+        core.doAction();
+        return;
+    }
+
+    if (!data.code) {
+        core.ui._animateUI('hide', null, core.doAction);
+    } else {
+        // 不清除对话框
+        core.doAction();
+    }
+}
+
 ////// 自定义事件时的点击操作 //////
 actions.prototype._clickAction = function (x, y, px, py) {
     if (core.status.event.data.type == 'text') {
-        // 正在淡入淡出的话不执行
-        if (core.status.event.animateUI) return;
-        
-        var data = core.clone(core.status.event.data.current);
-        if (typeof data == 'string') data = { "type": "text", "text": data };
-
-        // 打字机效果显示全部文字
-        if (core.status.event.interval != null) {
-            data.showAll = true;
-            core.insertAction(data);
-            core.doAction();
-            return;
-        }
-
-        // 文字
-        core.ui._animateUI('hide', core.doAction);
-        return;
+        return this._clickAction_text();
     }
 
     if (core.status.event.data.type == 'wait') {
@@ -1125,20 +1132,7 @@ actions.prototype._keyDownAction = function (keycode) {
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype._keyUpAction = function (keycode) {
     if (core.status.event.data.type == 'text' && (keycode == 13 || keycode == 32 || keycode == 67)) {
-        // 正在淡入淡出的话不执行
-        if (core.status.event.animateUI) return;
-
-        var data = core.clone(core.status.event.data.current);
-        if (typeof data == 'string') data = { "type": "text", "text": data };
-
-        // 打字机效果显示全部文字
-        if (core.status.event.interval != null) {
-            data.showAll = true;
-            core.insertAction(data);
-            return;
-        }
-        core.ui._animateUI('hide', core.doAction);
-        return;
+        return this._clickAction_text();
     }
     if (core.status.event.data.type == 'wait') {
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;

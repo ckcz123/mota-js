@@ -1382,7 +1382,8 @@ ui.prototype._getRealContent = function (content) {
     return content.replace(/(\r|\\(r|c|d|e|g|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
 }
 
-ui.prototype._animateUI = function (type, callback) {
+ui.prototype._animateUI = function (type, ctx, callback) {
+    ctx = ctx || 'ui';
     var time = core.status.textAttribute.animateTime || 0;
     if (!core.status.event || !time || core.isReplaying() || (type != 'show' && type != 'hide')) {
         if (callback) callback();
@@ -1395,12 +1396,12 @@ ui.prototype._animateUI = function (type, callback) {
     } else if (type == 'hide') {
         opacity = 1;
     }
-    core.setOpacity('ui', opacity);
+    core.setOpacity(ctx, opacity);
     core.dom.next.style.opacity = opacity;
     core.status.event.animateUI = setInterval(function () {
         if (type == 'show') opacity += 0.05;
         else opacity -= 0.05;
-        core.setOpacity('ui', opacity);
+        core.setOpacity(ctx, opacity);
         core.dom.next.style.opacity = opacity;
         if (opacity >= 1 || opacity <= 0) {
             clearInterval(core.status.event.animateUI);
@@ -1416,7 +1417,11 @@ ui.prototype.drawTextBox = function(content, config) {
 
     this.clearUI();
 
-    content = core.replaceText(content);
+    var ctx = config.ctx || null;
+    if (ctx && main.mode == 'play') {
+        core.createCanvas(ctx, 0, 0, core.__PIXELS__, core.__PIXELS__, 141);
+        ctx = core.getContextByName(ctx);
+    }
 
     // Step 1: 获得标题信息和位置信息
     var textAttribute = core.status.textAttribute;
@@ -1430,13 +1435,18 @@ ui.prototype.drawTextBox = function(content, config) {
         delete posInfo.py;
         posInfo.pos = config.pos;
     }
-    posInfo.ctx = config.ctx;
+    posInfo.ctx = ctx;
 
     // Step 2: 计算对话框的矩形位置
     var hPos = this._drawTextBox_getHorizontalPosition(content, titleInfo, posInfo);
     var vPos = this._drawTextBox_getVerticalPosition(content, titleInfo, posInfo, hPos.validWidth);
     posInfo.xoffset = hPos.xoffset;
     posInfo.yoffset = vPos.yoffset - 4;
+
+    if (ctx && main.mode == 'play') {
+        ctx.canvas.setAttribute('_text_left', hPos.left);
+        ctx.canvas.setAttribute('_text_top', vPos.top);
+    }
 
     // Step 3: 绘制背景图
     var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, posInfo);

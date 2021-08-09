@@ -1781,7 +1781,7 @@ control.prototype._replayAction_turn = function (action) {
 
 control.prototype._replayAction_getNext = function (action) {
     if (action != "getNext") return false;
-    if (!core.getNextItem()) return false;
+    core.getNextItem();
     core.replay();
     return true;
 }

@@ -939,20 +939,20 @@ actions.prototype._clickCenterFly = function (x, y) {
         }
         else {
             core.playSound('操作失败');
-            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name, 'centerFly');
         }
     }
 }
 
 actions.prototype._keyUpCenterFly = function (keycode) {
     core.ui.closePanel();
-    if (keycode == 51 || keycode == 13 || keycode == 32 || keycode == 67) {
+    if (keycode == 13 || keycode == 32 || keycode == 67) {
         if (core.canUseItem('centerFly')) {
             core.useItem('centerFly');
         }
         else {
             core.playSound('操作失败');
-            core.drawTip('当前不能使用' + core.material.items['centerFly'].name);
+            core.drawTip('当前不能使用' + core.material.items['centerFly'].name, 'centerFly');
         }
     }
 }
@@ -975,13 +975,13 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
     }
     if (keycode == 13 || keycode == 32 || keycode == 67) {
         if (core.status.event.selection == 0 && core.status.event.data.yes) {
-            core.playSound('确定');
+            // core.playSound('确定');
             core.status.event.selection = null;
             core.status.event.data.yes();
             return;
         }
         if (core.status.event.selection == 1 && core.status.event.data.no) {
-            core.playSound('确定');
+            // core.playSound('确定');
             core.status.event.selection = null;
             core.status.event.data.no();
             return;
@@ -1019,22 +1019,33 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
     }
 }
 
+actions.prototype._clickAction_text = function () {
+    // 正在淡入淡出的话不执行
+    if (core.status.event.animateUI) return;
+    
+    var data = core.clone(core.status.event.data.current);
+    if (typeof data == 'string') data = { "type": "text", "text": data };
+
+    // 打字机效果显示全部文字
+    if (core.status.event.interval != null) {
+        data.showAll = true;
+        core.insertAction(data);
+        core.doAction();
+        return;
+    }
+
+    if (!data.code) {
+        core.ui._animateUI('hide', null, core.doAction);
+    } else {
+        // 不清除对话框
+        core.doAction();
+    }
+}
+
 ////// 自定义事件时的点击操作 //////
 actions.prototype._clickAction = function (x, y, px, py) {
     if (core.status.event.data.type == 'text') {
-        // 正在淡入淡出的话不执行
-        if (core.status.event.animateUI) return;
-
-        // 打字机效果显示全部文字
-        if (core.status.event.interval != null) {
-            core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
-            core.doAction();
-            return;
-        }
-
-        // 文字
-        core.ui._animateUI('hide', core.doAction);
-        return;
+        return this._clickAction_text();
     }
 
     if (core.status.event.data.type == 'wait') {
@@ -1121,17 +1132,7 @@ actions.prototype._keyDownAction = function (keycode) {
 ////// 自定义事件时，放开某个键的操作 //////
 actions.prototype._keyUpAction = function (keycode) {
     if (core.status.event.data.type == 'text' && (keycode == 13 || keycode == 32 || keycode == 67)) {
-        // 正在淡入淡出的话不执行
-        if (core.status.event.animateUI) return;
-
-        // 打字机效果显示全部文字
-        if (core.status.event.interval != null) {
-            core.insertAction({"type": "text", "text": core.status.event.ui, "showAll": true});
-            core.doAction();
-            return;
-        }
-        core.ui._animateUI('hide', core.doAction);
-        return;
+        return this._clickAction_text();
     }
     if (core.status.event.data.type == 'wait') {
         var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
@@ -1440,6 +1441,10 @@ actions.prototype._keyUpViewMaps = function (keycode) {
         } else {
             core.openBook(false);
         }
+        return;
+    }
+    if (keycode == 71 && !core.isReplaying()) {
+        core.useFly(false);
         return;
     }
     return;
@@ -2437,11 +2442,11 @@ actions.prototype._clickSettings = function (x, y) {
                 core.ui._drawSwitchs();
                 break;
             case 1:
-                core.playSound('确定');
+                // core.playSound('确定');
                 core.ui._drawKeyBoard();
                 break;
             case 2:
-                core.playSound('确定');
+                // core.playSound('确定');
                 core.clearUI();
                 core.ui._drawViewMaps();
                 break;
@@ -2496,7 +2501,7 @@ actions.prototype._clickNotes = function (x, y) {
                 this._clickNotes_new();
                 break;
             case 1:
-                core.playSound('确定');
+                // core.playSound('确定');
                 this._clickNotes_show();
                 break;
             case 2:
@@ -2504,6 +2509,7 @@ actions.prototype._clickNotes = function (x, y) {
                 this._clickNotes_edit();
                 break;
             case 3:
+                core.playSound('确定');
                 this._clickNotes_delete();
                 break;
             case 4:
@@ -2539,6 +2545,7 @@ actions.prototype._clickNotes_new = function () {
 }
 
 actions.prototype._clickNotes_show = function () {
+    core.playSound('确定');
     core.status.hero.notes = core.status.hero.notes || [];
     var result = [];
     for (var i = 0; i < core.status.hero.notes.length; i+=5) {
@@ -2580,6 +2587,7 @@ actions.prototype._clickNotes_edit = function () {
 actions.prototype._clickNotes_delete = function () {
     core.status.hero.notes = core.status.hero.notes || [];
     if (core.status.hero.notes.length == 0) {
+        core.stopSound();
         core.playSound('操作失败');
         core.drawText("当前没有存档笔记，无法删除！");
     } else {
@@ -2646,7 +2654,7 @@ actions.prototype._clickSyncSave = function (x, y) {
                 core.playSound('确定');
                 return this._clickSyncSave_readFile();
             case 4:
-                core.playSound('确定');
+                // core.playSound('确定');
                 return this._clickSyncSave_replay();
             case 5:
                 core.status.event.selection = 0;
@@ -2786,7 +2794,7 @@ actions.prototype._clickStorageRemove = function (x, y) {
             case 1:
                 return this._clickStorageRemove_current();
             case 2:
-                core.status.event.selection = 6;
+                core.status.event.selection = 5;
                 core.playSound('取消');
                 core.ui._drawSyncSave();
                 break;
@@ -3067,8 +3075,10 @@ actions.prototype._clickKeyBoard = function (x, y) {
         if (x == m + 3) core.keyUp(13); // ENTER
         if (x == m + 4) core.keyUp(46); // DEL
     }
-    if (y == m + 4 && x >= m + 3 && x <= m + 5)
+    if (y == m + 4 && x >= m + 3 && x <= m + 5) {
+        core.playSound('取消');
         core.ui.closePanel();
+    }
 }
 
 ////// 光标界面时的点击操作 //////
@@ -3087,25 +3097,25 @@ actions.prototype._clickCursor = function (x, y, px, py) {
 actions.prototype._keyDownCursor = function (keycode) {
     if (keycode == 37) { // left
         core.status.automaticRoute.cursorX--;
-        core.playSound('确定');
+        core.playSound('光标移动');
         core.ui._drawCursor();
         return;
     }
     if (keycode == 38) { // up
         core.status.automaticRoute.cursorY--;
-        core.playSound('确定');
+        core.playSound('光标移动');
         core.ui._drawCursor();
         return;
     }
     if (keycode == 39) { // right
         core.status.automaticRoute.cursorX++;
-        core.playSound('确定');
+        core.playSound('光标移动');
         core.ui._drawCursor();
         return;
     }
     if (keycode == 40) { // down
         core.status.automaticRoute.cursorY++;
-        core.playSound('确定');
+        core.playSound('光标移动');
         core.ui._drawCursor();
         return;
     }

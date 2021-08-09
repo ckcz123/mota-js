@@ -1354,8 +1354,28 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
-    core.ui.drawTextBox(data.text, data.showAll);
-    if (!data.showAll) core.ui._animateUI('show');
+    var ctx = data.code ? '__text__' + data.code : null;;
+    data.ctx = ctx;
+    if (core.getContextByName(ctx) && !data.showAll) {
+        core.ui._animateUI('hide', ctx, function () {
+            core.ui.drawTextBox(data.text, data);
+            core.ui._animateUI('show', ctx);
+        });
+        return;
+    }
+    core.ui.drawTextBox(data.text, data);
+    if (!data.showAll) core.ui._animateUI('show', ctx);
+}
+
+events.prototype._action_moveTextBox = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    this.__action_doAsyncFunc(data.async, core.moveTextBox, 
+        data.code, this.__action_getLoc(data.loc, x, y, prefix), data.relative, data.moveMode, data.time);
+}
+
+events.prototype._action_clearTextBox = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    core.clearTextBox(data.code, core.doAction);
 }
 
 events.prototype._action_autoText = function (data, x, y, prefix) {
@@ -1380,23 +1400,7 @@ events.prototype._action__label = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setText = function (data, x, y, prefix) {
-    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "letterSpacing", "animateTime"].forEach(function (t) {
-        if (data[t] != null) core.status.textAttribute[t] = data[t];
-    });
-    ["background", "title", "text"].forEach(function (t) {
-        if ((data[t] instanceof Array) && data[t].length >= 3) {
-            if (data[t].length == 3) data[t].push(1);
-            core.status.textAttribute[t] = data[t];
-        }
-        if (t == 'background') {
-            var name = core.getMappedName(data[t]);
-            var img = core.material.images.images[name];
-            if (img && img.width == 192 && img.height == 128) {
-                core.status.textAttribute[t] = name;
-            }
-        }
-    });
-    core.setFlag('textAttribute', core.status.textAttribute);
+    this.setTextAttribute(data);
     core.doAction();
 }
 
@@ -2707,6 +2711,20 @@ events.prototype.openBook = function (fromUserAction) {
 ////// 点击楼层传送器时的打开操作 //////
 events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
+    // 从“浏览地图”页面：尝试直接传送到该层
+    if (core.status.event.id == 'viewMaps') {
+        if (!core.hasItem('fly')) {
+            core.playSound('操作失败');
+            core.drawTip('你没有' + core.material.items['fly'].name, 'fly');
+        } else if (!core.canUseItem('fly')) {
+            core.playSound('操作失败');
+            core.drawTip('无法传送到当前层', 'fly');
+        } else {
+            core.flyTo(core.status.event.data.floorId);
+        }
+        return;
+    }
+
     if (!this._checkStatus('fly', fromUserAction, true)) return;
     if (core.flags.flyNearStair && !core.nearStair()) {
         core.playSound('操作失败');
@@ -3037,6 +3055,89 @@ events.prototype.setNameMap = function (name, value) {
     flags.__nameMap__[name] = value;
 }
 
+////// 设置剧情文本的属性 //////
+events.prototype.setTextAttribute = function (data) {
+    if (!core.isPlaying()) return;
+    ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "letterSpacing", "animateTime"].forEach(function (t) {
+        if (data[t] != null) core.status.textAttribute[t] = data[t];
+    });
+    ["background", "title", "text"].forEach(function (t) {
+        if ((data[t] instanceof Array) && data[t].length >= 3) {
+            if (data[t].length == 3) data[t].push(1);
+            core.status.textAttribute[t] = data[t];
+        }
+        if (t == 'background') {
+            var name = core.getMappedName(data[t]);
+            var img = core.material.images.images[name];
+            if (img && img.width == 192 && img.height == 128) {
+                core.status.textAttribute[t] = name;
+            }
+        }
+    });
+    if (main.mode == 'play') core.setFlag('textAttribute', core.status.textAttribute);
+}
+
+events.prototype.moveTextBox = function (code, loc, relative, moveMode, time, callback) {
+    var ctx = core.getContextByName('__text__' + code);
+    if (!ctx) {
+        if (callback) callback();
+        return;
+    }
+    var sx = parseInt(ctx.canvas.getAttribute('_text_left')) || 0;
+    var sy = parseInt(ctx.canvas.getAttribute('_text_top')) || 0;
+    var dx = relative ? loc[0] : (loc[0] - sx);
+    var dy = relative ? loc[1] : (loc[1] - sy);
+    var ox = parseInt(ctx.canvas.getAttribute('_left')) || 0;
+    var oy = parseInt(ctx.canvas.getAttribute('_top')) || 0;
+
+    if (!time) {
+        core.relocateCanvas(ctx, ox + dx, oy + dy);
+        ctx.canvas.setAttribute('_text_left', loc[0]);
+        ctx.canvas.setAttribute('_text_top', loc[1]);
+        if (callback) callback();
+        return;
+    }
+
+    var moveInfo = {
+        sx: sx, sy: sy, dx: dx, dy: dy, ox: ox, oy: oy,
+        moveMode: moveMode, time: time / Math.max(core.status.replay.speed, 1)
+    };
+    this._moveTextBox_moving(ctx, moveInfo, callback);
+}
+
+events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
+    var step = 0, steps = moveInfo.time / 10;
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(moveInfo.moveMode);
+    var animate = setInterval(function () {
+        step++;
+        var dx = moveInfo.dx * moveFunc(step / steps);
+        var dy = moveInfo.dy * moveFunc(step / steps);
+        core.relocateCanvas(ctx, parseInt(moveInfo.ox + dx), parseInt(moveInfo.oy + dy));
+        ctx.canvas.setAttribute('_text_left', moveInfo.sx + dx);
+        ctx.canvas.setAttribute('_text_top', moveInfo.sy + dy);
+        if (step == steps) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+    }, 10);
+    core.animateFrame.asyncId[animate] = true;
+}
+
+////// 清除对话框 //////
+events.prototype.clearTextBox = function (code, callback) {
+    var ctx = '__text__' + code;
+    if (!core.getContextByName(ctx)) {
+        if (callback) callback();
+    }
+    core.ui._animateUI('hide', ctx, function () {
+        core.deleteCanvas(ctx);
+        if (callback) callback();
+    });
+}
+
+////// 关门 //////
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
     if ((core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null)
@@ -3500,6 +3601,6 @@ events.prototype.tryUseItem = function (itemId) {
         core.useItem(itemId);
     } else {
         core.playSound('操作失败');
-        core.drawTip("当前无法使用" + core.material.items[itemId].name);
+        core.drawTip("当前无法使用" + core.material.items[itemId].name, itemId);
     }
 }

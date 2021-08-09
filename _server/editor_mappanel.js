@@ -774,12 +774,13 @@ editor_mappanel_wrapper = function (editor) {
     }
 
     /**
-     * editor.dom.lockMode.onchange
+     * editor.dom.showMovable.onchange
      * 点击【】
      */
-    editor.uifunctions.lockMode_onchange = function () {
-        printf('锁定模式开启下将不再点击空白处自动保存，请谨慎操作。');
-        editor.uivalues.lockMode = editor.dom.lockMode.checked;
+    editor.uifunctions.showMovable_onchange = function () {
+        printf('此模式下将显示每个点的不可通行状态。<br/>请注意，修改了图块属性的不可出入方向后需要刷新才会正确显示在地图上。');
+        editor.uivalues.showMovable = editor.dom.showMovable.checked;
+        editor.drawEventBlock();
     }
 
     /**

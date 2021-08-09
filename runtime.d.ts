@@ -1245,6 +1245,18 @@ declare class events {
     /** 设置全塔属性 */
     setGlobalAttribute(name: string, value: any): void
 
+    /** 设置剧情文本的属性 */
+    setTextAttribute(data: any): void
+
+    /** 清除对话框 */
+    clearTextBox(code: number): void
+
+    /** 移动对话框 */
+    moveTextBox(code: number, loc: [number], relative: bool, moveMode?: string, time?: number, callback?: () => any): void
+
+    /** 设置文件别名 */
+    setNameMap(name: string, value?: string): void
+
     /** 检查升级事件 */
     checkLvUp(): void
 }
@@ -2247,7 +2259,7 @@ declare class ui {
     getTextContentHeight(content: string, config?: any): void
 
     /** 绘制一个对话框 */
-    drawTextBox(content: string, showAll?: boolean): void
+    drawTextBox(content: string, config?: any): void
 
     /** 绘制滚动字幕 */
     drawScrollText(content: string, time: number, lineHeight?: number, callback?: () => any): void

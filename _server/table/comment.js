@@ -201,8 +201,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"zoneSquare": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "九宫格领域",
-					"_data": "领域或光环怪是否九宫格"
+					"_docs": "九宫格",
+					"_data": "领域、阻击、光环或捕捉怪是否九宫格"
 				},
 				"range": {
 					"_leaf": true,
@@ -627,8 +627,18 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 								"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
 								"key": ["up", "down", "left", "right"]
 							},
-							"_docs": "不可通行性",
-							"_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表该点不能往上和左走"
+							"_docs": "不可出方向",
+							"_data": "该点不可通行出的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果"
+						},
+						"cannotMoveIn": {
+							"_leaf": true,
+							"_type": "checkboxSet",
+							"_checkboxSet": {
+								"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+								"key": ["up", "down", "left", "right"]
+							},
+							"_docs": "不可入方向",
+							"_data": "该点不可通行入的方向 \n 可以在这里定义从哪个方向前往该点，可以达到悬崖之类的效果"
 						},
 					}
 				}
@@ -664,7 +674,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"afterGetItem": {},
 			"afterOpenDoor": {},
 			"autoEvent": {},
-			"cannotMove": {}
+			"cannotMove": {},
+			"cannotMoveIn": {}
 		}
 	}
 }

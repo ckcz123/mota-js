@@ -241,6 +241,8 @@ editor_blockly = function () {
         return hasAsync;
     }
 
+    var _isTextAttributeSet = false;
+
     editor_blockly.previewBlock = function (b,args) {
 
         var previewTextDrawing = function (content) {
@@ -283,7 +285,7 @@ editor_blockly = function () {
 
         try {
             // 特殊处理立绘
-            if (b.type == 'textDrawing' || b.type == 'text_2_s') {
+            if (b.type == 'textDrawing') {
                 previewTextDrawing(Blockly.JavaScript.blockToCode(b));
                 return true;
             }
@@ -293,6 +295,23 @@ editor_blockly = function () {
             if (obj.length == 0) return true;
             obj = obj[0];
             switch (b.type) {
+            case 'text_0_s':
+            case 'text_1_s':
+            case 'text_2_s':
+            case 'choices_s':
+                if (!_isTextAttributeSet) {
+                    alert('警告！你尚未设置用于预览的剧情文本的属性，将采用默认属性进行预览。\n你可以双击“设置剧情文本的属性”事件来设置用于预览的属性。');
+                    core.status.textAttribute = core.clone(core.initStatus.textAttribute);
+                    _isTextAttributeSet = true;
+                }
+                editor.uievent.previewUI([obj]);
+                break;
+            case 'setText_s': // 设置剧情文本的属性
+                _isTextAttributeSet = true;
+                core.status.textAttribute = core.clone(core.initStatus.textAttribute);
+                core.setTextAttribute(obj);
+                alert('已成功设置此属性为显示文章的预览属性！')
+                break;
             case 'waitContext_2': // 等待用户操作坐标预览
                 editor.uievent.previewUI([{"type": "fillRect", "x": obj.px[0], "y": obj.py[0],
                     "width": "(" + obj.px[1] + ")-(" + obj.px[0] + ")", "height": "(" + obj.py[1] + ")-(" + obj.py[0] + ")",

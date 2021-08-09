@@ -771,6 +771,8 @@ action
     :   text_0_s
     |   text_1_s
     |   text_2_s
+    |   moveTextBox_s
+    |   clearTextBox_s
     |   comment_s
     |   autoText_s
     |   scrollText_s
@@ -914,8 +916,8 @@ text_0_s
 /* text_0_s
 tooltip : text：显示一段文字（剧情）
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
-default : ["欢迎使用事件编辑器(回车直接多行编辑)"]
+previewBlock : true
+default : ["欢迎使用事件编辑器(双击方块可直接预览)"]
 var code = '"'+EvalString_Multi_0+'"';
 if (block.isCollapsed() || !block.isEnabled()) {
     code = '{"type": "text", "text": '+code;
@@ -927,15 +929,15 @@ return code+',\n';
 */;
 
 text_1_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? BGNL? Newline EvalString_Multi Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi Newline
     
 
 /* text_1_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","欢迎使用事件编辑器(回车直接多行编辑)"]
+default : ["小妖精","fairy","","","","",0,"欢迎使用事件编辑器(双击方块可直接预览)"]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -944,13 +946,22 @@ if (EvalString_0==''){
     if (EvalString_1=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
+var pos = '';
+if (PosString_0 || PosString_1) {
+    if (EvalString_2) throw new Error('对话框效果和起点像素位置只能设置一项！');
+    pos = '[' + (PosString_0||0) + ',' + (PosString_1||0);
+    if (PosString_2) pos += ',' + PosString_2;
+    pos += ']';
+}
 if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled()) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
     code = '{"type": "text", "text": '+code;
+    if (pos) code += ', "pos": ' + pos;
+    if (Int_0) code += ', "code": ' + Int_0;
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';
@@ -959,16 +970,15 @@ return code+',\n';
 */;
 
 text_2_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
     
 
 /* text_2_s
 tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮助
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 allIds : ['EvalString_1']
-menu : [['预览所有立绘','editor_blockly.previewBlock(block)']]
-default : ["小妖精","fairy","","欢迎使用事件编辑器(回车直接多行编辑)",null]
+default : ["小妖精","fairy","","","","",0,"欢迎使用事件编辑器(双击方块可直接预览)",null]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -977,13 +987,22 @@ if (EvalString_0==''){
     if (EvalString_1=='')title='\\t['+EvalString_0+']';
     else title='\\t['+EvalString_0+','+EvalString_1+']';
 }
+var pos = '';
+if (PosString_0 || PosString_1) {
+    if (EvalString_2) throw new Error('对话框效果和起点像素位置只能设置一项！');
+    pos = '[' + (PosString_0||0) + ',' + (PosString_1||0);
+    if (PosString_2) pos += ',' + PosString_2;
+    pos += ']';
+}
 if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.test(EvalString_2))) {
   throw new Error('对话框效果的用法请右键点击帮助');
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled()) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
     code = '{"type": "text", "text": '+code;
+    if (pos) code += ', "pos": ' + pos;
+    if (Int_0) code += ', "code": ' + Int_0;
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';
@@ -1043,6 +1062,32 @@ textDrawingEmpty
 var code = '';
 return code;
 */;
+
+moveTextBox_s
+    :   '移动对话框' ':' Int 'px' PosString 'py' PosString '使用增量' Bool '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
+
+/* moveTextBox_s
+tooltip : 移动对话框
+helpUrl : /_docs/#/instruction
+default : [1,"0","0",false,'',500,false]
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+Bool_0 = Bool_0 ?', "relative": true':'';
+Bool_1 = Bool_1 ?', "async": true':'';
+var code = '{"type": "moveTextBox", "code": '+Int_0+', "loc": ['+PosString_0+','+PosString_1+']'+Bool_0+MoveMode_List_0+', "time": '+Int_1+Bool_1+'},\n';
+return code;
+*/;
+
+clearTextBox_s
+    :   '清除对话框' ':' Int Newline
+
+/* clearTextBox_s
+tooltip : 清除对话框
+helpUrl : /_docs/#/instruction
+default : [1]
+var code = '{"type": "clearTextBox", "code": '+Int_0+'},\n';
+return code;
+*/;
+
 
 comment_s
     :   '添加注释' ':' EvalString_Multi Newline
@@ -1105,6 +1150,7 @@ setText_s
 /* setText_s
 tooltip : setText：设置剧情文本的属性,颜色为RGB三元组或RGBA四元组,打字间隔为剧情文字添加的时间间隔,为整数或不填，字符间距为字符之间的距离，为整数或不填。
 helpUrl : /_docs/#/instruction
+previewBlock : true
 default : [null,"",null,null,"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"",'rgba(255,255,255,1)',"","","","","",""]
 SetTextPosition_List_0 =SetTextPosition_List_0==='null'?'': ', "position": "'+SetTextPosition_List_0+'"';
 TextAlign_List_0 = TextAlign_List_0==='null'?'': ', "align": "'+TextAlign_List_0+'"';
@@ -2673,7 +2719,7 @@ choices_s
 /* choices_s
 tooltip : choices: 给用户提供选项
 helpUrl : /_docs/#/instruction
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 default : ["","流浪者","trader",0]
 allIds : ['IdString_0']
 var title='';
@@ -3883,8 +3929,8 @@ Global_Attribute_List
     /*Global_Attribute_List ['font','statusLeftBackground','statusTopBackground', 'toolsBackground', 'borderColor', 'statusBarColor', 'selectColor', 'floorChangingStyle', 'equipName']*/;
 
 Global_Value_List
-    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'动画时间'
-    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redGem', 'blueGem', 'greenGem', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'animateSpeed']*/;
+    :   '血网伤害'|'中毒伤害'|'衰弱效果'|'红宝石效果'|'蓝宝石效果'|'绿宝石效果'|'红血瓶效果'|'蓝血瓶效果'|'黄血瓶效果'|'绿血瓶效果'|'破甲比例'|'反击比例'|'净化比例'|'仇恨增加值'|'图块每帧时间'|'上下楼时间'
+    /*Global_Value_List ['lavaDamage','poisonDamage','weakValue', 'redGem', 'blueGem', 'greenGem', 'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'breakArmor', 'counterAttack', 'purify', 'hatred', 'animateSpeed', 'floorChangeTime']*/;
 
 
 Global_Flag_List
@@ -3956,7 +4002,7 @@ Id_List
     /*Id_List ['flag','status','item', 'buff', 'switch', 'temp', 'global']*/;
 
 EnemyId_List
-    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'属性'|'名称'|'映射名'|'属性值'|'退化扣攻'|'退化扣防'|'不可炸'|'九宫格领域'|'领域范围'|'连击数'|'吸血到自身'|'固伤值'
+    :   '生命'|'攻击'|'防御'|'金币'|'经验'|'加点'|'特殊属性'|'名称'|'映射名'|'属性值'|'退化扣攻'|'退化扣防'|'不可炸'|'九宫格领域'|'领域范围'|'连击数'|'吸血到自身'|'固伤值'
     /*EnemyId_List ['hp','atk','def','money','exp','point','special','name','displayInBook','value','atkValue','defValue','notBomb','zoneSquare','range','n','add','damage']*/;
 
 EnemyPoint_List

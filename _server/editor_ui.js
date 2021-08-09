@@ -392,9 +392,27 @@ editor_ui_wrapper = function (editor) {
 
         if (uievent.values.list instanceof Array) {
             uievent.values.list.forEach(function (data) {
+                if (typeof data == 'string') data = { "type": "text", "text": data };
                 var type = data.type;
-                if (!type || !core.ui["_uievent_" + type]) return;
-                core.ui["_uievent_" + type](data);
+                if (type == "text") {
+                    data.ctx = 'uievent';
+                    core.saveCanvas('uievent');
+                    core.drawTextBox(data.text, data);
+                    core.loadCanvas('uievent');
+                    return;
+                }
+                else if (type == "choices") {
+                    for (var i = 0; i < data.choices.length; i++) {
+                        if (typeof data.choices[i] === 'string')
+                            data.choices[i] = {"text": data.choices[i]};
+                        data.choices[i].text = core.replaceText(data.choices[i].text);
+                    }
+                    core.saveCanvas('uievent');
+                    core.drawChoices(core.replaceText(data.text), data.choices, 'uievent');
+                    core.loadCanvas('uievent');
+                    return;
+                } else if (core.ui["_uievent_" + type])
+                    core.ui["_uievent_" + type](data);
             })
         }
     }

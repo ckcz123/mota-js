@@ -906,6 +906,9 @@ checkAutoEvents: fn()
 checkLvUp: fn()
 检查升级事件
 
+clearTextBox: fn(code: number)
+清除对话框
+
 closeDoor: fn(x: number, y: number, id: string, callback?: fn())
 关门，目标点必须为空地
 例如：core.closeDoor(0, 0, 'yellowWall', core.jumpHero); // 在左上角关掉一堵黄墙，然后主角原地跳跃半秒
@@ -1026,6 +1029,9 @@ moveMode: 移动模式
 time: 移动用时，单位为毫秒。不填视为1秒
 callback: 图片移动完毕后的回调函数，可选
 
+moveTextBox: fn(code: number, loc: [number], relative?: bool, moveMode?: string, time?: number, callback?: fn())
+移动对话框
+
 onSki: fn(number?: number) -> bool
 当前是否在冰上
 
@@ -1141,6 +1147,12 @@ setHeroIcon: fn(name: string, noDraw?: bool)
 例如：core.setHeroIcon('npc48.png', true); // 把主角从阳光变成样板0层左下角的小姐姐，但不立即刷新
 name: 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入core.status.hero.image
 noDraw: true表示不立即刷新（刷新会导致大地图下视野重置到以主角为中心）
+
+setNameMap: fn(name: string, value?: string)
+设置文件别名
+
+setTextAttribute: fn(data: ?)
+设置剧情文本的属性
 
 setValue: fn(name: string, operator: string, value: ?, prefix?: string)
 数值操作

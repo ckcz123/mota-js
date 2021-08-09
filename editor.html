@@ -316,8 +316,8 @@
                 <option value="commonevent">公共事件</option>
                 <option value="plugins">插件编写</option>
             </select>
-            <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定</span>
-            <select id="editorTheme" style="margin-left: 3px;">
+            <span style="font-size: 12px"><input type="checkbox" id="showMovable"/>通行度</span>
+            <select id="editorTheme" style="margin-left: 3px; font-size: 11px;">
                 <option value="editor_color">默认白</option>
                 <option value="editor_color_dark">夜间黑</option>
             </select>
@@ -348,6 +348,7 @@
             <input type="button" value="保存地图" id='saveFloor'/>
             <input type="button" value="后退" id="undoFloor" />
             <input type="button" value="查看帮助文档" id="openDoc" />
+            <input type="button" value="前往游戏" onclick="window.open('./index.html', '_blank')"/>
         </div>
     </div>
     <div id="mid2">

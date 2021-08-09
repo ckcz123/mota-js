@@ -743,10 +743,8 @@ ui.prototype.drawText = function (contents, callback) {
     }
 
     var data=core.status.event.data.list.shift();
-    if (typeof data == 'string')
-        core.ui.drawTextBox(data);
-    else
-        core.ui.drawTextBox(data.content, data.id);
+    if (typeof data == 'string') data = { "text": data };
+    core.ui.drawTextBox(data.text, data);
 }
 
 ui.prototype._drawText_setContent = function (contents, callback) {
@@ -816,12 +814,16 @@ ui.prototype._getPosition = function (content) {
         px = core.status.event.data.x;
         py = core.status.event.data.y;
     }
+    if (main.mode != 'play') {
+        px = editor.pos.x;
+        py = editor.pos.y;
+    }
     content = content.replace("\b", "\\b")
         .replace(/\\b\[(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?]/g, function (s0, s1, s2, s3) {
             pos = s1;
             if (s3 == 'hero' || s1=='hero' && !s3) {
-                px = core.status.hero.loc.x;
-                py = core.status.hero.loc.y;
+                px = core.getHeroLoc('x');
+                py = core.getHeroLoc('y');
             }
             else if (s3 == 'null') {
                 px = py = null;
@@ -956,10 +958,10 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     var xoffset = posInfo.xoffset || 0, yoffset = posInfo.yoffset || 0;
     var background = core.status.textAttribute.background;
 
-    if (this._drawBackground_drawWindowSkin(background, left, top, right, bottom, posInfo.position, px, py))
+    if (this._drawBackground_drawWindowSkin(background, left, top, right, bottom, posInfo.position, px, py, posInfo.ctx))
         return true;
     if (typeof background == 'string') background = core.initStatus.textAttribute.background;
-    this._drawBackground_drawColor(background, left, top, right, bottom, posInfo.position, px, py, xoffset, yoffset);
+    this._drawBackground_drawColor(background, left, top, right, bottom, posInfo.position, px, py, xoffset, yoffset, posInfo.ctx);
     return false;
 }
 
@@ -980,27 +982,29 @@ ui.prototype._drawWindowSkin_getOpacity = function () {
     return core.getFlag("__winskin_opacity__", 0.85);
 }
 
-ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, right, bottom, position, px, py) {
+ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, right, bottom, position, px, py, ctx) {
+    ctx = ctx || 'ui';
     if (typeof background == 'string' && core.material.images.images[background]) {
         var image = core.material.images.images[background];
         if (image.width==192 && image.height==128) {
-            core.setAlpha('ui', this._drawWindowSkin_getOpacity());
-            this.drawWindowSkin(image, 'ui', left, top, right - left, bottom - top, position, px, py);
-            core.setAlpha('ui', 1);
+            core.setAlpha(ctx, this._drawWindowSkin_getOpacity());
+            this.drawWindowSkin(image, ctx, left, top, right - left, bottom - top, position, px, py);
+            core.setAlpha(ctx, 1);
             return true;
         }
     }
     return false;
 }
 
-ui.prototype._drawBackground_drawColor = function (background, left, top, right, bottom, position, px, py, xoffset, yoffset) {
+ui.prototype._drawBackground_drawColor = function (background, left, top, right, bottom, position, px, py, xoffset, yoffset, ctx) {
+    ctx = ctx || 'ui';
     var alpha = background[3];
-    core.setAlpha('ui', alpha);
-    core.setStrokeStyle('ui', core.arrayToRGBA(core.status.globalAttribute.borderColor));
-    core.setFillStyle('ui', core.arrayToRGB(background));
-    core.setLineWidth('ui', 2);
+    core.setAlpha(ctx, alpha);
+    core.setStrokeStyle(ctx, core.arrayToRGBA(core.status.globalAttribute.borderColor));
+    core.setFillStyle(ctx, core.arrayToRGB(background));
+    core.setLineWidth(ctx, 2);
     // 绘制
-    var ctx = core.canvas.ui;
+    ctx = core.getContextByName(ctx);
     ctx.beginPath();
     ctx.moveTo(left, top);
     // 上边缘三角
@@ -1021,7 +1025,7 @@ ui.prototype._drawBackground_drawColor = function (background, left, top, right,
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    core.setAlpha('ui', 1);
+    core.setAlpha(ctx, 1);
 }
 
 ////// 计算有效文本框的宽度
@@ -1378,7 +1382,8 @@ ui.prototype._getRealContent = function (content) {
     return content.replace(/(\r|\\(r|c|d|e|g|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
 }
 
-ui.prototype._animateUI = function (type, callback) {
+ui.prototype._animateUI = function (type, ctx, callback) {
+    ctx = ctx || 'ui';
     var time = core.status.textAttribute.animateTime || 0;
     if (!core.status.event || !time || core.isReplaying() || (type != 'show' && type != 'hide')) {
         if (callback) callback();
@@ -1391,12 +1396,12 @@ ui.prototype._animateUI = function (type, callback) {
     } else if (type == 'hide') {
         opacity = 1;
     }
-    core.setOpacity('ui', opacity);
+    core.setOpacity(ctx, opacity);
     core.dom.next.style.opacity = opacity;
     core.status.event.animateUI = setInterval(function () {
         if (type == 'show') opacity += 0.05;
         else opacity -= 0.05;
-        core.setOpacity('ui', opacity);
+        core.setOpacity(ctx, opacity);
         core.dom.next.style.opacity = opacity;
         if (opacity >= 1 || opacity <= 0) {
             clearInterval(core.status.event.animateUI);
@@ -1407,13 +1412,16 @@ ui.prototype._animateUI = function (type, callback) {
 }
 
 ////// 绘制一个对话框 //////
-ui.prototype.drawTextBox = function(content, showAll) {
-    if (core.status.event && core.status.event.id == 'action')
-        core.status.event.ui = content;
+ui.prototype.drawTextBox = function(content, config) {
+    config = config || {};
 
     this.clearUI();
 
-    content = core.replaceText(content);
+    var ctx = config.ctx || null;
+    if (ctx && main.mode == 'play') {
+        core.createCanvas(ctx, 0, 0, core.__PIXELS__, core.__PIXELS__, 141);
+        ctx = core.getContextByName(ctx);
+    }
 
     // Step 1: 获得标题信息和位置信息
     var textAttribute = core.status.textAttribute;
@@ -1421,76 +1429,101 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var posInfo = this._getPosition(titleInfo.content);
     if (posInfo.position != 'up' && posInfo.position != 'down') posInfo.px = posInfo.py = null;
     if (!posInfo.position) posInfo.position = textAttribute.position;
-    content = this._drawTextBox_drawImages(posInfo.content);
+    content = this._drawTextBox_drawImages(posInfo.content, config.ctx);
+    if (config.pos) {
+        delete posInfo.px;
+        delete posInfo.py;
+        posInfo.pos = config.pos;
+    }
+    posInfo.ctx = ctx;
 
     // Step 2: 计算对话框的矩形位置
     var hPos = this._drawTextBox_getHorizontalPosition(content, titleInfo, posInfo);
     var vPos = this._drawTextBox_getVerticalPosition(content, titleInfo, posInfo, hPos.validWidth);
+    posInfo.xoffset = hPos.xoffset;
+    posInfo.yoffset = vPos.yoffset - 4;
+
+    if (ctx && main.mode == 'play') {
+        ctx.canvas.setAttribute('_text_left', hPos.left);
+        ctx.canvas.setAttribute('_text_top', vPos.top);
+    }
 
     // Step 3: 绘制背景图
-    var pInfo = core.clone(posInfo);
-    pInfo.xoffset = hPos.xoffset; pInfo.yoffset = vPos.yoffset - 4;
-    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, pInfo);
+    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, posInfo);
     var alpha = isWindowSkin ? this._drawWindowSkin_getOpacity() : textAttribute.background[3];
 
     // Step 4: 绘制标题、头像、动画
-    var content_top = this._drawTextBox_drawTitleAndIcon(titleInfo, hPos, vPos, alpha);
+    var content_top = this._drawTextBox_drawTitleAndIcon(titleInfo, hPos, vPos, alpha, config.ctx);
 
     // Step 5: 绘制正文
-    var config = this.drawTextContent('ui', content, {
+    var config = this.drawTextContent(config.ctx || 'ui', content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
-        lineHeight: vPos.lineHeight, time: (showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
+        lineHeight: vPos.lineHeight, time: (config.showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
     });
 
     // Step 6: 绘制光标
-    main.dom.next.style.display = 'block';
-    main.dom.next.style.borderRightColor = main.dom.next.style.borderBottomColor = core.arrayToRGB(textAttribute.text);
-    main.dom.next.style.top = (vPos.bottom - 20) * core.domStyle.scale + "px";
-    var left = (hPos.left + hPos.right) / 2;
-    if (pInfo.position == 'up' && !pInfo.noPeak && pInfo.px != null && Math.abs(pInfo.px * 32 + 16 - left) < 50)
-        left = hPos.right - 64;
-    main.dom.next.style.left = left * core.domStyle.scale + "px";
+    if (main.mode == 'play') {
+        main.dom.next.style.display = 'block';
+        main.dom.next.style.borderRightColor = main.dom.next.style.borderBottomColor = core.arrayToRGB(textAttribute.text);
+        main.dom.next.style.top = (vPos.bottom - 20) * core.domStyle.scale + "px";
+        var left = (hPos.left + hPos.right) / 2;
+        if (posInfo.position == 'up' && !posInfo.noPeak && posInfo.px != null && Math.abs(posInfo.px * 32 + 16 - left) < 50)
+            left = hPos.right - 64;
+        main.dom.next.style.left = left * core.domStyle.scale + "px";
+    }
     return config;
 }
 
-ui.prototype._drawTextBox_drawImages = function (content) {
+ui.prototype._drawTextBox_drawImages = function (content, ctx) {
+    ctx = ctx || 'ui';
     return content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
         var ss = str.split(",");
         // 绘制
         if (ss.length==3)
-            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]));
+            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]));
         else if (ss.length==5)
-            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
+            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
         else if (ss.length >= 9) {
-            if (ss.length >= 10) core.setAlpha('ui', parseFloat(ss[9]));
+            if (ss.length >= 10) core.setAlpha(ctx, parseFloat(ss[9]));
             var angle = (parseFloat(ss[10]) || 0) * Math.PI / 180;
-            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), 
+            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), 
                 parseFloat(ss[5]), parseFloat(ss[6]), parseFloat(ss[7]), parseFloat(ss[8]), angle);
-            core.setAlpha('ui', 1);
+            core.setAlpha(ctx, 1);
         }
         return "";
     });
 }
 
 ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, posInfo) {
+    var ctx = posInfo.ctx || 'ui';
     var realContent = this._getRealContent(content);
     var paddingLeft = 25, paddingRight = 12;
-    if (posInfo.px != null && posInfo.py != null) paddingLeft = 20;
+    if ((posInfo.px != null && posInfo.py != null) || posInfo.pos) paddingLeft = 20;
     if (titleInfo.icon != null) paddingLeft = 62; // 15 + 32 + 15
     else if (titleInfo.image) paddingLeft = 90; // 10 + 70 + 10
     var left = 7 + 3 * (this.HSIZE - 6), right = this.PIXEL - left,
         width = right - left, validWidth = width - paddingLeft - paddingRight;
     // 对话框效果：改为动态计算
-    if (posInfo.px != null && posInfo.py != null) {
+    if ((posInfo.px != null && posInfo.py != null) || posInfo.pos) {
         var min_width = 220 - paddingLeft, max_width = validWidth;
         // 无行走图或头像，则可以适当缩小min_width
         if (titleInfo.image == null) min_width = 160;
         if (titleInfo.title) {
-            min_width = core.clamp(core.calWidth('ui', titleInfo.title, this._buildFont(core.status.textAttribute.titlefont, true)), min_width, max_width);
+            min_width = core.clamp(core.calWidth(ctx, titleInfo.title, this._buildFont(core.status.textAttribute.titlefont, true)), min_width, max_width);
         }
-        validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
-        width = validWidth + paddingLeft + paddingRight;
-        left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);
+        if (posInfo.pos) {
+            left = core.calValue(posInfo.pos[0]) || 0;
+            max_width = Math.max(min_width, right - left - paddingLeft - paddingRight);
+        } else left = null;
+        if (posInfo.pos && posInfo.pos[2] != null) {
+            width = core.calValue(posInfo.pos[2]) || 0;
+            validWidth = width - paddingLeft - paddingRight;
+        } else validWidth = 0;
+        if (validWidth < min_width) {
+            validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
+            width = validWidth + paddingLeft + paddingRight;
+        }
+        if (left == null) left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);
         right = left + width;
     }
     return { left: left, right: right, width: width, validWidth: validWidth, xoffset: 11, content_left: left + paddingLeft };
@@ -1527,12 +1560,16 @@ ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, po
                 top = 32 * posInfo.py + 32 + yoffset - core.bigmap.offsetY;
             }
     }
+    if (posInfo.pos) {
+        top = core.calValue(posInfo.pos[1]) || 0;
+    }
 
     return { top: top, height: height, bottom: top + height, yoffset: yoffset, lineHeight: lineHeight };
 }
 
-ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, alpha) {
-    core.setTextAlign('ui', 'left');
+ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, alpha, ctx) {
+    ctx = ctx || 'ui';
+    core.setTextAlign(ctx, 'left');
     var textAttribute = core.status.textAttribute;
     var content_top = vPos.top + 15;
     var image_top = vPos.top + 15;
@@ -1540,23 +1577,23 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
         var titlefont = textAttribute.titlefont;
         content_top += titlefont + 5;
         image_top = vPos.top + 40;
-        core.setFillStyle('ui', core.arrayToRGB(textAttribute.title));
-        core.setStrokeStyle('ui', core.arrayToRGB(textAttribute.title));
+        core.setFillStyle(ctx, core.arrayToRGB(textAttribute.title));
+        core.setStrokeStyle(ctx, core.arrayToRGB(textAttribute.title));
 
         // --- title也要居中或者右对齐？
-        var title_width = core.calWidth('ui', titleInfo.title, this._buildFont(titlefont, true));
+        var title_width = core.calWidth(ctx, titleInfo.title, this._buildFont(titlefont, true));
         var title_left = hPos.content_left;
         if (textAttribute.align == 'center')
             title_left = hPos.left + (hPos.width - title_width) / 2;
         else if (textAttribute.align == 'right')
             title_left = hPos.right - title_width - 12;
 
-        core.fillText('ui', titleInfo.title, title_left, vPos.top + 8 + titlefont);
+        core.fillText(ctx, titleInfo.title, title_left, vPos.top + 8 + titlefont);
     }
     if (titleInfo.icon != null) {
-        core.setAlpha('ui', alpha);
-        core.strokeRect('ui', hPos.left + 15 - 1, image_top-1, 34, titleInfo.height + 2, null, 2);
-        core.setAlpha('ui', 1);
+        core.setAlpha(ctx, alpha);
+        core.strokeRect(ctx, hPos.left + 15 - 1, image_top-1, 34, titleInfo.height + 2, null, 2);
+        core.setAlpha(ctx, 1);
         core.status.boxAnimateObjs = [];
         // --- 勇士
         if (titleInfo.image == core.material.images.hero) {
@@ -1566,12 +1603,12 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
                 core.status.boxAnimateObjs.push({
                     'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
                     'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': 4,
-                    'image': titleInfo.image, 'pos': core.material.icons.hero[direction].loc * titleInfo.height
+                    'image': titleInfo.image, 'pos': core.material.icons.hero[direction].loc * titleInfo.height, ctx: ctx,
                 })
             } else {
-                core.clearMap('ui', hPos.left + 15, image_top, 32, titleInfo.height);
-                core.fillRect('ui', hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
-                core.drawImage('ui', titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
+                core.clearMap(ctx, hPos.left + 15, image_top, 32, titleInfo.height);
+                core.fillRect(ctx, hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
+                core.drawImage(ctx, titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
                     hPos.left + 15, image_top, 32, titleInfo.height);
             }            
         }
@@ -1579,13 +1616,13 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
             core.status.boxAnimateObjs.push({
                 'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
                 'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
-                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
+                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx,
             });
         }
         core.drawBoxAnimate();
     }
     if (titleInfo.image != null && titleInfo.icon == null) { // 头像图
-        core.drawImage('ui', titleInfo.image, 0, 0, titleInfo.image.width, titleInfo.image.height,
+        core.drawImage(ctx, titleInfo.image, 0, 0, titleInfo.image.width, titleInfo.image.height,
             hPos.left+10, vPos.top+10, 70, 70);
     }
     return content_top;
@@ -1648,7 +1685,7 @@ ui.prototype.textImage = function (content, lineHeight) {
 }
 
 ////// 绘制一个选项界面 //////
-ui.prototype.drawChoices = function(content, choices) {
+ui.prototype.drawChoices = function(content, choices, ctx) {
     choices = core.clone(choices || []);
 
     core.status.event.ui = {"text": content, "choices": choices};
@@ -1656,25 +1693,26 @@ ui.prototype.drawChoices = function(content, choices) {
 
     content = core.replaceText(content || "");
     var titleInfo = this._getTitleAndIcon(content);
-    titleInfo.content = this._drawTextBox_drawImages(titleInfo.content);
-    var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices);
+    titleInfo.content = this._drawTextBox_drawImages(titleInfo.content, ctx);
+    var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices, ctx);
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
     core.status.event.ui.offset = vPos.offset;
 
-    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom);
-    this._drawChoices_drawTitle(titleInfo, hPos, vPos);
-    this._drawChoices_drawChoices(choices, isWindowSkin, hPos, vPos);
+    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, {ctx: ctx});
+    this._drawChoices_drawTitle(titleInfo, hPos, vPos, ctx);
+    this._drawChoices_drawChoices(choices, isWindowSkin, hPos, vPos, ctx);
 }
 
-ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
+ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices, ctx) {
+    ctx = ctx || 'ui';
     // 宽度计算：考虑提示文字和选项的长度
-    core.setFont('ui', this._buildFont(17, true));
-    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
+    core.setFont(ctx, this._buildFont(17, true));
+    var width = this._calTextBoxWidth(ctx, titleInfo.content || "", 246, this.PIXEL - 20);
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
             choices[i] = {"text": choices[i]};
         choices[i].text = core.replaceText(choices[i].text);
-        choices[i].width = core.calWidth('ui', core.replaceText(choices[i].text));
+        choices[i].width = core.calWidth(ctx, core.replaceText(choices[i].text));
         if (choices[i].icon != null) choices[i].width += 28;
         width = Math.max(width, choices[i].width+30);
     }
@@ -1706,11 +1744,12 @@ ui.prototype._drawChoices_getVerticalPosition = function (titleInfo, choices, hP
     return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top, offset: offset };
 }
 
-ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {
+ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos, ctx) {
     if (!titleInfo.content) return;
+    ctx = ctx || 'ui';
     var content_top = vPos.top + 21;
     if (titleInfo.title != null) {
-        core.setTextAlign('ui', 'center');
+        core.setTextAlign(ctx, 'center');
 
         content_top = vPos.top + 41;
         var title_offset = hPos.left+hPos.width/2;
@@ -1718,45 +1757,46 @@ ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {
 
         if (titleInfo.icon != null) {
             title_offset += 12;
-            core.strokeRect('ui', hPos.left + 15 - 1, vPos.top + 30 - 1, 34, titleInfo.height + 2, '#DDDDDD', 2);
+            core.strokeRect(ctx, hPos.left + 15 - 1, vPos.top + 30 - 1, 34, titleInfo.height + 2, '#DDDDDD', 2);
             core.status.boxAnimateObjs = [];
             core.status.boxAnimateObjs.push({
                 'bgx': hPos.left + 15, 'bgy': vPos.top + 30, 'bgWidth': 32, 'bgHeight': titleInfo.height,
                 'x': hPos.left + 15, 'y': vPos.top + 30, 'height': titleInfo.height, 'animate': titleInfo.animate,
-                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
+                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx
             });
             core.drawBoxAnimate();
         };
 
-        core.fillText('ui', titleInfo.title, title_offset, vPos.top + 27,
+        core.fillText(ctx, titleInfo.title, title_offset, vPos.top + 27,
             core.arrayToRGBA(core.status.textAttribute.title), this._buildFont(19, true));
     }
 
-    core.setTextAlign('ui', 'left');
-    this.drawTextContent('ui', titleInfo.content, {
+    core.setTextAlign(ctx, 'left');
+    this.drawTextContent(ctx, titleInfo.content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
         fontSize: 15, lineHeight: 20, bold: true
     });
 }
 
-ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, vPos) {
+ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, vPos, ctx) {
+    ctx = ctx || 'ui';
     // 选项
-    core.setTextAlign('ui', 'center');
-    core.setFont('ui', this._buildFont(17, true));
+    core.setTextAlign(ctx, 'center');
+    core.setFont(ctx, this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
         if (choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
-        core.setFillStyle('ui', color);
+        core.setFillStyle(ctx, color);
         var offset = this.HPIXEL;
         if (choices[i].icon) {
             var iconInfo = this._getDrawableIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
             if (image != null) {
-                core.drawImage('ui', image, 0, 32 * icon, 32, 32,
+                core.drawImage(ctx, image, 0, 32 * icon, 32, 32,
                     this.HPIXEL - choices[i].width/2, vPos.choice_top + 32*i - 17, 22, 22);
                 offset += 14;
             }
         }
-        core.fillText('ui', choices[i].text, offset, vPos.choice_top + 32 * i, color);
+        core.fillText(ctx, choices[i].text, offset, vPos.choice_top + 32 * i, color);
     }
 
     if (choices.length>0 && core.status.event.selection != 'none') {
@@ -1764,11 +1804,17 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         while (core.status.event.selection < 0) core.status.event.selection += choices.length;
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
         var len = choices[core.status.event.selection].width;
-        if (isWindowSkin)
-            this._drawWindowSelector(core.status.textAttribute.background,
-                this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
+        if (isWindowSkin) {
+            if (ctx) {
+                this._drawSelector(ctx, core.status.textAttribute.background,
+                    len + 10, 28, this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20);
+            } else {
+                this._drawWindowSelector(core.status.textAttribute.background,
+                    this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
+            }
+        }
         else
-            core.strokeRoundRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
+            core.strokeRoundRect(ctx, this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
                 len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
@@ -1952,6 +1998,7 @@ ui.prototype._drawStorageRemove = function () {
 ui.prototype._drawReplay = function () {
     core.lockControl();
     core.status.event.id = 'replay';
+    core.playSound('打开界面');
     this.drawChoices(null, [
         "从头回放录像", "从存档开始回放", "接续播放剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
@@ -2470,7 +2517,7 @@ ui.prototype._drawCenterFly = function () {
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
     core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
     core.playSound('打开界面');
-    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置");
+    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置", 'centerFly');
     return;
 }
 
@@ -2479,10 +2526,10 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.lockControl();
     core.status.event.id = 'viewMaps';
     this.clearUI();
-    if (index == null) return this._drawMaps_drawHint();
+    if (index == null) return this._drawViewMaps_drawHint();
     core.animateFrame.tip = null;
     core.status.checkBlock.cache = {};
-    var data = this._drawMaps_buildData(index, x, y);
+    var data = this._drawViewMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
     core.drawThumbnail(data.floorId, null, {damage: data.damage, ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
     core.clearMap('data');
@@ -2498,7 +2545,8 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
 }
 
-ui.prototype._drawMaps_drawHint = function () {
+ui.prototype._drawViewMaps_drawHint = function () {
+    core.playSound('打开界面');
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.4)');
     core.setTextAlign('ui', 'center');
     var stroke = function (left, top, width, height, fillStyle, lineWidth) {
@@ -2537,7 +2585,7 @@ ui.prototype._drawMaps_drawHint = function () {
     core.setTextBaseline('ui', 'alphabetic');
 }
 
-ui.prototype._drawMaps_buildData = function (index, x, y) {
+ui.prototype._drawViewMaps_buildData = function (index, x, y) {
     var damage = (core.status.event.data||{}).damage;
     var all = (core.status.event.data||{all: true}).all;
     if (index.damage != null) damage=index.damage;
@@ -3012,6 +3060,7 @@ ui.prototype._drawKeyBoard = function () {
     core.lockControl();
     core.status.event.id = 'keyBoard';
     core.clearUI();
+    core.playSound('打开界面');
 
     var width = 384, height = 320;
     var left = (this.PIXEL - width) / 2, right = left + width;
@@ -3081,7 +3130,7 @@ ui.prototype._drawStatistics = function (floorIds) {
         "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 不会计算“不可被浏览地图”的隐藏层的数据。\n" +
         "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n"+
         "4. 在自定义道具（例如其他宝石）后，需在脚本编辑的drawStatistics中注册，不然不会进行统计。\n"+
-        "5. 所有统计信息仅供参考，如有错误，概不负责。"
+        "5. 道具不会统计通过插入事件或useItemEvent实现的效果。\n6. 所有统计信息仅供参考，如有错误，概不负责。"
     ])
     core.removeFlag("__replayText__");
 }

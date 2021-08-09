@@ -617,7 +617,7 @@ table.row {
 }
 
 .etable tr > :nth-child(1) {
-    width: 20%
+    width: 22%
 }
 
 .etable tr > :nth-child(2) {
@@ -625,7 +625,7 @@ table.row {
 }
 
 .etable tr > :nth-child(3) {
-    width: 35%;
+    width: 33%;
 }
 
 .etable tr > :nth-child(4) {

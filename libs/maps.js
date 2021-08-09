@@ -978,7 +978,7 @@ maps.prototype.drawBlock = function (block, animate, ctx) {
 
     var blockInfo = this.getBlockInfo(block);
     if (blockInfo == null) return;
-    if (blockInfo.cls != 'tileset') blockInfo.posX = animate % block.event.animate;
+    if (blockInfo.cls != 'tileset') blockInfo.posX = animate % blockInfo.animate;
     blockInfo.opacity = block.opacity;
     blockInfo.filter = block.filter;
     if (!block.name)
@@ -987,7 +987,46 @@ maps.prototype.drawBlock = function (block, animate, ctx) {
         this._drawBlockInfo_bgfg(blockInfo, block.name, block.x, block.y, ctx);
 }
 
+maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y) {
+    var face = blockInfo.face || "down";
+    if (["up", "down", "left", "right"].indexOf(face) < 0) face = "down";
+    var bigImage = blockInfo.bigImage;
+    var per_width = bigImage.width / 4;
+    var per_height = bigImage.height / 4;
+    if (face == 'down' && per_height < per_width / 2) { // 强制视为 1*4 的怪物
+        per_height = bigImage.height;
+    }
+    var sx = blockInfo.posX * per_width;
+    var sy = core.material.icons.hero[face].loc * per_height;
+    
+    // 上半部分 - 会遮挡勇士；z值高于event2，为51
+    var header = "_bigImage_header_" + x + "_" + y;
+    // 下半部分 - 会被勇士遮挡；z值高于event，为31
+    var body = "_bigImage_body_" + x + "_" + y;
+    var px = 32 * x - core.bigmap.offsetX;
+    var py = 32 * y - core.bigmap.offsetY;
+
+    switch (face) {
+        case "down":
+            var dx = px + 16 - per_width / 2;
+            var dy = py + 32 - per_height;
+            core.createCanvas(header, dx, dy, per_width, per_height - 32, 51);
+            core.drawImage(header, bigImage, sx, sy, per_width, per_height - 32, 0, 0, per_width, per_height - 32);
+            core.createCanvas(body, dx, dy + per_height - 32, per_width, 32, 31);
+            core.drawImage(body, bigImage, sx, sy + per_height - 32, per_width, 32, 0, 0, per_width, 32);
+            break;
+        case "left":
+            core.createCanvas(header, px, py + 16 - per_height / 2, per_width, per_height / 2 - 16, 51);
+            core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
+            core.createCanvas(body, px, py, per_width, per_height / 2 + 16, 31);
+            core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
+            break;
+    }
+}
+
 maps.prototype._drawBlockInfo = function (blockInfo, x, y, ctx) {
+    if (blockInfo.bigImage) return this._drawBlockInfo_bigImage(blockInfo, x, y);
+
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
     var px = 32 * x - 32 * core.bigmap.posX;
     var py = 32 * y - 32 * core.bigmap.posY;
@@ -1825,7 +1864,7 @@ maps.prototype.getBlockInfo = function (block) {
     }
     var number = block.id, id = block.event.id, cls = block.event.cls, name = block.event.name,
         image = null, posX = 0, posY = 0, animate = block.event.animate,
-        height = block.event.height || 32, faceIds = {};
+        height = block.event.height || 32, faceIds = {}, face = 'down', bigImage = null;
 
     if (id == 'none') return null;
     else if (id == 'airwall') {
@@ -1847,14 +1886,23 @@ maps.prototype.getBlockInfo = function (block) {
         image = core.material.images[cls];
         posY = core.material.icons[cls][id];
         faceIds = block.event.faceIds || {};
+        for (var f in faceIds) {
+            if (faceIds[f] == id) {
+                face = f;
+                break;
+            }
+        }
         if (core.material.enemys[id]) {
             name = core.material.enemys[id].name;
+            bigImage = core.material.images.images[core.material.enemys[id].bigImage] || null;
+            if (bigImage != null) animate = 4;
         } else if (core.material.items[id]) {
             name = core.material.items[id].name;
         }
     }
 
-    return {number: number, id: id, cls: cls, name: name, image: image, posX: posX, posY: posY, height: height, faceIds: faceIds, animate: animate};
+    return {number: number, id: id, cls: cls, name: name, image: image, posX: posX, 
+        posY: posY, height: height, faceIds: faceIds, animate: animate, face: face, bigImage: bigImage};
 }
 
 ////// 搜索某个图块出现的所有位置 //////

@@ -139,8 +139,23 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "event",
 					"_event": "faceIds",
-					"_docs": "行走图朝向",
+					"_docs": "行走朝向",
 					"_data": "行走图朝向。在勇士撞上图块时，或图块在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
+				},
+				"bigImage": {
+					"_leaf": true,
+					"_type": "material",
+					"_directory": "./project/images/",
+					"_transform": (function (one) {
+						if (one.endsWith('.png')) return one;
+						return null;
+					}).toString(),
+					"_onconfirm": (function (previous, current) {
+						if (current.length == 0) return null;
+						return current[0];
+					}).toString(),
+					"_docs": "绑定贴图",
+					"_data": "该怪物绑定的怪物贴图"
 				},
 				"hp": {
 					"_leaf": true,

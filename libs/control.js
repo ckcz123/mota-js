@@ -2869,8 +2869,7 @@ control.prototype.checkBgm = function() {
 control.prototype.setDisplayScale = function (delta) {
     var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
     if (index < 0) return;
-    index += delta;
-    if (index < 0 || index >= core.domStyle.availableScale.length) return;
+    index = (index + delta + core.domStyle.availableScale.length) % core.domStyle.availableScale.length;
     core.domStyle.scale = core.domStyle.availableScale[index];
     core.setLocalStorage('scale', core.domStyle.scale);
     core.resize();

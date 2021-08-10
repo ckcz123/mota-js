@@ -2097,7 +2097,7 @@ lockViewport_s
 /* lockViewport_s
 tooltip : lockViewport: 是否锁定视角
 helpUrl : /_docs/#/instruction
-default : []
+default : [false]
 colour : this.soundColor
 Bool_0 = Bool_0 ? (', "lock": true') : '';
 var code = '{"type": "lockViewport"'+Bool_0+'},\n';

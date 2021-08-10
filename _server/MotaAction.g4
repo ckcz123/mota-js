@@ -823,7 +823,6 @@ action
     |   setViewport_s
     |   setViewport_1_s
     |   lockViewport_s
-    |   unlockViewport_s    
     |   useItem_s
     |   loadEquip_s
     |   unloadEquip_s
@@ -2093,26 +2092,15 @@ return code;
 */;
 
 lockViewport_s
-    :   '锁定视角' Newline
+    :   '是否锁定视角' Bool Newline
 
 /* lockViewport_s
-tooltip : lockViewport: 锁定视角
+tooltip : lockViewport: 是否锁定视角
 helpUrl : /_docs/#/instruction
 default : []
 colour : this.soundColor
-var code = '{"type": "lockViewport"},\n';
-return code;
-*/;
-
-unlockViewport_s
-    :   '解锁视角' Newline
-
-/* unlockViewport_s
-tooltip : unlockViewport: 解锁视角
-helpUrl : /_docs/#/instruction
-default : []
-colour : this.soundColor
-var code = '{"type": "unlockViewport"},\n';
+Bool_0 = Bool_0 ? (', "lock": true') : '';
+var code = '{"type": "lockViewport"'+Bool_0+'},\n';
 return code;
 */;
 

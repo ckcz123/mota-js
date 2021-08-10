@@ -801,7 +801,7 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 }
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (status, offset, frame) {
+control.prototype.drawHero = function (status, offset, frame, noGather) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
@@ -820,7 +820,7 @@ control.prototype.drawHero = function (status, offset, frame) {
 
     this._drawHero_updateViewport(x, y, offset);
     if (!core.hasFlag('hideHero')) {
-        this._drawHero_draw(direction, x, y, status, offset, frame);
+        this._drawHero_draw(direction, x, y, status, offset, frame, noGather);
     }  
 }
 
@@ -836,15 +836,15 @@ control.prototype._drawHero_updateViewport = function (x, y, offset) {
     core.control.updateViewport();
 }
 
-control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
-    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame, noGather) {
+    this._drawHero_getDrawObjs(direction, x, y, status, offset, noGather).forEach(function (block) {
         core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
 }
 
-control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
+control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset, noGather) {
     var heroIconArr = core.material.icons.hero, drawObjs = [], index = 0;
     drawObjs.push({
         "img": core.material.images.hero,
@@ -856,18 +856,21 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
         "status": status,
         "index": index++,
     });
-    core.status.hero.followers.forEach(function (t) {
-        drawObjs.push({
-            "img": core.material.images.images[t.name],
-            "width": core.material.images.images[t.name].width/4,
-            "height": core.material.images.images[t.name].height/4,
-            "heroIcon": heroIconArr[t.direction],
-            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan2[t.direction].x*Math.abs(offset.x)),
-            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan2[t.direction].y*Math.abs(offset.y)),
-            "status": t.stop?"stop":status,
-            "index": index++
+    // 不重绘跟随者 比如说跳跃时……
+    if (!noGather) {
+        core.status.hero.followers.forEach(function(t) {
+            drawObjs.push({
+                "img": core.material.images.images[t.name],
+                "width": core.material.images.images[t.name].width / 4,
+                "height": core.material.images.images[t.name].height / 4,
+                "heroIcon": heroIconArr[t.direction],
+                "posx": 32 * t.x - core.bigmap.offsetX + (t.stop ? 0 : core.utils.scan2[t.direction].x * Math.abs(offset.x)),
+                "posy": 32 * t.y - core.bigmap.offsetY + (t.stop ? 0 : core.utils.scan2[t.direction].y * Math.abs(offset.y)),
+                "status": t.stop ? "stop" : status,
+                "index": index++
+            });
         });
-    });
+    }
     return drawObjs.sort(function(a, b) {
         return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
     });

@@ -299,6 +299,7 @@ editor_blockly = function () {
             case 'text_1_s':
             case 'text_2_s':
             case 'choices_s':
+            case 'confirm_s':
                 if (!_isTextAttributeSet) {
                     alert('警告！你尚未设置用于预览的剧情文本的属性，将采用默认属性进行预览。\n你可以双击“设置剧情文本的属性”事件来设置用于预览的属性。');
                     core.status.textAttribute = core.clone(core.initStatus.textAttribute);

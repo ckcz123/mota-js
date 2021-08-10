@@ -1780,13 +1780,14 @@ ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos, ctx) {
 }
 
 ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, vPos, ctx) {
+    var hasCtx = ctx != null;
     ctx = ctx || 'ui';
     // 选项
     core.setTextAlign(ctx, 'center');
     core.setFont(ctx, this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
-        if (choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
+        if (main.mode == 'play' && choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
         core.setFillStyle(ctx, color);
         var offset = this.HPIXEL;
         if (choices[i].icon) {
@@ -1806,7 +1807,7 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
         var len = choices[core.status.event.selection].width;
         if (isWindowSkin) {
-            if (ctx) {
+            if (hasCtx) {
                 this._drawSelector(ctx, core.status.textAttribute.background,
                     len + 10, 28, this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20);
             } else {
@@ -1821,47 +1822,58 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
 }
 
 ////// 绘制一个确认/取消的警告页面 //////
-ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
-    core.lockControl();
+ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
+    var hasCtx = ctx != null;
+    ctx = ctx || 'ui';
     text = core.replaceText(text || "");
 
-    // 处理自定义事件
-    if (core.status.event.id != 'action') {
-        core.status.event.id = 'confirmBox';
-        core.status.event.ui = text;
-        core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+    if (main.mode == 'play') {
+        core.lockControl();
+
+        // 处理自定义事件
+        if (core.status.event.id != 'action') {
+            core.status.event.id = 'confirmBox';
+            core.status.event.ui = text;
+            core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+        }
     }
 
     if (core.status.event.selection != 0 && core.status.event.selection != 'none') core.status.event.selection = 1;
     this.clearUI();
 
-    core.setFont('ui', this._buildFont(19, true));
+    core.setFont(ctx, this._buildFont(19, true));
     var contents = text.split("\n");
-    var rect = this._drawConfirmBox_getRect(contents);
-    var isWindowSkin = this.drawBackground(rect.left, rect.top, rect.right, rect.bottom);
+    var rect = this._drawConfirmBox_getRect(contents, ctx);
+    var isWindowSkin = this.drawBackground(rect.left, rect.top, rect.right, rect.bottom, {ctx: ctx});
 
-    core.setTextAlign('ui', 'center');
-    core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.text))
+    core.setTextAlign(ctx, 'center');
+    core.setFillStyle(ctx, core.arrayToRGBA(core.status.textAttribute.text))
     for (var i in contents) {
-        core.fillText('ui', contents[i], this.HPIXEL, rect.top + 50 + i*30);
+        core.fillText(ctx, contents[i], this.HPIXEL, rect.top + 50 + i*30);
     }
 
-    core.fillText('ui', "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
-    core.fillText('ui', "取消", this.HPIXEL + 38, rect.bottom - 35);
+    core.fillText(ctx, "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
+    core.fillText(ctx, "取消", this.HPIXEL + 38, rect.bottom - 35);
     if (core.status.event.selection != 'none') {
-        var len=core.calWidth('ui', "确定");
+        var len=core.calWidth(ctx, "确定");
         var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
     
-        if (isWindowSkin)
-            this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+        if (isWindowSkin) {
+            if (hasCtx) {
+                this._drawSelector(ctx, core.status.textAttribute.background,
+                    len + 10, 28, strokeLeft, rect.bottom-35-20);
+            } else {
+                this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+            }
+        }
         else
-            core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
+            core.strokeRoundRect(ctx, strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
-ui.prototype._drawConfirmBox_getRect = function (contents) {
+ui.prototype._drawConfirmBox_getRect = function (contents, ctx) {
     var max_width = contents.reduce(function (pre, curr) {
-        return Math.max(pre, core.calWidth('ui', curr));
+        return Math.max(pre, core.calWidth(ctx, curr));
     }, 0);
     var left = Math.min(this.HPIXEL - 40 - parseInt(max_width / 2), 100), right = this.PIXEL - left;
     var top = this.HPIXEL - 68 - (contents.length-1)*30, bottom = this.HPIXEL + 68;

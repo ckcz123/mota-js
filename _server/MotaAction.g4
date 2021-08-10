@@ -2771,7 +2771,7 @@ confirm_s
 tooltip : 弹出确认框
 helpUrl : /_docs/#/instruction
 default : ["确认要xxx吗?",0,false]
-doubleclicktext : EvalString_Multi_0
+previewBlock : true
 Bool_0 = Bool_0?', "default": true':''
 Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
 var code = ['{"type": "confirm"'+Int_0+Bool_0+', "text": "',EvalString_Multi_0,'",',

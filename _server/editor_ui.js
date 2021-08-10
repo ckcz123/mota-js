@@ -411,6 +411,10 @@ editor_ui_wrapper = function (editor) {
                     core.drawChoices(core.replaceText(data.text), data.choices, 'uievent');
                     core.loadCanvas('uievent');
                     return;
+                } else if (type == "confirm") {
+                    core.saveCanvas('uievent');
+                    core.drawConfirmBox(data.text, null, null, 'uievent');                    
+                    core.loadCanvas('uievent');
                 } else if (core.ui["_uievent_" + type])
                     core.ui["_uievent_" + type](data);
             })

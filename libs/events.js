@@ -2100,7 +2100,8 @@ events.prototype._precompile_choices = function (data) {
 }
 
 events.prototype._action_confirm = function (data, x, y, prefix) {
-    core.status.event.ui = {"text": core.replaceText(data.text, prefix), "yes": data.yes, "no": data.no};
+    data.text = core.replaceText(data.text, prefix);
+    core.status.event.ui = {"text": data.text, "yes": data.yes, "no": data.no};
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {

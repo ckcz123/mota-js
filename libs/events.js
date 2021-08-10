@@ -1534,12 +1534,7 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
 }
 
 events.prototype._action_lockViewport = function (data, x, y, prefix) {
-    flags.__lockViewport__ = true;
-    core.doAction();
-}
-
-events.prototype._action_unlockViewport = function (data, x, y, prefix) {
-    flags.__lockViewport__ = false;
+    flags.__lockViewport__ = data.lock;
     core.doAction();
 }
 
@@ -3492,10 +3487,16 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         return true;
     }
     if (step <= 4) {
-        core.drawHero('leftFoot', 4 * o * step);
+        core.drawHero('leftFoot', {
+            x: 4 * o * step,
+            y: 4 * o * step
+        });
     }
     else if (step <= 8) {
-        core.drawHero('rightFoot', 4 * o * step);
+        core.drawHero('rightFoot', {
+            x: 4 * o * step,
+            y: 4 * o * step
+        });
     }
     if (step == 8) {
         core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);

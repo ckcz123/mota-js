@@ -205,6 +205,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['animate_1_s'].xmlText(),
       MotaActionBlocks['setViewport_s'].xmlText(),
       MotaActionBlocks['setViewport_1_s'].xmlText(),
+      MotaActionBlocks['lockViewport_s'].xmlText(),      
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
       MotaActionBlocks['showHero_s'].xmlText(),

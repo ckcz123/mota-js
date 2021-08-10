@@ -822,6 +822,8 @@ action
     |   changePos_s
     |   setViewport_s
     |   setViewport_1_s
+    |   lockViewport_s
+    |   unlockViewport_s    
     |   useItem_s
     |   loadEquip_s
     |   unloadEquip_s
@@ -2087,6 +2089,30 @@ Int_0 = Int_0 ?(', "time": '+Int_0):'';
 Bool_0 = Bool_0?', "async": true':'';
 MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 var code = '{"type": "setViewport"'+loc+MoveMode_List_0+Int_0+Bool_0+'},\n';
+return code;
+*/;
+
+lockViewport_s
+    :   '锁定视角' Newline
+
+/* lockViewport_s
+tooltip : lockViewport: 锁定视角
+helpUrl : /_docs/#/instruction
+default : []
+colour : this.soundColor
+var code = '{"type": "lockViewport"},\n';
+return code;
+*/;
+
+unlockViewport_s
+    :   '解锁视角' Newline
+
+/* unlockViewport_s
+tooltip : unlockViewport: 解锁视角
+helpUrl : /_docs/#/instruction
+default : []
+colour : this.soundColor
+var code = '{"type": "unlockViewport"},\n';
 return code;
 */;
 

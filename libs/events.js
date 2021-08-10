@@ -1533,6 +1533,16 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.moveMode, data.time);
 }
 
+events.prototype._action_lockViewport = function (data, x, y, prefix) {
+    flags.__lockViewport__ = true;
+    core.doAction();
+}
+
+events.prototype._action_unlockViewport = function (data, x, y, prefix) {
+    flags.__lockViewport__ = false;
+    core.doAction();
+}
+
 events.prototype._action_move = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     this.__action_doAsyncFunc(data.async, core.moveBlock, loc[0], loc[1], data.steps, data.time, data.keep);

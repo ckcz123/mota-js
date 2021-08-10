@@ -559,6 +559,12 @@ declare class control {
      */
     setWeather(type?: 'rain' | 'snow' | 'sun' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
     
+    /** 注册一个天气 */
+    registerWeather(name: string, initFunc: (level: number) => void, frameFunc?: (timestamp: number, level: number) => void): void
+
+    /** 注销一个天气 */
+    unregisterWeather(name: string) : void;
+
     /**
      * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
      * @example core.setCurtain(); // 恢复画面色调，用时四分之三秒

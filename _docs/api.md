@@ -503,6 +503,13 @@ registerResize: fn(name: string, func: fn(obj: ?))
 name: 名称，可供注销使用
 func: 可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
 
+registerWeather: fn(name: string, initFunc: fn(level: number), frameFunc?: fn(timestamp: number, level: number))
+注册一个天气
+name: 要注册的天气名
+initFunc: 当切换到此天气时的初始化；接受level（天气等级）为参数；可用于创建多个节点（如初始化雪花）
+frameFunc: 每帧的天气效果变化；可接受timestamp（从页面加载完毕到当前所经过的时间）和level（天气等级）作为参数
+天气应当仅在weather层进行绘制，推荐使用core.animateFrame.weather.nodes用于节点信息。
+
 removeFlag: fn(name: string)
 删除某个flag/变量
 
@@ -697,6 +704,9 @@ unregisterReplayAction: fn(name: string)
 
 unregisterResize: fn(name: string)
 注销一个resize函数
+
+unregisterWeather: fn(name: string)
+注销一个天气
 
 updateCheckBlock: fn(floorId?: string)
 更新领域、夹击、阻击的伤害地图

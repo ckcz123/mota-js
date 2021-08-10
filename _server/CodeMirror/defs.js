@@ -2324,6 +2324,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "注销一个录像行为", 
           "!type": "fn(name: string)"
         }, 
+        "unregisterWeather": {
+          "!doc": "注销一个天气",
+          "!type": "fn(name: string)"
+        },
         "setBuff": {
           "!doc": "设置主角某个属性的百分比修正倍率，初始值为1，<br/>倍率存放在flag: '__'+name+'_buff__' 中<br/>例如：core.setBuff('atk', 0.5); // 主角能发挥出的攻击力减半<br/>name: 属性的英文名，请注意只能用于数值类属性哦，否则随后的乘法会得到NaN<br/>value: 新的百分比修正倍率，不填（效果上）视为1", 
           "!type": "fn(name: string, value: number)"
@@ -2460,6 +2464,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "注册一个resize函数<br/>name: 名称，可供注销使用<br/>func: 可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。", 
           "!type": "fn(name: string, func: fn(obj: ?))"
         }, 
+        "registerWeather": {
+          "!doc": "注册一个天气<br/>name: 要注册的天气名<br/>initFunc: 当切换到此天气时的初始化；接受level（天气等级）为参数；可用于创建多个节点（如初始化雪花）<br/>frameFunc: 每帧的天气效果变化；可接受timestamp（从页面加载完毕到当前所经过的时间）和level（天气等级）作为参数<br/>天气应当仅在weather层进行绘制，推荐使用core.animateFrame.weather.nodes用于节点信息。",
+          "!type": "fn(name: string, initFunc: fn(level: number), frameFunc?: fn( timestamp: number, level: number))"
+        },
         "stopReplay": {
           "!doc": "停止播放", 
           "!type": "fn(force?: bool)"

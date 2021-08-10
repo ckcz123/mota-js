@@ -16,6 +16,7 @@ control.prototype._init = function () {
     this.controldata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.control;
     this.renderFrameFuncs = [];
     this.replayActions = [];
+    this.weathers = {};
     this.resizes = [];
     // --- 注册系统的animationFrame
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
@@ -26,6 +27,12 @@ control.prototype._init = function () {
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("tip", true, this._animateFrame_tip);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
+    // --- 注册系统的天气
+    this.registerWeather("rain", this._weather_rain, this._animationFrame_weather_rain);
+    this.registerWeather("snow", this._weather_snow, this._animationFrame_weather_snow);
+    this.registerWeather("fog", this._weather_fog, this.__animateFrame_weather_image);
+    this.registerWeather("cloud", this._weather_cloud, this.__animateFrame_weather_image);
+    this.registerWeather("sun", this._weather_sun, this._animationFrame_weather_sun);
     // --- 注册系统的replay
     this.registerReplayAction("move", this._replayAction_move);
     this.registerReplayAction("item", this._replayAction_item);
@@ -199,13 +206,19 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
 }
 
 control.prototype._animationFrame_weather = function (timestamp) {
-    var weather = core.animateFrame.weather;
-    if (timestamp - weather.time <= 30 || !core.dymCanvas.weather) return;
-    core.control["_animationFrame_weather_"+weather.type]();
-    weather.time = timestamp;
+    var weather = core.animateFrame.weather, type = weather.type;
+    if (!core.dymCanvas.weather || !core.control.weathers[type] || !core.control.weathers[type].frameFunc) return;
+    try {
+        core.doFunc(core.control.weathers[type].frameFunc, core.control, timestamp, core.animateFrame.weather.level);
+    } catch (e) {
+        main.log(e);
+        main.log("ERROR in weather["+type+"]：已自动注销该项。");
+        core.unregisterWeather(type);
+    }
 }
 
-control.prototype._animationFrame_weather_rain = function () {
+control.prototype._animationFrame_weather_rain = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
     var ctx = core.dymCanvas.weather, ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
     core.clearMap('weather');
     ctx.strokeStyle = 'rgba(174,194,224,0.8)';
@@ -228,9 +241,11 @@ control.prototype._animationFrame_weather_rain = function () {
     });
 
     ctx.fill();
+    core.animateFrame.weather.time = timestamp;
 }
 
-control.prototype._animationFrame_weather_snow = function () {
+control.prototype._animationFrame_weather_snow = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
     var ctx = core.dymCanvas.weather, ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
     core.clearMap('weather');
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
@@ -260,11 +275,15 @@ control.prototype._animationFrame_weather_snow = function () {
         }
     });
     ctx.fill();
+    core.animateFrame.weather.time = timestamp;
 }
 
-control.prototype.__animateFrame_weather_image = function (image) {
-    if (!image) return;
+control.prototype.__animateFrame_weather_image = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
     var node = core.animateFrame.weather.nodes[0];
+    var image = node.image;
+    if (!image) return;
+    core.clearMap('weather');
     core.setAlpha('weather', node.level / 500);
     var wind = 1.5;
     var width = image.width, height = image.height;
@@ -296,20 +315,18 @@ control.prototype.__animateFrame_weather_image = function (image) {
         }
     }
     core.setAlpha('weather',1);
+    core.animateFrame.weather.time = timestamp;
 }
 
-control.prototype._animationFrame_weather_fog = function () {
-    core.clearMap('weather');
-    this.__animateFrame_weather_image(core.animateFrame.weather.fog);
-}
-
-control.prototype._animationFrame_weather_cloud = function () {
-    core.clearMap('weather');
-    this.__animateFrame_weather_image(core.animateFrame.weather.cloud);
-}
-
-control.prototype._animationFrame_weather_sun = function () {
-    // do nothing here.
+control.prototype._animationFrame_weather_sun = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
+    var node = core.animateFrame.weather.nodes[0];
+    var opacity = node.opacity + node.delta;
+    if (opacity > level / 10 + 0.3 || opacity < level / 10 - 0.3)
+        node.delta = -node.delta;
+    node.opacity = opacity;
+    core.setOpacity('weather', core.clamp(opacity, 0, 1));
+    core.animateFrame.weather.time = timestamp;
 }
 
 control.prototype._animateFrame_tip = function (timestamp) {
@@ -2542,7 +2559,7 @@ control.prototype.getMappedName = function (name) {
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
     // 非雨雪
-    if (type == null) {
+    if (type == null || !this.weathers[type]) {
         core.deleteCanvas('weather')
         core.animateFrame.weather.type = null;
         core.animateFrame.weather.nodes = [];
@@ -2555,70 +2572,96 @@ control.prototype.setWeather = function (type, level) {
 
     // 计算当前的宽高
     core.createCanvas('weather', 0, 0, core.__PIXELS__, core.__PIXELS__, 80);
+    core.setOpacity('weather', 1.0);
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
     core.animateFrame.weather.nodes = [];
-    this._setWeather_createNodes(type, level);
+    try {
+        core.doFunc(this.weathers[type].initFunc, this, level);
+    } catch (e) {
+        main.log(e);
+        main.log("ERROR in weather["+type+"]：已自动注销该项。");
+        core.unregisterWeather(type);
+    }
 }
 
-control.prototype._setWeather_createNodes = function (type, level) {
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
-    switch (type) {
-        case 'rain':
-            for (var a=0;a<number;a++) {
-                core.animateFrame.weather.nodes.push({
-                    'x': Math.random()*core.bigmap.width*32,
-                    'y': Math.random()*core.bigmap.height*32,
-                    'l': Math.random() * 2.5,
-                    'xs': -4 + Math.random() * 4 + 2,
-                    'ys': Math.random() * 10 + 10
-                })
-            }
-            break;
-        case 'snow':
-            for (var a=0;a<number;a++) {
-                core.animateFrame.weather.nodes.push({
-                    'x': Math.random()*core.bigmap.width*32,
-                    'y': Math.random()*core.bigmap.height*32,
-                    'r': Math.random() * 5 + 1,
-                    'd': Math.random() * Math.min(level, 200),
-                })
-            }
-            break;
-        case 'fog':
-            if (core.animateFrame.weather.fog) {
-                core.animateFrame.weather.nodes = [{
-                    'level': number,
-                    'x': 0,
-                    'y': -core.__PIXELS__ / 2,
-                    'dx': -Math.random() * 1.5,
-                    'dy': Math.random(),
-                    'delta': 0.001,
-                }];
-            }
-            break;
-        case 'cloud':
-            if (core.animateFrame.weather.cloud) {
-                core.animateFrame.weather.nodes = [{
-                    'level': number,
-                    'x': 0,
-                    'y': -core.__PIXELS__ / 2,
-                    'dx': -Math.random() * 1.5,
-                    'dy': Math.random(),
-                    'delta': 0.001,
-                }];
-            }
-            break;
-        case 'sun':
-            if (core.animateFrame.weather.sun) {
-                // 直接绘制
-                core.clearMap('weather');
-                core.setAlpha('weather', level / 10);
-                core.drawImage('weather', core.animateFrame.weather.sun, 0, 0, core.animateFrame.weather.sun.width, core.animateFrame.weather.sun.height, 0, 0, core.__PIXELS__, core.__PIXELS__);
-                core.setAlpha('weather', 1);
-            }
-            break;
+////// 注册一个天气 //////
+// name为天气类型，如 sun, rain, snow 等
+// initFunc 为设置为此天气时的初始化，接受level参数
+// frameFunc 为该天气下每帧的效果，接受和timestamp参数（从页面加载完毕到当前经过的时间）
+control.prototype.registerWeather = function (name, initFunc, frameFunc) {
+    this.unregisterWeather(name);
+    this.weathers[name] = { initFunc: initFunc, frameFunc: frameFunc };
+}
+
+////// 取消注册一个天气 //////
+control.prototype.unregisterWeather = function (name) {
+    delete this.weathers[name];
+    if (core.animateFrame.weather.type == name) {
+        this.setWeather(null);
     }
+}
+
+control.prototype._weather_rain = function (level) {
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    for (var a=0;a<number;a++) {
+        core.animateFrame.weather.nodes.push({
+            'x': Math.random()*core.bigmap.width*32,
+            'y': Math.random()*core.bigmap.height*32,
+            'l': Math.random() * 2.5,
+            'xs': -4 + Math.random() * 4 + 2,
+            'ys': Math.random() * 10 + 10
+        })
+    }
+}
+
+control.prototype._weather_snow = function (level) {
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    for (var a=0;a<number;a++) {
+        core.animateFrame.weather.nodes.push({
+            'x': Math.random()*core.bigmap.width*32,
+            'y': Math.random()*core.bigmap.height*32,
+            'r': Math.random() * 5 + 1,
+            'd': Math.random() * Math.min(level, 200),
+        })
+    }
+}
+
+control.prototype._weather_fog = function (level) {
+    if (!core.animateFrame.weather.fog) return;
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    core.animateFrame.weather.nodes = [{
+        'image': core.animateFrame.weather.fog,
+        'level': number,
+        'x': 0,
+        'y': -core.__PIXELS__ / 2,
+        'dx': -Math.random() * 1.5,
+        'dy': Math.random(),
+        'delta': 0.001,
+    }];
+}
+
+control.prototype._weather_cloud = function (level) {
+    if (!core.animateFrame.weather.cloud) return;
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    core.animateFrame.weather.nodes = [{
+        'image': core.animateFrame.weather.cloud,
+        'level': number,
+        'x': 0,
+        'y': -core.__PIXELS__ / 2,
+        'dx': -Math.random() * 1.5,
+        'dy': Math.random(),
+        'delta': 0.001,
+    }];
+}
+
+control.prototype._weather_sun = function (level) {
+    if (!core.animateFrame.weather.sun) return;
+    // 直接绘制
+    core.clearMap('weather');
+    core.drawImage('weather', core.animateFrame.weather.sun, 0, 0, core.animateFrame.weather.sun.width, core.animateFrame.weather.sun.height, 0, 0, core.__PIXELS__, core.__PIXELS__);
+    core.setOpacity('weather', level / 10);
+    core.animateFrame.weather.nodes = [{opacity: level / 10, delta: 0.01}];
 }
 
 ////// 更改画面色调 //////

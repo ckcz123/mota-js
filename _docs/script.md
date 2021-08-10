@@ -480,6 +480,53 @@ core.registerReplayAction('commonEvent', function (action) {
 });
 ```
 
+### registerWeather
+
+```
+registerWeather: fn(name: string, initFunc: fn(level: number), frameFunc?: fn(timestamp: number, level: number))
+注册一个天气
+name: 要注册的天气名
+initFunc: 当切换到此天气时的初始化；接受level（天气等级）为参数；可用于创建多个节点（如初始化雪花）
+frameFunc: 每帧的天气效果变化；可接受timestamp（从页面加载完毕到当前所经过的时间）和level（天气等级）作为参数
+天气应当仅在weather层进行绘制，推荐使用core.animateFrame.weather.nodes用于节点信息。
+```
+
+`registerWeather`允许你注册一个天气。
+
+在游戏时，楼层属性中可以设置天气如 `["snow", 5]`，或者脚本 `core.setWeather("snow", 5)` 来切换天气。
+
+下面是一个例子：
+
+```js
+// 注册一个”血“天气，每200ms就随机在界面上的绘制红色斑点
+core.registerWeather('blood', function (level) {
+    // 切换到此天气时应当执行的脚本吗，如播放一个音效
+    core.playSound('blood.mp3');
+}, function (timestamp, level) {
+    // 我们希望每200ms就界面上随机绘制 level^2 个红点，半径在0~32像素之间
+
+    // 检查是否经过了200ms
+    if (timestamp - core.animateFrame.weather.time < 200) return;
+    // 当且仅当在weather层上绘制
+    core.clearMap('weather');
+    for (var i = 0; i < level * level; ++i) {
+        // 随机界面中的一个点，半径在0~32之间
+        var px = Math.random() * core.__PIXELS__;
+        var py = Math.random() * core.__PIXELS__;
+        var r = Math.random() * 32;
+        core.fillCircle('weather', px, py, r, 'red');
+    }
+    // 设置本次天气调用的时间
+    core.animateFrame.weather.time = timestamp;
+});
+```
+
+值得注意的是，天气当且仅当在`weather`层进行绘制，推荐使用或设置`core.animateFrame.weather.time`作为上次天气调用的时间避免太过于频繁的调用。
+
+推荐使用`core.animateFrame.weather.nodes`来存储天气的节点，这样会在取消天气时自动被移除。
+
+样板的云`cloud`和雾`fog`均由多个图片叠加移动实现；如果你想实现类似效果，可直接使用`core.control.__animateFrame_weather_image`作为`frameFunc`，详见样板的云雾实现。
+
 ### registerSystemEvent
 
 ```

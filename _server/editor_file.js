@@ -128,6 +128,7 @@ editor_file_wrapper = function (editor) {
 
         var strToWrite = `var ${varName} = \n${content}`;
         editor.fs.writeFile(`project/${name}.js`, editor.util.encode64(strToWrite), 'base64', function (err, data) {
+            editor.addUsedFlags(content);
             callback(err);
         });
     }

@@ -491,7 +491,7 @@ editor_ui_wrapper = function (editor) {
     }
 
     uievent.updateSelectPoint = function (redraw) {
-        uievent.elements.title.innerText = '地图选点 (' + uievent.values.x + "," + uievent.values.y + ')';
+        uievent.elements.title.innerText = '地图选点【右键多选】 (' + uievent.values.x + "," + uievent.values.y + ')';
         // 计算size
         uievent.values.boxSize = uievent.values.size * 
             (uievent.values.bigmap ? (core.__SIZE__ / Math.max(uievent.values.width, uievent.values.height)) : 1);
@@ -697,13 +697,7 @@ editor_ui_wrapper = function (editor) {
         var html = "<p style='margin-left: 10px'>该变量出现的所有位置如下：</p><ul>";
         var list = uievent._searchUsedFlags(flag);
         list.forEach(function (v) {
-            var x = "<li>";
-            if (v[0] != null) x += v[0] + "层 ";
-            else x += "公共事件 ";
-            x += v[1];
-            if (v[2] != null) x += " 的 (" + v[2] + ") 点";
-            x += "</li>";
-            html += x;
+            html += "<li>" + x + "</li>";
         });
         html += "</ul>";
         uievent.elements.extraBody.innerHTML = html;
@@ -723,6 +717,7 @@ editor_ui_wrapper = function (editor) {
 
     uievent._searchUsedFlags = function (flag) {
         var list = [];
+        // 每个点的事件
         var events = ["events", "autoEvent", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor"]
         for (var floorId in core.floors) {
             var floor = core.floors[floorId];
@@ -732,19 +727,61 @@ editor_ui_wrapper = function (editor) {
                 if (floor[e]) {
                     for (var loc in floor[e]) {
                         if (hasUsedFlags(floor[e][loc], flag)) {
-                            list.push([floorId, e, loc]);
+                            list.push(floorId + " 层 " + e + " 的 (" + loc + ") 点");
                         }
                     }
                 }
             });
         }
         // 公共事件
-        if (core.events.commonEvent) {
-            for (var name in core.events.commonEvent) {
-                if (hasUsedFlags(core.events.commonEvent[name], flag))
-                    list.push([null, name]);
+        for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+            if (hasUsedFlags(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name], flag))
+                list.push("公共事件 " + name);
+        }
+        // 道具 & 装备属性
+        for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+            var item = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id];
+            // 装备属性
+            if (hasUsedFlags(item.equip, flag)) {
+                list.push("道具 " + (item.name || id) + " 的装备属性");
+            }
+            // 使用事件
+            if (hasUsedFlags(item.useItemEvent, flag)) { 
+                list.push("道具 " + (item.name || id) + " 的使用事件");
             }
         }
+        // 怪物战前 & 战后
+        for (var id in enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80) {
+            var enemy = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id];
+            if (hasUsedFlags(enemy.beforeBattle, flag)) {
+                list.push("怪物 " + (enemy.name || id) + " 的战前事件");
+            }
+            if (hasUsedFlags(enemy.afterBattle, flag)) {
+                list.push("怪物 " + (enemy.name || id) + " 的战后事件");
+            }
+        }
+        // 图块的碰触 & 门信息
+        for (var id in maps_90f36752_8815_4be8_b32b_d7fad1d0542e) {
+            var mapInfo = maps_90f36752_8815_4be8_b32b_d7fad1d0542e[id];
+            if (hasUsedFlags(mapInfo.doorInfo, flag))
+                list.push("图块 " + (mapInfo.name || mapInfo.id) + " 的门信息");
+            if (hasUsedFlags(mapInfo.event, flag))
+                list.push("图块 " + (mapInfo.name || mapInfo.id) + " 碰触事件");
+        }
+        // 难度 & 标题事件 & 开场剧情 & 等级提升
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.levelChoose, flag))
+            list.push("难度分歧");
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.startCanvas, flag))
+            list.push("标题事件");
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.startText, flag))
+            list.push("开场剧情");
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.levelUp, flag))
+            list.push("等级提升");
+        // 全局商店
+        (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.shops || []).forEach(function (shop) {
+            if (hasUsedFlags(shop, flag)) list.push("商店 " + shop.id);
+        });
+
         return list;
     }
 

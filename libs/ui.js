@@ -54,6 +54,7 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();
+        core.setWeather(null);
     }
     else {
         var ctx = this.getContextByName(name);

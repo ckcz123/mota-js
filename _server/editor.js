@@ -268,15 +268,14 @@ editor.prototype.init = function (callback) {
         
                 // --- 所有用到的flags
                 editor.used_flags = {};
+                editor.addUsedFlags(JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d));
                 // 楼层属性
                 for (var floorId in editor.main.floors) {
                     editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
                 }
                 // 公共事件
-                if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-                    for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-                        editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
-                    }
+                for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                    editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
                 }
                 // 道具效果
                 for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
@@ -284,6 +283,14 @@ editor.prototype.init = function (callback) {
                 }
                 // 全局商店
                 editor.addUsedFlags(JSON.stringify(editor.main.core.firstData.shops));
+                // 怪物战前战后
+                for (var id in enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80) {
+                    editor.addUsedFlags(JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id]));
+                }
+                // 图块属性
+                for (var id in maps_90f36752_8815_4be8_b32b_d7fad1d0542e) {
+                    editor.addUsedFlags(JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e[id]));
+                }
         
                 if (editor.useCompress == null) editor.useCompress = useCompress;
                 if (Boolean(callback)) callback();

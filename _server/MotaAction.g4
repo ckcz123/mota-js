@@ -1078,13 +1078,15 @@ return code;
 */;
 
 clearTextBox_s
-    :   '清除对话框' ':' Int Newline
+    :   '清除对话框' ':' EvalString? Newline
 
 /* clearTextBox_s
 tooltip : 清除对话框
 helpUrl : /_docs/#/instruction
-default : [1]
-var code = '{"type": "clearTextBox", "code": '+Int_0+'},\n';
+default : ["1"]
+if (EvalString_0 && !/^\d+(,\d+)*$/.test(EvalString_0)) throw new Error('对话框编号需要以逗号分隔');
+EvalString_0 = EvalString_0 ? (', "code": ['+EvalString_0+']') : '';
+var code = '{"type": "clearTextBox"'+EvalString_0+'},\n';
 return code;
 */;
 

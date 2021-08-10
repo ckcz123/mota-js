@@ -1354,7 +1354,7 @@ events.prototype.__action_doAsyncFunc = function (isAsync, func) {
 events.prototype._action_text = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
     data.text = core.replaceText(data.text, prefix);
-    var ctx = data.code ? '__text__' + data.code : null;;
+    var ctx = data.code ? ('__text__' + data.code) : null;;
     data.ctx = ctx;
     if (core.getContextByName(ctx) && !data.showAll) {
         core.ui._animateUI('hide', ctx, function () {
@@ -3127,14 +3127,26 @@ events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
 
 ////// 清除对话框 //////
 events.prototype.clearTextBox = function (code, callback) {
-    var ctx = '__text__' + code;
-    if (!core.getContextByName(ctx)) {
-        if (callback) callback();
+    if (code == null) {
+        code = Object.keys(core.dymCanvas).filter(function (one) { return one.startsWith('__text__') })
+            .map(function (one) { return one.substring('__text__'.length); })
     }
-    core.ui._animateUI('hide', ctx, function () {
-        core.deleteCanvas(ctx);
-        if (callback) callback();
-    });
+
+    if (!(code instanceof Array)) code = [code];
+    var index = 0;
+    var _work = function () {
+        if (index == code.length) {
+            if (callback) callback();
+            return;
+        }
+        var ctx = '__text__' + code[index++];
+        if (!core.getContextByName(ctx)) return _work();
+        core.ui._animateUI('hide', ctx, function () {
+            core.deleteCanvas(ctx);
+            _work();
+        });
+    };
+    _work();
 }
 
 ////// 关门 //////

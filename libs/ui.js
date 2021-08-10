@@ -1416,6 +1416,7 @@ ui.prototype.drawTextBox = function(content, config) {
     config = config || {};
 
     this.clearUI();
+    content = core.replaceText(content);
 
     var ctx = config.ctx || null;
     if (ctx && main.mode == 'play') {

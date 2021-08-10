@@ -301,7 +301,7 @@ ActionParser.prototype.parseAction = function() {
         data.code, data.loc[0], data.loc[1], data.relative||false, data.moveMode, data.time, data.async, this.next]);
       break;
     case "clearTextBox": // 清除对话框
-      this.next = MotaActionBlocks['clearTextBox_s'].xmlText([data.code,this.next]);
+      this.next = MotaActionBlocks['clearTextBox_s'].xmlText([(data.code||"").toString(),this.next]);
       break;  
     case "autoText": // 自动剧情文本
       var info = this.getTitleAndPosition(data.text);
@@ -321,7 +321,7 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=this.Colour(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.align,data.title,data.bold,'rgba('+data.title+')',
+        data.position,data.offset,data.align,data.bold,data.title,'rgba('+data.title+')',
         data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
         data.titlefont,data.textfont,data.lineHeight,data.time,data.letterSpacing,data.animateTime,this.next]);
       break;

@@ -527,6 +527,14 @@ core.registerWeather('blood', function (level) {
 
 样板的云`cloud`和雾`fog`均由多个图片叠加移动实现；如果你想实现类似效果，可直接使用`core.control.__animateFrame_weather_image`作为`frameFunc`，详见样板的云雾实现。
 
+另外注意的是，注册的天气无法在事件编辑器的下拉框中选择；你可以选择脚本调用`core.setWeather`，或者修改`_server/MotaAction.g4`中的`Weather_List`:
+
+```js
+Weather_List
+    :   '无'|'雨'|'雪'|'晴'|'雾'|'云'
+    /*Weather_List ['null','rain','snow','sun','fog','cloud']*/;
+```
+
 ### registerSystemEvent
 
 ```

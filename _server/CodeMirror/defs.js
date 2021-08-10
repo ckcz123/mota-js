@@ -2466,7 +2466,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "registerWeather": {
           "!doc": "注册一个天气<br/>name: 要注册的天气名<br/>initFunc: 当切换到此天气时的初始化；接受level（天气等级）为参数；可用于创建多个节点（如初始化雪花）<br/>frameFunc: 每帧的天气效果变化；可接受timestamp（从页面加载完毕到当前所经过的时间）和level（天气等级）作为参数<br/>天气应当仅在weather层进行绘制，推荐使用core.animateFrame.weather.nodes用于节点信息。",
-          "!type": "fn(name: string, initFunc: fn(level: number), frameFunc?: fn( timestamp: number, level: number))"
+          "!type": "fn(name: string, initFunc: fn(level: number), frameFunc?: fn(timestamp: number, level: number))"
         },
         "stopReplay": {
           "!doc": "停止播放", 

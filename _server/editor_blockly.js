@@ -1162,3 +1162,21 @@ Blockly.BlockSvg.prototype.generateContextMenu = function() {
     if (this.customContextMenu) this.customContextMenu(menuOptions);
     return menuOptions;
 };
+
+Blockly.FieldDropdown.prototype.doClassValidation_ = function (opt_newValue) { 
+    return opt_newValue;
+}
+
+Blockly.FieldDropdown.prototype.doValueUpdate_ = function (newValue) {
+    Blockly.FieldDropdown.superClass_.doValueUpdate_.call(this, newValue);
+    var options = this.getOptions(true);
+    for (var i = 0, option; (option = options[i]); i++) {
+        if (option[1] == this.value_) {
+            this.selectedOption_ = option;
+        }
+    }
+    if (this.selectedOption_[1] != this.value_) {
+        options.push([this.value_, this.value_]);
+        this.selectedOption_ = options[options.length - 1];
+    }
+};

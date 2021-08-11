@@ -696,7 +696,7 @@ editor_ui_wrapper = function (editor) {
 
         var html = "<p style='margin-left: 10px'>该变量出现的所有位置如下：</p><ul>";
         var list = uievent._searchUsedFlags(flag);
-        list.forEach(function (v) {
+        list.forEach(function (x) {
             html += "<li>" + x + "</li>";
         });
         html += "</ul>";

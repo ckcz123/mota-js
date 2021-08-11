@@ -3393,8 +3393,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, x: number, y: number)"
         }, 
         "deleteCanvas": {
-          "!doc": "删除一个自定义画布", 
-          "!type": "fn(name: string)"
+          "!doc": "删除一个自定义画布<br/>name: 画布名，也可以传入一个函数对所有画布进行筛选", 
+          "!type": "fn(name: string|fn(name: string) -> bool)"
         },
         "deleteAllCanvas": {
           "!doc": "清空所有的自定义画布", 

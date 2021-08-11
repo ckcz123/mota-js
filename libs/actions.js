@@ -946,7 +946,7 @@ actions.prototype._clickCenterFly = function (x, y) {
 
 actions.prototype._keyUpCenterFly = function (keycode) {
     core.ui.closePanel();
-    if (keycode == 13 || keycode == 32 || keycode == 67) {
+    if (keycode == 51 || keycode == 13 || keycode == 32 || keycode == 67) {
         if (core.canUseItem('centerFly')) {
             core.useItem('centerFly');
         }

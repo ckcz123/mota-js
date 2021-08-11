@@ -954,6 +954,29 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
 
 // -------- 绘制地图，各层图块，楼层贴图，Autotile -------- //
 
+maps.prototype._getBigImageInfo = function (bigImage, face, animate) {
+    face = face || "down";
+    if (["up", "down", "left", "right"].indexOf(face) < 0) face = "down";
+    var per_width = bigImage.width / 4;
+    var per_height = bigImage.height / 4;
+    var sx = animate * per_width, sy;
+    if (per_height < per_width / 2) { // 强制视为 1*4 的怪物
+        per_height = bigImage.height;
+        sy = 0;
+    } else {
+        sy = core.material.icons.hero[face].loc * per_height;
+    }
+    var dx, dy;
+    switch (face) {
+        case "down": dx = 16 - per_width / 2; dy = 32 - per_height; break;
+        case "left": dx = 0; dy = 16 - per_height / 2; break;
+        case "right": dx = 32 - per_width; dy = 16 - per_height / 2; break;
+        case "up": dx = 16 - per_width / 2; dy = 0; break;
+    }
+
+    return {sx: sx, sy: sy, per_width: per_width, per_height: per_height, face: face, dx: dx, dy: dy};
+}
+
 ////// 绘制一个图块 //////
 maps.prototype.drawBlock = function (block, animate, ctx) {
     if (block.event.id == 'none') return;
@@ -987,66 +1010,104 @@ maps.prototype.drawBlock = function (block, animate, ctx) {
         this._drawBlockInfo_bgfg(blockInfo, block.name, block.x, block.y, ctx);
 }
 
-maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y) {
-    var face = blockInfo.face || "down";
-    if (["up", "down", "left", "right"].indexOf(face) < 0) face = "down";
+maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y, ctx) {
+    var bigImageInfo = this._getBigImageInfo(blockInfo.bigImage, blockInfo.face, blockInfo.posX);
+    var per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height, sx = bigImageInfo.sx, sy = bigImageInfo.sy;
     var bigImage = blockInfo.bigImage;
-    var per_width = bigImage.width / 4;
-    var per_height = bigImage.height / 4;
-    if (face == 'down' && per_height < per_width / 2) { // 强制视为 1*4 的怪物
-        per_height = bigImage.height;
+
+    if (main.mode == 'editor') {
+        var px = 32 * x - 32 * core.bigmap.posX;
+        var py = 32 * y - 32 * core.bigmap.posY;
+        if (ctx == null) ctx = 'event';
+        core.clearMap(ctx, px, py, 32, 32);
+        core.drawImage(ctx, bigImage, sx, sy, per_width, per_height, px, py, 32, 32);
+        return;
     }
-    var sx = blockInfo.posX * per_width;
-    var sy = core.material.icons.hero[face].loc * per_height;
+
+    var px = 32 * x - core.bigmap.offsetX;
+    var py = 32 * y - core.bigmap.offsetY;
     
     // 上半部分 - 会遮挡勇士；z值高于event2，为51
     var header = "_bigImage_header_" + x + "_" + y;
     // 下半部分 - 会被勇士遮挡；z值高于event，为31
     var body = "_bigImage_body_" + x + "_" + y;
-    var px = 32 * x - core.bigmap.offsetX;
-    var py = 32 * y - core.bigmap.offsetY;
+    var dx = bigImageInfo.dx, dy = bigImageInfo.dy;
 
-    switch (face) {
+    switch (bigImageInfo.face) {
         case "down":
-            var dx = px + 16 - per_width / 2;
-            var dy = py + 32 - per_height;
-            core.createCanvas(header, dx, dy, per_width, per_height - 32, 51);
-            core.drawImage(header, bigImage, sx, sy, per_width, per_height - 32, 0, 0, per_width, per_height - 32);
-            core.createCanvas(body, dx, dy + per_height - 32, per_width, 32, 31);
-            core.drawImage(body, bigImage, sx, sy + per_height - 32, per_width, 32, 0, 0, per_width, 32);
+            core.createCanvas(header, px + dx, py + dy, per_width, per_height - 32, 51);
+            this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
+                core.drawImage(header, bigImage, sx, sy, per_width, per_height - 32, 0, 0, per_width, per_height - 32);
+            });
+            core.createCanvas(body, px + dx, py, per_width, 32, 31);
+            this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
+                core.drawImage(body, bigImage, sx, sy + per_height - 32, per_width, 32, 0, 0, per_width, 32);
+            })
             break;
         case "left":
-            core.createCanvas(header, px, py + 16 - per_height / 2, per_width, per_height / 2 - 16, 51);
-            core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
-            core.createCanvas(body, px, py, per_width, per_height / 2 + 16, 31);
-            core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
+            core.createCanvas(header, px + dx, py + dy, per_width, per_height / 2 - 16, 51);
+            this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
+                core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
+            });
+            core.createCanvas(body, px + dx, py, per_width, per_height / 2 + 16, 31);
+            this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
+                core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
+            });
             break;
+        case "right":
+            core.createCanvas(header, px + dx, py + dy, per_width, per_height / 2 - 16, 51);
+            this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
+                core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
+            });
+            core.createCanvas(body, px + dx, py, per_width, per_height / 2 + 16, 31);
+            this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
+                core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
+            });
+            break;
+        case "up":
+            core.deleteCanvas(header);
+            core.createCanvas(body, px + dx, py, per_width, per_height, 31);
+            this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
+                core.drawImage(body, bigImage, sx, sy, per_width, per_height, 0, 0, per_width, per_height);
+            });
+            break;
+    }
+    if (core.dymCanvas[header]) {
+        core.dymCanvas[header].canvas.setAttribute('_ox', 32 * x + dx);
+        core.dymCanvas[header].canvas.setAttribute('_oy', 32 * y + dy);
+    }
+    if (core.dymCanvas[body]) {
+        core.dymCanvas[body].canvas.setAttribute('_ox', 32 * x + dx);
+        core.dymCanvas[body].canvas.setAttribute('_oy', 32 * y);
     }
 }
 
+maps.prototype._drawBlockInfo_drawWithFilter = function (blockInfo, ctx, func) {
+    var alpha = null;
+    if (blockInfo.opacity != null) alpha = core.setAlpha(ctx, blockInfo.opacity);
+    core.setFilter(ctx, blockInfo.filter);
+    func();
+    core.setFilter(ctx, null);
+    if (alpha != null) core.setAlpha(ctx, alpha);
+}
+
 maps.prototype._drawBlockInfo = function (blockInfo, x, y, ctx) {
-    if (blockInfo.bigImage) return this._drawBlockInfo_bigImage(blockInfo, x, y);
+    if (blockInfo.bigImage) return this._drawBlockInfo_bigImage(blockInfo, x, y, ctx);
 
     var image = blockInfo.image, posX = blockInfo.posX, posY = blockInfo.posY, height = blockInfo.height;
     var px = 32 * x - 32 * core.bigmap.posX;
     var py = 32 * y - 32 * core.bigmap.posY;
     if (ctx == null) ctx = 'event';
 
-    var alpha = null;
-    if (blockInfo.opacity != null) alpha = core.setAlpha(ctx, blockInfo.opacity);
-    core.setFilter(ctx, blockInfo.filter);
-    core.clearMap(ctx, px, py, 32, 32);
-    core.drawImage(ctx, image, posX * 32, posY * height + height - 32, 32, 32, px, py, 32, 32);
-    core.setFilter(ctx, null);
-    if (alpha != null) core.setAlpha(ctx, alpha);
+    this._drawBlockInfo_drawWithFilter(blockInfo, ctx, function () {
+        core.clearMap(ctx, px, py, 32, 32);
+        core.drawImage(ctx, image, posX * 32, posY * height + height - 32, 32, 32, px, py, 32, 32);
+    });
     if (height > 32) {
-        alpha = null;
-        if (blockInfo.opacity != null) alpha = core.setAlpha('event2', blockInfo.opacity);
-        core.setFilter('event2', blockInfo.filter);
-        core.clearMap('event2', px, py + 32 - height, 32, height - 32)
-        core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, px, py + 32 - height, 32, height - 32);
-        core.setFilter('event2', null);
-        if (alpha != null) core.setAlpha('event2', alpha);
+        this._drawBlockInfo_drawWithFilter(blockInfo, 'event2', function () {
+            core.clearMap('event2', px, py + 32 - height, 32, height - 32);
+            core.drawImage('event2', image, posX * 32, posY * height, 32, height - 32, px, py + 32 - height, 32, height - 32);
+        });
     }
 }
 
@@ -1130,8 +1191,9 @@ maps.prototype._drawMap_drawAll = function (floorId, config) {
     this.drawFg(floorId, config);
 }
 
-maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, onMap) {
+maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, config) {
     if (blockInfo == null) return;
+    var onMap = config.onMap;
     if (onMap && core.bigmap.v2) {
         // 判定是否绘制
         var posX = core.bigmap.posX, posY = core.bigmap.posY;
@@ -1152,12 +1214,20 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, on
     }
     if (!onMap) {
         var height = blockInfo.height;
-        var alpha = null;
-        if (block.opacity != null) alpha = core.setAlpha(ctx, block.opacity);
-        core.setFilter(ctx, block.filter);
-        core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
-        core.setFilter(ctx, null);
-        if (alpha != null) core.setAlpha(ctx, alpha);
+        if (blockInfo.bigImage) {
+            config.postDraw.push(function () {
+                var bigImageInfo = core.maps._getBigImageInfo(blockInfo.bigImage, blockInfo.face, 0);
+                var per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
+                core.maps._drawBlockInfo_drawWithFilter(block, ctx, function () {
+                    core.drawImage(ctx, blockInfo.bigImage, bigImageInfo.sx, bigImageInfo.sy, per_width, per_height, 
+                        32 * block.x + bigImageInfo.dx, 32 * block.y + bigImageInfo.dy, per_width, per_height);
+                });
+            });
+            return;
+        }
+        this._drawBlockInfo_drawWithFilter(block, ctx, function () {
+            core.drawImage(ctx, blockInfo.image, 32 * blockInfo.posX, height * blockInfo.posY, 32, height, 32 * block.x, 32 * block.y + 32 - height, 32, height);
+        });
         return;
     }
     this.drawBlock(block, null, ctx);
@@ -1251,6 +1321,7 @@ maps.prototype.drawEvents = function (floorId, blocks, config) {
     } else {
         arr = this._getMapArrayFromBlocks(blocks, core.floors[floorId].width, core.floors[floorId].height);
     }
+    config.postDraw = [];
 
     blocks.filter(function (block) {
         if (config.onMap && core.bigmap.v2) {
@@ -1262,8 +1333,10 @@ maps.prototype.drawEvents = function (floorId, blocks, config) {
         }
         return block.event && !block.disable;
     }).forEach(function (block) {
-        core.maps._drawMap_drawBlockInfo(cacheCtx, block, core.maps.getBlockInfo(block), arr, config.onMap);
+        core.maps._drawMap_drawBlockInfo(cacheCtx, block, core.maps.getBlockInfo(block), arr, config);
     });
+    config.postDraw.forEach(function (v) { v(); });
+    delete config.postDraw;
 
     if (config.onMap) {
         core.drawImage(toDrawCtx, cacheCtx.canvas, core.bigmap.v2 ? -32 : 0, core.bigmap.v2 ? -32 : 0);
@@ -1323,6 +1396,7 @@ maps.prototype._drawBgFgMap = function (floorId, name, config) {
     var endY = config.onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + 2) : height; // +1 for 48 px
 
     var arr = this._getBgFgMapArray(name, floorId, !config.redraw);
+    config.postDraw = [];
     for (var x = startX; x < endX; x++) {
         for (var y = startY; y < endY; y++) {
             if (arr[y][x] == 0) continue;
@@ -1330,9 +1404,11 @@ maps.prototype._drawBgFgMap = function (floorId, name, config) {
             block.name = name;
             var blockInfo = this.getBlockInfo(block);
             if (!blockInfo) continue;
-            this._drawMap_drawBlockInfo(config.ctx, block, blockInfo, arr, config.onMap);
+            this._drawMap_drawBlockInfo(config.ctx, block, blockInfo, arr, config);
         }
     }
+    config.postDraw.forEach(function (v) { v(); });
+    delete config.postDraw;
 }
 
 ////// 绘制楼层贴图 //////
@@ -2034,8 +2110,10 @@ maps.prototype._removeBlockFromMap = function (floorId, block) {
         core.removeGlobalAnimate(x, y);
         core.clearMap('event', px, py, 32, 32);
         var height = block.event.height || 32;
-        if (height > 32)
-            core.clearMap('event2', px, py + 32 - height, 32, height - 32);
+        if (height > 32) core.clearMap('event2', px, py + 32 - height, 32, height - 32);
+        // 删除大怪物
+        core.deleteCanvas("_bigImage_header_" + x + "_" + y);
+        core.deleteCanvas("_bigImage_body_" + x + "_" + y);
         core.updateStatusBar();
     }
 }
@@ -2391,12 +2469,17 @@ maps.prototype.resetMap = function (floorId) {
 maps.prototype._initDetachedBlock = function (blockInfo, x, y, displayDamage) {
     var headCanvas = null, bodyCanvas = '__body_' + x + "_" + y, damageCanvas = null;
     // head
-    if (blockInfo.height > 32) {
+    if (!blockInfo.bigImage && blockInfo.height > 32) {
         headCanvas = "__head_" + x + "_" + y;
         core.createCanvas(headCanvas, 0, 0, 32, blockInfo.height - 32, 55);
     }
     // body
-    core.createCanvas(bodyCanvas, 0, 0, 32, 32, 35);
+    if (blockInfo.bigImage) {
+        var bigImageInfo = this._getBigImageInfo(blockInfo.bigImage, blockInfo.face, blockInfo.posX);
+        core.createCanvas(bodyCanvas, 0, 0, bigImageInfo.per_width, bigImageInfo.per_height, 35);
+    } else {
+        core.createCanvas(bodyCanvas, 0, 0, 32, 32, 35);
+    }
     // damage
     var damage = null, damageColor = null;
     if (blockInfo.cls.indexOf('enemy') == 0 && core.hasItem('book') && displayDamage) {
@@ -2436,10 +2519,19 @@ maps.prototype._moveDetachedBlock = function (blockInfo, nowX, nowY, opacity, ca
         core.setOpacity(headCanvas, opacity);
     }
     if (bodyCanvas) {
-        core.dymCanvas[bodyCanvas].clearRect(0, 0, 32, 32);
-        core.dymCanvas[bodyCanvas].drawImage(image, posX * 32, posY * height + height - 32, 32, 32, 0, 0, 32, 32);
-        core.relocateCanvas(bodyCanvas, nowX - core.bigmap.offsetX, nowY - core.bigmap.offsetY);
-        core.setOpacity(bodyCanvas, opacity);
+        if (blockInfo.bigImage) {
+            var bigImageInfo = this._getBigImageInfo(blockInfo.bigImage, blockInfo.face, blockInfo.posX);
+            var per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
+            core.dymCanvas[bodyCanvas].clearRect(0, 0, bigImageInfo.per_width, bigImageInfo.per_height);
+            core.dymCanvas[bodyCanvas].drawImage(blockInfo.bigImage, bigImageInfo.sx, bigImageInfo.sy, per_width, per_height, 0, 0, per_width, per_height);
+            core.relocateCanvas(bodyCanvas, nowX - core.bigmap.offsetX + bigImageInfo.dx, nowY - core.bigmap.offsetY + bigImageInfo.dy);
+            core.setOpacity(bodyCanvas, opacity);
+        } else {
+            core.dymCanvas[bodyCanvas].clearRect(0, 0, 32, 32);
+            core.dymCanvas[bodyCanvas].drawImage(image, posX * 32, posY * height + height - 32, 32, 32, 0, 0, 32, 32);
+            core.relocateCanvas(bodyCanvas, nowX - core.bigmap.offsetX, nowY - core.bigmap.offsetY);
+            core.setOpacity(bodyCanvas, opacity);
+        }
     }
     if (damageCanvas) {
         core.relocateCanvas(damageCanvas, nowX - core.bigmap.offsetX, nowY - core.bigmap.offsetY);
@@ -2560,6 +2652,7 @@ maps.prototype._moveBlock_updateDirection = function (blockInfo, moveInfo) {
     if (faceDirection == 'leftup' || faceDirection == 'leftdown') faceDirection = 'left';
     if (faceDirection == 'rightup' || faceDirection == 'rightdown') faceDirection = 'right';
     var currid = blockInfo.faceIds[faceDirection];
+    blockInfo.face = faceDirection;
     if (currid) {
         var posY = core.material.icons[blockInfo.cls][currid];
         if (posY != null) {
@@ -2719,9 +2812,10 @@ maps.prototype._animateBlock_getList = function (loc, type) {
     var list = [];
     loc.forEach(function (t) {
         var block = core.getBlock(t[0], t[1], null, true);
+        if (block == null) return;
+
         var fromOpacity = block.opacity;
         if (fromOpacity == null) fromOpacity = 1.0;
-        if (block == null) return;
 
         var blockInfo = core.maps.getBlockInfo(block);
         if (blockInfo == null) {
@@ -2807,12 +2901,27 @@ maps.prototype.removeGlobalAnimate = function (x, y, name) {
 ////// 绘制UI层的box动画 //////
 maps.prototype.drawBoxAnimate = function () {
     if (core.status.boxAnimateObjs.length == 0) return;
+    // check ui2
+    if (main.mode == 'play' && core.status.boxAnimateObjs.filter(function (one) { return one.bigImage }).length > 0 && !core.dymCanvas.ui2) {
+        core.createCanvas('ui2', 0, 0, core.__PIXELS__, core.__PIXELS__, 142);
+    }
+    core.clearMap('ui2');
+
     core.status.boxAnimateObjs.forEach(function (obj) {
-        var ctx = obj.ctx || 'ui';
-        core.clearMap(ctx, obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
-        core.fillRect(ctx, obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
-        core.drawImage(ctx, obj.image, core.status.globalAnimateStatus % obj.animate * 32, obj.pos,
-            32, obj.height, obj.x, obj.y, obj.dw || 32, obj.dh || obj.height);
+        if (obj.bigImage) {
+            var ctx = obj.ctx || 'ui2';
+            var bigImageInfo = core.maps._getBigImageInfo(obj.bigImage, obj.face, core.status.globalAnimateStatus % 4);
+            var sx = bigImageInfo.sx, sy = bigImageInfo.sy, per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
+            var actual_width = Math.min(per_width, obj.max_width || per_width), actual_height = per_height * actual_width / per_width;
+            core.drawImage(ctx, obj.bigImage, sx, sy, per_width, per_height, 
+                obj.centerX - actual_width / 2, obj.centerY - actual_height / 2, actual_width, actual_height);
+        } else {
+            var ctx = obj.ctx || 'ui';
+            core.clearMap(ctx, obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight);
+            core.fillRect(ctx, obj.bgx, obj.bgy, obj.bgWidth, obj.bgHeight, core.material.groundPattern);
+            core.drawImage(ctx, obj.image, core.status.globalAnimateStatus % obj.animate * 32, obj.pos,
+                32, obj.height, obj.x, obj.y, obj.dw || 32, obj.dh || obj.height);
+        }
     });
     if (main.mode != 'play') core.status.boxAnimateObjs = [];
 }

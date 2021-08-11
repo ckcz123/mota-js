@@ -54,6 +54,7 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();
+        core.deleteCanvas(function (one) { return one.startsWith('_bigImage_'); });
         core.setWeather(null);
     }
     else {
@@ -681,12 +682,13 @@ ui.prototype.closePanel = function () {
 
 ui.prototype.clearUI = function () {
     core.status.boxAnimateObjs = [];
-    if (core.dymCanvas._selector) core.deleteCanvas("_selector");
+    core.deleteCanvas("_selector");
     main.dom.next.style.display = 'none';
     main.dom.next.style.opacity = 1;
     core.clearMap('ui');
     core.setAlpha('ui', 1);
     core.setOpacity('ui', 1);
+    core.deleteCanvas('ui2');
 }
 
 ////// 左上角绘制一段提示 //////
@@ -704,7 +706,7 @@ ui.prototype.drawTip = function (text, id, frame) {
     };
     if (id != null) {
         var info = core.getBlockInfo(id);
-        if (info == null || !info.image) {
+        if (info == null || !info.image || info.bigImage) {
             // 检查状态栏图标
             if (core.statusBar.icons[id] instanceof Image) {
                 info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
@@ -767,6 +769,7 @@ ui.prototype._drawText_setContent = function (contents, callback) {
 ////// 正则处理 \t[xx,yy] 问题
 ui.prototype._getTitleAndIcon = function (content) {
     var title = null, image = null, icon = null, height = 32, animate = 1;
+    var bigImage = null, face = null;
     content = content.replace(/(\t|\\t)\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3, s4) {
         if (s4) {
             if (s4 == 'hero') {
@@ -784,9 +787,11 @@ ui.prototype._getTitleAndIcon = function (content) {
                 var blockInfo = core.getBlockInfo(s4);
                 if (blockInfo != null) {
                     if (blockInfo.name) title = blockInfo.name;
+                    bigImage = blockInfo.bigImage;
+                    face = blockInfo.face;
                     image = blockInfo.image;
                     icon = blockInfo.posY;
-                    height = blockInfo.height;
+                    height = bigImage == null ? blockInfo.height : 32;
                     animate = blockInfo.animate;
                 }
                 else title = s4;
@@ -804,7 +809,9 @@ ui.prototype._getTitleAndIcon = function (content) {
         image: image,
         icon: icon,
         height: height,
-        animate: animate
+        animate: animate,
+        bigImage: bigImage,
+        face: face,
     };
 }
 
@@ -882,11 +889,7 @@ ui.prototype._uievent_drawSelector = function (data) {
 ////// 清除自绘的选择光标
 ui.prototype.clearUIEventSelector = function (codes) {
     if (codes == null) {
-        Object.keys(core.dymCanvas).forEach(function (name) {
-            if (name.startsWith('_uievent_selector_')) {
-                core.deleteCanvas(name);
-            }
-        });
+        core.deleteCanvas(function (one) { return one.startsWith('_uievent_selector_'); })
         return;
     }
     if (codes instanceof Array) {
@@ -1615,11 +1618,18 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
             }            
         }
         else {
-            core.status.boxAnimateObjs.push({
-                'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
-                'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
-                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx,
-            });
+            if (titleInfo.bigImage) {
+                core.status.boxAnimateObjs.push({
+                    bigImage: titleInfo.bigImage, face: titleInfo.face, centerX: hPos.left + 15 + 16,
+                    centerY: image_top + titleInfo.height / 2, max_width: 50, ctx: ctx
+                });
+            } else {
+                core.status.boxAnimateObjs.push({
+                    'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
+                    'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
+                    'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx,
+                });
+            }
         }
         core.drawBoxAnimate();
     }
@@ -1761,11 +1771,18 @@ ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos, ctx) {
             title_offset += 12;
             core.strokeRect(ctx, hPos.left + 15 - 1, vPos.top + 30 - 1, 34, titleInfo.height + 2, '#DDDDDD', 2);
             core.status.boxAnimateObjs = [];
-            core.status.boxAnimateObjs.push({
-                'bgx': hPos.left + 15, 'bgy': vPos.top + 30, 'bgWidth': 32, 'bgHeight': titleInfo.height,
-                'x': hPos.left + 15, 'y': vPos.top + 30, 'height': titleInfo.height, 'animate': titleInfo.animate,
-                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx
-            });
+            if (titleInfo.bigImage) {
+                core.status.boxAnimateObjs.push({
+                    bigImage: titleInfo.bigImage, face: titleInfo.face, centerX: hPos.left + 15 + 16,
+                    centerY: vPos.top + 30 + titleInfo.height / 2, max_width: 50, ctx: ctx
+                });
+            } else {
+                core.status.boxAnimateObjs.push({
+                    'bgx': hPos.left + 15, 'bgy': vPos.top + 30, 'bgWidth': 32, 'bgHeight': titleInfo.height,
+                    'x': hPos.left + 15, 'y': vPos.top + 30, 'height': titleInfo.height, 'animate': titleInfo.animate,
+                    'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx
+                });
+            }
             core.drawBoxAnimate();
         };
 
@@ -2154,7 +2171,15 @@ ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
     var img_top = border_top + 5, img_left = border_left + 5;
     core.strokeRect('ui', 22, border_top, 42, 42, '#DDDDDD', 2);
     var blockInfo = core.getBlockInfo(enemy.id);
-    if (blockInfo.height >= 42) {
+
+    // 检查大怪物
+    if (blockInfo.bigImage) {
+        core.status.boxAnimateObjs.push({
+            bigImage: blockInfo.bigImage, face: blockInfo.face, centerX: border_left + 21, centerY: border_top + 21, 
+            max_width: 60
+        });
+    }
+    else if (blockInfo.height >= 42) {
         var originEnemy = core.material.enemys[enemy.id] || {};
         // 检查上半部分是不是纯透明的；取用原始值避免重复计算
         if (originEnemy.is32x32 == null) {
@@ -3415,6 +3440,13 @@ ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
 }
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
+    if (name instanceof Function) {
+        Object.keys(core.dymCanvas).forEach(function (one) {
+            if (name(one)) core.deleteCanvas(one);
+        });
+        return;
+    }
+
     if (!core.dymCanvas[name]) return null;
     core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
@@ -3422,8 +3454,5 @@ ui.prototype.deleteCanvas = function (name) {
 
 ////// 删除所有动态canvas //////
 ui.prototype.deleteAllCanvas = function () {
-    Object.keys(core.dymCanvas).forEach(function (name) {
-        core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
-        delete core.dymCanvas[name];
-    });
+    return this.deleteCanvas(function () { return true; })
 }

@@ -977,6 +977,17 @@ control.prototype.updateViewport = function() {
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
+    // ------ 所有的大怪物也都需要重定位
+    for (var one in core.dymCanvas) {
+        if (one.startsWith('_bigImage_')) {
+            var ox = core.dymCanvas[one].canvas.getAttribute('_ox');
+            var oy = core.dymCanvas[one].canvas.getAttribute('_oy');
+            if (ox != null && oy != null) {
+                core.relocateCanvas(one, parseInt(ox) - core.bigmap.offsetX, parseInt(oy) - core.bigmap.offsetY);
+            }
+        }
+    }
+    
 }
 
 ////// 设置视野范围 //////
@@ -988,6 +999,7 @@ control.prototype.setViewport = function (px, py) {
     var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
     var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
     core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
+
 }
 
 ////// 移动视野范围 //////

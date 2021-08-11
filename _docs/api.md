@@ -1846,8 +1846,9 @@ zIndex: 创建的纵向高度（关系到画布之间的覆盖），z值高的�
 deleteAllCanvas: fn()
 清空所有的自定义画布
 
-deleteCanvas: fn(name: string)
+deleteCanvas: fn(name: string|fn(name: string) -> bool)
 删除一个自定义画布
+name: 画布名；也可以传入一个filter对画布名进行筛选。
 
 drawArrow: fn(name: string|CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number)
 在某个canvas上绘制一个箭头

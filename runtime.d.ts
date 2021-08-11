@@ -2149,8 +2149,7 @@ declare class ui {
     rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
-    deleteCanvas(name: string): void
-
+    deleteCanvas(name: string | ((name: string) => bool)): void
 
     /** 清空所有的自定义画布 */
     deleteAllCanvas(): void

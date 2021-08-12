@@ -386,7 +386,7 @@ enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
     if (!enemy) return null;
 
     // 检查朝向；displayIdInBook
-    return core.material.enemys[(enemy.faceIds || {}).down] || core.material.enemys[enemy.displayIdInBook] || enemy;
+    return core.material.enemys[enemy.displayIdInBook] || core.material.enemys[(enemy.faceIds || {}).down] ||  enemy;
 }
 
 enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x, y, floorId) {

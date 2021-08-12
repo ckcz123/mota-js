@@ -960,7 +960,7 @@ maps.prototype._getBigImageInfo = function (bigImage, face, animate) {
     var per_width = bigImage.width / 4;
     var per_height = bigImage.height / 4;
     var sx = animate * per_width, sy;
-    if (per_height < per_width / 2) { // 强制视为 1*4 的怪物
+    if (per_height <= per_width / 2) { // 强制视为 1*4 的怪物
         per_height = bigImage.height;
         sy = 0;
     } else {
@@ -1968,13 +1968,14 @@ maps.prototype.getBlockInfo = function (block) {
                 break;
             }
         }
+        if (block.event.bigImage) bigImage = core.material.images.images[block.event.bigImage];
         if (core.material.enemys[id]) {
             name = core.material.enemys[id].name;
-            bigImage = core.material.images.images[core.material.enemys[id].bigImage] || null;
-            if (bigImage != null) animate = 4;
+            bigImage = core.material.images.images[core.material.enemys[id].bigImage];
         } else if (core.material.items[id]) {
             name = core.material.items[id].name;
         }
+        if (bigImage != null) animate = 4;
     }
 
     return {number: number, id: id, cls: cls, name: name, image: image, posX: posX, 
@@ -2582,7 +2583,7 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 }
 
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
-    var animateTotal = core.icons._getAnimateFrames(blockInfo.cls), animateTime = 0;
+    var animateTotal = blockInfo.animate, animateTime = 0;
     var _run = function () {
         var animate = window.setInterval(function () {
             if (blockInfo.cls != 'tileset') {
@@ -2872,7 +2873,7 @@ maps.prototype.addGlobalAnimate = function (block) {
         core.status.autotileAnimateObjs.push(block);
     }
     else {
-        if (!block.event.animate || block.event.animate == 1) return;
+        if (!block.event.bigImage && (!block.event.animate || block.event.animate == 1)) return;
         core.status.globalAnimateObjs.push(block);
     }
 }

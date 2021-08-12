@@ -146,7 +146,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
     if (core.status.floorId) {
         // Global Animate
         core.status.globalAnimateObjs.forEach(function (block) {
-            core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
+            core.drawBlock(block, core.status.globalAnimateStatus);
         });
 
         // Global floor images

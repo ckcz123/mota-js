@@ -235,6 +235,14 @@ editor_blockly = function () {
                     }
                 }
             }
+            if (one.type == 'wait') {
+                var list = one.data;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
             if (one.type == 'previewUI' && this.checkAsync(one.action)) return true; 
             if (one.async && one.type != 'animate' && one.type != 'function') hasAsync = true;
             if (one.type == 'waitAsync') hasAsync = false;

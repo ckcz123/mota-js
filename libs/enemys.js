@@ -224,19 +224,22 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     number = number || 1;
 
-    if (this.hasSpecial(enemy.special, 10)) return []; // 模仿怪物临界
+    var specialCriticals = this._nextCriticals_special(enemy, number, x, y, floorId);
+    if (specialCriticals != null) return specialCriticals;
     var info = this.getDamageInfo(enemy, null, x, y, floorId);
-    if (info == null || this.hasSpecial(enemy.special, 3)) { // 未破防，或是坚固怪
-        info = this.getEnemyInfo(enemy, null, x, y, floorId);
-        if (core.status.hero.atk <= info.def) {
-            return [[info.def + 1 - core.status.hero.atk, '?']];
-        }
-        return [];
+    if (info == null) { // 如果未破防...
+        var enemyInfo = this.getEnemyInfo(enemy, null, x, y, floorId);
+        if (enemyInfo.def == null || enemyInfo.def < core.status.hero.atk) return [];
+        // 再次尝试获得破防后伤害
+        info = this.getDamageInfo(enemy, {atk: enemyInfo.def + 1}, x, y, floorId);
+        if (info == null || info.mon_def != enemyInfo.def) return [];
+        info.__over__ = true;
+        info.__overAtk__ = info.mon_def + 1 - core.status.hero.atk;
     }
 
-    // getDamageInfo直接返回数字；0伤且无负伤
-    if (typeof info == 'number' || (info.damage <= 0 && !core.flags.enableNegativeDamage)) {
-        return [[0, 0]];
+    if (typeof info == 'number') return [[0,0]];
+    if (info.damage <= 0 && !core.flags.enableNegativeDamage) {
+        return [[info.__overAtk__ || 0, 0]];
     }
 
     if (core.flags.useLoop) {
@@ -253,10 +256,21 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     }
 }
 
+enemys.prototype._nextCriticals_special = function (enemy, number, x, y, floorId) {
+    if (this.hasSpecial(enemy.special, 10) || this.hasSpecial(enemy.special, 3))
+        return []; // 模仿or坚固临界
+    return null;
+}
+
 enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, floorId) {
     var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, pre = info.damage;
     var list = [];
-    for (var atk = hero_atk + 1; atk <= mon_hp + mon_def; atk++) {
+    var start_atk = hero_atk;
+    if (info.__over__) {
+        start_atk = mon_def + 1;
+        list.push([info.__overAtk__, -info.damage]);
+    }
+    for (var atk = start_atk + 1; atk <= mon_hp + mon_def; atk++) {
         var nextInfo = this.getDamageInfo(enemy, {"atk": atk}, x, y, floorId);
         if (nextInfo == null || (typeof nextInfo == 'number')) break;
         if (pre > nextInfo.damage) {
@@ -273,6 +287,11 @@ enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, f
 enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number, x, y, floorId) {
     var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, pre = info.damage;
     var list = [];
+    var start_atk = hero_atk;
+    if (info.__over__) {
+        start_atk = mon_def + 1;
+        list.push([info.__overAtk__, -info.damage]);
+    }
     var calNext = function (currAtk, maxAtk) {
         var start = Math.floor(currAtk), end = Math.floor(maxAtk);
         if (start > end) return null;
@@ -288,7 +307,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
         var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": start}, x, y, floorId);
         return nextInfo == null || (typeof nextInfo == 'number') || nextInfo.damage >= pre ? null : [start, nextInfo.damage];
     }
-    var currAtk = hero_atk;
+    var currAtk = start_atk;
     while (true) {
         var next = calNext(currAtk + 1, mon_hp + mon_def, pre);
         if (next == null) break;
@@ -310,11 +329,16 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
         return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
     }
     var list = [], pre = null;
+    var start_atk = hero_atk;
+    if (info.__over__) {
+        start_atk = mon_def + 1;
+        list.push([info.__overAtk__, -info.damage]);
+    }
     for (var t = turn - 1; t >= 1; t--) {
         var nextAtk = Math.ceil(mon_hp / t) + mon_def;
         // 装备提升比例的计算临界
         nextAtk = Math.ceil(nextAtk / core.getBuff('atk'));
-        if (nextAtk <= hero_atk) break;
+        if (nextAtk <= start_atk) break;
         if (nextAtk != pre) {
             var nextInfo = this.getDamageInfo(enemy, {"atk": nextAtk}, x, y, floorId);
             if (nextInfo == null || (typeof nextInfo == 'number')) break;

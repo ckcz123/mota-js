@@ -118,6 +118,7 @@ events.prototype.win = function (reason, norank, noexit) {
 
 ////// 游戏失败事件 //////
 events.prototype.lose = function (reason) {
+    if (core.isReplaying()) return core.control._replay_error(reason, function () { core.lose(reason); });
     core.status.gameOver = true;
     return this.eventdata.lose(reason);
 }

@@ -1637,7 +1637,7 @@ control.prototype._replay_save = function () {
     }
 }
 
-control.prototype._replay_error = function (action) {
+control.prototype._replay_error = function (action, callback) {
     core.ui.closePanel();
     core.status.replay.replaying = false;
     var len = core.status.replay.toReplay.length;
@@ -1655,12 +1655,14 @@ control.prototype._replay_error = function (action) {
         }
         else {
             core.playSound('操作失败');
-            core.drawTip("无法回到上一个节点");
             core.stopReplay(true);
+            core.drawTip("无法回到上一个节点");
+            if (callback) callback();
         }
     }, function () {
         core.ui.closePanel();
         core.stopReplay(true);
+        if (callback) callback();
     });
 }
 

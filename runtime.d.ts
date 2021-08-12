@@ -35,7 +35,6 @@ type Animate = {
     frame: number
     frames: frameObj[][]
     images: HTMLImageElement[]
-    images_rev: HTMLImageElement[]
     ratio: number
     se: string
 }

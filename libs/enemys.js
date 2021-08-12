@@ -243,8 +243,7 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     }
 
     if (core.flags.useLoop) {
-        var LOOP_MAX_VALUE = 1;
-        if (core.status.hero.atk <= LOOP_MAX_VALUE) {
+        if (core.status.hero.atk <= (main.criticalUseLoop || 1)) {
             return this._nextCriticals_useLoop(enemy, info, number, x, y, floorId);
         }
         else {

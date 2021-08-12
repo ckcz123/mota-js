@@ -3001,7 +3001,7 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
     var ctx = core.getContextByName(name);
     if (!ctx) return;
     var frame = animate.frames[index % animate.frame];
-    core.playSound((animate.se||{})[index % animate.frame + 1]);
+    core.playSound((animate.se||{})[index % animate.frame + 1], (animate.pitch||{})[index % animate.frame + 1]);
     var ratio = animate.ratio;
     frame.forEach(function (t) {
         var image = animate.images[t.index];

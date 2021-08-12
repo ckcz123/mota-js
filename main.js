@@ -15,6 +15,7 @@ function main() {
     this.isCompetition = false; // 是否是比赛模式
 
     this.savePages = 1000; // 存档页数，每页可存5个；默认为1000页5000个存档
+    this.criticalUseLoop = 1; // 循环临界的分界
 
     //------------------------ 用户修改内容 END ------------------------//
 

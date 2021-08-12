@@ -844,7 +844,8 @@ editor_ui_wrapper = function (editor) {
                 }
                 // 试听音频
                 if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac')) {
-                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>";
+                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>"
+                    html += "<small> 音调：<input value='100' style='width:28px' onchange='editor.uievent._previewMaterialAudio_onPitchChange(this)'></small>";
                     html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>
                         <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
                         <progress value="0" max="1" style="display:none; width:100%" onclick="editor.uievent._previewMaterialAudio_seek(this, event)"></progress>`;
@@ -884,7 +885,7 @@ editor_ui_wrapper = function (editor) {
     }
 
     uievent._previewMaterialAudio = function (button) {
-        var span = button.nextElementSibling;
+        var span = button.nextElementSibling.nextElementSibling;
         var br = span.nextElementSibling;
         var audio = br.nextElementSibling;
         var progress = audio.nextElementSibling;
@@ -901,6 +902,12 @@ editor_ui_wrapper = function (editor) {
             span.style.display = 'none';
             audio.pause();
         }
+    }
+
+    uievent._previewMaterialAudio_onPitchChange = function (input) {
+        var audio = input.parentElement.nextElementSibling.nextElementSibling.nextElementSibling;
+        audio.preservesPitch = false;
+        audio.playbackRate = core.clamp((parseInt(input.value) || 100) / 100, 0.3, 3.0);
     }
 
     uievent._previewMaterialAudio_onTimeUpdate = function (audio) {
@@ -960,13 +967,14 @@ editor_ui_wrapper = function (editor) {
     var _previewMaterialAnimate_buildSounds = function (span, content) {
         var sounds = content.se || {};
         if (typeof sounds == 'string') sounds = {1: sounds};
+        var pitch = content.pitch || {};
 
         span.appendChild(document.createElement('br'));
         var dom = document.createElement('span');
         dom.setAttribute('frames', content.frame);
         var html = "";
         Object.keys(sounds).forEach(function (frame) {
-            html += "<span>" + _previewMaterialAnimate_buildSoundRow(frame, sounds[frame], content.frame) + "</span>";
+            html += "<span>" + _previewMaterialAnimate_buildSoundRow(frame, sounds[frame], content.frame, pitch[frame]) + "</span>";
         });
         html += '<button onclick="editor.uievent._previewMaterialAnimate_addSound(this)">添加音效</button>';
         html += '<button onclick="editor.uievent._previewMaterialAnimate_saveSound(this)" style="margin-left:10px">保存</button>';
@@ -976,7 +984,7 @@ editor_ui_wrapper = function (editor) {
         _previewMaterialAnimate_awesomplete(span);
     }
 
-    var _previewMaterialAnimate_buildSoundRow = function (index, se, frames) {
+    var _previewMaterialAnimate_buildSoundRow = function (index, se, frames, pitch) {
         var audios = Object.keys(core.material.sounds).sort().join(",");
         var html = "";
         html += "第 <select>";
@@ -986,15 +994,16 @@ editor_ui_wrapper = function (editor) {
             html += ">"+i+"</option>";
         }
         html += "</select> 帧：";
-        html += '<input type="text" class="" data-list="'+audios+'" data-minchars="1" data-autofirst="true" style="margin-left: 5px" value="'+se+'"/>';
+        html += '<input type="text" class="_audio" data-list="'+audios+'" data-minchars="1" data-autofirst="true" style="width: 110px" value="'+se+'"/>';
         html += '<button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style="margin-left: 10px">试听</button>';
+        html += "<small> 音调：<input value='"+(pitch||100)+"' style='width:28px'></small>";
         html += '<button onclick="editor.uievent._previewMaterialAnimate_deleteSound(this)" style="margin-left: 10px">删除</button>';
         html += '<br/>';
         return html;
     }
 
     var _previewMaterialAnimate_awesomplete = function (span) {
-        var inputs = span.getElementsByTagName("input");
+        var inputs = span.getElementsByClassName("_audio");
         for (var i = 0; i < inputs.length; ++i) {
             var input = inputs[i];
             if (!input.hasAttribute('awesomplete')) {
@@ -1039,6 +1048,8 @@ editor_ui_wrapper = function (editor) {
         if (!uievent.values.audio)
             uievent.values.audio = new Audio();
         uievent.values.audio.src = './project/sounds/' + input.value;
+        uievent.values.audio.preservesPitch = false;
+        uievent.values.audio.playbackRate = core.clamp((parseInt(button.nextElementSibling.children[0].value) || 100) / 100, 0.3, 3.0);
         uievent.values.audio.play();
     }
 
@@ -1060,17 +1071,22 @@ editor_ui_wrapper = function (editor) {
         var filename = span.parentElement.getAttribute("key");
         if (!filename || !uievent.values.animates[filename]) return;
         var se = {};
+        var pitch = {};
 
-        var inputs = span.getElementsByTagName("input");
-        for (var i = 0; i < inputs.length; ++i) {
-            var input = inputs[i];
-            var select = input.parentElement.previousElementSibling;
-            if (input.value && select.tagName == 'SELECT') {
-                se[select.value] = input.value;
+        var audios = span.getElementsByClassName("_audio");
+        for (var i = 0; i < audios.length; ++i) {
+            var audio = audios[i];
+            var select = audio.parentElement.previousElementSibling;
+            if (audio.value && select.tagName == 'SELECT') {
+                se[select.value] = audio.value;
+                var p = audio.parentElement.nextElementSibling.nextElementSibling.children[0];
+                pitch[select.value] = core.clamp(parseInt(p.value) || 100, 30, 300);
             }
         }
         uievent.values.animates[filename].se = se;
         uievent.values.animates[filename+':raw'].se = se;
+        uievent.values.animates[filename].pitch = pitch;
+        uievent.values.animates[filename+':raw'].pitch = pitch;
         fs.writeFile(filename, JSON.stringify(uievent.values.animates[filename+':raw']), 'utf-8', function (e, d) {
             if (e) alert('无法修改音效文件！'+e);
             else {

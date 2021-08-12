@@ -1662,12 +1662,12 @@ events.prototype._precompile_rotateImage = function (data) {
 
 events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
-        core.setCurtain(data.color, data.time);
+        core.setCurtain(data.color, data.time, data.moveMode);
         if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
         core.doAction();
     }
     else {
-        core.setCurtain(data.color, data.time, function () {
+        core.setCurtain(data.color, data.time, data.moveMode, function () {
             if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
             core.doAction();
         });
@@ -1675,7 +1675,7 @@ events.prototype._action_setCurtain = function (data, x, y, prefix) {
 }
 
 events.prototype._action_screenFlash = function (data, x, y, prefix) {
-    this.__action_doAsyncFunc(data.async, core.screenFlash, data.color, data.time, data.times);
+    this.__action_doAsyncFunc(data.async, core.screenFlash, data.color, data.time, data.times, data.moveMode);
 }
 
 events.prototype._action_setWeather = function (data, x, y, prefix) {

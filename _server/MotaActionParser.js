@@ -605,16 +605,16 @@ ActionParser.prototype.parseAction = function() {
       if(this.isset(data.color)){
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['setCurtain_0_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time,data.keep||false,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time,data.moveMode,data.keep||false,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setCurtain_1_s'].xmlText([
-          data.time,data.async||false,this.next]);
+          data.time,data.moveMode,data.async||false,this.next]);
       }
       break;
     case "screenFlash": // 画面闪烁
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time||500,data.times,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time||500,data.times,data.moveMode,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([

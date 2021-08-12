@@ -2679,7 +2679,7 @@ control.prototype._weather_sun = function (level) {
 }
 
 ////// 更改画面色调 //////
-control.prototype.setCurtain = function(color, time, callback) {
+control.prototype.setCurtain = function(color, time, moveMode, callback) {
     if (time == null) time=750;
     if (time<=0) time=0;
     if (!core.status.curtainColor)
@@ -2697,24 +2697,25 @@ control.prototype.setCurtain = function(color, time, callback) {
         return;
     }
 
-    this._setCurtain_animate(core.status.curtainColor, color, time, callback);
+    this._setCurtain_animate(core.status.curtainColor, color, time, moveMode, callback);
 }
 
-control.prototype._setCurtain_animate = function (nowColor, color, time, callback) {
+control.prototype._setCurtain_animate = function (nowColor, color, time, moveMode, callback) {
     time /= Math.max(core.status.replay.speed, 1)
-    var per_time = 10, step = parseInt(time / per_time);
-    if (step <= 0) step = 1;
+    var per_time = 10, step = 0, steps = parseInt(time / per_time);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(moveMode);
     var animate = setInterval(function() {
-        nowColor = [
-            (nowColor[0]*(step-1)+color[0])/step,
-            (nowColor[1]*(step-1)+color[1])/step,
-            (nowColor[2]*(step-1)+color[2])/step,
-            (nowColor[3]*(step-1)+color[3])/step,
-        ];
+        step++;
+        var curr = [
+            nowColor[0] + (color[0] - nowColor[0]) * moveFunc(step / steps),
+            nowColor[1] + (color[1] - nowColor[1]) * moveFunc(step / steps),
+            nowColor[2] + (color[2] - nowColor[2]) * moveFunc(step / steps),
+            nowColor[3] + (color[3] - nowColor[3]) * moveFunc(step / steps),
+        ]
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
-        step--;
-        if (step <= 0) {
+        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(curr));
+        if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.status.curtainColor = color;
@@ -2726,14 +2727,14 @@ control.prototype._setCurtain_animate = function (nowColor, color, time, callbac
 }
 
 ////// 画面闪烁 //////
-control.prototype.screenFlash = function (color, time, times, callback) {
+control.prototype.screenFlash = function (color, time, times, moveMode, callback) {
     times = times || 1;
     time = time / 3;
     var nowColor = core.clone(core.status.curtainColor);
-    core.setCurtain(color, time, function() {
-        core.setCurtain(nowColor, time * 2, function() {
+    core.setCurtain(color, time, moveMode, function() {
+        core.setCurtain(nowColor, time * 2, moveMode, function() {
             if (times > 1)
-                core.screenFlash(color, time * 3, times - 1, callback);
+                core.screenFlash(color, time * 3, times - 1, moveMode, callback);
             else {
                 if (callback) callback();
             }

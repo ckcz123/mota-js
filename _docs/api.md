@@ -546,12 +546,13 @@ saveAndStopAutomaticRoute: fn()
 saveData: fn()
 存档到本地
 
-screenFlash: fn(color: [number], time: number, times?: number, callback?: fn())
+screenFlash: fn(color: [number], time: number, times?: number, moveMode?: string, callback?: fn())
 画面闪烁
 例如：core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过
 color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若填负数则会被视为0）的颜色数组，必填
 time: 单次闪烁时长，实际闪烁效果为先花其三分之一的时间渐变到目标色调，再花剩余三分之二的时间渐变回去
 times: 闪烁的总次数，不填或填0都视为1
+moveMode: 渐变方式
 callback: 闪烁全部完毕后的回调函数，可选
 
 setAutoHeroMove: fn(steps: [?])
@@ -578,11 +579,12 @@ setBuff: fn(name: string, value: number)
 name: 属性的英文名，请注意只能用于数值类属性哦，否则随后的乘法会得到NaN
 value: 新的百分比修正倍率，不填（效果上）视为1
 
-setCurtain: fn(color?: [number], time?: number, callback?: fn())
+setCurtain: fn(color?: [number], time?: number, moveMode?: string, callback?: fn())
 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
 例如：core.setCurtain(); // 恢复画面色调，用时四分之三秒
 color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若为负数则会被视为0）的颜色数组，不填视为[0, 0, 0, 0]
 time: 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）
+moveMode: 渐变方式
 callback: 更改完毕后的回调函数，可选。事件流中常取core.doAction
 
 setDisplayScale: fn(delta: number)
@@ -938,7 +940,7 @@ confirmRestart: fn()
 
 doAction: fn()
 执行下一个事件指令，常作为回调
-例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
+例如：core.setCurtain([0,0,0,1], undefined, null, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
 
 doEvent: fn(data?: ?, x?: number, y?: number, prefix?: string)
 执行一个自定义事件

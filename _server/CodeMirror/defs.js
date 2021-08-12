@@ -2145,12 +2145,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "screenFlash": {
-          "!doc": "画面闪烁<br/>例如：core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若填负数则会被视为0）的颜色数组，必填<br/>time: 单次闪烁时长，实际闪烁效果为先花其三分之一的时间渐变到目标色调，再花剩余三分之二的时间渐变回去<br/>times: 闪烁的总次数，不填或填0都视为1<br/>callback: 闪烁全部完毕后的回调函数，可选", 
-          "!type": "fn(color: [number], time: number, times?: number, callback?: fn())"
+          "!doc": "画面闪烁<br/>例如：core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若填负数则会被视为0）的颜色数组，必填<br/>time: 单次闪烁时长，实际闪烁效果为先花其三分之一的时间渐变到目标色调，再花剩余三分之二的时间渐变回去<br/>times: 闪烁的总次数，不填或填0都视为1<br/>moveMode: 渐变方式<br/>callback: 闪烁全部完毕后的回调函数，可选", 
+          "!type": "fn(color: [number], time: number, times?: number, moveMode?: string, callback?: fn())"
         }, 
         "setCurtain": {
-          "!doc": "更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数<br/>例如：core.setCurtain(); // 恢复画面色调，用时四分之三秒<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若为负数则会被视为0）的颜色数组，不填视为[0, 0, 0, 0]<br/>time: 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）<br/>callback: 更改完毕后的回调函数，可选。事件流中常取core.doAction", 
-          "!type": "fn(color?: [number], time?: number, callback?: fn())"
+          "!doc": "更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数<br/>例如：core.setCurtain(); // 恢复画面色调，用时四分之三秒<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若为负数则会被视为0）的颜色数组，不填视为[0, 0, 0, 0]<br/>time: 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）<br/>moveMode: 渐变方式<br/>callback: 更改完毕后的回调函数，可选。事件流中常取core.doAction", 
+          "!type": "fn(color?: [number], time?: number, moveMode?: string, callback?: fn())"
         }, 
         "updateDamage": {
           "!doc": "重算并绘制地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
@@ -3817,7 +3817,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(id?: string, x?: number, y?: number, isGentleClick?: bool)"
         }, 
         "doAction": {
-          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果", 
+          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], null, null, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果", 
           "!type": "fn()"
         }, 
         "openBook": {

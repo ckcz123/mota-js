@@ -2218,49 +2218,52 @@ return code;
 */;
 
 setCurtain_0_s
-    :   '更改画面色调' ColorString Colour '动画时间' IntString '持续到下一个本事件' Bool '不等待执行完毕' Bool Newline
+    :   '更改画面色调' ColorString Colour '动画时间' IntString? BGNL? Newline '渐变方式' MoveMode_List '持续到下一个本事件' Bool '不等待执行完毕' Bool Newline
     
 
 /* setCurtain_0_s
 tooltip : setCurtain: 更改画面色调,动画时间可不填
 helpUrl : /_docs/#/instruction
-default : ["255,255,255,1",'rgba(255,255,255,1)',500,true,false]
+default : ["255,255,255,1",'rgba(255,255,255,1)',500,'',true,false]
 colour : this.soundColor
 previewBlock : true
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
 var async = Bool_1?', "async": true':'';
-var code = '{"type": "setCurtain", "color": ['+ColorString_0+']'+IntString_0 +Bool_0+async+'},\n';
+var code = '{"type": "setCurtain", "color": ['+ColorString_0+']'+IntString_0+MoveMode_List_0+Bool_0+async+'},\n';
 return code;
 */;
 
 setCurtain_1_s
-    :   '恢复画面色调' '动画时间' IntString? '不等待执行完毕' Bool Newline
+    :   '恢复画面色调' '动画时间' IntString? '渐变方式' MoveMode_List '不等待执行完毕' Bool Newline
     
 
 /* setCurtain_1_s
 tooltip : setCurtain: 恢复画面色调,动画时间可不填
 helpUrl : /_docs/#/instruction
-default : [500,false]
+default : [500,'',false]
 colour : this.soundColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "setCurtain"'+IntString_0 +async+'},\n';
+var code = '{"type": "setCurtain"'+IntString_0+MoveMode_List_0 +async+'},\n';
 return code;
 */;
 
 screenFlash_s
-    :   '画面闪烁' ColorString Colour '单次时间' Int '执行次数' IntString? '不等待执行完毕' Bool Newline
+    :   '画面闪烁' ColorString Colour '单次时间' Int '执行次数' IntString? '渐变方式' MoveMode_List '不等待执行完毕' Bool Newline
 
 /* screenFlash_s
 tooltip : screenFlash: 画面闪烁,动画时间可不填
 helpUrl : /_docs/#/instruction
-default : ["255,255,255,1",'rgba(255,255,255,1)',500,1,false]
+default : ["255,255,255,1",'rgba(255,255,255,1)',500,1,'',false]
 colour : this.soundColor
 if (ColorString_0 == '') throw new Error('颜色格式错误,形如:0~255,0~255,0~255,0~1');
 IntString_0 = IntString_0 ? (', "times": '+IntString_0):'';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 var async = Bool_0?', "async": true':'';
-var code = '{"type": "screenFlash", "color": ['+ColorString_0+'], "time": '+Int_0 +IntString_0+async+'},\n';
+var code = '{"type": "screenFlash", "color": ['+ColorString_0+'], "time": '+Int_0 +IntString_0+MoveMode_List_0+async+'},\n';
 return code;
 */;
 

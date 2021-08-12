@@ -572,7 +572,7 @@ declare class control {
      * @param time 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）
      * @param callback 更改完毕后的回调函数，可选。事件流中常取core.doAction
      */
-    setCurtain(color?: [number, number, number, number?], time?: number, callback?: () => void): void
+    setCurtain(color?: [number, number, number, number?], time?: number, moveMode?: string, callback?: () => void): void
     
     /**
      * 画面闪烁
@@ -582,7 +582,7 @@ declare class control {
      * @param times 闪烁的总次数，不填或填0都视为1
      * @param callback 闪烁全部完毕后的回调函数，可选
      */
-    screenFlash(color: [number, number, number, number], time: number, times?: number, callback?: () => void): void
+    screenFlash(color: [number, number, number, number], time: number, times?: number, moveMode?: string, callback?: () => void): void
     
     /**
      * 播放背景音乐，中途开播但不计入存档且只会持续到下次场景切换。如需长期生效请将背景音乐的文件名赋值给flags.__bgm__
@@ -900,7 +900,7 @@ declare class events {
     
     /**
      * 执行下一个事件指令，常作为回调
-     * @example core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
+     * @example core.setCurtain([0,0,0,1], undefined, null, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
      * @param keepUI true表示不清除UI画布和选择光标
      */
     doAction(keepUI?: true): void

@@ -377,6 +377,11 @@ getSaveIndexes: fn(callback?: fn())
 getSaves: fn(ids?: ?, callback?: fn())
 获得某些存档内容
 
+getSounds: fn(name?: string) -> [number]
+获得当前正在播放的所有（指定）音效的id列表
+name: 音效名，可用别名；不填代表返回正在播放的全部音效
+返回值: 一个列表，每一项为一个正在播放的音效id；可用core.stopSound立刻停止播放
+
 getStatus: fn(name: string) -> number
 读取主角的某个属性，不包括百分比修正
 例如：core.getStatus('atk'); // 读取主角的攻击力
@@ -980,7 +985,7 @@ getNextItem: fn(noRoute?: bool)
 noRoute: 若为true则不计入录像
 
 hasAsync: fn() -> bool
-当前是否有未处理完毕的异步事件
+当前是否有未处理完毕的异步事件（不包含动画和音效）
 
 hasVisitedFloor: fn(floorId?: string) -> bool
 是否到达过某个楼层
@@ -1540,6 +1545,11 @@ generateMovableArray: fn(floorId?: string) -> [[[string]]]
 例如：core.generateMovableArray(); // 判断当前地图主角从各点能向何方向移动
 floorId: 地图id，不填视为当前地图
 返回值：从各点可移动方向的三维数组
+
+getAnimates: fn(name?: string) -> [number]
+获得当前正在播放的所有（指定）动画的id列表
+name: 动画名；不填代表返回全部正在播放的动画
+返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。
 
 getBgMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 生成背景层矩阵

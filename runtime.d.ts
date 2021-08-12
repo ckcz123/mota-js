@@ -795,6 +795,9 @@ declare class control {
     /** 停止（所有）音频 */
     stopSound(id?: number): void
 
+    /** 获得正在播放的所有（指定）音效的id列表 */
+    getSounds(name?: string): Array<number>
+
     /** 检查bgm状态 */
     checkBgm(): void
 
@@ -1227,7 +1230,7 @@ declare class events {
     /** 点击设置按钮时的操作 */
     openSettings(fromUserAction?: boolean): void
 
-    /** 当前是否有未处理完毕的异步事件 */
+    /** 当前是否有未处理完毕的异步事件（不包含动画和音效） */
     hasAsync(): boolean
 
     /** 
@@ -1777,6 +1780,9 @@ declare class maps {
      * @param doCallback 是否执行该动画的回调函数
      */
     stopAnimate(id: number, doCallback?: boolean): void 
+
+    /** 获得当前正在播放的所有（指定）动画的id列表 */
+    getAnimates(name?: string) : Array<number>
 
     /** 加载某个楼层（从剧本或存档中） */
     loadFloor(floorId?: string, map?: any): any

@@ -2868,6 +2868,7 @@ control.prototype.playSound = function (sound, pitch, callback) {
     try {
         if (core.musicStatus.audioContext != null) {
             var source = core.musicStatus.audioContext.createBufferSource();
+            source.__name = sound;
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
             var id = setTimeout(null);
@@ -2913,6 +2914,14 @@ control.prototype.stopSound = function (id) {
         main.log(e);
     }
     delete core.musicStatus.playingSounds[id];
+}
+
+////// 获得当前正在播放的所有（指定）音效的id列表 //////
+control.prototype.getSounds = function (name) {
+    name = core.getMappedName(name);
+    return Object.keys(core.musicStatus.playingSounds).filter(function (one){
+        return name == null || core.musicStatus.playingSounds[one].__name == name
+    });
 }
 
 ////// 检查bgm状态 //////

@@ -2196,6 +2196,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。", 
           "!type": "fn(id?: number)"
         }, 
+        "getSounds": {
+          "!doc": "获得当前正在播放的所有（指定）音效的id列表<br/>name: 音效名，可用别名；不填代表返回正在播放的全部音效<br/>返回值: 一个列表，每一项为一个正在播放的音效id；可用core.stopSound立刻停止播放",
+          "!type": "fn(name?: string) -> [number]"
+        },
         "addGameCanvasTranslate": {
           "!doc": "加减画布偏移", 
           "!type": "fn(x?: number, y?: number)"
@@ -3085,6 +3089,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "立刻停止一个动画播放<br/>id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值<br/>doCallback: 是否执行该动画的回调函数",
           "!type": "fn(id: number, doCallback?: bool)"
         },
+        "getAnimates": {
+          "!doc": "获得当前正在播放的所有（指定）动画的id列表<br/>name: 动画名；不填代表返回全部正在播放的动画<br/>返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。",
+          "!type": "fn(name?: string) -> [number]"
+        },
         "getBlockCls": {
           "!doc": "判定某个点的图块类型<br/>例如：if(core.getBlockCls(x1, y1) != 'enemys' && core.getBlockCls(x2, y2) != 'enemy48') core.openDoor(x3, y3); // 另一个简单的机关门事件，打败或炸掉这一对不同身高的敌人就开门<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块类型，即“地形、四帧动画、矮敌人、高敌人、道具、矮npc、高npc、自动元件、额外地形”之一", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string"
@@ -3829,9 +3837,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(noRoute?: bool)"
         }, 
         "hasAsync": {
-          "!doc": "当前是否有未处理完毕的异步事件", 
+          "!doc": "当前是否有未处理完毕的异步事件（不包含动画和音效）", 
           "!type": "fn() -> bool"
-        }, 
+        },
         "openEquipbox": {
           "!doc": "点击装备栏时的打开操作", 
           "!type": "fn(fromUserAction?: bool)"

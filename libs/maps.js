@@ -2947,6 +2947,7 @@ maps.prototype.drawAnimate = function (name, x, y, alignWindow, callback) {
 
     var id = setTimeout(null);
     core.status.animateObjs.push({
+        "name": name,
         "id": id,
         "animate": animate,
         "centerX": centerX,
@@ -2975,6 +2976,7 @@ maps.prototype.drawHeroAnimate = function (name, callback) {
 
     var id = setTimeout(null);
     core.status.animateObjs.push({
+        "name": name,
         "id": id,
         "animate": animate,
         "hero": true,
@@ -2983,6 +2985,13 @@ maps.prototype.drawHeroAnimate = function (name, callback) {
     });
 
     return id;
+}
+
+////// 获得当前正在播放的所有（指定）动画的id列表 //////
+maps.prototype.getAnimates = function (name) {
+    return (core.status.animateObjs || []).filter(function (one) {
+        return name == null || one.name == name;
+    }).map(function (one) { return one.id });
 }
 
 ////// 绘制动画的某一帧 //////

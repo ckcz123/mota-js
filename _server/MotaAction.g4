@@ -2974,14 +2974,17 @@ return '';
 
 
 waitAsync_s
-    :   '等待所有异步事件执行完毕'
+    :   '等待所有异步事件执行完毕' '不等待动画' Bool '不等待音效' Bool
 
 
 /* waitAsync_s
 tooltip : waitAsync: 等待所有异步事件执行完毕
 helpUrl : /_docs/#/instruction
+default : [false, false]
 colour : this.soundColor
-var code = '{"type": "waitAsync"},\n';
+Bool_0 = Bool_0 ? ', "excludeAnimates": true' : '';
+Bool_1 = Bool_1 ? ', "excludeSounds": true' : '';
+var code = '{"type": "waitAsync"'+Bool_0+Bool_1+'},\n';
 return code;
 */;
 

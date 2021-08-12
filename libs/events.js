@@ -2479,7 +2479,9 @@ events.prototype._precompile_wait = function (data) {
 
 events.prototype._action_waitAsync = function (data, x, y, prefix) {
     var test = window.setInterval(function () {
-        if (!core.hasAsync()) {
+        if (!core.hasAsync() 
+                && (data.excludeAnimates || core.getAnimates().length == 0)
+                && (data.excludeSounds || core.getSounds().length == 0)) {
             clearInterval(test);
             core.doAction();
         }
@@ -2860,7 +2862,11 @@ events.prototype.openSettings = function (fromUserAction) {
 // ------ 一些事件的具体执行过程 ------ //
 
 events.prototype.hasAsync = function () {
-    return Object.keys(core.animateFrame.asyncId).length > 0 || (core.status.animateObjs || []).length > 0;
+    return Object.keys(core.animateFrame.asyncId).length > 0;
+}
+
+events.prototype.hasAsyncAnimate = function () {
+    return (core.status.animateObjs || []).length > 0;
 }
 
 ////// 跟随 //////

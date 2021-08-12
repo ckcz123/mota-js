@@ -561,7 +561,8 @@ core.registerSystemEvent("custom", function (data, callback) {
     // 这里的`data`为碰触到的图块信息。
     console.log(data);
     // 插入一个公共事件（如“图块触碰”），把图块坐标作为公共事件参数传入。
-    core.insertCommonEvent("图块触碰", /*args*/ [data.x, data.y], data.x, data.y, callback);
+    core.insertCommonEvent("图块触碰", /*args*/ [data.x, data.y], data.x, data.y);
+    if (callback) callback();
 })
 ```
 

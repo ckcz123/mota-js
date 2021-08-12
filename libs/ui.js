@@ -1522,7 +1522,7 @@ ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, 
         } else left = null;
         if (posInfo.pos && posInfo.pos[2] != null) {
             width = core.calValue(posInfo.pos[2]) || 0;
-            validWidth = width - paddingLeft - paddingRight;
+            min_width = validWidth = width - paddingLeft - paddingRight;
         } else validWidth = 0;
         if (validWidth < min_width) {
             validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
@@ -1697,16 +1697,16 @@ ui.prototype.textImage = function (content, lineHeight) {
 }
 
 ////// 绘制一个选项界面 //////
-ui.prototype.drawChoices = function(content, choices, ctx) {
+ui.prototype.drawChoices = function(content, choices, width, ctx) {
     choices = core.clone(choices || []);
 
-    core.status.event.ui = {"text": content, "choices": choices};
+    core.status.event.ui = {"text": content, "choices": choices, "width": width};
     this.clearUI();
 
     content = core.replaceText(content || "");
     var titleInfo = this._getTitleAndIcon(content);
     titleInfo.content = this._drawTextBox_drawImages(titleInfo.content, ctx);
-    var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices, ctx);
+    var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices, width, ctx);
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
     core.status.event.ui.offset = vPos.offset;
 
@@ -1715,11 +1715,11 @@ ui.prototype.drawChoices = function(content, choices, ctx) {
     this._drawChoices_drawChoices(choices, isWindowSkin, hPos, vPos, ctx);
 }
 
-ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices, ctx) {
+ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices, width, ctx) {
     ctx = ctx || 'ui';
     // 宽度计算：考虑提示文字和选项的长度
     core.setFont(ctx, this._buildFont(17, true));
-    var width = this._calTextBoxWidth(ctx, titleInfo.content || "", 246, this.PIXEL - 20);
+    var width = this._calTextBoxWidth(ctx, titleInfo.content || "", width || 246, this.PIXEL - 20);
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
             choices[i] = {"text": choices[i]};

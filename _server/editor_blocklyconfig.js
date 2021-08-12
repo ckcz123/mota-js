@@ -115,7 +115,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['restart_s'].xmlText(),
       MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
-        '选择剑或者盾','流浪者','man',0,MotaActionBlocks['choicesContext'].xmlText([
+        '选择剑或者盾','流浪者','man',0,0,'',MotaActionBlocks['choicesContext'].xmlText([
           '剑','','',null,'','',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
         ])
       ]),

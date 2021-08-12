@@ -906,12 +906,12 @@ actions.prototype._keyDownChoices = function (keycode) {
     if (keycode == 38) {
         core.status.event.selection--;
         core.playSound('光标移动');
-        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices, core.status.event.ui.width);
     }
     if (keycode == 40) {
         core.status.event.selection++;
         core.playSound('光标移动');
-        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices, core.status.event.ui.width);
     }
 }
 
@@ -925,7 +925,7 @@ actions.prototype._onMoveChoices = function (x, y) {
         if (selection == core.status.event.selection) return;
         core.status.event.selection = selection;
         core.playSound('光标移动');
-        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices);
+        core.ui.drawChoices(core.status.event.ui.text, core.status.event.ui.choices, core.status.event.ui.width);
     }
 }
 

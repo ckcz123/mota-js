@@ -2715,14 +2715,14 @@ return code;
 */;
 
 choices_s
-    :   '选项' ':' EvalString_Multi? BGNL? '标题' EvalString? '图像' IdString? '超时毫秒数' Int BGNL? Newline choicesContext+ BEND Newline
+    :   '选项' ':' EvalString_Multi? BGNL? '标题' EvalString? '图像' IdString? '默认选中项' Int '超时毫秒数' Int '宽度' IntString? BGNL? Newline choicesContext+ BEND Newline
 
 
 /* choices_s
 tooltip : choices: 给用户提供选项
 helpUrl : /_docs/#/instruction
 previewBlock : true
-default : ["","流浪者","trader",0]
+default : ["","流浪者","trader",0,0,'']
 allIds : ['IdString_0']
 var title='';
 if (EvalString_0==''){
@@ -2734,8 +2734,10 @@ if (EvalString_0==''){
 }
 EvalString_Multi_0 = title+EvalString_Multi_0;
 EvalString_Multi_0 = EvalString_Multi_0 ?(', "text": "'+EvalString_Multi_0+'"'):'';
-Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
-var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,
+Int_0 = Int_0 ? (', "selected": '+Int_0) : '';
+Int_1 = Int_1 ? (', "timeout": '+Int_1) : '';
+IntString_0 = IntString_0 ? (', "width": ' + IntString_0) : '';
+var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,Int_1,IntString_0,
     block.isCollapsed()?', "_collapsed": true':'',
     block.isEnabled()?'':', "_disabled": true',
     ', "choices": [\n',

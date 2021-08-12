@@ -3585,7 +3585,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "drawChoices": {
           "!doc": "绘制一个选项界面", 
-          "!type": "fn(content?: string, choices?: [?])"
+          "!type": "fn(content?: string, choices?: [?], width?: number, ctx?: string|CanvasRenderingContext2D)"
         }, 
         "setFontForMaxWidth": {
           "!doc": "根据最大宽度自动缩小字体", 

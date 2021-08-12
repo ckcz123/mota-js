@@ -408,7 +408,9 @@ editor_ui_wrapper = function (editor) {
                         data.choices[i].text = core.replaceText(data.choices[i].text);
                     }
                     core.saveCanvas('uievent');
-                    core.drawChoices(core.replaceText(data.text), data.choices, 'uievent');
+                    core.status.event.selection = data.selected || 0;
+                    core.drawChoices(core.replaceText(data.text), data.choices, data.width, 'uievent');
+                    core.status.event.selection = null;
                     core.loadCanvas('uievent');
                     return;
                 } else if (type == "confirm") {

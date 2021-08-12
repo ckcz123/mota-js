@@ -1869,7 +1869,7 @@ drawBackground: fn(left: string, top: string, right: string, bottom: string, pos
 drawBook: fn(index?: ?)
 绘制怪物手册
 
-drawChoices: fn(content?: string, choices?: [?])
+drawChoices: fn(content?: string, choices?: [?], width?: number, ctx?: string|CanvasRenderingContext2D)
 绘制一个选项界面
 
 drawConfirmBox: fn(text: string, yesCallback?: fn(), noCallback?: fn())

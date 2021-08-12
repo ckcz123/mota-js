@@ -235,7 +235,7 @@ editor_blockly = function () {
                     }
                 }
             }
-            if (one.async && one.type != 'animate' && one.type != 'function') hasAsync = true;
+            if (one.async && one.type != 'animate' && one.type != 'function' && one.type != 'playSound') hasAsync = true;
             if (one.type == 'waitAsync') hasAsync = false;
         }
         return hasAsync;

@@ -217,7 +217,7 @@ editor_blockly = function () {
                 return true;
             if ((one.type == 'while' || one.type == 'dowhile') && this.checkAsync(one.data))
                 return true;
-            if (one.type == 'if' && (this.checkAsync(one.yes) || this.checkAsync(one.no)))
+            if (one.type == 'confirm' && (this.checkAsync(one.yes) || this.checkAsync(one.no)))
                 return true;
             if (one.type == 'choices') {
                 var list = one.choices;
@@ -235,7 +235,8 @@ editor_blockly = function () {
                     }
                 }
             }
-            if (one.async && one.type != 'animate' && one.type != 'function' && one.type != 'playSound') hasAsync = true;
+            if (one.type == 'previewUI' && this.checkAsync(one.action)) return true; 
+            if (one.async && one.type != 'animate' && one.type != 'function') hasAsync = true;
             if (one.type == 'waitAsync') hasAsync = false;
         }
         return hasAsync;

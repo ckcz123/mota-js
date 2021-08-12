@@ -852,7 +852,7 @@ ui.prototype._getPosition = function (content) {
                 }
             }
             if(pos=='hero' || pos=='this'){
-                pos = py==null?'center':(py>=core.__HALF_SIZE__? 'up':'down'); 
+                pos = py==null?'center':(py>core.__HALF_SIZE__? 'up':'down'); 
             }
             return "";
         });

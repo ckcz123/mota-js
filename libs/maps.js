@@ -1939,7 +1939,7 @@ maps.prototype.getBlockInfo = function (block) {
         block = this.getBlockByNumber(block);
     }
     var number = block.id, id = block.event.id, cls = block.event.cls, name = block.event.name,
-        image = null, posX = 0, posY = 0, animate = block.event.animate,
+        image = null, posX = 0, posY = 0, animate = block.event.animate, doorInfo = block.event.doorInfo,
         height = block.event.height || 32, faceIds = {}, face = 'down', bigImage = null;
 
     if (id == 'none') return null;
@@ -1975,10 +1975,11 @@ maps.prototype.getBlockInfo = function (block) {
         } else if (core.material.items[id]) {
             name = core.material.items[id].name;
         }
-        if (bigImage != null) animate = 4;
+        // 非门效果则强制变成四帧动画
+        if (!doorInfo && bigImage != null) animate = 4;
     }
 
-    return {number: number, id: id, cls: cls, name: name, image: image, posX: posX, 
+    return {number: number, id: id, cls: cls, name: name, image: image, posX: posX, doorInfo: doorInfo,
         posY: posY, height: height, faceIds: faceIds, animate: animate, face: face, bigImage: bigImage};
 }
 

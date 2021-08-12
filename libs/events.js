@@ -494,9 +494,9 @@ events.prototype._sys_openDoor = function (data, callback) {
 
 ////// 开门 //////
 events.prototype.openDoor = function (x, y, needKey, callback) {
-    var id = core.getBlockId(x, y);
+    var block = core.getBlock(x, y);
     core.saveAndStopAutomaticRoute();
-    if (!this._openDoor_check(id, x, y, needKey)) {
+    if (!this._openDoor_check(block, x, y, needKey)) {
         var locked = core.status.lockControl;
         core.waitHeroToStop(function () {
             if (!locked) core.unlockControl();
@@ -513,15 +513,18 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
             if (callback) callback();
         }, 1); // +1是为了录像检测系统
     } else {
-        this._openDoor_animate(id, x, y, callback);
+        this._openDoor_animate(block, x, y, callback);
     }
 }
 
-events.prototype._openDoor_check = function (id, x, y, needKey) {
+events.prototype._openDoor_check = function (block, x, y, needKey) {
     var clearAndReturn = function () {
         core.clearContinueAutomaticRoute();
         return false;
     }
+
+    if (block == null || block.event == null) return clearAndReturn();
+    var id = block.event.id;
 
     // 是否存在门或暗墙
     if (core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null) {
@@ -530,10 +533,8 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
 
     if (id == 'steelDoor' && core.flags.steelDoorWithoutKey)
         needKey = false;
-    var doorInfo = core.getBlockById(id).event;
-    if (doorInfo == null || doorInfo.doorInfo == null)
-        return clearAndReturn();
-    doorInfo = doorInfo.doorInfo;
+    var doorInfo = block.event.doorInfo;
+    if (doorInfo == null) return clearAndReturn();
     // Check all keys
     var keyInfo = doorInfo.keys || {};
     if (needKey) {
@@ -564,42 +565,33 @@ events.prototype._openDoor_check = function (id, x, y, needKey) {
     return true;
 }
 
-events.prototype._openDoor_animate = function (id, x, y, callback) {
-    var blockInfo = core.getBlockInfo(id);
-    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
+events.prototype._openDoor_animate = function (block, x, y, callback) {
+    var blockInfo = core.getBlockInfo(block);
+    blockInfo.opacity = block.opacity;
+    blockInfo.filter = block.filter;
 
-    var speed = (core.getBlockById(id).event.doorInfo.time || 160) / 4;
+    var speed = (block.event.doorInfo.time || 160) / 4;
 
     var locked = core.status.lockControl;
     core.lockControl();
     core.status.replay.animate = true;
     core.removeBlock(x, y);
-    var offsetX = 32 * x, offsetY = 32 * y;
-    if (core.bigmap.v2) {
-        offsetX -= core.bigmap.offsetX;
-        offsetY -= core.bigmap.offsetY;
-    }
-    core.drawImage('event', image, 0, posY * height + height - 32, 32, 32, offsetX, offsetY, 32, 32);
-    if (height > 32)
-        core.drawImage('event2', image, 0, posY * height, 32, height - 32, offsetX, offsetY + 32 - height, 32, height - 32);
-    var state = 0;
-    var animate = window.setInterval(function () {
-        core.clearMap('event', offsetX, offsetY, 32, 32);
-        if (height > 32) 
-            core.clearMap('event2', offsetX, offsetY + 32 - height, 32, height - 32)
-        state++;
-        if (state == 4) {
+
+    blockInfo.posX = 0;
+    core.maps._drawBlockInfo(blockInfo, x, y);
+    var animate = window.setInterval(function() {
+        blockInfo.posX++;
+        if (blockInfo.posX == 4) {
+            core.maps._removeBlockFromMap(core.status.floorId, block);
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
             if (!locked) core.unlockControl();
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(id, x, y);
+            core.events.afterOpenDoor(block.event.id, x, y);
             if (callback) callback();
             return;
         }
-        core.drawImage('event', image, 32 * state, posY * height + height - 32, 32, 32, offsetX, offsetY, 32, 32);
-        if (height > 32)
-            core.drawImage('event2', image, 32 * state, posY * height, 32, height - 32, offsetX, offsetY + 32 - height, 32, height - 32);
+        core.maps._drawBlockInfo(blockInfo, x, y);    
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }
@@ -3167,37 +3159,30 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         if (callback) callback();
         return;
     }
-    var doorInfo = (core.getBlockById(id).event || {}).doorInfo;
-    if (doorInfo == null) {
+    var block = core.getBlockById(id);
+    var doorInfo = (block.event || {}).doorInfo;
+    if (!doorInfo) {
         if (callback) callback();
         return;
     }
 
-    // 关门动画
     core.playSound(doorInfo.closeSound);
-    var blockInfo = core.getBlockInfo(id);
-    var image = blockInfo.image, posY = blockInfo.posY, height = blockInfo.height;
-
-    var speed = (doorInfo.time || 160) / 4, state = 0;
-    var offsetX = 32 * x, offsetY = 32 * y;
-    if (core.bigmap.v2) {
-        offsetX -= core.bigmap.offsetX;
-        offsetY -= core.bigmap.offsetY;
-    }
+    var blockInfo = core.getBlockInfo(block);
+    var speed = (doorInfo.time || 160) / 4;
+    blockInfo.posX = 3;
+    core.maps._drawBlockInfo(blockInfo, x, y);
 
     var animate = window.setInterval(function () {
-        state++;
-        if (state == 4) {
+        blockInfo.posX--;
+        if (blockInfo.posX < 0) {
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
             core.setBlock(id, x, y);
+            core.showBlock(x, y);
             if (callback) callback();
             return;
         }
-        core.clearMap('event', offsetX, offsetY, 32, 32);
-        core.drawImage('event', image, 32 * (4-state), posY * height + height - 32, 32, 32, offsetX, offsetY, 32, 32);
-        if (height > 32)
-        core.drawImage('event2', image, 32 * (4-state), posY * height, 32, height - 32, offsetX, offsetY + 32 - height, 32, height - 32);
+        core.maps._drawBlockInfo(blockInfo, x, y);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
     core.animateFrame.asyncId[animate] = true;
 }

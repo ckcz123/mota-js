@@ -1009,6 +1009,9 @@ declare class events {
      */
     rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
 
+    /** 放缩一张图片 */
+    scaleImage(code: number, center?: [Number?, number?], scale: number, moveMode?: string, time?: number, callback?: () => void): void
+
     /**
      * 绘制一张动图或擦除所有动图
      * @example core.showGif(); // 擦除所有动图

@@ -596,6 +596,11 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['rotateImage_s'].xmlText([
         data.code, data.center[0], data.center[1], data.moveMode||'',  data.angle||0, data.time||0, data.async||false, this.next]);
       break;
+    case "scaleImage": // 放缩图片
+      data.center=data.center||['','']
+      this.next = MotaActionBlocks['scaleImage_s'].xmlText([
+        data.code, data.center[0], data.center[1], data.moveMode||'',  data.scale, data.time||0, data.async||false, this.next]);
+      break;
     case "showGif": // 显示动图
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showGif_s'].xmlText([

@@ -838,6 +838,7 @@ action
     |   showTextImage_s
     |   moveImage_s
     |   rotateImage_s
+    |   scaleImage_s
     |   showGif_s
     |   setCurtain_0_s
     |   setCurtain_1_s
@@ -2214,6 +2215,24 @@ if (PosString_0 && PosString_1)
 MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "rotateImage", "code": '+NInt_0+loc+', "angle": '+NInt_1+MoveMode_List_0+', "time": '+Int_0+async+'},\n';
+return code;
+*/;
+
+scaleImage_s
+    :   '图片放缩' '图片编号' NInt '中心点像素' 'x' PosString? 'y' PosString? '移动方式' MoveMode_List BGNL? '放缩比例' Number '动画时间' Int '不等待执行完毕' Bool Newline
+       
+
+/* scaleImage_s
+tooltip : scaleImage：图片放缩
+helpUrl : /_docs/#/instruction
+default : [1,'','','',0.8,0,false]
+if (Number_0 <= 0) throw new Error('放缩比例需要大于0'); 
+var loc = '';
+if (PosString_0 && PosString_1)
+  loc = ', "center": ['+PosString_0+','+PosString_1+']';
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
+var async = Bool_0?', "async": true':'';
+var code = '{"type": "scaleImage", "code": '+NInt_0+loc+', "scale": '+Number_0+MoveMode_List_0+', "time": '+Int_0+async+'},\n';
 return code;
 */;
 

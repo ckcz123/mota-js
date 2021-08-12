@@ -3860,6 +3860,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "旋转一张图片<br/>code: 图片编号<br/>center: 旋转中心像素坐标（以屏幕为基准）；不填视为图片本身中心<br/>angle: 旋转角度；正数为顺时针，负数为逆时针<br/>moveMode: 旋转模式<br/>time: 旋转用时，单位为毫秒。不填视为1秒<br/>callback: 图片旋转完毕后的回调函数，可选",
           "!type": "fn(code: number, center?: [number], angle?: number, moveMode?: string, time?: number, callback?: fn())"
         },
+        "scaleImage": {
+          "!doc": "放缩一张图片",
+          "!type": "fn(code: number, center?: [number], scale?: number, moveMode?: string, time?: number, callback?: fn())"
+        },
         "moveTextBox": {
           "!doc": "移动对话框",
           "!type": "fn(code: number, loc: [number], relative?: bool, moveMode?: string, time?: number, callback?: fn())"

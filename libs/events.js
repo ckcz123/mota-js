@@ -1660,6 +1660,16 @@ events.prototype._precompile_rotateImage = function (data) {
     return data;
 }
 
+events.prototype._action_scaleImage = function (data, x, y, prefix) {
+    if (this.__action_checkReplaying()) return;
+    this.__action_doAsyncFunc(data.async, core.scaleImage, data.code, data.center, data.scale, data.moveMode, data.time);
+}
+
+events.prototype._precompile_scaleImage = function (data) {
+    data.center = this.__precompile_array(data.center);
+    return data;
+}
+
 events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
         core.setCurtain(data.color, data.time, data.moveMode);
@@ -3328,6 +3338,65 @@ events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
     }, per_time);
     core.animateFrame.asyncId[animate] = true;
 
+}
+
+////// 放缩一张图片 //////
+events.prototype.scaleImage = function (code, center, scale, moveMode, time, callback) {
+    center = center || [];
+    var name = "image" + (code + 100);
+    if (!core.dymCanvas[name]) {
+        if (callback) callback();
+        return;
+    }
+    var ctx = core.dymCanvas[name];
+    var currScale = 1.0;
+    if (ctx.canvas.hasAttribute('_scale')) {
+        currScale = parseFloat(ctx.canvas.getAttribute('_scale'));
+    }
+    var ratio = ctx.canvas.hasAttribute('isHD') ? core.domStyle.ratio : 1;
+    var width = ctx.canvas.width / ratio, height = ctx.canvas.height / ratio;
+    var currLeft = parseFloat(ctx.canvas.getAttribute("_left"));
+    var currTop = parseFloat(ctx.canvas.getAttribute("_top"));
+    var centerX = core.calValue(center[0]), centerY = core.calValue(center[1]);
+    if (centerX == null || centerY == null) {
+        centerX = currLeft + width * currScale / 2;
+        centerY = currTop + height * currScale / 2;
+    }
+    var scaleInfo = {
+        x: (currLeft - centerX) / currScale,  y: (currTop - centerY) / currScale, centerX: centerX, centerY: centerY,
+        width: width, height: height, currScale: currScale, scale: scale, moveMode: moveMode, time: time
+    }
+    this._scaleImage_scale(ctx, scaleInfo, callback);
+}
+
+events.prototype._scaleInfo_scale = function (ctx, scaleInfo, scale) {
+    core.resizeCanvas(ctx, scaleInfo.width * scale, scaleInfo.height * scale, true);
+    core.relocateCanvas(ctx, scaleInfo.centerX + scaleInfo.x * scale, scaleInfo.centerY + scaleInfo.y * scale);
+    ctx.canvas.setAttribute('_scale', scale);
+}
+
+events.prototype._scaleImage_scale = function (ctx, scaleInfo, callback) {
+    if (!scaleInfo.time) {
+        this._scaleInfo_scale(ctx, scaleInfo, scaleInfo.scale);
+        if (callback) callback();
+        return;
+    }
+
+    var per_time = 10, step = 0, steps = parseInt(scaleInfo.time / per_time);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(scaleInfo.moveMode);
+
+    var animate = setInterval(function () {
+        step++;
+        var scale = scaleInfo.currScale + (scaleInfo.scale - scaleInfo.currScale) * moveFunc(step / steps);
+        core.events._scaleInfo_scale(ctx, scaleInfo, scale);
+        if (step == steps) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+    }, per_time);
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 绘制或取消一张gif图片 //////

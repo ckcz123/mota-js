@@ -1126,6 +1126,9 @@ callback: 图片旋转完毕后的回调函数，可选
 save: fn(fromUserAction?: bool)
 点击存档按钮时的打开操作
 
+scaleImage: fn(code: number, center?: [number], scale?: number, moveMode?: string, time?: number, callback?: fn())
+放缩一张图片
+
 setEnemy: fn(id: string, name: string, value: ?, operator?: string, prefix?: string)
 设置一项敌人属性并计入存档
 例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0

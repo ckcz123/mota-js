@@ -1527,6 +1527,11 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
     this.__action_doAsyncFunc(data.async, core.moveViewport, data.loc[0], data.loc[1], data.moveMode, data.time);
 }
 
+events.prototype._action_lockViewport = function (data, x, y, prefix) {
+    flags.__lockViewport__ = data.lock;
+    core.doAction();
+}
+
 events.prototype._action_move = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     this.__action_doAsyncFunc(data.async, core.moveBlock, loc[0], loc[1], data.steps, data.time, data.keep);
@@ -3547,10 +3552,16 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         return true;
     }
     if (step <= 4) {
-        core.drawHero('leftFoot', 4 * o * step);
+        core.drawHero('leftFoot', {
+            x: 4 * o * step,
+            y: 4 * o * step
+        });
     }
     else if (step <= 8) {
-        core.drawHero('rightFoot', 4 * o * step);
+        core.drawHero('rightFoot', {
+            x: 4 * o * step,
+            y: 4 * o * step
+        });
     }
     if (step == 8) {
         core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);
@@ -3595,14 +3606,13 @@ events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
 events.prototype._jumpHero_jumping = function (jumpInfo) {
     core.clearMap('hero');
     core.maps.__updateJumpInfo(jumpInfo);
+    var x = core.getHeroLoc('x'),
+        y = core.getHeroLoc('y');
     var nowx = jumpInfo.px, nowy = jumpInfo.py, width = jumpInfo.width || 32, height = jumpInfo.height;
-    core.bigmap.offsetX = core.clamp(nowx - 32*core.__HALF_SIZE__, 0, 32*core.bigmap.width-core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp(nowy - 32*core.__HALF_SIZE__, 0, 32*core.bigmap.height-core.__PIXELS__);
-    core.control.updateViewport();
-    core.drawImage('hero', core.material.images.hero, jumpInfo.icon.stop, jumpInfo.icon.loc * height, width, height,
-        nowx + (32 - width) / 2 - core.bigmap.offsetX, nowy + 32-height - core.bigmap.offsetY, width, height);
-    core.status.heroCenter.px = nowx + 16;
-    core.status.heroCenter.py = nowy + 32 - height / 2;
+    core.drawHero(null, {
+        x: nowx - 32 * x,
+        y: nowy - 32 * y
+    }, 0, true);
 }
 
 events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {

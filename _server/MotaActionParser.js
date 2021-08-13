@@ -569,6 +569,10 @@ ActionParser.prototype.parseAction = function() {
           data.loc[0],data.loc[1],data.moveMode||'', data.time||0,data.async||false,this.next]);
       }
       break;
+    case "lockViewport":
+      this.next = MotaActionBlocks['lockViewport_s'].xmlText([data.lock,
+        this.next]);
+      break;
     case "vibrate": // 画面震动
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.direction||'horizontal', 
         data.time||0, data.speed, data.power, data.async||false, this.next]);

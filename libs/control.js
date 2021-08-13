@@ -202,7 +202,12 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
-    core.drawHero(core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
+    var way = core.utils.scan2[core.getHeroLoc('direction')],
+        heroMoving = core.status.heroMoving;
+    core.drawHero(core.animateFrame.leftLeg ? 'leftFoot' : 'rightFoot', {
+        x: way.x * 4 * heroMoving,
+        y: way.y * 4 * heroMoving
+    });
 }
 
 control.prototype._animationFrame_weather = function (timestamp) {
@@ -813,37 +818,78 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 }
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (status, offset, frame) {
+control.prototype.drawHero = function (status, offset, frame, noGather) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
-    offset = offset || 0;
+    offset = offset || {};
+    offset.x = offset.x || 0;
+    offset.y = offset.y || 0;
+
     var way = core.utils.scan2[direction];
-    var dx = way.x, dy = way.y, offsetX = dx * offset, offsetY = dy * offset;
-    core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
-    core.clearAutomaticRouteNode(x+dx, y+dy);
+    var dx = way.x, dy = way.y;
+    var offsetX = offset.x, offsetY = offset.y;
+
+    core.clearAutomaticRouteNode(x + dx, y + dy);
     core.clearMap('hero');
     core.status.heroCenter.px = 32 * x + offsetX + 16;
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
+    this._drawHero_updateViewport(x, y, offset);
     if (!core.hasFlag('hideHero')) {
-        this._drawHero_draw(direction, x, y, status, offset, frame);
-    }
-
-    this._drawHero_updateViewport();
+        this._drawHero_draw(direction, x, y, status, offset, frame, noGather);
+    }  
 }
 
-control.prototype._drawHero_updateViewport = function () {
-    core.control.updateViewport();
+control.prototype._drawHero_updateViewport = function (x, y, offset) {
     core.setGameCanvasTranslate('hero', 0, 0);
+    if (flags.__lockViewport__) return;
+    var offsetX = offset.x, offsetY = offset.y;
+    var ox = (x - core.__HALF_SIZE__) * 32 + offsetX,
+        oy = (y - core.__HALF_SIZE__) * 32 + offsetY;
+
+    core.bigmap.offsetX = core.clamp(ox, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp(oy, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    core.control.updateViewport();
 }
 
-control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
-    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
+control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame, noGather) {
+    this._drawHero_getDrawObjs(direction, x, y, status, offset, noGather).forEach(function (block) {
         core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+    });
+}
+
+control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset, noGather) {
+    var heroIconArr = core.material.icons.hero, drawObjs = [], index = 0;
+    drawObjs.push({
+        "img": core.material.images.hero,
+        "width": core.material.icons.hero.width || 32,
+        "height": core.material.icons.hero.height,
+        "heroIcon": heroIconArr[direction],
+        "posx": x * 32 - core.bigmap.offsetX + offset.x,
+        "posy": y * 32 - core.bigmap.offsetY + offset.y,
+        "status": status,
+        "index": index++,
+    });
+    // 不重绘跟随者 比如说跳跃时……
+    if (!noGather) {
+        core.status.hero.followers.forEach(function(t) {
+            drawObjs.push({
+                "img": core.material.images.images[t.name],
+                "width": core.material.images.images[t.name].width / 4,
+                "height": core.material.images.images[t.name].height / 4,
+                "heroIcon": heroIconArr[t.direction],
+                "posx": 32 * t.x - core.bigmap.offsetX + (t.stop ? 0 : core.utils.scan2[t.direction].x * Math.abs(offset.x)),
+                "posy": 32 * t.y - core.bigmap.offsetY + (t.stop ? 0 : core.utils.scan2[t.direction].y * Math.abs(offset.y)),
+                "status": t.stop ? "stop" : status,
+                "index": index++
+            });
+        });
+    }
+    return drawObjs.sort(function(a, b) {
+        return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
     });
 }
 
@@ -885,35 +931,6 @@ control.prototype._triggerHero_animate = function (type, delta, callback) {
     }, 10);
 
     core.animateFrame.asyncId[animate] = true;
-}
-
-control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
-    var heroIconArr = core.material.icons.hero, drawObjs = [], index = 0;
-    drawObjs.push({
-        "img": core.material.images.hero,
-        "width": core.material.icons.hero.width || 32,
-        "height": core.material.icons.hero.height,
-        "heroIcon": heroIconArr[direction],
-        "posx": x * 32 - core.bigmap.offsetX + core.utils.scan2[direction].x * offset,
-        "posy": y * 32 - core.bigmap.offsetY + core.utils.scan2[direction].y * offset,
-        "status": status,
-        "index": index++,
-    });
-    core.status.hero.followers.forEach(function (t) {
-        drawObjs.push({
-            "img": core.material.images.images[t.name],
-            "width": core.material.images.images[t.name].width/4,
-            "height": core.material.images.images[t.name].height/4,
-            "heroIcon": heroIconArr[t.direction],
-            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan2[t.direction].x*Math.abs(offset)),
-            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan2[t.direction].y*Math.abs(offset)),
-            "status": t.stop?"stop":status,
-            "index": index++
-        });
-    });
-    return drawObjs.sort(function(a, b) {
-        return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
-    });
 }
 
 // ------ 画布、位置、阻激夹域，显伤 ------ //

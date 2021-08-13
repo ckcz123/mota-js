@@ -1539,8 +1539,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (['left', 'right', 'up', 'down'].indexOf(lastDirection) >= 0)
 			core.setHeroLoc('direction', lastDirection);
 		// 设置坐标，并绘制
-		core.setHeroLoc('x', x);
-		core.setHeroLoc('y', y);
+		core.control._moveDirectyFollowers(x, y);
+		core.status.hero.loc.x = x;
+		core.status.hero.loc.y = y;
 		core.drawHero();
 		// 记录录像
 		core.status.route.push("move:" + x + ":" + y);

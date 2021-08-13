@@ -1107,6 +1107,31 @@ control.prototype.updateFollowers = function () {
     })
 }
 
+////// 瞬移更新跟随者坐标 //////
+control.prototype._moveDirectyFollowers = function (x, y) {
+    var route = core.automaticRoute(x, y);
+    if (route.length == 0) route = [{x: x, y: y, direction: core.getHeroLoc('direction')}];
+
+    var nowx = x, nowy = y;
+    for (var i = 0; i < core.status.hero.followers.length; ++i) {
+        var t = core.status.hero.followers[i];
+        var index = route.length - i - 2;
+        if (index < 0) index = 0;
+        t.stop = true;
+        t.x = route[index].x;
+        t.y = route[index].y;
+        t.direction = route[index].direction;
+        var dx = nowx - t.x, dy = nowy - t.y;
+        for (var dir in core.utils.scan2) {
+            if (core.utils.scan2[dir].x == dx && core.utils.scan2[dir].y == dy) {
+                t.stop = false;
+                t.direction = dir;
+            }
+        }
+        nowx = t.x; nowy = t.y;
+    }
+}
+
 ////// 更新领域、夹击、阻击的伤害地图 //////
 control.prototype.updateCheckBlock = function(floorId) {
     return this.controldata.updateCheckBlock(floorId);

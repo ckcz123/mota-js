@@ -2586,7 +2586,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
 
 ui.prototype._drawViewMaps_drawHint = function () {
     core.playSound('打开界面');
-    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.4)');
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.7)');
     core.setTextAlign('ui', 'center');
     var stroke = function (left, top, width, height, fillStyle, lineWidth) {
         core.strokeRect('ui', left*32+2, top*32+2, width*32-4, height*32-4, fillStyle, lineWidth);
@@ -2619,7 +2619,7 @@ ui.prototype._drawViewMaps_drawHint = function () {
     core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - (32 * per + 48));
 
     core.fillText('ui', "退出 [ESC / ENTER]", this.HPIXEL, this.HPIXEL);
-    core.fillText('ui', "[X] 可查看" + core.material.items['book'].name, this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
+    core.fillText('ui', "[X] 可查看" + core.material.items['book'].name + "   [G] 可使用" + core.material.items.fly.name, this.HPIXEL, this.HPIXEL + 32, null, '12px Arial');
 
     core.setTextBaseline('ui', 'alphabetic');
 }

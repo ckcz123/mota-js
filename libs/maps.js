@@ -2990,7 +2990,7 @@ maps.prototype.drawHeroAnimate = function (name, callback) {
 }
 
 ////// 获得当前正在播放的所有（指定）动画的id列表 //////
-maps.prototype.getAnimates = function (name) {
+maps.prototype.getPlayingAnimates = function (name) {
     return (core.status.animateObjs || []).filter(function (one) {
         return name == null || one.name == name;
     }).map(function (one) { return one.id });

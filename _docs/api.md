@@ -360,6 +360,11 @@ getNextLvUpNeed: fn() -> number
 升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
 如果无法进行下次升级，返回null。
 
+getPlayingSounds: fn(name?: string) -> [number]
+获得当前正在播放的所有（指定）音效的id列表
+name: 音效名，可用别名；不填代表返回正在播放的全部音效
+返回值: 一个列表，每一项为一个正在播放的音效id；可用core.stopSound立刻停止播放
+
 getRealStatus: fn(name: string)
 计算主角的某个属性，包括百分比修正
 例如：core.getRealStatus('atk'); // 计算主角的攻击力，包括百分比修正。战斗使用的就是这个值
@@ -376,11 +381,6 @@ getSaveIndexes: fn(callback?: fn())
 
 getSaves: fn(ids?: ?, callback?: fn())
 获得某些存档内容
-
-getSounds: fn(name?: string) -> [number]
-获得当前正在播放的所有（指定）音效的id列表
-name: 音效名，可用别名；不填代表返回正在播放的全部音效
-返回值: 一个列表，每一项为一个正在播放的音效id；可用core.stopSound立刻停止播放
 
 getStatus: fn(name: string) -> number
 读取主角的某个属性，不包括百分比修正
@@ -1551,11 +1551,6 @@ generateMovableArray: fn(floorId?: string) -> [[[string]]]
 floorId: 地图id，不填视为当前地图
 返回值：从各点可移动方向的三维数组
 
-getAnimates: fn(name?: string) -> [number]
-获得当前正在播放的所有（指定）动画的id列表
-name: 动画名；不填代表返回全部正在播放的动画
-返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。
-
 getBgMapArray: fn(floorId?: string, noCache?: bool) -> [[number]]
 生成背景层矩阵
 例如：core.getBgMapArray('MT0'); // 生成主塔0层的背景层矩阵，使用缓存
@@ -1653,6 +1648,11 @@ getNumberById: fn(id: string) -> number
 例如：core.getNumberById('yellowWall'); // 1
 id: 图块id
 返回值：图块的数字，定义在project\maps.js（请注意和project\icons.js中的“图块索引”相区分！）
+
+getPlayingAnimates: fn(name?: string) -> [number]
+获得当前正在播放的所有（指定）动画的id列表
+name: 动画名；不填代表返回全部正在播放的动画
+返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。
 
 hideBgFgMap: fn(name?: string, loc?: [number]|[[number]], floorId?: string, callback?: fn())
 隐藏前景/背景地图

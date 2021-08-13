@@ -795,7 +795,7 @@ declare class control {
     stopSound(id?: number): void
 
     /** 获得正在播放的所有（指定）音效的id列表 */
-    getSounds(name?: string): Array<number>
+    getPlayingSounds(name?: string): Array<number>
 
     /** 检查bgm状态 */
     checkBgm(): void
@@ -1784,7 +1784,7 @@ declare class maps {
     stopAnimate(id: number, doCallback?: boolean): void 
 
     /** 获得当前正在播放的所有（指定）动画的id列表 */
-    getAnimates(name?: string) : Array<number>
+    getPlayingAnimates(name?: string) : Array<number>
 
     /** 加载某个楼层（从剧本或存档中） */
     loadFloor(floorId?: string, map?: any): any

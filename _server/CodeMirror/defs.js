@@ -2196,7 +2196,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。", 
           "!type": "fn(id?: number)"
         }, 
-        "getSounds": {
+        "getPlayingSounds": {
           "!doc": "获得当前正在播放的所有（指定）音效的id列表<br/>name: 音效名，可用别名；不填代表返回正在播放的全部音效<br/>返回值: 一个列表，每一项为一个正在播放的音效id；可用core.stopSound立刻停止播放",
           "!type": "fn(name?: string) -> [number]"
         },
@@ -3089,7 +3089,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "立刻停止一个动画播放<br/>id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值<br/>doCallback: 是否执行该动画的回调函数",
           "!type": "fn(id: number, doCallback?: bool)"
         },
-        "getAnimates": {
+        "getPlayingAnimates": {
           "!doc": "获得当前正在播放的所有（指定）动画的id列表<br/>name: 动画名；不填代表返回全部正在播放的动画<br/>返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。",
           "!type": "fn(name?: string) -> [number]"
         },

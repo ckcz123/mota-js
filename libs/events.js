@@ -2495,8 +2495,8 @@ events.prototype._precompile_wait = function (data) {
 events.prototype._action_waitAsync = function (data, x, y, prefix) {
     var test = window.setInterval(function () {
         if (!core.hasAsync() 
-                && (data.excludeAnimates || core.isReplaying() || core.getAnimates().length == 0)
-                && (!data.includeSounds || core.isReplaying() ||  core.getSounds().length == 0)) {
+                && (data.excludeAnimates || core.isReplaying() || core.getPlayingAnimates().length == 0)
+                && (!data.includeSounds || core.isReplaying() ||  core.getPlayingSounds().length == 0)) {
             clearInterval(test);
             core.doAction();
         }

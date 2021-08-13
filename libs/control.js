@@ -2968,7 +2968,7 @@ control.prototype.stopSound = function (id) {
 }
 
 ////// 获得当前正在播放的所有（指定）音效的id列表 //////
-control.prototype.getSounds = function (name) {
+control.prototype.getPlayingSounds = function (name) {
     name = core.getMappedName(name);
     return Object.keys(core.musicStatus.playingSounds).filter(function (one){
         return name == null || core.musicStatus.playingSounds[one].__name == name

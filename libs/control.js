@@ -202,12 +202,7 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
-    var way = core.utils.scan2[core.getHeroLoc('direction')],
-        heroMoving = core.status.heroMoving;
-    core.drawHero(core.animateFrame.leftLeg ? 'leftFoot' : 'rightFoot', {
-        x: way.x * 4 * heroMoving,
-        y: way.y * 4 * heroMoving
-    });
+    core.drawHero(core.animateFrame.leftLeg ? 'leftFoot' : 'rightFoot', 4 * core.status.heroMoving);
 }
 
 control.prototype._animationFrame_weather = function (timestamp) {
@@ -818,50 +813,56 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 }
 
 ////// 绘制勇士 //////
-control.prototype.drawHero = function (status, offset, frame, noGather) {
+control.prototype.drawHero = function (status, offset, frame) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
-    offset = offset || {};
-    offset.x = offset.x || 0;
-    offset.y = offset.y || 0;
+    if (!offset) offset = 0;
 
     var way = core.utils.scan2[direction];
     var dx = way.x, dy = way.y;
-    var offsetX = offset.x, offsetY = offset.y;
+    var offsetX = typeof offset == 'number' ? dx * offset : (offset.x || 0);
+    var offsetY = typeof offset == 'number' ? dy * offset : (offset.y || 0);
+    offset = {x: offsetX, y: offsetY, offset: offset};
 
     core.clearAutomaticRouteNode(x + dx, y + dy);
     core.clearMap('hero');
     core.status.heroCenter.px = 32 * x + offsetX + 16;
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
-    this._drawHero_updateViewport(x, y, offset);
+    // 重置hero层画布
+    var px = parseFloat(core.canvas.hero.canvas.getAttribute('_px')) || 0;
+    var py = parseFloat(core.canvas.hero.canvas.getAttribute('_py')) || 0;
+    core.setGameCanvasTranslate('hero', 0, 0);
+    core.canvas.hero.canvas.removeAttribute('_px');
+    core.canvas.hero.canvas.removeAttribute('_py');
+    offset.px = px;
+    offset.py = py;
+    if (!core.hasFlag('__lockViewport__')) {
+        this._drawHero_updateViewport(x, y, offset);
+    }
+
     if (!core.hasFlag('hideHero')) {
-        this._drawHero_draw(direction, x, y, status, offset, frame, noGather);
+        this._drawHero_draw(direction, x, y, status, offset, frame);
     }  
 }
 
 control.prototype._drawHero_updateViewport = function (x, y, offset) {
-    core.setGameCanvasTranslate('hero', 0, 0);
-    if (flags.__lockViewport__) return;
-    var offsetX = offset.x, offsetY = offset.y;
-    var ox = (x - core.__HALF_SIZE__) * 32 + offsetX,
-        oy = (y - core.__HALF_SIZE__) * 32 + offsetY;
-
-    core.bigmap.offsetX = core.clamp(ox, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp(oy, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offset.x, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offset.y, 0, 32 * core.bigmap.height - core.__PIXELS__);
     core.control.updateViewport();
 }
 
-control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame, noGather) {
-    this._drawHero_getDrawObjs(direction, x, y, status, offset, noGather).forEach(function (block) {
+control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
+    offset = offset || {x: 0, y: 0, offset: 0, px: 0, py: 0};
+    this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
-            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
+            offset.px+block.posx+(32-block.width)/2, offset.py+block.posy+32-block.height, block.width, block.height);
     });
 }
 
-control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset, noGather) {
+control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
     var heroIconArr = core.material.icons.hero, drawObjs = [], index = 0;
     drawObjs.push({
         "img": core.material.images.hero,
@@ -873,16 +874,15 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
         "status": status,
         "index": index++,
     });
-    // 不重绘跟随者 比如说跳跃时……
-    if (!noGather) {
+    if (typeof offset.offset == 'number') {
         core.status.hero.followers.forEach(function(t) {
             drawObjs.push({
                 "img": core.material.images.images[t.name],
                 "width": core.material.images.images[t.name].width / 4,
                 "height": core.material.images.images[t.name].height / 4,
                 "heroIcon": heroIconArr[t.direction],
-                "posx": 32 * t.x - core.bigmap.offsetX + (t.stop ? 0 : core.utils.scan2[t.direction].x * Math.abs(offset.x)),
-                "posy": 32 * t.y - core.bigmap.offsetY + (t.stop ? 0 : core.utils.scan2[t.direction].y * Math.abs(offset.y)),
+                "posx": 32 * t.x - core.bigmap.offsetX + (t.stop ? 0 : core.utils.scan2[t.direction].x * Math.abs(offset.offset)),
+                "posy": 32 * t.y - core.bigmap.offsetY + (t.stop ? 0 : core.utils.scan2[t.direction].y * Math.abs(offset.offset)),
                 "status": t.stop ? "stop" : status,
                 "index": index++
             });
@@ -901,26 +901,27 @@ control.prototype.triggerHero = function (type, time, callback) {
         if (callback) callback();
         return;
     }
-    if (type == 'show') core.removeFlag('hideHero');
-    else core.setFlag('hideHero', true);
+    core.removeFlag('hideHero');
 
-    time = time || 0;
-    if (time == 0) {
+    var cb = function () {
+        if (type == 'hide') core.setFlag('hideHero', true);
         core.drawHero();
         if (callback) callback();
         return;
     }
+
+    time = time || 0;
+    if (time == 0) return cb();
     time /= Math.max(core.status.replay.speed, 1)    
-    this._triggerHero_animate(type, 10 / time, callback);
+    this._triggerHero_animate(type, 10 / time, cb);
 }
 
 control.prototype._triggerHero_animate = function (type, delta, callback) {
     var opacity = type != 'show' ? 1 : 0;
     var animate = setInterval(function () {
         opacity += type != 'show' ? -delta : delta;
-        core.clearMap('hero');
         core.setAlpha('hero', opacity);
-        core.control._drawHero_draw(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop', 0);
+        core.drawHero();
         core.setAlpha('hero', 1);
         if (opacity >= 1 || opacity <= 0) {
             delete core.animateFrame.asyncId[animate];
@@ -1009,14 +1010,19 @@ control.prototype.updateViewport = function() {
 
 ////// 设置视野范围 //////
 control.prototype.setViewport = function (px, py) {
+    var originOffsetX = core.bigmap.offsetX, originOffsetY = core.bigmap.offsetY;
     core.bigmap.offsetX = core.clamp(px, 0, 32 * core.bigmap.width - core.__PIXELS__);
     core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
-    var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
-    var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
-    core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
-
+    var canvas = core.canvas.hero.canvas;
+    var px = parseFloat(canvas.getAttribute('_px')) || 0;
+    var py = parseFloat(canvas.getAttribute('_py')) || 0;
+    px += originOffsetX - core.bigmap.offsetX;
+    py += originOffsetY - core.bigmap.offsetY;
+    core.control.setGameCanvasTranslate('hero', px, py);
+    core.canvas.hero.canvas.setAttribute('_px', px);
+    core.canvas.hero.canvas.setAttribute('_py', py);
 }
 
 ////// 移动视野范围 //////

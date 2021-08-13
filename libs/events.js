@@ -788,6 +788,11 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
 
 events.prototype._changeFloor_changing = function (info, callback) {
     this.changingFloor(info.floorId, info.heroLoc);
+    // 回归视角
+    var __lockViewport__ = flags.__lockViewport__;
+    core.setFlag('__lockViewport__', null);
+    core.drawHero();
+    core.setFlag('__lockViewport__', __lockViewport__);    
 
     if (info.time == 0)
         this._changeFloor_afterChange(info, callback);
@@ -1528,7 +1533,7 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
 }
 
 events.prototype._action_lockViewport = function (data, x, y, prefix) {
-    flags.__lockViewport__ = data.lock;
+    core.setFlag('__lockViewport__', data.lock || null);
     core.doAction();
 }
 
@@ -3552,16 +3557,10 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
         return true;
     }
     if (step <= 4) {
-        core.drawHero('leftFoot', {
-            x: 4 * o * step,
-            y: 4 * o * step
-        });
+        core.drawHero('leftFoot', 4 * o * step);
     }
     else if (step <= 8) {
-        core.drawHero('rightFoot', {
-            x: 4 * o * step,
-            y: 4 * o * step
-        });
+        core.drawHero('rightFoot', 4 * o * step);
     }
     if (step == 8) {
         core.setHeroLoc('x', x + o * core.utils.scan2[direction].x, true);
@@ -3609,10 +3608,7 @@ events.prototype._jumpHero_jumping = function (jumpInfo) {
     var x = core.getHeroLoc('x'),
         y = core.getHeroLoc('y');
     var nowx = jumpInfo.px, nowy = jumpInfo.py, width = jumpInfo.width || 32, height = jumpInfo.height;
-    core.drawHero(null, {
-        x: nowx - 32 * x,
-        y: nowy - 32 * y
-    }, 0, true);
+    core.drawHero('stop', { x: nowx - 32 * x, y: nowy - 32 * y });
 }
 
 events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {

@@ -115,14 +115,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['win_s'].xmlText(),
       MotaActionBlocks['lose_s'].xmlText(),
       MotaActionBlocks['restart_s'].xmlText(),
-      MotaActionBlocks['showImage_s'].xmlText(),
-      MotaActionBlocks['showImage_1_s'].xmlText(),
-      MotaActionBlocks['hideImage_s'].xmlText(),
-      MotaActionBlocks['showTextImage_s'].xmlText(),
-      MotaActionBlocks['moveImage_s'].xmlText(),
-      MotaActionBlocks['rotateImage_s'].xmlText(),
-      MotaActionBlocks['scaleImage_s'].xmlText(),
-      MotaActionBlocks['showGif_s'].xmlText(),
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -195,7 +187,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['insert_1_s'].xmlText(),
       MotaActionBlocks['insert_2_s'].xmlText(),
     ],
-    '特效/声音':[
+    '特效表现':[
       MotaActionBlocks['sleep_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
         {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件\n超时剩余时间会写入flag:timeout"}]},
@@ -218,6 +210,21 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['setCurtain_1_s'].xmlText(),
       MotaActionBlocks['screenFlash_s'].xmlText(),
       MotaActionBlocks['setWeather_s'].xmlText(),
+      MotaActionBlocks['callBook_s'].xmlText(),
+      MotaActionBlocks['callSave_s'].xmlText(),
+      MotaActionBlocks['autoSave_s'].xmlText(),
+      MotaActionBlocks['forbidSave_s'].xmlText(),
+      MotaActionBlocks['callLoad_s'].xmlText(),
+    ],
+    '音像处理':[
+      MotaActionBlocks['showImage_s'].xmlText(),
+      MotaActionBlocks['showImage_1_s'].xmlText(),
+      MotaActionBlocks['hideImage_s'].xmlText(),
+      MotaActionBlocks['showTextImage_s'].xmlText(),
+      MotaActionBlocks['moveImage_s'].xmlText(),
+      MotaActionBlocks['rotateImage_s'].xmlText(),
+      MotaActionBlocks['scaleImage_s'].xmlText(),
+      MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['playBgm_s'].xmlText(),
       MotaActionBlocks['pauseBgm_s'].xmlText(),
       MotaActionBlocks['resumeBgm_s'].xmlText(),
@@ -228,11 +235,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
       MotaActionBlocks['setBgmSpeed_s'].xmlText(),
-      MotaActionBlocks['callBook_s'].xmlText(),
-      MotaActionBlocks['callSave_s'].xmlText(),
-      MotaActionBlocks['autoSave_s'].xmlText(),
-      MotaActionBlocks['forbidSave_s'].xmlText(),
-      MotaActionBlocks['callLoad_s'].xmlText(),
     ],
     'UI绘制':[
       MotaActionBlocks['previewUI_s'].xmlText(),

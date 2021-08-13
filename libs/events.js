@@ -3264,7 +3264,6 @@ events.prototype.hideImage = function (code, time, callback) {
 
 ////// 移动图片 //////
 events.prototype.moveImage = function (code, to, opacityVal, moveMode, time, callback) {
-    time = time || 1000;
     to = to || [];
     var name = "image" + (code + 100);
     if (!core.dymCanvas[name]) {
@@ -3281,6 +3280,13 @@ events.prototype.moveImage = function (code, to, opacityVal, moveMode, time, cal
         toX = getOrDefault(to[0], fromX), toY = getOrDefault(to[1], fromY);
 
     var opacity = parseFloat(canvas.style.opacity), toOpacity = getOrDefault(opacityVal, opacity);
+
+    if (!time) {
+        core.relocateCanvas(name, toX, toY);
+        core.setOpacity(toOpacity);
+        if (callback) callback();
+        return;
+    }
 
     this._moveImage_moving(name, {
         fromX: fromX, fromY: fromY, toX: toX, toY: toY, opacity: opacity, toOpacity: toOpacity,
@@ -3314,7 +3320,6 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
 
 ////// 旋转图片 //////
 events.prototype.rotateImage = function (code, center, angle, moveMode, time, callback) {
-    time = time || 1000;
     center = center || [];
     var name = "image" + (code + 100);
     if (!core.dymCanvas[name]) {
@@ -3325,6 +3330,13 @@ events.prototype.rotateImage = function (code, center, angle, moveMode, time, ca
     var centerX = core.calValue(center[0]), centerY = core.calValue(center[1]);
 
     var fromAngle = parseFloat(canvas.getAttribute('_angle')) || 0;
+
+    if (!time) {
+        core.rotateCanvas(name, fromAngle + angle, centerX, centerY);
+        if (callback) callback();
+        return;
+    }
+
     var rotateInfo = {
         fromAngle: fromAngle, angle: angle, centerX: centerX, centerY: centerY,
         moveMode: moveMode, time: time / Math.max(core.status.replay.speed, 1)

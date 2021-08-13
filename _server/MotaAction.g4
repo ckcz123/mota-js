@@ -2155,6 +2155,7 @@ default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
 menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/:images", "EvalString_0"])']]
 previewBlock : true
+colour : this.imageColor
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
@@ -2176,6 +2177,7 @@ default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
 menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/:images", "EvalString_0"])']]
 previewBlock : true
+colour : this.imageColor
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
 } else Reverse_List_0 = '';
@@ -2195,6 +2197,7 @@ showTextImage_s
 /* showTextImage_s
 tooltip : showTextImage：显示图片化文本
 helpUrl : /_docs/#/instruction
+colour : this.imageColor
 doubleclicktext : EvalString_Multi_0
 default : ["可以使用setText事件来控制字体、颜色、大小、偏移量等",1,"0","0",1.4,"null",1,0,false]
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
@@ -2213,6 +2216,7 @@ hideImage_s
 tooltip : hideImage：清除图片
 helpUrl : /_docs/#/instruction
 default : [1,0,false]
+colour : this.imageColor
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "hideImage", "code": '+NInt_0+', "time": '+Int_0+async+'},\n';
 return code;
@@ -2228,6 +2232,7 @@ helpUrl : /_docs/#/instruction
 default : ["","",""]
 allImages : ['EvalString_0']
 previewBlock : true
+colour : this.imageColor
 EvalString_0 = EvalString_0 ? (', "name": "'+EvalString_0+'"') : '';
 var loc = (PosString_0 && PosString_1) ? (', "loc": ['+PosString_0+','+PosString_1+']') : '';
 var code = '{"type": "showGif"'+EvalString_0+loc+'},\n';
@@ -2243,6 +2248,7 @@ moveImage_s
 tooltip : moveImage：图片移动
 helpUrl : /_docs/#/instruction
 default : [1,'','','','',500,false]
+colour : this.imageColor
 var toloc = '';
 if (PosString_0 && PosString_1)
   toloc = ', "to": ['+PosString_0+','+PosString_1+']';
@@ -2261,6 +2267,7 @@ rotateImage_s
 tooltip : rotateImage：图片旋转
 helpUrl : /_docs/#/instruction
 default : [1,'','','',90,500,false]
+colour : this.imageColor
 var loc = '';
 if (PosString_0 && PosString_1)
   loc = ', "center": ['+PosString_0+','+PosString_1+']';
@@ -2278,6 +2285,7 @@ scaleImage_s
 tooltip : scaleImage：图片放缩
 helpUrl : /_docs/#/instruction
 default : [1,'','','',0.8,0,false]
+colour : this.imageColor
 if (Number_0 <= 0) throw new Error('放缩比例需要大于0'); 
 var loc = '';
 if (PosString_0 && PosString_1)
@@ -2515,7 +2523,7 @@ helpUrl : /_docs/#/instruction
 default : ["bgm.mp3", 0, true]
 allBgms : ['EvalString_0']
 material : ["./project/bgms/", "EvalString_0"]
-colour : this.soundColor
+colour : this.imageColor
 Int_0 = Int_0 ? (', "startTime": '+Int_0) : '';
 Bool_0 = Bool_0 ? ', "keep": true' : '';
 var code = '{"type": "playBgm", "name": "'+EvalString_0+'"'+Int_0+Bool_0+'},\n';
@@ -2529,7 +2537,7 @@ pauseBgm_s
 /* pauseBgm_s
 tooltip : pauseBgm: 暂停背景音乐
 helpUrl : /_docs/#/instruction
-colour : this.soundColor
+colour : this.imageColor
 var code = '{"type": "pauseBgm"},\n';
 return code;
 */;
@@ -2541,7 +2549,7 @@ resumeBgm_s
 /* resumeBgm_s
 tooltip : resumeBgm: 恢复背景音乐
 helpUrl : /_docs/#/instruction
-colour : this.soundColor
+colour : this.imageColor
 Bool_0 = Bool_0 ? ', "resume": true' : '';
 var code = '{"type": "resumeBgm"' + Bool_0 + '},\n';
 return code;
@@ -2557,7 +2565,7 @@ helpUrl : /_docs/#/instruction
 default : ["bgm.mp3"]
 allBgms : ['EvalString_0']
 material : ["./project/bgms/", "EvalString_0"]
-colour : this.soundColor
+colour : this.imageColor
 var code = '{"type": "loadBgm", "name": "'+EvalString_0+'"},\n';
 return code;
 */;
@@ -2571,7 +2579,7 @@ tooltip : freeBgm: 释放背景音乐的缓存
 helpUrl : /_docs/#/instruction
 default : ["bgm.mp3"]
 allBgms : ['EvalString_0']
-colour : this.soundColor
+colour : this.imageColor
 var code = '{"type": "freeBgm", "name": "'+EvalString_0+'"},\n';
 return code;
 */;
@@ -2584,7 +2592,7 @@ playSound_s
 tooltip : playSound: 播放音效
 helpUrl : /_docs/#/instruction
 default : ["item.mp3",false,"",false]
-colour : this.soundColor
+colour : this.imageColor
 allSounds : ['EvalString_0']
 material : ["./project/sounds/", "EvalString_0"]
 if (IntString_0) {
@@ -2605,7 +2613,7 @@ playSound_1_s
 tooltip : playSound: 播放系统音效
 helpUrl : /_docs/#/instruction
 default : ["确定",false,"",false]
-colour : this.soundColor
+colour : this.imageColor
 if (IntString_0) {
     if (parseInt(IntString_0) < 30 || parseInt(IntString_0) > 300) throw '音调设置只能在30-300之间；100为正常音调。';
     IntString_0 = ', "pitch": ' + IntString_0;
@@ -2623,7 +2631,7 @@ stopSound_s
 /* stopSound_s
 tooltip : stopSound: 停止所有音效
 helpUrl : /_docs/#/instruction
-colour : this.soundColor
+colour : this.imageColor
 var code = '{"type": "stopSound"},\n';
 return code;
 */;
@@ -2636,7 +2644,7 @@ setVolume_s
 tooltip : setVolume: 设置音量
 helpUrl : /_docs/#/instruction
 default : [90, 500, false]
-colour : this.soundColor
+colour : this.imageColor
 IntString_0 = IntString_0 ?(', "time": '+IntString_0):'';
 var async = Bool_0?', "async": true':'';
 var code = '{"type": "setVolume", "value": '+Int_0+IntString_0+async+'},\n';
@@ -2651,7 +2659,7 @@ setBgmSpeed_s
 tooltip : setSpeed: 设置背景音乐播放速度
 helpUrl : /_docs/#/instruction
 default : [100, true]
-colour : this.soundColor
+colour : this.imageColor
 if (Int_0 < 30 || Int_0 > 300) throw '速度只能设置只能在30-300之间；100为正常速度。';
 Bool_0 = Bool_0?', "pitch": true':'';
 var code = '{"type": "setBgmSpeed", "value": '+Int_0+Bool_0+'},\n';
@@ -4168,6 +4176,7 @@ this.evisitor.soundColor=20;
 this.evisitor.commentColor=285;
 this.evisitor.mapColor=175;
 this.evisitor.uiColor=359;
+this.evisitor.imageColor=45;
 */
 
 /* Function_1

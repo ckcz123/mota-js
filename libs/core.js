@@ -472,6 +472,23 @@ core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
     core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
+    // 图片裁剪
+    (main.splitImages || []).forEach(function (one) {
+        var name = core.getMappedName(one.name);
+        if (!core.material.images.images[name]) {
+            console.warn('找不到图片：' + name + '，无法裁剪');
+            return;
+        }
+        if (!name.endsWith('.png')) {
+            console.warn('无法裁剪非png格式图片：' + name);
+            return;
+        }
+        var arr = core.splitImage(core.material.images.images[name], one.width, one.height);
+        for (var i = 0; i < arr.length; ++i) {
+            core.material.images.images[(one.prefix||"") + i + '.png'] = arr[i];
+        }
+    });
+
     if (core.plugin._afterLoadResources)
         core.plugin._afterLoadResources();
     core.showStartAnimate();

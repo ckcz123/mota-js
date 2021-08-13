@@ -38,6 +38,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "使用图片",
 					"_data": "在此存放所有可能使用的图片（tilesets除外） \n图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加",
 				},
+				"splitImages": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "splitImages",
+					"_docs": "图片切分",
+					"_data": "可以在这里对使用到的图片进行按照一定宽高切分，生成若干新的小图供使用"
+				},
 				"tilesets": {
 					"_leaf": true,
 					"_type": "material",

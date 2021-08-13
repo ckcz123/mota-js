@@ -11,14 +11,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	this._afterLoadResources = function () {
 		// 本函数将在所有资源加载完毕后，游戏开启前被执行
-		// 可以在这个函数里面对资源进行一些操作，比如切分图片等。
-
-		// 这是一个将assets.png拆分成若干个32x32像素的小图片并保存的样例。
-		// var arr = core.splitImage("assets.png", 32, 32);
-		// for (var i = 0; i < arr.length; i++) {
-		//     core.material.images.images["asset"+i+".png"] = arr[i];
-		// }
-
+		// 可以在这个函数里面对资源进行一些操作。
+		// 若需要进行切分图片，可以使用 core.splitImage() 函数，或直接在全塔属性-图片切分中操作
 	}
 
 	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为 core.plugin.xxx();

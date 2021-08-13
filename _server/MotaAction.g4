@@ -731,7 +731,7 @@ nameMapImage
 tooltip : 映射图片
 default : ['背景图', 'bg.jpg']
 allImages : ['EvalString_1']
-material : ["./project/images/", "EvalString_1"]
+material : ["./project/images/:images", "EvalString_1"]
 helpUrl : /_docs/#/instruction
 return ',"'+EvalString_0+'":"'+EvalString_1+'"';
 */;
@@ -763,6 +763,44 @@ nameMapEmpty
     
 /* nameMapEmpty
 return ' \n';
+*/;
+
+
+splitImages_m
+    :   '图片切分（你可以将一张png格式的大图切分为若干小图）' BGNL? splitImagesList+ BEND
+
+
+/* splitImages_m
+tooltip: 图片裁剪
+helpUrl : /_docs/#/instruction
+var code = '[\n'+splitImagesList_0+']\n';
+return code;
+*/;
+
+splitImagesList
+    : splitImagesOne
+    | splitImagesEmpty;
+
+
+splitImagesOne
+    :   '图片切分项' '图片名' EvalString '每个小图宽度' Int '高度' Int '生成小图的前缀' EvalString BEND
+
+/* splitImagesOne
+tooltip : 图片裁剪项
+helpUrl : /_docs/#/instruction
+default : ['hero.png', 32, 32, 'hero_']
+material : ["./project/images/:images", "EvalString_0"]
+allImages : ['EvalString_0']
+var code = '{"name": "'+EvalString_0+'", "width": '+Int_0+', "height": '+Int_1+', "prefix": "'+EvalString_1+'"},\n';
+return code;
+*/;
+
+splitImagesEmpty
+    :   Newline
+    
+/* splitImagesEmpty
+var code = ' \n';
+return code;
 */;
 
 //为了避免关键字冲突,全部加了_s
@@ -1689,7 +1727,7 @@ helpUrl : /_docs/#/instruction
 colour : this.dataColor
 default : ["hero.png", false]
 allImages : ['EvalString_0']
-material : ["./project/images/", "EvalString_0"]
+material : ["./project/images/:images", "EvalString_0"]
 EvalString_0 = EvalString_0 && (', "name": "'+EvalString_0+'"');
 Bool_0 = Bool_0 ? (', "noDraw": true') : '';
 var code = '{"type": "setHeroIcon"'+EvalString_0+Bool_0+'},\n';
@@ -1979,7 +2017,7 @@ tooltip : follow: 跟随勇士
 helpUrl : /_docs/#/instruction
 default : ["npc.png"]
 allImages : ['EvalString_0']
-material : ["./project/images/", "EvalString_0"]
+material : ["./project/images/:images", "EvalString_0"]
 colour : this.dataColor
 var code = '{"type": "follow", "name": "'+EvalString_0+'"},\n';
 return code;
@@ -1994,7 +2032,7 @@ tooltip : unfollow: 取消跟随
 helpUrl : /_docs/#/instruction
 default : [""]
 allImages : ['EvalString_0']
-material : ["./project/images/", "EvalString_0"]
+material : ["./project/images/:images", "EvalString_0"]
 colour : this.dataColor
 EvalString_0 = EvalString_0 ? (', "name": "' + EvalString_0 + '"') : "";
 var code = '{"type": "unfollow"' + EvalString_0 + '},\n';
@@ -2101,7 +2139,7 @@ tooltip : showImage：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0",1,0,false]
 allImages : ['EvalString_0']
-menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/", "EvalString_0"])']]
+menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/:images", "EvalString_0"])']]
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';
@@ -2122,7 +2160,7 @@ tooltip : showImage_1：显示图片
 helpUrl : /_docs/#/instruction
 default : [1,"bg.jpg","null","0","0","","",1,"0","0","","",0,false]
 allImages : ['EvalString_0']
-menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/", "EvalString_0"])']]
+menu : [['选择图片','editor_blockly.selectMaterial(block, ["./project/images/:images", "EvalString_0"])']]
 previewBlock : true
 if (Reverse_List_0 && Reverse_List_0 != 'null') {
     Reverse_List_0 = ', "reverse": "' + Reverse_List_0 + '"';

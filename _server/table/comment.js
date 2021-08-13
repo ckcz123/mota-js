@@ -145,7 +145,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"bigImage": {
 					"_leaf": true,
 					"_type": "material",
-					"_directory": "./project/images/",
+					"_directory": "./project/images/:images",
 					"_transform": (function (one) {
 						if (one.endsWith('.png')) return one;
 						return null;
@@ -401,7 +401,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"bigImage": {
 					"_leaf": true,
 					"_type": "material",
-					"_directory": "./project/images/",
+					"_directory": "./project/images/:images",
 					"_transform": (function (one) {
 						if (one.endsWith('.png')) return one;
 						return null;

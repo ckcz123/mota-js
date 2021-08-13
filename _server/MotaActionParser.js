@@ -117,6 +117,15 @@ ActionParser.prototype.parse = function (obj,type) {
       if(!obj) obj={};
       return MotaActionBlocks['faceIds_m'].xmlText([obj.down||"", obj.left||"", obj.right||"", obj.up||""]);
 
+    case 'splitImages':
+      if(!obj) obj=[];
+      var text_choices = null;
+      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+        text_choices=MotaActionBlocks['splitImagesOne'].xmlText([
+          choice.name, choice.width, choice.height, choice.prefix, text_choices]);
+      }
+      return MotaActionBlocks['splitImages_m'].xmlText([text_choices]);
+
     case 'mainStyle':
       if(!obj) obj={};
       return MotaActionBlocks['mainStyle_m'].xmlText([

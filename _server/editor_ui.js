@@ -789,6 +789,10 @@ editor_ui_wrapper = function (editor) {
 
     // ------ 素材选择框 ------ //
     uievent.selectMaterial = function (value, title, directory, transform, callback) {
+        var one = directory.split(':');
+        if (one.length > 1) directory = one[0];
+        var appendedImages = one[1] == 'images' ? core.material.images.images : {};
+
         fs.readdir(directory, function (err, data) {
             if (err) {
                 printe(directory + '不存在！');
@@ -800,6 +804,10 @@ editor_ui_wrapper = function (editor) {
             }
             value = value || [];
             data = (transform ? data.map(transform) : data).filter(function (one) {return one;}).sort();
+            var data2 = Object.keys(appendedImages);
+            data2 = (transform ? data2.map(transform) : data2).filter(function (one) {
+                return one && data.indexOf(one) < 0;
+            }).sort();
 
             uievent.isOpen = true;
             uievent.elements.div.style.display = 'block';
@@ -857,6 +865,16 @@ editor_ui_wrapper = function (editor) {
                 }
                 html += '<br/>';
             });
+            data2.forEach(function (one) {
+                var checked = value.indexOf(one) >= 0? 'checked' : '';
+                var disabled = _isTileset && value.indexOf(one) >= 0 ? 'disabled' : '';
+                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${checked} ${disabled}/> ${one}`;
+                // 预览图片
+                if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
+                    html += "<button onclick='editor.uievent._previewMaterialImage2(this)' style='margin-left: 10px'>预览</button>";
+                    html += '<br style="display:none" key="'+one+'"/><br/>';
+                }
+            })
             html += "</p>";
             html += "<p style='margin-left: 10px'><small>如果文件未在此列表显示，请检查文件名是否合法（只能由数字字母下划线横线和点组成），后缀名是否正确。</small></p>";
             uievent.elements.extraBody.innerHTML = html;
@@ -881,6 +899,19 @@ editor_ui_wrapper = function (editor) {
             button.innerText = '预览';
             br.style.display = 'none';
             img.style.display = 'none';
+        }
+    }
+
+    uievent._previewMaterialImage2 = function (button) {
+        var br = button.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '折叠';
+            br.style.display = 'block';
+            br.parentElement.insertBefore(core.material.images.images[br.getAttribute('key')], br.nextElementSibling);
+        } else {
+            button.innerText = '预览';
+            br.style.display = 'none';
+            br.parentElement.removeChild(core.material.images.images[br.getAttribute('key')]);
         }
     }
 

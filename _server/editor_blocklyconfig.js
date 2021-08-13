@@ -91,6 +91,9 @@ editor_blocklyconfig=(function(){
       MotaActionFunctions.actionParser.parse({
         "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "领域": "zone", "文件名": "file.jpg"
       }, 'nameMap'),
+      MotaActionFunctions.actionParser.parse([
+        {"name": "hero.png", "width": 32, "height": 32, "prefix": "hero_"},
+      ], 'splitImages'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),

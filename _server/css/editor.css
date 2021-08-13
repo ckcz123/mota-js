@@ -617,15 +617,15 @@ table.row {
 }
 
 .etable tr > :nth-child(1) {
-    width: 22%
+    width: 24%
 }
 
 .etable tr > :nth-child(2) {
-    width: 20%
+    width: 19%
 }
 
 .etable tr > :nth-child(3) {
-    width: 33%;
+    width: 32%;
 }
 
 .etable tr > :nth-child(4) {

@@ -969,7 +969,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
-        data.excludeAnimates||false, data.excludeSounds||false, this.next]);
+        data.excludeAnimates||false, data.includeSounds||false, this.next]);
       break;
     case "callBook": // 呼出怪物手册
       this.next = MotaActionBlocks['callBook_s'].xmlText([

@@ -3058,7 +3058,7 @@ return '';
 
 
 waitAsync_s
-    :   '等待所有异步事件执行完毕' '不等待动画' Bool '不等待音效' Bool
+    :   '等待所有异步事件执行完毕' '不等待动画' Bool '等待音效' Bool
 
 
 /* waitAsync_s
@@ -3067,7 +3067,7 @@ helpUrl : /_docs/#/instruction
 default : [false, false]
 colour : this.soundColor
 Bool_0 = Bool_0 ? ', "excludeAnimates": true' : '';
-Bool_1 = Bool_1 ? ', "excludeSounds": true' : '';
+Bool_1 = Bool_1 ? ', "includeSounds": true' : '';
 var code = '{"type": "waitAsync"'+Bool_0+Bool_1+'},\n';
 return code;
 */;

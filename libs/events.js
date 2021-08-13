@@ -510,7 +510,7 @@ events.prototype.openDoor = function (x, y, needKey, callback) {
         core.removeBlock(x, y);
         setTimeout(function () {
             core.status.replay.animate = false;
-            core.events.afterOpenDoor(id, x, y);
+            core.events.afterOpenDoor(block.event.id, x, y);
             if (callback) callback();
         }, 1); // +1是为了录像检测系统
     } else {
@@ -2495,8 +2495,8 @@ events.prototype._precompile_wait = function (data) {
 events.prototype._action_waitAsync = function (data, x, y, prefix) {
     var test = window.setInterval(function () {
         if (!core.hasAsync() 
-                && (data.excludeAnimates || core.getAnimates().length == 0)
-                && (data.excludeSounds || core.getSounds().length == 0)) {
+                && (data.excludeAnimates || core.isReplaying() || core.getAnimates().length == 0)
+                && (!data.includeSounds || core.isReplaying() ||  core.getSounds().length == 0)) {
             clearInterval(test);
             core.doAction();
         }

@@ -270,11 +270,11 @@ enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, f
         list.push([info.__overAtk__, -info.damage]);
     }
     for (var atk = start_atk + 1; atk <= mon_hp + mon_def; atk++) {
-        var nextInfo = this.getDamageInfo(enemy, {"atk": atk}, x, y, floorId);
+        var nextInfo = this.getDamageInfo(enemy, {"atk": Math.ceil(atk / core.getBuff('atk'))}, x, y, floorId);
         if (nextInfo == null || (typeof nextInfo == 'number')) break;
         if (pre > nextInfo.damage) {
             pre = nextInfo.damage;
-            list.push([atk - hero_atk, info.damage - nextInfo.damage]);
+            list.push([Math.ceil(atk / core.getBuff('atk')) - hero_atk, info.damage - nextInfo.damage]);
             if (nextInfo.damage <= 0 && !core.flags.enableNegativeDamage) break;
             if (list.length >= number) break;
         }
@@ -298,12 +298,12 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
         while (start < end) {
             var mid = Math.floor((start + end) / 2);
             if (mid - start > end - mid) mid--;
-            var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": mid}, x, y, floorId);
+            var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": Math.ceil(mid / core.getBuff('atk'))}, x, y, floorId);
             if (nextInfo == null || (typeof nextInfo == 'number')) return null;
             if (pre > nextInfo.damage) end = mid;
             else start = mid + 1;
         }
-        var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": start}, x, y, floorId);
+        var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": Math.ceil(start / core.getBuff('atk'))}, x, y, floorId);
         return nextInfo == null || (typeof nextInfo == 'number') || nextInfo.damage >= pre ? null : [start, nextInfo.damage];
     }
     var currAtk = start_atk;
@@ -312,7 +312,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
         if (next == null) break;
         currAtk = next[0];
         pre = next[1];
-        list.push([currAtk - hero_atk, info.damage - pre]);
+        list.push([Math.ceil(currAtk / core.getBuff('atk')) - hero_atk, info.damage - pre]);
         if (pre <= 0 && !core.flags.enableNegativeDamage) break;
         if (list.length >= number) break;
     }

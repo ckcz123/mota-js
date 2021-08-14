@@ -217,7 +217,7 @@ editor_blockly = function () {
                 return true;
             if ((one.type == 'while' || one.type == 'dowhile') && this.checkAsync(one.data))
                 return true;
-            if (one.type == 'if' && (this.checkAsync(one.yes) || this.checkAsync(one.no)))
+            if (one.type == 'confirm' && (this.checkAsync(one.yes) || this.checkAsync(one.no)))
                 return true;
             if (one.type == 'choices') {
                 var list = one.choices;
@@ -235,11 +235,22 @@ editor_blockly = function () {
                     }
                 }
             }
+            if (one.type == 'wait') {
+                var list = one.data;
+                if (list instanceof Array) {
+                    for (var j = 0; j < list.length; j++) {
+                        if (this.checkAsync(list[j].action)) return true;
+                    }
+                }
+            }
+            if (one.type == 'previewUI' && this.checkAsync(one.action)) return true; 
             if (one.async && one.type != 'animate' && one.type != 'function') hasAsync = true;
             if (one.type == 'waitAsync') hasAsync = false;
         }
         return hasAsync;
     }
+
+    var _isTextAttributeSet = false;
 
     editor_blockly.previewBlock = function (b,args) {
 
@@ -283,7 +294,7 @@ editor_blockly = function () {
 
         try {
             // 特殊处理立绘
-            if (b.type == 'textDrawing' || b.type == 'text_2_s') {
+            if (b.type == 'textDrawing') {
                 previewTextDrawing(Blockly.JavaScript.blockToCode(b));
                 return true;
             }
@@ -293,6 +304,24 @@ editor_blockly = function () {
             if (obj.length == 0) return true;
             obj = obj[0];
             switch (b.type) {
+            case 'text_0_s':
+            case 'text_1_s':
+            case 'text_2_s':
+            case 'choices_s':
+            case 'confirm_s':
+                if (!_isTextAttributeSet) {
+                    alert('警告！你尚未设置用于预览的剧情文本的属性，将采用默认属性进行预览。\n你可以双击“设置剧情文本的属性”事件来设置用于预览的属性。');
+                    core.status.textAttribute = core.clone(core.initStatus.textAttribute);
+                    _isTextAttributeSet = true;
+                }
+                editor.uievent.previewUI([obj]);
+                break;
+            case 'setText_s': // 设置剧情文本的属性
+                _isTextAttributeSet = true;
+                core.status.textAttribute = core.clone(core.initStatus.textAttribute);
+                core.setTextAttribute(obj);
+                alert('已成功设置此属性为显示文章的预览属性！')
+                break;
             case 'waitContext_2': // 等待用户操作坐标预览
                 editor.uievent.previewUI([{"type": "fillRect", "x": obj.px[0], "y": obj.py[0],
                     "width": "(" + obj.px[1] + ")-(" + obj.px[0] + ")", "height": "(" + obj.py[1] + ")-(" + obj.py[0] + ")",
@@ -1141,4 +1170,22 @@ Blockly.BlockSvg.prototype.generateContextMenu = function() {
     menuOptions.push(Blockly.ContextMenu.blockHelpOption(block));  
     if (this.customContextMenu) this.customContextMenu(menuOptions);
     return menuOptions;
+};
+
+Blockly.FieldDropdown.prototype.doClassValidation_ = function (opt_newValue) { 
+    return opt_newValue;
+}
+
+Blockly.FieldDropdown.prototype.doValueUpdate_ = function (newValue) {
+    Blockly.FieldDropdown.superClass_.doValueUpdate_.call(this, newValue);
+    var options = this.getOptions(true);
+    for (var i = 0, option; (option = options[i]); i++) {
+        if (option[1] == this.value_) {
+            this.selectedOption_ = option;
+        }
+    }
+    if (this.selectedOption_[1] != this.value_) {
+        options.push([this.value_, this.value_]);
+        this.selectedOption_ = options[options.length - 1];
+    }
 };

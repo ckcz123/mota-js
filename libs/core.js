@@ -358,14 +358,14 @@ core.prototype._init_flags = function () {
 
 core.prototype._init_sys_flags = function () {
     if (core.flags.equipboxButton) core.flags.equipment = true;
-    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
-    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', true);
+    core.flags.displayCritical = core.getLocalStorage('critical', true);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', true);
     core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
     core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 0);
     // 行走速度
-    core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
+    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed || 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
@@ -472,6 +472,23 @@ core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
     core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
+    // 图片裁剪
+    (main.splitImages || []).forEach(function (one) {
+        var name = core.getMappedName(one.name);
+        if (!core.material.images.images[name]) {
+            console.warn('找不到图片：' + name + '，无法裁剪');
+            return;
+        }
+        if (!name.endsWith('.png')) {
+            console.warn('无法裁剪非png格式图片：' + name);
+            return;
+        }
+        var arr = core.splitImage(core.material.images.images[name], one.width, one.height);
+        for (var i = 0; i < arr.length; ++i) {
+            core.material.images.images[(one.prefix||"") + i + '.png'] = arr[i];
+        }
+    });
+
     if (core.plugin._afterLoadResources)
         core.plugin._afterLoadResources();
     core.showStartAnimate();

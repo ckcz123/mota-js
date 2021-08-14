@@ -96,9 +96,18 @@ utils.prototype._init = function () {
 ////// 将文字中的${和}（表达式）进行替换 //////
 utils.prototype.replaceText = function (text, prefix) {
     if (typeof text != 'string') return text;
-    return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value, prefix);
-    });
+    var index = text.indexOf("${");
+    if (index < 0) return text;
+    var cnt = 0, curr = index;
+    while (++curr < text.length) {
+        if (text.charAt(curr) == '{') cnt++;
+        if (text.charAt(curr) == '}') cnt--;
+        if (cnt == 0) break;
+    }
+    if (cnt != 0) return text;
+    var value = core.calValue(text.substring(index+2, curr), prefix);
+    if (value == null) value = "";
+    return text.substring(0, index) + value + core.replaceText(text.substring(curr + 1), prefix);
 }
 
 utils.prototype.replaceValue = function (value) {

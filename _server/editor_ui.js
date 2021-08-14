@@ -392,9 +392,33 @@ editor_ui_wrapper = function (editor) {
 
         if (uievent.values.list instanceof Array) {
             uievent.values.list.forEach(function (data) {
+                if (typeof data == 'string') data = { "type": "text", "text": data };
                 var type = data.type;
-                if (!type || !core.ui["_uievent_" + type]) return;
-                core.ui["_uievent_" + type](data);
+                if (type == "text") {
+                    data.ctx = 'uievent';
+                    core.saveCanvas('uievent');
+                    core.drawTextBox(data.text, data);
+                    core.loadCanvas('uievent');
+                    return;
+                }
+                else if (type == "choices") {
+                    for (var i = 0; i < data.choices.length; i++) {
+                        if (typeof data.choices[i] === 'string')
+                            data.choices[i] = {"text": data.choices[i]};
+                        data.choices[i].text = core.replaceText(data.choices[i].text);
+                    }
+                    core.saveCanvas('uievent');
+                    core.status.event.selection = data.selected || 0;
+                    core.drawChoices(core.replaceText(data.text), data.choices, data.width, 'uievent');
+                    core.status.event.selection = null;
+                    core.loadCanvas('uievent');
+                    return;
+                } else if (type == "confirm") {
+                    core.saveCanvas('uievent');
+                    core.drawConfirmBox(data.text, null, null, 'uievent');                    
+                    core.loadCanvas('uievent');
+                } else if (core.ui["_uievent_" + type])
+                    core.ui["_uievent_" + type](data);
             })
         }
     }
@@ -469,7 +493,7 @@ editor_ui_wrapper = function (editor) {
     }
 
     uievent.updateSelectPoint = function (redraw) {
-        uievent.elements.title.innerText = '地图选点 (' + uievent.values.x + "," + uievent.values.y + ')';
+        uievent.elements.title.innerText = '地图选点【右键多选】 (' + uievent.values.x + "," + uievent.values.y + ')';
         // 计算size
         uievent.values.boxSize = uievent.values.size * 
             (uievent.values.bigmap ? (core.__SIZE__ / Math.max(uievent.values.width, uievent.values.height)) : 1);
@@ -674,14 +698,8 @@ editor_ui_wrapper = function (editor) {
 
         var html = "<p style='margin-left: 10px'>该变量出现的所有位置如下：</p><ul>";
         var list = uievent._searchUsedFlags(flag);
-        list.forEach(function (v) {
-            var x = "<li>";
-            if (v[0] != null) x += v[0] + "层 ";
-            else x += "公共事件 ";
-            x += v[1];
-            if (v[2] != null) x += " 的 (" + v[2] + ") 点";
-            x += "</li>";
-            html += x;
+        list.forEach(function (x) {
+            html += "<li>" + x + "</li>";
         });
         html += "</ul>";
         uievent.elements.extraBody.innerHTML = html;
@@ -701,6 +719,7 @@ editor_ui_wrapper = function (editor) {
 
     uievent._searchUsedFlags = function (flag) {
         var list = [];
+        // 每个点的事件
         var events = ["events", "autoEvent", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor"]
         for (var floorId in core.floors) {
             var floor = core.floors[floorId];
@@ -710,24 +729,70 @@ editor_ui_wrapper = function (editor) {
                 if (floor[e]) {
                     for (var loc in floor[e]) {
                         if (hasUsedFlags(floor[e][loc], flag)) {
-                            list.push([floorId, e, loc]);
+                            list.push(floorId + " 层 " + e + " 的 (" + loc + ") 点");
                         }
                     }
                 }
             });
         }
         // 公共事件
-        if (core.events.commonEvent) {
-            for (var name in core.events.commonEvent) {
-                if (hasUsedFlags(core.events.commonEvent[name], flag))
-                    list.push([null, name]);
+        for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+            if (hasUsedFlags(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name], flag))
+                list.push("公共事件 " + name);
+        }
+        // 道具 & 装备属性
+        for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
+            var item = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a[id];
+            // 装备属性
+            if (hasUsedFlags(item.equip, flag)) {
+                list.push("道具 " + (item.name || id) + " 的装备属性");
+            }
+            // 使用事件
+            if (hasUsedFlags(item.useItemEvent, flag)) { 
+                list.push("道具 " + (item.name || id) + " 的使用事件");
             }
         }
+        // 怪物战前 & 战后
+        for (var id in enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80) {
+            var enemy = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id];
+            if (hasUsedFlags(enemy.beforeBattle, flag)) {
+                list.push("怪物 " + (enemy.name || id) + " 的战前事件");
+            }
+            if (hasUsedFlags(enemy.afterBattle, flag)) {
+                list.push("怪物 " + (enemy.name || id) + " 的战后事件");
+            }
+        }
+        // 图块的碰触 & 门信息
+        for (var id in maps_90f36752_8815_4be8_b32b_d7fad1d0542e) {
+            var mapInfo = maps_90f36752_8815_4be8_b32b_d7fad1d0542e[id];
+            if (hasUsedFlags(mapInfo.doorInfo, flag))
+                list.push("图块 " + (mapInfo.name || mapInfo.id) + " 的门信息");
+            if (hasUsedFlags(mapInfo.event, flag))
+                list.push("图块 " + (mapInfo.name || mapInfo.id) + " 碰触事件");
+        }
+        // 难度 & 标题事件 & 开场剧情 & 等级提升
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main.levelChoose, flag))
+            list.push("难度分歧");
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.startCanvas, flag))
+            list.push("标题事件");
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.startText, flag))
+            list.push("开场剧情");
+        if (hasUsedFlags(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.levelUp, flag))
+            list.push("等级提升");
+        // 全局商店
+        (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.shops || []).forEach(function (shop) {
+            if (hasUsedFlags(shop, flag)) list.push("商店 " + shop.id);
+        });
+
         return list;
     }
 
     // ------ 素材选择框 ------ //
     uievent.selectMaterial = function (value, title, directory, transform, callback) {
+        var one = directory.split(':');
+        if (one.length > 1) directory = one[0];
+        var appendedImages = one[1] == 'images' ? core.material.images.images : {};
+
         fs.readdir(directory, function (err, data) {
             if (err) {
                 printe(directory + '不存在！');
@@ -739,6 +804,10 @@ editor_ui_wrapper = function (editor) {
             }
             value = value || [];
             data = (transform ? data.map(transform) : data).filter(function (one) {return one;}).sort();
+            var data2 = Object.keys(appendedImages);
+            data2 = (transform ? data2.map(transform) : data2).filter(function (one) {
+                return one && data.indexOf(one) < 0;
+            }).sort();
 
             uievent.isOpen = true;
             uievent.elements.div.style.display = 'block';
@@ -783,7 +852,8 @@ editor_ui_wrapper = function (editor) {
                 }
                 // 试听音频
                 if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac')) {
-                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>";
+                    html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>"
+                    html += "<small> 音调：<input value='100' style='width:28px' onchange='editor.uievent._previewMaterialAudio_onPitchChange(this)'></small>";
                     html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>
                         <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
                         <progress value="0" max="1" style="display:none; width:100%" onclick="editor.uievent._previewMaterialAudio_seek(this, event)"></progress>`;
@@ -795,6 +865,16 @@ editor_ui_wrapper = function (editor) {
                 }
                 html += '<br/>';
             });
+            data2.forEach(function (one) {
+                var checked = value.indexOf(one) >= 0? 'checked' : '';
+                var disabled = _isTileset && value.indexOf(one) >= 0 ? 'disabled' : '';
+                html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${checked} ${disabled}/> ${one}`;
+                // 预览图片
+                if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
+                    html += "<button onclick='editor.uievent._previewMaterialImage2(this)' style='margin-left: 10px'>预览</button>";
+                    html += '<br style="display:none" key="'+one+'"/><br/>';
+                }
+            })
             html += "</p>";
             html += "<p style='margin-left: 10px'><small>如果文件未在此列表显示，请检查文件名是否合法（只能由数字字母下划线横线和点组成），后缀名是否正确。</small></p>";
             uievent.elements.extraBody.innerHTML = html;
@@ -822,8 +902,21 @@ editor_ui_wrapper = function (editor) {
         }
     }
 
+    uievent._previewMaterialImage2 = function (button) {
+        var br = button.nextElementSibling;
+        if (br.style.display == 'none') {
+            button.innerText = '折叠';
+            br.style.display = 'block';
+            br.parentElement.insertBefore(core.material.images.images[br.getAttribute('key')], br.nextElementSibling);
+        } else {
+            button.innerText = '预览';
+            br.style.display = 'none';
+            br.parentElement.removeChild(core.material.images.images[br.getAttribute('key')]);
+        }
+    }
+
     uievent._previewMaterialAudio = function (button) {
-        var span = button.nextElementSibling;
+        var span = button.nextElementSibling.nextElementSibling;
         var br = span.nextElementSibling;
         var audio = br.nextElementSibling;
         var progress = audio.nextElementSibling;
@@ -840,6 +933,12 @@ editor_ui_wrapper = function (editor) {
             span.style.display = 'none';
             audio.pause();
         }
+    }
+
+    uievent._previewMaterialAudio_onPitchChange = function (input) {
+        var audio = input.parentElement.nextElementSibling.nextElementSibling.nextElementSibling;
+        audio.preservesPitch = false;
+        audio.playbackRate = core.clamp((parseInt(input.value) || 100) / 100, 0.3, 3.0);
     }
 
     uievent._previewMaterialAudio_onTimeUpdate = function (audio) {
@@ -899,13 +998,14 @@ editor_ui_wrapper = function (editor) {
     var _previewMaterialAnimate_buildSounds = function (span, content) {
         var sounds = content.se || {};
         if (typeof sounds == 'string') sounds = {1: sounds};
+        var pitch = content.pitch || {};
 
         span.appendChild(document.createElement('br'));
         var dom = document.createElement('span');
         dom.setAttribute('frames', content.frame);
         var html = "";
         Object.keys(sounds).forEach(function (frame) {
-            html += "<span>" + _previewMaterialAnimate_buildSoundRow(frame, sounds[frame], content.frame) + "</span>";
+            html += "<span>" + _previewMaterialAnimate_buildSoundRow(frame, sounds[frame], content.frame, pitch[frame]) + "</span>";
         });
         html += '<button onclick="editor.uievent._previewMaterialAnimate_addSound(this)">添加音效</button>';
         html += '<button onclick="editor.uievent._previewMaterialAnimate_saveSound(this)" style="margin-left:10px">保存</button>';
@@ -915,7 +1015,7 @@ editor_ui_wrapper = function (editor) {
         _previewMaterialAnimate_awesomplete(span);
     }
 
-    var _previewMaterialAnimate_buildSoundRow = function (index, se, frames) {
+    var _previewMaterialAnimate_buildSoundRow = function (index, se, frames, pitch) {
         var audios = Object.keys(core.material.sounds).sort().join(",");
         var html = "";
         html += "第 <select>";
@@ -925,15 +1025,16 @@ editor_ui_wrapper = function (editor) {
             html += ">"+i+"</option>";
         }
         html += "</select> 帧：";
-        html += '<input type="text" class="" data-list="'+audios+'" data-minchars="1" data-autofirst="true" style="margin-left: 5px" value="'+se+'"/>';
+        html += '<input type="text" class="_audio" data-list="'+audios+'" data-minchars="1" data-autofirst="true" style="width: 110px" value="'+se+'"/>';
         html += '<button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style="margin-left: 10px">试听</button>';
+        html += "<small> 音调：<input value='"+(pitch||100)+"' style='width:28px'></small>";
         html += '<button onclick="editor.uievent._previewMaterialAnimate_deleteSound(this)" style="margin-left: 10px">删除</button>';
         html += '<br/>';
         return html;
     }
 
     var _previewMaterialAnimate_awesomplete = function (span) {
-        var inputs = span.getElementsByTagName("input");
+        var inputs = span.getElementsByClassName("_audio");
         for (var i = 0; i < inputs.length; ++i) {
             var input = inputs[i];
             if (!input.hasAttribute('awesomplete')) {
@@ -978,6 +1079,8 @@ editor_ui_wrapper = function (editor) {
         if (!uievent.values.audio)
             uievent.values.audio = new Audio();
         uievent.values.audio.src = './project/sounds/' + input.value;
+        uievent.values.audio.preservesPitch = false;
+        uievent.values.audio.playbackRate = core.clamp((parseInt(button.nextElementSibling.children[0].value) || 100) / 100, 0.3, 3.0);
         uievent.values.audio.play();
     }
 
@@ -999,17 +1102,22 @@ editor_ui_wrapper = function (editor) {
         var filename = span.parentElement.getAttribute("key");
         if (!filename || !uievent.values.animates[filename]) return;
         var se = {};
+        var pitch = {};
 
-        var inputs = span.getElementsByTagName("input");
-        for (var i = 0; i < inputs.length; ++i) {
-            var input = inputs[i];
-            var select = input.parentElement.previousElementSibling;
-            if (input.value && select.tagName == 'SELECT') {
-                se[select.value] = input.value;
+        var audios = span.getElementsByClassName("_audio");
+        for (var i = 0; i < audios.length; ++i) {
+            var audio = audios[i];
+            var select = audio.parentElement.previousElementSibling;
+            if (audio.value && select.tagName == 'SELECT') {
+                se[select.value] = audio.value;
+                var p = audio.parentElement.nextElementSibling.nextElementSibling.children[0];
+                pitch[select.value] = core.clamp(parseInt(p.value) || 100, 30, 300);
             }
         }
         uievent.values.animates[filename].se = se;
         uievent.values.animates[filename+':raw'].se = se;
+        uievent.values.animates[filename].pitch = pitch;
+        uievent.values.animates[filename+':raw'].pitch = pitch;
         fs.writeFile(filename, JSON.stringify(uievent.values.animates[filename+':raw']), 'utf-8', function (e, d) {
             if (e) alert('无法修改音效文件！'+e);
             else {

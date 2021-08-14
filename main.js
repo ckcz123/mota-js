@@ -15,6 +15,7 @@ function main() {
     this.isCompetition = false; // 是否是比赛模式
 
     this.savePages = 1000; // 存档页数，每页可存5个；默认为1000页5000个存档
+    this.criticalUseLoop = 1; // 循环临界的分界
 
     //------------------------ 用户修改内容 END ------------------------//
 
@@ -631,6 +632,15 @@ main.statusBar.image.money.onclick = function (e) {
 
     if (main.core.isPlaying())
         main.core.openQuickShop(true);
+}
+
+////// 点击楼梯图标也可以浏览地图 //////
+main.statusBar.image.floor.onclick = function (e) {
+    e.stopPropagation();
+
+    if (main.core && main.core.isPlaying() && !core.isMoving() && !core.status.lockControl) {
+        core.ui._drawViewMaps();
+    }
 }
 
 ////// 点击状态栏中的存档按钮时 //////

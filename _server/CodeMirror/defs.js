@@ -2145,12 +2145,12 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn()"
         }, 
         "screenFlash": {
-          "!doc": "画面闪烁<br/>例如：core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若填负数则会被视为0）的颜色数组，必填<br/>time: 单次闪烁时长，实际闪烁效果为先花其三分之一的时间渐变到目标色调，再花剩余三分之二的时间渐变回去<br/>times: 闪烁的总次数，不填或填0都视为1<br/>callback: 闪烁全部完毕后的回调函数，可选", 
-          "!type": "fn(color: [number], time: number, times?: number, callback?: fn())"
+          "!doc": "画面闪烁<br/>例如：core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若填负数则会被视为0）的颜色数组，必填<br/>time: 单次闪烁时长，实际闪烁效果为先花其三分之一的时间渐变到目标色调，再花剩余三分之二的时间渐变回去<br/>times: 闪烁的总次数，不填或填0都视为1<br/>moveMode: 渐变方式<br/>callback: 闪烁全部完毕后的回调函数，可选", 
+          "!type": "fn(color: [number], time: number, times?: number, moveMode?: string, callback?: fn())"
         }, 
         "setCurtain": {
-          "!doc": "更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数<br/>例如：core.setCurtain(); // 恢复画面色调，用时四分之三秒<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若为负数则会被视为0）的颜色数组，不填视为[0, 0, 0, 0]<br/>time: 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）<br/>callback: 更改完毕后的回调函数，可选。事件流中常取core.doAction", 
-          "!type": "fn(color?: [number], time?: number, callback?: fn())"
+          "!doc": "更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数<br/>例如：core.setCurtain(); // 恢复画面色调，用时四分之三秒<br/>color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若为负数则会被视为0）的颜色数组，不填视为[0, 0, 0, 0]<br/>time: 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）<br/>moveMode: 渐变方式<br/>callback: 更改完毕后的回调函数，可选。事件流中常取core.doAction", 
+          "!type": "fn(color?: [number], time?: number, moveMode?: string, callback?: fn())"
         }, 
         "updateDamage": {
           "!doc": "重算并绘制地图显伤<br/>例如：core.updateDamage(); // 更新当前地图的显伤，绘制在显伤层（废话）<br/>floorId: 地图id，不填视为当前地图。预览地图时填写<br/>ctx: 绘制到的画布，如果填写了就会画在该画布而不是显伤层", 
@@ -2196,6 +2196,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "停止播放音效。如果未指定id则停止所有音效，否则只停止指定的音效。", 
           "!type": "fn(id?: number)"
         }, 
+        "getPlayingSounds": {
+          "!doc": "获得当前正在播放的所有（指定）音效的id列表<br/>name: 音效名，可用别名；不填代表返回正在播放的全部音效<br/>返回值: 一个列表，每一项为一个正在播放的音效id；可用core.stopSound立刻停止播放",
+          "!type": "fn(name?: string) -> [number]"
+        },
         "addGameCanvasTranslate": {
           "!doc": "加减画布偏移", 
           "!type": "fn(x?: number, y?: number)"
@@ -2324,6 +2328,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "注销一个录像行为", 
           "!type": "fn(name: string)"
         }, 
+        "unregisterWeather": {
+          "!doc": "注销一个天气",
+          "!type": "fn(name: string)"
+        },
         "setBuff": {
           "!doc": "设置主角某个属性的百分比修正倍率，初始值为1，<br/>倍率存放在flag: '__'+name+'_buff__' 中<br/>例如：core.setBuff('atk', 0.5); // 主角能发挥出的攻击力减半<br/>name: 属性的英文名，请注意只能用于数值类属性哦，否则随后的乘法会得到NaN<br/>value: 新的百分比修正倍率，不填（效果上）视为1", 
           "!type": "fn(name: string, value: number)"
@@ -2460,6 +2468,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "注册一个resize函数<br/>name: 名称，可供注销使用<br/>func: 可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。", 
           "!type": "fn(name: string, func: fn(obj: ?))"
         }, 
+        "registerWeather": {
+          "!doc": "注册一个天气<br/>name: 要注册的天气名<br/>initFunc: 当切换到此天气时的初始化；接受level（天气等级）为参数；可用于创建多个节点（如初始化雪花）<br/>frameFunc: 每帧的天气效果变化；可接受timestamp（从页面加载完毕到当前所经过的时间）和level（天气等级）作为参数<br/>天气应当仅在weather层进行绘制，推荐使用core.animateFrame.weather.nodes用于节点信息。",
+          "!type": "fn(name: string, initFunc: fn(level: number), frameFunc?: fn(timestamp: number, level: number))"
+        },
         "stopReplay": {
           "!doc": "停止播放", 
           "!type": "fn(force?: bool)"
@@ -3077,6 +3089,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "立刻停止一个动画播放<br/>id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值<br/>doCallback: 是否执行该动画的回调函数",
           "!type": "fn(id: number, doCallback?: bool)"
         },
+        "getPlayingAnimates": {
+          "!doc": "获得当前正在播放的所有（指定）动画的id列表<br/>name: 动画名；不填代表返回全部正在播放的动画<br/>返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。",
+          "!type": "fn(name?: string) -> [number]"
+        },
         "getBlockCls": {
           "!doc": "判定某个点的图块类型<br/>例如：if(core.getBlockCls(x1, y1) != 'enemys' && core.getBlockCls(x2, y2) != 'enemy48') core.openDoor(x3, y3); // 另一个简单的机关门事件，打败或炸掉这一对不同身高的敌人就开门<br/>x: 横坐标<br/>y: 纵坐标<br/>floorId: 地图id，不填视为当前地图<br/>showDisable: 隐藏点是否不返回null，true表示不返回null<br/>返回值：图块类型，即“地形、四帧动画、矮敌人、高敌人、道具、矮npc、高npc、自动元件、额外地形”之一", 
           "!type": "fn(x: number, y: number, floorId?: string, showDisable?: bool) -> string"
@@ -3385,8 +3401,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, x: number, y: number)"
         }, 
         "deleteCanvas": {
-          "!doc": "删除一个自定义画布", 
-          "!type": "fn(name: string)"
+          "!doc": "删除一个自定义画布<br/>name: 画布名，也可以传入一个函数对所有画布进行筛选", 
+          "!type": "fn(name: string|fn(name: string) -> bool)"
         },
         "deleteAllCanvas": {
           "!doc": "清空所有的自定义画布", 
@@ -3569,7 +3585,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "drawChoices": {
           "!doc": "绘制一个选项界面", 
-          "!type": "fn(content?: string, choices?: [?])"
+          "!type": "fn(content?: string, choices?: [?], width?: number, ctx?: string|CanvasRenderingContext2D)"
         }, 
         "setFontForMaxWidth": {
           "!doc": "根据最大宽度自动缩小字体", 
@@ -3801,7 +3817,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(id?: string, x?: number, y?: number, isGentleClick?: bool)"
         }, 
         "doAction": {
-          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果", 
+          "!doc": "执行下一个事件指令，常作为回调<br/>例如：core.setCurtain([0,0,0,1], null, null, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果", 
           "!type": "fn()"
         }, 
         "openBook": {
@@ -3821,9 +3837,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(noRoute?: bool)"
         }, 
         "hasAsync": {
-          "!doc": "当前是否有未处理完毕的异步事件", 
+          "!doc": "当前是否有未处理完毕的异步事件（不包含动画和音效）", 
           "!type": "fn() -> bool"
-        }, 
+        },
         "openEquipbox": {
           "!doc": "点击装备栏时的打开操作", 
           "!type": "fn(fromUserAction?: bool)"
@@ -3843,6 +3859,18 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "rotateImage": {
           "!doc": "旋转一张图片<br/>code: 图片编号<br/>center: 旋转中心像素坐标（以屏幕为基准）；不填视为图片本身中心<br/>angle: 旋转角度；正数为顺时针，负数为逆时针<br/>moveMode: 旋转模式<br/>time: 旋转用时，单位为毫秒。不填视为1秒<br/>callback: 图片旋转完毕后的回调函数，可选",
           "!type": "fn(code: number, center?: [number], angle?: number, moveMode?: string, time?: number, callback?: fn())"
+        },
+        "scaleImage": {
+          "!doc": "放缩一张图片",
+          "!type": "fn(code: number, center?: [number], scale?: number, moveMode?: string, time?: number, callback?: fn())"
+        },
+        "moveTextBox": {
+          "!doc": "移动对话框",
+          "!type": "fn(code: number, loc: [number], relative?: bool, moveMode?: string, time?: number, callback?: fn())"
+        },
+        "clearTextBox": {
+          "!doc": "清除对话框",
+          "!type": "fn(code: number)"
         },
         "openSettings": {
           "!doc": "点击设置按钮时的操作", 
@@ -3876,6 +3904,14 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "设置全塔属性", 
           "!type": "fn(name: string, value: string)"
         }, 
+        "setNameMap": {
+          "!doc": "设置文件别名",
+          "!type": "fn(name: string, value?: string)"
+        },
+        "setTextAttribute": {
+          "!doc": "设置剧情文本的属性",
+          "!type": "fn(data: ?)"
+        },
         "openToolbox": {
           "!doc": "点击工具栏时的打开操作", 
           "!type": "fn(fromUserAction?: bool)"

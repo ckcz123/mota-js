@@ -334,8 +334,8 @@ loader.prototype._loadAnimate = function (content) {
         var data = {};
         data.ratio = content.ratio;
         data.se = content.se;
+        data.pitch = content.pitch;
         data.images = [];
-        data.images_rev = [];
         content.bitmaps.forEach(function (t2) {
             if (!t2) {
                 data.images.push(null);

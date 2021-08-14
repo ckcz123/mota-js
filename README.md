@@ -720,6 +720,6 @@ HTML5魔塔交流群群号： `539113091`
 
 [@tocque](https://github.com/tocque) 鹿神：装备栏、动态创建图层等多项功能的编写者。同时也参与了多种辅助小工具的开发。
 
-[@AutumnOrange51](https://github.com/AutumnOrange51) 秋橙：样板的QA（质量监管人员），提出了大量需求，同时也编写了全新的文档。
+[@AutumnOrange](https://space.bilibili.com/399329257) 秋橙：样板的QA（质量监管人员），提出了大量需求，同时也编写了全新的文档。
 
 以及H5魔塔交流群`539113091`，HTML5造塔技术交流群`959329661`的诸位魔塔爱好者们对本样板的大力支持！

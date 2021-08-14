@@ -117,6 +117,15 @@ ActionParser.prototype.parse = function (obj,type) {
       if(!obj) obj={};
       return MotaActionBlocks['faceIds_m'].xmlText([obj.down||"", obj.left||"", obj.right||"", obj.up||""]);
 
+    case 'splitImages':
+      if(!obj) obj=[];
+      var text_choices = null;
+      for(var ii=obj.length-1,choice;choice=obj[ii];ii--) {
+        text_choices=MotaActionBlocks['splitImagesOne'].xmlText([
+          choice.name, choice.width, choice.height, choice.prefix, text_choices]);
+      }
+      return MotaActionBlocks['splitImages_m'].xmlText([text_choices]);
+
     case 'mainStyle':
       if(!obj) obj={};
       return MotaActionBlocks['mainStyle_m'].xmlText([
@@ -281,18 +290,28 @@ ActionParser.prototype.parseAction = function() {
           }
           return text_choices;
         }
+        data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_2_s', [
-          info[0], info[1], info[2], info[3], buildTextDrawing(textDrawing), this.next
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, info[3], buildTextDrawing(textDrawing), this.next
         ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
-      } else if (info[0] || info[1] || info[2]) {
+      } else if (info[0] || info[1] || info[2] || data.pos || data.code) {
+        data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_1_s',[
-          info[0], info[1], info[2], info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('text_0_s', [info[3],this.next],
            /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       break;
+    case "moveTextBox": // 移动对话框
+      data.loc = data.loc || ['',''];
+      this.next = MotaActionBlocks['moveTextBox_s'].xmlText([
+        data.code, data.loc[0], data.loc[1], data.relative||false, data.moveMode, data.time, data.async, this.next]);
+      break;
+    case "clearTextBox": // 清除对话框
+      this.next = MotaActionBlocks['clearTextBox_s'].xmlText([(data.code||"").toString(),this.next]);
+      break;  
     case "autoText": // 自动剧情文本
       var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionBlocks['autoText_s'].xmlText([
@@ -311,7 +330,7 @@ ActionParser.prototype.parseAction = function() {
       if (!/^\w+\.png$/.test(data.background))
         data.background=this.Colour(data.background);
       this.next = MotaActionBlocks['setText_s'].xmlText([
-        data.position,data.offset,data.align,data.title,data.bold,'rgba('+data.title+')',
+        data.position,data.offset,data.align,data.bold,data.title,'rgba('+data.title+')',
         data.text,'rgba('+data.text+')',data.background,'rgba('+data.background+')',
         data.titlefont,data.textfont,data.lineHeight,data.time,data.letterSpacing,data.animateTime,this.next]);
       break;
@@ -550,6 +569,10 @@ ActionParser.prototype.parseAction = function() {
           data.loc[0],data.loc[1],data.moveMode||'', data.time||0,data.async||false,this.next]);
       }
       break;
+    case "lockViewport":
+      this.next = MotaActionBlocks['lockViewport_s'].xmlText([data.lock,
+        this.next]);
+      break;
     case "vibrate": // 画面震动
       this.next = MotaActionBlocks['vibrate_s'].xmlText([data.direction||'horizontal', 
         data.time||0, data.speed, data.power, data.async||false, this.next]);
@@ -586,6 +609,11 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['rotateImage_s'].xmlText([
         data.code, data.center[0], data.center[1], data.moveMode||'',  data.angle||0, data.time||0, data.async||false, this.next]);
       break;
+    case "scaleImage": // 放缩图片
+      data.center=data.center||['','']
+      this.next = MotaActionBlocks['scaleImage_s'].xmlText([
+        data.code, data.center[0], data.center[1], data.moveMode||'',  data.scale, data.time||0, data.async||false, this.next]);
+      break;
     case "showGif": // 显示动图
       data.loc=data.loc||['','']
       this.next = MotaActionBlocks['showGif_s'].xmlText([
@@ -595,16 +623,16 @@ ActionParser.prototype.parseAction = function() {
       if(this.isset(data.color)){
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['setCurtain_0_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time,data.keep||false,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time,data.moveMode,data.keep||false,data.async||false,this.next]);
       } else {
         this.next = MotaActionBlocks['setCurtain_1_s'].xmlText([
-          data.time,data.async||false,this.next]);
+          data.time,data.moveMode,data.async||false,this.next]);
       }
       break;
     case "screenFlash": // 画面闪烁
         data.color = this.Colour(data.color);
         this.next = MotaActionBlocks['screenFlash_s'].xmlText([
-          data.color,'rgba('+data.color+')',data.time||500,data.times,data.async||false,this.next]);
+          data.color,'rgba('+data.color+')',data.time||500,data.times,data.moveMode,data.async||false,this.next]);
       break;
     case "setWeather": // 更改天气
       this.next = MotaActionBlocks['setWeather_s'].xmlText([
@@ -835,7 +863,7 @@ ActionParser.prototype.parseAction = function() {
       if (!this.isset(data.text)) data.text = '';
       var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionFunctions.xmlText('choices_s', [
-        info[3],info[0],info[1],data.timeout||0,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+        info[3],info[0],info[1],data.selected||0,data.timeout||0,data.width,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "for": // 循环遍历
       this.next = MotaActionFunctions.xmlText('for_s',[
@@ -941,7 +969,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
-        this.next]);
+        data.excludeAnimates||false, data.includeSounds||false, this.next]);
       break;
     case "callBook": // 呼出怪物手册
       this.next = MotaActionBlocks['callBook_s'].xmlText([

@@ -360,6 +360,11 @@ getNextLvUpNeed: fn() -> number
 升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
 如果无法进行下次升级，返回null。
 
+getPlayingSounds: fn(name?: string) -> [number]
+获得当前正在播放的所有（指定）音效的id列表
+name: 音效名，可用别名；不填代表返回正在播放的全部音效
+返回值: 一个列表，每一项为一个正在播放的音效id；可用core.stopSound立刻停止播放
+
 getRealStatus: fn(name: string)
 计算主角的某个属性，包括百分比修正
 例如：core.getRealStatus('atk'); // 计算主角的攻击力，包括百分比修正。战斗使用的就是这个值
@@ -503,6 +508,13 @@ registerResize: fn(name: string, func: fn(obj: ?))
 name: 名称，可供注销使用
 func: 可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
 
+registerWeather: fn(name: string, initFunc: fn(level: number), frameFunc?: fn(timestamp: number, level: number))
+注册一个天气
+name: 要注册的天气名
+initFunc: 当切换到此天气时的初始化；接受level（天气等级）为参数；可用于创建多个节点（如初始化雪花）
+frameFunc: 每帧的天气效果变化；可接受timestamp（从页面加载完毕到当前所经过的时间）和level（天气等级）作为参数
+天气应当仅在weather层进行绘制，推荐使用core.animateFrame.weather.nodes用于节点信息。
+
 removeFlag: fn(name: string)
 删除某个flag/变量
 
@@ -534,12 +546,13 @@ saveAndStopAutomaticRoute: fn()
 saveData: fn()
 存档到本地
 
-screenFlash: fn(color: [number], time: number, times?: number, callback?: fn())
+screenFlash: fn(color: [number], time: number, times?: number, moveMode?: string, callback?: fn())
 画面闪烁
 例如：core.screenFlash([255, 0, 0, 1], 3); // 红屏一闪而过
 color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若填负数则会被视为0）的颜色数组，必填
 time: 单次闪烁时长，实际闪烁效果为先花其三分之一的时间渐变到目标色调，再花剩余三分之二的时间渐变回去
 times: 闪烁的总次数，不填或填0都视为1
+moveMode: 渐变方式
 callback: 闪烁全部完毕后的回调函数，可选
 
 setAutoHeroMove: fn(steps: [?])
@@ -566,11 +579,12 @@ setBuff: fn(name: string, value: number)
 name: 属性的英文名，请注意只能用于数值类属性哦，否则随后的乘法会得到NaN
 value: 新的百分比修正倍率，不填（效果上）视为1
 
-setCurtain: fn(color?: [number], time?: number, callback?: fn())
+setCurtain: fn(color?: [number], time?: number, moveMode?: string, callback?: fn())
 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
 例如：core.setCurtain(); // 恢复画面色调，用时四分之三秒
 color: 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若为负数则会被视为0）的颜色数组，不填视为[0, 0, 0, 0]
 time: 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）
+moveMode: 渐变方式
 callback: 更改完毕后的回调函数，可选。事件流中常取core.doAction
 
 setDisplayScale: fn(delta: number)
@@ -697,6 +711,9 @@ unregisterReplayAction: fn(name: string)
 
 unregisterResize: fn(name: string)
 注销一个resize函数
+
+unregisterWeather: fn(name: string)
+注销一个天气
 
 updateCheckBlock: fn(floorId?: string)
 更新领域、夹击、阻击的伤害地图
@@ -906,6 +923,9 @@ checkAutoEvents: fn()
 checkLvUp: fn()
 检查升级事件
 
+clearTextBox: fn(code: number)
+清除对话框
+
 closeDoor: fn(x: number, y: number, id: string, callback?: fn())
 关门，目标点必须为空地
 例如：core.closeDoor(0, 0, 'yellowWall', core.jumpHero); // 在左上角关掉一堵黄墙，然后主角原地跳跃半秒
@@ -920,7 +940,7 @@ confirmRestart: fn()
 
 doAction: fn()
 执行下一个事件指令，常作为回调
-例如：core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
+例如：core.setCurtain([0,0,0,1], undefined, null, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
 
 doEvent: fn(data?: ?, x?: number, y?: number, prefix?: string)
 执行一个自定义事件
@@ -967,7 +987,7 @@ getNextItem: fn(noRoute?: bool)
 noRoute: 若为true则不计入录像
 
 hasAsync: fn() -> bool
-当前是否有未处理完毕的异步事件
+当前是否有未处理完毕的异步事件（不包含动画和音效）
 
 hasVisitedFloor: fn(floorId?: string) -> bool
 是否到达过某个楼层
@@ -1025,6 +1045,9 @@ opacityVal: 新的透明度，省略表示不变
 moveMode: 移动模式
 time: 移动用时，单位为毫秒。不填视为1秒
 callback: 图片移动完毕后的回调函数，可选
+
+moveTextBox: fn(code: number, loc: [number], relative?: bool, moveMode?: string, time?: number, callback?: fn())
+移动对话框
 
 onSki: fn(number?: number) -> bool
 当前是否在冰上
@@ -1103,6 +1126,9 @@ callback: 图片旋转完毕后的回调函数，可选
 save: fn(fromUserAction?: bool)
 点击存档按钮时的打开操作
 
+scaleImage: fn(code: number, center?: [number], scale?: number, moveMode?: string, time?: number, callback?: fn())
+放缩一张图片
+
 setEnemy: fn(id: string, name: string, value: ?, operator?: string, prefix?: string)
 设置一项敌人属性并计入存档
 例如：core.setEnemy('greenSlime', 'def', 0); // 把绿头怪的防御设为0
@@ -1141,6 +1167,12 @@ setHeroIcon: fn(name: string, noDraw?: bool)
 例如：core.setHeroIcon('npc48.png', true); // 把主角从阳光变成样板0层左下角的小姐姐，但不立即刷新
 name: 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入core.status.hero.image
 noDraw: true表示不立即刷新（刷新会导致大地图下视野重置到以主角为中心）
+
+setNameMap: fn(name: string, value?: string)
+设置文件别名
+
+setTextAttribute: fn(data: ?)
+设置剧情文本的属性
 
 setValue: fn(name: string, operator: string, value: ?, prefix?: string)
 数值操作
@@ -1617,6 +1649,11 @@ getNumberById: fn(id: string) -> number
 id: 图块id
 返回值：图块的数字，定义在project\maps.js（请注意和project\icons.js中的“图块索引”相区分！）
 
+getPlayingAnimates: fn(name?: string) -> [number]
+获得当前正在播放的所有（指定）动画的id列表
+name: 动画名；不填代表返回全部正在播放的动画
+返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。
+
 hideBgFgMap: fn(name?: string, loc?: [number]|[[number]], floorId?: string, callback?: fn())
 隐藏前景/背景地图
 
@@ -1824,8 +1861,9 @@ zIndex: 创建的纵向高度（关系到画布之间的覆盖），z值高的�
 deleteAllCanvas: fn()
 清空所有的自定义画布
 
-deleteCanvas: fn(name: string)
+deleteCanvas: fn(name: string|fn(name: string) -> bool)
 删除一个自定义画布
+name: 画布名；也可以传入一个filter对画布名进行筛选。
 
 drawArrow: fn(name: string|CanvasRenderingContext2D, x1: number, y1: number, x2: number, y2: number, style?: string, lineWidth?: number)
 在某个canvas上绘制一个箭头
@@ -1836,7 +1874,7 @@ drawBackground: fn(left: string, top: string, right: string, bottom: string, pos
 drawBook: fn(index?: ?)
 绘制怪物手册
 
-drawChoices: fn(content?: string, choices?: [?])
+drawChoices: fn(content?: string, choices?: [?], width?: number, ctx?: string|CanvasRenderingContext2D)
 绘制一个选项界面
 
 drawConfirmBox: fn(text: string, yesCallback?: fn(), noCallback?: fn())

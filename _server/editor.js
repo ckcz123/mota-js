@@ -54,7 +54,7 @@ function editor() {
         lastUsedDiv: document.getElementById('lastUsedDiv'),
         lastUsed: document.getElementById('lastUsed'),
         lastUsedCtx: document.getElementById('lastUsed').getContext('2d'),
-        lockMode: document.getElementById('lockMode'),
+        showMovable: document.getElementById('showMovable'),
         gameInject: document.getElementById('gameInject'),
         undoFloor: document.getElementById('undoFloor'),
         editorTheme: document.getElementById('editorTheme'),
@@ -118,6 +118,8 @@ function editor() {
 
         // tile
         lockMode: false,
+        
+        showMovable: false,
 
         // 最近使用的图块
         lastUsedType: null,
@@ -266,15 +268,14 @@ editor.prototype.init = function (callback) {
         
                 // --- 所有用到的flags
                 editor.used_flags = {};
+                editor.addUsedFlags(JSON.stringify(data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d));
                 // 楼层属性
                 for (var floorId in editor.main.floors) {
                     editor.addUsedFlags(JSON.stringify(editor.main.floors[floorId]));
                 }
                 // 公共事件
-                if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-                    for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
-                        editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
-                    }
+                for (var name in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent) {
+                    editor.addUsedFlags(JSON.stringify(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEvent[name]));
                 }
                 // 道具效果
                 for (var id in items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a) {
@@ -282,6 +283,14 @@ editor.prototype.init = function (callback) {
                 }
                 // 全局商店
                 editor.addUsedFlags(JSON.stringify(editor.main.core.firstData.shops));
+                // 怪物战前战后
+                for (var id in enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80) {
+                    editor.addUsedFlags(JSON.stringify(enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80[id]));
+                }
+                // 图块属性
+                for (var id in maps_90f36752_8815_4be8_b32b_d7fad1d0542e) {
+                    editor.addUsedFlags(JSON.stringify(maps_90f36752_8815_4be8_b32b_d7fad1d0542e[id]));
+                }
         
                 if (editor.useCompress == null) editor.useCompress = useCompress;
                 if (Boolean(callback)) callback();
@@ -375,9 +384,41 @@ editor.prototype.drawEventBlock = function () {
     if (editor.uivalues.bigmap) return this._drawEventBlock_bigmap();
 
     var firstData = editor.game.getFirstData();
+    // 不可通行性
+    var movableArray = {};
+    if (editor.uivalues.showMovable) {
+        movableArray = core.generateMovableArray() || {};
+        fg.fillStyle = "rgba(0,0,0,0.4)";
+        fg.fillRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+        for (var i=0;i<core.__SIZE__;i++) {
+            for (var j=0;j<core.__SIZE__;j++) {
+                var x = i+core.bigmap.offsetX/32, y = j+core.bigmap.offsetY/32;
+                var directions = (movableArray[x]||{})[y];
+                if (directions == null) continue;
+                if (!directions.includes('left') && x != 0) {
+                    core.drawLine(fg, 32 * i + 1, 32 * j + 10, 32 * i + 1, 32 * j + 22, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 9, 32 * j + 12], [32 * i + 1, 32 * j + 16], [32 * i + 9, 32 * j + 20]], '#FF0000');
+                }
+                if (!directions.includes('right') && x != editor.currentFloorData.width - 1) {
+                    core.drawLine(fg, 32 * i + 31, 32 * j + 10, 32 * i + 31, 32 * j + 22, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 23, 32 * j + 12], [32 * i + 31, 32 * j + 16], [32 * i + 23, 32 * j + 20]], '#FF0000');
+                }
+                if (!directions.includes('up') && y != 0) {
+                    core.drawLine(fg, 32 * i + 10, 32 * j + 1, 32 * i + 22, 32 * j + 1, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 12, 32 * j + 9], [32 * i + 16, 32 * j + 1], [32 * i + 20, 32 * j + 9]], '#FF0000');
+                }
+                if (!directions.includes('down') && y != editor.currentFloorData.height - 1) {
+                    core.drawLine(fg, 32 * i + 10, 32 * j + 31, 32 * i + 22, 32 * j + 31, '#FF0000', 2);
+                    core.fillPolygon(fg, [[32 * i + 12, 32 * j + 23], [32 * i + 16, 32 * j + 31], [32 * i + 20, 32 * j + 23]], '#FF0000');
+                }
+            }
+        }
+        return;
+    }
     for (var i=0;i<core.__SIZE__;i++) {
         for (var j=0;j<core.__SIZE__;j++) {
-            var loc=(i+core.bigmap.offsetX/32)+","+(j+core.bigmap.offsetY/32);
+            var x = i+core.bigmap.offsetX/32, y = j+core.bigmap.offsetY/32;
+            var loc= x + ',' + y;
             if (editor.currentFloorId == firstData.floorId
                 && loc == firstData.hero.loc.x + "," + firstData.hero.loc.y) {
                 fg.textAlign = 'center';
@@ -418,6 +459,45 @@ editor.prototype.drawEventBlock = function () {
 editor.prototype._drawEventBlock_bigmap = function () {
     var fg=editor.dom.efgCtx;
     var info = editor.uivalues.bigmapInfo, size = info.size, psize = size / 4;
+    
+    // 不可通行性
+    var movableArray = {};
+    if (editor.uivalues.showMovable) {
+        movableArray = core.generateMovableArray() || {};
+        fg.fillStyle = "rgba(0,0,0,0.4)";
+        fg.fillRect(0, 0, core.__PIXELS__, core.__PIXELS__);
+        for (var i = 0; i < editor.currentFloorData.width; ++i) {
+            for (var j = 0; j < editor.currentFloorData.height; ++j) {
+                var directions = (movableArray[i]||{})[j];
+                if (directions == null) continue;
+                if (!directions.includes('left') && i != 0) {
+                    core.drawLine(fg, info.left + size * i, info.top + size * j + size / 3, info.left + size * i + 1, info.top + size * j + size * 2 / 3, '#FF0000', 2);
+                    core.fillPolygon(fg, [[info.left + size * i + size / 4, info.top + size * j + size * 3 / 8], 
+                                          [info.left + size * i, info.top + size * j + size / 2], 
+                                          [info.left + size * i + size / 4, info.top + size * j + size * 5 / 8]], '#FF0000');
+                }
+                if (!directions.includes('right') && i != editor.currentFloorData.width - 1) {
+                    core.drawLine(fg, info.left + size * i + size, info.top + size * j + size / 3, info.left + size * i + size, info.top + size * j + size * 2 / 3, '#FF0000', 2);
+                    core.fillPolygon(fg, [[info.left + size * i + size * 3 / 4, info.top + size * j + size * 3 / 8], 
+                        [info.left + size * i + size, info.top + size * j + size / 2], 
+                        [info.left + size * i + size * 3 / 4, info.top + size * j + size * 5 / 8]], '#FF0000');
+                }
+                if (!directions.includes('up') && j != 0) {
+                    core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j, info.left + size * i + size * 2 / 3, info.top + size * j, '#FF0000', 2);
+                    core.fillPolygon(fg, [[info.left + size * i + size * 3 / 8, info.top + size * j + size / 4], 
+                        [info.left + size * i + size / 2, info.top + size * j], 
+                        [info.left + size * i + size * 5 / 8, info.top + size * j + size / 4]], '#FF0000');
+                }
+                if (!directions.includes('down') && j != editor.currentFloorData.height - 1) {
+                    core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j + size - 1, info.left + size * i + size * 2 / 3, info.top + size * j + size - 1, '#FF0000', 2);
+                    core.fillPolygon(fg, [[info.left + size * i + size * 3 / 8, info.top + size * j + size  * 3 / 4], 
+                        [info.left + size * i + size / 2, info.top + size * j + size], 
+                        [info.left + size * i + size * 5 / 8, info.top + size * j + size * 3 / 4]], '#FF0000');
+                }
+            }
+        }
+        return;
+    }
 
     for (var i = 0; i < editor.currentFloorData.width; ++i) {
         for (var j = 0; j < editor.currentFloorData.height; ++j) {
@@ -444,15 +524,13 @@ editor.prototype._drawEventBlock_getColor = function (loc) {
         }
     }
     if (editor.currentFloorData.beforeBattle[loc])
-        color.push('#009090');
+        color.push('#0000FF');
     if (editor.currentFloorData.afterBattle[loc])
         color.push('#FFFF00');
     if (editor.currentFloorData.changeFloor[loc])
         color.push('#00FF00');
     if (editor.currentFloorData.afterGetItem[loc])
         color.push('#00FFFF');
-    if (editor.currentFloorData.cannotMove[loc] && editor.currentFloorData.cannotMove[loc].length > 0)
-        color.push('#0000FF');
     if (editor.currentFloorData.afterOpenDoor[loc])
         color.push('#FF00FF');
     return color;

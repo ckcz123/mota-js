@@ -958,7 +958,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// px和py为点击的像素坐标
 	// vertical为录像播放过程中的横竖屏信息
 	// 
-	// 横屏模式下状态栏的画布大小是 149*480
+	// 横屏模式下状态栏的画布大小是 149*480 （开启拓展装备栏后是 148*521）
 	// 竖屏模式下状态栏的画布大小是 480*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 _isVertical() 来判定当前是否是竖屏模式
 
@@ -1539,8 +1539,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (['left', 'right', 'up', 'down'].indexOf(lastDirection) >= 0)
 			core.setHeroLoc('direction', lastDirection);
 		// 设置坐标，并绘制
-		core.setHeroLoc('x', x);
-		core.setHeroLoc('y', y);
+		core.control._moveDirectyFollowers(x, y);
+		core.status.hero.loc.x = x;
+		core.status.hero.loc.y = y;
 		core.drawHero();
 		// 记录录像
 		core.status.route.push("move:" + x + ":" + y);

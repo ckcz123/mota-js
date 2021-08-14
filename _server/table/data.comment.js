@@ -38,6 +38,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "使用图片",
 					"_data": "在此存放所有可能使用的图片（tilesets除外） \n图片可以被作为背景图（的一部分），也可以直接用自定义事件进行显示。 \n 图片名不能使用中文，不能带空格或特殊字符；可以直接改名拼音就好 \n 建议对于较大的图片，在网上使用在线的“图片压缩工具(http://compresspng.com/zh/)”来进行压缩，以节省流量 \n 依次向后添加",
 				},
+				"splitImages": {
+					"_leaf": true,
+					"_type": "event",
+					"_event": "splitImages",
+					"_docs": "图片切分",
+					"_data": "可以在这里对使用到的图片进行按照一定宽高切分，生成若干新的小图供使用"
+				},
 				"tilesets": {
 					"_leaf": true,
 					"_type": "material",
@@ -275,11 +282,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"equipment": {
 							"_leaf": true,
 							"_type": "textarea",
+							"_hide": true,
 							"_range": "thiseval instanceof Array",
 							"_data": "初始装备"
 						},
 						"items": {
 							"_type": "object",
+							"_hide": true,
 							"_data": {
 								"constants": {
 									"_leaf": true,
@@ -323,29 +332,32 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 								"x": {
 									"_leaf": true,
 									"_type": "textarea",
-									"_data": "初始x坐标"
+									"_data": "横坐标"
 								},
 								"y": {
 									"_leaf": true,
 									"_type": "textarea",
-									"_data": "初始y坐标"
+									"_data": "纵坐标"
 								}
 							}
 						},
 						"flags": {
 							"_leaf": true,
 							"_type": "textarea",
+							"_hide": true,
 							"_range": "thiseval instanceof Object && !(thiseval instanceof Array)",
 							"_data": "游戏变量"
 						},
 						"followers": {
 							"_leaf": true,
 							"_type": "disable",
+							"_hide": true,
 							"_data": "跟随者"
 						},
 						"steps": {
 							"_leaf": true,
 							"_type": "disable",
+							"_hide": true,
 							"_data": "行走步数"
 						}
 					}
@@ -468,6 +480,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_docs": "全局帧动画时间",
 					"_data": "全局帧动画时间，即怪物振动频率，一般300比较合适"
 				},
+				"moveSpeed": {
+					"_leaf": true,
+					"_type": "textarea",
+					"_docs": "勇士移速",
+					"_data": "勇士每一格的移速，默认是100；此项可被用户修改覆盖"
+				},
 				"statusCanvasRowsOnMobile": {
 					"_leaf": true,
 					"_type": "select",
@@ -535,6 +553,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					},
 					"_data": "状态栏显示项"
 				},
+				"extendToolbar": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "横屏底部工具栏",
+					"_data": "在横屏状态下是否将工具栏挪动到游戏画布下方，从而完全解放状态栏空间"
+				},
 				"flyNearStair": {
 					"_leaf": true,
 					"_type": "checkbox",
@@ -546,12 +570,6 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_type": "checkbox",
 					"_docs": "楼传开平面模式",
 					"_data": "传送器平面塔模式；此模式下楼层传送器将飞到上次离开该楼层的位置。"
-				},
-				"steelDoorWithoutKey": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "铁门不消耗钥匙",
-					"_data": "铁门是否不需要钥匙开启。如果此项为true，则无需钥匙也可以开铁门。"
 				},
 				"itemFirstText": {
 					"_leaf": true,
@@ -568,13 +586,13 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"enableAddPoint": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "加点",
+					"_docs": "开启加点",
 					"_data": "是否支持加点"
 				},
 				"enableNegativeDamage": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "负伤",
+					"_docs": "开启负伤",
 					"_data": "是否支持负伤害（回血）"
 				},
 				"betweenAttackMax": {
@@ -604,26 +622,8 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"enableEnemyPoint": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "怪物显伤",
+					"_docs": "定点怪显",
 					"_data": "是否开启怪物的定点显示功能，即属性不同的怪物会在怪物手册单列；用户可以手动在菜单栏中开关"
-				},
-				"displayEnemyDamage": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "怪物显伤",
-					"_data": "是否地图怪物显伤；用户可以手动在菜单栏中开关"
-				},
-				"displayCritical": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "临界显伤",
-					"_data": "是否地图显示临界；用户可以手动在菜单栏中开关"
-				},
-				"displayExtraDamage": {
-					"_leaf": true,
-					"_type": "checkbox",
-					"_docs": "高级显伤",
-					"_data": "是否地图高级显伤（领域、夹击等）；用户可以手动在菜单栏中开关"
 				},
 				"enableGentleClick": {
 					"_leaf": true,

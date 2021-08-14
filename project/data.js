@@ -25,24 +25,27 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bgm.mp3"
 		],
 		"sounds": [
-			"floor.mp3",
 			"attack.mp3",
-			"door.mp3",
-			"item.mp3",
-			"equip.mp3",
-			"zone.mp3",
-			"jump.mp3",
-			"pickaxe.mp3",
 			"bomb.mp3",
-			"centerFly.mp3",
-			"error.mp3",
 			"cancel.mp3",
-			"cursor.mp3",
+			"centerFly.mp3",
 			"confirm.mp3",
-			"open_ui.mp3",
+			"cursor.mp3",
+			"door.mp3",
+			"equip.mp3",
+			"error.mp3",
+			"floor.mp3",
+			"gem.mp3",
+			"icePickaxe.mp3",
+			"item.mp3",
+			"jump.mp3",
 			"load.mp3",
+			"open_ui.mp3",
+			"pickaxe.mp3",
 			"recovery.mp3",
-			"save.mp3"
+			"save.mp3",
+			"shop.mp3",
+			"zone.mp3"
 		],
 		"fonts": [],
 		"nameMap": {
@@ -61,11 +64,14 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"上下楼": "floor.mp3",
 			"跳跃": "jump.mp3",
 			"破墙镐": "pickaxe.mp3",
+			"破冰镐": "icePickaxe.mp3",
+			"宝石": "gem.mp3",
 			"阻激夹域": "zone.mp3",
 			"穿脱装备": "equip.mp3",
 			"背景音乐": "bgm.mp3",
 			"攻击": "attack.mp3",
 			"背景图": "bg.jpg",
+			"商店": "shop.mp3",
 			"领域": "zone"
 		},
 		"levelChoose": [
@@ -73,6 +79,12 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"title": "简单",
 				"name": "Easy",
 				"hard": 1,
+				"color": [
+					64,
+					255,
+					85,
+					1
+				],
 				"action": [
 					{
 						"type": "comment",
@@ -85,9 +97,21 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"name": "Normal",
 				"hard": 2,
 				"color": [
-					0,
 					255,
-					0,
+					221,
+					32,
+					1
+				],
+				"action": []
+			},
+			{
+				"title": "困难",
+				"name": "Hard",
+				"hard": 3,
+				"color": [
+					255,
+					68,
+					64,
 					1
 				],
 				"action": []
@@ -101,7 +125,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"styles": {
 			"startBackground": "project/images/bg.jpg",
 			"startVerticalBackground": "project/images/bg.jpg",
-			"startLogoStyle": "color: white",
+			"startLogoStyle": "color: black",
 			"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;",
 			"statusLeftBackground": "url(project/materials/ground.png) repeat",
 			"statusTopBackground": "url(project/materials/ground.png) repeat",
@@ -131,7 +155,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.8",
+		"version": "Ver 2.8.1",
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",

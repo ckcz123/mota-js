@@ -2033,7 +2033,6 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         try { return core.calValue(x.condition, prefix); } catch (e) { return true; }
     })
     if (data.choices.length == 0) return this.doAction();
-    var selected = data.selected || 0;
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
@@ -2049,7 +2048,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
             if (main.replayChecking) {
                 // 录像验证系统中选择第一项
                 if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
-                core.events.__action_choices_replaying(data, selected)
+                core.events.__action_choices_replaying(data, 0)
             } else {
                 // 正常游戏中弹窗选择
                 core.myprompt('录像回放出错！当前需要执行选择项但录像中未记录。\n如需修复请输入您要选的项（从0起），点击取消将不会修复。', 0, function (value) {
@@ -2077,7 +2076,6 @@ events.prototype._action_choices = function (data, x, y, prefix) {
             data.choices[i] = {"text": data.choices[i]};
         data.choices[i].text = core.replaceText(data.choices[i].text, prefix);
     }
-    core.status.event.selection = selected;
     core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices, data.width);
 }
 

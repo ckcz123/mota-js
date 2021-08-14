@@ -2797,7 +2797,7 @@ return code;
 */;
 
 choices_s
-    :   '选项' ':' EvalString_Multi? BGNL? '标题' EvalString? '图像' IdString? '默认选中项' Int '超时毫秒数' Int '宽度' IntString? BGNL? Newline choicesContext+ BEND Newline
+    :   '选项' ':' EvalString_Multi? BGNL? '标题' EvalString? '图像' IdString? '超时毫秒数' Int '宽度' IntString? BGNL? Newline choicesContext+ BEND Newline
 
 
 /* choices_s
@@ -2816,10 +2816,9 @@ if (EvalString_0==''){
 }
 EvalString_Multi_0 = title+EvalString_Multi_0;
 EvalString_Multi_0 = EvalString_Multi_0 ?(', "text": "'+EvalString_Multi_0+'"'):'';
-Int_0 = Int_0 ? (', "selected": '+Int_0) : '';
-Int_1 = Int_1 ? (', "timeout": '+Int_1) : '';
+Int_0 = Int_0 ? (', "timeout": '+Int_0) : '';
 IntString_0 = IntString_0 ? (', "width": ' + IntString_0) : '';
-var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,Int_1,IntString_0,
+var code = ['{"type": "choices"',EvalString_Multi_0,Int_0,IntString_0,
     block.isCollapsed()?', "_collapsed": true':'',
     block.isEnabled()?'':', "_disabled": true',
     ', "choices": [\n',
@@ -4115,8 +4114,8 @@ MoveMode_List
     /*MoveMode_List ['', 'easeIn', 'easeOut', 'easeInOut']*/;
 
 NameMap_List
-    :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'阻激夹域'|'穿脱装备'
-    /*NameMap_List ['确定','取消','操作失败','光标移动','打开界面','读档','存档','获得道具','回血','炸弹','飞行器','开关门','上下楼','跳跃','破墙镐','阻激夹域','穿脱装备']*/;
+    :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'宝石'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'破冰镐'|'阻激夹域'|'穿脱装备'|'商店'
+    /*NameMap_List ['确定','取消','操作失败','光标移动','打开界面','读档','存档','获得道具','回血','宝石','炸弹','飞行器','开关门','上下楼','跳跃','破墙镐','破冰稿','阻激夹域','穿脱装备','商店']*/;
 
 //转blockly后不保留需要加"
 EvalString

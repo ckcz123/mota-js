@@ -863,7 +863,7 @@ ActionParser.prototype.parseAction = function() {
       if (!this.isset(data.text)) data.text = '';
       var info = this.getTitleAndPosition(data.text);
       this.next = MotaActionFunctions.xmlText('choices_s', [
-        info[3],info[0],info[1],data.selected||0,data.timeout||0,data.width,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+        info[3],info[0],info[1],data.timeout||0,data.width,text_choices,this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       break;
     case "for": // 循环遍历
       this.next = MotaActionFunctions.xmlText('for_s',[

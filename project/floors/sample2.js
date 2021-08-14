@@ -70,5 +70,6 @@ main.floors.sample2=
     "fgmap": [
 
 ],
-    "autoEvent": {}
+    "autoEvent": {},
+    "beforeBattle": {}
 }

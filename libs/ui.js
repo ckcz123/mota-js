@@ -2513,6 +2513,10 @@ ui.prototype.drawFly = function(page) {
     core.setTextAlign('ui', 'center');
     core.fillText('ui', '楼层跳跃', this.HPIXEL, 60, '#FFFFFF', this._buildFont(28, true));
     core.fillText('ui', '返回游戏', this.HPIXEL, this.PIXEL - 13, null, this._buildFont(15, true))
+    core.setTextAlign('ui', 'right');
+    core.fillText('ui', '浏览地图时也', this.PIXEL - 10, this.PIXEL - 23, '#aaaaaa', this._buildFont(10, false));
+    core.fillText('ui', '可楼层跳跃！', this.PIXEL - 10, this.PIXEL - 11, null, this._buildFont(10, false));
+    core.setTextAlign('ui', 'center');
 
     var middle = this.HPIXEL + 39;
 

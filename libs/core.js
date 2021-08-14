@@ -358,14 +358,14 @@ core.prototype._init_flags = function () {
 
 core.prototype._init_sys_flags = function () {
     if (core.flags.equipboxButton) core.flags.equipment = true;
-    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
-    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', true);
+    core.flags.displayCritical = core.getLocalStorage('critical', true);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', true);
     core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
     core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 0);
     // 行走速度
-    core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
+    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed || 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);

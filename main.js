@@ -634,6 +634,15 @@ main.statusBar.image.money.onclick = function (e) {
         main.core.openQuickShop(true);
 }
 
+////// 点击楼梯图标也可以浏览地图 //////
+main.statusBar.image.floor.onclick = function (e) {
+    e.stopPropagation();
+
+    if (main.core && main.core.isPlaying() && !core.isMoving() && !core.status.lockControl) {
+        core.ui._drawViewMaps();
+    }
+}
+
 ////// 点击状态栏中的存档按钮时 //////
 main.statusBar.image.save.onclick = function (e) {
     e.stopPropagation();

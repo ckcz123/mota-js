@@ -3079,11 +3079,11 @@ control.prototype.hideStatusBar = function (showToolbox) {
     // 隐藏
     for (var i = 0; i < statusItems.length; ++i)
         statusItems[i].style.opacity = 0;
-    if (!core.domStyle.isVertical || !showToolbox) {
+    if ((!core.domStyle.isVertical && !core.flags.extendToolbar) || !showToolbox) {
         for (var i = 0; i < toolItems.length; ++i)
             toolItems[i].style.display = 'none';
     }
-    if (!core.domStyle.isVertical) {
+    if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
         core.dom.toolBar.style.display = 'none';
     }
 }
@@ -3113,7 +3113,7 @@ control.prototype.updateHeroIcon = function (name) {
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {
         // 隐藏状态栏时检查竖屏
-        if (!core.domStyle.isVertical) {
+        if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
             for (var i = 0; i < core.dom.tools.length; ++i)
                 core.dom.tools[i].style.display = 'none';
             return;
@@ -3123,7 +3123,7 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 
     if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical || core.isReplaying()) useButton = false;
+    if ((!core.domStyle.isVertical && !core.flags.extendToolbar) || core.isReplaying()) useButton = false;
     core.domStyle.toolbarBtn = useButton;
 
     if (useButton) {
@@ -3144,7 +3144,7 @@ control.prototype.setToolbarButton = function (useButton) {
         });
         core.statusBar.image.keyboard.style.display
             = core.statusBar.image.shop.style.display
-            = core.domStyle.isVertical ? "block":"none";
+            = core.domStyle.isVertical || core.flags.extendToolbar ? "block":"none";
     }
 }
 
@@ -3217,19 +3217,22 @@ control.prototype.resize = function() {
     var clientWidth = main.dom.body.clientWidth, clientHeight = main.dom.body.clientHeight;
     var CANVAS_WIDTH = core.__PIXELS__, BAR_WIDTH = Math.round(core.__PIXELS__ * 0.31);
     var BORDER = 3;
+    var extendToolbar = core.flags.extendToolbar;
 
-    if (clientWidth - 3 * BORDER >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && clientHeight - 2 * BORDER < CANVAS_WIDTH)) {
+    var horizontalMaxRatio = (clientHeight - 2 * BORDER - (extendToolbar ? BORDER : 0)) / (CANVAS_WIDTH + (extendToolbar ? 38 : 0));
+
+    if (clientWidth - 3 * BORDER >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && horizontalMaxRatio < 1)) {
         // 横屏
         core.domStyle.isVertical = false;
 
         core.domStyle.availableScale = [];
         [1, 1.25, 1.5, 1.75, 2].forEach(function (v) {
-            if (clientWidth - 3 * BORDER >= v*(CANVAS_WIDTH + BAR_WIDTH) && clientHeight - 2 * BORDER >= v * CANVAS_WIDTH) {
-                core.domStyle.availableScale.push(v); // 64x64
+            if (clientWidth - 3 * BORDER >= v*(CANVAS_WIDTH + BAR_WIDTH) && horizontalMaxRatio >= v) {
+                core.domStyle.availableScale.push(v);
             }
         });
         if (core.domStyle.availableScale.indexOf(core.domStyle.scale) < 0) {
-            core.domStyle.scale = Math.min(1, (clientHeight - 2 * BORDER) / CANVAS_WIDTH);
+            core.domStyle.scale = Math.min(1, horizontalMaxRatio);
         }
     }
     else {
@@ -3237,6 +3240,7 @@ control.prototype.resize = function() {
         core.domStyle.isVertical = true;
         core.domStyle.scale = Math.min(1, (clientWidth - 2 * BORDER) / CANVAS_WIDTH);
         core.domStyle.availableScale = [];
+        extendToolbar = false;
     }
 
     var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
@@ -3254,6 +3258,7 @@ control.prototype.resize = function() {
         CANVAS_WIDTH: CANVAS_WIDTH,
         BORDER: BORDER,
         BAR_WIDTH: BAR_WIDTH,
+        TOOLBAR_HEIGHT: extendToolbar ? 38 : 44,
         outerSize: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
         globalAttribute: globalAttribute,
         border: '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
@@ -3262,6 +3267,7 @@ control.prototype.resize = function() {
         col: col,
         statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER : 0,
         toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 2 * BORDER : 0,
+        extendToolbar: extendToolbar,
         is15x15: core.__SIZE__ == 15
     };
 
@@ -3285,7 +3291,7 @@ control.prototype._resize_gameGroup = function (obj) {
     }
     else {
         totalWidth = obj.outerSize + obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER;
-        totalHeight = obj.outerSize;
+        totalHeight = obj.outerSize + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0);
     }
     gameGroup.style.width = totalWidth + "px";
     gameGroup.style.height = totalHeight + "px";
@@ -3354,10 +3360,14 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         statusBar.style.width = (obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER) + "px";
-        statusBar.style.height = obj.outerSize + "px";
+        statusBar.style.height = obj.outerSize + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
         statusBar.style.background = obj.globalAttribute.statusLeftBackground;
         // --- 计算文字大小
-        statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
+        if (obj.extendToolbar) {
+            statusBar.style.fontSize = 16 * core.domStyle.scale + "px";
+        } else {
+            statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
+        }
     }
     statusBar.style.display = 'block';
     statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
@@ -3371,14 +3381,19 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER + "px";
-        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_WIDTH);
+        core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER +  (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_WIDTH + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0));
     }
     core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
 }
 
 control.prototype._resize_status = function (obj) {
-    var statusHeight = (core.domStyle.isVertical ? 1 : (core.__HALF_SIZE__ + obj.BORDER) / obj.count) *  32 * core.domStyle.scale * 0.8;
+    var statusHeight;
+    if (core.domStyle.isVertical) {
+        statusHeight = 32 * core.domStyle.scale * 0.8;
+    } else {
+        statusHeight = (obj.extendToolbar ? core.__SIZE__ : core.__HALF_SIZE__ + 3) / obj.count * 32  * core.domStyle.scale * 0.8;
+    }
     // status
     for (var i = 0; i < core.dom.status.length; ++i) {
         var id = core.dom.status[i].id, style = core.dom.status[i].style;
@@ -3412,22 +3427,35 @@ control.prototype._resize_toolBar = function (obj) {
     // toolBar
     var toolBar = core.dom.toolBar;
     if (core.domStyle.isVertical) {
+        toolBar.style.left = 0;
+        toolBar.style.right = "";
         toolBar.style.width = obj.outerSize + "px";
         toolBar.style.top = obj.statusBarHeightInVertical + obj.outerSize + "px";
         toolBar.style.height = obj.toolbarHeightInVertical + "px";
         toolBar.style.background = obj.globalAttribute.toolsBackground;
     }
     else {
-        toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + "px";
-        toolBar.style.top = 0.718 * obj.outerSize + "px";
-        toolBar.style.height = 0.281 * obj.outerSize + "px";
-        toolBar.style.background = 'transparent';
+        if (obj.extendToolbar) {
+            toolBar.style.left = "";
+            toolBar.style.right = 0;
+            toolBar.style.width = obj.outerSize + "px";
+            toolBar.style.top = obj.outerSize + "px";
+            toolBar.style.height = obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER + "px";
+            toolBar.style.background = obj.globalAttribute.toolsBackground;
+        } else {
+            toolBar.style.left = 0;
+            toolBar.style.right = "";
+            toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + "px";
+            toolBar.style.top = 0.718 * obj.outerSize + "px";
+            toolBar.style.height = 0.281 * obj.outerSize + "px";
+            toolBar.style.background = 'transparent';
+        }
     }
     toolBar.style.borderLeft = obj.border;
-    toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical ? obj.border : '';
+    toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical || obj.extendToolbar ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
 
-    if (!core.domStyle.showStatusBar && !core.domStyle.isVertical) {
+    if (!core.domStyle.showStatusBar && !core.domStyle.isVertical && !obj.extendToolbar) {
         toolBar.style.display = 'none';
     } else {
         toolBar.style.display = 'block';
@@ -3435,9 +3463,9 @@ control.prototype._resize_toolBar = function (obj) {
 }
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical && !obj.is15x15 ? 0.95 : 1);
+    var toolsHeight = 32 * core.domStyle.scale * ((core.domStyle.isVertical || obj.extendToolbar) && !obj.is15x15 ? 0.95 : 1);
     var toolsMarginLeft;
-    if (core.domStyle.isVertical)
+    if (core.domStyle.isVertical || obj.extendToolbar)
         toolsMarginLeft = (core.__HALF_SIZE__ - 3) * 3 * core.domStyle.scale;
     else
         toolsMarginLeft = (obj.BAR_WIDTH * core.domStyle.scale - 9 - toolsHeight * 3) / 4;
@@ -3445,10 +3473,10 @@ control.prototype._resize_tools = function (obj) {
         var style = core.dom.tools[i].style;
         style.height = toolsHeight + "px";
         style.marginLeft = toolsMarginLeft + "px";
-        style.marginTop = 6 * core.domStyle.scale + "px"
+        style.marginTop = (obj.extendToolbar ? 3 : 6) * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
-    if (core.domStyle.isVertical) {
+    if (core.domStyle.isVertical || obj.extendToolbar) {
         core.dom.hard.style.width = obj.outerSize - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + "px";
     }
     else {

@@ -297,15 +297,9 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"name": "圣水",
 		"itemEffect": "core.status.hero.hp *= 2",
 		"itemEffectTip": "，生命值翻倍",
-		"useItemEffect": "core.status.hero.hp *= 2; core.playSound('回血');",
+		"useItemEffect": "core.status.hero.hp *= 2;\ncore.playSound('回血');",
 		"canUseItemEffect": "true",
 		"text": "生命值翻倍"
-	},
-	"silverCoin": {
-		"cls": "items",
-		"name": "银币",
-		"itemEffect": "core.status.hero.money += 500",
-		"itemEffectTip": "，金币+500"
 	},
 	"book": {
 		"cls": "constants",
@@ -381,8 +375,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "tools",
 		"name": "破冰镐",
 		"text": "可以破坏勇士面前的一堵冰墙",
-		"useItemEffect": "(function () {\n\tcore.removeBlock(core.nextX(), core.nextY());\n\tcore.playSound('打开界面');\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
-		"canUseItemEffect": "(function () {\n\treturn core.getBlockId(core.nextX(), core.nextY()) == 'ice' || core.getBlockId(core.nextX(), core.nextY()) == 'iceDoor';\n})();"
+		"useItemEffect": "(function () {\n\tcore.openDoor(core.nextX(), core.nextY(), false);\n\tcore.playSound('破冰镐');\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
+		"canUseItemEffect": "(function () {\n\treturn core.getBlockId(core.nextX(), core.nextY()) == 'ice';\n})();"
 	},
 	"bomb": {
 		"cls": "tools",
@@ -416,35 +410,35 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "tools",
 		"name": "地震卷轴",
 		"text": "可以破坏当前层的所有墙",
-		"useItemEffect": "(function () {\n\tvar indexes = [];\n\tfor (var index in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[index];\n\t\tif (!block.disable && block.event.canBreak) {\n\t\t\tindexes.push(index);\n\t\t}\n\t}\n\tcore.removeBlockByIndexes(indexes);\n\tcore.drawMap();\n\tcore.playSound('打开界面');\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
+		"useItemEffect": "(function () {\n\tvar indexes = [];\n\tfor (var index in core.status.thisMap.blocks) {\n\t\tvar block = core.status.thisMap.blocks[index];\n\t\tif (!block.disable && block.event.canBreak) {\n\t\t\tindexes.push(index);\n\t\t}\n\t}\n\tcore.removeBlockByIndexes(indexes);\n\tcore.drawMap();\n\tcore.playSound('炸弹');\n\tcore.drawTip(core.material.items[itemId].name + '使用成功');\n})();",
 		"canUseItemEffect": "(function () {\n\treturn core.status.thisMap.blocks.filter(function (block) {\n\t\treturn !block.disable && block.event.canBreak;\n\t}).length > 0;\n})();"
 	},
 	"poisonWine": {
 		"cls": "tools",
 		"name": "解毒药水",
 		"text": "可以解除中毒状态",
-		"useItemEffect": "core.triggerDebuff('remove', 'poison');",
+		"useItemEffect": "core.triggerDebuff('remove', 'poison');\ncore.playSound('回血');",
 		"canUseItemEffect": "core.hasFlag('poison');"
 	},
 	"weakWine": {
 		"cls": "tools",
 		"name": "解衰药水",
 		"text": "可以解除衰弱状态",
-		"useItemEffect": "core.triggerDebuff('remove', 'weak');",
+		"useItemEffect": "core.triggerDebuff('remove', 'weak');\ncore.playSound('回血');",
 		"canUseItemEffect": "core.hasFlag('weak');"
 	},
 	"curseWine": {
 		"cls": "tools",
 		"name": "解咒药水",
 		"text": "可以解除诅咒状态",
-		"useItemEffect": "core.triggerDebuff('remove', 'curse');",
+		"useItemEffect": "core.triggerDebuff('remove', 'curse');\ncore.playSound('回血');",
 		"canUseItemEffect": "core.hasFlag('curse');"
 	},
 	"superWine": {
 		"cls": "tools",
 		"name": "万能药水",
 		"text": "可以解除所有不良状态",
-		"useItemEffect": "core.triggerDebuff('remove', ['poison', 'weak', 'curse']);",
+		"useItemEffect": "core.triggerDebuff('remove', ['poison', 'weak', 'curse']);\ncore.playSound('回血');",
 		"canUseItemEffect": "(function() {\n\treturn core.hasFlag('poison') || core.hasFlag('weak') || core.hasFlag('curse');\n})();"
 	},
 	"hammer": {
@@ -472,6 +466,10 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 			{
 				"type": "input",
 				"text": "请输入生命魔杖使用次数：(0-${item:lifeWand})"
+			},
+			{
+				"type": "comment",
+				"text": "【接受用户输入】弹窗输入的结果将会保存在“flag:input”中\n如果需要更多帮助，请查阅帮助文档"
 			},
 			{
 				"type": "if",
@@ -524,5 +522,11 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 	"wand": {
 		"cls": "items",
 		"name": "新物品"
+	},
+	"pack": {
+		"cls": "items",
+		"name": "钱袋",
+		"itemEffect": "core.status.hero.money += 500",
+		"itemEffectTip": "，金币+500"
 	}
 }

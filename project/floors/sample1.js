@@ -30,17 +30,6 @@ main.floors.sample1=
 ],
     "firstArrive": [],
     "events": {
-        "4,10": [
-            "\t[样板提示]本层楼将会对各类事件进行介绍。",
-            "左边是一个仿51层的陷阱做法，上方是商店、快捷商店的使用方法，右上是一个典型的杀怪开门的例子，右下是各类可能的NPC事件。",
-            "本样板目前支持的事件列表大致有：\ntext: 显示一段文字（比如你现在正在看到的）\ntip: 左上角显示提示\nshow: 使一个事件有效（可见、可被交互）\nhide: 使一个事件失效（不可见、不可被交互）\ntrigger: 触发另一个地点的事件\nanimate: 显示动画\nbattle: 强制和某怪物战斗\nopenDoor: 无需钥匙开门（例如机关门、暗墙）",
-            "openShop: 打开一个全局商店\ndisableShop: 禁用一个全局商店\nchangeFloor: 传送勇士到某层某位置\nchangePos: 传送勇士到当层某位置；转向\nshowImage: 显示图片\nsetCurtain: 更改画面色调\nsetWeather: 更改天气\nmove: 移动事件效果\nmoveHero: 移动勇士效果\nplayBgm: 播放某个背景音乐\npauseBgm: 暂停背景音乐\nresumeBgm: 恢复背景音乐的播放\nplaySound: 播放某个音频",
-            "if: 条件判断\nchoices: 提供选项\nsetValue: 设置勇士属性道具，或某个变量/flag\nupdate: 更新状态栏和地图显伤\nwin: 获得胜利（游戏通关）\nlose: 游戏失败\nsleep: 等待多少毫秒\nexit: 立刻结束当前事件\nfunction: 自定义JS脚本\n\n更多支持的事件还在编写中，欢迎您宝贵的意见。",
-            "有关各事件的样例，可参见本层一些NPC的写法。\n所有事件样例本层都有介绍。\n\n一个自定义事件处理完后，需要调用{\"type\": \"hide\"}该事件才不会再次出现。",
-            {
-                "type": "hide"
-            }
-        ],
         "1,7": [
             {
                 "type": "setBlock",
@@ -181,6 +170,10 @@ main.floors.sample1=
                 ]
             },
             {
+                "type": "comment",
+                "text": "{type: openDoor} 不止可以开“门”，也可以用来开墙等等"
+            },
+            {
                 "type": "sleep",
                 "time": 300
             },
@@ -189,9 +182,8 @@ main.floors.sample1=
                 "type": "move",
                 "time": 750,
                 "steps": [
-                    "right",
-                    "right",
-                    "down"
+                    "right:2",
+                    "down:1"
                 ]
             },
             "上面是个move事件，可以对NPC等进行移动。\n详见样板中小偷事件的写法。",
@@ -623,5 +615,6 @@ main.floors.sample1=
         }
     },
     "width": 13,
-    "height": 13
+    "height": 13,
+    "beforeBattle": {}
 }

@@ -5,7 +5,7 @@ var maps_90f36752_8815_4be8_b32b_d7fad1d0542e =
 	"3": {"cls":"animates","id":"blueWall","canBreak":true,"animate":1,"doorInfo":{"time":160,"openSound":"door.mp3","closeSound":"door.mp3","keys":{}}},
 	"4": {"cls":"animates","id":"star","name":"星空"},
 	"5": {"cls":"animates","id":"lava","name":"岩浆"},
-	"6": {"cls":"animates","id":"ice","doorInfo":{"time":160,"openSound":"icepickaxe.mp3","closeSound":"door.mp3","keys":{"specialKey":1}},"animate":1},
+	"6": {"cls":"animates","id":"ice","doorInfo":{"time":160,"openSound":"破冰镐","closeSound":"door.mp3","keys":{"icePickaxe":1}},"animate":1},
 	"7": {"cls":"terrains","id":"blueShopLeft"},
 	"8": {"cls":"terrains","id":"blueShopRight"},
 	"9": {"cls":"terrains","id":"pinkShopLeft"},

@@ -1141,11 +1141,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.setFlag('curse', true);
 		}
 	} else if (action == 'remove') {
+		var success = false;
 		if (core.inArray(type, "poison") && core.hasFlag("poison")) {
+			success = true;
 			// 移除毒效果
 			core.setFlag("poison", false);
 		}
 		if (core.inArray(type, "weak") && core.hasFlag("weak")) {
+			success = true;
 			// 移除衰效果
 			core.setFlag("weak", false);
 			if (core.values.weakValue >= 1) {
@@ -1159,9 +1162,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 		if (core.inArray(type, "curse") && core.hasFlag("curse")) {
+			success = true;
 			// 移除咒效果
 			core.setFlag("curse", false);
 		}
+		if (success) core.playSound('回血');
 	}
 },
         "updateStatusBar": function () {

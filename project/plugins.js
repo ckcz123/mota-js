@@ -356,7 +356,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
 	// 另外 请注意加入两个新图层 会让大地图的性能降低一些
 	// 插件作者：ad
-	var __enable = false;
+	var __enable = true;
 	if (!__enable) return;
 
 	// 创建新图层
@@ -1054,6 +1054,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.ui.drawTip = _drawTip;
 		core.control.playSound = _playSound;
 		core.status.route = core.status.route.slice(0, routeLength);
+		core.control._bindRoutePush();
 
 		// 插入事件：改变角色行走图并进行楼层切换
 		var toFloorId = data.floorId || core.status.floorId;

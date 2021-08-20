@@ -2069,6 +2069,7 @@ ui.prototype._drawCursor = function () {
     if (automaticRoute.cursorY == null)
         automaticRoute.cursorY = core.getHeroLoc('y');
     automaticRoute.cursorX = core.clamp(automaticRoute.cursorX, 0, this.LAST);
+    automaticRoute.cursorY = core.clamp(automaticRoute.cursorY, 0, this.LAST);
     core.status.event.id = 'cursor';
     core.lockControl();
     core.clearUI();
@@ -2524,7 +2525,7 @@ ui.prototype.drawFly = function(page) {
     var lines = core.splitLines('ui', title, 120, this._buildFont(19, true));
     var start_y = middle - (lines.length - 1) * 11;
     for (var i in lines) {
-        core.fillText('ui', lines[i], this.PIXEL - 60, start_y);
+        core.fillText('ui', lines[i], this.PIXEL - 60, start_y, '#FFFFFF');
         start_y += 22;
     }
 
@@ -3386,6 +3387,7 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.top = y * core.domStyle.scale + 'px';
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
+    newCanvas.style.pointerEvents = 'none';
     core.dymCanvas[name] = newCanvas.getContext('2d');
     core.maps._setHDCanvasSize(core.dymCanvas[name], width, height);
     core.dom.gameDraw.appendChild(newCanvas);

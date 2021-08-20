@@ -460,9 +460,13 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     e.damage = this.getDamage(enemy, x, y, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];
-    var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
-    e.defDamage = this.getDefDamage(enemy, ratio, x, y, floorId);
+    e.defDamage = this._getCurrentEnemys_addEnemy_defDamage(enemy, x, y, floorId);
     enemys.push(e);
+}
+
+enemys.prototype._getCurrentEnemys_addEnemy_defDamage = function (enemy, x, y, floorId) {
+    var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
+    return this.getDefDamage(enemy, ratio, x, y, floorId);
 }
 
 enemys.prototype._getCurrentEnemys_sort = function (enemys) {

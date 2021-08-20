@@ -322,7 +322,7 @@ ActionParser.prototype.parseAction = function() {
         data.time, data.lineHeight||1.4, data.async||false, this.EvalString_Multi(data.text), this.next]);
         break;
     case "comment": // 注释
-      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next],null,data.text);
+      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next]);
       break;
     case "setText": // 设置剧情文本的属性
       data.title=this.Colour(data.title);

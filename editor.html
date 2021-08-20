@@ -305,16 +305,16 @@
         </div>
         <div class="tools">
             <div id="tip"></div>
-            <select id="editModeSelect">
-                <option value="map">地图编辑Z</option>
-                <option value="loc">地图选点X</option>
-                <option value="enemyitem">图块属性C</option>
-                <option value="floor">楼层属性V</option>
-                <option value="tower">全塔属性B</option>
-                <option value="functions">脚本编辑N</option>
-                <option value="appendpic">追加素材M</option>
-                <option value="commonevent">公共事件 ,</option>
-                <option value="plugins">插件编写 .</option>
+            <select id="editModeSelect" style="font-size: 13px">
+                <option value="map">地图编辑(Z)</option>
+                <option value="loc">地图选点(X)</option>
+                <option value="enemyitem">图块属性(C)</option>
+                <option value="floor">楼层属性(V)</option>
+                <option value="tower">全塔属性(B)</option>
+                <option value="functions">脚本编辑(N)</option>
+                <option value="appendpic">追加素材(M)</option>
+                <option value="commonevent">公共事件(,)</option>
+                <option value="plugins">插件编写(.)</option>
             </select>
             <span style="font-size: 12px"><input type="checkbox" id="showMovable" style="margin-left:0;margin-right: 2px"/>通行度</span>
             <select id="editorTheme" style="margin-left: 0; font-size: 11px;">
@@ -336,14 +336,13 @@
             <input type="radio" id="layerMod3" name="layerMod" value="fgmap" style="margin-left: 5px" />前景层
             </span>
             <br>
-            <div id="viewportButtons">
+            <div id="viewportButtons" style="margin-bottom: 7px">
                 <input type="button" value="←"/>
                 <input type="button" value="↑"/>
                 <input type="button" value="↓"/>
                 <input type="button" value="→"/>
                 <input type="button" id='bigmapBtn' value="大地图" style="margin-left: 5px"/>
             </div>
-            <br>
             <select id="selectFloor" style="margin-bottom: 5px;"></select>
             <input type="button" value="保存地图" id='saveFloor'/>
             <input type="button" value="后退" id="undoFloor" />

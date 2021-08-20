@@ -150,10 +150,10 @@ editor_materialpanel_wrapper = function (editor) {
                 }
                 else {
                     var height = editor.widthsX[spriter][3], col = height / ysize;
+                    if (spriter == 'terrains') col += 2;
                     if (editor.uivalues.folded && core.tilesets.indexOf(pos.images) == -1) {
                         col = (pos.x == editor.widthsX[spriter][2] - 1) ? ((col - 1) % editor.uivalues.foldPerCol + 1) : editor.uivalues.foldPerCol;
                     }
-                    if (spriter == 'terrains' && pos.x == editor.widthsX[spriter][1]) col += 2;
                     pos.y = Math.min(pos.y, col - 1);
                 }
 
@@ -177,7 +177,7 @@ editor_materialpanel_wrapper = function (editor) {
                         if (editor.uivalues.folded) {
                             y += editor.uivalues.foldPerCol * (pos.x - editor.widthsX[spriter][1]);
                         }
-                        if (pos.images == 'terrains' && pos.x == 0) y -= 2;
+                        if (pos.images == 'terrains') y -= 2;
                         editor.info = { 'images': pos.images, 'y': y }
                     }
 

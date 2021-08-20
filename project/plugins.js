@@ -438,13 +438,16 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			// 背景层2插入事件层前
 			parent.insertBefore(input, child);
 			// 不能直接更改背景层2的innerText 所以创建文本节点
-			var txt = document.createTextNode('背景层2');
+			var txt = document.createTextNode('bg2');
 			// 插入事件层前(即新插入的背景层2前)
 			parent.insertBefore(txt, child);
 			// 向最后插入前景层2(即插入前景层后)
 			parent.appendChild(input2);
-			var txt2 = document.createTextNode('前景层2');
+			var txt2 = document.createTextNode('fg2');
 			parent.appendChild(txt2);
+			parent.childNodes[2].replaceWith("bg");
+			parent.childNodes[6].replaceWith("事件");
+			parent.childNodes[8].replaceWith("fg");
 		} else {
 			var input = createCanvasBtn_mobile('bg2');
 			var input2 = createCanvasBtn_mobile('fg2');

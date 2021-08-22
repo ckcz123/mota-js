@@ -252,17 +252,6 @@ utils.prototype.removeLocalStorage = function (key) {
 }
 
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
-
-    if (!core.platform.useLocalForage) {
-        if (this.setLocalStorage(key, value)) {
-            if (successCallback) successCallback();
-        }
-        else {
-            if (errorCallback) errorCallback();
-        }
-        return;
-    }
-
     if (value == null) {
         this.removeLocalForage(key);
         return;
@@ -286,13 +275,6 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
 }
 
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
-
-    if (!core.platform.useLocalForage) {
-        var value = this.getLocalStorage(key, defaultValue);
-        if (successCallback) successCallback(value);
-        return;
-    }
-
     localforage.getItem(core.firstData.name + "_" + key, function (err, value) {
         if (err) {
             if (errorCallback) errorCallback(err);
@@ -310,13 +292,6 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
 }
 
 utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
-
-    if (!core.platform.useLocalForage) {
-        this.removeLocalStorage(key);
-        if (successCallback) successCallback();
-        return;
-    }
-
     localforage.removeItem(core.firstData.name + "_" + key, function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);

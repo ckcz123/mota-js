@@ -1824,7 +1824,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "isPC": "bool",
         "isAndroid": "bool",
         "isIOS": "bool",
-        "useLocalForage": "bool"
       },
       "domStyle": {
         "!doc": "界面样式",

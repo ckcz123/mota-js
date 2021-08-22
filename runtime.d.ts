@@ -2774,7 +2774,6 @@ type core = {
         /** 是否是QQ */isQQ: boolean
         /** 是否是Chrome */isChrome: boolean
         /** 是否支持复制到剪切板 */supportCopy: boolean
-        useLocalForage: boolean,
 
         fileInput: null
         /** 是否支持FileReader */fileReader: null

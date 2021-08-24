@@ -60,6 +60,28 @@ def get_file(path):
 def root():
 	return static_file('index.html')
 
+@app.route('/__all_floors__.js', methods=['GET'])
+def all_floors():
+	ids = request.args.get('id', '').split(',')
+	if len(ids) == 0:
+		abort(404)
+		return None
+	return Response('\n'.join([get_file('project/floors/%s.js' % id) for id in ids]), mimetype = 'text/javascript')
+
+@app.route('/__all_animates__', methods=['GET'])
+def all_animates():
+	ids = request.args.get('id', '').split(',')
+	if len(ids) == 0:
+		abort(404)
+		return None
+	content = []
+	for id in ids:
+		animate = 'project/animates/%s.animate' % id
+		if os.path.exists(animate):
+			content.append(get_file(animate))
+		else: content.append('')
+	return '@@@~~~###~~~@@@'.join(content)
+
 @app.route('/<path:path>', methods=['GET'])
 def static_file(path):
 	if os.path.isdir(path): 

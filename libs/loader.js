@@ -305,6 +305,22 @@ loader.prototype.loadImagesFromZip = function (url, names, toSave, onprogress, o
 loader.prototype._loadAnimates_sync = function () {
     this._setStartLoadTipText("正在加载动画文件...");
 
+    if (main.supportBunch) {
+        if (core.animates.length > 0) {
+            core.http('GET', '__all_animates__?v=' + main.version + '&id=' + core.animates.join(','), null, function (content) {
+                var u = content.split('@@@~~~###~~~@@@');
+                for (var i = 0; i < core.animates.length; ++i) {
+                    if (u[i] != '') {
+                        core.material.animates[core.animates[i]] = core.loader._loadAnimate(u[i]);
+                    } else {
+                        console.error('无法找到动画文件' + core.animates[i] + '！');
+                    }
+                }
+            }, "text/plain; charset=x-user-defined");
+        }
+        return;
+    }
+
     core.animates.forEach(function (t) {
         core.http('GET', 'project/animates/' + t + ".animate?v=" + main.version, null, function (content) {        
             core.material.animates[t] = core.loader._loadAnimate(content);

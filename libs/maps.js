@@ -1684,25 +1684,26 @@ maps.prototype._makeAutotileEdges = function () {
     ctx.msImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
 
+    var first = {}, second = {};
     autotileIds.forEach(function (t) {
         var n = core.maps.getNumberById(t);
-        core.material.autotileEdges[n] = [n];
-
         core.clearMap(ctx, 0, 0, 32, 32);
         core.drawImage(ctx, core.material.images.autotile[t], 0, 0, 32, 32, 0, 0, 32, 32);
-        var data = canvas.toDataURL("image/png");
+        first[n] = canvas.toDataURL("image/png");
+        core.clearMap(ctx, 0, 0, 32, 32);
+        core.drawImage(ctx, core.material.images.autotile[t], 32, 0, 32, 32, 0, 0, 32, 32);
+        second[n] = canvas.toDataURL("image/png");
+    });
 
-        autotileIds.forEach(function (t2) {
-            if (t == t2) return;
-            var n2 = core.maps.getNumberById(t2);
-
-            core.clearMap(ctx, 0, 0, 32, 32);
-            core.drawImage(ctx, core.material.images.autotile[t2], 32, 0, 32, 32, 0, 0, 32, 32);
-            if (data == canvas.toDataURL("image/png")) {
+    for (var n in first) {
+        core.material.autotileEdges[n] = [n];
+        for (var n2 in second) {
+            if (n == n2) continue;
+            if (first[n] == second[n2]) {
                 core.material.autotileEdges[n].push(n2);
             }
-        });
-    });
+        }
+    }
 }
 
 ////// 绘制缩略图 //////

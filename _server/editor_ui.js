@@ -787,6 +787,88 @@ editor_ui_wrapper = function (editor) {
         return list;
     }
 
+    // ------ 选择楼层 ------ //
+    uievent.selectFloor = function (floorId, title, callback) {
+        uievent.isOpen = true;
+        uievent.elements.div.style.display = 'block';
+        uievent.mode = 'selectFloor';
+        uievent.elements.selectPoint.style.display = 'none';
+        uievent.elements.yes.style.display = 'block';
+        uievent.elements.title.innerText = title;
+        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.selectFloor.style.display = 'none';
+        uievent.elements.selectPointBox.style.display = 'none';
+        uievent.elements.canvas.style.display = 'none';
+        uievent.elements.usedFlags.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'block';
+        uievent.elements.body.style.overflow = "auto";
+
+        uievent.elements.yes.onclick = function () {
+            var floorId = uievent.values.floorId;
+            uievent.close();
+            if (callback) callback(floorId);
+        }
+
+        if (floorId instanceof Array) floorId = floorId[0];
+        if (!floorId) floorId = editor.currentFloorId;
+        uievent.values.floorId = floorId;
+
+        var html = "<p style='margin-left: 10px; line-height: 25px'>";
+        html += "搜索楼层：<input type='text' oninput='editor.uievent._selectFloor_update(this.value)' "
+        html += "placeholder='楼层ID或楼层名...' style='vertical-align:text-bottom'><br/>"
+        html += '<span id="selectFloor_floorList"></span>';
+        html += "</p>";
+
+        uievent.elements.extraBody.innerHTML = html;
+        uievent._selectFloor_update();
+    }
+
+    uievent._selectFloor_update = function (value) {
+        value = value || '';
+        var floorList = document.getElementById('selectFloor_floorList');
+        var html = '';
+        core.floorIds.forEach(function (one) {
+            var checked = one == uievent.values.floorId;
+            var floor = core.floors[one];
+            if (floor == null) return;
+            if (!one.includes(value) && !(floor.title||"").includes(value) && !(floor.name||"").includes(value)) return;
+            html += "<input type='radio' name='uievent_selectFloor' onchange='editor.uievent.values.floorId=\""+one+"\"'" + (checked ? ' checked' : '') + ">";
+            html += "<span onclick='this.previousElementSibling.checked=true;editor.uievent.values.floorId=\""+one+"\"' style='cursor: default'>" 
+                + one + '（' + floor.title + '）' + "</span>";
+            html += "<button onclick='editor.uievent._selectFloor_preview(this)' style='margin-left: 10px'>预览</button>";
+            html += "<span style='display:none;' key='"+one+"'></span>";
+            html += '<br/>';
+        });
+        floorList.innerHTML = html;
+    }
+
+    uievent._selectFloor_preview = function (button) {
+        var span = button.nextElementSibling;
+        while (span.firstChild) span.removeChild(span.lastChild);
+        var floorId = span.getAttribute('key');
+
+        if (span.style.display == 'none') {
+            button.innerText = '收起';
+            span.style.display = 'inline';
+            if (!uievent.values.dom) {
+                var canvas = document.createElement('canvas');
+                canvas.style.position = 'relative';
+                canvas.style.marginLeft = "-10px";
+                canvas.style.marginTop = '5px';
+                canvas.style.width = "100%"
+                canvas.width = canvas.height = core.__PIXELS__;
+                uievent.values.dom = canvas;
+                uievent.values.ctx = canvas.getContext('2d');
+            }
+            span.appendChild(uievent.values.dom);
+            core.clearMap(uievent.values.ctx);
+            core.drawThumbnail(floorId, null, {ctx: uievent.values.ctx});
+        } else {
+            button.innerText = '预览';
+            span.style.display = 'none';
+        }
+    }
+
     // ------ 素材选择框 ------ //
     uievent.selectMaterial = function (value, title, directory, transform, callback) {
         var one = directory.split(':');

@@ -57,6 +57,7 @@ function editor() {
         showMovable: document.getElementById('showMovable'),
         gameInject: document.getElementById('gameInject'),
         undoFloor: document.getElementById('undoFloor'),
+        selectFloorBtn: document.getElementById('selectFloorBtn'),
         editorTheme: document.getElementById('editorTheme'),
         bigmapBtn : document.getElementById('bigmapBtn'),
         mapRowMark: document.getElementById('mapRowMark'),

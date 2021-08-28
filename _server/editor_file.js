@@ -219,7 +219,15 @@ editor_file = function (editor, callback) {
             color: currData.color,
             weather: currData.weather,
         }:{});
-        
+        // 继承配置表格新增的基本楼层属性
+        if (saveStatus) {
+            for (var x in currData) {
+                if (editor.currentFloorData[x] == null && (typeof currData[x] == 'number' || typeof currData[x] == 'string')) {
+                    editor.currentFloorData[x] = currData[x];
+                }
+            }
+        }
+
         Object.keys(editor.currentFloorData).forEach(function (t) {
             if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];

@@ -1303,15 +1303,9 @@ control.prototype.drawDamage = function (ctx) {
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
     if (!core.hasItem('book')) return;
-    // 双缓冲
-    var cacheCtx = core.bigmap.cacheCanvas;
-    cacheCtx.canvas.width = ctx.canvas.width;
-    cacheCtx.canvas.height = ctx.canvas.height;
-    cacheCtx.clearRect(0, 0, cacheCtx.canvas.width, cacheCtx.canvas.height);
-    if (onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
 
-    core.setFont(cacheCtx, "bold 11px Arial");
-    core.setTextAlign(cacheCtx, 'left');
+    core.setFont(ctx, "bold 11px Arial");
+    core.setTextAlign(ctx, 'left');
     core.status.damage.data.forEach(function (one) {
         var px = one.px, py = one.py;
         if (onMap && core.bigmap.v2) {
@@ -1320,10 +1314,10 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 * 2 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;
         }
-        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
+        core.fillBoldText(ctx, one.text, px, py, one.color);
     });
 
-    core.setTextAlign(cacheCtx, 'center');
+    core.setTextAlign(ctx, 'center');
     core.status.damage.extraData.forEach(function (one) {
         var px = one.px, py = one.py;
         if (onMap && core.bigmap.v2) {
@@ -1332,13 +1326,10 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;         
         }
-        var alpha = core.setAlpha(cacheCtx, one.alpha);
-        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
-        core.setAlpha(cacheCtx, alpha);
+        var alpha = core.setAlpha(ctx, one.alpha);
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.setAlpha(ctx, alpha);
     });
-    cacheCtx.translate(0, 0);
-
-    core.drawImage(ctx, cacheCtx.canvas, onMap && core.bigmap.v2 ? -32 : 0, onMap && core.bigmap.v2 ? -32 : 0);
 }
 
 // ------ 录像相关 ------ //

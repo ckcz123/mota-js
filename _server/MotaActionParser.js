@@ -322,7 +322,7 @@ ActionParser.prototype.parseAction = function() {
         data.time, data.lineHeight||1.4, data.async||false, this.EvalString_Multi(data.text), this.next]);
         break;
     case "comment": // 注释
-      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next],null,data.text);
+      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next]);
       break;
     case "setText": // 设置剧情文本的属性
       data.title=this.Colour(data.title);
@@ -1464,7 +1464,7 @@ MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
   //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   var comma = PosString.indexOf(',');
-  if (comma >= 0 && PosString.substring(0, comma).ifndexOf('(') < 0) throw '此处不可写多点坐标';
+  if (comma >= 0 && PosString.substring(0, comma).indexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
 }
 

@@ -396,20 +396,40 @@ editor.prototype.drawEventBlock = function () {
                 var directions = (movableArray[x]||{})[y];
                 if (directions == null) continue;
                 if (!directions.includes('left') && x != 0) {
-                    core.drawLine(fg, 32 * i + 1, 32 * j + 10, 32 * i + 1, 32 * j + 22, '#FF0000', 2);
-                    core.fillPolygon(fg, [[32 * i + 9, 32 * j + 12], [32 * i + 1, 32 * j + 16], [32 * i + 9, 32 * j + 20]], '#FF0000');
+                    var ndirections = (movableArray[x-1]||{})[y];
+                    if (ndirections != null && !ndirections.includes('right')) {
+                        core.drawLine(fg, 32 * i + 1, 32 * j + 6, 32 * i + 1, 32 * j + 26, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, 32 * i + 1, 32 * j + 10, 32 * i + 1, 32 * j + 22, '#FF0000', 2);
+                        core.fillPolygon(fg, [[32 * i + 9, 32 * j + 12], [32 * i + 1, 32 * j + 16], [32 * i + 9, 32 * j + 20]], '#FF0000');
+                    }
                 }
                 if (!directions.includes('right') && x != editor.currentFloorData.width - 1) {
-                    core.drawLine(fg, 32 * i + 31, 32 * j + 10, 32 * i + 31, 32 * j + 22, '#FF0000', 2);
-                    core.fillPolygon(fg, [[32 * i + 23, 32 * j + 12], [32 * i + 31, 32 * j + 16], [32 * i + 23, 32 * j + 20]], '#FF0000');
+                    var ndirections = (movableArray[x+1]||{})[y];
+                    if (ndirections != null && !ndirections.includes('left')) {
+                        core.drawLine(fg, 32 * i + 31, 32 * j + 6, 32 * i + 31, 32 * j + 26, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, 32 * i + 31, 32 * j + 10, 32 * i + 31, 32 * j + 22, '#FF0000', 2);
+                        core.fillPolygon(fg, [[32 * i + 23, 32 * j + 12], [32 * i + 31, 32 * j + 16], [32 * i + 23, 32 * j + 20]], '#FF0000');
+                    }
                 }
                 if (!directions.includes('up') && y != 0) {
-                    core.drawLine(fg, 32 * i + 10, 32 * j + 1, 32 * i + 22, 32 * j + 1, '#FF0000', 2);
-                    core.fillPolygon(fg, [[32 * i + 12, 32 * j + 9], [32 * i + 16, 32 * j + 1], [32 * i + 20, 32 * j + 9]], '#FF0000');
+                    var ndirections = movableArray[x][y-1];
+                    if (ndirections != null && !ndirections.includes('down')) {
+                        core.drawLine(fg, 32 * i + 6, 32 * j + 1, 32 * i + 26, 32 * j + 1, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, 32 * i + 10, 32 * j + 1, 32 * i + 22, 32 * j + 1, '#FF0000', 2);
+                        core.fillPolygon(fg, [[32 * i + 12, 32 * j + 9], [32 * i + 16, 32 * j + 1], [32 * i + 20, 32 * j + 9]], '#FF0000');
+                    }
                 }
                 if (!directions.includes('down') && y != editor.currentFloorData.height - 1) {
-                    core.drawLine(fg, 32 * i + 10, 32 * j + 31, 32 * i + 22, 32 * j + 31, '#FF0000', 2);
-                    core.fillPolygon(fg, [[32 * i + 12, 32 * j + 23], [32 * i + 16, 32 * j + 31], [32 * i + 20, 32 * j + 23]], '#FF0000');
+                    var ndirections = movableArray[x][y+1];
+                    if (ndirections != null && !ndirections.includes('up')) {
+                        core.drawLine(fg, 32 * i + 6, 32 * j + 31, 32 * i + 26, 32 * j + 31, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, 32 * i + 10, 32 * j + 31, 32 * i + 22, 32 * j + 31, '#FF0000', 2);
+                        core.fillPolygon(fg, [[32 * i + 12, 32 * j + 23], [32 * i + 16, 32 * j + 31], [32 * i + 20, 32 * j + 23]], '#FF0000');
+                    }
                 }
             }
         }
@@ -471,28 +491,48 @@ editor.prototype._drawEventBlock_bigmap = function () {
                 var directions = (movableArray[i]||{})[j];
                 if (directions == null) continue;
                 if (!directions.includes('left') && i != 0) {
-                    core.drawLine(fg, info.left + size * i, info.top + size * j + size / 3, info.left + size * i + 1, info.top + size * j + size * 2 / 3, '#FF0000', 2);
-                    core.fillPolygon(fg, [[info.left + size * i + size / 4, info.top + size * j + size * 3 / 8], 
-                                          [info.left + size * i, info.top + size * j + size / 2], 
-                                          [info.left + size * i + size / 4, info.top + size * j + size * 5 / 8]], '#FF0000');
+                    var ndirections = (movableArray[i-1]||{})[j];
+                    if (ndirections != null && !ndirections.includes('right')) {
+                        core.drawLine(fg, info.left + size * i, info.top + size * j + size / 4, info.left + size * i, info.top + size * j + size * 3 / 4, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, info.left + size * i, info.top + size * j + size / 3, info.left + size * i, info.top + size * j + size * 2 / 3, '#FF0000', 2);
+                        core.fillPolygon(fg, [[info.left + size * i + size / 4, info.top + size * j + size * 3 / 8], 
+                                            [info.left + size * i, info.top + size * j + size / 2], 
+                                            [info.left + size * i + size / 4, info.top + size * j + size * 5 / 8]], '#FF0000');
+                    }
                 }
                 if (!directions.includes('right') && i != editor.currentFloorData.width - 1) {
-                    core.drawLine(fg, info.left + size * i + size, info.top + size * j + size / 3, info.left + size * i + size, info.top + size * j + size * 2 / 3, '#FF0000', 2);
-                    core.fillPolygon(fg, [[info.left + size * i + size * 3 / 4, info.top + size * j + size * 3 / 8], 
-                        [info.left + size * i + size, info.top + size * j + size / 2], 
-                        [info.left + size * i + size * 3 / 4, info.top + size * j + size * 5 / 8]], '#FF0000');
+                    var ndirections = (movableArray[i+1]||{})[j];
+                    if (ndirections != null && !ndirections.includes('left')) {
+                        core.drawLine(fg, info.left + size * i + size, info.top + size * j + size / 4, info.left + size * i + size, info.top + size * j + size * 3 / 4, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, info.left + size * i + size, info.top + size * j + size / 3, info.left + size * i + size, info.top + size * j + size * 2 / 3, '#FF0000', 2);
+                        core.fillPolygon(fg, [[info.left + size * i + size * 3 / 4, info.top + size * j + size * 3 / 8], 
+                            [info.left + size * i + size, info.top + size * j + size / 2], 
+                            [info.left + size * i + size * 3 / 4, info.top + size * j + size * 5 / 8]], '#FF0000');
+                    }
                 }
                 if (!directions.includes('up') && j != 0) {
-                    core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j, info.left + size * i + size * 2 / 3, info.top + size * j, '#FF0000', 2);
-                    core.fillPolygon(fg, [[info.left + size * i + size * 3 / 8, info.top + size * j + size / 4], 
-                        [info.left + size * i + size / 2, info.top + size * j], 
-                        [info.left + size * i + size * 5 / 8, info.top + size * j + size / 4]], '#FF0000');
+                    var ndirections = movableArray[i][j-1];
+                    if (ndirections != null && !ndirections.includes('down')) {
+                        core.drawLine(fg, info.left + size * i + size / 4, info.top + size * j, info.left + size * i + size * 3 / 4, info.top + size * j, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j, info.left + size * i + size * 2 / 3, info.top + size * j, '#FF0000', 2);
+                        core.fillPolygon(fg, [[info.left + size * i + size * 3 / 8, info.top + size * j + size / 4], 
+                            [info.left + size * i + size / 2, info.top + size * j], 
+                            [info.left + size * i + size * 5 / 8, info.top + size * j + size / 4]], '#FF0000');
+                    }
                 }
                 if (!directions.includes('down') && j != editor.currentFloorData.height - 1) {
-                    core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j + size - 1, info.left + size * i + size * 2 / 3, info.top + size * j + size - 1, '#FF0000', 2);
-                    core.fillPolygon(fg, [[info.left + size * i + size * 3 / 8, info.top + size * j + size  * 3 / 4], 
-                        [info.left + size * i + size / 2, info.top + size * j + size], 
-                        [info.left + size * i + size * 5 / 8, info.top + size * j + size * 3 / 4]], '#FF0000');
+                    var ndirections = movableArray[i][j+1];
+                    if (ndirections != null && !ndirections.includes('up')) {
+                        core.drawLine(fg, info.left + size * i + size / 4, info.top + size * j + size, info.left + size * i + size * 3 / 4, info.top + size * j + size, '#FF0000', 2);
+                    } else {
+                        core.drawLine(fg, info.left + size * i + size / 3, info.top + size * j + size, info.left + size * i + size * 2 / 3, info.top + size * j + size, '#FF0000', 2);
+                        core.fillPolygon(fg, [[info.left + size * i + size * 3 / 8, info.top + size * j + size  * 3 / 4], 
+                            [info.left + size * i + size / 2, info.top + size * j + size], 
+                            [info.left + size * i + size * 5 / 8, info.top + size * j + size * 3 / 4]], '#FF0000');
+                    }
                 }
             }
         }
@@ -729,9 +769,14 @@ editor.prototype.drawInitData = function (icons) {
         }
         var width = images[img].width, height = images[img].height, mh = height;
         if (editor.uivalues.folded) {
-            var per_height = (img == 'enemy48' || img == 'npc48' ? 48 : 32);
-            width = Math.ceil(height / per_height / editor.uivalues.foldPerCol) * 32;
-            if (width > 32) mh = per_height * editor.uivalues.foldPerCol;
+            if (img == 'terrains') {
+                width = Math.ceil((height / 32 + 2) / editor.uivalues.foldPerCol) * 32;
+                if (width > 32) mh = 32 * editor.uivalues.foldPerCol;
+            } else {
+                var per_height = (img == 'enemy48' || img == 'npc48' ? 48 : 32);
+                width = Math.ceil(height / per_height / editor.uivalues.foldPerCol) * 32;
+                if (width > 32) mh = per_height * editor.uivalues.foldPerCol;
+            }
         }
         editor.widthsX[img] = [img, sumWidth / 32, (sumWidth + width) / 32, height];
         sumWidth += width;
@@ -812,10 +857,14 @@ editor.prototype.drawInitData = function (icons) {
             })(editor.airwallImg,nowx);
             if (editor.uivalues.folded) {
                 // --- 单列 & 折行
-                var subimgs = core.splitImage(images[img], 32, editor.uivalues.foldPerCol * 32);
+                var canvas = document.createElement("canvas");
+                canvas.width = 32;
+                canvas.height = images[img].height + 64;
+                canvas.getContext('2d').drawImage(images[img], 0, 64);
+                var subimgs = core.splitImage(canvas, 32, editor.uivalues.foldPerCol * 32);
                 var frames = images[img].width / 32;
                 for (var i = 0; i < subimgs.length; i+=frames) {
-                    drawImage(subimgs[i], nowx, i==0?2*32:0, img);
+                    drawImage(subimgs[i], nowx, 0, img);
                     nowx += 32;
                 }
             }

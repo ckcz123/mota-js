@@ -2482,14 +2482,6 @@ ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts)
     });
     while (criticals[0]=='0:0') criticals.shift();
     texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]"+JSON.stringify(criticals));
-    var prevInfo = core.getDamageInfo(enemy.id, {atk: core.status.hero.atk-1}, null, null, floorId);
-    if (prevInfo != null && damageInfo != null) {
-        if (damageInfo.damage != null) damageInfo = damageInfo.damage;
-        if (prevInfo.damage != null) prevInfo = prevInfo.damage;
-        if (prevInfo > damageInfo) {
-            texts.push("（当前攻击力正位于临界点上）")
-        }
-    }
 }
 
 ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {

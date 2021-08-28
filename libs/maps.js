@@ -1696,8 +1696,10 @@ maps.prototype._makeAutotileEdges = function () {
     });
 
     for (var n in first) {
+        n = parseInt(n);
         core.material.autotileEdges[n] = [n];
         for (var n2 in second) {
+            n2 = parseInt(n2);
             if (n == n2) continue;
             if (first[n] == second[n2]) {
                 core.material.autotileEdges[n].push(n2);

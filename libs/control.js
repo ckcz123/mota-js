@@ -1989,12 +1989,7 @@ control.prototype._doSL_save = function (id) {
         core.drawTip('存档成功！');
     }, function(err) {
         main.log(err);
-        if (core.platform.useLocalForage) {
-            alert("存档失败，错误信息：\n"+err);
-        }
-        else {
-            alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
-        }
+        alert("存档失败，错误信息：\n"+err);
     });
     core.removeFlag("__events__");
     return;
@@ -2290,19 +2285,16 @@ control.prototype.getAllSaves = function (callback) {
 ////// 获得所有存在存档的存档位 //////
 control.prototype.getSaveIndexes = function (callback) {
     var indexes = {};
-    if (core.platform.useLocalForage) {
-        localforage.iterate(function (value, key, n) {
+    localforage.keys(function (err, keys) {
+       if (err) {
+           main.log(err);
+           return callback(indexes);
+       }
+       keys.forEach(function (key) {
             core.control._getSaveIndexes_getIndex(indexes, key);
-        }, function () {
-            callback(indexes);
-        });
-    }
-    else {
-        Object.keys(localStorage).forEach(function (key) {
-            core.control._getSaveIndexes_getIndex(indexes, key);
-        });
-        callback(indexes);
-    }
+       });
+       callback(indexes);
+   });
 }
 
 control.prototype._getSaveIndexes_getIndex = function (indexes, name) {

@@ -150,12 +150,14 @@
                 <button>确定</button>
                 <br/>
                 <button style="margin-top: 10px">自动注册</button>
-                <button style="margin-top: 10px; margin-left: 10px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">以此素材为模板追加</button>
             </div>
             <div id='changeId'><!-- id and idnum -->
-                <input placeholder="修改图块id为"/>
+                <input placeholder="修改图块id为" style="width: 100px"/>
                 <button>确定</button>
-                <button style="margin-left: 10px">删除此素材</button>
+                <button style="margin-left: 5px">删除此素材</button>
+                <button style="margin-left: 5px">以此素材为模板追加</button>
             </div>
         </div>
     </div>
@@ -346,7 +348,7 @@
                         <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
                     </div>
                 </div>
-                <select id="editModeSelect">
+                <select id="editModeSelect" style="font-size: 12px">
                     <option value="map">地图编辑</option>
                     <option value="loc">地图选点</option>
                     <option value="enemyitem">图块属性</option>
@@ -381,8 +383,9 @@
                     <input type="button" id="bigmapBtn" value="大地图" style="margin-left: 5px"/>
                 </div>
                 <select id="selectFloor" style="clear:left"></select>
+                <input type="button" value="选层" id='selectFloorBtn'/>
                 <input type="button" value="保存地图" id='saveFloor'/>
-                <input type="button" value="后退" id="undoFloor" />
+                <input type="button" value="后退" id="undoFloor" style="display: none;"/>
                 <input type="button" value="帮助文档" id="openDoc" />
                 <span id='mobileeditdata' style="display:none">
                     <input type="button" value="编辑"/>

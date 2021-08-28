@@ -2817,14 +2817,8 @@ actions.prototype._clickStorageRemove_all = function () {
             core.removeLocalStorage('saveIndex');
             core.drawText("\t[操作成功]你的所有存档已被清空。");
         };
-        if (core.platform.useLocalForage) {
-            core.ui.drawWaiting("正在清空，请稍候...");
-            localforage.clear(done);
-        }
-        else {
-            localStorage.clear();
-            done();
-        }
+        core.ui.drawWaiting("正在清空，请稍候...");
+        localforage.clear(done);
     });
 }
 
@@ -2843,20 +2837,11 @@ actions.prototype._clickStorageRemove_current = function () {
             core.removeLocalStorage('saveIndex');
             core.drawText("\t[操作成功]当前塔的存档已被清空。");
         }
-        if (core.platform.useLocalForage) {
-            core.ui.drawWaiting("正在清空，请稍候...");
-            Object.keys(core.saves.ids).forEach(function (v) {
-                core.removeLocalForage("save" + v);
-            });
-            core.removeLocalForage("autoSave", done);
-        }
-        else {
-            Object.keys(core.saves.ids).forEach(function (v) {
-                core.removeLocalStorage("save" + v);
-            });
-            core.removeLocalStorage("autoSave");
-            done();
-        }
+        core.ui.drawWaiting("正在清空，请稍候...");
+        Object.keys(core.saves.ids).forEach(function (v) {
+            core.removeLocalForage("save" + v);
+        });
+        core.removeLocalForage("autoSave", done);
     });
 }
 

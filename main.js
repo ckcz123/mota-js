@@ -290,8 +290,19 @@ main.prototype.loadFloors = function (callback) {
             main.dom.mainTips.style.display = 'none';
             callback();
         }
+        return;
     }
-    else {
+
+    // 高层塔优化
+    var script = document.createElement('script');
+    script.src = '__all_floors__.js?v=' + this.version + '&id=' + main.floorIds.join(',');
+    script.onload = function () {
+        main.dom.mainTips.style.display = 'none';
+        main.supportBunch = true;
+        callback();
+    }
+    script.onerror = script.onabort = script.ontimeout = function (e) {
+        console.clear();
         for (var i = 0; i < main.floorIds.length; i++) {
             main.loadFloor(main.floorIds[i], function (modName) {
                 main.setMainTipsText("楼层 " + modName + '.js 加载完毕');
@@ -300,8 +311,9 @@ main.prototype.loadFloors = function (callback) {
                     callback();
                 }
             });
-        }
+        }    
     }
+    main.dom.body.appendChild(script);
 }
 
 ////// 加载某一个楼层 //////

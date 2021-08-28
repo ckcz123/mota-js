@@ -332,6 +332,9 @@ editor_datapanel_wrapper = function (editor) {
                 window.location.reload();
             });
         }
+        newIdIdnum.children[6].onclick = function () {
+            editor.uifunctions.appendMaterialByInfo(editor_mode.info);
+        }
     }
 
     editor.uifunctions.changeId_func = function () {
@@ -380,6 +383,9 @@ editor_datapanel_wrapper = function (editor) {
                 alert('删除此素材成功！');
                 window.location.reload();
             });
+        }
+        changeId.children[3].onclick = function () {
+            editor.uifunctions.appendMaterialByInfo(editor_mode.info);
         }
     }
 
@@ -811,6 +817,10 @@ editor_datapanel_wrapper = function (editor) {
         }
 
         var loadImage = function (content, callback) {
+            if (content instanceof Image || content.getContext != null) {
+                callback(content);
+                return;
+            }
             var image = new Image();
             try {
                 image.onload = function () {
@@ -1124,6 +1134,46 @@ editor_datapanel_wrapper = function (editor) {
             }
             reader.readAsDataURL(file);
         }
+
+        editor.uifunctions.appendMaterialByInfo = function (info) {
+            if (info.isTile) {
+                printe('额外素材不支持此功能！');
+                return;
+            }
+            var img = null;
+            var cls = info.images;
+            var height = cls == 'enemy48' || cls == 'npc48' ? 48 : 32;
+
+            if (cls == 'autotile') {
+                img = core.material.images.autotile[info.id];
+            } else {
+                var image = core.material.images[cls];
+                var width = image.width;
+                img = document.createElement('canvas');
+                img.width = width;
+                img.height = height;
+                img.getContext('2d').drawImage(image, 0, info.y * height, width, height, 0, 0, width, height);
+            }
+
+            editor.mode.change('appendpic');
+            editor.dom.selectAppend.value = cls;
+            editor.dom.selectAppend.onchange();
+
+            afterReadFile(img, function () {
+                changeColorInput.value = 0;
+                if (cls == 'autotile') return;
+
+                editor_mode.appendPic.index = 0;
+                for (var ii = 0; ii < editor_mode.appendPic.num; ++ii) {
+                    editor_mode.appendPic.selectPos[ii] = {x: ii, y: 0, ysize: height};
+                    editor.dom.appendPicSelection.children[ii].style = [
+                        'left:', ii * 32, 'px;',
+                        'top:', 0, 'px;',
+                        'height:', height - 6, 'px;'
+                    ].join('');
+                }
+            });
+        } 
     }
 
     ///////////////////////////////////////////////////////////////////////

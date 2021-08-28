@@ -57,6 +57,7 @@ function editor() {
         showMovable: document.getElementById('showMovable'),
         gameInject: document.getElementById('gameInject'),
         undoFloor: document.getElementById('undoFloor'),
+        selectFloorBtn: document.getElementById('selectFloorBtn'),
         editorTheme: document.getElementById('editorTheme'),
         bigmapBtn : document.getElementById('bigmapBtn'),
         mapRowMark: document.getElementById('mapRowMark'),
@@ -754,6 +755,27 @@ editor.prototype.drawInitData = function (icons) {
     });
     var imgNames = ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48", "autotile"];
 
+    var splitCanvas = document.createElement('canvas');
+    var splitCtx = splitCanvas.getContext('2d');
+    splitCtx.imageSmoothingEnabled = false;
+
+    var splitImage = function (image, width, height) {
+        if (image.width == width && image.height == height) {
+            return [image];
+        }
+        var ans = [];
+        for (var j = 0; j < image.height; j += h) {
+            var h = Math.min(height, image.height - j);
+            splitCanvas.width = width;
+            splitCanvas.height = h;
+            core.drawImage(splitCtx, image, 0, j, width, h, 0, 0, width, h);
+            var data = new Image();
+            data.src = splitCanvas.toDataURL("image/png");
+            ans.push(data);
+        }
+        return ans;
+    }
+
     for (var ii = 0; ii < imgNames.length; ii++) {
         var img = imgNames[ii], tempy = 0;
         if (img == 'autotile') {
@@ -861,9 +883,8 @@ editor.prototype.drawInitData = function (icons) {
                 canvas.width = 32;
                 canvas.height = images[img].height + 64;
                 canvas.getContext('2d').drawImage(images[img], 0, 64);
-                var subimgs = core.splitImage(canvas, 32, editor.uivalues.foldPerCol * 32);
-                var frames = images[img].width / 32;
-                for (var i = 0; i < subimgs.length; i+=frames) {
+                var subimgs = splitImage(canvas, 32, editor.uivalues.foldPerCol * 32);
+                for (var i = 0; i < subimgs.length; i++) {
                     drawImage(subimgs[i], nowx, 0, img);
                     nowx += 32;
                 }
@@ -879,7 +900,7 @@ editor.prototype.drawInitData = function (icons) {
             var tempx = editor.uivalues.folded ? 32 : 96;
             for (var im in autotiles) {
                 var tempy = editor.uivalues.folded ? 32 : autotiles[im].height;
-                var subimgs = core.splitImage(autotiles[im], tempx, tempy);
+                var subimgs = splitImage(autotiles[im], tempx, tempy);
                 drawImage(subimgs[0], nowx, nowy, img);
                 nowy += tempy;
             }
@@ -889,9 +910,8 @@ editor.prototype.drawInitData = function (icons) {
         if (editor.uivalues.folded) {
             // --- 单列 & 折行
             var per_height = img.endsWith('48') ? 48 : 32;
-            var subimgs = core.splitImage(images[img], 32, editor.uivalues.foldPerCol * per_height);
-            var frames = images[img].width / 32;
-            for (var i = 0; i < subimgs.length; i+=frames) {
+            var subimgs = splitImage(images[img], 32, editor.uivalues.foldPerCol * per_height);
+            for (var i = 0; i < subimgs.length; i++) {
                 drawImage(subimgs[i], nowx, 0, img);
                 nowx += 32;
             }

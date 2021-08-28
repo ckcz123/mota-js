@@ -109,24 +109,8 @@ var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
 		"expShop": 9,
 		"moneyShop": 10,
 		"princess": 11,
-		"greenMan": 28,
-		"blueTrader": 29,
-		"octopusLeftTop": 12,
-		"octopusTop": 13,
-		"octopusRightTop": 14,
-		"octopusLeft": 15,
-		"octopusCenter": 16,
-		"octopusRight": 17,
-		"octopusLeftBottom": 18,
-		"octopusRightBottom": 19,
-		"dragonLeftTop": 20,
-		"dragonTop": 21,
-		"dragonRightTop": 22,
-		"dragonLeft": 23,
-		"dragonCenter": 24,
-		"dragonRight": 25,
-		"dragonLeftBottom": 26,
-		"dragonRightBottom": 27
+		"greenMan": 12,
+		"blueTrader": 13
 	},
 	"npc48": {
 		"npc0": 0,
@@ -219,7 +203,11 @@ var icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1 =
 		"angel": 0,
 		"elemental": 1,
 		"steelGuard": 2,
-		"evilBat": 3
+		"evilBat": 3,
+		"bearDown": 4,
+		"bearLeft": 5,
+		"bearRight": 6,
+		"bearUp": 7
 	},
 	"items": {
 		"yellowKey": 0,

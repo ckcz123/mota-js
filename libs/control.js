@@ -2285,7 +2285,7 @@ control.prototype.getAllSaves = function (callback) {
 ////// 获得所有存在存档的存档位 //////
 control.prototype.getSaveIndexes = function (callback) {
     var indexes = {};
-    localforage.keys(function (err, keys) {
+    core.keysLocalForage(function (err, keys) {
        if (err) {
            main.log(err);
            return callback(indexes);

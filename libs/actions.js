@@ -2804,7 +2804,8 @@ actions.prototype._clickStorageRemove = function (x, y) {
 
 actions.prototype._clickStorageRemove_all = function () {
     core.myconfirm("你确定要清除【全部游戏】的所有本地存档？\n此行为不可逆！！！", function () {
-        var done = function () {
+        core.ui.drawWaiting("正在清空，请稍候...");
+        core.clearLocalForage(function () {
             core.saves.ids = {};
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
@@ -2816,9 +2817,7 @@ actions.prototype._clickStorageRemove_all = function () {
             core.control._updateFavoriteSaves();
             core.removeLocalStorage('saveIndex');
             core.drawText("\t[操作成功]你的所有存档已被清空。");
-        };
-        core.ui.drawWaiting("正在清空，请稍候...");
-        localforage.clear(done);
+        });
     });
 }
 

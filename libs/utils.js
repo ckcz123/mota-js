@@ -257,12 +257,11 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
         return;
     }
 
-    // Save to localforage
+    var name = core.firstData.name + "_" + key;
     var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
         return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
     });
-    var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
-    localforage.setItem(core.firstData.name + "_" + key, compressed, function (err) {
+    var callback = function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
@@ -271,11 +270,21 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
             else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
             if (successCallback) successCallback();
         }
-    });
+    }
+
+    if (window.jsinterface && window.jsinterface.setLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.setLocalForage(id, name, str);
+    } else {
+        var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
+        localforage.setItem(name, compressed, callback);
+    }
 }
 
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
-    localforage.getItem(core.firstData.name + "_" + key, function (err, value) {
+    var name = core.firstData.name + "_" + key;
+    var callback = function (err, value) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
@@ -288,11 +297,20 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             }
             successCallback(defaultValue);
         }
-    })
+    };
+
+    if (window.jsinterface && window.jsinterface.getLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.getLocalForage(id, name);
+    } else {
+        localforage.getItem(name, callback);
+    }
 }
 
 utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
-    localforage.removeItem(core.firstData.name + "_" + key, function (err) {
+    var name = core.firstData.name + "_" + key;
+    var callback = function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
@@ -301,7 +319,56 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
             else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
             if (successCallback) successCallback();
         }
-    })
+    }
+
+    if (window.jsinterface && window.jsinterface.removeLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.removeLocalForage(id, name);
+    } else {
+        localforage.removeItem(name, callback);
+    }
+}
+
+utils.prototype.clearLocalForage = function (callback) {
+    if (window.jsinterface && window.jsinterface.clearLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.clearLocalForage(id);
+    } else {
+        localforage.clear(callback);
+    }
+}
+
+utils.prototype.iterateLocalForage = function (iter, callback) {
+    if (window.jsinterface && window.jsinterface.iterateLocalForage) {
+        var id = setTimeout(null);
+        core['__iter' + id] = iter;
+        core['__callback' + id] = callback;
+        window.jsinterface.iterateLocalForage(id);
+    } else {
+        localforage.iterate(iter, callback);
+    }
+}
+
+utils.prototype.keysLocalForage = function (callback) {
+    if (window.jsinterface && window.jsinterface.keysLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.keysLocalForage(id);
+    } else {
+        localforage.keys(callback);
+    }
+}
+
+utils.prototype.lengthLocalForage = function (callback) {
+    if (window.jsinterface && window.jsinterface.lengthLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.lengthLocalForage(id);
+    } else {
+        localforage.length(callback);
+    }
 }
 
 utils.prototype.setGlobal = function (key, value) {

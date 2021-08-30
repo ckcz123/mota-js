@@ -1189,3 +1189,16 @@ Blockly.FieldDropdown.prototype.doValueUpdate_ = function (newValue) {
         this.selectedOption_ = options[options.length - 1];
     }
 };
+
+Blockly.FieldMultilineInput.prototype.getDisplayText_ = function() {
+    var value = this.value_;
+    if (!value) return Blockly.Field.NBSP;
+    var curr = '', text = '';
+    for (var i = 0; i < value.length; ++i) {
+        if (value[i] == '\n' || curr.length == this.maxDisplayLength) {
+            text += curr.replace(/\s/g, Blockly.Field.NBSP) + '\n';
+            curr = value[i] == '\n' ? '' : value[i];
+        } else curr += value[i];
+    }
+    return text + curr;
+};

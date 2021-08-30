@@ -122,7 +122,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	////// 将一个全局商店转变成可预览的公共事件 //////
 	this._convertShop = function (shop) {
 		return [
-			{ "type": "function", "function": "function() {core.setFlag('@temp@shop', true);}" },
+			{ "type": "function", "function": "function() {core.addFlag('@temp@shop', 1);}" },
 			{
 				"type": "while",
 				"condition": "true",
@@ -156,7 +156,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					}
 				]
 			},
-			{ "type": "function", "function": "function() {core.removeFlag('@temp@shop');}" }
+			{ "type": "function", "function": "function() {core.addFlag('@temp@shop', -1);}" }
 		];
 	}
 

@@ -227,13 +227,13 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	/// 允许商店X键退出
 	core.registerAction('keyUp', 'shops', function (keycode) {
-		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
+		if (!core.status.lockControl || core.status.event.id != 'action') return false;
 		if ((keycode == 13 || keycode == 32) && !_shouldProcessKeyUp) {
 			_shouldProcessKeyUp = true;
 			return true;
 		}
 
-		if (core.status.event.data.type != 'choices') return false;
+		if (!core.hasFlag("@temp@shop") || core.status.event.data.type != 'choices') return false;
 		var data = core.status.event.data.current;
 		var choices = data.choices;
 		var topIndex = core.actions._getChoicesTopIndex(choices.length);

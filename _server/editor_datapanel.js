@@ -301,6 +301,13 @@ editor_datapanel_wrapper = function (editor) {
                     printe('不合法的id，请使用字母、数字或下划线，且不能以数字开头');
                     return;
                 }
+                if (id == 'hero' || id == 'this' || id == 'none' || id == 'airwall') {
+                    printe('不得使用保留关键字作为id！');
+                    return;
+                }
+                if (core.statusBar.icons[id] != null) {
+                    alert('警告！此ID在状态栏图标中被注册；仍然允许使用，但是\\i[]等绘制可能出现冲突。');
+                }
                 editor.file.changeIdAndIdnum(id, idnum, editor_mode.info, function (err) {
                     if (err) {
                         printe(err);
@@ -357,6 +364,9 @@ editor_datapanel_wrapper = function (editor) {
                 if (editor_mode.info.idnum >= 10000) {
                     printe('额外素材不可修改id！');
                     return;
+                }
+                if (core.statusBar.icons[id] != null) {
+                    alert('警告！此ID在状态栏图标中被注册；仍然允许使用，但是\\i[]等绘制可能出现冲突。');
                 }
                 editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {
                     if (err) {

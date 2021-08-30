@@ -2674,10 +2674,9 @@ control.prototype._weather_snow = function (level) {
 
 control.prototype._weather_fog = function (level) {
     if (!core.animateFrame.weather.fog) return;
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
     core.animateFrame.weather.nodes = [{
         'image': core.animateFrame.weather.fog,
-        'level': number,
+        'level': 40 * level,
         'x': 0,
         'y': -core.__PIXELS__ / 2,
         'dx': -Math.random() * 1.5,
@@ -2688,10 +2687,9 @@ control.prototype._weather_fog = function (level) {
 
 control.prototype._weather_cloud = function (level) {
     if (!core.animateFrame.weather.cloud) return;
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
     core.animateFrame.weather.nodes = [{
         'image': core.animateFrame.weather.cloud,
-        'level': number,
+        'level': 40 * level,
         'x': 0,
         'y': -core.__PIXELS__ / 2,
         'dx': -Math.random() * 1.5,
@@ -3229,9 +3227,9 @@ control.prototype.resize = function() {
     var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
     var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.values.statusCanvasRowsOnMobile || 3;
     var col = statusCanvas ? statusCanvasRows : Math.ceil(count / 3);
-    if (col > 4) {
-        if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过4！");
-        else alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
+    if (col > 5) {
+        if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过5！");
+        else alert("当前状态栏数目("+count+")大于15，请调整到不超过15以避免手机端出现显示问题。");
     }
     var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
 
@@ -3241,7 +3239,7 @@ control.prototype.resize = function() {
         CANVAS_WIDTH: CANVAS_WIDTH,
         BORDER: BORDER,
         BAR_WIDTH: BAR_WIDTH,
-        TOOLBAR_HEIGHT: extendToolbar ? 38 : 44,
+        TOOLBAR_HEIGHT: 38,
         outerSize: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
         globalAttribute: globalAttribute,
         border: '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
@@ -3249,7 +3247,7 @@ control.prototype.resize = function() {
         count: count,
         col: col,
         statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER : 0,
-        toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 2 * BORDER : 0,
+        toolbarHeightInVertical: core.domStyle.isVertical ? 38 * core.domStyle.scale + 2 * BORDER : 0,
         extendToolbar: extendToolbar,
         is15x15: core.__SIZE__ == 15
     };
@@ -3456,7 +3454,7 @@ control.prototype._resize_tools = function (obj) {
         var style = core.dom.tools[i].style;
         style.height = toolsHeight + "px";
         style.marginLeft = toolsMarginLeft + "px";
-        style.marginTop = (obj.extendToolbar ? 3 : 6) * core.domStyle.scale + "px"
+        style.marginTop = 3 * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
     if (core.domStyle.isVertical || obj.extendToolbar) {

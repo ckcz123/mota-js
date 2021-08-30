@@ -1243,10 +1243,10 @@ utils.prototype.same = function (a, b) {
         return true;
     }
     if (a instanceof Object && b instanceof Object) {
-        for (var i in a) {
-            if (!this.same(a[i], b[i])) return false;
-        }
-        for (var i in b) {
+        var obj = {};
+        for (var i in a) obj[i] = true;
+        for (var i in b) obj[i] = true;
+        for (var i in obj) {
             if (!this.same(a[i], b[i])) return false;
         }
         return true;

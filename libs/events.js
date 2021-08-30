@@ -1682,12 +1682,12 @@ events.prototype._precompile_scaleImage = function (data) {
 
 events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
-        core.setCurtain(data.color, data.time, data.moveMode);
+        core.setCurtain(data.color || core.status.thisMap.color, data.time, data.moveMode);
         if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
         core.doAction();
     }
     else {
-        core.setCurtain(data.color, data.time, data.moveMode, function () {
+        core.setCurtain(data.color || core.status.thisMap.color, data.time, data.moveMode, function () {
             if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
             core.doAction();
         });
@@ -3073,7 +3073,7 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.setFlag("globalFlags", flags);
     core.resize();
     if (name == 'blurFg')
-        core.drawMap();
+        core.redrawMap();
 }
 
 ////// 设置文件别名 //////

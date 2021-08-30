@@ -385,7 +385,7 @@ maps.prototype.setBlockOpacity = function (opacity, x, y, floorId) {
         block.opacity = opacity;
         if (floorId == core.status.floorId && !block.disable) {
             if (block.event.cls == 'autotile') {
-                core.drawMap();
+                core.redrawMap();
             } else {
                 core.drawBlock(block);
                 core.addGlobalAnimate(block);
@@ -416,7 +416,7 @@ maps.prototype.setBlockFilter = function (filter, x, y, floorId) {
         block.filter = core.clone(filter);
         if (floorId == core.status.floorId && !block.disable) {
             if (block.event.cls == 'autotile') {
-                core.drawMap();
+                core.redrawMap();
             } else {
                 core.drawBlock(block);
                 core.addGlobalAnimate(block);
@@ -2057,7 +2057,7 @@ maps.prototype.showBlock = function (x, y, floorId) {
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
             if (block.event.cls == 'autotile') {
-                core.drawMap();
+                core.redrawMap();
             } else {
                 core.drawBlock(block);
                 core.addGlobalAnimate(block);
@@ -2107,7 +2107,7 @@ maps.prototype._removeBlockFromMap = function (floorId, block) {
     if (floorId != core.status.floorId) return;
     var filter = block.filter || {};
     if (block.event.cls == 'autotile' || filter.blur > 0 || filter.shadow > 0) {
-        core.drawMap();
+        core.redrawMap();
     } else {
         var x = block.x, y = block.y;
         var px = 32 * x - core.bigmap.posX * 32;
@@ -2196,7 +2196,7 @@ maps.prototype._triggerBgFgMap = function (type, name, loc, floorId, callback) {
     core.status[name + "maps"][floorId] = null;
 
     if (floorId == core.status.floorId) {
-        core.drawMap(floorId);
+        core.redrawMap();
     }
     if (callback) callback();
 }
@@ -2228,7 +2228,7 @@ maps.prototype._triggerFloorImage = function (type, loc, floorId, callback) {
     })
 
     if (floorId == core.status.floorId) {
-        core.drawMap(floorId);
+        core.redrawMap();
     }
     if (callback) callback();
 }
@@ -2267,7 +2267,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     if (floorId == core.status.floorId) {
         // 有任何一个是autotile直接重绘地图
         if ((originEvent != null && originEvent.cls == 'autotile') || block.event.cls == 'autotile') {
-            core.drawMap();
+            core.redrawMap();
         } else {
             if (originEvent != null) {
                 this._removeBlockFromMap(floorId, {x: x, y: y, event: originEvent});
@@ -2418,7 +2418,7 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
             this._updateMapArray(floorId, block.x, block.y);
         }
     }, this);
-    if (floorId == core.status.floorId) core.drawMap();
+    if (floorId == core.status.floorId) core.redrawMap();
 }
 
 ////// 改变前景背景的图块 //////
@@ -2464,7 +2464,7 @@ maps.prototype.resetMap = function (floorId) {
         delete (core.status.mapBlockObjs || {})[t];
         if (t == core.status.floorId) needRefresh = true;
     });
-    if (needRefresh) this.drawMap();
+    if (needRefresh) this.redrawMap();
     core.drawTip("地图重置成功");
 }
 

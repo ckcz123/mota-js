@@ -1871,14 +1871,14 @@ events.prototype._action_addValue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setEnemy = function (data, x, y, prefix) {
-    this.setEnemy(data.id, data.name, data.value, data.operator, prefix);
+    this.setEnemy(data.id, data.name, data.value, data.operator, prefix, data.norefresh);
     core.doAction();
 }
 
 events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
     var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     loc.forEach(function (one) {
-        core.setEnemyOnPoint(one[0], one[1], data.floorId, data.name, data.value, data.operator, prefix);
+        core.setEnemyOnPoint(one[0], one[1], data.floorId, data.name, data.value, data.operator, prefix, data.norefresh);
     });
     core.doAction();
 }
@@ -1886,7 +1886,7 @@ events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
 events.prototype._action_resetEnemyOnPoint = function (data, x, y, prefix) {
     var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     loc.forEach(function (one) {
-        core.resetEnemyOnPoint(one[0], one[1], data.floorId);
+        core.resetEnemyOnPoint(one[0], one[1], data.floorId, data.norefresh);
     });
     core.doAction();
 }
@@ -1905,7 +1905,7 @@ events.prototype._action_moveEnemyOnPoint = function (data, x, y, prefix) {
     } else {
         to = this.__action_getLoc(data.to, x, y, prefix);
     }
-    this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId);
+    this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId, data.norefresh);
     core.doAction();
 }
 
@@ -2986,7 +2986,7 @@ events.prototype._setValue_setGlobal = function (name, value) {
 }
 
 ////// 设置一个怪物属性 //////
-events.prototype.setEnemy = function (id, name, value, operator, prefix) {
+events.prototype.setEnemy = function (id, name, value, operator, prefix, norefresh) {
     if (!core.hasFlag('enemyInfo')) {
         core.setFlag('enemyInfo', {});
     }
@@ -2996,11 +2996,11 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix) {
     value = this._updateValueByOperator(core.calValue(value, prefix), (core.material.enemys[id]||{})[name], operator);
     enemyInfo[id][name] = value;
     (core.material.enemys[id]||{})[name] = core.clone(value);
-    core.updateStatusBar();
+    if (!norefresh) core.updateStatusBar();
 }
 
 ////// 设置某个点上的怪物属性 //////
-events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operator, prefix) {
+events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operator, prefix, norefresh) {
     floorId = floorId || core.status.floorId;
     var block = core.getBlock(x, y, floorId);
     if (block == null) return;
@@ -3013,22 +3013,22 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
     flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
     flags.enemyOnPoint[floorId][x+","+y] = flags.enemyOnPoint[floorId][x+","+y] || {};
     flags.enemyOnPoint[floorId][x+","+y][name] = value;
-    core.updateStatusBar();
+    if (!norefresh) core.updateStatusBar();
 }
 
 ////// 重置某个点上的怪物属性 //////
-events.prototype.resetEnemyOnPoint = function (x, y, floorId) {
+events.prototype.resetEnemyOnPoint = function (x, y, floorId, norefresh) {
     delete ((flags.enemyOnPoint||{})[floorId||core.status.floorId]||{})[x+","+y];
-    core.updateStatusBar();
+    if (!norefresh) core.updateStatusBar();
 }
 
 ////// 将某个点上已经设置的怪物属性移动到其他点 //////
-events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId) {
+events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId, norefresh) {
     floorId = floorId || core.status.floorId;
     if (((flags.enemyOnPoint||{})[floorId]||{})[fromX+","+fromY]) {
         flags.enemyOnPoint[floorId][toX+","+toY] = flags.enemyOnPoint[floorId][fromX+","+fromY];
         delete flags.enemyOnPoint[floorId][fromX+","+fromY];
-        core.updateStatusBar();
+        if (!norefresh) core.updateStatusBar();
     }
 }
 

@@ -750,7 +750,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
+        data.norefresh||false, this.next]);
       break;
     case "setEnemyOnPoint":
       data.loc=data.loc||[];
@@ -762,7 +763,8 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
+        data.norefresh||false, this.next]);
       break;
     case "resetEnemyOnPoint":
       data.loc=data.loc||[];
@@ -774,17 +776,17 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','), data.floorId||'',this.next]);
+        x_str.join(','),y_str.join(','), data.floorId||'',data.norefresh||false,this.next]);
       break;
     case "moveEnemyOnPoint":
       data.from=data.from||['','']
       if (data.dxy) {
         this.next = MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText([
-          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',this.next]);
+          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',data.norefresh||false,this.next]);
       } else {
         data.to=data.to||['','']
         this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
-          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',data.norefresh||false,this.next]);
       }
       break;
     case "setEquip":

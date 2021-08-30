@@ -230,7 +230,9 @@ utils.prototype.setLocalStorage = function (key, value) {
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function (key, defaultValue) {
     try {
-        return JSON.parse(localStorage.getItem(core.firstData.name + "_" + key));
+        var value = JSON.parse(localStorage.getItem(core.firstData.name + "_" + key));
+        if (value == null) return defaultValue;
+        return value;
     } catch (e) {
         return defaultValue;
     }

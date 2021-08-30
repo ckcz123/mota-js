@@ -441,7 +441,10 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,trader]你的金钱不足！"
+                                                            "\t[老人,trader]你的金钱不足！",
+                                                            {
+                                                                "type": "continue"
+                                                            }
                                                         ]
                                                     }
                                                 ]
@@ -464,13 +467,13 @@ main.floors.sample1=
                                                                 "name": "item:blueKey",
                                                                 "operator": "+=",
                                                                 "value": "1"
-                                                            },
-                                                            {
-                                                                "type": "continue"
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,trader]你的金钱不足！"
+                                                            "\t[老人,trader]你的金钱不足！",
+                                                            {
+                                                                "type": "continue"
+                                                            }
                                                         ]
                                                     }
                                                 ]

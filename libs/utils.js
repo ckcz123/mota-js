@@ -677,8 +677,14 @@ utils.prototype.decodeRoute = function (route) {
 
 utils.prototype._decodeRoute_getNumber = function (decodeObj, noparse) {
     var num = "";
-    while (decodeObj.index < decodeObj.route.length && !isNaN(decodeObj.route.charAt(decodeObj.index))) {
-        num += decodeObj.route.charAt(decodeObj.index++);
+    var first = true;
+    while (true) {
+        var ch = decodeObj.route.charAt(decodeObj.index);
+        if (ch >= '0' && ch <= '9') num += ch;
+        else if (ch == '-' && first) num += ch;
+        else break;
+        first = false;
+        decodeObj.index++;
     }
     if (num.length == 0) num = "1";
     return noparse ? num : parseInt(num);

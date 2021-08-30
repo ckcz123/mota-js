@@ -2037,9 +2037,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
             var index = action.substring(8);
-            if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
-                this.__action_choices_replaying(data, index);
-            } else {
+            if (!this.__action_choices_replaying(data, index)) {
                 core.control._replay_error(action);
                 return;
             }
@@ -2057,7 +2055,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                         return;
                     }
                     if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
-                    core.events.__action_choices_replaying(data, core.clamp(parseInt(value), 0, data.choices.length - 1))
+                    core.events.__action_choices_replaying(data, ((parseInt(value) || 0) + data.choices.length) % data.choices.length);
                 });
             }
         }
@@ -2080,17 +2078,24 @@ events.prototype._action_choices = function (data, x, y, prefix) {
 }
 
 events.prototype.__action_choices_replaying = function (data, index) {
+    var selection = index;
     if (index != 'none') {
-        var timeout = Math.floor(index / 100) || 0;
+        selection = parseInt(index);
+        if (isNaN(selection)) return false;
+        if (selection < 0) selection += data.choices.length;
+        if (selection < 0) return false;
+        if (selection % 100 > 50) selection += data.choices.length;
+        if (selection % 100 > data.choices.length) return false;
+        var timeout = Math.floor(selection / 100) || 0;
         core.setFlag('timeout', timeout);
-        index %= 100;
+        selection %= 100;
     } else core.setFlag('timeout', 0);
-    core.status.event.selection = index;
+    core.status.event.selection = selection;
     setTimeout(function () {
         core.status.route.push("choices:"+index);
-        if (index != 'none') {
+        if (selection != 'none') {
             // 检查
-            var choice = data.choices[index];
+            var choice = data.choices[selection];
             if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
                 // 无法选择此项
                 core.control._replay_error("无法选择项："+index);
@@ -2101,6 +2106,7 @@ events.prototype.__action_choices_replaying = function (data, index) {
         }
         core.doAction();
     }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+    return true;
 }
 
 events.prototype._precompile_choices = function (data) {

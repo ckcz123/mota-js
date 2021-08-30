@@ -1084,7 +1084,12 @@ actions.prototype._clickAction = function (x, y, px, py) {
                 var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
                 delete core.status.event.timeout;
                 core.setFlag('timeout', timeout);
-                core.status.route.push("choices:" + (100 * timeout + y - topIndex));
+                // 对全局商店特殊处理
+                var index = y - topIndex;
+                if (index == choices.length - 1 && core.hasFlag('@temp@shop')) {
+                    index = -1;
+                }
+                core.status.route.push("choices:" + (100 * timeout + index));
                 core.insertAction(choice.action);
                 core.doAction();
             }

@@ -125,7 +125,8 @@ function core() {
             "now": 0,
         },
         "favorite": [],
-        "favoriteName": {}
+        "favoriteName": {},
+        "cache": {}
     }
     this.initStatus = {
         'played': false,

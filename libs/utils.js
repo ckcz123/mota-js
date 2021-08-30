@@ -214,18 +214,7 @@ utils.prototype.setLocalStorage = function (key, value) {
         var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
             return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
         });
-        var compressed = lzw_encode(str);
-
-        // test if we can save to localStorage
-        localStorage.setItem("__tmp__", compressed);
-        if (lzw_decode(localStorage.getItem("__tmp__")) == str) {
-            localStorage.setItem(core.firstData.name + "_" + key, compressed);
-        }
-        else {
-            // We cannot compress the data
-            localStorage.setItem(core.firstData.name + "_" + key, str);
-        }
-        localStorage.removeItem("__tmp__");
+        localStorage.setItem(core.firstData.name + "_" + key, str);
 
         if (key == 'autoSave') core.saves.ids[0] = true;
         else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
@@ -240,8 +229,11 @@ utils.prototype.setLocalStorage = function (key, value) {
 
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function (key, defaultValue) {
-    var res = this.decompress(localStorage.getItem(core.firstData.name + "_" + key));
-    return res == null ? defaultValue : res;
+    try {
+        return JSON.parse(localStorage.getItem(core.firstData.name + "_" + key));
+    } catch (e) {
+        return defaultValue;
+    }
 }
 
 ////// 移除本地存储 //////
@@ -271,13 +263,18 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
             if (successCallback) successCallback();
         }
     }
+    this._setLocalForage_set(name, str, callback);
+}
 
+utils.prototype._setLocalForage_set = function (name, str, callback) {
     if (window.jsinterface && window.jsinterface.setLocalForage) {
         var id = setTimeout(null);
         core['__callback' + id] = callback;
+        core.saves.cache[name] = str;
         window.jsinterface.setLocalForage(id, name, str);
     } else {
         var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
+        core.saves.cache[name] = compressed;
         localforage.setItem(name, compressed, callback);
     }
 }
@@ -289,6 +286,7 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             if (errorCallback) errorCallback(err);
         }
         else {
+            core.saves.cache[name] = value;
             if (!successCallback) return;
             if (value != null) {
                 var res = core.utils.decompress(value);
@@ -298,7 +296,13 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             successCallback(defaultValue);
         }
     };
+    if (core.saves.cache[name] != null) {
+        return callback(null, core.saves.cache[name]);
+    }
+    this._getLocalForage_get(name, callback);
+}
 
+utils.prototype._getLocalForage_get = function (name, callback) {
     if (window.jsinterface && window.jsinterface.getLocalForage) {
         var id = setTimeout(null);
         core['__callback' + id] = callback;
@@ -320,7 +324,11 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
             if (successCallback) successCallback();
         }
     }
+    delete core.saves.cache[name];
+    this._removeLocalForage_remove(name, callback);
+}
 
+utils.prototype._removeLocalForage_remove = function (name, callback) {
     if (window.jsinterface && window.jsinterface.removeLocalForage) {
         var id = setTimeout(null);
         core['__callback' + id] = callback;
@@ -331,6 +339,7 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
 }
 
 utils.prototype.clearLocalForage = function (callback) {
+    core.saves.cache = {};
     if (window.jsinterface && window.jsinterface.clearLocalForage) {
         var id = setTimeout(null);
         core['__callback' + id] = callback;

@@ -510,41 +510,32 @@ utils.prototype.formatSize = function (size) {
     else return (size/1024/1024).toFixed(2) + "MB";
 }
 
-utils.prototype.formatBigNumber = function (x, onMap) {
-    x = Math.floor(parseFloat(x));
-    if (!core.isset(x) || !Number.isFinite(x)) return '???';
-    if (x > 1e24 || x < -1e24) return x.toExponential(2);
-
-    var c = x < 0 ? "-" : "";
-    x = Math.abs(x);
-
-    if (x <= 99999 || (!onMap && x <= 999999)) return c + x;
-
-    var all = [
-        {"val": 1e20, "c": "g"},
-        {"val": 1e16, "c": "j"},
-        {"val": 1e12, "c": "z"},
-        {"val": 1e8, "c": "e"},
-        {"val": 1e4, "c": "w"},
-    ]
-
-    for (var i = 0; i < all.length; i++) {
-        var one = all[i];
-        if (onMap) {
-            if (x >= one.val) {
-                var v = x / one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(3 - Math.log10(v + 1)))) + one.c;
-            }
-        }
-        else {
-            if (x >= 10 * one.val) {
-                var v = x / one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(4 - Math.log10(v + 1)))) + one.c;
-            }
-        }
-    }
-
-    return c + x;
+utils.prototype.formatBigNumber = function (x, digits) {
+	if (digits === true) digits = 5; // 兼容旧版onMap参数
+	if (!digits || digits < 5) digits = 6; // 连同负号、小数点和后缀字母在内的总位数，至少需为5，默认为6
+	x = Math.trunc(parseFloat(x)); // 尝试识别为小数，然后向0取整
+	if (x == null || !Number.isFinite(x)) return '???'; // 无法识别的数或正负无穷大，显示'???'
+	var units = [ // 单位及其后缀字母，可自定义，如改成千进制下的K、M、G、T、P
+		{ "val": 1e20, "suffix": "g" },
+		{ "val": 1e16, "suffix": "j" },
+		{ "val": 1e12, "suffix": "z" },
+		{ "val": 1e8, "suffix": "e" },
+		{ "val": 10000, "suffix": "w" },
+	];
+	if (Math.abs(x) > units[0].val * Math.pow(10, digits - 2))
+		return x.toExponential(0); // 绝对值过大以致于失去精度的数，直接使用科学记数法，系数只保留整数
+	var sign = x < 0 ? '-' : '';
+	if (sign) --digits; // 符号位单独处理，负号要占一位
+	x = Math.abs(x);
+	if (x.toString().length <= digits) return sign + x;
+	for (var i = 0; i < units.length; ++i) { // 从大到小尝试选取合适的单位
+		var each = units[i];
+		if (x >= each.val) {
+			var v = x / each.val;
+			return sign + v.toFixed(Math.max(0, Math.floor(digits - 2 - Math.log10(v + 1)))) + each.suffix;
+		}
+	}
+	return sign + x;
 }
 
 ////// 变速移动 //////

@@ -968,7 +968,7 @@ return code+',\n';
 */;
 
 text_1_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点 px' PosString? 'py' PosString? '宽' PosString? '编号' Int '不等待操作' Bool BGNL? Newline EvalString_Multi Newline
     
 
 /* text_1_s
@@ -976,7 +976,7 @@ tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮�
 helpUrl : /_docs/#/instruction
 previewBlock : true
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","","","",0,"欢迎使用事件编辑器(双击方块可直接预览)"]
+default : ["小妖精","fairy","","","","",0,false,"欢迎使用事件编辑器(双击方块可直接预览)"]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -997,10 +997,11 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0 || Bool_0) {
     code = '{"type": "text", "text": '+code;
     if (pos) code += ', "pos": ' + pos;
     if (Int_0) code += ', "code": ' + Int_0;
+    if (Bool_0) code += ', "async": true';
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';
@@ -1009,7 +1010,7 @@ return code+',\n';
 */;
 
 text_2_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点 px' PosString? 'py' PosString? '宽' PosString? '编号' Int '不等待操作' Bool BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
     
 
 /* text_2_s
@@ -1038,10 +1039,11 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0 || Bool_0) {
     code = '{"type": "text", "text": '+code;
     if (pos) code += ', "pos": ' + pos;
     if (Int_0) code += ', "code": ' + Int_0;
+    if (Bool_0) code += ', "async": true';
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';

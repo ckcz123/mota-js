@@ -1463,7 +1463,7 @@ ui.prototype.drawTextBox = function(content, config) {
     // Step 5: 绘制正文
     var config = this.drawTextContent(config.ctx || 'ui', content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
-        lineHeight: vPos.lineHeight, time: (config.showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
+        lineHeight: vPos.lineHeight, time: (config.showAll || config.async || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
     });
 
     // Step 6: 绘制光标

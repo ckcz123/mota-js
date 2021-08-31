@@ -1359,12 +1359,18 @@ events.prototype._action_text = function (data, x, y, prefix) {
     if (core.getContextByName(ctx) && !data.showAll) {
         core.ui._animateUI('hide', ctx, function () {
             core.ui.drawTextBox(data.text, data);
-            core.ui._animateUI('show', ctx);
+            core.ui._animateUI('show', ctx, function () {
+                if (data.async) core.doAction();
+            });
         });
         return;
     }
     core.ui.drawTextBox(data.text, data);
-    if (!data.showAll) core.ui._animateUI('show', ctx);
+    if (!data.showAll) {
+        core.ui._animateUI('show', ctx, function () {
+            if (data.async) core.doAction();
+        });
+    }
 }
 
 events.prototype._action_moveTextBox = function (data, x, y, prefix) {

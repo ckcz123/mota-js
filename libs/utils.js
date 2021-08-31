@@ -864,6 +864,8 @@ utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
     var directionList = ["left", "leftup", "up", "rightup", "right", "rightdown", "down", "leftdown"];
     if (directionList.indexOf(turn) >= 0) return turn;
+    if (turn == ':hero') return this.turnDirection(':back', core.getHeroLoc('direction'));
+    if (turn == ':backhero') return core.getHeroLoc('direction');
     if (typeof turn === 'number' && turn % 45 == 0) turn /= 45;
     else {
         switch (turn) {

@@ -286,6 +286,7 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._keyDownSL(keyCode);
             break;
         case 'selectShop':
@@ -388,6 +389,7 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._keyUpSL(keyCode);
             break;
         case 'keyBoard':
@@ -674,6 +676,7 @@ actions.prototype._sys_onclick_lockControl = function (x, y, px, py) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._clickSL(x, y, px, py);
             break;
         case 'confirmBox':
@@ -839,7 +842,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
         }
     }
     // 长按SL上下页快速翻页
-    if (["save","load","replayLoad","replayRemain"].indexOf(core.status.event.id) >= 0) {
+    if (["save","load","replayLoad","replayRemain","replaySince"].indexOf(core.status.event.id) >= 0) {
         if ([this.HSIZE-2, this.HSIZE-3, this.HSIZE+2, this.HSIZE+3].indexOf(x) >= 0 && y == this.LAST) {
             this._clickSL(x, y);
             return true;
@@ -2875,9 +2878,10 @@ actions.prototype._clickReplay = function (x, y) {
             case 0: core.playSound('确定'); return this._clickReplay_fromBeginning();
             case 1: core.playSound('确定'); return this._clickReplay_fromLoad();
             case 2: core.playSound('确定'); return this._clickReplay_replayRemain();
-            case 3: core.playSound('确定'); return core.chooseReplayFile();
-            case 4: core.playSound('确定'); return this._clickReplay_download();
-            case 5: core.playSound('取消'); return core.ui.closePanel();
+            case 3: core.playSound('确定'); return this._clickReplay_replaySince();
+            case 4: core.playSound('确定'); return core.chooseReplayFile();
+            case 5: core.playSound('确定'); return this._clickReplay_download();
+            case 6: core.playSound('取消'); return core.ui.closePanel();
         }
     }
 }
@@ -2905,6 +2909,23 @@ actions.prototype._clickReplay_replayRemain = function () {
         "\t[步骤1]请选择一个存档。\n\r[yellow]该存档的坐标必须和当前勇士坐标完全相同。\r\n将尝试从此处开始回放。",
     ], function () {
         core.status.event.id = 'replayRemain';
+        core.lockControl();
+        var saveIndex = core.saves.saveIndex;
+        var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
+        core.ui._drawSLPanel(10 * page + offset);
+    });
+}
+
+actions.prototype._clickReplay_replaySince = function () {
+    core.closePanel();
+    core.drawText([
+        "\t[播放存档剩余录像]该功能为【接续播放录像】的简化版本，允许你播放\r[yellow]一个存档中剩余的录像\r，常常用于\r[yellow]录像局部优化\r。\n" +
+        "在录像正常播放中，你随时可以暂停并按S键进行存档；此时\r[yellow]剩余录像\r也会被记在存档中（在读档界面用\r[yellow][R]\r标识。）\n" + 
+        "之后，你可以选择在路线优化后直接播放该存档的\r[yellow]剩余录像\r，而无需再像接续播放一样选择录像起点和终点。\n\n" +
+        "详细使用方法参见露珠录制的视频教程：\n\r[yellow]https://bilibili.com/video/BV1az4y1C78x",
+        "请选择一个存档。\n\n\r[yellow]该存档需为录像播放中存的，且坐标必须和当前勇士坐标完全相同。\r\n将尝试播放此存档的剩余录像。",
+    ], function () {
+        core.status.event.id = 'replaySince';
         core.lockControl();
         var saveIndex = core.saves.saveIndex;
         var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;

@@ -1968,6 +1968,7 @@ control.prototype.doSL = function (id, type) {
         case 'reload': this._doSL_reload(id, this._doSL_load_afterGet); break;
         case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
         case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
+        case 'replaySince': this._doSL_load(id, this._doSL_replaySince_afterGet); break;
     }
 }
 
@@ -1979,7 +1980,11 @@ control.prototype._doSL_save = function (id) {
     // 在事件中的存档
     if (core.status.event.interval != null)
         core.setFlag("__events__", core.status.event.interval);
-    core.setLocalForage("save"+id, core.saveData(), function() {
+    var data = core.saveData();
+    if (core.isReplaying() && core.status.replay.toReplay.length > 0) {
+        data.__toReplay__ = core.encodeRoute(core.status.replay.toReplay);
+    }
+    core.setLocalForage("save"+id, data, function() {
         core.saves.saveIndex = id;
         core.setLocalStorage('saveIndex', core.saves.saveIndex);
         // 恢复事件
@@ -2088,7 +2093,6 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
         core.startReplay(route);
         core.drawTip("回退到存档节点");
     });
-
 }
 
 control.prototype._doSL_replayRemain_afterGet = function (id, data) {
@@ -2119,6 +2123,16 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
         var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
         core.ui._drawSLPanel(10 * page + offset);
     });
+}
+
+control.prototype._doSL_replaySince_afterGet = function (id, data) {
+    if (data.floorId != core.status.floorId || data.hero.loc.x != core.getHeroLoc('x') || data.hero.loc.y != core.getHeroLoc('y'))
+        return alert("楼层或坐标不一致！");
+    if (!data.__toReplay__) return alert('该存档没有剩余录像！');
+    core.ui.closePanel();
+    core.startReplay(core.decodeRoute(data.__toReplay__));
+    core.drawTip("播放存档剩余录像");
+    return;
 }
 
 ////// 同步存档到服务器 //////

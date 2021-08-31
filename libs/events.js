@@ -217,7 +217,8 @@ events.prototype._gameOver_confirmDownload = function (ending) {
             'seed': core.getFlag('__seed__'),
             'route': core.encodeRoute(core.status.route)
         }
-        core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", JSON.stringify(obj));
+        core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", 
+            LZString.compressToBase64(JSON.stringify(obj)));
         core.events._gameOver_askRate(ending);
     }, function () {
         core.events._gameOver_askRate(ending);

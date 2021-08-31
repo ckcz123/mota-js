@@ -1019,19 +1019,22 @@ utils.prototype.readFileContent = function (content) {
             core.platform.successCallback(content);
         return;
     }
+    // 检查base64
     try {
-        obj = JSON.parse(content);
-        if (obj) {
-            if (core.platform.successCallback)
-                core.platform.successCallback(obj);
-            return;
+        obj = JSON.parse(LZString.decompressFromBase64(content));
+    } catch (e) {
+        try {
+            obj = JSON.parse(content);
+        } catch (e) {
+            main.log(e)
         }
     }
-    catch (e) {
-        main.log(e);
-        alert(e);
+
+    if (obj) {
+        if (core.platform.successCallback)
+            core.platform.successCallback(obj);
+        return;
     }
-    // alert("不是有效的JSON文件！");
 
     if (core.platform.errorCallback)
         core.platform.errorCallback();

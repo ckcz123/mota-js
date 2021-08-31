@@ -2136,7 +2136,7 @@ control.prototype._syncSave_http = function (type, saves) {
     var formData = new FormData();
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);
-    formData.append('data', JSON.stringify(saves));
+    formData.append('data', LZString.compressToBase64(JSON.stringify(saves)));
     formData.append('shorten', '1');
 
     core.http("POST", "/games/sync.php", formData, function (data) {
@@ -2181,7 +2181,19 @@ control.prototype._syncLoad_http = function (id, password) {
     core.http("POST", "/games/sync.php", formData, function (data) {
         var response = JSON.parse(data);
         if (response.code == 0) {
-            core.control._syncLoad_write(JSON.parse(response.msg));
+            var msg = null;
+            try {
+                msg = JSON.parse(LZString.decompressFromBase64(response.msg));
+            } catch (e) {
+                try {
+                    msg = JSON.parse(response.msg);
+                } catch (e) {}
+            }
+            if (msg) {
+                core.control._syncLoad_write(msg);
+            } else {
+                core.drawText("出错啦！\n存档解析失败！");
+            }
         }
         else {
             core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);

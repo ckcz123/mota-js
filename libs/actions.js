@@ -2759,7 +2759,8 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
                         "version": core.firstData.version,
                         "data": saves
                     }
-                    core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", JSON.stringify(content));
+                    core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", 
+                        LZString.compressToBase64(JSON.stringify(content)));
                 }
             };
             if (selection == 0) core.getAllSaves(callback);
@@ -2913,12 +2914,13 @@ actions.prototype._clickReplay_replayRemain = function () {
 
 actions.prototype._clickReplay_download = function () {
     // if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
-    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
-        'name': core.firstData.name,
-        'hard': core.status.hard,
-        'seed': core.getFlag('__seed__'),
-        'route': core.encodeRoute(core.status.route)
-    }));
+    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", 
+        LZString.compressToBase64(JSON.stringify({
+            'name': core.firstData.name,
+            'hard': core.status.hard,
+            'seed': core.getFlag('__seed__'),
+            'route': core.encodeRoute(core.status.route)
+        })));
 
 }
 

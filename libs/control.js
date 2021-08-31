@@ -831,20 +831,16 @@ control.prototype.drawHero = function (status, offset, frame) {
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
     // 重置hero层画布
-    var px = parseFloat(core.canvas.hero.canvas.getAttribute('_px')) || 0;
-    var py = parseFloat(core.canvas.hero.canvas.getAttribute('_py')) || 0;
     core.setGameCanvasTranslate('hero', 0, 0);
-    core.canvas.hero.canvas.removeAttribute('_px');
-    core.canvas.hero.canvas.removeAttribute('_py');
-    offset.px = px;
-    offset.py = py;
+    delete core.canvas.hero._px;
+    delete core.canvas.hero._py;
     if (!core.hasFlag('__lockViewport__')) {
         this._drawHero_updateViewport(x, y, offset);
     }
 
     if (!core.hasFlag('hideHero')) {
         this._drawHero_draw(direction, x, y, status, offset, frame);
-    }  
+    }
 }
 
 control.prototype._drawHero_updateViewport = function (x, y, offset) {
@@ -858,7 +854,7 @@ control.prototype._drawHero_draw = function (direction, x, y, status, offset, fr
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
-            offset.px+block.posx+(32-block.width)/2, offset.py+block.posy+32-block.height, block.width, block.height);
+            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
 }
 
@@ -1015,14 +1011,13 @@ control.prototype.setViewport = function (px, py) {
     core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
-    var canvas = core.canvas.hero.canvas;
-    var px = parseFloat(canvas.getAttribute('_px')) || 0;
-    var py = parseFloat(canvas.getAttribute('_py')) || 0;
+    var px = parseFloat(core.canvas.hero._px) || 0;
+    var py = parseFloat(core.canvas.hero._py) || 0;
     px += originOffsetX - core.bigmap.offsetX;
     py += originOffsetY - core.bigmap.offsetY;
     core.control.setGameCanvasTranslate('hero', px, py);
-    core.canvas.hero.canvas.setAttribute('_px', px);
-    core.canvas.hero.canvas.setAttribute('_py', py);
+    core.canvas.hero._px = px;
+    core.canvas.hero._py = py;
 }
 
 ////// 移动视野范围 //////

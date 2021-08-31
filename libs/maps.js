@@ -968,10 +968,9 @@ maps.prototype._getBigImageInfo = function (bigImage, face, animate) {
     }
     var dx, dy;
     switch (face) {
-        case "down": dx = 16 - per_width / 2; dy = 32 - per_height; break;
-        case "left": dx = 0; dy = 16 - per_height / 2; break;
-        case "right": dx = 32 - per_width; dy = 16 - per_height / 2; break;
-        case "up": dx = 16 - per_width / 2; dy = 0; break;
+        case "down": case "up": dx = 16 - per_width / 2; dy = 32 - per_height; break;
+        case "left": dx = 0; dy = 32 - per_height; break;
+        case "right": dx = 32 - per_width; dy = 32 - per_height; break;
     }
 
     return {sx: sx, sy: sy, per_width: per_width, per_height: per_height, face: face, dx: dx, dy: dy};
@@ -1034,41 +1033,34 @@ maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y, ctx) {
     var dx = bigImageInfo.dx, dy = bigImageInfo.dy;
 
     switch (bigImageInfo.face) {
-        case "down":
-            core.createCanvas(header, px + dx, py + dy, per_width, per_height - 32, 51);
+        case "down": case "up":
+            core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
-                core.drawImage(header, bigImage, sx, sy, per_width, per_height - 32, 0, 0, per_width, per_height - 32);
+                core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
             });
             core.createCanvas(body, px + dx, py, per_width, 32, 31);
             this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy + per_height - 32, per_width, 32, 0, 0, per_width, 32);
+                core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             })
             break;
         case "left":
-            core.createCanvas(header, px + dx, py + dy, per_width, per_height / 2 - 16, 51);
+            core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
-                core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
+                core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
             });
-            core.createCanvas(body, px + dx, py, per_width, per_height / 2 + 16, 31);
+            core.createCanvas(body, px + dx, py, per_width, 32, 31);
             this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
+                core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             });
             break;
         case "right":
-            core.createCanvas(header, px + dx, py + dy, per_width, per_height / 2 - 16, 51);
+            core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
-                core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
+                core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
             });
             core.createCanvas(body, px + dx, py, per_width, per_height / 2 + 16, 31);
             this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
-            });
-            break;
-        case "up":
-            core.deleteCanvas(header);
-            core.createCanvas(body, px + dx, py, per_width, per_height, 31);
-            this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy, per_width, per_height, 0, 0, per_width, per_height);
+                core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             });
             break;
     }
@@ -2525,7 +2517,18 @@ maps.prototype._moveDetachedBlock = function (blockInfo, nowX, nowY, opacity, ca
     }
     if (bodyCanvas) {
         if (blockInfo.bigImage) {
-            var bigImageInfo = this._getBigImageInfo(blockInfo.bigImage, blockInfo.face, blockInfo.posX);
+            var face = blockInfo.face;
+            if (!blockInfo.faceIds) face = 'down';
+            else if (!blockInfo.faceIds[face]) {
+                // 维持此时朝向
+                face = 'down';
+                for (var f in blockInfo.faceIds) {
+                    if (blockInfo.faceIds[f] == blockInfo.id) {
+                        face = f;
+                    }
+                }
+            }
+            var bigImageInfo = this._getBigImageInfo(blockInfo.bigImage, face, blockInfo.posX);
             var per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
             core.dymCanvas[bodyCanvas].clearRect(0, 0, bigImageInfo.per_width, bigImageInfo.per_height);
             core.dymCanvas[bodyCanvas].drawImage(blockInfo.bigImage, bigImageInfo.sx, bigImageInfo.sy, per_width, per_height, 0, 0, per_width, per_height);

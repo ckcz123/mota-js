@@ -423,7 +423,7 @@ events.prototype._trigger_ignoreChangeFloor = function (block) {
 
 events.prototype._sys_battle = function (data, callback) {
     // 检查是否需要改变朝向
-    if (data.x == core.nextX() && data.y == core.nextY()) {
+    /* if (data.x == core.nextX() && data.y == core.nextY()) {
         var dir = core.turnDirection(":back");
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
@@ -431,7 +431,7 @@ events.prototype._sys_battle = function (data, callback) {
             if (number > 0)
                 core.setBlock(number, data.x, data.y);
         }
-    }
+    } */
 
     // 检查战前事件
     var beforeBattle = [];

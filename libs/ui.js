@@ -2031,7 +2031,7 @@ ui.prototype._drawReplay = function () {
     core.status.event.id = 'replay';
     core.playSound('打开界面');
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
+        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "播放存档剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
 }
 

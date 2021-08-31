@@ -4062,7 +4062,7 @@ Direction_List
     /*Direction_List ['up','down','left','right']*/;
 
 DirectionEx_List
-    :   '不变'|'朝上'|'朝下'|'朝左'|'朝右'|'左转'|'右转'|'背对'|'面对角色'|'背对角色'
+    :   '不变'|'朝上'|'朝下'|'朝左'|'朝右'|'左转'|'右转'|'背对'|'角色同向'|'角色反向'
     /*DirectionEx_List ['null','up','down','left','right',':left',':right',':back',':hero',':backhero']*/;
 
 StepString

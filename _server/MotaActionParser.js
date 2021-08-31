@@ -931,13 +931,9 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
         data.toolbox||false,this.next]);
       break;
-    case "showHero":
-      this.next = MotaActionBlocks['showHero_s'].xmlText([
-        data.time, data.async||false, this.next]);
-      break;
-    case "hideHero":
-      this.next = MotaActionBlocks['hideHero_s'].xmlText([
-        data.time, data.async||false, this.next]);
+    case "setHeroOpacity":
+      this.next = MotaActionBlocks['setHeroOpacity_s'].xmlText([
+        data.opacity, data.moveMode, data.time, data.async||false, this.next]);
       break;
     case "sleep": // 等待多少毫秒
       this.next = MotaActionBlocks['sleep_s'].xmlText([

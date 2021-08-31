@@ -2346,22 +2346,22 @@ events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
 }
 
 events.prototype._action_showHero = function (data, x, y, prefix) {
-    data.time = data.time || 0;
-    if (data.time > 0) {
-        this.__action_doAsyncFunc(data.async, core.triggerHero, 'show', data.time);
-    } else {
-        core.removeFlag('hideHero');
-        core.drawHero();
-        core.doAction();
-    }
+    data.opacity = 1;
+    return this._action_setHeroOpacity(data, x, y, prefix);
 }
 
 events.prototype._action_hideHero = function (data, x, y, prefix) {
+    data.opacity = 0;
+    return this._action_setHeroOpacity(data, x, y, prefix);
+}
+
+events.prototype._action_setHeroOpacity = function (data, x, y, prefix) {
     data.time = data.time || 0;
+    if (data.opacity == null) data.opacity = 1;
     if (data.time > 0) {
-        this.__action_doAsyncFunc(data.async, core.triggerHero, 'hide', data.time);
+        this.__action_doAsyncFunc(data.async, core.setHeroOpacity, data.opacity, data.moveMode, data.time);
     } else {
-        core.setFlag('hideHero', true);
+        core.setFlag('__heroOpacity__', data.opacity);
         core.drawHero();
         core.doAction();
     }

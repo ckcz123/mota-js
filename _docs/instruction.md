@@ -581,8 +581,8 @@ core.insertAction({"type": "changeFloor", "floorId": "MT" + core.rand2(20)})
     * V2.8.1起，支持暂时锁定视角，视角锁定期间，只有上下楼后才会将视角重置到勇士身上（但依然保持锁定）。
 4.  **显隐状态栏：**如题，如果隐藏状态栏期间勇士需要恢复行动，则建议不隐藏竖屏工具栏以方便手机玩家。
     * 实际调用`core.showStatusBar()`和`core.hideStatusBar(showToolbox)`
-5.  **显隐勇士：**如题，动画时间为淡入淡出时间，异步勾选框用法如前。
-    * 实际调用`core.triggerHero(type, time, callback)`
+5.  **设置勇士不透明度：**如题，动画时间为淡入淡出时间，异步勾选框用法如前。
+    * 实际调用`core.setHeroOpacity(opacity, moveMode, time, callback)`
 6.  **更改画面色调：**色调可以用调色器调配，“动画时间”为渐变的总时间。
     * 请注意渐变是在RGBA颜色空间中直线运动（V2.8.1支持加速度），因此效果可能不好，画面闪烁同理。
     * 如需在勇士自由行动时反复执行，请使用并行脚本或自我回调。

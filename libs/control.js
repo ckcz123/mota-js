@@ -838,9 +838,7 @@ control.prototype.drawHero = function (status, offset, frame) {
         this._drawHero_updateViewport(x, y, offset);
     }
 
-    if (!core.hasFlag('hideHero')) {
-        this._drawHero_draw(direction, x, y, status, offset, frame);
-    }
+    this._drawHero_draw(direction, x, y, status, offset, frame);
 }
 
 control.prototype._drawHero_updateViewport = function (x, y, offset) {
@@ -851,11 +849,13 @@ control.prototype._drawHero_updateViewport = function (x, y, offset) {
 
 control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
     offset = offset || {x: 0, y: 0, offset: 0, px: 0, py: 0};
+    var opacity = core.setAlpha('hero', core.getFlag('__heroOpacity__', 1))
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
+    core.setAlpha('hero', opacity);
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -889,40 +889,28 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     });
 }
 
-control.prototype.triggerHero = function (type, time, callback) {
-    if (type == null) {
-        type = core.hasFlag('hideHero') ? 'show' : 'hide';
-    }
-    if ((core.hasFlag('hideHero') && type != 'show') || (!core.hasFlag('hideHero') && type != 'hide')) {
-        if (callback) callback();
-        return;
-    }
-    core.removeFlag('hideHero');
-
-    var cb = function () {
-        if (type == 'hide') core.setFlag('hideHero', true);
-        core.drawHero();
-        if (callback) callback();
-        return;
-    }
-
+control.prototype.setHeroOpacity = function (opacity, moveMode, time, callback) {
     time = time || 0;
-    if (time == 0) return cb();
-    time /= Math.max(core.status.replay.speed, 1)    
-    this._triggerHero_animate(type, 10 / time, cb);
-}
-
-control.prototype._triggerHero_animate = function (type, delta, callback) {
-    var opacity = type != 'show' ? 1 : 0;
-    var animate = setInterval(function () {
-        opacity += type != 'show' ? -delta : delta;
-        core.setAlpha('hero', opacity);
+    if (time == 0) {
+        core.setFlag('__heroOpacity__', opacity);
         core.drawHero();
-        core.setAlpha('hero', 1);
-        if (opacity >= 1 || opacity <= 0) {
+        if (callback) callback();
+        return;
+    }
+    time /= Math.max(core.status.replay.speed, 1)    
+
+    var fromOpacity = core.getFlag('__heroOpacity__', 1);
+    var step = 0, steps = parseInt(time / 10);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(moveMode);
+
+    var animate = setInterval(function () {
+        step++;
+        core.setFlag('__heroOpacity__', fromOpacity + (opacity - fromOpacity) * moveFunc(step / steps));
+        core.drawHero();
+        if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            core.drawHero();
             if (callback) callback();
         }
     }, 10);

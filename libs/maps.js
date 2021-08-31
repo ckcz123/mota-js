@@ -968,9 +968,9 @@ maps.prototype._getBigImageInfo = function (bigImage, face, animate) {
     }
     var dx, dy;
     switch (face) {
-        case "down": case "up": dx = 16 - per_width / 2; dy = 32 - per_height; break;
-        case "left": dx = 0; dy = 32 - per_height; break;
-        case "right": dx = 32 - per_width; dy = 32 - per_height; break;
+        case "down": case "up": case "left": case "right": dx = 16 - per_width / 2; dy = 32 - per_height; break;
+        // case "left": dx = 0; dy = 32 - per_height; break;
+        // case "right": dx = 32 - per_width; dy = 32 - per_height; break;
     }
 
     return {sx: sx, sy: sy, per_width: per_width, per_height: per_height, face: face, dx: dx, dy: dy};
@@ -1033,7 +1033,7 @@ maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y, ctx) {
     var dx = bigImageInfo.dx, dy = bigImageInfo.dy;
 
     switch (bigImageInfo.face) {
-        case "down": case "up":
+        case "down": case "up": case "left": case "right":
             core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
                 core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
@@ -1043,7 +1043,7 @@ maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y, ctx) {
                 core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             })
             break;
-        case "left":
+        /*case "left":
             core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
                 core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
@@ -1062,7 +1062,7 @@ maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y, ctx) {
             this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
                 core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             });
-            break;
+            break;*/
     }
     if (core.dymCanvas[header]) {
         core.dymCanvas[header].canvas.setAttribute('_ox', 32 * x + dx);

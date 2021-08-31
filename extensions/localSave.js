@@ -38,8 +38,10 @@
             fs.deleteFile('_saves/' + name, callback);
         }
 
-        core.utils.clearLocalForage = function (name, callback) {
-            // Nothing to do
+        core.utils.clearLocalForage = function (callback) {
+            fs.deleteFile('_saves', function () {
+                fs.mkdir('_saves', callback);
+            })
         }
 
         core.utils.iterateLocalForage = function (iter, callback) {

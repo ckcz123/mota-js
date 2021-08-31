@@ -847,8 +847,7 @@ action
     |   update_s
     |   showStatusBar_s
     |   hideStatusBar_s
-    |   showHero_s
-    |   hideHero_s
+    |   setHeroOpacity_s
     |   sleep_s
     |   wait_s
     |   waitAsync_s
@@ -1780,33 +1779,19 @@ var code = '{"type": "hideStatusBar"'+Bool_0+'},\n';
 return code;
 */;
 
-showHero_s
-    :   '显示勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
+setHeroOpacity_s
+    :   '设置勇士不透明度' Number '渐变方式' MoveMode_List '动画时间' IntString? '不等待执行完毕' Bool Newline
 
-
-/* showHero_s
-tooltip : showHero: 显示勇士
+/* setHeroOpacity_s
+tooltip : setHeroOpacity: 设置勇士不透明度
 helpUrl : /_docs/#/instruction
-default : ['',false]
+default : [1,'','',false]
 colour : this.soundColor
+if (Number_0 < 0 || Number_0 > 1) throw new Error('不透明度需要在0~1之间');
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 IntString_0 = IntString_0 && (', "time": ' + IntString_0);
 Bool_0 = Bool_0 ? (', "async": true') : '';
-var code = '{"type": "showHero"'+IntString_0+Bool_0+'},\n';
-return code;
-*/;
-
-hideHero_s
-    :   '隐藏勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
-
-
-/* hideHero_s
-tooltip : hideHero: 隐藏勇士
-helpUrl : /_docs/#/instruction
-default : ['',false]
-colour : this.soundColor
-IntString_0 = IntString_0 && (', "time": ' + IntString_0);
-Bool_0 = Bool_0 ? (', "async": true') : '';
-var code = '{"type": "hideHero"'+IntString_0+Bool_0+'},\n';
+var code = '{"type": "setHeroOpacity", "opacity": '+Number_0+MoveMode_List_0+IntString_0+Bool_0+'},\n';
 return code;
 */;
 

@@ -638,8 +638,8 @@ declare class control {
     /** 瞬间移动 */
     moveDirectly(destX?: any, destY?: any, ignoreSteps?: any): void
 
-    /** 改变勇士的显隐状态 */
-    triggerHero(type?: 'show' | 'hide', time?: any, callback?: () => any): void
+    /** 改变勇士的不透明度 */
+    setHeroOpacity(opacity?: number, moveMode?: string, time?: any, callback?: () => any): void
 
     /** 加减画布偏移 */
     addGameCanvasTranslate(x?: number, y?: number): void

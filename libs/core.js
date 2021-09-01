@@ -178,6 +178,13 @@ function core() {
         // 按下键的时间：为了判定双击
         'downTime': null,
         'ctrlDown': false,
+        'preview': {
+            'enabled': false,
+            'prepareDragging': false,
+            'dragging': false,
+            'px': 0,
+            'py': 0,
+        },
 
         // 路线&回放
         'route': [],

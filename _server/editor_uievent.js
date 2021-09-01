@@ -516,14 +516,13 @@ editor_uievent_wrapper = function (editor) {
                 canvas.style.position = 'relative';
                 canvas.style.marginLeft = "-10px";
                 canvas.style.marginTop = '5px';
-                canvas.style.width = "100%"
                 canvas.width = canvas.height = core.__PIXELS__;
                 uievent.values.dom = canvas;
                 uievent.values.ctx = canvas.getContext('2d');
             }
             span.appendChild(uievent.values.dom);
             core.clearMap(uievent.values.ctx);
-            core.drawThumbnail(floorId, null, {ctx: uievent.values.ctx});
+            core.drawThumbnail(floorId, null, {ctx: uievent.values.ctx, all: true});
         } else {
             button.innerText = '预览';
             span.style.display = 'none';
@@ -973,9 +972,9 @@ editor_uievent_wrapper = function (editor) {
         html += "属性设置: <button onclick='editor.uievent._previewStatusBar()'>确定</button><br/>"
         html += "名称:<input value='阳光'> 生命:<input value='1000'> 上限:<input value='9999'> 攻击:<input value='10'> 防御:<input value='10'> 护盾:<input value='0'> ";
         html += "魔力:<input value='0'> 上限:<input value='-1'> 金币:<input value='0'> 经验:<input value='0'> 等级:<input value='1'> ";
-        html += "<br/>当前道具ID列表（以逗号分隔)：<br/><textarea style='width:230px;height:30px'>yellowKey,yellowKey,blueKey</textarea>";
-        html += "<br/>当前装备ID（以逗号分隔)：<br/><textarea style='width:230px;height:30px'>sword1,sheild1</textarea>";
-        html += "<br/>当前变量值（JSON格式）：<br/><textarea style='width:230px;height:50px'>"+JSON.stringify(flags)+"</textarea>";
+        html += "<br/>当前道具ID（以逗号分隔)：<br/><textarea style='width:300px;height:40px'>yellowKey,yellowKey,blueKey</textarea>";
+        html += "<br/>当前装备ID（以逗号分隔)：<br/><textarea style='width:300px;height:40px'>sword1,sheild1</textarea>";
+        html += "<br/>当前变量值（JSON格式）：<br/><textarea style='width:300px;height:80px'>"+JSON.stringify(flags)+"</textarea>";
         html += "</span></p>"
         uievent.elements.extraBody.innerHTML = html;
 

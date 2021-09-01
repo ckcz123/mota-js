@@ -159,7 +159,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         });
 
         // Global hero animate
-        if ((core.status.hero || {}).animate && core.status.heroMoving == 0 && main.mode == 'play') {
+        if ((core.status.hero || {}).animate && core.status.heroMoving == 0 && main.mode == 'play' && !core.status.preview.enabled) {
             core.drawHero('stop', null, core.status.globalAnimateStatus);
         }
     }
@@ -498,11 +498,6 @@ control.prototype.clearContinueAutomaticRoute = function (callback) {
     if (callback) callback();
 }
 
-////// 显示离散的寻路点 //////
-control.prototype.fillPosWithPoint = function (pos) {
-    core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
-}
-
 ////// 设置自动寻路路线 //////
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) return;
@@ -834,6 +829,7 @@ control.prototype.drawHero = function (status, offset, frame) {
     core.setGameCanvasTranslate('hero', 0, 0);
     delete core.canvas.hero._px;
     delete core.canvas.hero._py;
+    core.status.preview.enabled = false;
     if (!core.hasFlag('__lockViewport__')) {
         this._drawHero_updateViewport(x, y, offset);
     }
@@ -2053,23 +2049,19 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (!data) {
         core.playSound('操作失败');
         return core.drawTip("无效的存档");
-    }
+    } 
     if (data.version != core.firstData.version) {
         core.playSound('操作失败');
         return core.drawTip("存档版本不匹配");
-    }
-    if (data.hard != core.status.hard) {
-        core.playSound('操作失败');
-        return core.drawTip("游戏难度不匹配！");
     }
     if (data.hero.flags.__events__ && data.guid != core.getGuid()) {
         core.playSound('操作失败');
         return core.drawTip("此存档可能存在风险，无法读档");
     }
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-    if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__')) {
+    if (route == null) {
         core.playSound('操作失败');
-        return core.drawTip("种子不一致，无法从此存档回放录像");
+        return core.drawTip("无法从此存档回放录像");
     }
     core.loadData(data, function () {
         core.removeFlag('__fromLoad__');

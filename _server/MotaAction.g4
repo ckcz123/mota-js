@@ -4026,8 +4026,8 @@ EquipValueType_List
     /*EquipValueType_List ['value','percentage']*/;
 
 Vibrate_List
-    :   '左右'|'上下'|'左上-右下'|'左下-右上'
-    /*Vibrate_List ['horizontal','vertical','diagonal1','diagonal2']*/;
+    :   '左右'|'上下'|'左上-右下'|'左下-右上'|'随机'
+    /*Vibrate_List ['horizontal','vertical','diagonal1','diagonal2','random']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -4102,8 +4102,8 @@ Move_List
     /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed']*/;
 
 MoveMode_List
-    :   '匀速移动'|'缓入快出'|'快入缓出'|'缓入缓出'
-    /*MoveMode_List ['', 'easeIn', 'easeOut', 'easeInOut']*/;
+    :   '匀速移动'|'缓入快出'|'快入缓出'|'缓入缓出'|'随机'
+    /*MoveMode_List ['', 'easeIn', 'easeOut', 'easeInOut', 'random']*/;
 
 NameMap_List
     :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'宝石'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'破冰镐'|'阻激夹域'|'穿脱装备'|'商店'

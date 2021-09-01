@@ -240,6 +240,7 @@
         <button onclick="editor_multi.confirm()">确认</button>
         <button onclick="editor_multi.cancel()">取消</button>
         <button onclick="editor_multi.format()">格式化</button>
+        <button id="editor_multi_preview" style="display: none;">预览</button>
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: middle;margin-left:6px"/>
         <span style="vertical-align: middle; margin-left: -3px">语法检查</span>
@@ -389,12 +390,7 @@
     <div id='uieventDialog'>
         <div id="uieventHead">
             <span id="uieventTitle"></span>
-            <select id="uieventBackground" style="margin-left: 20px">
-                <option value="thumbnail" selected>缩略图</option>
-                <option value="#000000">黑色</option>
-                <option value="#FFFFFF">白色</option>
-            </select>
-            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
+            <select id="uieventSelect" style="margin-left: 20px"></select>
             <button id="uieventNo">关闭</button>
             <button id="uieventYes">确定</button>
         </div>

@@ -558,6 +558,10 @@ utils.prototype.applyEasing = function(name) {
             return t
         }
     }
+    if (name == 'random') {
+        var keys = Object.keys(list);
+        name = keys[Math.floor(Math.random() * keys.length)];
+    }
     return list[name] || list.linear;
 }
 

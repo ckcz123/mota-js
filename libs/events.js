@@ -3489,6 +3489,9 @@ events.prototype.vibrate = function (direction, time, speed, power, callback) {
     speed = speed || 10;
     power = power || 10;
     var shakeInfo = {duration: parseInt(time / 10), speed: speed, power: power, direction: 1, shake: 0};
+    if (direction == 'random') {
+        direction = ['horizontal', 'vertical', 'diagonal1', 'diagonal2'][Math.floor(Math.random() * 4)];
+    }
     var animate = setInterval(function () {
         core.events._vibrate_update(shakeInfo);
         switch (direction) {

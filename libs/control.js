@@ -2376,7 +2376,7 @@ control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
         return this.getHeroLoc(name);
-    if (main.mode == 'editor') {
+    if (main.mode == 'editor' && !core.hasFlag('__statistics__')) {
         return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero[name];
     }
     return core.status.hero[name];

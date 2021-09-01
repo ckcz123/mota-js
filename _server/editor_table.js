@@ -419,7 +419,7 @@ editor_table_wrapper = function (editor) {
         var cobj = JSON.parse(tr.children[1].getAttribute('cobj'));
         var input = tr.children[2].children[0].children[0];
         if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
-        if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string, template: cobj._template });
+        if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string, template: cobj._template, preview: cobj._preview });
         if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
         if (cobj._type === 'color') editor.table.selectColor(input);
         if (cobj._type === 'point') editor.table.selectPoint(input);
@@ -451,7 +451,7 @@ editor_table_wrapper = function (editor) {
     editor_table.prototype.dblclickfunc = function (guid, obj, commentObj, thisTr, input, field, cobj, modeNode) {
         if (editor_mode.doubleClickMode === 'change') {
             if (cobj._type === 'event') editor_blockly.import(guid, { type: cobj._event });
-            if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string, template: cobj._template });
+            if (cobj._type === 'textarea') editor_multi.import(guid, { lint: cobj._lint, string: cobj._string, template: cobj._template, preview: cobj._preview });
             if (cobj._type === 'material') editor.table.selectMaterial(input, cobj);
             if (cobj._type === 'color') editor.table.selectColor(input);
             if (cobj._type === 'point') editor.table.selectPoint(input);

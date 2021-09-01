@@ -282,6 +282,18 @@ editor_multi = function () {
         }).length > 0;
     }
 
+    var _previewButton = document.getElementById('editor_multi_preview');
+
+    _previewButton.onclick = function () {
+        if (!editor_multi.preview) return;
+        _format();
+        if (editor_multi.hasError()) {
+            alert("当前好像存在严重的语法错误，请处理后再预览。");
+            return;
+        }
+        editor.uievent.previewEditorMulti(editor_multi.preview, codeEditor.getValue());
+    }
+
     editor_multi.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
         if (!thisTr) return false;
@@ -292,6 +304,8 @@ editor_multi = function () {
         editor_multi.id = id_;
         editor_multi.isString = false;
         editor_multi.lintAutocomplete = false;
+        editor_multi.preview = args.preview;
+        _previewButton.style.display = editor_multi.preview ? 'inline' : 'none';
         if (args.lint === true) editor_multi.lintAutocomplete = true;
         if ((!input.value || input.value == 'null') && args.template)
             input.value = '"' + args.template + '"';
@@ -318,7 +332,7 @@ editor_multi = function () {
             _setValue(tstr || '');
         }
         editor_multi.show();
-        codeEditor.scrollTo(0, lastOffset[id_] || 0);
+        codeEditor.scrollTo(0, lastOffset[editor_multi.id] || 0);
         return true;
     }
 

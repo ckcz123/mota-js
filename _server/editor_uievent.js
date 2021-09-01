@@ -13,14 +13,13 @@ editor_uievent_wrapper = function (editor) {
     uievent.elements.title = document.getElementById('uieventTitle');
     uievent.elements.yes = document.getElementById('uieventYes');
     uievent.elements.no = document.getElementById('uieventNo');
-    uievent.elements.selectBackground = document.getElementById('uieventBackground');
+    uievent.elements.select = document.getElementById('uieventSelect');
     uievent.elements.selectPoint = document.getElementById('selectPoint');
     uievent.elements.selectFloor = document.getElementById('selectPointFloor');
     uievent.elements.selectPointBox = document.getElementById('selectPointBox');
     uievent.elements.body = document.getElementById('uieventBody');
     uievent.elements.selectPointButtons = document.getElementById('selectPointButtons');
     uievent.elements.canvas = document.getElementById('uievent');
-    uievent.elements.usedFlags = document.getElementById('uieventUsedFlags');
     uievent.elements.extraBody = document.getElementById('uieventExtraBody');
 
     uievent.close = function () {
@@ -34,17 +33,13 @@ editor_uievent_wrapper = function (editor) {
     }
     uievent.elements.no.onclick = uievent.close;
 
-    uievent.elements.selectBackground.onchange = function () {
-        uievent.drawPreviewUI();
-    }
-
     uievent.drawPreviewUI = function () {
         core.setAlpha('uievent', 1);
         core.clearMap('uievent');
         core.setFilter('uievent', null);
 
         // 绘制UI
-        var background = uievent.elements.selectBackground.value;
+        var background = uievent.elements.select.value;
         if (background == 'thumbnail') {
             core.drawThumbnail(editor.currentFloorId, null, {ctx: 'uievent'});
         }
@@ -92,14 +87,20 @@ editor_uievent_wrapper = function (editor) {
         uievent.elements.selectPoint.style.display = 'none';
         uievent.elements.yes.style.display = 'none';
         uievent.elements.title.innerText = 'UI绘制预览';
-        uievent.elements.selectBackground.style.display = 'inline';
-        uievent.elements.selectBackground.value = 'thumbnail';
+        uievent.elements.select.style.display = 'inline';
         uievent.elements.selectFloor.style.display = 'none';
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'block';
-        uievent.elements.usedFlags.style.display = 'none';
         uievent.elements.extraBody.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
+
+        uievent.elements.select.innerHTML = 
+            '<option value="thumbnail" selected>缩略图</option>' + 
+            '<option value="#000000">黑色</option>' + 
+            '<option value="#FFFFFF">白色</option>';
+        uievent.elements.select.onchange = function () {
+            uievent.drawPreviewUI();
+        }
 
         uievent.values.list = list;
         uievent.drawPreviewUI();
@@ -114,11 +115,10 @@ editor_uievent_wrapper = function (editor) {
         uievent.mode = 'selectPoint';
         uievent.elements.selectPoint.style.display = 'block';
         uievent.elements.yes.style.display = 'inline';
-        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.select.style.display = 'none';
         uievent.elements.selectFloor.style.display = 'inline';
         uievent.elements.selectPointBox.style.display = 'block';
         uievent.elements.canvas.style.display = 'block';
-        uievent.elements.usedFlags.style.display = 'none';
         uievent.elements.extraBody.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
         uievent.elements.yes.onclick = function () {
@@ -336,11 +336,10 @@ editor_uievent_wrapper = function (editor) {
         uievent.elements.selectPoint.style.display = 'none';
         uievent.elements.yes.style.display = 'none';
         uievent.elements.title.innerText = '搜索变量';
-        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.select.style.display = 'inline';
         uievent.elements.selectFloor.style.display = 'none';
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'none';
-        uievent.elements.usedFlags.style.display = 'inline';
         uievent.elements.extraBody.style.display = 'block';
         uievent.elements.body.style.overflow = "auto";
 
@@ -350,13 +349,14 @@ editor_uievent_wrapper = function (editor) {
             v = "flag:" + v;
             html += "<option value='" + v + "'>" + v + "</option>";
         });
-        uievent.elements.usedFlags.innerHTML = html;
+        uievent.elements.select.innerHTML = html;
+        uievent.elements.select.onchange = uievent.doSearchUsedFlags;
 
         uievent.doSearchUsedFlags();
     }
 
     uievent.doSearchUsedFlags = function () {
-        var flag = uievent.elements.usedFlags.value;
+        var flag = uievent.elements.select.value;
 
         var html = "<p style='margin-left: 10px'>该变量出现的所有位置如下：</p><ul>";
         var list = uievent._searchUsedFlags(flag);
@@ -457,11 +457,10 @@ editor_uievent_wrapper = function (editor) {
         uievent.elements.selectPoint.style.display = 'none';
         uievent.elements.yes.style.display = 'block';
         uievent.elements.title.innerText = title;
-        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.select.style.display = 'none';
         uievent.elements.selectFloor.style.display = 'none';
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'none';
-        uievent.elements.usedFlags.style.display = 'none';
         uievent.elements.extraBody.style.display = 'block';
         uievent.elements.body.style.overflow = "auto";
 
@@ -559,11 +558,10 @@ editor_uievent_wrapper = function (editor) {
             uievent.elements.selectPoint.style.display = 'none';
             uievent.elements.yes.style.display = 'block';
             uievent.elements.title.innerText = title;
-            uievent.elements.selectBackground.style.display = 'none';
+            uievent.elements.select.style.display = 'none';
             uievent.elements.selectFloor.style.display = 'none';
             uievent.elements.selectPointBox.style.display = 'none';
             uievent.elements.canvas.style.display = 'none';
-            uievent.elements.usedFlags.style.display = 'none';
             uievent.elements.extraBody.style.display = 'block';
             uievent.elements.body.style.overflow = "auto";
 
@@ -884,11 +882,10 @@ editor_uievent_wrapper = function (editor) {
         uievent.elements.selectPoint.style.display = 'none';
         uievent.elements.yes.style.display = 'block';
         uievent.elements.title.innerText = title;
-        uievent.elements.selectBackground.style.display = 'none';
+        uievent.elements.select.style.display = 'none';
         uievent.elements.selectFloor.style.display = 'none';
         uievent.elements.selectPointBox.style.display = 'none';
         uievent.elements.canvas.style.display = 'none';
-        uievent.elements.usedFlags.style.display = 'none';
         uievent.elements.extraBody.style.display = 'block';
         uievent.elements.body.style.overflow = "auto";
 
@@ -928,6 +925,144 @@ editor_uievent_wrapper = function (editor) {
         table += '</table>';
 
         uievent.elements.extraBody.innerHTML = "<p>"+table+"</p>";
+    }
+
+    uievent.previewEditorMulti = function (mode, code) {
+        if (mode == 'statusBar') return uievent.previewStatusBar(code);
+    }
+
+    // ------ 状态栏预览 ------ //
+    uievent.previewStatusBar = function (code) {
+        if (!/^function\s*\(\)\s*{/.test(code)) return;
+
+        uievent.isOpen = true;
+        uievent.elements.div.style.display = 'block';
+        uievent.mode = 'previewStatusBar';
+        uievent.elements.selectPoint.style.display = 'none';
+        uievent.elements.yes.style.display = 'none';
+        uievent.elements.title.innerText = '状态栏自绘预览';
+        uievent.elements.select.style.display = 'inline';
+        uievent.elements.selectFloor.style.display = 'none';
+        uievent.elements.selectPointBox.style.display = 'none';
+        uievent.elements.canvas.style.display = 'none';
+        uievent.elements.extraBody.style.display = 'block';
+        uievent.elements.body.style.overflow = "auto";
+
+        uievent.elements.select.innerHTML = '<option value="horizontal" selected>横屏</option><option value="vertical">竖屏</option>'
+        uievent.elements.select.onchange = uievent._previewStatusBar;
+
+        // 计算在自绘状态栏中使用到的所有flag
+        var flags = {};
+        code.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, function (s0, s1) {
+            flags[s1] = 0; return s0;
+        });
+        code.replace(/(core\.)?flags.([a-zA-Z0-9_]+)/g, function (s0, s1, s2) {
+            if (!s1) flags[s2] = 0; return s0;
+        });
+        code.replace(/core\.(has|get|set|add|remove)Flag\('(.*?)'/g, function (s0, s1, s2) {
+            flags[s2] = 0; return s0;
+        });
+        code.replace(/core\.(has|get|set|add|remove)Flag\("(.*?)"/g, function (s0, s1, s2) {
+            flags[s2] = 0; return s0;
+        });
+
+        var html = '';
+        html += "<p style='margin-left: 10px; margin-right: 10px'><b>注：此处预览效果与实际游戏内效果会有所出入，仅供参考，请以游戏内实际效果为准。</b></p>";
+        html += "<p id='_previewStatusBarP' style='display:flex; flex-wrap: nowrap'><canvas id='_previewStatusBarCanvas' style='max-width: 100%'></canvas>";
+        html += "<span style='margin: 10px' id='_previewStatusBarValue'>";
+        html += "属性设置: <button onclick='editor.uievent._previewStatusBar()'>确定</button><br/>"
+        html += "名称:<input value='阳光'> 生命:<input value='1000'> 上限:<input value='9999'> 攻击:<input value='10'> 防御:<input value='10'> 护盾:<input value='0'> ";
+        html += "魔力:<input value='0'> 上限:<input value='-1'> 金币:<input value='0'> 经验:<input value='0'> 等级:<input value='1'> ";
+        html += "<br/>当前道具ID列表（以逗号分隔)：<br/><textarea style='width:230px;height:30px'>yellowKey,yellowKey,blueKey</textarea>";
+        html += "<br/>当前装备ID（以逗号分隔)：<br/><textarea style='width:230px;height:30px'>sword1,sheild1</textarea>";
+        html += "<br/>当前变量值（JSON格式）：<br/><textarea style='width:230px;height:50px'>"+JSON.stringify(flags)+"</textarea>";
+        html += "</span></p>"
+        uievent.elements.extraBody.innerHTML = html;
+
+        var inputs = document.querySelectorAll('#_previewStatusBarP input');
+        for (var i = 0; i < inputs.length; ++i) inputs[i].style.width = '50px';
+
+        uievent.values.code = code;
+        uievent._previewStatusBar();
+    }
+
+    uievent._previewStatusBar = function () {
+        var domStyle = core.clone(core.domStyle);
+        var hero = core.clone(core.status.hero);
+        core.status.hero.flags.__statistics__ = true;
+
+        var statusCanvasCtx = core.dom.statusCanvasCtx;
+        var enable = core.flags.statusCanvas;
+
+        core.domStyle.showStatusBar = true;
+        core.flags.statusCanvas = true;
+        core.domStyle.isVertical = uievent.elements.select.value == 'vertical';
+
+        var canvas = document.getElementById('_previewStatusBarCanvas');
+        var canvas2 = document.createElement('canvas');
+
+        document.getElementById('_previewStatusBarP').style.flexWrap = core.domStyle.isVertical ? 'wrap' : 'nowrap';
+
+        var values = Array.from(document.getElementById('_previewStatusBarValue').children).filter(function (one) {
+            return one.tagName == 'INPUT' || one.tagName == 'TEXTAREA';
+        }).map(function (one) { return one.value; });
+        core.status.hero.name = values[0].value;
+        core.status.hero.hp = parseFloat(values[1]);
+        core.status.hero.hpmax = parseFloat(values[2]);
+        core.status.hero.atk = parseFloat(values[3]);
+        core.status.hero.def = parseFloat(values[4]);
+        core.status.hero.mdef = parseFloat(values[5]);
+        core.status.hero.mana = parseFloat(values[6]);
+        core.status.hero.manamax = parseFloat(values[7]);
+        core.status.hero.money = parseFloat(values[8]);
+        core.status.hero.exp = parseFloat(values[9]);
+        core.status.hero.lv = parseFloat(values[10]);
+
+        values[11].split(',').forEach(function (itemId) {
+            if (!core.material.items[itemId]) return;
+            var itemCls = core.material.items[itemId].cls;
+            if (itemCls == 'items') return;        
+            core.status.hero.items[itemCls][itemId] = (core.status.hero.items[itemCls][itemId]||0) + 1;
+        });
+        core.status.hero.equipment = values[12].split(',');
+        try {
+            var flags = JSON.parse(values[13]);
+            for (var flag in flags) {
+                core.status.hero.flags[flag] = flags[flag];
+            }
+        } catch (e) {}
+        
+        var ctx = canvas2.getContext('2d');
+
+        if (core.domStyle.isVertical) {
+            canvas.width = canvas2.width = core.__PIXELS__;
+            canvas.height = canvas2.height = 32*(core.values.statusCanvasRowsOnMobile||3)+9;
+        } else if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.flags.extendToolbar) {
+            canvas.width = canvas2.width = Math.round(core.__PIXELS__ * 0.31);
+            canvas.height = canvas2.height = core.__PIXELS__ + 3 + 38;
+        } else {
+            canvas.width = canvas2.width = Math.round(core.__PIXELS__ * 0.31);
+            canvas.height = canvas2.height = core.__PIXELS__;
+        }
+
+        core.dom.statusCanvasCtx = ctx;
+
+        try {
+            eval('(' + uievent.values.code + ')()');
+        } catch (e) {
+            console.error(e);
+        }
+
+        var toCtx = canvas.getContext('2d');
+        core.fillRect(toCtx, 0, 0, canvas.width, canvas.height, 'black');
+        core.drawImage(toCtx, canvas2, 0, 0);
+
+        core.dom.statusCanvasCtx = statusCanvasCtx;
+        core.domStyle = domStyle;
+        core.flags.statusCanvas = enable;
+        core.status.hero = hero;
+        window.hero = hero;
+        window.flags = core.status.hero.flags;
     }
 
     editor.constructor.prototype.uievent=uievent;

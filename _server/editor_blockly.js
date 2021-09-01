@@ -163,7 +163,7 @@ editor_blockly = function () {
         editor_blockly.hide();
     }
 
-    editor_blockly.confirm = function () {
+    editor_blockly.confirm = function (keep) {
         if (!editor_blockly.id) {
             editor_blockly.id = '';
             return;
@@ -186,10 +186,13 @@ editor_blockly = function () {
         }
         var setvalue = function (value) {
             var thisTr = document.getElementById(editor_blockly.id);
-            editor_blockly.id = '';
             var input = thisTr.children[2].children[0].children[0];
             input.value = value;
-            editor_blockly.hide();
+            if (!keep) {
+                editor_blockly.id = '';
+                editor_blockly.hide();
+            }
+            else alert('保存成功！');
             input.onchange();
         }
         if (codeAreaHL.getValue() === '') {

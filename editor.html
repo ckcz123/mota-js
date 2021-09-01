@@ -209,6 +209,7 @@
                 <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
                 -->
                 <button onclick="editor_blockly.confirm()">确认</button>
+                <button onclick="editor_blockly.confirm(true)">应用</button>
                 <button id='blocklyParse' onclick="editor_blockly.parse()">解析</button>
                 <button onclick="editor_blockly.cancel()">取消</button>
                 <div style="position: relative; display: inline-block; margin-left: 10px">
@@ -239,6 +240,7 @@
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
         <button onclick="editor_multi.confirm()">确认</button>
         <button onclick="editor_multi.cancel()">取消</button>
+        <button onclick="editor_multi.confirm(true)">应用</button>
         <button onclick="editor_multi.format()">格式化</button>
         <button id="editor_multi_preview" style="display: none;">预览</button>
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"

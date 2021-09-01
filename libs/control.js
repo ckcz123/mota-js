@@ -831,20 +831,14 @@ control.prototype.drawHero = function (status, offset, frame) {
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
     // 重置hero层画布
-    var px = parseFloat(core.canvas.hero.canvas.getAttribute('_px')) || 0;
-    var py = parseFloat(core.canvas.hero.canvas.getAttribute('_py')) || 0;
     core.setGameCanvasTranslate('hero', 0, 0);
-    core.canvas.hero.canvas.removeAttribute('_px');
-    core.canvas.hero.canvas.removeAttribute('_py');
-    offset.px = px;
-    offset.py = py;
+    delete core.canvas.hero._px;
+    delete core.canvas.hero._py;
     if (!core.hasFlag('__lockViewport__')) {
         this._drawHero_updateViewport(x, y, offset);
     }
 
-    if (!core.hasFlag('hideHero')) {
-        this._drawHero_draw(direction, x, y, status, offset, frame);
-    }  
+    this._drawHero_draw(direction, x, y, status, offset, frame);
 }
 
 control.prototype._drawHero_updateViewport = function (x, y, offset) {
@@ -855,11 +849,13 @@ control.prototype._drawHero_updateViewport = function (x, y, offset) {
 
 control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
     offset = offset || {x: 0, y: 0, offset: 0, px: 0, py: 0};
+    var opacity = core.setAlpha('hero', core.getFlag('__heroOpacity__', 1))
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
-            offset.px+block.posx+(32-block.width)/2, offset.py+block.posy+32-block.height, block.width, block.height);
+            block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
+    core.setAlpha('hero', opacity);
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -893,40 +889,28 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     });
 }
 
-control.prototype.triggerHero = function (type, time, callback) {
-    if (type == null) {
-        type = core.hasFlag('hideHero') ? 'show' : 'hide';
-    }
-    if ((core.hasFlag('hideHero') && type != 'show') || (!core.hasFlag('hideHero') && type != 'hide')) {
-        if (callback) callback();
-        return;
-    }
-    core.removeFlag('hideHero');
-
-    var cb = function () {
-        if (type == 'hide') core.setFlag('hideHero', true);
-        core.drawHero();
-        if (callback) callback();
-        return;
-    }
-
+control.prototype.setHeroOpacity = function (opacity, moveMode, time, callback) {
     time = time || 0;
-    if (time == 0) return cb();
-    time /= Math.max(core.status.replay.speed, 1)    
-    this._triggerHero_animate(type, 10 / time, cb);
-}
-
-control.prototype._triggerHero_animate = function (type, delta, callback) {
-    var opacity = type != 'show' ? 1 : 0;
-    var animate = setInterval(function () {
-        opacity += type != 'show' ? -delta : delta;
-        core.setAlpha('hero', opacity);
+    if (time == 0) {
+        core.setFlag('__heroOpacity__', opacity);
         core.drawHero();
-        core.setAlpha('hero', 1);
-        if (opacity >= 1 || opacity <= 0) {
+        if (callback) callback();
+        return;
+    }
+    time /= Math.max(core.status.replay.speed, 1)    
+
+    var fromOpacity = core.getFlag('__heroOpacity__', 1);
+    var step = 0, steps = parseInt(time / 10);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(moveMode);
+
+    var animate = setInterval(function () {
+        step++;
+        core.setFlag('__heroOpacity__', fromOpacity + (opacity - fromOpacity) * moveFunc(step / steps));
+        core.drawHero();
+        if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            core.drawHero();
             if (callback) callback();
         }
     }, 10);
@@ -1015,14 +999,13 @@ control.prototype.setViewport = function (px, py) {
     core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
-    var canvas = core.canvas.hero.canvas;
-    var px = parseFloat(canvas.getAttribute('_px')) || 0;
-    var py = parseFloat(canvas.getAttribute('_py')) || 0;
+    var px = parseFloat(core.canvas.hero._px) || 0;
+    var py = parseFloat(core.canvas.hero._py) || 0;
     px += originOffsetX - core.bigmap.offsetX;
     py += originOffsetY - core.bigmap.offsetY;
     core.control.setGameCanvasTranslate('hero', px, py);
-    core.canvas.hero.canvas.setAttribute('_px', px);
-    core.canvas.hero.canvas.setAttribute('_py', py);
+    core.canvas.hero._px = px;
+    core.canvas.hero._py = py;
 }
 
 ////// 移动视野范围 //////
@@ -1968,6 +1951,7 @@ control.prototype.doSL = function (id, type) {
         case 'reload': this._doSL_reload(id, this._doSL_load_afterGet); break;
         case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
         case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
+        case 'replaySince': this._doSL_load(id, this._doSL_replaySince_afterGet); break;
     }
 }
 
@@ -1979,7 +1963,11 @@ control.prototype._doSL_save = function (id) {
     // 在事件中的存档
     if (core.status.event.interval != null)
         core.setFlag("__events__", core.status.event.interval);
-    core.setLocalForage("save"+id, core.saveData(), function() {
+    var data = core.saveData();
+    if (core.isReplaying() && core.status.replay.toReplay.length > 0) {
+        data.__toReplay__ = core.encodeRoute(core.status.replay.toReplay);
+    }
+    core.setLocalForage("save"+id, data, function() {
         core.saves.saveIndex = id;
         core.setLocalStorage('saveIndex', core.saves.saveIndex);
         // 恢复事件
@@ -2088,7 +2076,6 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
         core.startReplay(route);
         core.drawTip("回退到存档节点");
     });
-
 }
 
 control.prototype._doSL_replayRemain_afterGet = function (id, data) {
@@ -2121,6 +2108,16 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
     });
 }
 
+control.prototype._doSL_replaySince_afterGet = function (id, data) {
+    if (data.floorId != core.status.floorId || data.hero.loc.x != core.getHeroLoc('x') || data.hero.loc.y != core.getHeroLoc('y'))
+        return alert("楼层或坐标不一致！");
+    if (!data.__toReplay__) return alert('该存档没有剩余录像！');
+    core.ui.closePanel();
+    core.startReplay(core.decodeRoute(data.__toReplay__));
+    core.drawTip("播放存档剩余录像");
+    return;
+}
+
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍候...");
@@ -2136,7 +2133,7 @@ control.prototype._syncSave_http = function (type, saves) {
     var formData = new FormData();
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);
-    formData.append('data', JSON.stringify(saves));
+    formData.append('data', LZString.compressToBase64(JSON.stringify(saves)));
     formData.append('shorten', '1');
 
     core.http("POST", "/games/sync.php", formData, function (data) {
@@ -2181,7 +2178,19 @@ control.prototype._syncLoad_http = function (id, password) {
     core.http("POST", "/games/sync.php", formData, function (data) {
         var response = JSON.parse(data);
         if (response.code == 0) {
-            core.control._syncLoad_write(JSON.parse(response.msg));
+            var msg = null;
+            try {
+                msg = JSON.parse(LZString.decompressFromBase64(response.msg));
+            } catch (e) {
+                try {
+                    msg = JSON.parse(response.msg);
+                } catch (e) {}
+            }
+            if (msg) {
+                core.control._syncLoad_write(msg);
+            } else {
+                core.drawText("出错啦！\n存档解析失败！");
+            }
         }
         else {
             core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);
@@ -2285,7 +2294,7 @@ control.prototype.getAllSaves = function (callback) {
 ////// 获得所有存在存档的存档位 //////
 control.prototype.getSaveIndexes = function (callback) {
     var indexes = {};
-    localforage.keys(function (err, keys) {
+    core.keysLocalForage(function (err, keys) {
        if (err) {
            main.log(err);
            return callback(indexes);
@@ -2367,7 +2376,7 @@ control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
         return this.getHeroLoc(name);
-    if (main.mode == 'editor') {
+    if (main.mode == 'editor' && !core.hasFlag('__statistics__')) {
         return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero[name];
     }
     return core.status.hero[name];
@@ -2674,10 +2683,9 @@ control.prototype._weather_snow = function (level) {
 
 control.prototype._weather_fog = function (level) {
     if (!core.animateFrame.weather.fog) return;
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
     core.animateFrame.weather.nodes = [{
         'image': core.animateFrame.weather.fog,
-        'level': number,
+        'level': 40 * level,
         'x': 0,
         'y': -core.__PIXELS__ / 2,
         'dx': -Math.random() * 1.5,
@@ -2688,10 +2696,9 @@ control.prototype._weather_fog = function (level) {
 
 control.prototype._weather_cloud = function (level) {
     if (!core.animateFrame.weather.cloud) return;
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
     core.animateFrame.weather.nodes = [{
         'image': core.animateFrame.weather.cloud,
-        'level': number,
+        'level': 40 * level,
         'x': 0,
         'y': -core.__PIXELS__ / 2,
         'dx': -Math.random() * 1.5,
@@ -3229,9 +3236,9 @@ control.prototype.resize = function() {
     var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
     var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.values.statusCanvasRowsOnMobile || 3;
     var col = statusCanvas ? statusCanvasRows : Math.ceil(count / 3);
-    if (col > 4) {
-        if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过4！");
-        else alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
+    if (col > 5) {
+        if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过5！");
+        else alert("当前状态栏数目("+count+")大于15，请调整到不超过15以避免手机端出现显示问题。");
     }
     var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
 
@@ -3241,7 +3248,7 @@ control.prototype.resize = function() {
         CANVAS_WIDTH: CANVAS_WIDTH,
         BORDER: BORDER,
         BAR_WIDTH: BAR_WIDTH,
-        TOOLBAR_HEIGHT: extendToolbar ? 38 : 44,
+        TOOLBAR_HEIGHT: 38,
         outerSize: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
         globalAttribute: globalAttribute,
         border: '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
@@ -3249,7 +3256,7 @@ control.prototype.resize = function() {
         count: count,
         col: col,
         statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER : 0,
-        toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 2 * BORDER : 0,
+        toolbarHeightInVertical: core.domStyle.isVertical ? 38 * core.domStyle.scale + 2 * BORDER : 0,
         extendToolbar: extendToolbar,
         is15x15: core.__SIZE__ == 15
     };
@@ -3456,7 +3463,7 @@ control.prototype._resize_tools = function (obj) {
         var style = core.dom.tools[i].style;
         style.height = toolsHeight + "px";
         style.marginLeft = toolsMarginLeft + "px";
-        style.marginTop = (obj.extendToolbar ? 3 : 6) * core.domStyle.scale + "px"
+        style.marginTop = 3 * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
     if (core.domStyle.isVertical || obj.extendToolbar) {

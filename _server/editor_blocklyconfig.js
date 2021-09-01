@@ -204,8 +204,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['lockViewport_s'].xmlText(),      
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
-      MotaActionBlocks['showHero_s'].xmlText(),
-      MotaActionBlocks['hideHero_s'].xmlText(),
+      MotaActionBlocks['setHeroOpacity_s'].xmlText(),
       MotaActionBlocks['setCurtain_0_s'].xmlText(),
       MotaActionBlocks['setCurtain_1_s'].xmlText(),
       MotaActionBlocks['screenFlash_s'].xmlText(),
@@ -362,23 +361,7 @@ editor_blocklyconfig=(function(){
             }
           ]
       }
-      ], 'event'),  
-      '<label text="战前剧情"></label>',
-      MotaActionFunctions.actionParser.parse({ 
-        "trigger": "action", 
-        "displayDamage": true, 
-        "data": [ 
-          ' ... 战前剧情',
-          {"type": "battle", "id": "greenSlime"},
-          ' ... 战后剧情；请注意上面的强制战斗不会使怪物消失',
-          '需要下一句来调用{"type": "hide"}来隐藏事件',
-          {"type": "hide"},
-        ]
-      },'event'),
-      '<label text="杀死魔龙后隐藏其余图块"></label>',
-      MotaActionFunctions.actionParser.parse([
-        {"type": "function", "function": "function(){var x=core.status.event.data.x,y=core.status.event.data.y;if(core.isset(x)&&core.isset(y)){core.insertAction([{type:'hide',loc:[[x-1,y-2],[x,y-2],[x+1,y-2],[x-1,y-1],[x,y-1],[x+1,y-1],[x-1,y],[x+1,y]]}]);}}"},
-      ],'afterBattle'),
+      ], 'event'),
       '<label text="全地图选中一个点"></label>',
       MotaActionFunctions.actionParser.parse([
         {

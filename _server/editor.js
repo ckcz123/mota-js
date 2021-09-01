@@ -207,6 +207,7 @@ editor.prototype.init = function (callback) {
                 editor_file_wrapper(editor);
                 editor_table_wrapper(editor);
                 editor_ui_wrapper(editor);
+                editor_uievent_wrapper(editor);
                 editor_mappanel_wrapper(editor);
                 editor_datapanel_wrapper(editor);
                 editor_materialpanel_wrapper(editor);

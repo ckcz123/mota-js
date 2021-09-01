@@ -217,7 +217,8 @@ events.prototype._gameOver_confirmDownload = function (ending) {
             'seed': core.getFlag('__seed__'),
             'route': core.encodeRoute(core.status.route)
         }
-        core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", JSON.stringify(obj));
+        core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", 
+            LZString.compressToBase64(JSON.stringify(obj)));
         core.events._gameOver_askRate(ending);
     }, function () {
         core.events._gameOver_askRate(ending);
@@ -422,7 +423,7 @@ events.prototype._trigger_ignoreChangeFloor = function (block) {
 
 events.prototype._sys_battle = function (data, callback) {
     // 检查是否需要改变朝向
-    if (data.x == core.nextX() && data.y == core.nextY()) {
+    /* if (data.x == core.nextX() && data.y == core.nextY()) {
         var dir = core.turnDirection(":back");
         var id = data.event.id, toId = (data.event.faceIds || {})[dir];
         if (toId && id != toId) {
@@ -430,7 +431,7 @@ events.prototype._sys_battle = function (data, callback) {
             if (number > 0)
                 core.setBlock(number, data.x, data.y);
         }
-    }
+    } */
 
     // 检查战前事件
     var beforeBattle = [];
@@ -1358,12 +1359,18 @@ events.prototype._action_text = function (data, x, y, prefix) {
     if (core.getContextByName(ctx) && !data.showAll) {
         core.ui._animateUI('hide', ctx, function () {
             core.ui.drawTextBox(data.text, data);
-            core.ui._animateUI('show', ctx);
+            core.ui._animateUI('show', ctx, function () {
+                if (data.async) core.doAction();
+            });
         });
         return;
     }
     core.ui.drawTextBox(data.text, data);
-    if (!data.showAll) core.ui._animateUI('show', ctx);
+    if (!data.showAll) {
+        core.ui._animateUI('show', ctx, function () {
+            if (data.async) core.doAction();
+        });
+    }
 }
 
 events.prototype._action_moveTextBox = function (data, x, y, prefix) {
@@ -1682,12 +1689,12 @@ events.prototype._precompile_scaleImage = function (data) {
 
 events.prototype._action_setCurtain = function (data, x, y, prefix) {
     if (data.async) {
-        core.setCurtain(data.color, data.time, data.moveMode);
+        core.setCurtain(data.color || core.status.thisMap.color, data.time, data.moveMode);
         if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
         core.doAction();
     }
     else {
-        core.setCurtain(data.color, data.time, data.moveMode, function () {
+        core.setCurtain(data.color || core.status.thisMap.color, data.time, data.moveMode, function () {
             if (data.color == null || data.keep) core.setFlag('__color__', data.color || null);
             core.doAction();
         });
@@ -1871,14 +1878,14 @@ events.prototype._action_addValue = function (data, x, y, prefix) {
 }
 
 events.prototype._action_setEnemy = function (data, x, y, prefix) {
-    this.setEnemy(data.id, data.name, data.value, data.operator, prefix);
+    this.setEnemy(data.id, data.name, data.value, data.operator, prefix, data.norefresh);
     core.doAction();
 }
 
 events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
     var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     loc.forEach(function (one) {
-        core.setEnemyOnPoint(one[0], one[1], data.floorId, data.name, data.value, data.operator, prefix);
+        core.setEnemyOnPoint(one[0], one[1], data.floorId, data.name, data.value, data.operator, prefix, data.norefresh);
     });
     core.doAction();
 }
@@ -1886,7 +1893,7 @@ events.prototype._action_setEnemyOnPoint = function (data, x, y, prefix) {
 events.prototype._action_resetEnemyOnPoint = function (data, x, y, prefix) {
     var loc = this.__action_getLoc2D(data.loc, x, y, prefix);
     loc.forEach(function (one) {
-        core.resetEnemyOnPoint(one[0], one[1], data.floorId);
+        core.resetEnemyOnPoint(one[0], one[1], data.floorId, data.norefresh);
     });
     core.doAction();
 }
@@ -1905,7 +1912,7 @@ events.prototype._action_moveEnemyOnPoint = function (data, x, y, prefix) {
     } else {
         to = this.__action_getLoc(data.to, x, y, prefix);
     }
-    this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId);
+    this.moveEnemyOnPoint(from[0], from[1], to[0], to[1], data.floorId, data.norefresh);
     core.doAction();
 }
 
@@ -2037,9 +2044,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
             var index = action.substring(8);
-            if (index == 'none' || ((index = parseInt(index)) >= 0) && index % 100 < data.choices.length) {
-                this.__action_choices_replaying(data, index);
-            } else {
+            if (!this.__action_choices_replaying(data, index)) {
                 core.control._replay_error(action);
                 return;
             }
@@ -2057,7 +2062,7 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                         return;
                     }
                     if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
-                    core.events.__action_choices_replaying(data, core.clamp(parseInt(value), 0, data.choices.length - 1))
+                    core.events.__action_choices_replaying(data, ((parseInt(value) || 0) + data.choices.length) % data.choices.length);
                 });
             }
         }
@@ -2080,17 +2085,24 @@ events.prototype._action_choices = function (data, x, y, prefix) {
 }
 
 events.prototype.__action_choices_replaying = function (data, index) {
+    var selection = index;
     if (index != 'none') {
-        var timeout = Math.floor(index / 100) || 0;
+        selection = parseInt(index);
+        if (isNaN(selection)) return false;
+        if (selection < 0) selection += data.choices.length;
+        if (selection < 0) return false;
+        if (selection % 100 > 50) selection += data.choices.length;
+        if (selection % 100 > data.choices.length) return false;
+        var timeout = Math.floor(selection / 100) || 0;
         core.setFlag('timeout', timeout);
-        index %= 100;
+        selection %= 100;
     } else core.setFlag('timeout', 0);
-    core.status.event.selection = index;
+    core.status.event.selection = selection;
     setTimeout(function () {
         core.status.route.push("choices:"+index);
-        if (index != 'none') {
+        if (selection != 'none') {
             // 检查
-            var choice = data.choices[index];
+            var choice = data.choices[selection];
             if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
                 // 无法选择此项
                 core.control._replay_error("无法选择项："+index);
@@ -2101,6 +2113,7 @@ events.prototype.__action_choices_replaying = function (data, index) {
         }
         core.doAction();
     }, core.status.replay.speed == 24 ? 1 : 750 / Math.max(1, core.status.replay.speed));
+    return true;
 }
 
 events.prototype._precompile_choices = function (data) {
@@ -2339,22 +2352,22 @@ events.prototype._action_hideStatusBar = function (data, x, y, prefix) {
 }
 
 events.prototype._action_showHero = function (data, x, y, prefix) {
-    data.time = data.time || 0;
-    if (data.time > 0) {
-        this.__action_doAsyncFunc(data.async, core.triggerHero, 'show', data.time);
-    } else {
-        core.removeFlag('hideHero');
-        core.drawHero();
-        core.doAction();
-    }
+    data.opacity = 1;
+    return this._action_setHeroOpacity(data, x, y, prefix);
 }
 
 events.prototype._action_hideHero = function (data, x, y, prefix) {
+    data.opacity = 0;
+    return this._action_setHeroOpacity(data, x, y, prefix);
+}
+
+events.prototype._action_setHeroOpacity = function (data, x, y, prefix) {
     data.time = data.time || 0;
+    if (data.opacity == null) data.opacity = 1;
     if (data.time > 0) {
-        this.__action_doAsyncFunc(data.async, core.triggerHero, 'hide', data.time);
+        this.__action_doAsyncFunc(data.async, core.setHeroOpacity, data.opacity, data.moveMode, data.time);
     } else {
-        core.setFlag('hideHero', true);
+        core.setFlag('__heroOpacity__', data.opacity);
         core.drawHero();
         core.doAction();
     }
@@ -2980,7 +2993,7 @@ events.prototype._setValue_setGlobal = function (name, value) {
 }
 
 ////// 设置一个怪物属性 //////
-events.prototype.setEnemy = function (id, name, value, operator, prefix) {
+events.prototype.setEnemy = function (id, name, value, operator, prefix, norefresh) {
     if (!core.hasFlag('enemyInfo')) {
         core.setFlag('enemyInfo', {});
     }
@@ -2990,11 +3003,11 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix) {
     value = this._updateValueByOperator(core.calValue(value, prefix), (core.material.enemys[id]||{})[name], operator);
     enemyInfo[id][name] = value;
     (core.material.enemys[id]||{})[name] = core.clone(value);
-    core.updateStatusBar();
+    if (!norefresh) core.updateStatusBar();
 }
 
 ////// 设置某个点上的怪物属性 //////
-events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operator, prefix) {
+events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operator, prefix, norefresh) {
     floorId = floorId || core.status.floorId;
     var block = core.getBlock(x, y, floorId);
     if (block == null) return;
@@ -3007,22 +3020,22 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
     flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
     flags.enemyOnPoint[floorId][x+","+y] = flags.enemyOnPoint[floorId][x+","+y] || {};
     flags.enemyOnPoint[floorId][x+","+y][name] = value;
-    core.updateStatusBar();
+    if (!norefresh) core.updateStatusBar();
 }
 
 ////// 重置某个点上的怪物属性 //////
-events.prototype.resetEnemyOnPoint = function (x, y, floorId) {
+events.prototype.resetEnemyOnPoint = function (x, y, floorId, norefresh) {
     delete ((flags.enemyOnPoint||{})[floorId||core.status.floorId]||{})[x+","+y];
-    core.updateStatusBar();
+    if (!norefresh) core.updateStatusBar();
 }
 
 ////// 将某个点上已经设置的怪物属性移动到其他点 //////
-events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId) {
+events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId, norefresh) {
     floorId = floorId || core.status.floorId;
     if (((flags.enemyOnPoint||{})[floorId]||{})[fromX+","+fromY]) {
         flags.enemyOnPoint[floorId][toX+","+toY] = flags.enemyOnPoint[floorId][fromX+","+fromY];
         delete flags.enemyOnPoint[floorId][fromX+","+fromY];
-        core.updateStatusBar();
+        if (!norefresh) core.updateStatusBar();
     }
 }
 
@@ -3067,7 +3080,7 @@ events.prototype.setGlobalFlag = function (name, value) {
     core.setFlag("globalFlags", flags);
     core.resize();
     if (name == 'blurFg')
-        core.drawMap();
+        core.redrawMap();
 }
 
 ////// 设置文件别名 //////
@@ -3476,6 +3489,9 @@ events.prototype.vibrate = function (direction, time, speed, power, callback) {
     speed = speed || 10;
     power = power || 10;
     var shakeInfo = {duration: parseInt(time / 10), speed: speed, power: power, direction: 1, shake: 0};
+    if (direction == 'random') {
+        direction = ['horizontal', 'vertical', 'diagonal1', 'diagonal2'][Math.floor(Math.random() * 4)];
+    }
     var animate = setInterval(function () {
         core.events._vibrate_update(shakeInfo);
         switch (direction) {

@@ -422,7 +422,7 @@ table.row {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -60%);
-    width: 500px;
+    width: 620px;
 }
 
 #uieventHead {
@@ -444,8 +444,8 @@ table.row {
 }
 
 #uieventBody {
-    width: 480px;
-    height: 480px;
+    width: 600px;
+    height: 600px;
     position: relative;
     margin-left: 10px;
     margin-bottom: 5px;

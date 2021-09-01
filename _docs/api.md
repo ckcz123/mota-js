@@ -610,6 +610,9 @@ noGather: 是否聚集跟随者
 setHeroMoveInterval: fn(callback?: fn())
 设置行走的效果动画
 
+setHeroOpacity: fn(opacity?: number, moveMode?: string, time?: number, callback?: fn())
+改变勇士的不透明度
+
 setMusicBtn: fn()
 设置音乐图标的显隐状态
 
@@ -681,9 +684,6 @@ triggerDebuff: fn(action: string, type: string|[string])
 获得或移除毒衰咒效果
 action: 要获得还是移除，'get'为获得，'remove'为移除
 type: 获得或移除的内容（poison/weak/curse），可以为字符串或数组
-
-triggerHero: fn(type?: string, time?: number, callback?: fn())
-改变勇士的显隐状态
 
 triggerReplay: fn()
 播放或暂停录像回放

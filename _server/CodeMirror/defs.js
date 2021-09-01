@@ -2239,9 +2239,9 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "半自动寻路，用于鼠标或手指拖动<br/>例如：core.setAutomaticRoute(0, 0, [{direction: \"right\", x: 4, y: 9}, {direction: \"right\", x: 5, y: 9}]);<br/>destX: 鼠标或手指的起拖点横坐标<br/>destY: 鼠标或手指的起拖点纵坐标<br/>stepPostfix: 拖动轨迹的数组表示，每项为一步的方向和目标点。", 
           "!type": "fn(destX: number, destY: number, stepPostfix: [{x: number, y: number, direction: string}])"
         }, 
-        "triggerHero": {
-          "!doc": "改变勇士的显隐状态", 
-          "!type": "fn(type?: string, time?: number, callback?: fn())"
+        "setHeroOpacity": {
+          "!doc": "改变勇士的不透明度", 
+          "!type": "fn(opacity?: number, moveMode?: string, time?: number, callback?: fn())"
         }, 
         "gatherFollowers": {
           "!doc": "立刻聚集所有的跟随者", 

@@ -109,7 +109,7 @@
             }
         });
         if (!isInput)
-            style.whiteSpace = 'pre';
+            style.whiteSpace = 'pre-wrap';
 
         if (isFirefox) {
             // Firefox lies about the overflow property for textareas: https://bugzilla.mozilla.org/show_bug.cgi?id=984275

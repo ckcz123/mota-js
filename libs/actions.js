@@ -286,6 +286,7 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._keyDownSL(keyCode);
             break;
         case 'selectShop':
@@ -388,6 +389,7 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._keyUpSL(keyCode);
             break;
         case 'keyBoard':
@@ -674,6 +676,7 @@ actions.prototype._sys_onclick_lockControl = function (x, y, px, py) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._clickSL(x, y, px, py);
             break;
         case 'confirmBox':
@@ -839,7 +842,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
         }
     }
     // 长按SL上下页快速翻页
-    if (["save","load","replayLoad","replayRemain"].indexOf(core.status.event.id) >= 0) {
+    if (["save","load","replayLoad","replayRemain","replaySince"].indexOf(core.status.event.id) >= 0) {
         if ([this.HSIZE-2, this.HSIZE-3, this.HSIZE+2, this.HSIZE+3].indexOf(x) >= 0 && y == this.LAST) {
             this._clickSL(x, y);
             return true;
@@ -1084,7 +1087,12 @@ actions.prototype._clickAction = function (x, y, px, py) {
                 var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
                 delete core.status.event.timeout;
                 core.setFlag('timeout', timeout);
-                core.status.route.push("choices:" + (100 * timeout + y - topIndex));
+                // 对全局商店特殊处理
+                var index = y - topIndex;
+                if (index == choices.length - 1 && core.hasFlag('@temp@shop')) {
+                    index = -1;
+                }
+                core.status.route.push("choices:" + (100 * timeout + index));
                 core.insertAction(choice.action);
                 core.doAction();
             }
@@ -2754,7 +2762,8 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
                         "version": core.firstData.version,
                         "data": saves
                     }
-                    core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", JSON.stringify(content));
+                    core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", 
+                        LZString.compressToBase64(JSON.stringify(content)));
                 }
             };
             if (selection == 0) core.getAllSaves(callback);
@@ -2804,11 +2813,13 @@ actions.prototype._clickStorageRemove = function (x, y) {
 
 actions.prototype._clickStorageRemove_all = function () {
     core.myconfirm("你确定要清除【全部游戏】的所有本地存档？\n此行为不可逆！！！", function () {
-        var done = function () {
+        core.ui.drawWaiting("正在清空，请稍候...");
+        core.clearLocalForage(function () {
             core.saves.ids = {};
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
             core.saves.autosave.now = 0;
+            core.saves.cache = {};
             core.ui.closePanel();
             core.saves.saveIndex = 1;
             core.saves.favorite = [];
@@ -2816,9 +2827,7 @@ actions.prototype._clickStorageRemove_all = function () {
             core.control._updateFavoriteSaves();
             core.removeLocalStorage('saveIndex');
             core.drawText("\t[操作成功]你的所有存档已被清空。");
-        };
-        core.ui.drawWaiting("正在清空，请稍候...");
-        localforage.clear(done);
+        });
     });
 }
 
@@ -2870,9 +2879,10 @@ actions.prototype._clickReplay = function (x, y) {
             case 0: core.playSound('确定'); return this._clickReplay_fromBeginning();
             case 1: core.playSound('确定'); return this._clickReplay_fromLoad();
             case 2: core.playSound('确定'); return this._clickReplay_replayRemain();
-            case 3: core.playSound('确定'); return core.chooseReplayFile();
-            case 4: core.playSound('确定'); return this._clickReplay_download();
-            case 5: core.playSound('取消'); return core.ui.closePanel();
+            case 3: core.playSound('确定'); return this._clickReplay_replaySince();
+            case 4: core.playSound('确定'); return core.chooseReplayFile();
+            case 5: core.playSound('确定'); return this._clickReplay_download();
+            case 6: core.playSound('取消'); return core.ui.closePanel();
         }
     }
 }
@@ -2907,14 +2917,32 @@ actions.prototype._clickReplay_replayRemain = function () {
     });
 }
 
+actions.prototype._clickReplay_replaySince = function () {
+    core.closePanel();
+    core.drawText([
+        "\t[播放存档剩余录像]该功能为【接续播放录像】的简化版本，允许你播放\r[yellow]一个存档中剩余的录像\r，常常用于\r[yellow]录像局部优化\r。\n" +
+        "在录像正常播放中，你随时可以暂停并按S键进行存档；此时\r[yellow]剩余录像\r也会被记在存档中（在读档界面用\r[yellow][R]\r标识。）\n" + 
+        "之后，你可以选择在路线优化后直接播放该存档的\r[yellow]剩余录像\r，而无需再像接续播放一样选择录像起点和终点。\n\n" +
+        "详细使用方法参见露珠录制的视频教程：\n\r[yellow]https://bilibili.com/video/BV1az4y1C78x",
+        "请选择一个存档。\n\n\r[yellow]该存档需为录像播放中存的，且坐标必须和当前勇士坐标完全相同。\r\n将尝试播放此存档的剩余录像。",
+    ], function () {
+        core.status.event.id = 'replaySince';
+        core.lockControl();
+        var saveIndex = core.saves.saveIndex;
+        var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
+        core.ui._drawSLPanel(10 * page + offset);
+    });
+}
+
 actions.prototype._clickReplay_download = function () {
     // if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
-    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
-        'name': core.firstData.name,
-        'hard': core.status.hard,
-        'seed': core.getFlag('__seed__'),
-        'route': core.encodeRoute(core.status.route)
-    }));
+    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", 
+        LZString.compressToBase64(JSON.stringify({
+            'name': core.firstData.name,
+            'hard': core.status.hard,
+            'seed': core.getFlag('__seed__'),
+            'route': core.encodeRoute(core.status.route)
+        })));
 
 }
 

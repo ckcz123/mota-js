@@ -292,12 +292,12 @@ ActionParser.prototype.parseAction = function() {
         }
         data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_2_s', [
-          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, info[3], buildTextDrawing(textDrawing), this.next
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, data.async||false, info[3], buildTextDrawing(textDrawing), this.next
         ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       } else if (info[0] || info[1] || info[2] || data.pos || data.code) {
         data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_1_s',[
-          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, data.async||false, info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('text_0_s', [info[3],this.next],
@@ -750,7 +750,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
+        data.norefresh||false, this.next]);
       break;
     case "setEnemyOnPoint":
       data.loc=data.loc||[];
@@ -762,7 +763,8 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
+        data.norefresh||false, this.next]);
       break;
     case "resetEnemyOnPoint":
       data.loc=data.loc||[];
@@ -774,17 +776,17 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','), data.floorId||'',this.next]);
+        x_str.join(','),y_str.join(','), data.floorId||'',data.norefresh||false,this.next]);
       break;
     case "moveEnemyOnPoint":
       data.from=data.from||['','']
       if (data.dxy) {
         this.next = MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText([
-          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',this.next]);
+          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',data.norefresh||false,this.next]);
       } else {
         data.to=data.to||['','']
         this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
-          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',data.norefresh||false,this.next]);
       }
       break;
     case "setEquip":
@@ -929,13 +931,9 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
         data.toolbox||false,this.next]);
       break;
-    case "showHero":
-      this.next = MotaActionBlocks['showHero_s'].xmlText([
-        data.time, data.async||false, this.next]);
-      break;
-    case "hideHero":
-      this.next = MotaActionBlocks['hideHero_s'].xmlText([
-        data.time, data.async||false, this.next]);
+    case "setHeroOpacity":
+      this.next = MotaActionBlocks['setHeroOpacity_s'].xmlText([
+        data.opacity, data.moveMode, data.time, data.async||false, this.next]);
       break;
     case "sleep": // 等待多少毫秒
       this.next = MotaActionBlocks['sleep_s'].xmlText([

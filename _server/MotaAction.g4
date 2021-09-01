@@ -847,8 +847,7 @@ action
     |   update_s
     |   showStatusBar_s
     |   hideStatusBar_s
-    |   showHero_s
-    |   hideHero_s
+    |   setHeroOpacity_s
     |   sleep_s
     |   wait_s
     |   waitAsync_s
@@ -969,7 +968,7 @@ return code+',\n';
 */;
 
 text_1_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点 px' PosString? 'py' PosString? '宽' PosString? '编号' Int '不等待操作' Bool BGNL? Newline EvalString_Multi Newline
     
 
 /* text_1_s
@@ -977,7 +976,7 @@ tooltip : text：显示一段文字（剧情）,选项较多请右键点击帮�
 helpUrl : /_docs/#/instruction
 previewBlock : true
 allIds : ['EvalString_1']
-default : ["小妖精","fairy","","","","",0,"欢迎使用事件编辑器(双击方块可直接预览)"]
+default : ["小妖精","fairy","","","","",0,false,"欢迎使用事件编辑器(双击方块可直接预览)"]
 var title='';
 if (EvalString_0==''){
     if (EvalString_1=='' )title='';
@@ -998,10 +997,11 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0 || Bool_0) {
     code = '{"type": "text", "text": '+code;
     if (pos) code += ', "pos": ' + pos;
     if (Int_0) code += ', "code": ' + Int_0;
+    if (Bool_0) code += ', "async": true';
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';
@@ -1010,7 +1010,7 @@ return code+',\n';
 */;
 
 text_2_s
-    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点像素 px' PosString? 'py' PosString? '宽度' PosString? '对话框编号' Int BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
+    :   '标题' EvalString? '图像' EvalString? '对话框效果' EvalString? '起点 px' PosString? 'py' PosString? '宽' PosString? '编号' Int '不等待操作' Bool BGNL? Newline EvalString_Multi BGNL? Newline textDrawingList* Newline
     
 
 /* text_2_s
@@ -1039,10 +1039,11 @@ if(EvalString_2 && !(/^(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?$/.t
 }
 EvalString_2 = EvalString_2 && ('\\b['+EvalString_2+']');
 var code =  '"'+title+EvalString_2+textDrawingList_0.replace(/\s/g, '')+EvalString_Multi_0+'"';
-if (block.isCollapsed() || !block.isEnabled() || pos || Int_0) {
+if (block.isCollapsed() || !block.isEnabled() || pos || Int_0 || Bool_0) {
     code = '{"type": "text", "text": '+code;
     if (pos) code += ', "pos": ' + pos;
     if (Int_0) code += ', "code": ' + Int_0;
+    if (Bool_0) code += ', "async": true';
     if (block.isCollapsed()) code += ', "_collapsed": true';
     if (!block.isEnabled()) code += ', "_disabled": true';
     code += '}';
@@ -1255,19 +1256,20 @@ return code;
 
 
 setEnemy_s
-    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List AssignOperator_List expression Newline
+    :   '设置怪物属性' ':' '怪物ID' IdString '的' EnemyId_List AssignOperator_List expression '不刷新显伤' Bool Newline
 
 
 /* setEnemy_s
 tooltip : setEnemy：设置某个怪物的属性
 helpUrl : /_docs/#/instruction
-default : ["greenSlime", "atk", "="]
+default : ["greenSlime", "atk", "=", "", false]
 allEnemys : ['IdString_0']
 colour : this.dataColor
 if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
   AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
 } else AssignOperator_List_0 = '';
-var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
+Bool_0 = Bool_0 ? ', "norefresh": true' : '';
+var code = '{"type": "setEnemy", "id": "'+IdString_0+'", "name": "'+EnemyId_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -1292,13 +1294,13 @@ return code;
 
 
 setEnemyOnPoint_s
-    :   '设置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression Newline
+    :   '设置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '的' EnemyPoint_List AssignOperator_List expression '不刷新显伤' Bool Newline
 
 
 /* setEnemyOnPoint_s
 tooltip : setEnemyOnPoint：设置某个点上怪物的属性
 helpUrl : /_docs/#/instruction
-default : ["", "", "", "atk", "="]
+default : ["", "", "", "atk", "=", "", false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.dataColor
@@ -1307,35 +1309,37 @@ if (AssignOperator_List_0 && AssignOperator_List_0 != '=') {
   AssignOperator_List_0 = ', "operator": "' + AssignOperator_List_0 + '"';
 } else AssignOperator_List_0 = '';
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyPoint_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"},\n';
+Bool_0 = Bool_0 ? ', "norefresh": true' : '';
+var code = '{"type": "setEnemyOnPoint"'+floorstr+IdString_0+', "name": "'+EnemyPoint_List_0+'"'+AssignOperator_List_0+', "value": "'+expression_0+'"'+Bool_0+'},\n';
 return code;
 */;
 
 resetEnemyOnPoint_s
-    :   '重置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? Newline
+    :   '重置某点怪物属性' ':' 'x' EvalString? ',' 'y' EvalString? '楼层' IdString? '不刷新显伤' Bool Newline
 
 
 /* resetEnemyOnPoint_s
 tooltip : resetEnemyOnPoint：重置某个点上怪物的属性
 helpUrl : /_docs/#/instruction
-default : ["", "", ""]
+default : ["", "", "", false]
 selectPoint : ["EvalString_0", "EvalString_1", "IdString_0"]
 allFloorIds : ['IdString_0']
 colour : this.dataColor
 var floorstr = MotaActionFunctions.processMultiLoc(EvalString_0, EvalString_1);
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
-var code = '{"type": "resetEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+Bool_0 = Bool_0 ? ', "norefresh": true' : '';
+var code = '{"type": "resetEnemyOnPoint"'+floorstr+IdString_0+Bool_0+'},\n';
 return code;
 */;
 
 moveEnemyOnPoint_s
-    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '终点' 'x' PosString? 'y' PosString? '楼层' IdString? Newline
+    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '终点' 'x' PosString? 'y' PosString? '楼层' IdString? '不刷新显伤' Bool Newline
 
 
 /* moveEnemyOnPoint_s
 tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
 helpUrl : /_docs/#/instruction
-default : ["", "", "", "", ""]
+default : ["", "", "", "", "", false]
 allFloorIds : ['IdString_0']
 selectPoint : ["PosString_2", "PosString_3"]
 menu : [['选择起点位置','editor_blockly.selectPoint(block,["PosString_0", "PosString_1"])']]
@@ -1343,25 +1347,27 @@ colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
 if (PosString_2 && PosString_3) floorstr += ', "to": ['+PosString_2+','+PosString_3+']'
-var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+Bool_0 = Bool_0 ? ', "norefresh": true' : '';
+var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+Bool_0+'},\n';
 return code;
 */;
 
 moveEnemyOnPoint_1_s
-    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '增量' 'dx' PosString? 'dy' PosString? '楼层' IdString? Newline
+    :   '移动某点怪物属性' ':' '起点' 'x' PosString? ',' 'y' PosString? '增量' 'dx' PosString? 'dy' PosString? '楼层' IdString? '不刷新显伤' Bool Newline
 
 
 /* moveEnemyOnPoint_1_s
 tooltip : moveEnemyOnPoint：移动某个点上怪物的属性到其他点
 helpUrl : /_docs/#/instruction
-default : ["", "", "", "", ""]
+default : ["", "", "", "", "", false]
 allFloorIds : ['IdString_0']
 selectPoint : ["PosString_0", "PosString_1"]
 colour : this.dataColor
 IdString_0 = IdString_0 && (', "floorId": "'+IdString_0+'"');
 var floorstr = PosString_0 && PosString_1 ? ', "from": ['+PosString_0+','+PosString_1+']' : '';
 if (PosString_2 && PosString_3) floorstr += ', "dxy": ['+PosString_2+','+PosString_3+']'
-var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+'},\n';
+Bool_0 = Bool_0 ? ', "norefresh": true' : '';
+var code = '{"type": "moveEnemyOnPoint"'+floorstr+IdString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -1775,33 +1781,19 @@ var code = '{"type": "hideStatusBar"'+Bool_0+'},\n';
 return code;
 */;
 
-showHero_s
-    :   '显示勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
+setHeroOpacity_s
+    :   '设置勇士不透明度' Number '渐变方式' MoveMode_List '动画时间' IntString? '不等待执行完毕' Bool Newline
 
-
-/* showHero_s
-tooltip : showHero: 显示勇士
+/* setHeroOpacity_s
+tooltip : setHeroOpacity: 设置勇士不透明度
 helpUrl : /_docs/#/instruction
-default : ['',false]
+default : [1,'','',false]
 colour : this.soundColor
+if (Number_0 < 0 || Number_0 > 1) throw new Error('不透明度需要在0~1之间');
+MoveMode_List_0 = (MoveMode_List_0!=='') ? (', "moveMode": "'+MoveMode_List_0+'"'):'';
 IntString_0 = IntString_0 && (', "time": ' + IntString_0);
 Bool_0 = Bool_0 ? (', "async": true') : '';
-var code = '{"type": "showHero"'+IntString_0+Bool_0+'},\n';
-return code;
-*/;
-
-hideHero_s
-    :   '隐藏勇士' '动画时间' IntString? '不等待执行完毕' Bool Newline
-
-
-/* hideHero_s
-tooltip : hideHero: 隐藏勇士
-helpUrl : /_docs/#/instruction
-default : ['',false]
-colour : this.soundColor
-IntString_0 = IntString_0 && (', "time": ' + IntString_0);
-Bool_0 = Bool_0 ? (', "async": true') : '';
-var code = '{"type": "hideHero"'+IntString_0+Bool_0+'},\n';
+var code = '{"type": "setHeroOpacity", "opacity": '+Number_0+MoveMode_List_0+IntString_0+Bool_0+'},\n';
 return code;
 */;
 
@@ -2055,37 +2047,37 @@ return code;
 */;
 
 animate_s
-    :   '显示动画' IdString '位置' 'x' PosString? 'y' PosString? '相对窗口坐标' Bool '不等待执行完毕' Bool Newline
+    :   '显示动画' EvalString '位置' 'x' PosString? 'y' PosString? '相对窗口坐标' Bool '不等待执行完毕' Bool Newline
     
 
 /* animate_s
 tooltip : animate：显示动画,位置填hero或者1,2形式的位置,或者不填代表当前事件点
 helpUrl : /_docs/#/instruction
 default : ["zone","","",false,false]
-allAnimates : ['IdString_0']
-material : ["./project/animates/", "IdString_0"]
+allAnimates : ['EvalString_0']
+material : ["./project/animates/", "EvalString_0"]
 menu : [['选择位置', 'editor_blockly.selectPoint(block, ["PosString_0", "PosString_1"])']]
 colour : this.soundColor
 var loc = PosString_0&&PosString_1?(', "loc": ['+PosString_0+','+PosString_1+']'):'';
 Bool_0 = Bool_0?', "alignWindow": true':'';
 Bool_1 = Bool_1?', "async": true':'';
-var code = '{"type": "animate", "name": "'+IdString_0+'"'+loc+Bool_0+Bool_1+'},\n';
+var code = '{"type": "animate", "name": "'+EvalString_0+'"'+loc+Bool_0+Bool_1+'},\n';
 return code;
 */;
 
 animate_1_s
-    :   '显示动画并跟随角色' IdString '不等待执行完毕' Bool Newline
+    :   '显示动画并跟随角色' EvalString '不等待执行完毕' Bool Newline
     
 
 /* animate_1_s
 tooltip : animate：显示动画并跟随角色
 helpUrl : /_docs/#/instruction
 default : ["zone",false]
-allAnimates : ['IdString_0']
-material : ["./project/animates/", "IdString_0"]
+allAnimates : ['EvalString_0']
+material : ["./project/animates/", "EvalString_0"]
 colour : this.soundColor
 Bool_0 = Bool_0?', "async": true':'';
-var code = '{"type": "animate", "name": "'+IdString_0+'", "loc": "hero"'+Bool_0+'},\n';
+var code = '{"type": "animate", "name": "'+EvalString_0+'", "loc": "hero"'+Bool_0+'},\n';
 return code;
 */;
 
@@ -4034,8 +4026,8 @@ EquipValueType_List
     /*EquipValueType_List ['value','percentage']*/;
 
 Vibrate_List
-    :   '左右'|'上下'|'左上-右下'|'左下-右上'
-    /*Vibrate_List ['horizontal','vertical','diagonal1','diagonal2']*/;
+    :   '左右'|'上下'|'左上-右下'|'左下-右上'|'随机'
+    /*Vibrate_List ['horizontal','vertical','diagonal1','diagonal2','random']*/;
 
 Colour
     :   'sdeirughvuiyasdeb'+ //为了被识别为复杂词法规则
@@ -4070,8 +4062,8 @@ Direction_List
     /*Direction_List ['up','down','left','right']*/;
 
 DirectionEx_List
-    :   '不变'|'朝上'|'朝下'|'朝左'|'朝右'|'左转'|'右转'|'背对'
-    /*DirectionEx_List ['null','up','down','left','right',':left',':right',':back']*/;
+    :   '不变'|'朝上'|'朝下'|'朝左'|'朝右'|'左转'|'右转'|'背对'|'角色同向'|'角色反向'
+    /*DirectionEx_List ['null','up','down','left','right',':left',':right',':back',':hero',':backhero']*/;
 
 StepString
     :   (Direction_List Int?)+
@@ -4110,8 +4102,8 @@ Move_List
     /*Move_List ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed']*/;
 
 MoveMode_List
-    :   '匀速移动'|'缓入快出'|'快入缓出'|'缓入缓出'
-    /*MoveMode_List ['', 'easeIn', 'easeOut', 'easeInOut']*/;
+    :   '匀速移动'|'缓入快出'|'快入缓出'|'缓入缓出'|'随机'
+    /*MoveMode_List ['', 'easeIn', 'easeOut', 'easeInOut', 'random']*/;
 
 NameMap_List
     :   '确定'|'取消'|'操作失败'|'光标移动'|'打开界面'|'读档'|'存档'|'获得道具'|'回血'|'宝石'|'炸弹'|'飞行器'|'开关门'|'上下楼'|'跳跃'|'破墙镐'|'破冰镐'|'阻激夹域'|'穿脱装备'|'商店'

@@ -1463,7 +1463,7 @@ ui.prototype.drawTextBox = function(content, config) {
     // Step 5: 绘制正文
     var config = this.drawTextContent(config.ctx || 'ui', content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
-        lineHeight: vPos.lineHeight, time: (config.showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
+        lineHeight: vPos.lineHeight, time: (config.showAll || config.async || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
     });
 
     // Step 6: 绘制光标
@@ -2031,7 +2031,7 @@ ui.prototype._drawReplay = function () {
     core.status.event.id = 'replay';
     core.playSound('打开界面');
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
+        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "播放存档剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
 }
 
@@ -3019,6 +3019,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     var strokeColor = globalAttribute.selectColor;
     if (core.status.event.selection) strokeColor = '#FF6A6A';
     if (!data || !data.floorId) highLight = false;
+    if (data && data.__toReplay__) title = '[R]' + title;
 
     core.fillText('ui', title, x, y, highLight?globalAttribute.selectColor:'#FFFFFF', this._buildFont(17, true));
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);

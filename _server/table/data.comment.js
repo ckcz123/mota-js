@@ -490,10 +490,10 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "select",
 					"_select": {
-						"values": [1, 2, 3, 4]
+						"values": [1, 2, 3, 4, 5]
 					},
 					"_docs": "竖状态栏自绘行数",
-					"_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于4。\n仅在statusCanvas开启时才有效"
+					"_data": "竖屏模式下，顶端状态栏canvas化后的行数。\n此项将决定竖屏的状态栏高度，如果设置则不小于1且不大于5。\n仅在statusCanvas开启时才有效"
 				},
 				"floorChangeTime": {
 					"_leaf": true,

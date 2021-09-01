@@ -214,18 +214,7 @@ utils.prototype.setLocalStorage = function (key, value) {
         var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
             return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
         });
-        var compressed = lzw_encode(str);
-
-        // test if we can save to localStorage
-        localStorage.setItem("__tmp__", compressed);
-        if (lzw_decode(localStorage.getItem("__tmp__")) == str) {
-            localStorage.setItem(core.firstData.name + "_" + key, compressed);
-        }
-        else {
-            // We cannot compress the data
-            localStorage.setItem(core.firstData.name + "_" + key, str);
-        }
-        localStorage.removeItem("__tmp__");
+        localStorage.setItem(core.firstData.name + "_" + key, str);
 
         if (key == 'autoSave') core.saves.ids[0] = true;
         else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
@@ -240,8 +229,13 @@ utils.prototype.setLocalStorage = function (key, value) {
 
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function (key, defaultValue) {
-    var res = this.decompress(localStorage.getItem(core.firstData.name + "_" + key));
-    return res == null ? defaultValue : res;
+    try {
+        var value = JSON.parse(localStorage.getItem(core.firstData.name + "_" + key));
+        if (value == null) return defaultValue;
+        return value;
+    } catch (e) {
+        return defaultValue;
+    }
 }
 
 ////// 移除本地存储 //////
@@ -257,12 +251,11 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
         return;
     }
 
-    // Save to localforage
+    var name = core.firstData.name + "_" + key;
     var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
         return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
     });
-    var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
-    localforage.setItem(core.firstData.name + "_" + key, compressed, function (err) {
+    var callback = function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
@@ -271,15 +264,31 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
             else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
             if (successCallback) successCallback();
         }
-    });
+    }
+    this._setLocalForage_set(name, str, callback);
+}
+
+utils.prototype._setLocalForage_set = function (name, str, callback) {
+    if (window.jsinterface && window.jsinterface.setLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        core.saves.cache[name] = str;
+        window.jsinterface.setLocalForage(id, name, str);
+    } else {
+        var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
+        core.saves.cache[name] = compressed;
+        localforage.setItem(name, compressed, callback);
+    }
 }
 
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
-    localforage.getItem(core.firstData.name + "_" + key, function (err, value) {
+    var name = core.firstData.name + "_" + key;
+    var callback = function (err, value) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
         else {
+            core.saves.cache[name] = value;
             if (!successCallback) return;
             if (value != null) {
                 var res = core.utils.decompress(value);
@@ -288,11 +297,26 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             }
             successCallback(defaultValue);
         }
-    })
+    };
+    if (core.saves.cache[name] != null) {
+        return callback(null, core.saves.cache[name]);
+    }
+    this._getLocalForage_get(name, callback);
+}
+
+utils.prototype._getLocalForage_get = function (name, callback) {
+    if (window.jsinterface && window.jsinterface.getLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.getLocalForage(id, name);
+    } else {
+        localforage.getItem(name, callback);
+    }
 }
 
 utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
-    localforage.removeItem(core.firstData.name + "_" + key, function (err) {
+    var name = core.firstData.name + "_" + key;
+    var callback = function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
@@ -301,7 +325,61 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
             else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
             if (successCallback) successCallback();
         }
-    })
+    }
+    delete core.saves.cache[name];
+    this._removeLocalForage_remove(name, callback);
+}
+
+utils.prototype._removeLocalForage_remove = function (name, callback) {
+    if (window.jsinterface && window.jsinterface.removeLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.removeLocalForage(id, name);
+    } else {
+        localforage.removeItem(name, callback);
+    }
+}
+
+utils.prototype.clearLocalForage = function (callback) {
+    core.saves.cache = {};
+    if (window.jsinterface && window.jsinterface.clearLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.clearLocalForage(id);
+    } else {
+        localforage.clear(callback);
+    }
+}
+
+utils.prototype.iterateLocalForage = function (iter, callback) {
+    if (window.jsinterface && window.jsinterface.iterateLocalForage) {
+        var id = setTimeout(null);
+        core['__iter' + id] = iter;
+        core['__callback' + id] = callback;
+        window.jsinterface.iterateLocalForage(id);
+    } else {
+        localforage.iterate(iter, callback);
+    }
+}
+
+utils.prototype.keysLocalForage = function (callback) {
+    if (window.jsinterface && window.jsinterface.keysLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.keysLocalForage(id);
+    } else {
+        localforage.keys(callback);
+    }
+}
+
+utils.prototype.lengthLocalForage = function (callback) {
+    if (window.jsinterface && window.jsinterface.lengthLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.lengthLocalForage(id);
+    } else {
+        localforage.length(callback);
+    }
 }
 
 utils.prototype.setGlobal = function (key, value) {
@@ -434,41 +512,32 @@ utils.prototype.formatSize = function (size) {
     else return (size/1024/1024).toFixed(2) + "MB";
 }
 
-utils.prototype.formatBigNumber = function (x, onMap) {
-    x = Math.floor(parseFloat(x));
-    if (!core.isset(x) || !Number.isFinite(x)) return '???';
-    if (x > 1e24 || x < -1e24) return x.toExponential(2);
-
-    var c = x < 0 ? "-" : "";
-    x = Math.abs(x);
-
-    if (x <= 99999 || (!onMap && x <= 999999)) return c + x;
-
-    var all = [
-        {"val": 1e20, "c": "g"},
-        {"val": 1e16, "c": "j"},
-        {"val": 1e12, "c": "z"},
-        {"val": 1e8, "c": "e"},
-        {"val": 1e4, "c": "w"},
-    ]
-
-    for (var i = 0; i < all.length; i++) {
-        var one = all[i];
-        if (onMap) {
-            if (x >= one.val) {
-                var v = x / one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(3 - Math.log10(v + 1)))) + one.c;
-            }
-        }
-        else {
-            if (x >= 10 * one.val) {
-                var v = x / one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(4 - Math.log10(v + 1)))) + one.c;
-            }
-        }
-    }
-
-    return c + x;
+utils.prototype.formatBigNumber = function (x, digits) {
+	if (digits === true) digits = 5; // 兼容旧版onMap参数
+	if (!digits || digits < 5) digits = 6; // 连同负号、小数点和后缀字母在内的总位数，至少需为5，默认为6
+	x = Math.trunc(parseFloat(x)); // 尝试识别为小数，然后向0取整
+	if (x == null || !Number.isFinite(x)) return '???'; // 无法识别的数或正负无穷大，显示'???'
+	var units = [ // 单位及其后缀字母，可自定义，如改成千进制下的K、M、G、T、P
+		{ "val": 1e20, "suffix": "g" },
+		{ "val": 1e16, "suffix": "j" },
+		{ "val": 1e12, "suffix": "z" },
+		{ "val": 1e8, "suffix": "e" },
+		{ "val": 10000, "suffix": "w" },
+	];
+	if (Math.abs(x) > units[0].val * Math.pow(10, digits - 2))
+		return x.toExponential(0); // 绝对值过大以致于失去精度的数，直接使用科学记数法，系数只保留整数
+	var sign = x < 0 ? '-' : '';
+	if (sign) --digits; // 符号位单独处理，负号要占一位
+	x = Math.abs(x);
+	if (x.toString().length <= digits) return sign + x;
+	for (var i = 0; i < units.length; ++i) { // 从大到小尝试选取合适的单位
+		var each = units[i];
+		if (x >= each.val) {
+			var v = x / each.val;
+			return sign + v.toFixed(Math.max(0, Math.floor(digits - 2 - Math.log10(v + 1)))) + each.suffix;
+		}
+	}
+	return sign + x;
 }
 
 ////// 变速移动 //////
@@ -488,6 +557,10 @@ utils.prototype.applyEasing = function(name) {
         "linear": function(t) {
             return t
         }
+    }
+    if (name == 'random') {
+        var keys = Object.keys(list);
+        name = keys[Math.floor(Math.random() * keys.length)];
     }
     return list[name] || list.linear;
 }
@@ -610,8 +683,14 @@ utils.prototype.decodeRoute = function (route) {
 
 utils.prototype._decodeRoute_getNumber = function (decodeObj, noparse) {
     var num = "";
-    while (decodeObj.index < decodeObj.route.length && !isNaN(decodeObj.route.charAt(decodeObj.index))) {
-        num += decodeObj.route.charAt(decodeObj.index++);
+    var first = true;
+    while (true) {
+        var ch = decodeObj.route.charAt(decodeObj.index);
+        if (ch >= '0' && ch <= '9') num += ch;
+        else if (ch == '-' && first) num += ch;
+        else break;
+        first = false;
+        decodeObj.index++;
     }
     if (num.length == 0) num = "1";
     return noparse ? num : parseInt(num);
@@ -789,6 +868,8 @@ utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
     var directionList = ["left", "leftup", "up", "rightup", "right", "rightdown", "down", "leftdown"];
     if (directionList.indexOf(turn) >= 0) return turn;
+    if (turn == ':hero') return core.getHeroLoc('direction'); 
+    if (turn == ':backhero') return this.turnDirection(':back', core.getHeroLoc('direction'));
     if (typeof turn === 'number' && turn % 45 == 0) turn /= 45;
     else {
         switch (turn) {
@@ -944,19 +1025,22 @@ utils.prototype.readFileContent = function (content) {
             core.platform.successCallback(content);
         return;
     }
+    // 检查base64
     try {
-        obj = JSON.parse(content);
-        if (obj) {
-            if (core.platform.successCallback)
-                core.platform.successCallback(obj);
-            return;
+        obj = JSON.parse(LZString.decompressFromBase64(content));
+    } catch (e) {
+        try {
+            obj = JSON.parse(content);
+        } catch (e) {
+            main.log(e)
         }
     }
-    catch (e) {
-        main.log(e);
-        alert(e);
+
+    if (obj) {
+        if (core.platform.successCallback)
+            core.platform.successCallback(obj);
+        return;
     }
-    // alert("不是有效的JSON文件！");
 
     if (core.platform.errorCallback)
         core.platform.errorCallback();
@@ -1170,10 +1254,10 @@ utils.prototype.same = function (a, b) {
         return true;
     }
     if (a instanceof Object && b instanceof Object) {
-        for (var i in a) {
-            if (!this.same(a[i], b[i])) return false;
-        }
-        for (var i in b) {
+        var obj = {};
+        for (var i in a) obj[i] = true;
+        for (var i in b) obj[i] = true;
+        for (var i in obj) {
             if (!this.same(a[i], b[i])) return false;
         }
         return true;

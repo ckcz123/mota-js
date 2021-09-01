@@ -47,11 +47,12 @@ def get_mimetype(path):
 
 def get_file(path):
 	if not os.path.isfile(path):
+		if path.startswith('_saves/'):
+			return ''
 		abort(404)
 		return None
 	if not is_sub(path):
 		abort(403)
-		return None
 	with open(path, 'rb') as f:
 		content = f.read() # str in py2 and bytes in py3
 	return content 
@@ -81,6 +82,10 @@ def all_animates():
 			content.append(get_file(animate))
 		else: content.append('')
 	return '@@@~~~###~~~@@@'.join(content)
+
+@app.route('/favicon.ico', methods=['GET'])
+def favicon():
+	return ''
 
 @app.route('/<path:path>', methods=['GET'])
 def static_file(path):
@@ -205,6 +210,10 @@ def deleteFile():
 	elif os.path.isdir(name):
 		shutil.rmtree(name)
 	return 'Success'
+
+@app.route('/games/upload.php', methods=['POST'])
+def upload():
+	return ''
 
 def port_used(port):
 	sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

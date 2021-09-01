@@ -317,9 +317,6 @@ status: 只能为 stop, leftFoot 和 rightFoot，不填用stop。
 offset: 相对主角逻辑位置的偏移量，不填视为无偏移。
 frame: 绘制的第几帧
 
-fillPosWithPoint: fn(pos?: ?)
-显示离散的寻路点
-
 gatherFollowers: fn()
 立刻聚集所有的跟随者
 

@@ -623,9 +623,6 @@ declare class control {
     /** 清空剩下的自动寻路列表 */
     clearContinueAutomaticRoute(callback?: () => any): void
 
-    /** 显示离散的寻路点 */
-    fillPosWithPoint(pos?: any): void
-
     /** 设置行走的效果动画 */
     setHeroMoveInterval(callback?: () => any): void
 

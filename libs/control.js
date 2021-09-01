@@ -159,7 +159,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         });
 
         // Global hero animate
-        if ((core.status.hero || {}).animate && core.status.heroMoving == 0 && main.mode == 'play') {
+        if ((core.status.hero || {}).animate && core.status.heroMoving == 0 && main.mode == 'play' && !core.status.preview.enabled) {
             core.drawHero('stop', null, core.status.globalAnimateStatus);
         }
     }
@@ -498,11 +498,6 @@ control.prototype.clearContinueAutomaticRoute = function (callback) {
     if (callback) callback();
 }
 
-////// 显示离散的寻路点 //////
-control.prototype.fillPosWithPoint = function (pos) {
-    core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
-}
-
 ////// 设置自动寻路路线 //////
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) return;
@@ -834,6 +829,7 @@ control.prototype.drawHero = function (status, offset, frame) {
     core.setGameCanvasTranslate('hero', 0, 0);
     delete core.canvas.hero._px;
     delete core.canvas.hero._py;
+    core.status.preview.enabled = false;
     if (!core.hasFlag('__lockViewport__')) {
         this._drawHero_updateViewport(x, y, offset);
     }

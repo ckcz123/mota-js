@@ -2343,10 +2343,6 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "连续行走<br/>例如：core.setAutoHeroMove([{direction: \"up\", step: 1}, {direction: \"left\", step: 3}]); // 上左左左<br/>steps: 压缩的步伐数组，每项表示朝某方向走多少步", 
           "!type": "fn(steps: [?])"
         },
-        "fillPosWithPoint": {
-          "!doc": "显示离散的寻路点",
-          "!type": "fn(pos?: ?)"
-        }, 
         "unregisterResize": {
           "!doc": "注销一个resize函数", 
           "!type": "fn(name: string)"

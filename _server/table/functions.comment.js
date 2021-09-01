@@ -192,6 +192,7 @@ var functions_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "textarea",
 					"_lint": true,
+					"_preview": "statusBar",
 					"_data": "自绘状态栏"
 				},
 				"drawStatistics": {

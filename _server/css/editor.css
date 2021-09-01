@@ -422,7 +422,7 @@ table.row {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -60%);
-    width: 436px;
+    width: 540px;
 }
 
 #uieventHead {
@@ -444,8 +444,8 @@ table.row {
 }
 
 #uieventBody {
-    width: 416px;
-    height: 416px;
+    width: 520px;
+    height: 520px;
     position: relative;
     margin-left: 10px;
     margin-bottom: 5px;
@@ -617,15 +617,15 @@ table.row {
 }
 
 .etable tr > :nth-child(1) {
-    width: 20%
+    width: 24%
 }
 
 .etable tr > :nth-child(2) {
-    width: 20%
+    width: 19%
 }
 
 .etable tr > :nth-child(3) {
-    width: 35%;
+    width: 32%;
 }
 
 .etable tr > :nth-child(4) {

@@ -224,24 +224,25 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     number = number || 1;
 
-    if (this.hasSpecial(enemy.special, 10)) return []; // 模仿怪物临界
+    var specialCriticals = this._nextCriticals_special(enemy, number, x, y, floorId);
+    if (specialCriticals != null) return specialCriticals;
     var info = this.getDamageInfo(enemy, null, x, y, floorId);
-    if (info == null || this.hasSpecial(enemy.special, 3)) { // 未破防，或是坚固怪
-        info = this.getEnemyInfo(enemy, null, x, y, floorId);
-        if (core.status.hero.atk <= info.def) {
-            return [[info.def + 1 - core.status.hero.atk, '?']];
-        }
-        return [];
+    if (info == null) { // 如果未破防...
+        var overAtk = this._nextCriticals_overAtk(enemy, x, y, floorId);
+        if (overAtk == null) return [];
+        if (typeof overAtk[1] == 'number') return [[overAtk[0], -overAtk[1]]];
+        info = overAtk[1];
+        info.__over__ = true;
+        info.__overAtk__ = overAtk[0];
     }
 
-    // getDamageInfo直接返回数字；0伤且无负伤
-    if (typeof info == 'number' || (info.damage <= 0 && !core.flags.enableNegativeDamage)) {
-        return [[0, 0]];
+    if (typeof info == 'number') return [[0,0]];
+    if (info.damage <= 0 && !core.flags.enableNegativeDamage) {
+        return [[info.__overAtk__ || 0, 0]];
     }
 
     if (core.flags.useLoop) {
-        var LOOP_MAX_VALUE = 1;
-        if (core.status.hero.atk <= LOOP_MAX_VALUE) {
+        if (core.status.hero.atk <= (main.criticalUseLoop || 1)) {
             return this._nextCriticals_useLoop(enemy, info, number, x, y, floorId);
         }
         else {
@@ -253,10 +254,41 @@ enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     }
 }
 
+/// 未破防临界采用二分计算
+enemys.prototype._nextCriticals_overAtk = function (enemy, x, y, floorId) {
+    var calNext = function (currAtk, maxAtk) {
+        var start = currAtk, end = maxAtk;
+        if (start > end) return null;
+
+        while (start < end) {
+            var mid = Math.floor((start + end) / 2);
+            if (mid - start > end - mid) mid--;
+            var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": mid}, x, y, floorId);
+            if (nextInfo != null) end = mid;
+            else start = mid + 1;
+        }
+        var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": start}, x, y, floorId);
+        return nextInfo == null ? null : [start - core.status.hero.atk, nextInfo];
+    }
+    return calNext(core.status.hero.atk + 1, 
+        core.getEnemyValue(enemy, 'hp', x, y, floorId)  + core.getEnemyValue(enemy, 'def', x, y, floorId));
+}
+
+enemys.prototype._nextCriticals_special = function (enemy, number, x, y, floorId) {
+    if (this.hasSpecial(enemy.special, 10) || this.hasSpecial(enemy.special, 3))
+        return []; // 模仿or坚固临界
+    return null;
+}
+
 enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, floorId) {
     var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, pre = info.damage;
     var list = [];
-    for (var atk = hero_atk + 1; atk <= mon_hp + mon_def; atk++) {
+    var start_atk = hero_atk;
+    if (info.__over__) {
+        start_atk += info.__overAtk__;
+        list.push([info.__overAtk__, -info.damage]);
+    }
+    for (var atk = start_atk + 1; atk <= mon_hp + mon_def; atk++) {
         var nextInfo = this.getDamageInfo(enemy, {"atk": atk}, x, y, floorId);
         if (nextInfo == null || (typeof nextInfo == 'number')) break;
         if (pre > nextInfo.damage) {
@@ -273,6 +305,11 @@ enemys.prototype._nextCriticals_useLoop = function (enemy, info, number, x, y, f
 enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number, x, y, floorId) {
     var mon_hp = info.mon_hp, hero_atk = core.status.hero.atk, mon_def = info.mon_def, pre = info.damage;
     var list = [];
+    var start_atk = hero_atk;
+    if (info.__over__) {
+        start_atk += info.__overAtk__;
+        list.push([info.__overAtk__, -info.damage]);
+    }
     var calNext = function (currAtk, maxAtk) {
         var start = Math.floor(currAtk), end = Math.floor(maxAtk);
         if (start > end) return null;
@@ -288,7 +325,7 @@ enemys.prototype._nextCriticals_useBinarySearch = function (enemy, info, number,
         var nextInfo = core.enemys.getDamageInfo(enemy, {"atk": start}, x, y, floorId);
         return nextInfo == null || (typeof nextInfo == 'number') || nextInfo.damage >= pre ? null : [start, nextInfo.damage];
     }
-    var currAtk = hero_atk;
+    var currAtk = start_atk;
     while (true) {
         var next = calNext(currAtk + 1, mon_hp + mon_def, pre);
         if (next == null) break;
@@ -310,11 +347,16 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
         return this._nextCriticals_useBinarySearch(enemy, info, number, x, y, floorId);
     }
     var list = [], pre = null;
+    var start_atk = hero_atk;
+    if (info.__over__) {
+        start_atk += info.__overAtk__;
+        list.push([info.__overAtk__, -info.damage]);
+    }
     for (var t = turn - 1; t >= 1; t--) {
         var nextAtk = Math.ceil(mon_hp / t) + mon_def;
         // 装备提升比例的计算临界
         nextAtk = Math.ceil(nextAtk / core.getBuff('atk'));
-        if (nextAtk <= hero_atk) break;
+        if (nextAtk <= start_atk) break;
         if (nextAtk != pre) {
             var nextInfo = this.getDamageInfo(enemy, {"atk": nextAtk}, x, y, floorId);
             if (nextInfo == null || (typeof nextInfo == 'number')) break;
@@ -386,7 +428,7 @@ enemys.prototype._getCurrentEnemys_getEnemy = function (enemyId) {
     if (!enemy) return null;
 
     // 检查朝向；displayIdInBook
-    return core.material.enemys[(enemy.faceIds || {}).down] || core.material.enemys[enemy.displayIdInBook] || enemy;
+    return core.material.enemys[enemy.displayIdInBook] || core.material.enemys[(enemy.faceIds || {}).down] ||  enemy;
 }
 
 enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x, y, floorId) {
@@ -437,9 +479,13 @@ enemys.prototype._getCurrentEnemys_addEnemy = function (enemyId, enemys, used, x
     e.damage = this.getDamage(enemy, x, y, floorId);
     e.critical = critical[0];
     e.criticalDamage = critical[1];
-    var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
-    e.defDamage = this.getDefDamage(enemy, ratio, x, y, floorId);
+    e.defDamage = this._getCurrentEnemys_addEnemy_defDamage(enemy, x, y, floorId);
     enemys.push(e);
+}
+
+enemys.prototype._getCurrentEnemys_addEnemy_defDamage = function (enemy, x, y, floorId) {
+    var ratio = core.status.maps[floorId || core.status.floorId].ratio || 1;
+    return this.getDefDamage(enemy, ratio, x, y, floorId);
 }
 
 enemys.prototype._getCurrentEnemys_sort = function (enemys) {

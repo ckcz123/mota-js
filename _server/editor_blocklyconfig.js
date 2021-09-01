@@ -91,32 +91,30 @@ editor_blocklyconfig=(function(){
       MotaActionFunctions.actionParser.parse({
         "背景音乐": "bgm.mp3", "确定": "confirm.mp3", "攻击": "attack.mp3", "背景图": "bg.jpg", "领域": "zone", "文件名": "file.jpg"
       }, 'nameMap'),
+      MotaActionFunctions.actionParser.parse([
+        {"name": "hero.png", "width": 32, "height": 32, "prefix": "hero_"},
+      ], 'splitImages'),
     ],
     '显示文字':[
       MotaActionBlocks['text_0_s'].xmlText(),
       MotaActionBlocks['text_1_s'].xmlText(),
-      MotaActionFunctions.actionParser.parseList("\t[小妖精,fairy]\f[fairy.png,0,0]欢迎使用事件编辑器(双击方块进入多行编辑)"),
+      MotaActionFunctions.actionParser.parseList("\t[小妖精,fairy]\f[fairy.png,0,0]欢迎使用事件编辑器(双击方块可直接预览)"),
+      MotaActionBlocks['moveTextBox_s'].xmlText(),
+      MotaActionBlocks['clearTextBox_s'].xmlText(),
       MotaActionBlocks['comment_s'].xmlText(),
       MotaActionBlocks['autoText_s'].xmlText(),
       MotaActionBlocks['scrollText_s'].xmlText(),
       MotaActionBlocks['setText_s'].xmlText(),
-      MotaActionBlocks['showImage_s'].xmlText(),
-      MotaActionBlocks['showImage_1_s'].xmlText(),
-      MotaActionBlocks['hideImage_s'].xmlText(),
-      MotaActionBlocks['showTextImage_s'].xmlText(),
-      MotaActionBlocks['moveImage_s'].xmlText(),
-      MotaActionBlocks['rotateImage_s'].xmlText(),
-      MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['tip_s'].xmlText(),
-      MotaActionBlocks['win_s'].xmlText(),
-      MotaActionBlocks['lose_s'].xmlText(),
-      MotaActionBlocks['restart_s'].xmlText(),
       MotaActionBlocks['confirm_s'].xmlText(),
       MotaActionBlocks['choices_s'].xmlText([
-        '选择剑或者盾','流浪者','man',0,MotaActionBlocks['choicesContext'].xmlText([
+        '选择剑或者盾','流浪者','man',0,'',MotaActionBlocks['choicesContext'].xmlText([
           '剑','','',null,'','',MotaActionFunctions.actionParser.parseList([{"type": "openDoor", "loc": [3,3]}]),
         ])
       ]),
+      MotaActionBlocks['win_s'].xmlText(),
+      MotaActionBlocks['lose_s'].xmlText(),
+      MotaActionBlocks['restart_s'].xmlText(),
     ],
     '数据相关':[
       MotaActionBlocks['setValue_s'].xmlText([
@@ -189,7 +187,7 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['insert_1_s'].xmlText(),
       MotaActionBlocks['insert_2_s'].xmlText(),
     ],
-    '特效/声音':[
+    '特效表现':[
       MotaActionBlocks['sleep_s'].xmlText(),
       MotaActionFunctions.actionParser.parseList({"type": "wait", "timeout": 0, "data": [
         {"case": "keyboard", "keycode": "13,32", "action": [{"type": "comment", "text": "当按下回车(keycode=13)或空格(keycode=32)时执行此事件\n超时剩余时间会写入flag:timeout"}]},
@@ -203,14 +201,29 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['animate_1_s'].xmlText(),
       MotaActionBlocks['setViewport_s'].xmlText(),
       MotaActionBlocks['setViewport_1_s'].xmlText(),
+      MotaActionBlocks['lockViewport_s'].xmlText(),      
       MotaActionBlocks['showStatusBar_s'].xmlText(),
       MotaActionBlocks['hideStatusBar_s'].xmlText(),
-      MotaActionBlocks['showHero_s'].xmlText(),
-      MotaActionBlocks['hideHero_s'].xmlText(),
+      MotaActionBlocks['setHeroOpacity_s'].xmlText(),
       MotaActionBlocks['setCurtain_0_s'].xmlText(),
       MotaActionBlocks['setCurtain_1_s'].xmlText(),
       MotaActionBlocks['screenFlash_s'].xmlText(),
       MotaActionBlocks['setWeather_s'].xmlText(),
+      MotaActionBlocks['callBook_s'].xmlText(),
+      MotaActionBlocks['callSave_s'].xmlText(),
+      MotaActionBlocks['autoSave_s'].xmlText(),
+      MotaActionBlocks['forbidSave_s'].xmlText(),
+      MotaActionBlocks['callLoad_s'].xmlText(),
+    ],
+    '音像处理':[
+      MotaActionBlocks['showImage_s'].xmlText(),
+      MotaActionBlocks['showImage_1_s'].xmlText(),
+      MotaActionBlocks['hideImage_s'].xmlText(),
+      MotaActionBlocks['showTextImage_s'].xmlText(),
+      MotaActionBlocks['moveImage_s'].xmlText(),
+      MotaActionBlocks['rotateImage_s'].xmlText(),
+      MotaActionBlocks['scaleImage_s'].xmlText(),
+      MotaActionBlocks['showGif_s'].xmlText(),
       MotaActionBlocks['playBgm_s'].xmlText(),
       MotaActionBlocks['pauseBgm_s'].xmlText(),
       MotaActionBlocks['resumeBgm_s'].xmlText(),
@@ -221,11 +234,6 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['stopSound_s'].xmlText(),
       MotaActionBlocks['setVolume_s'].xmlText(),
       MotaActionBlocks['setBgmSpeed_s'].xmlText(),
-      MotaActionBlocks['callBook_s'].xmlText(),
-      MotaActionBlocks['callSave_s'].xmlText(),
-      MotaActionBlocks['autoSave_s'].xmlText(),
-      MotaActionBlocks['forbidSave_s'].xmlText(),
-      MotaActionBlocks['callLoad_s'].xmlText(),
     ],
     'UI绘制':[
       MotaActionBlocks['previewUI_s'].xmlText(),
@@ -353,23 +361,7 @@ editor_blocklyconfig=(function(){
             }
           ]
       }
-      ], 'event'),  
-      '<label text="战前剧情"></label>',
-      MotaActionFunctions.actionParser.parse({ 
-        "trigger": "action", 
-        "displayDamage": true, 
-        "data": [ 
-          ' ... 战前剧情',
-          {"type": "battle", "id": "greenSlime"},
-          ' ... 战后剧情；请注意上面的强制战斗不会使怪物消失',
-          '需要下一句来调用{"type": "hide"}来隐藏事件',
-          {"type": "hide"},
-        ]
-      },'event'),
-      '<label text="杀死魔龙后隐藏其余图块"></label>',
-      MotaActionFunctions.actionParser.parse([
-        {"type": "function", "function": "function(){var x=core.status.event.data.x,y=core.status.event.data.y;if(core.isset(x)&&core.isset(y)){core.insertAction([{type:'hide',loc:[[x-1,y-2],[x,y-2],[x+1,y-2],[x-1,y-1],[x,y-1],[x+1,y-1],[x-1,y],[x+1,y]]}]);}}"},
-      ],'afterBattle'),
+      ], 'event'),
       '<label text="全地图选中一个点"></label>',
       MotaActionFunctions.actionParser.parse([
         {

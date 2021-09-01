@@ -150,12 +150,14 @@
                 <button>确定</button>
                 <br/>
                 <button style="margin-top: 10px">自动注册</button>
-                <button style="margin-top: 10px; margin-left: 10px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">以此素材为模板追加</button>
             </div>
             <div id='changeId'><!-- id and idnum -->
-                <input placeholder="修改图块id为"/>
+                <input placeholder="修改图块id为" style="width: 100px"/>
                 <button>确定</button>
-                <button style="margin-left: 10px">删除此素材</button>
+                <button style="margin-left: 5px">删除此素材</button>
+                <button style="margin-left: 5px">以此素材为模板追加</button>
             </div>
         </div>
     </div>
@@ -210,6 +212,7 @@
                 <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
                 -->
                 <button onclick="editor_blockly.confirm()">确认</button>
+                <button onclick="editor_blockly.confirm(true)">应用</button>
                 <button id='blocklyParse' onclick="editor_blockly.parse()">解析</button>
                 <button onclick="editor_blockly.cancel()">取消</button>
                 <!-- 手机端放不下，因此不显示搜索框 -->
@@ -241,7 +244,9 @@
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
         <button onclick="editor_multi.confirm()">确认</button>
         <button onclick="editor_multi.cancel()">取消</button>
+        <button onclick="editor_multi.confirm(true)">应用</button>
         <button onclick="editor_multi.format()">格式化</button>
+        <button id="editor_multi_preview" style="display: none;">预览</button>
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: middle;margin-left:6px"/>
         <span style="vertical-align: middle; margin-left: -3px">语法检查</span>
@@ -346,7 +351,7 @@
                         <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
                     </div>
                 </div>
-                <select id="editModeSelect">
+                <select id="editModeSelect" style="font-size: 12px">
                     <option value="map">地图编辑</option>
                     <option value="loc">地图选点</option>
                     <option value="enemyitem">图块属性</option>
@@ -357,8 +362,8 @@
                     <option value="commonevent">公共事件</option>
                     <option value="plugins">插件编写</option>
                 </select>
-                <span style="font-size: 12px"><input type="checkbox" id="lockMode"/>锁定</span>
-                <select id="editorTheme">
+                <span style="font-size: 12px"><input type="checkbox" id="showMovable"/>通行度</span>
+                <select id="editorTheme" style="font-size: 11px;">
                     <option value="editor_color">默认白</option>
                     <option value="editor_color_dark">夜间黑</option>
                 </select>
@@ -381,9 +386,10 @@
                     <input type="button" id="bigmapBtn" value="大地图" style="margin-left: 5px"/>
                 </div>
                 <select id="selectFloor" style="clear:left"></select>
+                <input type="button" value="选层" id='selectFloorBtn'/>
                 <input type="button" value="保存地图" id='saveFloor'/>
-                <input type="button" value="后退" id="undoFloor" />
-                <input type="button" value="查看帮助文档" id="openDoc" />
+                <input type="button" value="后退" id="undoFloor" style="display: none;"/>
+                <input type="button" value="帮助文档" id="openDoc" />
                 <span id='mobileeditdata' style="display:none">
                     <input type="button" value="编辑"/>
                     <input type="button" value="显示完整名称" style="display: none;"/>
@@ -403,12 +409,7 @@
     <div id='uieventDialog'>
         <div id="uieventHead">
             <span id="uieventTitle"></span>
-            <select id="uieventBackground" style="margin-left: 20px">
-                <option value="thumbnail" selected>缩略图</option>
-                <option value="#000000">黑色</option>
-                <option value="#FFFFFF">白色</option>
-            </select>
-            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
+            <select id="uieventSelect" style="margin-left: 20px"></select>
             <button id="uieventNo">关闭</button>
             <button id="uieventYes">确定</button>
         </div>
@@ -446,6 +447,7 @@
 <script src='_server/editor_table.js'></script>
 <script src='_server/editor_mode.js'></script>
 <script src='_server/editor_ui.js'></script>
+<script src='_server/editor_uievent.js'></script>
 <script src='_server/editor_mappanel.js'></script>
 <script src='_server/editor_datapanel.js'></script>
 <script src='_server/editor_materialpanel.js'></script>

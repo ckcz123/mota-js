@@ -11,14 +11,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	this._afterLoadResources = function () {
 		// 本函数将在所有资源加载完毕后，游戏开启前被执行
-		// 可以在这个函数里面对资源进行一些操作，比如切分图片等。
-
-		// 这是一个将assets.png拆分成若干个32x32像素的小图片并保存的样例。
-		// var arr = core.splitImage("assets.png", 32, 32);
-		// for (var i = 0; i < arr.length; i++) {
-		//     core.material.images.images["asset"+i+".png"] = arr[i];
-		// }
-
+		// 可以在这个函数里面对资源进行一些操作。
+		// 若需要进行切分图片，可以使用 core.splitImage() 函数，或直接在全塔属性-图片切分中操作
 	}
 
 	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为 core.plugin.xxx();
@@ -118,6 +112,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			return;
 		}
 
+		_shouldProcessKeyUp = true;
+
 		// Step 4: 执行标准公共商店    
 		core.insertAction(this._convertShop(shop));
 		return true;
@@ -126,7 +122,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	////// 将一个全局商店转变成可预览的公共事件 //////
 	this._convertShop = function (shop) {
 		return [
-			{ "type": "function", "function": "function() {core.setFlag('@temp@shop', true);}" },
+			{ "type": "function", "function": "function() {core.addFlag('@temp@shop', 1);}" },
 			{
 				"type": "while",
 				"condition": "true",
@@ -160,7 +156,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 					}
 				]
 			},
-			{ "type": "function", "function": "function() {core.removeFlag('@temp@shop');}" }
+			{ "type": "function", "function": "function() {core.addFlag('@temp@shop', -1);}" }
 		];
 	}
 
@@ -175,7 +171,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				"text": choice.text,
 				"icon": choice.icon,
 				"color": ableToBuy && !previewMode ? choice.color : [153, 153, 153, 1],
-				"action": ableToBuy && !previewMode ? [{ "type": "playSound", "name": "确定" }].concat(choice.action) : [
+				"action": ableToBuy && !previewMode ? [{ "type": "playSound", "name": "商店" }].concat(choice.action) : [
 					{ "type": "playSound", "name": "操作失败" },
 					{ "type": "tip", "text": previewMode ? "预览模式下不可购买" : "购买条件不足" }
 				]
@@ -227,10 +223,17 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		return null;
 	}
 
+	var _shouldProcessKeyUp = true;
+
 	/// 允许商店X键退出
 	core.registerAction('keyUp', 'shops', function (keycode) {
-		if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
-		if (core.status.event.data.type != 'choices') return false;
+		if (!core.status.lockControl || core.status.event.id != 'action') return false;
+		if ((keycode == 13 || keycode == 32) && !_shouldProcessKeyUp) {
+			_shouldProcessKeyUp = true;
+			return true;
+		}
+
+		if (!core.hasFlag("@temp@shop") || core.status.event.data.type != 'choices') return false;
 		var data = core.status.event.data.current;
 		var choices = data.choices;
 		var topIndex = core.actions._getChoicesTopIndex(choices.length);
@@ -238,7 +241,6 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
 			return true;
 		}
-		if (keycode == 13 || keycode == 32) return true;
 		return false;
 	}, 60);
 
@@ -251,6 +253,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (keycode == 13 || keycode == 32) { // Space, Enter
 			core.actions._clickAction(core.actions.HSIZE, topIndex + core.status.event.selection);
+			_shouldProcessKeyUp = false;
 			return true;
 		}
 		return false;
@@ -377,12 +380,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		document.getElementById('gameDraw').appendChild(canvas);
 		var ctx = canvas.getContext('2d');
 		core.canvas[name] = ctx;
-		if (core.domStyle.hdCanvas.indexOf('name') >= 0)
-			core.maps._setHDCanvasSize(ctx, core.__PIXELS__, core.__PIXELS__);
-		else {
-			canvas.width = core.__PIXELS__;
-			canvas.height = core.__PIXELS__;
-		}
+		canvas.width = core.__PIXELS__;
+		canvas.height = core.__PIXELS__;
 		return canvas;
 	}
 
@@ -448,13 +447,16 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			// 背景层2插入事件层前
 			parent.insertBefore(input, child);
 			// 不能直接更改背景层2的innerText 所以创建文本节点
-			var txt = document.createTextNode('背景层2');
+			var txt = document.createTextNode('bg2');
 			// 插入事件层前(即新插入的背景层2前)
 			parent.insertBefore(txt, child);
 			// 向最后插入前景层2(即插入前景层后)
 			parent.appendChild(input2);
-			var txt2 = document.createTextNode('前景层2');
+			var txt2 = document.createTextNode('fg2');
 			parent.appendChild(txt2);
+			parent.childNodes[2].replaceWith("bg");
+			parent.childNodes[6].replaceWith("事件");
+			parent.childNodes[8].replaceWith("fg");
 		} else {
 			var input = createCanvasBtn_mobile('bg2');
 			var input2 = createCanvasBtn_mobile('fg2');
@@ -1064,6 +1066,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.ui.drawTip = _drawTip;
 		core.control.playSound = _playSound;
 		core.status.route = core.status.route.slice(0, routeLength);
+		core.control._bindRoutePush();
 
 		// 插入事件：改变角色行走图并进行楼层切换
 		var toFloorId = data.floorId || core.status.floorId;

@@ -35,7 +35,6 @@ type Animate = {
     frame: number
     frames: frameObj[][]
     images: HTMLImageElement[]
-    images_rev: HTMLImageElement[]
     ratio: number
     se: string
 }
@@ -559,6 +558,12 @@ declare class control {
      */
     setWeather(type?: 'rain' | 'snow' | 'sun' | 'fog' | 'cloud', level?: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10): void
     
+    /** 注册一个天气 */
+    registerWeather(name: string, initFunc: (level: number) => void, frameFunc?: (timestamp: number, level: number) => void): void
+
+    /** 注销一个天气 */
+    unregisterWeather(name: string) : void;
+
     /**
      * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
      * @example core.setCurtain(); // 恢复画面色调，用时四分之三秒
@@ -566,7 +571,7 @@ declare class control {
      * @param time 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）
      * @param callback 更改完毕后的回调函数，可选。事件流中常取core.doAction
      */
-    setCurtain(color?: [number, number, number, number?], time?: number, callback?: () => void): void
+    setCurtain(color?: [number, number, number, number?], time?: number, moveMode?: string, callback?: () => void): void
     
     /**
      * 画面闪烁
@@ -576,7 +581,7 @@ declare class control {
      * @param times 闪烁的总次数，不填或填0都视为1
      * @param callback 闪烁全部完毕后的回调函数，可选
      */
-    screenFlash(color: [number, number, number, number], time: number, times?: number, callback?: () => void): void
+    screenFlash(color: [number, number, number, number], time: number, times?: number, moveMode?: string, callback?: () => void): void
     
     /**
      * 播放背景音乐，中途开播但不计入存档且只会持续到下次场景切换。如需长期生效请将背景音乐的文件名赋值给flags.__bgm__
@@ -618,9 +623,6 @@ declare class control {
     /** 清空剩下的自动寻路列表 */
     clearContinueAutomaticRoute(callback?: () => any): void
 
-    /** 显示离散的寻路点 */
-    fillPosWithPoint(pos?: any): void
-
     /** 设置行走的效果动画 */
     setHeroMoveInterval(callback?: () => any): void
 
@@ -633,8 +635,8 @@ declare class control {
     /** 瞬间移动 */
     moveDirectly(destX?: any, destY?: any, ignoreSteps?: any): void
 
-    /** 改变勇士的显隐状态 */
-    triggerHero(type?: 'show' | 'hide', time?: any, callback?: () => any): void
+    /** 改变勇士的不透明度 */
+    setHeroOpacity(opacity?: number, moveMode?: string, time?: any, callback?: () => any): void
 
     /** 加减画布偏移 */
     addGameCanvasTranslate(x?: number, y?: number): void
@@ -789,6 +791,9 @@ declare class control {
     /** 停止（所有）音频 */
     stopSound(id?: number): void
 
+    /** 获得正在播放的所有（指定）音效的id列表 */
+    getPlayingSounds(name?: string): Array<number>
+
     /** 检查bgm状态 */
     checkBgm(): void
 
@@ -891,7 +896,7 @@ declare class events {
     
     /**
      * 执行下一个事件指令，常作为回调
-     * @example core.setCurtain([0,0,0,1], undefined, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
+     * @example core.setCurtain([0,0,0,1], undefined, null, core.doAction); // 事件中的原生脚本，配合勾选“不自动执行下一个事件”来达到此改变色调只持续到下次场景切换的效果
      * @param keepUI true表示不清除UI画布和选择光标
      */
     doAction(keepUI?: true): void
@@ -999,6 +1004,9 @@ declare class events {
      * @param callback 图片移动完毕后的回调函数，可选
      */
     rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
+
+    /** 放缩一张图片 */
+    scaleImage(code: number, center?: [Number?, number?], scale: number, moveMode?: string, time?: number, callback?: () => void): void
 
     /**
      * 绘制一张动图或擦除所有动图
@@ -1221,7 +1229,7 @@ declare class events {
     /** 点击设置按钮时的操作 */
     openSettings(fromUserAction?: boolean): void
 
-    /** 当前是否有未处理完毕的异步事件 */
+    /** 当前是否有未处理完毕的异步事件（不包含动画和音效） */
     hasAsync(): boolean
 
     /** 
@@ -1244,6 +1252,18 @@ declare class events {
 
     /** 设置全塔属性 */
     setGlobalAttribute(name: string, value: any): void
+
+    /** 设置剧情文本的属性 */
+    setTextAttribute(data: any): void
+
+    /** 清除对话框 */
+    clearTextBox(code: number): void
+
+    /** 移动对话框 */
+    moveTextBox(code: number, loc: [number], relative: bool, moveMode?: string, time?: number, callback?: () => any): void
+
+    /** 设置文件别名 */
+    setNameMap(name: string, value?: string): void
 
     /** 检查升级事件 */
     checkLvUp(): void
@@ -1760,6 +1780,9 @@ declare class maps {
      */
     stopAnimate(id: number, doCallback?: boolean): void 
 
+    /** 获得当前正在播放的所有（指定）动画的id列表 */
+    getPlayingAnimates(name?: string) : Array<number>
+
     /** 加载某个楼层（从剧本或存档中） */
     loadFloor(floorId?: string, map?: any): any
 
@@ -2131,8 +2154,7 @@ declare class ui {
     rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
-    deleteCanvas(name: string): void
-
+    deleteCanvas(name: string | ((name: string) => bool)): void
 
     /** 清空所有的自定义画布 */
     deleteAllCanvas(): void
@@ -2247,7 +2269,7 @@ declare class ui {
     getTextContentHeight(content: string, config?: any): void
 
     /** 绘制一个对话框 */
-    drawTextBox(content: string, showAll?: boolean): void
+    drawTextBox(content: string, config?: any): void
 
     /** 绘制滚动字幕 */
     drawScrollText(content: string, time: number, lineHeight?: number, callback?: () => any): void
@@ -2749,7 +2771,6 @@ type core = {
         /** 是否是QQ */isQQ: boolean
         /** 是否是Chrome */isChrome: boolean
         /** 是否支持复制到剪切板 */supportCopy: boolean
-        useLocalForage: boolean,
 
         fileInput: null
         /** 是否支持FileReader */fileReader: null

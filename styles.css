@@ -247,7 +247,6 @@
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
     display: none;
-    left: 0;
     padding: 3px;
 }
 #toolBar .tools{

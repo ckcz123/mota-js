@@ -37,12 +37,13 @@ editor_listen_wrapper = function (editor) {
         editor.dom.clearEvent.onmouseup = editor.uifunctions.clearEvent_click
         editor.dom.clearLoc.onmouseup = editor.uifunctions.clearLoc_click
         editor.dom.undoFloor.onclick = editor.uifunctions.undoFloor_click
+        editor.dom.selectFloorBtn.onclick = editor.uifunctions.selectFloorBtn_click
         editor.dom.editorTheme.onchange = editor.uifunctions.editorTheme_onchange
 
         editor.dom.lastUsed.onmouseup = editor.uifunctions.lastUsed_click;
         editor.dom.lastUsed.oncontextmenu = function (e) { e.preventDefault(); }
         editor.dom.clearLastUsedBtn.onclick = editor.uifunctions.clearLastUsedBtn_click;
-        editor.dom.lockMode.onchange = editor.uifunctions.lockMode_onchange;
+        editor.dom.showMovable.onchange = editor.uifunctions.showMovable_onchange;
 
         editor.dom.brushMod.onchange = editor.uifunctions.brushMod_onchange
         if (editor.dom.brushMod2) editor.dom.brushMod2.onchange = editor.uifunctions.brushMod2_onchange;

@@ -54,6 +54,8 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();
+        core.deleteCanvas(function (one) { return one.startsWith('_bigImage_'); });
+        core.setWeather(null);
     }
     else {
         var ctx = this.getContextByName(name);
@@ -680,12 +682,13 @@ ui.prototype.closePanel = function () {
 
 ui.prototype.clearUI = function () {
     core.status.boxAnimateObjs = [];
-    if (core.dymCanvas._selector) core.deleteCanvas("_selector");
+    core.deleteCanvas("_selector");
     main.dom.next.style.display = 'none';
     main.dom.next.style.opacity = 1;
     core.clearMap('ui');
     core.setAlpha('ui', 1);
     core.setOpacity('ui', 1);
+    core.deleteCanvas('ui2');
 }
 
 ////// 左上角绘制一段提示 //////
@@ -703,7 +706,7 @@ ui.prototype.drawTip = function (text, id, frame) {
     };
     if (id != null) {
         var info = core.getBlockInfo(id);
-        if (info == null || !info.image) {
+        if (info == null || !info.image || info.bigImage) {
             // 检查状态栏图标
             if (core.statusBar.icons[id] instanceof Image) {
                 info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
@@ -743,10 +746,8 @@ ui.prototype.drawText = function (contents, callback) {
     }
 
     var data=core.status.event.data.list.shift();
-    if (typeof data == 'string')
-        core.ui.drawTextBox(data);
-    else
-        core.ui.drawTextBox(data.content, data.id);
+    if (typeof data == 'string') data = { "text": data };
+    core.ui.drawTextBox(data.text, data);
 }
 
 ui.prototype._drawText_setContent = function (contents, callback) {
@@ -768,6 +769,7 @@ ui.prototype._drawText_setContent = function (contents, callback) {
 ////// 正则处理 \t[xx,yy] 问题
 ui.prototype._getTitleAndIcon = function (content) {
     var title = null, image = null, icon = null, height = 32, animate = 1;
+    var bigImage = null, face = null;
     content = content.replace(/(\t|\\t)\[(([^\],]+),)?([^\],]+)\]/g, function (s0, s1, s2, s3, s4) {
         if (s4) {
             if (s4 == 'hero') {
@@ -785,9 +787,11 @@ ui.prototype._getTitleAndIcon = function (content) {
                 var blockInfo = core.getBlockInfo(s4);
                 if (blockInfo != null) {
                     if (blockInfo.name) title = blockInfo.name;
+                    bigImage = blockInfo.bigImage;
+                    face = blockInfo.face;
                     image = blockInfo.image;
                     icon = blockInfo.posY;
-                    height = blockInfo.height;
+                    height = bigImage == null ? blockInfo.height : 32;
                     animate = blockInfo.animate;
                 }
                 else title = s4;
@@ -805,7 +809,9 @@ ui.prototype._getTitleAndIcon = function (content) {
         image: image,
         icon: icon,
         height: height,
-        animate: animate
+        animate: animate,
+        bigImage: bigImage,
+        face: face,
     };
 }
 
@@ -816,12 +822,16 @@ ui.prototype._getPosition = function (content) {
         px = core.status.event.data.x;
         py = core.status.event.data.y;
     }
+    if (main.mode != 'play') {
+        px = editor.pos.x;
+        py = editor.pos.y;
+    }
     content = content.replace("\b", "\\b")
         .replace(/\\b\[(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?]/g, function (s0, s1, s2, s3) {
             pos = s1;
             if (s3 == 'hero' || s1=='hero' && !s3) {
-                px = core.status.hero.loc.x;
-                py = core.status.hero.loc.y;
+                px = core.getHeroLoc('x');
+                py = core.getHeroLoc('y');
             }
             else if (s3 == 'null') {
                 px = py = null;
@@ -842,7 +852,7 @@ ui.prototype._getPosition = function (content) {
                 }
             }
             if(pos=='hero' || pos=='this'){
-                pos = py==null?'center':(py>=core.__HALF_SIZE__? 'up':'down'); 
+                pos = py==null?'center':(py>core.__HALF_SIZE__? 'up':'down'); 
             }
             return "";
         });
@@ -879,11 +889,7 @@ ui.prototype._uievent_drawSelector = function (data) {
 ////// 清除自绘的选择光标
 ui.prototype.clearUIEventSelector = function (codes) {
     if (codes == null) {
-        Object.keys(core.dymCanvas).forEach(function (name) {
-            if (name.startsWith('_uievent_selector_')) {
-                core.deleteCanvas(name);
-            }
-        });
+        core.deleteCanvas(function (one) { return one.startsWith('_uievent_selector_'); })
         return;
     }
     if (codes instanceof Array) {
@@ -956,10 +962,10 @@ ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     var xoffset = posInfo.xoffset || 0, yoffset = posInfo.yoffset || 0;
     var background = core.status.textAttribute.background;
 
-    if (this._drawBackground_drawWindowSkin(background, left, top, right, bottom, posInfo.position, px, py))
+    if (this._drawBackground_drawWindowSkin(background, left, top, right, bottom, posInfo.position, px, py, posInfo.ctx))
         return true;
     if (typeof background == 'string') background = core.initStatus.textAttribute.background;
-    this._drawBackground_drawColor(background, left, top, right, bottom, posInfo.position, px, py, xoffset, yoffset);
+    this._drawBackground_drawColor(background, left, top, right, bottom, posInfo.position, px, py, xoffset, yoffset, posInfo.ctx);
     return false;
 }
 
@@ -980,27 +986,29 @@ ui.prototype._drawWindowSkin_getOpacity = function () {
     return core.getFlag("__winskin_opacity__", 0.85);
 }
 
-ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, right, bottom, position, px, py) {
+ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, right, bottom, position, px, py, ctx) {
+    ctx = ctx || 'ui';
     if (typeof background == 'string' && core.material.images.images[background]) {
         var image = core.material.images.images[background];
         if (image.width==192 && image.height==128) {
-            core.setAlpha('ui', this._drawWindowSkin_getOpacity());
-            this.drawWindowSkin(image, 'ui', left, top, right - left, bottom - top, position, px, py);
-            core.setAlpha('ui', 1);
+            core.setAlpha(ctx, this._drawWindowSkin_getOpacity());
+            this.drawWindowSkin(image, ctx, left, top, right - left, bottom - top, position, px, py);
+            core.setAlpha(ctx, 1);
             return true;
         }
     }
     return false;
 }
 
-ui.prototype._drawBackground_drawColor = function (background, left, top, right, bottom, position, px, py, xoffset, yoffset) {
+ui.prototype._drawBackground_drawColor = function (background, left, top, right, bottom, position, px, py, xoffset, yoffset, ctx) {
+    ctx = ctx || 'ui';
     var alpha = background[3];
-    core.setAlpha('ui', alpha);
-    core.setStrokeStyle('ui', core.arrayToRGBA(core.status.globalAttribute.borderColor));
-    core.setFillStyle('ui', core.arrayToRGB(background));
-    core.setLineWidth('ui', 2);
+    core.setAlpha(ctx, alpha);
+    core.setStrokeStyle(ctx, core.arrayToRGBA(core.status.globalAttribute.borderColor));
+    core.setFillStyle(ctx, core.arrayToRGB(background));
+    core.setLineWidth(ctx, 2);
     // 绘制
-    var ctx = core.canvas.ui;
+    ctx = core.getContextByName(ctx);
     ctx.beginPath();
     ctx.moveTo(left, top);
     // 上边缘三角
@@ -1021,7 +1029,7 @@ ui.prototype._drawBackground_drawColor = function (background, left, top, right,
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
-    core.setAlpha('ui', 1);
+    core.setAlpha(ctx, 1);
 }
 
 ////// 计算有效文本框的宽度
@@ -1378,7 +1386,8 @@ ui.prototype._getRealContent = function (content) {
     return content.replace(/(\r|\\(r|c|d|e|g|z))(\[.*?])?/g, "").replace(/(\\i)(\[.*?])?/g, "占1");
 }
 
-ui.prototype._animateUI = function (type, callback) {
+ui.prototype._animateUI = function (type, ctx, callback) {
+    ctx = ctx || 'ui';
     var time = core.status.textAttribute.animateTime || 0;
     if (!core.status.event || !time || core.isReplaying() || (type != 'show' && type != 'hide')) {
         if (callback) callback();
@@ -1391,12 +1400,12 @@ ui.prototype._animateUI = function (type, callback) {
     } else if (type == 'hide') {
         opacity = 1;
     }
-    core.setOpacity('ui', opacity);
+    core.setOpacity(ctx, opacity);
     core.dom.next.style.opacity = opacity;
     core.status.event.animateUI = setInterval(function () {
         if (type == 'show') opacity += 0.05;
         else opacity -= 0.05;
-        core.setOpacity('ui', opacity);
+        core.setOpacity(ctx, opacity);
         core.dom.next.style.opacity = opacity;
         if (opacity >= 1 || opacity <= 0) {
             clearInterval(core.status.event.animateUI);
@@ -1407,13 +1416,17 @@ ui.prototype._animateUI = function (type, callback) {
 }
 
 ////// 绘制一个对话框 //////
-ui.prototype.drawTextBox = function(content, showAll) {
-    if (core.status.event && core.status.event.id == 'action')
-        core.status.event.ui = content;
+ui.prototype.drawTextBox = function(content, config) {
+    config = config || {};
 
     this.clearUI();
-
     content = core.replaceText(content);
+
+    var ctx = config.ctx || null;
+    if (ctx && main.mode == 'play') {
+        core.createCanvas(ctx, 0, 0, core.__PIXELS__, core.__PIXELS__, 141);
+        ctx = core.getContextByName(ctx);
+    }
 
     // Step 1: 获得标题信息和位置信息
     var textAttribute = core.status.textAttribute;
@@ -1421,76 +1434,101 @@ ui.prototype.drawTextBox = function(content, showAll) {
     var posInfo = this._getPosition(titleInfo.content);
     if (posInfo.position != 'up' && posInfo.position != 'down') posInfo.px = posInfo.py = null;
     if (!posInfo.position) posInfo.position = textAttribute.position;
-    content = this._drawTextBox_drawImages(posInfo.content);
+    content = this._drawTextBox_drawImages(posInfo.content, config.ctx);
+    if (config.pos) {
+        delete posInfo.px;
+        delete posInfo.py;
+        posInfo.pos = config.pos;
+    }
+    posInfo.ctx = ctx;
 
     // Step 2: 计算对话框的矩形位置
     var hPos = this._drawTextBox_getHorizontalPosition(content, titleInfo, posInfo);
     var vPos = this._drawTextBox_getVerticalPosition(content, titleInfo, posInfo, hPos.validWidth);
+    posInfo.xoffset = hPos.xoffset;
+    posInfo.yoffset = vPos.yoffset - 4;
+
+    if (ctx && main.mode == 'play') {
+        ctx.canvas.setAttribute('_text_left', hPos.left);
+        ctx.canvas.setAttribute('_text_top', vPos.top);
+    }
 
     // Step 3: 绘制背景图
-    var pInfo = core.clone(posInfo);
-    pInfo.xoffset = hPos.xoffset; pInfo.yoffset = vPos.yoffset - 4;
-    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, pInfo);
+    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, posInfo);
     var alpha = isWindowSkin ? this._drawWindowSkin_getOpacity() : textAttribute.background[3];
 
     // Step 4: 绘制标题、头像、动画
-    var content_top = this._drawTextBox_drawTitleAndIcon(titleInfo, hPos, vPos, alpha);
+    var content_top = this._drawTextBox_drawTitleAndIcon(titleInfo, hPos, vPos, alpha, config.ctx);
 
     // Step 5: 绘制正文
-    var config = this.drawTextContent('ui', content, {
+    var config = this.drawTextContent(config.ctx || 'ui', content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
-        lineHeight: vPos.lineHeight, time: (showAll || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
+        lineHeight: vPos.lineHeight, time: (config.showAll || config.async || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
     });
 
     // Step 6: 绘制光标
-    main.dom.next.style.display = 'block';
-    main.dom.next.style.borderRightColor = main.dom.next.style.borderBottomColor = core.arrayToRGB(textAttribute.text);
-    main.dom.next.style.top = (vPos.bottom - 20) * core.domStyle.scale + "px";
-    var left = (hPos.left + hPos.right) / 2;
-    if (pInfo.position == 'up' && !pInfo.noPeak && pInfo.px != null && Math.abs(pInfo.px * 32 + 16 - left) < 50)
-        left = hPos.right - 64;
-    main.dom.next.style.left = left * core.domStyle.scale + "px";
+    if (main.mode == 'play') {
+        main.dom.next.style.display = 'block';
+        main.dom.next.style.borderRightColor = main.dom.next.style.borderBottomColor = core.arrayToRGB(textAttribute.text);
+        main.dom.next.style.top = (vPos.bottom - 20) * core.domStyle.scale + "px";
+        var left = (hPos.left + hPos.right) / 2;
+        if (posInfo.position == 'up' && !posInfo.noPeak && posInfo.px != null && Math.abs(posInfo.px * 32 + 16 - left) < 50)
+            left = hPos.right - 64;
+        main.dom.next.style.left = left * core.domStyle.scale + "px";
+    }
     return config;
 }
 
-ui.prototype._drawTextBox_drawImages = function (content) {
+ui.prototype._drawTextBox_drawImages = function (content, ctx) {
+    ctx = ctx || 'ui';
     return content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
         var ss = str.split(",");
         // 绘制
         if (ss.length==3)
-            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]));
+            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]));
         else if (ss.length==5)
-            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
+            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
         else if (ss.length >= 9) {
-            if (ss.length >= 10) core.setAlpha('ui', parseFloat(ss[9]));
+            if (ss.length >= 10) core.setAlpha(ctx, parseFloat(ss[9]));
             var angle = (parseFloat(ss[10]) || 0) * Math.PI / 180;
-            core.drawImage('ui', ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), 
+            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), 
                 parseFloat(ss[5]), parseFloat(ss[6]), parseFloat(ss[7]), parseFloat(ss[8]), angle);
-            core.setAlpha('ui', 1);
+            core.setAlpha(ctx, 1);
         }
         return "";
     });
 }
 
 ui.prototype._drawTextBox_getHorizontalPosition = function (content, titleInfo, posInfo) {
+    var ctx = posInfo.ctx || 'ui';
     var realContent = this._getRealContent(content);
     var paddingLeft = 25, paddingRight = 12;
-    if (posInfo.px != null && posInfo.py != null) paddingLeft = 20;
+    if ((posInfo.px != null && posInfo.py != null) || posInfo.pos) paddingLeft = 20;
     if (titleInfo.icon != null) paddingLeft = 62; // 15 + 32 + 15
     else if (titleInfo.image) paddingLeft = 90; // 10 + 70 + 10
     var left = 7 + 3 * (this.HSIZE - 6), right = this.PIXEL - left,
         width = right - left, validWidth = width - paddingLeft - paddingRight;
     // 对话框效果：改为动态计算
-    if (posInfo.px != null && posInfo.py != null) {
+    if ((posInfo.px != null && posInfo.py != null) || posInfo.pos) {
         var min_width = 220 - paddingLeft, max_width = validWidth;
         // 无行走图或头像，则可以适当缩小min_width
         if (titleInfo.image == null) min_width = 160;
         if (titleInfo.title) {
-            min_width = core.clamp(core.calWidth('ui', titleInfo.title, this._buildFont(core.status.textAttribute.titlefont, true)), min_width, max_width);
+            min_width = core.clamp(core.calWidth(ctx, titleInfo.title, this._buildFont(core.status.textAttribute.titlefont, true)), min_width, max_width);
         }
-        validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
-        width = validWidth + paddingLeft + paddingRight;
-        left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);
+        if (posInfo.pos) {
+            left = core.calValue(posInfo.pos[0]) || 0;
+            max_width = Math.max(min_width, right - left - paddingLeft - paddingRight);
+        } else left = null;
+        if (posInfo.pos && posInfo.pos[2] != null) {
+            width = core.calValue(posInfo.pos[2]) || 0;
+            min_width = validWidth = width - paddingLeft - paddingRight;
+        } else validWidth = 0;
+        if (validWidth < min_width) {
+            validWidth = this._calTextBoxWidth('ui', realContent, min_width, max_width, this._buildFont());
+            width = validWidth + paddingLeft + paddingRight;
+        }
+        if (left == null) left = core.clamp(32 * posInfo.px + 16 - width / 2 - core.bigmap.offsetX, left, right - width);
         right = left + width;
     }
     return { left: left, right: right, width: width, validWidth: validWidth, xoffset: 11, content_left: left + paddingLeft };
@@ -1527,12 +1565,16 @@ ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, po
                 top = 32 * posInfo.py + 32 + yoffset - core.bigmap.offsetY;
             }
     }
+    if (posInfo.pos) {
+        top = core.calValue(posInfo.pos[1]) || 0;
+    }
 
     return { top: top, height: height, bottom: top + height, yoffset: yoffset, lineHeight: lineHeight };
 }
 
-ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, alpha) {
-    core.setTextAlign('ui', 'left');
+ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, alpha, ctx) {
+    ctx = ctx || 'ui';
+    core.setTextAlign(ctx, 'left');
     var textAttribute = core.status.textAttribute;
     var content_top = vPos.top + 15;
     var image_top = vPos.top + 15;
@@ -1540,23 +1582,23 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
         var titlefont = textAttribute.titlefont;
         content_top += titlefont + 5;
         image_top = vPos.top + 40;
-        core.setFillStyle('ui', core.arrayToRGB(textAttribute.title));
-        core.setStrokeStyle('ui', core.arrayToRGB(textAttribute.title));
+        core.setFillStyle(ctx, core.arrayToRGB(textAttribute.title));
+        core.setStrokeStyle(ctx, core.arrayToRGB(textAttribute.title));
 
         // --- title也要居中或者右对齐？
-        var title_width = core.calWidth('ui', titleInfo.title, this._buildFont(titlefont, true));
+        var title_width = core.calWidth(ctx, titleInfo.title, this._buildFont(titlefont, true));
         var title_left = hPos.content_left;
         if (textAttribute.align == 'center')
             title_left = hPos.left + (hPos.width - title_width) / 2;
         else if (textAttribute.align == 'right')
             title_left = hPos.right - title_width - 12;
 
-        core.fillText('ui', titleInfo.title, title_left, vPos.top + 8 + titlefont);
+        core.fillText(ctx, titleInfo.title, title_left, vPos.top + 8 + titlefont);
     }
     if (titleInfo.icon != null) {
-        core.setAlpha('ui', alpha);
-        core.strokeRect('ui', hPos.left + 15 - 1, image_top-1, 34, titleInfo.height + 2, null, 2);
-        core.setAlpha('ui', 1);
+        core.setAlpha(ctx, alpha);
+        core.strokeRect(ctx, hPos.left + 15 - 1, image_top-1, 34, titleInfo.height + 2, null, 2);
+        core.setAlpha(ctx, 1);
         core.status.boxAnimateObjs = [];
         // --- 勇士
         if (titleInfo.image == core.material.images.hero) {
@@ -1566,26 +1608,33 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
                 core.status.boxAnimateObjs.push({
                     'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
                     'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': 4,
-                    'image': titleInfo.image, 'pos': core.material.icons.hero[direction].loc * titleInfo.height
+                    'image': titleInfo.image, 'pos': core.material.icons.hero[direction].loc * titleInfo.height, ctx: ctx,
                 })
             } else {
-                core.clearMap('ui', hPos.left + 15, image_top, 32, titleInfo.height);
-                core.fillRect('ui', hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
-                core.drawImage('ui', titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
+                core.clearMap(ctx, hPos.left + 15, image_top, 32, titleInfo.height);
+                core.fillRect(ctx, hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
+                core.drawImage(ctx, titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
                     hPos.left + 15, image_top, 32, titleInfo.height);
             }            
         }
         else {
-            core.status.boxAnimateObjs.push({
-                'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
-                'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
-                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
-            });
+            if (titleInfo.bigImage) {
+                core.status.boxAnimateObjs.push({
+                    bigImage: titleInfo.bigImage, face: titleInfo.face, centerX: hPos.left + 15 + 16,
+                    centerY: image_top + titleInfo.height / 2, max_width: 50, ctx: ctx
+                });
+            } else {
+                core.status.boxAnimateObjs.push({
+                    'bgx': hPos.left + 15, 'bgy': image_top, 'bgWidth': 32, 'bgHeight': titleInfo.height,
+                    'x': hPos.left + 15, 'y': image_top, 'height': titleInfo.height, 'animate': titleInfo.animate,
+                    'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx,
+                });
+            }
         }
         core.drawBoxAnimate();
     }
     if (titleInfo.image != null && titleInfo.icon == null) { // 头像图
-        core.drawImage('ui', titleInfo.image, 0, 0, titleInfo.image.width, titleInfo.image.height,
+        core.drawImage(ctx, titleInfo.image, 0, 0, titleInfo.image.width, titleInfo.image.height,
             hPos.left+10, vPos.top+10, 70, 70);
     }
     return content_top;
@@ -1648,33 +1697,34 @@ ui.prototype.textImage = function (content, lineHeight) {
 }
 
 ////// 绘制一个选项界面 //////
-ui.prototype.drawChoices = function(content, choices) {
+ui.prototype.drawChoices = function(content, choices, width, ctx) {
     choices = core.clone(choices || []);
 
-    core.status.event.ui = {"text": content, "choices": choices};
+    core.status.event.ui = {"text": content, "choices": choices, "width": width};
     this.clearUI();
 
     content = core.replaceText(content || "");
     var titleInfo = this._getTitleAndIcon(content);
-    titleInfo.content = this._drawTextBox_drawImages(titleInfo.content);
-    var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices);
+    titleInfo.content = this._drawTextBox_drawImages(titleInfo.content, ctx);
+    var hPos = this._drawChoices_getHorizontalPosition(titleInfo, choices, width, ctx);
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
     core.status.event.ui.offset = vPos.offset;
 
-    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom);
-    this._drawChoices_drawTitle(titleInfo, hPos, vPos);
-    this._drawChoices_drawChoices(choices, isWindowSkin, hPos, vPos);
+    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, {ctx: ctx});
+    this._drawChoices_drawTitle(titleInfo, hPos, vPos, ctx);
+    this._drawChoices_drawChoices(choices, isWindowSkin, hPos, vPos, ctx);
 }
 
-ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices) {
+ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices, width, ctx) {
+    ctx = ctx || 'ui';
     // 宽度计算：考虑提示文字和选项的长度
-    core.setFont('ui', this._buildFont(17, true));
-    var width = this._calTextBoxWidth('ui', titleInfo.content || "", 246, this.PIXEL - 20);
+    core.setFont(ctx, this._buildFont(17, true));
+    var width = this._calTextBoxWidth(ctx, titleInfo.content || "", width || 246, this.PIXEL - 20);
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
             choices[i] = {"text": choices[i]};
         choices[i].text = core.replaceText(choices[i].text);
-        choices[i].width = core.calWidth('ui', core.replaceText(choices[i].text));
+        choices[i].width = core.calWidth(ctx, core.replaceText(choices[i].text));
         if (choices[i].icon != null) choices[i].width += 28;
         width = Math.max(width, choices[i].width+30);
     }
@@ -1706,11 +1756,12 @@ ui.prototype._drawChoices_getVerticalPosition = function (titleInfo, choices, hP
     return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top, offset: offset };
 }
 
-ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {
+ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos, ctx) {
     if (!titleInfo.content) return;
+    ctx = ctx || 'ui';
     var content_top = vPos.top + 21;
     if (titleInfo.title != null) {
-        core.setTextAlign('ui', 'center');
+        core.setTextAlign(ctx, 'center');
 
         content_top = vPos.top + 41;
         var title_offset = hPos.left+hPos.width/2;
@@ -1718,45 +1769,54 @@ ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos) {
 
         if (titleInfo.icon != null) {
             title_offset += 12;
-            core.strokeRect('ui', hPos.left + 15 - 1, vPos.top + 30 - 1, 34, titleInfo.height + 2, '#DDDDDD', 2);
+            core.strokeRect(ctx, hPos.left + 15 - 1, vPos.top + 30 - 1, 34, titleInfo.height + 2, '#DDDDDD', 2);
             core.status.boxAnimateObjs = [];
-            core.status.boxAnimateObjs.push({
-                'bgx': hPos.left + 15, 'bgy': vPos.top + 30, 'bgWidth': 32, 'bgHeight': titleInfo.height,
-                'x': hPos.left + 15, 'y': vPos.top + 30, 'height': titleInfo.height, 'animate': titleInfo.animate,
-                'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height
-            });
+            if (titleInfo.bigImage) {
+                core.status.boxAnimateObjs.push({
+                    bigImage: titleInfo.bigImage, face: titleInfo.face, centerX: hPos.left + 15 + 16,
+                    centerY: vPos.top + 30 + titleInfo.height / 2, max_width: 50, ctx: ctx
+                });
+            } else {
+                core.status.boxAnimateObjs.push({
+                    'bgx': hPos.left + 15, 'bgy': vPos.top + 30, 'bgWidth': 32, 'bgHeight': titleInfo.height,
+                    'x': hPos.left + 15, 'y': vPos.top + 30, 'height': titleInfo.height, 'animate': titleInfo.animate,
+                    'image': titleInfo.image, 'pos': titleInfo.icon * titleInfo.height, ctx: ctx
+                });
+            }
             core.drawBoxAnimate();
         };
 
-        core.fillText('ui', titleInfo.title, title_offset, vPos.top + 27,
+        core.fillText(ctx, titleInfo.title, title_offset, vPos.top + 27,
             core.arrayToRGBA(core.status.textAttribute.title), this._buildFont(19, true));
     }
 
-    core.setTextAlign('ui', 'left');
-    this.drawTextContent('ui', titleInfo.content, {
+    core.setTextAlign(ctx, 'left');
+    this.drawTextContent(ctx, titleInfo.content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
         fontSize: 15, lineHeight: 20, bold: true
     });
 }
 
-ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, vPos) {
+ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, vPos, ctx) {
+    var hasCtx = ctx != null;
+    ctx = ctx || 'ui';
     // 选项
-    core.setTextAlign('ui', 'center');
-    core.setFont('ui', this._buildFont(17, true));
+    core.setTextAlign(ctx, 'center');
+    core.setFont(ctx, this._buildFont(17, true));
     for (var i = 0; i < choices.length; i++) {
         var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
-        if (choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
-        core.setFillStyle('ui', color);
+        if (main.mode == 'play' && choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
+        core.setFillStyle(ctx, color);
         var offset = this.HPIXEL;
         if (choices[i].icon) {
             var iconInfo = this._getDrawableIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
             if (image != null) {
-                core.drawImage('ui', image, 0, 32 * icon, 32, 32,
+                core.drawImage(ctx, image, 0, 32 * icon, 32, 32,
                     this.HPIXEL - choices[i].width/2, vPos.choice_top + 32*i - 17, 22, 22);
                 offset += 14;
             }
         }
-        core.fillText('ui', choices[i].text, offset, vPos.choice_top + 32 * i, color);
+        core.fillText(ctx, choices[i].text, offset, vPos.choice_top + 32 * i, color);
     }
 
     if (choices.length>0 && core.status.event.selection != 'none') {
@@ -1764,57 +1824,74 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         while (core.status.event.selection < 0) core.status.event.selection += choices.length;
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
         var len = choices[core.status.event.selection].width;
-        if (isWindowSkin)
-            this._drawWindowSelector(core.status.textAttribute.background,
-                this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
+        if (isWindowSkin) {
+            if (hasCtx) {
+                this._drawSelector(ctx, core.status.textAttribute.background,
+                    len + 10, 28, this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20);
+            } else {
+                this._drawWindowSelector(core.status.textAttribute.background,
+                    this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
+            }
+        }
         else
-            core.strokeRoundRect('ui', this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
+            core.strokeRoundRect(ctx, this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
                 len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
 ////// 绘制一个确认/取消的警告页面 //////
-ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback) {
-    core.lockControl();
+ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
+    var hasCtx = ctx != null;
+    ctx = ctx || 'ui';
     text = core.replaceText(text || "");
 
-    // 处理自定义事件
-    if (core.status.event.id != 'action') {
-        core.status.event.id = 'confirmBox';
-        core.status.event.ui = text;
-        core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+    if (main.mode == 'play') {
+        core.lockControl();
+
+        // 处理自定义事件
+        if (core.status.event.id != 'action') {
+            core.status.event.id = 'confirmBox';
+            core.status.event.ui = text;
+            core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+        }
     }
 
     if (core.status.event.selection != 0 && core.status.event.selection != 'none') core.status.event.selection = 1;
     this.clearUI();
 
-    core.setFont('ui', this._buildFont(19, true));
+    core.setFont(ctx, this._buildFont(19, true));
     var contents = text.split("\n");
-    var rect = this._drawConfirmBox_getRect(contents);
-    var isWindowSkin = this.drawBackground(rect.left, rect.top, rect.right, rect.bottom);
+    var rect = this._drawConfirmBox_getRect(contents, ctx);
+    var isWindowSkin = this.drawBackground(rect.left, rect.top, rect.right, rect.bottom, {ctx: ctx});
 
-    core.setTextAlign('ui', 'center');
-    core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.text))
+    core.setTextAlign(ctx, 'center');
+    core.setFillStyle(ctx, core.arrayToRGBA(core.status.textAttribute.text))
     for (var i in contents) {
-        core.fillText('ui', contents[i], this.HPIXEL, rect.top + 50 + i*30);
+        core.fillText(ctx, contents[i], this.HPIXEL, rect.top + 50 + i*30);
     }
 
-    core.fillText('ui', "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
-    core.fillText('ui', "取消", this.HPIXEL + 38, rect.bottom - 35);
+    core.fillText(ctx, "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
+    core.fillText(ctx, "取消", this.HPIXEL + 38, rect.bottom - 35);
     if (core.status.event.selection != 'none') {
-        var len=core.calWidth('ui', "确定");
+        var len=core.calWidth(ctx, "确定");
         var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
     
-        if (isWindowSkin)
-            this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+        if (isWindowSkin) {
+            if (hasCtx) {
+                this._drawSelector(ctx, core.status.textAttribute.background,
+                    len + 10, 28, strokeLeft, rect.bottom-35-20);
+            } else {
+                this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+            }
+        }
         else
-            core.strokeRoundRect('ui', strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
+            core.strokeRoundRect(ctx, strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
-ui.prototype._drawConfirmBox_getRect = function (contents) {
+ui.prototype._drawConfirmBox_getRect = function (contents, ctx) {
     var max_width = contents.reduce(function (pre, curr) {
-        return Math.max(pre, core.calWidth('ui', curr));
+        return Math.max(pre, core.calWidth(ctx, curr));
     }, 0);
     var left = Math.min(this.HPIXEL - 40 - parseInt(max_width / 2), 100), right = this.PIXEL - left;
     var top = this.HPIXEL - 68 - (contents.length-1)*30, bottom = this.HPIXEL + 68;
@@ -1954,7 +2031,7 @@ ui.prototype._drawReplay = function () {
     core.status.event.id = 'replay';
     core.playSound('打开界面');
     this.drawChoices(null, [
-        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
+        "从头回放录像", "从存档开始回放", "接续播放剩余录像", "播放存档剩余录像", "选择录像文件", "下载当前录像", "返回游戏"
     ]);
 }
 
@@ -1992,6 +2069,7 @@ ui.prototype._drawCursor = function () {
     if (automaticRoute.cursorY == null)
         automaticRoute.cursorY = core.getHeroLoc('y');
     automaticRoute.cursorX = core.clamp(automaticRoute.cursorX, 0, this.LAST);
+    automaticRoute.cursorY = core.clamp(automaticRoute.cursorY, 0, this.LAST);
     core.status.event.id = 'cursor';
     core.lockControl();
     core.clearUI();
@@ -2094,7 +2172,15 @@ ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
     var img_top = border_top + 5, img_left = border_left + 5;
     core.strokeRect('ui', 22, border_top, 42, 42, '#DDDDDD', 2);
     var blockInfo = core.getBlockInfo(enemy.id);
-    if (blockInfo.height >= 42) {
+
+    // 检查大怪物
+    if (blockInfo.bigImage) {
+        core.status.boxAnimateObjs.push({
+            bigImage: blockInfo.bigImage, face: blockInfo.face, centerX: border_left + 21, centerY: border_top + 21, 
+            max_width: 60
+        });
+    }
+    else if (blockInfo.height >= 42) {
         var originEnemy = core.material.enemys[enemy.id] || {};
         // 检查上半部分是不是纯透明的；取用原始值避免重复计算
         if (originEnemy.is32x32 == null) {
@@ -2396,14 +2482,6 @@ ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts)
     });
     while (criticals[0]=='0:0') criticals.shift();
     texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]"+JSON.stringify(criticals));
-    var prevInfo = core.getDamageInfo(enemy.id, {atk: core.status.hero.atk-1}, null, null, floorId);
-    if (prevInfo != null && damageInfo != null) {
-        if (damageInfo.damage != null) damageInfo = damageInfo.damage;
-        if (prevInfo.damage != null) prevInfo = prevInfo.damage;
-        if (prevInfo > damageInfo) {
-            texts.push("（当前攻击力正位于临界点上）")
-        }
-    }
 }
 
 ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
@@ -2428,6 +2506,10 @@ ui.prototype.drawFly = function(page) {
     core.setTextAlign('ui', 'center');
     core.fillText('ui', '楼层跳跃', this.HPIXEL, 60, '#FFFFFF', this._buildFont(28, true));
     core.fillText('ui', '返回游戏', this.HPIXEL, this.PIXEL - 13, null, this._buildFont(15, true))
+    core.setTextAlign('ui', 'right');
+    core.fillText('ui', '浏览地图时也', this.PIXEL - 10, this.PIXEL - 23, '#aaaaaa', this._buildFont(10, false));
+    core.fillText('ui', '可楼层跳跃！', this.PIXEL - 10, this.PIXEL - 11, null, this._buildFont(10, false));
+    core.setTextAlign('ui', 'center');
 
     var middle = this.HPIXEL + 39;
 
@@ -2435,7 +2517,7 @@ ui.prototype.drawFly = function(page) {
     var lines = core.splitLines('ui', title, 120, this._buildFont(19, true));
     var start_y = middle - (lines.length - 1) * 11;
     for (var i in lines) {
-        core.fillText('ui', lines[i], this.PIXEL - 60, start_y);
+        core.fillText('ui', lines[i], this.PIXEL - 60, start_y, '#FFFFFF');
         start_y += 22;
     }
 
@@ -2501,7 +2583,7 @@ ui.prototype._drawViewMaps = function (index, x, y) {
 
 ui.prototype._drawViewMaps_drawHint = function () {
     core.playSound('打开界面');
-    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.4)');
+    core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.7)');
     core.setTextAlign('ui', 'center');
     var stroke = function (left, top, width, height, fillStyle, lineWidth) {
         core.strokeRect('ui', left*32+2, top*32+2, width*32-4, height*32-4, fillStyle, lineWidth);
@@ -2534,7 +2616,7 @@ ui.prototype._drawViewMaps_drawHint = function () {
     core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - (32 * per + 48));
 
     core.fillText('ui', "退出 [ESC / ENTER]", this.HPIXEL, this.HPIXEL);
-    core.fillText('ui', "[X] 可查看" + core.material.items['book'].name, this.HPIXEL + 77, this.HPIXEL + 32, null, '13px Arial');
+    core.fillText('ui', "[X] 可查看" + core.material.items['book'].name + "   [G] 可使用" + core.material.items.fly.name, this.HPIXEL, this.HPIXEL + 32, null, '12px Arial');
 
     core.setTextBaseline('ui', 'alphabetic');
 }
@@ -2937,6 +3019,7 @@ ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, hi
     var strokeColor = globalAttribute.selectColor;
     if (core.status.event.selection) strokeColor = '#FF6A6A';
     if (!data || !data.floorId) highLight = false;
+    if (data && data.__toReplay__) title = '[R]' + title;
 
     core.fillText('ui', title, x, y, highLight?globalAttribute.selectColor:'#FFFFFF', this._buildFont(17, true));
     core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
@@ -3297,6 +3380,7 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.top = y * core.domStyle.scale + 'px';
     newCanvas.style.zIndex = z;
     newCanvas.style.position = 'absolute';
+    newCanvas.style.pointerEvents = 'none';
     core.dymCanvas[name] = newCanvas.getContext('2d');
     core.maps._setHDCanvasSize(core.dymCanvas[name], width, height);
     core.dom.gameDraw.appendChild(newCanvas);
@@ -3355,6 +3439,13 @@ ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
 }
 ////// canvas删除 //////
 ui.prototype.deleteCanvas = function (name) {
+    if (name instanceof Function) {
+        Object.keys(core.dymCanvas).forEach(function (one) {
+            if (name(one)) core.deleteCanvas(one);
+        });
+        return;
+    }
+
     if (!core.dymCanvas[name]) return null;
     core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
     delete core.dymCanvas[name];
@@ -3362,8 +3453,5 @@ ui.prototype.deleteCanvas = function (name) {
 
 ////// 删除所有动态canvas //////
 ui.prototype.deleteAllCanvas = function () {
-    Object.keys(core.dymCanvas).forEach(function (name) {
-        core.dom.gameDraw.removeChild(core.dymCanvas[name].canvas);
-        delete core.dymCanvas[name];
-    });
+    return this.deleteCanvas(function () { return true; })
 }

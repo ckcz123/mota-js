@@ -139,8 +139,23 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_leaf": true,
 					"_type": "event",
 					"_event": "faceIds",
-					"_docs": "行走图朝向",
+					"_docs": "行走朝向",
 					"_data": "行走图朝向。在勇士撞上图块时，或图块在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
+				},
+				"bigImage": {
+					"_leaf": true,
+					"_type": "material",
+					"_directory": "./project/images/:images",
+					"_transform": (function (one) {
+						if (one.endsWith('.png')) return one;
+						return null;
+					}).toString(),
+					"_onconfirm": (function (previous, current) {
+						if (current.length == 0) return null;
+						return current[0];
+					}).toString(),
+					"_docs": "绑定贴图",
+					"_data": "该怪物绑定的怪物贴图，用法详见文档"
 				},
 				"hp": {
 					"_leaf": true,
@@ -382,6 +397,21 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					"_event": "faceIds",
 					"_docs": "行走图朝向",
 					"_data": "行走图朝向。在勇士撞上图块时，或图块在移动时，会自动选择最合适的朝向图块（如果存在定义）来进行绘制。"
+				},
+				"bigImage": {
+					"_leaf": true,
+					"_type": "material",
+					"_directory": "./project/images/:images",
+					"_transform": (function (one) {
+						if (one.endsWith('.png')) return one;
+						return null;
+					}).toString(),
+					"_onconfirm": (function (previous, current) {
+						if (current.length == 0) return null;
+						return current[0];
+					}).toString(),
+					"_docs": "绑定贴图",
+					"_data": "该图块绑定的贴图，用法详见文档"
 				}
 			}
 		},
@@ -627,8 +657,18 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 								"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
 								"key": ["up", "down", "left", "right"]
 							},
-							"_docs": "不可通行性",
-							"_data": "该点不可通行的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果\n例如 [\"up\", \"left\"] 代表该点不能往上和左走"
+							"_docs": "不可出方向",
+							"_data": "该点不可通行出的方向 \n 可以在这里定义该点不能前往哪个方向，可以达到悬崖之类的效果"
+						},
+						"cannotMoveIn": {
+							"_leaf": true,
+							"_type": "checkboxSet",
+							"_checkboxSet": {
+								"prefix": ["上: ", "下: ", "<br>左: ", "右: "],
+								"key": ["up", "down", "left", "right"]
+							},
+							"_docs": "不可入方向",
+							"_data": "该点不可通行入的方向 \n 可以在这里定义从哪个方向前往该点，可以达到悬崖之类的效果"
 						},
 					}
 				}
@@ -664,7 +704,8 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 			"afterGetItem": {},
 			"afterOpenDoor": {},
 			"autoEvent": {},
-			"cannotMove": {}
+			"cannotMove": {},
+			"cannotMoveIn": {}
 		}
 	}
 }

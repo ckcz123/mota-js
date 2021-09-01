@@ -82,7 +82,6 @@ function core() {
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
-        'useLocalForage': true,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -126,7 +125,8 @@ function core() {
             "now": 0,
         },
         "favorite": [],
-        "favoriteName": {}
+        "favoriteName": {},
+        "cache": {}
     }
     this.initStatus = {
         'played': false,
@@ -178,6 +178,13 @@ function core() {
         // 按下键的时间：为了判定双击
         'downTime': null,
         'ctrlDown': false,
+        'preview': {
+            'enabled': false,
+            'prepareDragging': false,
+            'dragging': false,
+            'px': 0,
+            'py': 0,
+        },
 
         // 路线&回放
         'route': [],
@@ -358,14 +365,14 @@ core.prototype._init_flags = function () {
 
 core.prototype._init_sys_flags = function () {
     if (core.flags.equipboxButton) core.flags.equipment = true;
-    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', core.flags.displayEnemyDamage);
-    core.flags.displayCritical = core.getLocalStorage('critical', core.flags.displayCritical);
-    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', core.flags.displayExtraDamage);
+    core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', true);
+    core.flags.displayCritical = core.getLocalStorage('critical', true);
+    core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', true);
     core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
     core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 0);
     // 行走速度
-    core.values.moveSpeed = core.getLocalStorage('moveSpeed', 100);
+    core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed || 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
     if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
@@ -402,7 +409,6 @@ core.prototype._init_platform = function () {
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
-    this._init_checkLocalForage();
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {
@@ -418,37 +424,6 @@ core.prototype._init_platform = function () {
     if (main.mode != 'editor') {
         core.domStyle.scale = core.getLocalStorage('scale', 1);
         if (core.flags.enableHDCanvas) core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
-    }
-}
-
-core.prototype._init_checkLocalForage = function () {
-    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
-    var _error = function (e) {
-        main.log(e);
-        core.platform.useLocalForage = false;
-    };
-    if (core.platform.useLocalForage) {
-        try {
-            core.setLocalForage("__test__", lzw_encode("__test__"), function () {
-                try {
-                    core.getLocalForage("__test__", null, function (data) {
-                        try {
-                            if (lzw_decode(data) != "__test__") {
-                                console.log("localForage unsupported!");
-                                core.platform.useLocalForage = false;
-                            }
-                            else {
-                                console.log("localForage supported!");
-                                core.removeLocalForage("__test__");
-                            }
-                        }
-                        catch (e) {_error(e);}
-                    }, _error)
-                }
-                catch (e) {_error(e);}
-            }, _error)
-        }
-        catch (e) {_error(e);}
     }
 }
 
@@ -472,6 +447,23 @@ core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
     core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
+    // 图片裁剪
+    (main.splitImages || []).forEach(function (one) {
+        var name = core.getMappedName(one.name);
+        if (!core.material.images.images[name]) {
+            console.warn('找不到图片：' + name + '，无法裁剪');
+            return;
+        }
+        if (!name.endsWith('.png')) {
+            console.warn('无法裁剪非png格式图片：' + name);
+            return;
+        }
+        var arr = core.splitImage(core.material.images.images[name], one.width, one.height);
+        for (var i = 0; i < arr.length; ++i) {
+            core.material.images.images[(one.prefix||"") + i + '.png'] = arr[i];
+        }
+    });
+
     if (core.plugin._afterLoadResources)
         core.plugin._afterLoadResources();
     core.showStartAnimate();

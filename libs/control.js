@@ -16,6 +16,7 @@ control.prototype._init = function () {
     this.controldata = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a.control;
     this.renderFrameFuncs = [];
     this.replayActions = [];
+    this.weathers = {};
     this.resizes = [];
     // --- 注册系统的animationFrame
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
@@ -26,6 +27,12 @@ control.prototype._init = function () {
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("tip", true, this._animateFrame_tip);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
+    // --- 注册系统的天气
+    this.registerWeather("rain", this._weather_rain, this._animationFrame_weather_rain);
+    this.registerWeather("snow", this._weather_snow, this._animationFrame_weather_snow);
+    this.registerWeather("fog", this._weather_fog, this.__animateFrame_weather_image);
+    this.registerWeather("cloud", this._weather_cloud, this.__animateFrame_weather_image);
+    this.registerWeather("sun", this._weather_sun, this._animationFrame_weather_sun);
     // --- 注册系统的replay
     this.registerReplayAction("move", this._replayAction_move);
     this.registerReplayAction("item", this._replayAction_item);
@@ -139,7 +146,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
     if (core.status.floorId) {
         // Global Animate
         core.status.globalAnimateObjs.forEach(function (block) {
-            core.drawBlock(block, core.status.globalAnimateStatus % (block.event.animate||1));
+            core.drawBlock(block, core.status.globalAnimateStatus);
         });
 
         // Global floor images
@@ -152,7 +159,7 @@ control.prototype._animationFrame_globalAnimate = function (timestamp) {
         });
 
         // Global hero animate
-        if ((core.status.hero || {}).animate && core.status.heroMoving == 0 && main.mode == 'play') {
+        if ((core.status.hero || {}).animate && core.status.heroMoving == 0 && main.mode == 'play' && !core.status.preview.enabled) {
             core.drawHero('stop', null, core.status.globalAnimateStatus);
         }
     }
@@ -195,17 +202,23 @@ control.prototype._animationFrame_heroMoving = function (timestamp) {
         core.animateFrame.leftLeg = !core.animateFrame.leftLeg;
         core.animateFrame.moveTime = timestamp;
     }
-    core.drawHero(core.animateFrame.leftLeg?'leftFoot':'rightFoot', 4*core.status.heroMoving);
+    core.drawHero(core.animateFrame.leftLeg ? 'leftFoot' : 'rightFoot', 4 * core.status.heroMoving);
 }
 
 control.prototype._animationFrame_weather = function (timestamp) {
-    var weather = core.animateFrame.weather;
-    if (timestamp - weather.time <= 30 || !core.dymCanvas.weather) return;
-    core.control["_animationFrame_weather_"+weather.type]();
-    weather.time = timestamp;
+    var weather = core.animateFrame.weather, type = weather.type;
+    if (!core.dymCanvas.weather || !core.control.weathers[type] || !core.control.weathers[type].frameFunc) return;
+    try {
+        core.doFunc(core.control.weathers[type].frameFunc, core.control, timestamp, core.animateFrame.weather.level);
+    } catch (e) {
+        main.log(e);
+        main.log("ERROR in weather["+type+"]：已自动注销该项。");
+        core.unregisterWeather(type);
+    }
 }
 
-control.prototype._animationFrame_weather_rain = function () {
+control.prototype._animationFrame_weather_rain = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
     var ctx = core.dymCanvas.weather, ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
     core.clearMap('weather');
     ctx.strokeStyle = 'rgba(174,194,224,0.8)';
@@ -228,9 +241,11 @@ control.prototype._animationFrame_weather_rain = function () {
     });
 
     ctx.fill();
+    core.animateFrame.weather.time = timestamp;
 }
 
-control.prototype._animationFrame_weather_snow = function () {
+control.prototype._animationFrame_weather_snow = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
     var ctx = core.dymCanvas.weather, ox = core.bigmap.offsetX, oy = core.bigmap.offsetY;
     core.clearMap('weather');
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
@@ -260,11 +275,15 @@ control.prototype._animationFrame_weather_snow = function () {
         }
     });
     ctx.fill();
+    core.animateFrame.weather.time = timestamp;
 }
 
-control.prototype.__animateFrame_weather_image = function (image) {
-    if (!image) return;
+control.prototype.__animateFrame_weather_image = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
     var node = core.animateFrame.weather.nodes[0];
+    var image = node.image;
+    if (!image) return;
+    core.clearMap('weather');
     core.setAlpha('weather', node.level / 500);
     var wind = 1.5;
     var width = image.width, height = image.height;
@@ -296,20 +315,18 @@ control.prototype.__animateFrame_weather_image = function (image) {
         }
     }
     core.setAlpha('weather',1);
+    core.animateFrame.weather.time = timestamp;
 }
 
-control.prototype._animationFrame_weather_fog = function () {
-    core.clearMap('weather');
-    this.__animateFrame_weather_image(core.animateFrame.weather.fog);
-}
-
-control.prototype._animationFrame_weather_cloud = function () {
-    core.clearMap('weather');
-    this.__animateFrame_weather_image(core.animateFrame.weather.cloud);
-}
-
-control.prototype._animationFrame_weather_sun = function () {
-    // do nothing here.
+control.prototype._animationFrame_weather_sun = function (timestamp, level) {
+    if (timestamp - core.animateFrame.weather.time < 30) return;
+    var node = core.animateFrame.weather.nodes[0];
+    var opacity = node.opacity + node.delta;
+    if (opacity > level / 10 + 0.3 || opacity < level / 10 - 0.3)
+        node.delta = -node.delta;
+    node.opacity = opacity;
+    core.setOpacity('weather', core.clamp(opacity, 0, 1));
+    core.animateFrame.weather.time = timestamp;
 }
 
 control.prototype._animateFrame_tip = function (timestamp) {
@@ -479,11 +496,6 @@ control.prototype.clearContinueAutomaticRoute = function (callback) {
     core.deleteCanvas('route');
     core.status.automaticRoute.moveStepBeforeStop=[];
     if (callback) callback();
-}
-
-////// 显示离散的寻路点 //////
-control.prototype.fillPosWithPoint = function (pos) {
-    core.fillRect('ui', pos.x*32+12,pos.y*32+12,8,8, '#bfbfbf');
 }
 
 ////// 设置自动寻路路线 //////
@@ -800,74 +812,46 @@ control.prototype.drawHero = function (status, offset, frame) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
     status = status || 'stop';
-    offset = offset || 0;
+    if (!offset) offset = 0;
+
     var way = core.utils.scan2[direction];
-    var dx = way.x, dy = way.y, offsetX = dx * offset, offsetY = dy * offset;
-    core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offsetX, 0, 32*core.bigmap.width-core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offsetY, 0, 32*core.bigmap.height-core.__PIXELS__);
-    core.clearAutomaticRouteNode(x+dx, y+dy);
+    var dx = way.x, dy = way.y;
+    var offsetX = typeof offset == 'number' ? dx * offset : (offset.x || 0);
+    var offsetY = typeof offset == 'number' ? dy * offset : (offset.y || 0);
+    offset = {x: offsetX, y: offsetY, offset: offset};
+
+    core.clearAutomaticRouteNode(x + dx, y + dy);
     core.clearMap('hero');
     core.status.heroCenter.px = 32 * x + offsetX + 16;
     core.status.heroCenter.py = 32 * y + offsetY + 32 - core.material.icons.hero.height / 2;
 
-    if (!core.hasFlag('hideHero')) {
-        this._drawHero_draw(direction, x, y, status, offset, frame);
+    // 重置hero层画布
+    core.setGameCanvasTranslate('hero', 0, 0);
+    delete core.canvas.hero._px;
+    delete core.canvas.hero._py;
+    core.status.preview.enabled = false;
+    if (!core.hasFlag('__lockViewport__')) {
+        this._drawHero_updateViewport(x, y, offset);
     }
 
-    this._drawHero_updateViewport();
+    this._drawHero_draw(direction, x, y, status, offset, frame);
 }
 
-control.prototype._drawHero_updateViewport = function () {
+control.prototype._drawHero_updateViewport = function (x, y, offset) {
+    core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offset.x, 0, 32 * core.bigmap.width - core.__PIXELS__);
+    core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offset.y, 0, 32 * core.bigmap.height - core.__PIXELS__);
     core.control.updateViewport();
-    core.setGameCanvasTranslate('hero', 0, 0);
 }
 
 control.prototype._drawHero_draw = function (direction, x, y, status, offset, frame) {
+    offset = offset || {x: 0, y: 0, offset: 0, px: 0, py: 0};
+    var opacity = core.setAlpha('hero', core.getFlag('__heroOpacity__', 1))
     this._drawHero_getDrawObjs(direction, x, y, status, offset).forEach(function (block) {
         core.drawImage('hero', block.img, (block.heroIcon[block.status] + (frame || 0))%4*block.width,
             block.heroIcon.loc * block.height, block.width, block.height,
             block.posx+(32-block.width)/2, block.posy+32-block.height, block.width, block.height);
     });
-}
-
-control.prototype.triggerHero = function (type, time, callback) {
-    if (type == null) {
-        type = core.hasFlag('hideHero') ? 'show' : 'hide';
-    }
-    if ((core.hasFlag('hideHero') && type != 'show') || (!core.hasFlag('hideHero') && type != 'hide')) {
-        if (callback) callback();
-        return;
-    }
-    if (type == 'show') core.removeFlag('hideHero');
-    else core.setFlag('hideHero', true);
-
-    time = time || 0;
-    if (time == 0) {
-        core.drawHero();
-        if (callback) callback();
-        return;
-    }
-    time /= Math.max(core.status.replay.speed, 1)    
-    this._triggerHero_animate(type, 10 / time, callback);
-}
-
-control.prototype._triggerHero_animate = function (type, delta, callback) {
-    var opacity = type != 'show' ? 1 : 0;
-    var animate = setInterval(function () {
-        opacity += type != 'show' ? -delta : delta;
-        core.clearMap('hero');
-        core.setAlpha('hero', opacity);
-        core.control._drawHero_draw(core.getHeroLoc('direction'), core.getHeroLoc('x'), core.getHeroLoc('y'), 'stop', 0);
-        core.setAlpha('hero', 1);
-        if (opacity >= 1 || opacity <= 0) {
-            delete core.animateFrame.asyncId[animate];
-            clearInterval(animate);
-            core.drawHero();
-            if (callback) callback();
-        }
-    }, 10);
-
-    core.animateFrame.asyncId[animate] = true;
+    core.setAlpha('hero', opacity);
 }
 
 control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, offset) {
@@ -877,26 +861,57 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
         "width": core.material.icons.hero.width || 32,
         "height": core.material.icons.hero.height,
         "heroIcon": heroIconArr[direction],
-        "posx": x * 32 - core.bigmap.offsetX + core.utils.scan2[direction].x * offset,
-        "posy": y * 32 - core.bigmap.offsetY + core.utils.scan2[direction].y * offset,
+        "posx": x * 32 - core.bigmap.offsetX + offset.x,
+        "posy": y * 32 - core.bigmap.offsetY + offset.y,
         "status": status,
         "index": index++,
     });
-    core.status.hero.followers.forEach(function (t) {
-        drawObjs.push({
-            "img": core.material.images.images[t.name],
-            "width": core.material.images.images[t.name].width/4,
-            "height": core.material.images.images[t.name].height/4,
-            "heroIcon": heroIconArr[t.direction],
-            "posx": 32*t.x - core.bigmap.offsetX + (t.stop?0:core.utils.scan2[t.direction].x*Math.abs(offset)),
-            "posy": 32*t.y - core.bigmap.offsetY + (t.stop?0:core.utils.scan2[t.direction].y*Math.abs(offset)),
-            "status": t.stop?"stop":status,
-            "index": index++
+    if (typeof offset.offset == 'number') {
+        core.status.hero.followers.forEach(function(t) {
+            drawObjs.push({
+                "img": core.material.images.images[t.name],
+                "width": core.material.images.images[t.name].width / 4,
+                "height": core.material.images.images[t.name].height / 4,
+                "heroIcon": heroIconArr[t.direction],
+                "posx": 32 * t.x - core.bigmap.offsetX + (t.stop ? 0 : core.utils.scan2[t.direction].x * Math.abs(offset.offset)),
+                "posy": 32 * t.y - core.bigmap.offsetY + (t.stop ? 0 : core.utils.scan2[t.direction].y * Math.abs(offset.offset)),
+                "status": t.stop ? "stop" : status,
+                "index": index++
+            });
         });
-    });
+    }
     return drawObjs.sort(function(a, b) {
         return a.posy==b.posy?b.index-a.index:a.posy-b.posy;
     });
+}
+
+control.prototype.setHeroOpacity = function (opacity, moveMode, time, callback) {
+    time = time || 0;
+    if (time == 0) {
+        core.setFlag('__heroOpacity__', opacity);
+        core.drawHero();
+        if (callback) callback();
+        return;
+    }
+    time /= Math.max(core.status.replay.speed, 1)    
+
+    var fromOpacity = core.getFlag('__heroOpacity__', 1);
+    var step = 0, steps = parseInt(time / 10);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(moveMode);
+
+    var animate = setInterval(function () {
+        step++;
+        core.setFlag('__heroOpacity__', fromOpacity + (opacity - fromOpacity) * moveFunc(step / steps));
+        core.drawHero();
+        if (step == steps) {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            if (callback) callback();
+        }
+    }, 10);
+
+    core.animateFrame.asyncId[animate] = true;
 }
 
 // ------ 画布、位置、阻激夹域，显伤 ------ //
@@ -960,17 +975,33 @@ control.prototype.updateViewport = function() {
     });
     // ------ 路线
     core.relocateCanvas('route', core.status.automaticRoute.offsetX - core.bigmap.offsetX, core.status.automaticRoute.offsetY - core.bigmap.offsetY);
+    // ------ 所有的大怪物也都需要重定位
+    for (var one in core.dymCanvas) {
+        if (one.startsWith('_bigImage_')) {
+            var ox = core.dymCanvas[one].canvas.getAttribute('_ox');
+            var oy = core.dymCanvas[one].canvas.getAttribute('_oy');
+            if (ox != null && oy != null) {
+                core.relocateCanvas(one, parseInt(ox) - core.bigmap.offsetX, parseInt(oy) - core.bigmap.offsetY);
+            }
+        }
+    }
+    
 }
 
 ////// 设置视野范围 //////
 control.prototype.setViewport = function (px, py) {
+    var originOffsetX = core.bigmap.offsetX, originOffsetY = core.bigmap.offsetY;
     core.bigmap.offsetX = core.clamp(px, 0, 32 * core.bigmap.width - core.__PIXELS__);
     core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PIXELS__);
     this.updateViewport();
     // ------ hero层也需要！
-    var hero_x = core.clamp((core.getHeroLoc('x') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.width-core.__PIXELS__);
-    var hero_y = core.clamp((core.getHeroLoc('y') - core.__HALF_SIZE__) * 32, 0, 32*core.bigmap.height-core.__PIXELS__);
-    core.control.setGameCanvasTranslate('hero', hero_x - core.bigmap.offsetX, hero_y - core.bigmap.offsetY);
+    var px = parseFloat(core.canvas.hero._px) || 0;
+    var py = parseFloat(core.canvas.hero._py) || 0;
+    px += originOffsetX - core.bigmap.offsetX;
+    py += originOffsetY - core.bigmap.offsetY;
+    core.control.setGameCanvasTranslate('hero', px, py);
+    core.canvas.hero._px = px;
+    core.canvas.hero._py = py;
 }
 
 ////// 移动视野范围 //////
@@ -1053,6 +1084,31 @@ control.prototype.updateFollowers = function () {
         }
         nowx = t.x; nowy = t.y;
     })
+}
+
+////// 瞬移更新跟随者坐标 //////
+control.prototype._moveDirectyFollowers = function (x, y) {
+    var route = core.automaticRoute(x, y);
+    if (route.length == 0) route = [{x: x, y: y, direction: core.getHeroLoc('direction')}];
+
+    var nowx = x, nowy = y;
+    for (var i = 0; i < core.status.hero.followers.length; ++i) {
+        var t = core.status.hero.followers[i];
+        var index = route.length - i - 2;
+        if (index < 0) index = 0;
+        t.stop = true;
+        t.x = route[index].x;
+        t.y = route[index].y;
+        t.direction = route[index].direction;
+        var dx = nowx - t.x, dy = nowy - t.y;
+        for (var dir in core.utils.scan2) {
+            if (core.utils.scan2[dir].x == dx && core.utils.scan2[dir].y == dy) {
+                t.stop = false;
+                t.direction = dir;
+            }
+        }
+        nowx = t.x; nowy = t.y;
+    }
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
@@ -1226,15 +1282,9 @@ control.prototype.drawDamage = function (ctx) {
 
 control.prototype._drawDamage_draw = function (ctx, onMap) {
     if (!core.hasItem('book')) return;
-    // 双缓冲
-    var cacheCtx = core.bigmap.cacheCanvas;
-    cacheCtx.canvas.width = ctx.canvas.width;
-    cacheCtx.canvas.height = ctx.canvas.height;
-    cacheCtx.clearRect(0, 0, cacheCtx.canvas.width, cacheCtx.canvas.height);
-    if (onMap && core.bigmap.v2) cacheCtx.translate(32, 32);
 
-    core.setFont(cacheCtx, "bold 11px Arial");
-    core.setTextAlign(cacheCtx, 'left');
+    core.setFont(ctx, "bold 11px Arial");
+    core.setTextAlign(ctx, 'left');
     core.status.damage.data.forEach(function (one) {
         var px = one.px, py = one.py;
         if (onMap && core.bigmap.v2) {
@@ -1243,10 +1293,10 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 * 2 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;
         }
-        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
+        core.fillBoldText(ctx, one.text, px, py, one.color);
     });
 
-    core.setTextAlign(cacheCtx, 'center');
+    core.setTextAlign(ctx, 'center');
     core.status.damage.extraData.forEach(function (one) {
         var px = one.px, py = one.py;
         if (onMap && core.bigmap.v2) {
@@ -1255,13 +1305,10 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
             if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
                 return;         
         }
-        var alpha = core.setAlpha(cacheCtx, one.alpha);
-        core.fillBoldText(cacheCtx, one.text, px, py, one.color);
-        core.setAlpha(cacheCtx, alpha);
+        var alpha = core.setAlpha(ctx, one.alpha);
+        core.fillBoldText(ctx, one.text, px, py, one.color);
+        core.setAlpha(ctx, alpha);
     });
-    cacheCtx.translate(0, 0);
-
-    core.drawImage(ctx, cacheCtx.canvas, onMap && core.bigmap.v2 ? -32 : 0, onMap && core.bigmap.v2 ? -32 : 0);
 }
 
 // ------ 录像相关 ------ //
@@ -1608,7 +1655,7 @@ control.prototype._replay_save = function () {
     }
 }
 
-control.prototype._replay_error = function (action) {
+control.prototype._replay_error = function (action, callback) {
     core.ui.closePanel();
     core.status.replay.replaying = false;
     var len = core.status.replay.toReplay.length;
@@ -1626,12 +1673,14 @@ control.prototype._replay_error = function (action) {
         }
         else {
             core.playSound('操作失败');
-            core.drawTip("无法回到上一个节点");
             core.stopReplay(true);
+            core.drawTip("无法回到上一个节点");
+            if (callback) callback();
         }
     }, function () {
         core.ui.closePanel();
         core.stopReplay(true);
+        if (callback) callback();
     });
 }
 
@@ -1781,7 +1830,7 @@ control.prototype._replayAction_turn = function (action) {
 
 control.prototype._replayAction_getNext = function (action) {
     if (action != "getNext") return false;
-    if (!core.getNextItem()) return false;
+    core.getNextItem();
     core.replay();
     return true;
 }
@@ -1898,6 +1947,7 @@ control.prototype.doSL = function (id, type) {
         case 'reload': this._doSL_reload(id, this._doSL_load_afterGet); break;
         case 'replayLoad': this._doSL_load(id, this._doSL_replayLoad_afterGet); break;
         case 'replayRemain': this._doSL_load(id, this._doSL_replayRemain_afterGet); break;
+        case 'replaySince': this._doSL_load(id, this._doSL_replaySince_afterGet); break;
     }
 }
 
@@ -1909,7 +1959,11 @@ control.prototype._doSL_save = function (id) {
     // 在事件中的存档
     if (core.status.event.interval != null)
         core.setFlag("__events__", core.status.event.interval);
-    core.setLocalForage("save"+id, core.saveData(), function() {
+    var data = core.saveData();
+    if (core.isReplaying() && core.status.replay.toReplay.length > 0) {
+        data.__toReplay__ = core.encodeRoute(core.status.replay.toReplay);
+    }
+    core.setLocalForage("save"+id, data, function() {
         core.saves.saveIndex = id;
         core.setLocalStorage('saveIndex', core.saves.saveIndex);
         // 恢复事件
@@ -1919,12 +1973,7 @@ control.prototype._doSL_save = function (id) {
         core.drawTip('存档成功！');
     }, function(err) {
         main.log(err);
-        if (core.platform.useLocalForage) {
-            alert("存档失败，错误信息：\n"+err);
-        }
-        else {
-            alert("存档失败，错误信息：\n"+err+"\n建议使用垃圾存档清理工具进行清理！");
-        }
+        alert("存档失败，错误信息：\n"+err);
     });
     core.removeFlag("__events__");
     return;
@@ -2000,30 +2049,25 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (!data) {
         core.playSound('操作失败');
         return core.drawTip("无效的存档");
-    }
+    } 
     if (data.version != core.firstData.version) {
         core.playSound('操作失败');
         return core.drawTip("存档版本不匹配");
-    }
-    if (data.hard != core.status.hard) {
-        core.playSound('操作失败');
-        return core.drawTip("游戏难度不匹配！");
     }
     if (data.hero.flags.__events__ && data.guid != core.getGuid()) {
         core.playSound('操作失败');
         return core.drawTip("此存档可能存在风险，无法读档");
     }
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-    if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__')) {
+    if (route == null) {
         core.playSound('操作失败');
-        return core.drawTip("种子不一致，无法从此存档回放录像");
+        return core.drawTip("无法从此存档回放录像");
     }
     core.loadData(data, function () {
         core.removeFlag('__fromLoad__');
         core.startReplay(route);
         core.drawTip("回退到存档节点");
     });
-
 }
 
 control.prototype._doSL_replayRemain_afterGet = function (id, data) {
@@ -2056,6 +2100,16 @@ control.prototype._doSL_replayRemain_afterGet = function (id, data) {
     });
 }
 
+control.prototype._doSL_replaySince_afterGet = function (id, data) {
+    if (data.floorId != core.status.floorId || data.hero.loc.x != core.getHeroLoc('x') || data.hero.loc.y != core.getHeroLoc('y'))
+        return alert("楼层或坐标不一致！");
+    if (!data.__toReplay__) return alert('该存档没有剩余录像！');
+    core.ui.closePanel();
+    core.startReplay(core.decodeRoute(data.__toReplay__));
+    core.drawTip("播放存档剩余录像");
+    return;
+}
+
 ////// 同步存档到服务器 //////
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍候...");
@@ -2071,7 +2125,7 @@ control.prototype._syncSave_http = function (type, saves) {
     var formData = new FormData();
     formData.append('type', 'save');
     formData.append('name', core.firstData.name);
-    formData.append('data', JSON.stringify(saves));
+    formData.append('data', LZString.compressToBase64(JSON.stringify(saves)));
     formData.append('shorten', '1');
 
     core.http("POST", "/games/sync.php", formData, function (data) {
@@ -2116,7 +2170,20 @@ control.prototype._syncLoad_http = function (id, password) {
     core.http("POST", "/games/sync.php", formData, function (data) {
         var response = JSON.parse(data);
         if (response.code == 0) {
-            core.control._syncLoad_write(JSON.parse(response.msg));
+            var msg = null;
+            try {
+                msg = JSON.parse(LZString.decompressFromBase64(response.msg));
+            } catch (e) {}
+            if (!msg) {
+                try {
+                    msg = JSON.parse(response.msg);
+                } catch (e) {}
+            }
+            if (msg) {
+                core.control._syncLoad_write(msg);
+            } else {
+                core.drawText("出错啦！\n存档解析失败！");
+            }
         }
         else {
             core.drawText("出错啦！\n无法从服务器同步存档。\n错误原因："+response.msg);
@@ -2220,19 +2287,16 @@ control.prototype.getAllSaves = function (callback) {
 ////// 获得所有存在存档的存档位 //////
 control.prototype.getSaveIndexes = function (callback) {
     var indexes = {};
-    if (core.platform.useLocalForage) {
-        localforage.iterate(function (value, key, n) {
+    core.keysLocalForage(function (err, keys) {
+       if (err) {
+           main.log(err);
+           return callback(indexes);
+       }
+       keys.forEach(function (key) {
             core.control._getSaveIndexes_getIndex(indexes, key);
-        }, function () {
-            callback(indexes);
-        });
-    }
-    else {
-        Object.keys(localStorage).forEach(function (key) {
-            core.control._getSaveIndexes_getIndex(indexes, key);
-        });
-        callback(indexes);
-    }
+       });
+       callback(indexes);
+   });
 }
 
 control.prototype._getSaveIndexes_getIndex = function (indexes, name) {
@@ -2305,6 +2369,9 @@ control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
         return this.getHeroLoc(name);
+    if (main.mode == 'editor' && !core.hasFlag('__statistics__')) {
+        return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero[name];
+    }
     return core.status.hero[name];
 }
 
@@ -2389,6 +2456,10 @@ control.prototype.setHeroLoc = function (name, value, noGather) {
 ////// 获得勇士的位置 //////
 control.prototype.getHeroLoc = function (name) {
     if (!core.status.hero) return;
+    if (main.mode == 'editor') {
+        if (name == null) return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero.loc;
+        return data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.hero.loc[name];
+    }
     if (name == null) return core.status.hero.loc;
     return core.status.hero.loc[name];
 }
@@ -2535,7 +2606,7 @@ control.prototype.getMappedName = function (name) {
 ////// 更改天气效果 //////
 control.prototype.setWeather = function (type, level) {
     // 非雨雪
-    if (type == null) {
+    if (type == null || !this.weathers[type]) {
         core.deleteCanvas('weather')
         core.animateFrame.weather.type = null;
         core.animateFrame.weather.nodes = [];
@@ -2548,74 +2619,98 @@ control.prototype.setWeather = function (type, level) {
 
     // 计算当前的宽高
     core.createCanvas('weather', 0, 0, core.__PIXELS__, core.__PIXELS__, 80);
+    core.setOpacity('weather', 1.0);
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
     core.animateFrame.weather.nodes = [];
-    this._setWeather_createNodes(type, level);
-}
-
-control.prototype._setWeather_createNodes = function (type, level) {
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
-    switch (type) {
-        case 'rain':
-            for (var a=0;a<number;a++) {
-                core.animateFrame.weather.nodes.push({
-                    'x': Math.random()*core.bigmap.width*32,
-                    'y': Math.random()*core.bigmap.height*32,
-                    'l': Math.random() * 2.5,
-                    'xs': -4 + Math.random() * 4 + 2,
-                    'ys': Math.random() * 10 + 10
-                })
-            }
-            break;
-        case 'snow':
-            for (var a=0;a<number;a++) {
-                core.animateFrame.weather.nodes.push({
-                    'x': Math.random()*core.bigmap.width*32,
-                    'y': Math.random()*core.bigmap.height*32,
-                    'r': Math.random() * 5 + 1,
-                    'd': Math.random() * Math.min(level, 200),
-                })
-            }
-            break;
-        case 'fog':
-            if (core.animateFrame.weather.fog) {
-                core.animateFrame.weather.nodes = [{
-                    'level': number,
-                    'x': 0,
-                    'y': -core.__PIXELS__ / 2,
-                    'dx': -Math.random() * 1.5,
-                    'dy': Math.random(),
-                    'delta': 0.001,
-                }];
-            }
-            break;
-        case 'cloud':
-            if (core.animateFrame.weather.cloud) {
-                core.animateFrame.weather.nodes = [{
-                    'level': number,
-                    'x': 0,
-                    'y': -core.__PIXELS__ / 2,
-                    'dx': -Math.random() * 1.5,
-                    'dy': Math.random(),
-                    'delta': 0.001,
-                }];
-            }
-            break;
-        case 'sun':
-            if (core.animateFrame.weather.sun) {
-                // 直接绘制
-                core.clearMap('weather');
-                core.setAlpha('weather', level / 10);
-                core.drawImage('weather', core.animateFrame.weather.sun, 0, 0, core.animateFrame.weather.sun.width, core.animateFrame.weather.sun.height, 0, 0, core.__PIXELS__, core.__PIXELS__);
-                core.setAlpha('weather', 1);
-            }
-            break;
+    try {
+        core.doFunc(this.weathers[type].initFunc, this, level);
+    } catch (e) {
+        main.log(e);
+        main.log("ERROR in weather["+type+"]：已自动注销该项。");
+        core.unregisterWeather(type);
     }
 }
 
+////// 注册一个天气 //////
+// name为天气类型，如 sun, rain, snow 等
+// initFunc 为设置为此天气时的初始化，接受level参数
+// frameFunc 为该天气下每帧的效果，接受和timestamp参数（从页面加载完毕到当前经过的时间）
+control.prototype.registerWeather = function (name, initFunc, frameFunc) {
+    this.unregisterWeather(name);
+    this.weathers[name] = { initFunc: initFunc, frameFunc: frameFunc };
+}
+
+////// 取消注册一个天气 //////
+control.prototype.unregisterWeather = function (name) {
+    delete this.weathers[name];
+    if (core.animateFrame.weather.type == name) {
+        this.setWeather(null);
+    }
+}
+
+control.prototype._weather_rain = function (level) {
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    for (var a=0;a<number;a++) {
+        core.animateFrame.weather.nodes.push({
+            'x': Math.random()*core.bigmap.width*32,
+            'y': Math.random()*core.bigmap.height*32,
+            'l': Math.random() * 2.5,
+            'xs': -4 + Math.random() * 4 + 2,
+            'ys': Math.random() * 10 + 10
+        })
+    }
+}
+
+control.prototype._weather_snow = function (level) {
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    for (var a=0;a<number;a++) {
+        core.animateFrame.weather.nodes.push({
+            'x': Math.random()*core.bigmap.width*32,
+            'y': Math.random()*core.bigmap.height*32,
+            'r': Math.random() * 5 + 1,
+            'd': Math.random() * Math.min(level, 200),
+        })
+    }
+}
+
+control.prototype._weather_fog = function (level) {
+    if (!core.animateFrame.weather.fog) return;
+    core.animateFrame.weather.nodes = [{
+        'image': core.animateFrame.weather.fog,
+        'level': 40 * level,
+        'x': 0,
+        'y': -core.__PIXELS__ / 2,
+        'dx': -Math.random() * 1.5,
+        'dy': Math.random(),
+        'delta': 0.001,
+    }];
+}
+
+control.prototype._weather_cloud = function (level) {
+    if (!core.animateFrame.weather.cloud) return;
+    core.animateFrame.weather.nodes = [{
+        'image': core.animateFrame.weather.cloud,
+        'level': 40 * level,
+        'x': 0,
+        'y': -core.__PIXELS__ / 2,
+        'dx': -Math.random() * 1.5,
+        'dy': Math.random(),
+        'delta': 0.001,
+    }];
+}
+
+control.prototype._weather_sun = function (level) {
+    if (!core.animateFrame.weather.sun) return;
+    // 直接绘制
+    core.clearMap('weather');
+    core.drawImage('weather', core.animateFrame.weather.sun, 0, 0, core.animateFrame.weather.sun.width, core.animateFrame.weather.sun.height, 0, 0, core.__PIXELS__, core.__PIXELS__);
+    core.setOpacity('weather', level / 10);
+    core.animateFrame.weather.nodes = [{opacity: level / 10, delta: 0.01}];
+}
+
 ////// 更改画面色调 //////
-control.prototype.setCurtain = function(color, time, callback) {
+control.prototype.setCurtain = function(color, time, moveMode, callback) {
     if (time == null) time=750;
     if (time<=0) time=0;
     if (!core.status.curtainColor)
@@ -2633,24 +2728,25 @@ control.prototype.setCurtain = function(color, time, callback) {
         return;
     }
 
-    this._setCurtain_animate(core.status.curtainColor, color, time, callback);
+    this._setCurtain_animate(core.status.curtainColor, color, time, moveMode, callback);
 }
 
-control.prototype._setCurtain_animate = function (nowColor, color, time, callback) {
+control.prototype._setCurtain_animate = function (nowColor, color, time, moveMode, callback) {
     time /= Math.max(core.status.replay.speed, 1)
-    var per_time = 10, step = parseInt(time / per_time);
-    if (step <= 0) step = 1;
+    var per_time = 10, step = 0, steps = parseInt(time / per_time);
+    if (steps <= 0) steps = 1;
+    var moveFunc = core.applyEasing(moveMode);
     var animate = setInterval(function() {
-        nowColor = [
-            (nowColor[0]*(step-1)+color[0])/step,
-            (nowColor[1]*(step-1)+color[1])/step,
-            (nowColor[2]*(step-1)+color[2])/step,
-            (nowColor[3]*(step-1)+color[3])/step,
-        ];
+        step++;
+        var curr = [
+            nowColor[0] + (color[0] - nowColor[0]) * moveFunc(step / steps),
+            nowColor[1] + (color[1] - nowColor[1]) * moveFunc(step / steps),
+            nowColor[2] + (color[2] - nowColor[2]) * moveFunc(step / steps),
+            nowColor[3] + (color[3] - nowColor[3]) * moveFunc(step / steps),
+        ]
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(nowColor));
-        step--;
-        if (step <= 0) {
+        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(curr));
+        if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             core.status.curtainColor = color;
@@ -2662,14 +2758,14 @@ control.prototype._setCurtain_animate = function (nowColor, color, time, callbac
 }
 
 ////// 画面闪烁 //////
-control.prototype.screenFlash = function (color, time, times, callback) {
+control.prototype.screenFlash = function (color, time, times, moveMode, callback) {
     times = times || 1;
     time = time / 3;
     var nowColor = core.clone(core.status.curtainColor);
-    core.setCurtain(color, time, function() {
-        core.setCurtain(nowColor, time * 2, function() {
+    core.setCurtain(color, time, moveMode, function() {
+        core.setCurtain(nowColor, time * 2, moveMode, function() {
             if (times > 1)
-                core.screenFlash(color, time * 3, times - 1, callback);
+                core.screenFlash(color, time * 3, times - 1, moveMode, callback);
             else {
                 if (callback) callback();
             }
@@ -2806,6 +2902,7 @@ control.prototype.playSound = function (sound, pitch, callback) {
     try {
         if (core.musicStatus.audioContext != null) {
             var source = core.musicStatus.audioContext.createBufferSource();
+            source.__name = sound;
             source.buffer = core.material.sounds[sound];
             source.connect(core.musicStatus.gainNode);
             var id = setTimeout(null);
@@ -2853,6 +2950,14 @@ control.prototype.stopSound = function (id) {
     delete core.musicStatus.playingSounds[id];
 }
 
+////// 获得当前正在播放的所有（指定）音效的id列表 //////
+control.prototype.getPlayingSounds = function (name) {
+    name = core.getMappedName(name);
+    return Object.keys(core.musicStatus.playingSounds).filter(function (one){
+        return name == null || core.musicStatus.playingSounds[one].__name == name
+    });
+}
+
 ////// 检查bgm状态 //////
 control.prototype.checkBgm = function() {
     core.playBgm(core.musicStatus.playingBgm || main.startBgm);
@@ -2862,8 +2967,7 @@ control.prototype.checkBgm = function() {
 control.prototype.setDisplayScale = function (delta) {
     var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
     if (index < 0) return;
-    index += delta;
-    if (index < 0 || index >= core.domStyle.availableScale.length) return;
+    index = (index + delta + core.domStyle.availableScale.length) % core.domStyle.availableScale.length;
     core.domStyle.scale = core.domStyle.availableScale[index];
     core.setLocalStorage('scale', core.domStyle.scale);
     core.resize();
@@ -2958,11 +3062,11 @@ control.prototype.hideStatusBar = function (showToolbox) {
     // 隐藏
     for (var i = 0; i < statusItems.length; ++i)
         statusItems[i].style.opacity = 0;
-    if (!core.domStyle.isVertical || !showToolbox) {
+    if ((!core.domStyle.isVertical && !core.flags.extendToolbar) || !showToolbox) {
         for (var i = 0; i < toolItems.length; ++i)
             toolItems[i].style.display = 'none';
     }
-    if (!core.domStyle.isVertical) {
+    if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
         core.dom.toolBar.style.display = 'none';
     }
 }
@@ -2992,7 +3096,7 @@ control.prototype.updateHeroIcon = function (name) {
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {
         // 隐藏状态栏时检查竖屏
-        if (!core.domStyle.isVertical) {
+        if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
             for (var i = 0; i < core.dom.tools.length; ++i)
                 core.dom.tools[i].style.display = 'none';
             return;
@@ -3002,7 +3106,7 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 
     if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if (!core.domStyle.isVertical || core.isReplaying()) useButton = false;
+    if ((!core.domStyle.isVertical && !core.flags.extendToolbar) || core.isReplaying()) useButton = false;
     core.domStyle.toolbarBtn = useButton;
 
     if (useButton) {
@@ -3023,7 +3127,7 @@ control.prototype.setToolbarButton = function (useButton) {
         });
         core.statusBar.image.keyboard.style.display
             = core.statusBar.image.shop.style.display
-            = core.domStyle.isVertical ? "block":"none";
+            = core.domStyle.isVertical || core.flags.extendToolbar ? "block":"none";
     }
 }
 
@@ -3096,19 +3200,22 @@ control.prototype.resize = function() {
     var clientWidth = main.dom.body.clientWidth, clientHeight = main.dom.body.clientHeight;
     var CANVAS_WIDTH = core.__PIXELS__, BAR_WIDTH = Math.round(core.__PIXELS__ * 0.31);
     var BORDER = 3;
+    var extendToolbar = core.flags.extendToolbar;
 
-    if (clientWidth - 3 * BORDER >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && clientHeight - 2 * BORDER < CANVAS_WIDTH)) {
+    var horizontalMaxRatio = (clientHeight - 2 * BORDER - (extendToolbar ? BORDER : 0)) / (CANVAS_WIDTH + (extendToolbar ? 38 : 0));
+
+    if (clientWidth - 3 * BORDER >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && horizontalMaxRatio < 1)) {
         // 横屏
         core.domStyle.isVertical = false;
 
         core.domStyle.availableScale = [];
         [1, 1.25, 1.5, 1.75, 2].forEach(function (v) {
-            if (clientWidth - 3 * BORDER >= v*(CANVAS_WIDTH + BAR_WIDTH) && clientHeight - 2 * BORDER >= v * CANVAS_WIDTH) {
-                core.domStyle.availableScale.push(v); // 64x64
+            if (clientWidth - 3 * BORDER >= v*(CANVAS_WIDTH + BAR_WIDTH) && horizontalMaxRatio >= v) {
+                core.domStyle.availableScale.push(v);
             }
         });
         if (core.domStyle.availableScale.indexOf(core.domStyle.scale) < 0) {
-            core.domStyle.scale = Math.min(1, (clientHeight - 2 * BORDER) / CANVAS_WIDTH);
+            core.domStyle.scale = Math.min(1, horizontalMaxRatio);
         }
     }
     else {
@@ -3116,14 +3223,15 @@ control.prototype.resize = function() {
         core.domStyle.isVertical = true;
         core.domStyle.scale = Math.min(1, (clientWidth - 2 * BORDER) / CANVAS_WIDTH);
         core.domStyle.availableScale = [];
+        extendToolbar = false;
     }
 
     var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
     var statusCanvas = core.flags.statusCanvas, statusCanvasRows = core.values.statusCanvasRowsOnMobile || 3;
     var col = statusCanvas ? statusCanvasRows : Math.ceil(count / 3);
-    if (col > 4) {
-        if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过4！");
-        else alert("当前状态栏数目("+count+")大于12，请调整到不超过12以避免手机端出现显示问题。");
+    if (col > 5) {
+        if (statusCanvas) alert("自绘状态栏的在竖屏下的行数应不超过5！");
+        else alert("当前状态栏数目("+count+")大于15，请调整到不超过15以避免手机端出现显示问题。");
     }
     var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
 
@@ -3133,6 +3241,7 @@ control.prototype.resize = function() {
         CANVAS_WIDTH: CANVAS_WIDTH,
         BORDER: BORDER,
         BAR_WIDTH: BAR_WIDTH,
+        TOOLBAR_HEIGHT: 38,
         outerSize: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
         globalAttribute: globalAttribute,
         border: '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
@@ -3140,7 +3249,8 @@ control.prototype.resize = function() {
         count: count,
         col: col,
         statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER : 0,
-        toolbarHeightInVertical: core.domStyle.isVertical ? 44 * core.domStyle.scale + 2 * BORDER : 0,
+        toolbarHeightInVertical: core.domStyle.isVertical ? 38 * core.domStyle.scale + 2 * BORDER : 0,
+        extendToolbar: extendToolbar,
         is15x15: core.__SIZE__ == 15
     };
 
@@ -3164,7 +3274,7 @@ control.prototype._resize_gameGroup = function (obj) {
     }
     else {
         totalWidth = obj.outerSize + obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER;
-        totalHeight = obj.outerSize;
+        totalHeight = obj.outerSize + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0);
     }
     gameGroup.style.width = totalWidth + "px";
     gameGroup.style.height = totalHeight + "px";
@@ -3233,10 +3343,14 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         statusBar.style.width = (obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER) + "px";
-        statusBar.style.height = obj.outerSize + "px";
+        statusBar.style.height = obj.outerSize + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
         statusBar.style.background = obj.globalAttribute.statusLeftBackground;
         // --- 计算文字大小
-        statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
+        if (obj.extendToolbar) {
+            statusBar.style.fontSize = 16 * core.domStyle.scale + "px";
+        } else {
+            statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
+        }
     }
     statusBar.style.display = 'block';
     statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
@@ -3250,14 +3364,19 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER + "px";
-        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_WIDTH);
+        core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER +  (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_WIDTH + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0));
     }
     core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
 }
 
 control.prototype._resize_status = function (obj) {
-    var statusHeight = (core.domStyle.isVertical ? 1 : (core.__HALF_SIZE__ + obj.BORDER) / obj.count) *  32 * core.domStyle.scale * 0.8;
+    var statusHeight;
+    if (core.domStyle.isVertical) {
+        statusHeight = 32 * core.domStyle.scale * 0.8;
+    } else {
+        statusHeight = (obj.extendToolbar ? core.__SIZE__ : core.__HALF_SIZE__ + 3) / obj.count * 32  * core.domStyle.scale * 0.8;
+    }
     // status
     for (var i = 0; i < core.dom.status.length; ++i) {
         var id = core.dom.status[i].id, style = core.dom.status[i].style;
@@ -3291,22 +3410,35 @@ control.prototype._resize_toolBar = function (obj) {
     // toolBar
     var toolBar = core.dom.toolBar;
     if (core.domStyle.isVertical) {
+        toolBar.style.left = 0;
+        toolBar.style.right = "";
         toolBar.style.width = obj.outerSize + "px";
         toolBar.style.top = obj.statusBarHeightInVertical + obj.outerSize + "px";
         toolBar.style.height = obj.toolbarHeightInVertical + "px";
         toolBar.style.background = obj.globalAttribute.toolsBackground;
     }
     else {
-        toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + "px";
-        toolBar.style.top = 0.718 * obj.outerSize + "px";
-        toolBar.style.height = 0.281 * obj.outerSize + "px";
-        toolBar.style.background = 'transparent';
+        if (obj.extendToolbar) {
+            toolBar.style.left = "";
+            toolBar.style.right = 0;
+            toolBar.style.width = obj.outerSize + "px";
+            toolBar.style.top = obj.outerSize + "px";
+            toolBar.style.height = obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER + "px";
+            toolBar.style.background = obj.globalAttribute.toolsBackground;
+        } else {
+            toolBar.style.left = 0;
+            toolBar.style.right = "";
+            toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + "px";
+            toolBar.style.top = 0.718 * obj.outerSize + "px";
+            toolBar.style.height = 0.281 * obj.outerSize + "px";
+            toolBar.style.background = 'transparent';
+        }
     }
     toolBar.style.borderLeft = obj.border;
-    toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical ? obj.border : '';
+    toolBar.style.borderRight = toolBar.style.borderBottom = core.domStyle.isVertical || obj.extendToolbar ? obj.border : '';
     toolBar.style.fontSize = 16 * core.domStyle.scale + "px";
 
-    if (!core.domStyle.showStatusBar && !core.domStyle.isVertical) {
+    if (!core.domStyle.showStatusBar && !core.domStyle.isVertical && !obj.extendToolbar) {
         toolBar.style.display = 'none';
     } else {
         toolBar.style.display = 'block';
@@ -3314,9 +3446,9 @@ control.prototype._resize_toolBar = function (obj) {
 }
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight = 32 * core.domStyle.scale * (core.domStyle.isVertical && !obj.is15x15 ? 0.95 : 1);
+    var toolsHeight = 32 * core.domStyle.scale * ((core.domStyle.isVertical || obj.extendToolbar) && !obj.is15x15 ? 0.95 : 1);
     var toolsMarginLeft;
-    if (core.domStyle.isVertical)
+    if (core.domStyle.isVertical || obj.extendToolbar)
         toolsMarginLeft = (core.__HALF_SIZE__ - 3) * 3 * core.domStyle.scale;
     else
         toolsMarginLeft = (obj.BAR_WIDTH * core.domStyle.scale - 9 - toolsHeight * 3) / 4;
@@ -3324,10 +3456,10 @@ control.prototype._resize_tools = function (obj) {
         var style = core.dom.tools[i].style;
         style.height = toolsHeight + "px";
         style.marginLeft = toolsMarginLeft + "px";
-        style.marginTop = 6 * core.domStyle.scale + "px"
+        style.marginTop = 3 * core.domStyle.scale + "px"
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
-    if (core.domStyle.isVertical) {
+    if (core.domStyle.isVertical || obj.extendToolbar) {
         core.dom.hard.style.width = obj.outerSize - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + "px";
     }
     else {

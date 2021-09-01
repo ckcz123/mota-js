@@ -458,6 +458,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// isGentleClick：是否是轻按触发的
 	if (itemId.endsWith('Potion') && core.material.items[itemId].cls == 'items')
 		core.playSound('回血');
+	else if (itemId.endsWith('Gem') && core.material.items[itemId].cls == 'items')
+		core.playSound('宝石')
 	else
 		core.playSound('获得道具');
 
@@ -494,30 +496,30 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 名字和描述可以直接写字符串，也可以写个function将怪物传进去
 	return [
 		[1, "先攻", "怪物首先攻击", "#ffcc33"],
-		[2, "魔攻", "怪物无视勇士的防御", "#bbb0ff"],
-		[3, "坚固", "怪物防御不小于勇士攻击-1", "#c0b088"],
+		[2, "魔攻", "怪物无视角色的防御", "#bbb0ff"],
+		[3, "坚固", "怪物防御不小于角色攻击-1", "#c0b088"],
 		[4, "2连击", "怪物每回合攻击2次", "#ffee77"],
 		[5, "3连击", "怪物每回合攻击3次", "#ffee77"],
 		[6, function (enemy) { return (enemy.n || '') + "连击"; }, function (enemy) { return "怪物每回合攻击" + (enemy.n || 4) + "次"; }, "#ffee77"],
-		[7, "破甲", function (enemy) { return "战斗前，怪物附加角色防御的" + Math.floor(100 * (enemy.defValue || core.values.breakArmor || 0)) + "%作为伤害"; }, "#b30000"],
+		[7, "破甲", function (enemy) { return "战斗前，怪物附加角色防御的" + Math.floor(100 * (enemy.defValue || core.values.breakArmor || 0)) + "%作为伤害"; }, "#88c0ff"],
 		[8, "反击", function (enemy) { return "战斗时，怪物每回合附加角色攻击的" + Math.floor(100 * (enemy.atkValue || core.values.counterAttack || 0)) + "%作为伤害，无视角色防御"; }, "#ffaa44"],
-		[9, "净化", function (enemy) { return "战斗前，怪物附加勇士护盾的" + (enemy.n || core.values.purify) + "倍作为伤害"; }, "#80eed6"],
-		[10, "模仿", "怪物的攻防和勇士攻防相等", "#b0c0dd"],
-		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }, "#ff00d2"],
-		[12, "中毒", "战斗后，勇士陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点", "#99ee88"],
-		[13, "衰弱", "战斗后，勇士陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%"), "#f0bbcc"],
-		[14, "诅咒", "战斗后，勇士陷入诅咒状态，战斗无法获得金币和经验", "#bbeef0"],
+		[9, "净化", function (enemy) { return "战斗前，怪物附加角色护盾的" + (enemy.n || core.values.purify) + "倍作为伤害"; }, "#80eed6"],
+		[10, "模仿", "怪物的攻防和角色攻防相等", "#b0c0dd"],
+		[11, "吸血", function (enemy) { return "战斗前，怪物首先吸取角色的" + Math.floor(100 * enemy.value || 0) + "%生命（约" + Math.floor((enemy.value || 0) * core.getStatus('hp')) + "点）作为伤害" + (enemy.add ? "，并把伤害数值加到自身生命上" : ""); }, "#dd4448"],
+		[12, "中毒", "战斗后，角色陷入中毒状态，每一步损失生命" + core.values.poisonDamage + "点", "#99ee88"],
+		[13, "衰弱", "战斗后，角色陷入衰弱状态，攻防暂时下降" + (core.values.weakValue >= 1 ? core.values.weakValue + "点" : parseInt(core.values.weakValue * 100) + "%"), "#f0bbcc"],
+		[14, "诅咒", "战斗后，角色陷入诅咒状态，战斗无法获得金币和经验", "#bbeef0"],
 		[15, "领域", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "范围内" + (enemy.range || 1) + "格时自动减生命" + (enemy.value || 0) + "点"; }, "#c677dd"],
-		[16, "夹击", "经过两只相同的怪物中间，勇士生命值变成一半", "#bb99ee"],
+		[16, "夹击", "经过两只相同的怪物中间，角色生命值变成一半", "#bb99ee"],
 		[17, "仇恨", "战斗前，怪物附加之前积累的仇恨值作为伤害；战斗后，释放一半的仇恨值。（每杀死一个怪物获得" + (core.values.hatred || 0) + "点仇恨值）", "#b0b666"],
 		[18, "阻击", function (enemy) { return "经过怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "时自动减生命" + (enemy.value || 0) + "点，同时怪物后退一格"; }, "#8888e6"],
-		[19, "自爆", "战斗后勇士的生命值变成1", "#ff6666"],
-		[20, "无敌", "勇士无法打败怪物，除非拥有十字架", "#aaaaaa"],
-		[21, "退化", function (enemy) { return "战斗后勇士永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }],
-		[22, "固伤", function (enemy) { return "战斗前，怪物对勇士造成" + (enemy.damage || 0) + "点固定伤害，未开启负伤时无视勇士护盾。"; }, "#ff9977"],
+		[19, "自爆", "战斗后角色的生命值变成1", "#ff6666"],
+		[20, "无敌", "角色无法打败怪物，除非拥有十字架", "#aaaaaa"],
+		[21, "退化", function (enemy) { return "战斗后角色永久下降" + (enemy.atkValue || 0) + "点攻击和" + (enemy.defValue || 0) + "点防御"; }],
+		[22, "固伤", function (enemy) { return "战斗前，怪物对角色造成" + (enemy.damage || 0) + "点固定伤害，未开启负伤时无视角色护盾。"; }, "#ff9977"],
 		[23, "重生", "怪物被击败后，角色转换楼层则怪物将再次出现", "#a0e0ff"],
 		[24, "激光", function (enemy) { return "经过怪物同行或同列时自动减生命" + (enemy.value || 0) + "点"; }, "#dda0dd"],
-		[25, "光环", function (enemy) { return (enemy.range != null ? ((enemy.zoneSquare ? "该怪物九宫格" : "该怪物十字") + enemy.range + "格范围内") : "同楼层所有" ) + "怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#e6e099", 1],
+		[25, "光环", function (enemy) { return (enemy.range != null ? ((enemy.zoneSquare ? "该怪物九宫格" : "该怪物十字") + enemy.range + "格范围内") : "同楼层所有") + "怪物生命提升" + (enemy.value || 0) + "%，攻击提升" + (enemy.atkValue || 0) + "%，防御提升" + (enemy.defValue || 0) + "%，" + (enemy.add ? "可叠加" : "不可叠加"); }, "#e6e099", 1],
 		[26, "支援", "当周围一圈的怪物受到攻击时将上前支援，并组成小队战斗。", "#77c0b6", 1],
 		[27, "捕捉", function (enemy) { return "当走到怪物周围" + (enemy.zoneSquare ? "九宫格" : "十字") + "时会强制进行战斗。"; }, "#c0ddbb"]
 	];
@@ -958,7 +960,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// px和py为点击的像素坐标
 	// vertical为录像播放过程中的横竖屏信息
 	// 
-	// 横屏模式下状态栏的画布大小是 129*416
+	// 横屏模式下状态栏的画布大小是 129*416 （开启拓展装备栏后是 129*457）
 	// 竖屏模式下状态栏的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
 	// 可以使用 _isVertical() 来判定当前是否是竖屏模式
 
@@ -1139,11 +1141,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.setFlag('curse', true);
 		}
 	} else if (action == 'remove') {
+		var success = false;
 		if (core.inArray(type, "poison") && core.hasFlag("poison")) {
+			success = true;
 			// 移除毒效果
 			core.setFlag("poison", false);
 		}
 		if (core.inArray(type, "weak") && core.hasFlag("weak")) {
+			success = true;
 			// 移除衰效果
 			core.setFlag("weak", false);
 			if (core.values.weakValue >= 1) {
@@ -1157,9 +1162,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 		if (core.inArray(type, "curse") && core.hasFlag("curse")) {
+			success = true;
 			// 移除咒效果
 			core.setFlag("curse", false);
 		}
+		if (success) core.playSound('回血');
 	}
 },
         "updateStatusBar": function () {
@@ -1539,8 +1546,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		if (['left', 'right', 'up', 'down'].indexOf(lastDirection) >= 0)
 			core.setHeroLoc('direction', lastDirection);
 		// 设置坐标，并绘制
-		core.setHeroLoc('x', x);
-		core.setHeroLoc('y', y);
+		core.control._moveDirectyFollowers(x, y);
+		core.status.hero.loc.x = x;
+		core.status.hero.loc.y = y;
 		core.drawHero();
 		// 记录录像
 		core.status.route.push("move:" + x + ":" + y);

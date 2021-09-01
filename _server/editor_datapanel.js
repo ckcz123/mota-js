@@ -301,6 +301,13 @@ editor_datapanel_wrapper = function (editor) {
                     printe('不合法的id，请使用字母、数字或下划线，且不能以数字开头');
                     return;
                 }
+                if (id == 'hero' || id == 'this' || id == 'none' || id == 'airwall') {
+                    printe('不得使用保留关键字作为id！');
+                    return;
+                }
+                if (core.statusBar.icons[id] != null) {
+                    alert('警告！此ID在状态栏图标中被注册；仍然允许使用，但是\\i[]等绘制可能出现冲突。');
+                }
                 editor.file.changeIdAndIdnum(id, idnum, editor_mode.info, function (err) {
                     if (err) {
                         printe(err);
@@ -332,6 +339,9 @@ editor_datapanel_wrapper = function (editor) {
                 window.location.reload();
             });
         }
+        newIdIdnum.children[6].onclick = function () {
+            editor.uifunctions.appendMaterialByInfo(editor_mode.info);
+        }
     }
 
     editor.uifunctions.changeId_func = function () {
@@ -354,6 +364,9 @@ editor_datapanel_wrapper = function (editor) {
                 if (editor_mode.info.idnum >= 10000) {
                     printe('额外素材不可修改id！');
                     return;
+                }
+                if (core.statusBar.icons[id] != null) {
+                    alert('警告！此ID在状态栏图标中被注册；仍然允许使用，但是\\i[]等绘制可能出现冲突。');
                 }
                 editor.file.changeIdAndIdnum(id, null, editor_mode.info, function (err) {
                     if (err) {
@@ -380,6 +393,9 @@ editor_datapanel_wrapper = function (editor) {
                 alert('删除此素材成功！');
                 window.location.reload();
             });
+        }
+        changeId.children[3].onclick = function () {
+            editor.uifunctions.appendMaterialByInfo(editor_mode.info);
         }
     }
 
@@ -811,6 +827,10 @@ editor_datapanel_wrapper = function (editor) {
         }
 
         var loadImage = function (content, callback) {
+            if (content instanceof Image || content.getContext != null) {
+                callback(content);
+                return;
+            }
             var image = new Image();
             try {
                 image.onload = function () {
@@ -1124,6 +1144,46 @@ editor_datapanel_wrapper = function (editor) {
             }
             reader.readAsDataURL(file);
         }
+
+        editor.uifunctions.appendMaterialByInfo = function (info) {
+            if (info.isTile) {
+                printe('额外素材不支持此功能！');
+                return;
+            }
+            var img = null;
+            var cls = info.images;
+            var height = cls == 'enemy48' || cls == 'npc48' ? 48 : 32;
+
+            if (cls == 'autotile') {
+                img = core.material.images.autotile[info.id];
+            } else {
+                var image = core.material.images[cls];
+                var width = image.width;
+                img = document.createElement('canvas');
+                img.width = width;
+                img.height = height;
+                img.getContext('2d').drawImage(image, 0, info.y * height, width, height, 0, 0, width, height);
+            }
+
+            editor.mode.change('appendpic');
+            editor.dom.selectAppend.value = cls;
+            editor.dom.selectAppend.onchange();
+
+            afterReadFile(img, function () {
+                changeColorInput.value = 0;
+                if (cls == 'autotile') return;
+
+                editor_mode.appendPic.index = 0;
+                for (var ii = 0; ii < editor_mode.appendPic.num; ++ii) {
+                    editor_mode.appendPic.selectPos[ii] = {x: ii, y: 0, ysize: height};
+                    editor.dom.appendPicSelection.children[ii].style = [
+                        'left:', ii * 32, 'px;',
+                        'top:', 0, 'px;',
+                        'height:', height - 6, 'px;'
+                    ].join('');
+                }
+            });
+        } 
     }
 
     ///////////////////////////////////////////////////////////////////////

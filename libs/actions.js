@@ -589,9 +589,8 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
             core.status.preview.enabled = true;
             core.status.preview.dragging = true;
             core.drawTip('已进入预览模式，可直接拖动大地图');
-            console.log('已进入预览模式，可直接拖动大地图');
             core.status.stepPostfix = [];
-        }, 1200);
+        }, 600);
     } 
 }
 

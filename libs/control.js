@@ -2173,7 +2173,8 @@ control.prototype._syncLoad_http = function (id, password) {
             var msg = null;
             try {
                 msg = JSON.parse(LZString.decompressFromBase64(response.msg));
-            } catch (e) {
+            } catch (e) {}
+            if (!msg) {
                 try {
                     msg = JSON.parse(response.msg);
                 } catch (e) {}

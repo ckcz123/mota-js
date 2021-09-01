@@ -1030,7 +1030,8 @@ utils.prototype.readFileContent = function (content) {
     // 检查base64
     try {
         obj = JSON.parse(LZString.decompressFromBase64(content));
-    } catch (e) {
+    } catch (e) {}
+    if (!obj) {
         try {
             obj = JSON.parse(content);
         } catch (e) {

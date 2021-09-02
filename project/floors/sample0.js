@@ -99,61 +99,6 @@ main.floors.sample0=
                 "type": "hide",
                 "time": 500
             }
-        ],
-        "7,7": [
-            {
-                "type": "move",
-                "loc": [
-                    0,
-                    0
-                ],
-                "time": 100,
-                "keep": true,
-                "async": true,
-                "steps": [
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12",
-                    "right:12",
-                    "left:12"
-                ]
-            },
-            {
-                "type": "wait",
-                "forceChild": true,
-                "timeout": 10000,
-                "data": [
-                    {
-                        "case": "keyboard",
-                        "keycode": "13,32",
-                        "action": [
-                            {
-                                "type": "stopAsync"
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "type": "waitAsync"
-            }
         ]
     },
     "changeFloor": {

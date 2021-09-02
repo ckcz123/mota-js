@@ -1683,7 +1683,7 @@ ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
         core.drawImage('ui', ctx.canvas, 0, currH);
     }, per_time);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 ////// 文本图片化 //////

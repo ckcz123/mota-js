@@ -851,6 +851,7 @@ action
     |   sleep_s
     |   wait_s
     |   waitAsync_s
+    |   stopAsync_s
     |   battle_s
     |   battle_1_s
     |   openDoor_s
@@ -3072,6 +3073,19 @@ colour : this.soundColor
 Bool_0 = Bool_0 ? ', "excludeAnimates": true' : '';
 Bool_1 = Bool_1 ? ', "includeSounds": true' : '';
 var code = '{"type": "waitAsync"'+Bool_0+Bool_1+'},\n';
+return code;
+*/;
+
+
+stopAsync_s
+    :   '立刻结束所有异步事件' BGNL Newline
+
+
+/* stopAsync_s
+tooltip : stopAsync: 立刻结束所有异步事件
+helpUrl : /_docs/#/instruction
+colour : this.soundColor
+var code = '{"type": "stopAsync"},\n';
 return code;
 */;
 

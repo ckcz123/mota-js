@@ -1209,6 +1209,9 @@ seed: 随机种子，相同的种子保证了录像的可重复性
 route: 经由base64压缩后的录像，用于从头开始的录像回放
 callback: 回调函数，可选
 
+stopAsync: fn()
+立刻停止所有正在进行的异步事件
+
 trigger: fn(x?: number, y?: number, callback?: fn())
 触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等
 callback: 执行完毕的回调函数

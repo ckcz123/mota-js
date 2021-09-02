@@ -3835,6 +3835,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!doc": "当前是否有未处理完毕的异步事件（不包含动画和音效）", 
           "!type": "fn() -> bool"
         },
+        "stopAsync": {
+          "!doc": "立刻停止所有正在进行的异步事件",
+          "!type": "fn()"
+        },
         "openEquipbox": {
           "!doc": "点击装备栏时的打开操作", 
           "!type": "fn(fromUserAction?: bool)"

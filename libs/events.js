@@ -581,21 +581,26 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
 
     blockInfo.posX = 0;
     core.maps._drawBlockInfo(blockInfo, x, y);
+
+    var cb = function () {
+        core.maps._removeBlockFromMap(core.status.floorId, block);
+        if (!locked) core.unlockControl();
+        core.status.replay.animate = false;
+        core.events.afterOpenDoor(block.event.id, x, y);
+        if (callback) callback();
+    }
+
     var animate = window.setInterval(function() {
         blockInfo.posX++;
         if (blockInfo.posX == 4) {
-            core.maps._removeBlockFromMap(core.status.floorId, block);
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
-            if (!locked) core.unlockControl();
-            core.status.replay.animate = false;
-            core.events.afterOpenDoor(block.event.id, x, y);
-            if (callback) callback();
+            cb();
             return;
         }
         core.maps._drawBlockInfo(blockInfo, x, y);    
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 ////// 开一个门后触发的事件 //////
@@ -2519,6 +2524,11 @@ events.prototype._action_waitAsync = function (data, x, y, prefix) {
     }, 50 / core.status.replay.speed);
 }
 
+events.prototype._action_stopAsync = function (data, x, y, prefix) {
+    core.stopAsync();
+    core.doAction();
+}
+
 events.prototype._action_callBook = function (data, x, y, prefix) {
     if (core.isReplaying() || !core.hasItem('book')) {
         core.doAction();
@@ -2896,6 +2906,19 @@ events.prototype.hasAsync = function () {
     return Object.keys(core.animateFrame.asyncId).length > 0;
 }
 
+////// 立刻停止所有异步事件 //////
+events.prototype.stopAsync = function () {
+    var callbacks = [];
+    for (var id in core.animateFrame.asyncId) {
+        clearInterval(id);
+        callbacks.push(core.animateFrame.asyncId[id]);
+    }
+    core.animateFrame.asyncId = {};
+    callbacks.forEach(function (cb) {
+        if (cb && cb instanceof Function) cb();
+    });
+}
+
 events.prototype.hasAsyncAnimate = function () {
     return (core.status.animateObjs || []).length > 0;
 }
@@ -3161,7 +3184,7 @@ events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
             if (callback) callback();
         }
     }, 10);
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 ////// 清除对话框 //////
@@ -3209,19 +3232,23 @@ events.prototype.closeDoor = function (x, y, id, callback) {
     blockInfo.posX = 3;
     core.maps._drawBlockInfo(blockInfo, x, y);
 
+    var cb = function () {
+        core.setBlock(id, x, y);
+        core.showBlock(x, y);
+        if (callback) callback();
+    }
+
     var animate = window.setInterval(function () {
         blockInfo.posX--;
         if (blockInfo.posX < 0) {
             clearInterval(animate);
             delete core.animateFrame.asyncId[animate];
-            core.setBlock(id, x, y);
-            core.showBlock(x, y);
-            if (callback) callback();
+            cb();
             return;
         }
         core.maps._drawBlockInfo(blockInfo, x, y);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 ////// 显示图片 //////
@@ -3325,13 +3352,12 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
         core.setOpacity(name, currOpacity);
         core.relocateCanvas(name, currX, currY);
         if (step == steps) {
-            core.setOpacity(name, toOpacity);
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
             if (callback) callback();
         }
     }, per_time);
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 ////// 旋转图片 //////
@@ -3374,8 +3400,7 @@ events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
-    core.animateFrame.asyncId[animate] = true;
-
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 ////// 放缩一张图片 //////
@@ -3434,7 +3459,7 @@ events.prototype._scaleImage_scale = function (ctx, scaleInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 ////// 绘制或取消一张gif图片 //////
@@ -3481,7 +3506,7 @@ events.prototype.setVolume = function (value, time, callback) {
             if (callback) callback();
         }
     }, per_time);
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 ////// 画面震动 //////
@@ -3497,6 +3522,10 @@ events.prototype.vibrate = function (direction, time, speed, power, callback) {
     if (direction == 'random') {
         direction = ['horizontal', 'vertical', 'diagonal1', 'diagonal2'][Math.floor(Math.random() * 4)];
     }
+    var cb = function () {
+        core.addGameCanvasTranslate(0, 0);
+        if (callback) callback();
+    }
     var animate = setInterval(function () {
         core.events._vibrate_update(shakeInfo);
         switch (direction) {
@@ -3508,11 +3537,11 @@ events.prototype.vibrate = function (direction, time, speed, power, callback) {
         if (shakeInfo.duration === 0 && shakeInfo.shake == 0) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            if (callback) callback();
+            cb();
         }
     }, 10);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 events.prototype._vibrate_update = function (shakeInfo) {
@@ -3546,13 +3575,17 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
     });
     core.status.heroMoving = -1;
     var _run = function () {
+        var cb = function () {
+            core.status.heroMoving = 0;
+            core.drawHero();
+            if (callback) callback();
+        }
+
         var animate=window.setInterval(function() {
             if (moveSteps.length==0) {
                 delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
-                core.status.heroMoving = 0;
-                core.drawHero();
-                if (callback) callback();
+                cb();
             }
             else {
                 if (step == 0 && moveSteps[0][0] == 'speed' && moveSteps[0][1] >= 16) {
@@ -3567,7 +3600,7 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
             }
         }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
     
-        core.animateFrame.asyncId[animate] = true;
+        core.animateFrame.asyncId[animate] = cb;
     }
     _run();
 }
@@ -3622,15 +3655,26 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
 }
 
 events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
+    var cb = function () {
+        core.setHeroLoc('x', jumpInfo.ex);
+        core.setHeroLoc('y', jumpInfo.ey);
+        core.status.heroMoving = 0;
+        core.drawHero();
+        if (callback) callback();
+    }
+
     core.status.heroMoving = -1;
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0)
             core.events._jumpHero_jumping(jumpInfo)
-        else
-            core.events._jumpHero_finished(animate, jumpInfo.ex, jumpInfo.ey, callback);
+        else {
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
+            cb();
+        }
     }, jumpInfo.per_time);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 events.prototype._jumpHero_jumping = function (jumpInfo) {
@@ -3640,16 +3684,6 @@ events.prototype._jumpHero_jumping = function (jumpInfo) {
         y = core.getHeroLoc('y');
     var nowx = jumpInfo.px, nowy = jumpInfo.py, width = jumpInfo.width || 32, height = jumpInfo.height;
     core.drawHero('stop', { x: nowx - 32 * x, y: nowy - 32 * y });
-}
-
-events.prototype._jumpHero_finished = function (animate, ex, ey, callback) {
-    delete core.animateFrame.asyncId[animate];
-    clearInterval(animate);
-    core.setHeroLoc('x', ex);
-    core.setHeroLoc('y', ey);
-    core.status.heroMoving = 0;
-    core.drawHero();
-    if (callback) callback();
 }
 
 ////// 设置角色行走图 //////

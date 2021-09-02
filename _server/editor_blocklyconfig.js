@@ -196,6 +196,7 @@ editor_blocklyconfig=(function(){
         {"case": "timeout", "action": [{"type": "comment", "text": "当超时未操作时执行此事件"}]},
       ]}),
       MotaActionBlocks['waitAsync_s'].xmlText(),
+      MotaActionBlocks['stopAsync_s'].xmlText(),
       MotaActionBlocks['vibrate_s'].xmlText(),
       MotaActionBlocks['animate_s'].xmlText(),
       MotaActionBlocks['animate_1_s'].xmlText(),

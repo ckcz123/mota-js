@@ -1232,6 +1232,9 @@ declare class events {
     /** 当前是否有未处理完毕的异步事件（不包含动画和音效） */
     hasAsync(): boolean
 
+    /** 立刻停止所有异步事件 */
+    stopAsync(): void
+
     /** 
      * 跟随
      * @param name 要跟随的一个合法的4x4的行走图名称，需要在全塔属性注册

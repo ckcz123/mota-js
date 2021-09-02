@@ -2049,23 +2049,19 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
     if (!data) {
         core.playSound('操作失败');
         return core.drawTip("无效的存档");
-    }
+    } 
     if (data.version != core.firstData.version) {
         core.playSound('操作失败');
         return core.drawTip("存档版本不匹配");
-    }
-    if (data.hard != core.status.hard) {
-        core.playSound('操作失败');
-        return core.drawTip("游戏难度不匹配！");
     }
     if (data.hero.flags.__events__ && data.guid != core.getGuid()) {
         core.playSound('操作失败');
         return core.drawTip("此存档可能存在风险，无法读档");
     }
     var route = core.subarray(core.status.route, core.decodeRoute(data.route));
-    if (route == null || data.hero.flags.__seed__ != core.getFlag('__seed__')) {
+    if (route == null) {
         core.playSound('操作失败');
-        return core.drawTip("种子不一致，无法从此存档回放录像");
+        return core.drawTip("无法从此存档回放录像");
     }
     core.loadData(data, function () {
         core.removeFlag('__fromLoad__');
@@ -2177,7 +2173,8 @@ control.prototype._syncLoad_http = function (id, password) {
             var msg = null;
             try {
                 msg = JSON.parse(LZString.decompressFromBase64(response.msg));
-            } catch (e) {
+            } catch (e) {}
+            if (!msg) {
                 try {
                     msg = JSON.parse(response.msg);
                 } catch (e) {}

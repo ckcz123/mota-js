@@ -559,6 +559,9 @@ ActionParser.prototype.parseAction = function() {
           data.name,data.loc[0],data.loc[1],data.alignWindow||false,data.async||false,this.next]);
       }
       break;
+    case "stopAnimate": // 停止所有动画
+      this.next = MotaActionBlocks['stopAnimate_s'].xmlText([this.next]);
+      break;
     case "setViewport": // 设置视角
       if (data.dxy) {
         this.next = MotaActionBlocks['setViewport_1_s'].xmlText([

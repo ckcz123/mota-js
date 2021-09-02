@@ -1528,6 +1528,11 @@ events.prototype._action_animate = function (data, x, y, prefix) {
     }
 }
 
+events.prototype._action_stopAnimate = function (data, x, y, prefix) {
+    core.stopAnimate();
+    core.doAction();
+}
+
 events.prototype._action_setViewport = function (data, x, y, prefix) {
     if (data.dxy != null) {
         data.loc = [core.bigmap.offsetX / 32 + (core.calValue(data.dxy[0], prefix) || 0), core.bigmap.offsetY / 32 + (core.calValue(data.dxy[1], prefix) || 0)];
@@ -3467,16 +3472,16 @@ events.prototype.setVolume = function (value, time, callback) {
     time /= Math.max(core.status.replay.speed, 1);
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     if (steps <= 0) steps = 1;
-    var fade = setInterval(function () {
+    var animate = setInterval(function () {
         step++;
         set(currVolume + (value - currVolume) * step / steps);
         if (step >= steps) {
-            delete core.animateFrame.asyncId[fade];
-            clearInterval(fade);
+            delete core.animateFrame.asyncId[animate];
+            clearInterval(animate);
             if (callback) callback();
         }
     }, per_time);
-    core.animateFrame.asyncId[fade] = true;
+    core.animateFrame.asyncId[animate] = true;
 }
 
 ////// 画面震动 //////

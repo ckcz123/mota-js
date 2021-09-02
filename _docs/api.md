@@ -1806,9 +1806,9 @@ showFloorImage: fn(loc?: [number]|[[number]], floorId?: string, callback?: fn())
 stairExists: fn(x: number, y: number, floorId?: string) -> bool
 某个点是否存在楼梯
 
-stopAnimate: fn(id: number, doCallback?: bool)
+stopAnimate: fn(id?: number, doCallback?: bool)
 立刻停止一个动画播放
-id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值
+id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值；不填视为停止所有动画
 doCallback: 是否执行该动画的回调函数
 
 terrainExists: fn(x: number, y: number, id?: string, floorId?: string) -> bool

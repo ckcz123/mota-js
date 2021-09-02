@@ -3034,7 +3034,7 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
 maps.prototype.stopAnimate = function (id, doCallback) {
     for (var i = 0; i < core.status.animateObjs.length; i++) {
         var obj = core.status.animateObjs[i];
-        if (obj.id == id) {
+        if (id == null || obj.id == id) {
             if (doCallback) {
                 (function (callback) {
                     setTimeout(function () {
@@ -3044,7 +3044,7 @@ maps.prototype.stopAnimate = function (id, doCallback) {
             }
         }
     }
-    core.status.animateObjs = core.status.animateObjs.filter(function (x) { return x.id != id });
+    core.status.animateObjs = core.status.animateObjs.filter(function (x) { return id != null && x.id != id });
     if (core.status.animateObjs.length == 0)
         core.clearMap('animate');
 }

@@ -869,6 +869,7 @@ action
     |   unfollow_s
     |   animate_s
     |   animate_1_s
+    |   stopAnimate_s
     |   vibrate_s
     |   showImage_s
     |   showImage_1_s
@@ -2078,6 +2079,17 @@ material : ["./project/animates/", "EvalString_0"]
 colour : this.soundColor
 Bool_0 = Bool_0?', "async": true':'';
 var code = '{"type": "animate", "name": "'+EvalString_0+'", "loc": "hero"'+Bool_0+'},\n';
+return code;
+*/;
+
+stopAnimate_s
+    :   '停止所有动画' Newline
+
+/* stopAnimate_s
+tooltip : stopAnimate：停止所有动画
+helpUrl : /_docs/#/instruction
+colour : this.soundColor
+var code = '{"type": "stopAnimate"},\n';
 return code;
 */;
 

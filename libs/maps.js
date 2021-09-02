@@ -2622,6 +2622,8 @@ maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, call
             else
                 core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, cb);
         }, moveInfo.per_time);
+        
+        core.animateFrame.lastAsyncId = animate;
         core.animateFrame.asyncId[animate] = cb;
     }
     _run();
@@ -2754,6 +2756,7 @@ maps.prototype._jumpBlock_doJump = function (blockInfo, canvases, jumpInfo, call
             core.maps._moveJumpBlock_finished(blockInfo, canvases, jumpInfo, animate, cb);
     }, jumpInfo.per_time);
 
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
 
@@ -2832,6 +2835,7 @@ maps.prototype._animateBlock_doAnimate = function (loc, list, type, time, callba
         }
     }, 10);
 
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
 

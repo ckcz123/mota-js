@@ -2592,6 +2592,17 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
     var animateTotal = blockInfo.animate, animateTime = 0;
     var _run = function () {
+        var cb = function () {
+            core.maps._deleteDetachedBlock(canvases);
+            // 不消失
+            if (moveInfo.keep) {
+                core.setBlock(blockInfo.number, moveInfo.x, moveInfo.y);
+                core.showBlock(moveInfo.x, moveInfo.y);
+                core.moveEnemyOnPoint(moveInfo.sx, moveInfo.sy, moveInfo.x, moveInfo.y);
+            }
+            if (callback) callback();
+        }
+
         var animate = window.setInterval(function () {
             if (blockInfo.cls != 'tileset') {
                 animateTime += moveInfo.per_time;
@@ -2609,9 +2620,9 @@ maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, call
                 else core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
             }
             else
-                core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
+                core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, cb);
         }, moveInfo.per_time);
-        core.animateFrame.asyncId[animate] = true;
+        core.animateFrame.asyncId[animate] = cb;
     }
     _run();
 }
@@ -2725,14 +2736,25 @@ maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
 }
 
 maps.prototype._jumpBlock_doJump = function (blockInfo, canvases, jumpInfo, callback) {
+    var cb = function () {
+        core.maps._deleteDetachedBlock(canvases);
+        // 不消失
+        if (jumpInfo.keep) {
+            core.setBlock(blockInfo.number, jumpInfo.ex, jumpInfo.ey);
+            core.showBlock(jumpInfo.ex, jumpInfo.ey);
+            core.moveEnemyOnPoint(jumpInfo.sx, jumpInfo.sy, jumpInfo.ex, jumpInfo.ey);
+        }
+        if (callback) callback();
+    }
+
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0)
             core.maps._jumpBlock_jumping(blockInfo, canvases, jumpInfo)
         else
-            core.maps._moveJumpBlock_finished(blockInfo, canvases, jumpInfo, animate, callback);
+            core.maps._moveJumpBlock_finished(blockInfo, canvases, jumpInfo, animate, cb);
     }, jumpInfo.per_time);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 maps.prototype.__updateJumpInfo = function (jumpInfo) {
@@ -2749,20 +2771,13 @@ maps.prototype._jumpBlock_jumping = function (blockInfo, canvases, jumpInfo) {
     core.maps._moveDetachedBlock(blockInfo, jumpInfo.px, jumpInfo.py, jumpInfo.opacity, canvases);
 }
 
-maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, animate, callback) {
+maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, animate, cb) {
     if (info.keep) info.opacity = 0;
     else info.opacity -= 0.06;
     if (info.opacity <= 0) {
         delete core.animateFrame.asyncId[animate];
         clearInterval(animate);
-        this._deleteDetachedBlock(canvases);
-        // 不消失
-        if (info.keep) {
-            core.setBlock(blockInfo.number, info.x, info.y);
-            core.showBlock(info.x, info.y);
-            core.moveEnemyOnPoint(info.sx, info.sy, info.x, info.y);
-        }
-        if (callback) callback();
+        cb();
     }
     else {
         this._moveDetachedBlock(blockInfo, info.px, info.py, info.opacity, canvases);
@@ -2790,30 +2805,34 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
 
 maps.prototype._animateBlock_doAnimate = function (loc, list, type, time, callback) {
     var step = 0, steps = Math.max(parseInt(time / 10), 1);
+    var cb = function () {
+        list.forEach(function (t) {
+            if (t.blockInfo)
+                core.maps._deleteDetachedBlock(t.canvases);
+        });
+        loc.forEach(function (t) {
+            if (type == 'show') core.showBlock(t[0], t[1]);
+            else if (type == 'hide') core.hideBlock(t[0], t[1]);
+            else if (type == 'remove') core.removeBlock(t[0], t[1]);
+            else {
+                core.setBlockOpacity(type, t[0], t[1]);
+                core.showBlock(t[0], t[1]);
+            }
+        });
+        if (callback) callback();
+    }
+
     var animate = setInterval(function () {
         step++;
         core.maps._animateBlock_drawList(list, step / steps);
         if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            list.forEach(function (t) {
-                if (t.blockInfo)
-                    core.maps._deleteDetachedBlock(t.canvases);
-            });
-            loc.forEach(function (t) {
-                if (type == 'show') core.showBlock(t[0], t[1]);
-                else if (type == 'hide') core.hideBlock(t[0], t[1]);
-                else if (type == 'remove') core.removeBlock(t[0], t[1]);
-                else {
-                    core.setBlockOpacity(type, t[0], t[1]);
-                    core.showBlock(t[0], t[1]);
-                }
-            });
-            if (callback) callback();
+            cb();
         }
     }, 10);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 maps.prototype._animateBlock_getList = function (loc, type) {
@@ -3034,7 +3053,7 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
 maps.prototype.stopAnimate = function (id, doCallback) {
     for (var i = 0; i < core.status.animateObjs.length; i++) {
         var obj = core.status.animateObjs[i];
-        if (obj.id == id) {
+        if (id == null || obj.id == id) {
             if (doCallback) {
                 (function (callback) {
                     setTimeout(function () {
@@ -3044,7 +3063,7 @@ maps.prototype.stopAnimate = function (id, doCallback) {
             }
         }
     }
-    core.status.animateObjs = core.status.animateObjs.filter(function (x) { return x.id != id });
+    core.status.animateObjs = core.status.animateObjs.filter(function (x) { return id != null && x.id != id });
     if (core.status.animateObjs.length == 0)
         core.clearMap('animate');
 }

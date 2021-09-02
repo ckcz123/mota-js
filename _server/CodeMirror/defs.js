@@ -3081,8 +3081,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(name: string, callback?: fn()) -> number"
         },
         "stopAnimate": {
-          "!doc": "立刻停止一个动画播放<br/>id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值<br/>doCallback: 是否执行该动画的回调函数",
-          "!type": "fn(id: number, doCallback?: bool)"
+          "!doc": "立刻停止一个动画播放<br/>id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值；不填视为所有动画br/>doCallback: 是否执行该动画的回调函数",
+          "!type": "fn(id?: number, doCallback?: bool)"
         },
         "getPlayingAnimates": {
           "!doc": "获得当前正在播放的所有（指定）动画的id列表<br/>name: 动画名；不填代表返回全部正在播放的动画<br/>返回值: 一个数组，每一项为一个正在播放的动画；可用core.stopAnimate停止播放。",
@@ -3834,6 +3834,10 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "hasAsync": {
           "!doc": "当前是否有未处理完毕的异步事件（不包含动画和音效）", 
           "!type": "fn() -> bool"
+        },
+        "stopAsync": {
+          "!doc": "立刻停止所有正在进行的异步事件",
+          "!type": "fn()"
         },
         "openEquipbox": {
           "!doc": "点击装备栏时的打开操作", 

@@ -851,6 +851,7 @@ action
     |   sleep_s
     |   wait_s
     |   waitAsync_s
+    |   stopAsync_s
     |   battle_s
     |   battle_1_s
     |   openDoor_s
@@ -869,6 +870,7 @@ action
     |   unfollow_s
     |   animate_s
     |   animate_1_s
+    |   stopAnimate_s
     |   vibrate_s
     |   showImage_s
     |   showImage_1_s
@@ -2081,6 +2083,17 @@ var code = '{"type": "animate", "name": "'+EvalString_0+'", "loc": "hero"'+Bool_
 return code;
 */;
 
+stopAnimate_s
+    :   '停止所有动画' Newline
+
+/* stopAnimate_s
+tooltip : stopAnimate：停止所有动画
+helpUrl : /_docs/#/instruction
+colour : this.soundColor
+var code = '{"type": "stopAnimate"},\n';
+return code;
+*/;
+
 setViewport_s
     :   '设置视角' '左上角坐标' 'x' PosString? ',' 'y' PosString? '移动方式' MoveMode_List '动画时间' Int '不等待执行完毕' Bool Newline
 
@@ -3060,6 +3073,19 @@ colour : this.soundColor
 Bool_0 = Bool_0 ? ', "excludeAnimates": true' : '';
 Bool_1 = Bool_1 ? ', "includeSounds": true' : '';
 var code = '{"type": "waitAsync"'+Bool_0+Bool_1+'},\n';
+return code;
+*/;
+
+
+stopAsync_s
+    :   '立刻结束所有异步事件' BGNL Newline
+
+
+/* stopAsync_s
+tooltip : stopAsync: 立刻结束所有异步事件
+helpUrl : /_docs/#/instruction
+colour : this.soundColor
+var code = '{"type": "stopAsync"},\n';
 return code;
 */;
 

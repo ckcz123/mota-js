@@ -559,6 +559,9 @@ ActionParser.prototype.parseAction = function() {
           data.name,data.loc[0],data.loc[1],data.alignWindow||false,data.async||false,this.next]);
       }
       break;
+    case "stopAnimate": // 停止所有动画
+      this.next = MotaActionBlocks['stopAnimate_s'].xmlText([this.next]);
+      break;
     case "setViewport": // 设置视角
       if (data.dxy) {
         this.next = MotaActionBlocks['setViewport_1_s'].xmlText([
@@ -968,6 +971,10 @@ ActionParser.prototype.parseAction = function() {
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
         data.excludeAnimates||false, data.includeSounds||false, this.next]);
+      break;
+    case "stopAsync": // 立刻停止所有异步事件
+      this.next = MotaActionBlocks['stopAsync_s'].xmlText([
+        this.next]);
       break;
     case "callBook": // 呼出怪物手册
       this.next = MotaActionBlocks['callBook_s'].xmlText([

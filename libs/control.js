@@ -911,7 +911,7 @@ control.prototype.setHeroOpacity = function (opacity, moveMode, time, callback) 
         }
     }, 10);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 // ------ 画布、位置、阻激夹域，显伤 ------ //
@@ -1031,7 +1031,7 @@ control.prototype.moveViewport = function (x, y, moveMode, time, callback) {
         }
     }, per_time);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = callback;
 }
 
 ////// 获得勇士面对位置的x坐标 //////
@@ -2735,10 +2735,16 @@ control.prototype._setCurtain_animate = function (nowColor, color, time, moveMod
     time /= Math.max(core.status.replay.speed, 1)
     var per_time = 10, step = 0, steps = parseInt(time / per_time);
     if (steps <= 0) steps = 1;
+    var curr = nowColor;
     var moveFunc = core.applyEasing(moveMode);
+
+    var cb = function () {
+        core.status.curtainColor = curr;
+        if (callback) callback();
+    }
     var animate = setInterval(function() {
         step++;
-        var curr = [
+        curr = [
             nowColor[0] + (color[0] - nowColor[0]) * moveFunc(step / steps),
             nowColor[1] + (color[1] - nowColor[1]) * moveFunc(step / steps),
             nowColor[2] + (color[2] - nowColor[2]) * moveFunc(step / steps),
@@ -2749,12 +2755,11 @@ control.prototype._setCurtain_animate = function (nowColor, color, time, moveMod
         if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            core.status.curtainColor = color;
-            if (core.isset(callback)) callback();
+            cb();
         }
     }, per_time);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 ////// 画面闪烁 //////

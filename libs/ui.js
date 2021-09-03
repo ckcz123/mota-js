@@ -2587,34 +2587,35 @@ ui.prototype._drawViewMaps_drawHint = function () {
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.7)');
     core.setTextAlign('ui', 'center');
     var stroke = function (left, top, width, height, fillStyle, lineWidth) {
-        core.strokeRect('ui', left*32+2, top*32+2, width*32-4, height*32-4, fillStyle, lineWidth);
+        core.strokeRect('ui', left+2, top+2, width-4, height-4, fillStyle, lineWidth);
     }
-    var per = this.HSIZE - 4;
-    stroke(per, 0, 9, per, core.status.globalAttribute.selectColor, 4); // up
-    stroke(0, per, per, 9); // left
-    stroke(per, this.SIZE - per, 9, per); // down
-    stroke(this.SIZE - per, per, per, 9); // right
-    stroke(per, per, 9, 3); // prev
-    stroke(per, this.SIZE - per - 3, 9, 3); // next
-    stroke(0, 0, per-1, per-1); // left top
-    stroke(this.SIZE-(per - 1), 0, per-1, per-1); // right top
-    stroke(0, this.SIZE-(per-1), per-1, per-1); // left bottom
+
+    var perpx = this.PIXEL / 5, cornerpx = perpx * 3 / 4;
+    stroke(perpx, 0, 3 * perpx, perpx, core.status.globalAttribute.selectColor, 4); // up
+    stroke(0, perpx, perpx, 3 * perpx); // left
+    stroke(perpx, 4 * perpx, 3 * perpx, perpx); // down
+    stroke(4 * perpx, perpx, perpx, 3 * perpx); // right
+    stroke(perpx, perpx, 3 * perpx, perpx); // prev
+    stroke(perpx, 3 * perpx, 3 * perpx, perpx); // next
+    stroke(0, 0, cornerpx, cornerpx); // left top
+    stroke(this.PIXEL - cornerpx, 0, cornerpx, cornerpx); // right top
+    stroke(0, this.PIXEL - cornerpx, cornerpx, cornerpx); // left bottom;
 
     core.setTextBaseline('ui', 'middle');
-    core.fillText('ui', "上移地图 [W]", this.HPIXEL, per * 16, core.status.globalAttribute.selectColor, '20px Arial');
-    core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - per * 16);
-    core.fillText('ui', 'V', (per-1)*16, (per-1)*16);
-    core.fillText('ui', 'Z', this.PIXEL - (per-1)*16, (per-1)*16);
-    core.fillText('ui', 'B', (per-1)*16, this.PIXEL - (per-1)*16);
+    core.fillText('ui', "上移地图 [W]", this.HPIXEL, perpx / 2, core.status.globalAttribute.selectColor, '20px Arial');
+    core.fillText('ui', "下移地图 [S]", this.HPIXEL, this.PIXEL - perpx / 2);
+    core.fillText('ui', 'V', cornerpx / 2, cornerpx / 2);
+    core.fillText('ui', 'Z', this.PIXEL - cornerpx / 2, cornerpx / 2);
+    core.fillText('ui', 'B', cornerpx / 2, this.PIXEL - cornerpx / 2);
 
-    var top = this.HPIXEL - 66, left = per * 16, right = this.PIXEL - left;
+    var top = this.HPIXEL - 66, left = perpx / 2, right = this.PIXEL - left;
     var lt = ["左", "移", "地", "图", "[A]"], rt = ["右", "移", "地", "图", "[D]"];
     for (var i = 0; i < 5; ++i) {
         core.fillText("ui", lt[i], left, top + 32 * i);
         core.fillText("ui", rt[i], right, top + 32 * i);
     }
-    core.fillText('ui', "前张地图 [▲ / PGUP]", this.HPIXEL, 32 * per + 48);
-    core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - (32 * per + 48));
+    core.fillText('ui', "前张地图 [▲ / PGUP]", this.HPIXEL, perpx * 1.5);
+    core.fillText('ui', "后张地图 [▼ / PGDN]", this.HPIXEL, this.PIXEL - perpx * 1.5);
 
     core.fillText('ui', "退出 [ESC / ENTER]", this.HPIXEL, this.HPIXEL);
     core.fillText('ui', "[X] 可查看" + core.material.items['book'].name + "   [G] 可使用" + core.material.items.fly.name, this.HPIXEL, this.HPIXEL + 32, null, '12px Arial');
@@ -3100,17 +3101,20 @@ ui.prototype._drawKeyBoard = function () {
     core.clearUI();
     core.playSound('打开界面');
 
+    var offset = this.SIZE % 2 == 0 ? 16 : 0;
+
     var width = 384, height = 320;
-    var left = (this.PIXEL - width) / 2, right = left + width;
-    var top = (this.PIXEL - height) / 2, bottom = top + height;
+    var left = (this.PIXEL - width) / 2 + offset, right = left + width;
+    var top = (this.PIXEL - height) / 2 + offset, bottom = top + height;
+
 
     var isWindowSkin = this.drawBackground(left, top, right, bottom);
     core.setTextAlign('ui', 'center');
     core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.title));
-    core.fillText('ui', '虚拟键盘', this.HPIXEL, top + 35, null, this._buildFont(22, true));
+    core.fillText('ui', '虚拟键盘', this.HPIXEL + offset, top + 35, null, this._buildFont(22, true));
     core.setFont('ui', this._buildFont(17, false));
     core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.text));
-    var offset = this.HPIXEL - 89;
+    var now = this.HPIXEL - 89 + offset;
 
     var lines = [
         ["F1","F2","F3","F4","F5","F6","F7","F8","F9","10","11"],
@@ -3124,17 +3128,17 @@ ui.prototype._drawKeyBoard = function () {
 
     lines.forEach(function (line) {
         for (var i=0;i<line.length;i++) {
-            core.fillText('ui', line[i], core.ui.HPIXEL + 32*(i-5), offset);
+            core.fillText('ui', line[i], core.ui.HPIXEL + 32*(i-5) + offset, now);
         }
-        offset+=32;
+        now+=32;
     });
 
-    core.fillText("ui", "返回游戏", this.HPIXEL + 128, offset-3, '#FFFFFF', this._buildFont(15, true));
+    core.fillText("ui", "返回游戏", this.HPIXEL + 128 + offset, now-3, '#FFFFFF', this._buildFont(15, true));
 
     if (isWindowSkin)
-        this._drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92, offset - 22, 72, 27);
+        this._drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92 + offset, now - 22, 72, 27);
     else
-        core.strokeRoundRect('ui', this.HPIXEL + 92, offset - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
+        core.strokeRoundRect('ui', this.HPIXEL + 92 + offset, now - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
 }
 
 ////// 绘制状态栏 /////

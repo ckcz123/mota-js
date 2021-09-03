@@ -1,5 +1,9 @@
 /** editor **/
 
+:root {
+    --pixel: 416px;
+}
+
 html, body, div, img {
     margin: 0;
     padding: 0;
@@ -128,15 +132,15 @@ body {
     position: absolute;
     left: 448px;
     top: 10px;
-    width: 440px;
-    height: 630px;
+    width: calc(24px + var(--pixel));
+    height: calc(422px + var(--pixel) / 2);
 }
 
 #mid2 {
     position: absolute;
     left: 448px;
-    top: 650px;
-    width: 440px;
+    top: calc(442px + var(--pixel) / 2);
+    width: calc(24px + var(--pixel));
     bottom: 10px;
 }
 
@@ -148,8 +152,8 @@ body {
     position: absolute;
     left: 20px;
     top: 21px;
-    width: 416px;
-    height: 416px;
+    width: var(--pixel);
+    height: var(--pixel);
 }
 
 #lastUsedDiv {
@@ -162,8 +166,8 @@ body {
 
 #mid .tools {
     position: absolute;
-    width: 425px;
-    height: 180px;
+    width: calc(var(--pixel) + 9px);
+    height: calc(388px - var(--pixel) / 2);
     left: 0;
     bottom: 0;
     padding: 10px 5px;
@@ -214,7 +218,7 @@ body {
 
 #right {
     position: absolute;
-    left: 900px;
+    left: calc(484px + var(--pixel));
     top: 10px;
     right: 0;
     bottom: 0;
@@ -300,7 +304,7 @@ table.col {
 #mapColMark {
     top: 2px;
     left: 19px;
-    width: 418px;
+    width: var(--pixel);
     height: 16px;
     font-size: 13px;
 }
@@ -312,7 +316,7 @@ table.col {
 #mapColMark td:hover .colBlock {
     position: absolute;
     top: 19px;
-    height: 416px;
+    height: var(--pixel);
     width: 32px;
     z-index: 100;
 }
@@ -336,7 +340,7 @@ table.row {
     top: 1px;
     left: 2px;
     width: 16px;
-    height: 416px;
+    height: var(--pixel);
     font-size: 12px;
 }
 
@@ -348,7 +352,7 @@ table.row {
     position: absolute;
     left: 18px;
     height: 32px;
-    width: 416px;
+    width: var(--pixel);
     z-index: 100;
 }
 
@@ -421,8 +425,8 @@ table.row {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -60%);
-    width: 540px;
+    transform: translate(-50%, -55%);
+    width: calc(20px + 1.25 * var(--pixel));
 }
 
 #uieventHead {
@@ -444,8 +448,8 @@ table.row {
 }
 
 #uieventBody {
-    width: 520px;
-    height: 520px;
+    width: calc(1.25 * var(--pixel));
+    height: calc(1.25 * var(--pixel));
     position: relative;
     margin-left: 10px;
     margin-bottom: 5px;

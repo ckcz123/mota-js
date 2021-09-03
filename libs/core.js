@@ -250,6 +250,10 @@ function core() {
     this.markedFloorIds = {};
     this.status = {};
     this.dymCanvas = {};
+
+    if (main.mode == 'editor') {
+        document.documentElement.style.setProperty('--pixel', this.__PIXELS__ + 'px');
+    }
 }
 
 /////////// 系统事件相关 ///////////

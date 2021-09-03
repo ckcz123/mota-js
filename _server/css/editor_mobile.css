@@ -1,5 +1,9 @@
 /** editor **/
 
+:root {
+    --size: 13;
+}
+
 html{
     font-size: 4vw;
 }
@@ -276,14 +280,14 @@ table.col, div.col {
 #mapColMark .coltd,
 #mapColMark .coltd .coltext {
     position: absolute;
-    width: 6.4vw;
+    width: calc(93vw / var(--size));
     height: 4vw;
     line-height: 4vw;
     padding: 0;
     border-bottom-width: 0px;
     border-top-width: 0px;
-    border-left-width: 0vw;
-    border-right-width: 0vw;
+    border-left-width: calc(1.5vw / var(--size));
+    border-right-width: calc(1.5vw / var(--size));
 }
 
 #mapColMark .coltd:hover .colBlock {
@@ -291,7 +295,7 @@ table.col, div.col {
     top: 4vw;
     left:0;
     height: 96vw;
-    width: 6.4vw;
+    width: calc(96vw / var(--size));
     z-index: 100;
 }
 
@@ -328,20 +332,20 @@ table.row,div.row .rowtext {
 
 #mapRowMark .rowtd,
 #mapRowMark .rowtd .rowtext{
-    height: 6.2vw;
-    line-height: 6.2vw;
+    height: calc(93vw / var(--size));
+    line-height: calc(93vw / var(--size));
     padding: 0;
     border-left-width: 0px;
     border-right-width: 0px;
-    border-top-width: 0.1vw;
-    border-bottom-width: 0.1vw;
+    border-top-width: calc(1.5vw / var(--size));
+    border-bottom-width: calc(1.5vw / var(--size));
 }
 
 #mapRowMark .rowtd:hover .rowBlock {
     position: absolute;
     left: 4vw;
     top: 0;
-    height: 6.4vw;
+    height: calc(96vw / var(--size));
     width: 96vw;
     z-index: 100;
 }

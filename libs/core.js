@@ -252,6 +252,7 @@ function core() {
     this.dymCanvas = {};
 
     if (main.mode == 'editor') {
+        document.documentElement.style.setProperty('--size', this.__SIZE__);
         document.documentElement.style.setProperty('--pixel', this.__PIXELS__ + 'px');
     }
 }

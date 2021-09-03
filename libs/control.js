@@ -911,6 +911,7 @@ control.prototype.setHeroOpacity = function (opacity, moveMode, time, callback) 
         }
     }, 10);
 
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
 
@@ -1031,6 +1032,7 @@ control.prototype.moveViewport = function (x, y, moveMode, time, callback) {
         }
     }, per_time);
 
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
 
@@ -2759,6 +2761,7 @@ control.prototype._setCurtain_animate = function (nowColor, color, time, moveMod
         }
     }, per_time);
 
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
 

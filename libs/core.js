@@ -54,7 +54,8 @@ function core() {
             'sun': null
         },
         "tip": null,
-        "asyncId": {}
+        "asyncId": {},
+        "lastAsyncId": null
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext

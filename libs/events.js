@@ -600,6 +600,8 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
         }
         core.maps._drawBlockInfo(blockInfo, x, y);    
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
+    
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
 
@@ -1534,7 +1536,7 @@ events.prototype._action_animate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_stopAnimate = function (data, x, y, prefix) {
-    core.stopAnimate();
+    core.stopAnimate(data.doCallback);
     core.doAction();
 }
 
@@ -3184,6 +3186,8 @@ events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
             if (callback) callback();
         }
     }, 10);
+    
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
 
@@ -3248,6 +3252,8 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         }
         core.maps._drawBlockInfo(blockInfo, x, y);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
+    
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
 
@@ -3357,6 +3363,8 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
+    
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
 
@@ -3400,6 +3408,8 @@ events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
+    
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
 
@@ -3459,6 +3469,8 @@ events.prototype._scaleImage_scale = function (ctx, scaleInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
+    
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
 
@@ -3506,6 +3518,8 @@ events.prototype.setVolume = function (value, time, callback) {
             if (callback) callback();
         }
     }, per_time);
+    
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
 
@@ -3541,6 +3555,7 @@ events.prototype.vibrate = function (direction, time, speed, power, callback) {
         }
     }, 10);
 
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
 
@@ -3600,6 +3615,7 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
             }
         }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
     
+        core.animateFrame.lastAsyncId = animate;
         core.animateFrame.asyncId[animate] = cb;
     }
     _run();
@@ -3674,6 +3690,7 @@ events.prototype._jumpHero_doJump = function (jumpInfo, callback) {
         }
     }, jumpInfo.per_time);
 
+    core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
 

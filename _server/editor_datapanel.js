@@ -180,6 +180,12 @@ editor_datapanel_wrapper = function (editor) {
 
 
     editor.uifunctions.createNewMaps_func = function () {
+
+        document.getElementById('newMapWidth').value = core.__SIZE__;
+        document.getElementById('newMapHeight').value = core.__SIZE__;
+        document.getElementById('newMapsWidth').value = core.__SIZE__;
+        document.getElementById('newMapsHeight').value = core.__SIZE__;
+
         var newMaps = document.getElementById('newMaps');
         var newFloors = document.getElementById('newFloors');
         newMaps.onclick = function () {

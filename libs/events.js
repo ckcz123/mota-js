@@ -1536,7 +1536,7 @@ events.prototype._action_animate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_stopAnimate = function (data, x, y, prefix) {
-    core.stopAnimate();
+    core.stopAnimate(data.doCallback);
     core.doAction();
 }
 

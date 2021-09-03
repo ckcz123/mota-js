@@ -2084,13 +2084,15 @@ return code;
 */;
 
 stopAnimate_s
-    :   '停止所有动画' Newline
+    :   '停止所有动画' '执行动画回调' Bool Newline
 
 /* stopAnimate_s
 tooltip : stopAnimate：停止所有动画
 helpUrl : /_docs/#/instruction
+default : [false]
 colour : this.soundColor
-var code = '{"type": "stopAnimate"},\n';
+Bool_0 = Bool_0?', "doCallback": true':'';
+var code = '{"type": "stopAnimate"'+Bool_0+'},\n';
 return code;
 */;
 

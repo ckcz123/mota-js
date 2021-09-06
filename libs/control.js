@@ -1336,6 +1336,7 @@ control.prototype.startReplay = function (list) {
     if (!core.isPlaying()) return;
     core.status.replay.replaying=true;
     core.status.replay.pausing=true;
+    core.status.replay.failed = false;
     core.status.replay.speed=1.0;
     core.status.replay.toReplay = core.cloneArray(list);
     core.status.replay.totalList = core.status.route.concat(list);
@@ -1431,6 +1432,7 @@ control.prototype.stopReplay = function (force) {
     core.status.replay.totalList = [];
     core.status.replay.replaying=false;
     core.status.replay.pausing=false;
+    core.status.replay.failed = false;
     core.status.replay.speed=1.0;
     core.status.replay.steps = 0;
     core.status.replay.save = [];
@@ -1586,7 +1588,7 @@ control.prototype.isReplaying = function () {
 ////// 回放 //////
 control.prototype.replay = function (force) {
     if (!core.isPlaying() || !core.isReplaying()
-         || core.status.replay.animate || core.status.event.id) return;
+         || core.status.replay.animate || core.status.event.id || core.status.replay.failed) return;
     if (core.status.replay.pausing && !force) return;
     this._replay_drawProgress();
     if (core.status.replay.toReplay.length==0)
@@ -1628,6 +1630,7 @@ control.prototype._doReplayAction = function (action) {
 
 control.prototype._replay_finished = function () {
     core.status.replay.replaying = false;
+    core.status.replay.failed = false;
     core.status.event.selection = 0;
     var str = "录像播放完毕，你想退出播放吗？";
     if (core.status.route.length != core.status.replay.totalList.length
@@ -1660,6 +1663,7 @@ control.prototype._replay_save = function () {
 control.prototype._replay_error = function (action, callback) {
     core.ui.closePanel();
     core.status.replay.replaying = false;
+    core.status.replay.failed = true;
     var len = core.status.replay.toReplay.length;
     var prevList = core.status.replay.totalList.slice(-len - 11, -len - 1);
     var nextList = core.status.replay.toReplay.slice(0, 10);
@@ -1667,6 +1671,7 @@ control.prototype._replay_error = function (action, callback) {
     main.log("之前的10个操作是：\n" + prevList.toString());
     main.log("接下来10个操作是：\n" + nextList.toString());
     core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
+        core.status.replay.failed = false;
         core.ui.closePanel();
         if (core.status.replay.save.length > 0) {
             core.status.replay.replaying = true;
@@ -1680,6 +1685,7 @@ control.prototype._replay_error = function (action, callback) {
             if (callback) callback();
         }
     }, function () {
+        core.status.replay.failed = false;
         core.ui.closePanel();
         core.stopReplay(true);
         if (callback) callback();

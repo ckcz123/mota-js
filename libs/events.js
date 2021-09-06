@@ -1877,6 +1877,7 @@ events.prototype._action_setValue = function (data, x, y, prefix) {
             core.status.hero.hp = 0;
             core.updateStatusBar();
             core.events.lose();
+            return;
         } else {
             core.updateStatusBar();
         }

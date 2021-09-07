@@ -3520,7 +3520,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         }, 
         "relocateCanvas": {
           "!doc": "重新定位一个自定义画布", 
-          "!type": "fn(name: string, x: number, y: number)"
+          "!type": "fn(name: string, x: number, y: number, useDelta: bool)"
         }, 
         "rotateCanvas": {
           "!doc": "设置一个自定义画布的旋转角度<br/>centerX, centerY: 旋转中心（以屏幕像素为基准）；不填视为图片正中心。",

@@ -503,7 +503,7 @@ utils.prototype.formatTime = function (time) {
 
 ////// 两位数显示 //////
 utils.prototype.setTwoDigits = function (x) {
-    return parseInt(x) < 10 ? "0" + x : x;
+    return (parseInt(x) < 10 && parseInt(x) >= 0) ? "0" + x : x;
 }
 
 utils.prototype.formatSize = function (size) {

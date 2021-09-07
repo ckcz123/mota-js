@@ -426,7 +426,7 @@ table.row {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -55%);
-    width: calc(20px + 1.25 * var(--pixel));
+    width: 560px;
 }
 
 #uieventHead {
@@ -448,8 +448,8 @@ table.row {
 }
 
 #uieventBody {
-    width: calc(1.25 * var(--pixel));
-    height: calc(1.25 * var(--pixel));
+    width: 540px;
+    height: 540px;
     position: relative;
     margin-left: 10px;
     margin-bottom: 5px;

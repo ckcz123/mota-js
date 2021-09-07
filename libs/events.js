@@ -783,6 +783,7 @@ events.prototype._changeFloor_getHeroLoc = function (floorId, stair, heroLoc) {
 }
 
 events.prototype._changeFloor_beforeChange = function (info, callback) {
+    this._changeFloor_playSound();
     // 需要 setTimeout 执行，不然会出错
     window.setTimeout(function () {
         if (info.time == 0)
@@ -792,6 +793,16 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
                 core.events._changeFloor_changing(info, callback);
             });
     }, 25)
+}
+
+events.prototype._changeFloor_playSound = function () {
+	// 播放换层音效
+	if (core.hasFlag('__fromLoad__')) // 是否是读档造成的切换
+		core.playSound('读档');
+	else if (core.hasFlag('__isFlying__')) // 是否是楼传造成的切换
+		core.playSound('飞行器');
+	else
+	    core.playSound('上下楼');
 }
 
 events.prototype._changeFloor_changing = function (info, callback) {
@@ -992,6 +1003,7 @@ events.prototype.doAction = function () {
     clearInterval(core.status.event.animateUI);
     core.status.event.interval = null;
     delete core.status.event.aniamteUI;
+    if (core.status.gameOver || core.status.replay.failed) return;
     core.clearUI();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
@@ -1015,8 +1027,6 @@ events.prototype.doAction = function () {
 }
 
 events.prototype._doAction_finishEvents = function () {
-    if (core.status.gameOver) return true;
-
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
         // 检测并执行延迟自动事件

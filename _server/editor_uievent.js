@@ -108,7 +108,7 @@ editor_uievent_wrapper = function (editor) {
 
     uievent.selectPoint = function (floorId, x, y, bigmap, callback) {
         uievent.values.bigmap = bigmap;
-        uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32 * 1.25;
+        uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32 * 540 / core.__PIXELS__;
 
         uievent.isOpen = true;
         uievent.elements.div.style.display = 'block';

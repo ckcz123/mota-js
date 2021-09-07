@@ -193,6 +193,7 @@ function core() {
             'replaying': false,
             'pausing': false,
             'animate': false, // 正在某段动画中
+            'failed': false,
             'toReplay': [],
             'totalList': [],
             'speed': 1.0,

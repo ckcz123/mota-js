@@ -692,10 +692,12 @@ actions.prototype._sys_onup = function (x, y, px, py) {
     clearInterval(core.interval.onDownInterval);
     core.interval.onDownInterval = null;
 
-    core.status.preview.prepareDragging = false;
-    if (core.status.preview.dragging) {
-        core.status.preview.dragging = false;
-        return true;
+    if (core.isPlaying()) {
+        core.status.preview.prepareDragging = false;
+        if (core.status.preview.dragging) {
+            core.status.preview.dragging = false;
+            return true;
+        }
     }
 
     if ((core.status.stepPostfix || []).length == 0) return false;

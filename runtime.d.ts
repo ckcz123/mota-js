@@ -1232,6 +1232,9 @@ declare class events {
     /** 当前是否有未处理完毕的异步事件（不包含动画和音效） */
     hasAsync(): boolean
 
+    /** 立刻停止所有异步事件 */
+    stopAsync(): void
+
     /** 
      * 跟随
      * @param name 要跟随的一个合法的4x4的行走图名称，需要在全塔属性注册
@@ -1778,7 +1781,7 @@ declare class maps {
      * @param id 播放动画的编号，即drawAnimate或drawHeroAnimate返回值
      * @param doCallback 是否执行该动画的回调函数
      */
-    stopAnimate(id: number, doCallback?: boolean): void 
+    stopAnimate(id?: number, doCallback?: boolean): void 
 
     /** 获得当前正在播放的所有（指定）动画的id列表 */
     getPlayingAnimates(name?: string) : Array<number>
@@ -2145,7 +2148,7 @@ declare class ui {
     createCanvas(name: string, x: number, y: number, width: number, height: number, zIndex: number): CanvasRenderingContext2D
 
     /** 重新定位一个自定义画布 */
-    relocateCanvas(name: string, x: number, y: number): void
+    relocateCanvas(name: string, x: number, y: number, useDelta: boolean): void
 
     /** 重新设置一个自定义画布的大小 */
     resizeCanvas(name: string, x: number, y: number): void

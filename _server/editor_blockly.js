@@ -248,7 +248,7 @@ editor_blockly = function () {
             }
             if (one.type == 'previewUI' && this.checkAsync(one.action)) return true; 
             if (one.async && one.type != 'animate' && one.type != 'function' && one.type != 'text') hasAsync = true;
-            if (one.type == 'waitAsync') hasAsync = false;
+            if (one.type == 'waitAsync' || one.type == 'stopAsync') hasAsync = false;
         }
         return hasAsync;
     }

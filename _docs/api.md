@@ -1209,6 +1209,9 @@ seed: 随机种子，相同的种子保证了录像的可重复性
 route: 经由base64压缩后的录像，用于从头开始的录像回放
 callback: 回调函数，可选
 
+stopAsync: fn()
+立刻停止所有正在进行的异步事件
+
 trigger: fn(x?: number, y?: number, callback?: fn())
 触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等
 callback: 执行完毕的回调函数
@@ -1806,9 +1809,9 @@ showFloorImage: fn(loc?: [number]|[[number]], floorId?: string, callback?: fn())
 stairExists: fn(x: number, y: number, floorId?: string) -> bool
 某个点是否存在楼梯
 
-stopAnimate: fn(id: number, doCallback?: bool)
+stopAnimate: fn(id?: number, doCallback?: bool)
 立刻停止一个动画播放
-id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值
+id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值；不填视为停止所有动画
 doCallback: 是否执行该动画的回调函数
 
 terrainExists: fn(x: number, y: number, id?: string, floorId?: string) -> bool
@@ -1995,7 +1998,7 @@ getToolboxItems: fn(cls: string) -> [string]
 loadCanvas: fn(name: string|CanvasRenderingContext2D)
 加载某个canvas状态
 
-relocateCanvas: fn(name: string, x: number, y: number)
+relocateCanvas: fn(name: string, x: number, y: number, useDelta: bool)
 重新定位一个自定义画布
 
 resizeCanvas: fn(name: string, x: number, y: number)

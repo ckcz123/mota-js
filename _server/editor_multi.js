@@ -456,7 +456,7 @@ editor_multi = function () {
         })
     }
 
-    editor_multi.writeFileDone = function () {
+    editor_multi.writeFileDone = function (keep) {
         fs.writeFile(_fileValues[0], editor.util.encode64(codeEditor.getValue() || ''), 'base64', function (err, data) {
             if (err) printe('文件写入失败,请手动粘贴至' + _fileValues[0] + '\n' + err);
             else {

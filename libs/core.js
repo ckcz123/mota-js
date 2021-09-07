@@ -54,7 +54,8 @@ function core() {
             'sun': null
         },
         "tip": null,
-        "asyncId": {}
+        "asyncId": {},
+        "lastAsyncId": null
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext
@@ -192,6 +193,7 @@ function core() {
             'replaying': false,
             'pausing': false,
             'animate': false, // 正在某段动画中
+            'failed': false,
             'toReplay': [],
             'totalList': [],
             'speed': 1.0,
@@ -249,6 +251,11 @@ function core() {
     this.markedFloorIds = {};
     this.status = {};
     this.dymCanvas = {};
+
+    if (main.mode == 'editor') {
+        document.documentElement.style.setProperty('--size', this.__SIZE__);
+        document.documentElement.style.setProperty('--pixel', this.__PIXELS__ + 'px');
+    }
 }
 
 /////////// 系统事件相关 ///////////

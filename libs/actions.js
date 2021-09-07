@@ -601,7 +601,7 @@ actions.prototype.onmove = function (loc) {
     this.doRegisteredAction('onmove', x, y, px, py);
 }
 
-actions.prototype._sys_onmove_choices = function (x, y) {
+actions.prototype._sys_onmove_choices = function (x, y, px, py) {
     if (!core.status.lockControl) return false;
 
     switch (core.status.event.id) {
@@ -611,7 +611,7 @@ actions.prototype._sys_onmove_choices = function (x, y) {
                 return true;
             }
             if (core.status.event.data.type == 'confirm') {
-                this._onMoveConfirmBox(x, y);
+                this._onMoveConfirmBox(x, y, px, py);
                 return true;
             }
             break;
@@ -631,7 +631,7 @@ actions.prototype._sys_onmove_choices = function (x, y) {
             this._onMoveChoices(x, y);
             return true;
         case 'confirmBox':
-            this._onMoveConfirmBox(x, y);
+            this._onMoveConfirmBox(x, y, px, py);
             return true;
         default:
             break;
@@ -793,8 +793,8 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct == 1) this._clickViewMaps(this.HSIZE, this.HSIZE - 3);
-        if (direct == -1) this._clickViewMaps(this.HSIZE, this.HSIZE + 3);
+        if (direct == 1) this._clickViewMaps(this.HSIZE, this.HSIZE - 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 1.5);
+        if (direct == -1) this._clickViewMaps(this.HSIZE, this.HSIZE + 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 3.5);
         return;
     }
 
@@ -976,10 +976,12 @@ actions.prototype._keyUpCenterFly = function (keycode) {
 }
 
 ////// 点击确认框时 //////
-actions.prototype._clickConfirmBox = function (x, y) {
-    if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1 && core.status.event.data.yes)
+actions.prototype._clickConfirmBox = function (x, y, px, py) {
+    if (px >= core.__PIXELS__ / 2 - 70 && px <= core.__PIXELS__ / 2 - 10
+        && py >= core.__PIXELS__ / 2 && py <= core.__PIXELS__ / 2 + 64 && core.status.event.data.yes)
         core.status.event.data.yes();
-    if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1 && core.status.event.data.no)
+    if (px >= core.__PIXELS__ / 2 + 10 && px <= core.__PIXELS__ / 2 + 70
+        && py >= core.__PIXELS__ / 2 && py <= core.__PIXELS__ / 2 + 64 && core.status.event.data.no)
         core.status.event.data.no();
 }
 
@@ -1008,9 +1010,9 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
 }
 
 ////// 鼠标在确认框上移动时 //////
-actions.prototype._onMoveConfirmBox = function (x, y) {
-    if (y == this.HSIZE + 1) {
-        if (x == this.HSIZE - 2 || x == this.HSIZE - 1) {
+actions.prototype._onMoveConfirmBox = function (x, y, px, py) {
+    if (py >= core.__PIXELS__ / 2 && py <= core.__PIXELS__ / 2 + 64) {
+        if (px >= core.__PIXELS__ / 2 - 70 && px <= core.__PIXELS__ / 2 - 10) {
             if (core.status.event.selection != 0) {
                 core.status.event.selection = 0;
                 core.playSound('光标移动');
@@ -1022,7 +1024,7 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
             }
             return;
         }
-        if (x == this.HSIZE + 2 || x == this.HSIZE + 1) {
+        if (px >= core.__PIXELS__ / 2 + 10 && px <= core.__PIXELS__ / 2 + 70) {
             if (core.status.event.selection != 1) {
                 core.status.event.selection = 1;
                 core.playSound('光标移动');
@@ -1332,7 +1334,7 @@ actions.prototype._keyUpFly = function (keycode) {
 }
 
 ////// 查看地图界面时的点击操作 //////
-actions.prototype._clickViewMaps = function (x, y) {
+actions.prototype._clickViewMaps = function (x, y, px, py) {
     if (core.status.event.data == null) {
         core.ui._drawViewMaps(core.floorIds.indexOf(core.status.floorId));
         return;
@@ -1341,50 +1343,50 @@ actions.prototype._clickViewMaps = function (x, y) {
     var index = core.status.event.data.index;
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
     var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
-    var per = this.HSIZE - 4;
+    var perpx = core.__PIXELS__ / 5, cornerpx = perpx * 3 / 4;
 
-    if (x <= per - 2 && y <= per - 2) {
+    if (px <= cornerpx && py <= cornerpx) {
         core.status.event.data.damage = !core.status.event.data.damage;
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
-    if (x <= per - 2 && y >= this.SIZE + 1 - per) {
+    if (px <= cornerpx && py >= core.__PIXELS__ - cornerpx) {
         if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
         else core.markedFloorIds[floorId] = true;
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
-    if (x >= this.SIZE + 1 - per && y <= per - 2) {
+    if (px >= core.__PIXELS__ - cornerpx && py <= cornerpx) {
         core.status.event.data.all = !core.status.event.data.all;
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
 
-    if (x >= per && x <= this.LAST - per && y <= per - 1 && (!core.status.event.data.all && mh > this.SIZE)) {
+    if (px >= perpx && px <= core.__PIXELS__ - perpx && py <= perpx && (!core.status.event.data.all && mh > this.SIZE)) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy - 1);
         return;
     }
-    if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && (!core.status.event.data.all && mh > this.SIZE)) {
+    if (px >= perpx && px <= core.__PIXELS__ - perpx && py >= core.__PIXELS__ - perpx && (!core.status.event.data.all && mh > this.SIZE)) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy + 1);
         return;
     }
-    if (x <= per - 1 && y >= per && y <= this.LAST - per) {
+    if (px <= perpx && py >= perpx && py <= core.__PIXELS__ - perpx) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx - 1, cy);
         return;
     }
-    if (x >= this.SIZE - per && y >= per && y <= this.LAST - per) {
+    if (px >= core.__PIXELS__ - perpx && py >= perpx && py <= core.__PIXELS__ - perpx) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx + 1, cy);
         return;
     }
 
-    if (y <= this.HSIZE - 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+    if (py <= 2 * perpx && (mh == this.SIZE || (px >= perpx && px <= core.__PIXELS__ - perpx))) {
         core.playSound('光标移动');
         index++;
         while (index < core.floorIds.length && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
@@ -1393,7 +1395,7 @@ actions.prototype._clickViewMaps = function (x, y) {
             core.ui._drawViewMaps(index);
         return;
     }
-    if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+    if (py >= 3 * perpx && (mh == this.SIZE || (px >= perpx && px <= core.__PIXELS__ - perpx))) {
         core.playSound('光标移动');
         index--;
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
@@ -1402,7 +1404,7 @@ actions.prototype._clickViewMaps = function (x, y) {
             core.ui._drawViewMaps(index);
         return;
     }
-    if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
+    if (px >= perpx && px <= core.__PIXELS__ - perpx && py >= perpx * 2 && py <= perpx * 3) {
         core.clearMap('data');
         core.playSound('取消');
         core.ui.closePanel();
@@ -1416,12 +1418,12 @@ actions.prototype._keyDownViewMaps = function (keycode) {
 
     var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height;
 
-    if (keycode == 38 || keycode == 33) this._clickViewMaps(this.HSIZE, this.HSIZE - 3);
-    if (keycode == 40 || keycode == 34) this._clickViewMaps(this.HSIZE, this.HSIZE + 3);
-    if (keycode == 87 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, 0);
-    if (keycode == 65) this._clickViewMaps(0, this.HSIZE);
-    if (keycode == 83 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, this.LAST);
-    if (keycode == 68) this._clickViewMaps(this.LAST, this.HSIZE);
+    if (keycode == 38 || keycode == 33) this._clickViewMaps(this.HSIZE, this.HSIZE - 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 1.5);
+    if (keycode == 40 || keycode == 34) this._clickViewMaps(this.HSIZE, this.HSIZE + 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 3.5);
+    if (keycode == 87 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, 0, core.__PIXELS__ / 2, 1);
+    if (keycode == 65) this._clickViewMaps(0, this.HSIZE, 1, core.__PIXELS__ / 2);
+    if (keycode == 83 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, this.LAST, core.__PIXELS__ / 2, core.__PIXELS__ - 1);
+    if (keycode == 68) this._clickViewMaps(this.LAST, this.HSIZE, core.__PIXELS__, core.__PIXELS__ / 2 - 1);
     return;
 }
 

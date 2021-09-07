@@ -108,7 +108,7 @@ editor_uievent_wrapper = function (editor) {
 
     uievent.selectPoint = function (floorId, x, y, bigmap, callback) {
         uievent.values.bigmap = bigmap;
-        uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32 * 1.25;
+        uievent.values.size = editor.isMobile ? window.innerWidth / core.__SIZE__ : 32 * 540 / core.__PIXELS__;
 
         uievent.isOpen = true;
         uievent.elements.div.style.display = 'block';
@@ -1005,7 +1005,7 @@ editor_uievent_wrapper = function (editor) {
         var values = Array.from(document.getElementById('_previewStatusBarValue').children).filter(function (one) {
             return one.tagName == 'INPUT' || one.tagName == 'TEXTAREA';
         }).map(function (one) { return one.value; });
-        core.status.hero.name = values[0].value;
+        core.status.hero.name = values[0];
         core.status.hero.hp = parseFloat(values[1]);
         core.status.hero.hpmax = parseFloat(values[2]);
         core.status.hero.atk = parseFloat(values[3]);

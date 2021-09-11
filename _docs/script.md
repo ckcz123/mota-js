@@ -1,8 +1,10 @@
 # 脚本
 
-?> 目前版本**v2.6.3**，上次更新时间：* {docsify-updated} *
+?> 在这一节中，让我们来了解如何使用控制台和使用脚本！
 
-在V2.6版本中，基本对整个项目代码进行了重写，更加方便造塔者的使用和复写函数。
+在V2.6版本中，基本对整个项目代码进行了重写，更加方便造塔者的使用。
+
+可配合基础js教学视频 https://www.bilibili.com/video/BV1uL411J7yZ/ 使用。
 
 ## 控制台的使用
 
@@ -202,6 +204,414 @@ function () {
 
 可以查看附录中的[API列表](api)来查看所有的系统API内容。
 
+## register系列函数
+
+在API列表中，有一系列的函数以`register`开头；这一系列函数允许你将一部分自定义的代码注入到样板中，从而可以监听某一系列行为并进行处理。
+
+下面会对这系列函数进行逐个介绍。
+
+### registerAction
+
+```
+registerAction: fn(action: string, name: string, func: string|fn(params: ?), priority?: number)
+此函数将注册一个用户交互行为。
+action: 要注册的交互类型，如 ondown, onup, keyDown 等等。
+name: 你的自定义名称，可被注销使用；同名重复注册将后者覆盖前者。
+func: 执行函数。
+如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
+priority: 优先级；优先级高的将会被执行。此项可不填，默认为0
+```
+
+`registerAction`为register系列最常用的功能之一，它允许你任意监听用户的交互事件，包括且不仅限于按键、点击、拖动、长按，等等。
+
+下面是一个例子：
+
+```js
+// 当flag:abc是true时，点击屏幕左上角可以使用道具破墙镐
+// 注入一个 ondown 事件，名称为 my_pickaxe
+core.registerAction('ondown', 'my_pickaxe', function (x, y, px, py) {
+    // 如果当前正在执行某个事件，则忽略之。
+    if (core.status.lockControl) return false;
+    // 如果勇士正在行走中，则忽略之。
+    if (core.isMoving()) return false;
+    // x, y 为点击坐标；px, py 为点击的像素坐标
+    // 检查flag是否为true，且点击了(0,0)点
+    if (core.hasFlag('abc') && x == 0 && y == 0) {
+        // 检查能否使用破墙镐
+        if (core.canUseItem('pickaxe')) {
+            core.useItem('pickaxe');
+            // 返回true将拦截其他交互函数对于点击的处理
+            return true;
+        }
+    }
+    // 返回false后将会继续执行其他的交互函数（例如寻路）
+    return false;
+
+// 优先级设置为100，比系统优先级高，因此将会优先执行此注入的项目。
+}, 100);
+
+// 当你不再需要上述监听时，可以通过下面这一句取消注入。
+// core.unregisterActon('ondown', 'my_pickaxe');
+```
+
+下面是另一个例子：
+
+```js
+// 假设我们通过事件流做了一个商店，希望能通过”长按空格“和“长按屏幕”进行连续确认购买
+// 此时，需要使用一个flag，表示是否在商店中；例如 flag:inShop
+
+// 注入一个keyDown（按下）事件；请注意，当按下按键且不释放时，会连续触发keyDown。
+core.registerAction('keyDown', 'my_shop', function (keycode) {
+    // 检查是否确实在该商店事件中；进该商店前需要将flag:inShop设为true，退出后需要设为false
+    if (!core.hasFlag('inShop')) return false;
+    // 检查当前事件是一个”显示选择项“
+    if (core.status.event.id != 'action' || core.status.event.data.type != 'choices') {
+        return false;
+    }
+    // 获得当前“显示选择项”的各个选项
+    var choices = core.status.event.data.current.choices;
+    // 获得当前选项第一项在屏幕上的y坐标
+    var topIndex = core.actions._getChoicesTopIndex(choices.length);
+    // 检查按键的键值，是否是空格或者回车
+    if (keycode == 13 || keycode == 32) {
+        // 如果是，则视为直接点击屏幕上的选项
+        // core.status.event.selection为当前光标选择项；第一项为0
+        // 点击的x为HSIZE，即屏幕左右居中；y为topIndex + core.status.event.selection为该选择项
+		core.actions._clickAction(core.actions.HSIZE, topIndex + core.status.event.selection);
+        // 不再执行其他的交互函数
+        return true;
+    }
+    // 否则，继续执行其他的交互函数（如上下键光标选择）
+    return false;
+}, 100);
+
+
+// 还需要注册一个keyUp（放开）事件，拦截空格和回车
+// 这是因为，按一下空格会先触发keyDown再触发keyUp；这里不拦截的话会购买两次。
+var _my_shop_up = function (keycode) {
+    if (!core.hasFlag('inShop')) return false;
+    if (core.status.event.id != 'action' || core.status.event.data.type != 'choices') {
+        return false;
+    }
+    // 检查是否是空格或者回车，如果是则拦截操作。
+    if (keycode == 13 || keycode == 32) return true;
+    return false;
+};
+// 这里可以传入前面定义的函数体。
+core.registerAction('keyUp', 'my_shop', _my_shop_up, 100);
+
+
+// 注册一个长按事件，允许长按连续购买
+this._my_shop_longClick = function (x, y, px, py) {
+    if (!core.hasFlag('inShop')) return false;
+    if (core.status.event.id != 'action' || core.status.event.data.type != 'choices') {
+        return false;
+    }
+    // 直接视为点击了此位置
+    core.actions._clickAction(x, y, px, py);
+	return true;
+}
+// 如果是插件中使用`this.xxx`定义的函数，也可以直接传入函数名。
+core.registerAction('longClick', 'my_shop', '_my_shop_longClick', 100);
+```
+
+简单地说，`registerAction`这个函数**允许你在任何时候监听和拦截任何用户交互行为**。
+
+目前，`registerAction`支持监听和拦截如下交互：
+
+- `keyDown`: 当一个键被按下时
+  - 对应的函数参数：`function (keycode)`，为此时按下键的键值
+  - 请注意：如果长按键不放开的话，会连续触发`keyDown`事件
+- `keyUp`: 当一个键被放开时
+  - 对应的函数参数：`function (keycode, altKey, fromReplay)`，为此时放开键的键值、当前alt是否被按下、是否是录像播放中模拟的按键
+- `onKeyDown`: 当一个键被按下时
+  - 对应的函数参数：`function (e)`，为此时按键的信息。这里的`e`是一个`KeyboardEvent`。
+  - 请注意：如果长按键不放开的话，会连续触发`onKeyDown`事件。
+  - 和上述`keyDown`的主要区别就是参数为原始的`KeyboardEvent`；仍然推荐直接使用`keyDown`。
+- `onKeyUp`: 当一个键被放开时
+  - 对应的函数参数：`function (e)`，为此时按键的信息。这里的`e`是一个`KeyboardEvent`。
+  - 和上述`keyUp`的主要区别就是参数为原始的`KeyboardEvent`；仍然推荐直接使用`keyUp`。
+- `ondown`: 当屏幕被鼠标或手指按下时
+  - 对应的函数参数：`function (x, y, px, py)`，为此时按下时的格子坐标和像素坐标。
+- `onmove`: 当屏幕被鼠标滑动，或手指拖动时
+  - 对应的函数参数：`function (x, y, px, py)`，为此时滑动或拖动时的格子坐标和像素坐标。
+  - 如果是鼠标，只要在屏幕上滑动就会触发`onmove`，无需处于点击状态（也就是悬浮也是可以的）。
+  - 如果是触摸屏，则只有手指按下滑动时才会触发`onmove`（并不存在什么悬浮的说法）。
+- `onup`: 当屏幕被鼠标或手指放开时
+  - 对应的函数参数：`function (x, y, px, py)`，为此时放开时的格子坐标和像素坐标。
+- `onclick` 【已废弃】
+  - 从V2.8.2起，此交互已被废弃，注册一个`onclick`会被直接转发至`ondown`。
+- `onmousewheel`: 当鼠标滚轮滚动时
+  - 对应的函数参数：`function (direct)`，为此时滚轮方向。向下滚动是-1，向上滚动是1。
+  - 目前在楼传、怪物手册、存读档、浏览地图等多个地方绑定了鼠标滚轮事件。
+- `keyDownCtrl`: 当Ctrl键处于被长按不放时
+  - 对应的函数参数：`function ()`，即无参数。
+  - 目前主要用于跳过剧情对话。
+- `longClick`: 当鼠标或手指长按屏幕时
+  - 对应的函数参数：`function (x, y, px, py)`，为长按屏幕对应的格子坐标和像素坐标
+  - 目前主要用于虚拟键盘，和跳过剧情对话。
+- `onStatusBarClick`: 当点击状态栏时
+  - 对应的函数参数：`function (px, py, vertical)`，为状态栏点击的像素坐标。
+  - 如果参数`vertical`不为`null`，表示该状态栏点击是录像播放时触发的，其值为录像记录时的横竖屏状态。
+
+### registerAnimationFrame
+
+```
+registerAnimationFrame: fn(name: string, needPlaying: bool, func?: fn(timestamp: number))
+注册一个 animationFrame
+name: 名称，可用来作为注销使用
+needPlaying: 是否只在游戏运行时才执行（在标题界面不执行）
+func: 要执行的函数，或插件中的函数名；可接受timestamp（从页面加载完毕到当前所经过的时间）作为参数
+```
+
+`registerAnimationFrame`为其次常用的功能，可以用于需要反复执行的脚本，常用于动画之类。
+
+目前，样板的全局动画（即怪物的帧振动）、人物行走动画、普通动画、天气效果、游戏计时、以及楼层并行事件等，都是通过`registerAnimationFrame`进行实现的。
+
+通过`registerAnimationFrame`注册的函数会平均每16.6ms执行一次（视浏览器的性能而定，例如手机上可能执行频率会变慢）。可以通过函数的`timestamp`参数来获得从页面加载完毕到当前所经过的毫秒数（从而可以进一步控制执行频率，如每500ms才执行一次）。
+
+**推荐所有的需要反复执行的脚本（如动画相关）都通过此函数来注册，而不是使用`setInterval`，以获得更好的性能。**
+
+下面是“人物血量动态变化”的插件的例子。
+
+```js
+var speed = 0.05; // 动态血量变化速度，越大越快。
+var _currentHp = null; // 当前正在变化的hp值
+var _lastStatus = null; // 上次人物的属性对象
+
+// 注册一个
+core.registerAnimationFrame('dynamicHp', true, function (timestamp) {
+    // 检查人物所指向的对象是否发生了变化
+    // 在例如读档后，core.status.hero被重置了，此时需要将_currentHp重置为正确的生命值。
+    if (_lastStatus != core.status.hero) {
+        _lastStatus = core.status.hero;
+        _currentHp = core.status.hero.hp;
+    }
+    // 如果显示的hp值和当前实际hp值不同
+    if (core.status.hero.hp != _currentHp) {
+        // 计算hp差值，并获得下个血量变化值。
+        var dis = (_currentHp - core.status.hero.hp) * speed;
+        if (Math.abs(dis) < 2) {
+            // 如果很接近了，直接设为实际hp值。
+            _currentHp = core.status.hero.hp;
+        } else {
+            // 否则，改变显示值使其更接近。
+            _currentHp -= dis;
+        }
+        // 然后设置状态栏中生命的显示项。
+        core.setStatusBarInnerHTML('hp', _currentHp);
+    }
+});
+```
+
+### registerReplayAction
+
+```
+registerReplayAction: fn(name: string, func: fn(action?: string) -> bool)
+注册一个录像行为
+name: 自定义名称，可用于注销使用
+func: 具体执行录像的函数，可为一个函数或插件中的函数名；
+需要接受一个action参数，代表录像回放时的下一个操作
+func返回true代表成功处理了此录像行为，false代表没有处理此录像行为。
+```
+
+`registerReplayAction`允许你自己定义和注册一个录像行为。
+
+在游戏时，你的所有操作会被记录为一个数组`core.status.route`，如按上就是`up`，使用破墙镐就是`item:pickaxe`，瞬移到(1,2)就是`move:1:2`，等等。
+
+在录像播放时，会依次从数组中取出一个个的录像操作，并模拟执行对应的操作。这里对于每个录像操作，都是靠`registerReplayAction`进行注册的。
+
+下面是一个例子：
+
+```js
+// 当flag:abc为true时，点击屏幕(0,0)，(0,1)，(0,2)，(0,3)会分别执行不同的公共事件。
+
+// 先通过registerAction注册屏幕点击事件
+core.registerAction('onclick', 'commonEvent', function (x, y, px, py) {
+    // 检查是否是自由状态、是否在移动，是否存在flag。
+    if (core.status.lockControl || core.isMoving() || !core.hasFlag('abc')) return false;
+    // 公共事件名
+    var eventName = null;
+    if (x == 0 && y == 0) {
+        eventName = "公共事件0";
+    } else if (x == 0 && y == 1) {
+        eventName = "公共事件1";
+    } else if (x == 0 && y == 2) {
+        eventName = "公共事件2";
+    } // ... 可以继续写下去。
+
+    // 如果存在需要执行的公共事件
+    if (eventName != null) {
+        // 重要！往录像中写入一个自定义的`commonEvent:`项，记录执行的公共事件名称。
+        // 由于录像编码时只支持部分ascii码，而eventName作为公共事件名可能带有中文，
+        // 因此需要使用 core.encodeBase64() 对eventName进行编码
+        core.status.route.push("commonEvent:" + core.encodeBase64(eventName));
+        // 插入公共事件
+        core.insertCommonEvent(eventName);
+        return true;
+    }
+    return false;
+});
+
+// 注册一个录像处理行为来处理上述的`commonEvent:`项。
+core.registerReplayAction('commonEvent', function (action) {
+    // 参数action为此时录像播放时执行到的项目。
+    // 如果不是`commonEvent:`，则不应该被此函数处理。
+    if (action.indexOf('commonEvent:') !== 0) return false;
+    // 二次检查flag:abc是否存在
+    if (!core.hasFlag('abc')) {
+        core.control._replay_error(action);
+        return true;
+    }
+    // 如果是我们的录像行为，获得具体的公共事件名。
+    // 上面使用encodeBase64()编码了录像，现在同样需要解码。
+    var eventName = core.decodeBase64(action.substring(12));
+    // 由于录像播放中存在二次记录，还需要将action写入到当前播放过程中的录像中。
+    // 这样录像播放完毕后再次直接重头播放不会出现问题。
+    core.status.route.push(action);
+    // 执行该公共事件。
+    core.insertCommonEvent(eventName);
+    // 继续播放录像。
+    core.replay();
+    // 返回true表示我们已经成功处理了此录像行为。
+    return true;
+});
+```
+
+### registerWeather
+
+```
+registerWeather: fn(name: string, initFunc: fn(level: number), frameFunc?: fn(timestamp: number, level: number))
+注册一个天气
+name: 要注册的天气名
+initFunc: 当切换到此天气时的初始化；接受level（天气等级）为参数；可用于创建多个节点（如初始化雪花）
+frameFunc: 每帧的天气效果变化；可接受timestamp（从页面加载完毕到当前所经过的时间）和level（天气等级）作为参数
+天气应当仅在weather层进行绘制，推荐使用core.animateFrame.weather.nodes用于节点信息。
+```
+
+`registerWeather`允许你注册一个天气。
+
+在游戏时，楼层属性中可以设置天气如 `["snow", 5]`，或者脚本 `core.setWeather("snow", 5)` 来切换天气。
+
+下面是一个例子：
+
+```js
+// 注册一个”血“天气，每200ms就随机在界面上的绘制红色斑点
+core.registerWeather('blood', function (level) {
+    // 切换到此天气时应当执行的脚本吗，如播放一个音效
+    core.playSound('blood.mp3');
+}, function (timestamp, level) {
+    // 我们希望每200ms就界面上随机绘制 level^2 个红点，半径在0~32像素之间
+
+    // 检查是否经过了200ms
+    if (timestamp - core.animateFrame.weather.time < 200) return;
+    // 当且仅当在weather层上绘制
+    core.clearMap('weather');
+    for (var i = 0; i < level * level; ++i) {
+        // 随机界面中的一个点，半径在0~32之间
+        var px = Math.random() * core.__PIXELS__;
+        var py = Math.random() * core.__PIXELS__;
+        var r = Math.random() * 32;
+        core.fillCircle('weather', px, py, r, 'red');
+    }
+    // 设置本次天气调用的时间
+    core.animateFrame.weather.time = timestamp;
+});
+```
+
+值得注意的是，天气当且仅当在`weather`层进行绘制，推荐使用或设置`core.animateFrame.weather.time`作为上次天气调用的时间避免太过于频繁的调用。
+
+推荐使用`core.animateFrame.weather.nodes`来存储天气的节点，这样会在取消天气时自动被移除。
+
+样板的云`cloud`和雾`fog`均由多个图片叠加移动实现；如果你想实现类似效果，可直接使用`core.control.__animateFrame_weather_image`作为`frameFunc`，详见样板的云雾实现。
+
+另外注意的是，注册的天气无法在事件编辑器的下拉框中选择；你可以选择脚本调用`core.setWeather`，或者修改`_server/MotaAction.g4`中的`Weather_List`:
+
+```js
+Weather_List
+    :   '无'|'雨'|'雪'|'晴'|'雾'|'云'
+    /*Weather_List ['null','rain','snow','sun','fog','cloud']*/;
+```
+
+### registerSystemEvent
+
+```
+registerSystemEvent: fn(type: string, func: fn(data?: ?, callback?: fn()))
+注册一个系统事件
+type: 事件名
+func: 为事件的处理函数，可接受(data,callback)参数
+```
+
+`registerSystemEvent`允许你注册一个系统事件。
+
+在图块属性中，存在一个`trigger`选项，可以设置图块的触发器；当玩家碰触到对应的图块时，会根据对应图块的触发器来执行对应系统事件，即`registerSystemEvent`所注册的。
+
+这里的`data`为触发该图块时的`block`信息，和`core.getBlock()`的返回值相同。`callback`为执行完毕时的回调。
+
+下面是一个例子：
+
+```js
+// 假设存在一个图块，当触碰时会触发一个公共事件，且需要图块坐标作为公共事件参数。
+// 首先需要将该图块的触发器设置为`custom`。
+
+// 注册一个`custom`的系统事件；当角色碰触到触发器为`custom`的图块时会被执行。
+core.registerSystemEvent("custom", function (data, callback) {
+    // 这里的`data`为碰触到的图块信息。
+    console.log(data);
+    // 插入一个公共事件（如“图块触碰”），把图块坐标作为公共事件参数传入。
+    core.insertCommonEvent("图块触碰", /*args*/ [data.x, data.y], data.x, data.y);
+    if (callback) callback();
+})
+```
+
+`registerSystemEvent`系列最大的好处是，他是和“图块”相关而不是和“点”相关的。也就是说，可以任意通过`setBlock`之类的函数移动图块，不会影响到事件的触发（而这个是靠红点所无法完成的）。
+
+也可以通过`registerSystemEvent`来拦截默认的系统事件，例如 `core.registerSystemEvent("battle", ...)` 可以拦截当遇到没有覆盖触发器的怪物的系统处理（即不再直接战斗）。
+
+### registerEvent
+
+```
+registerEvent: fn(type: string, func: fn(data: ?, x?: number, y?: number, prefix?: string))
+注册一个自定义事件
+type: 事件类型
+func: 事件的处理函数，可接受(data, x, y, prefix)参数
+data为事件内容，x和y为当前点坐标（可为null），prefix为当前点前缀
+```
+
+`registerEvent`允许你注册一个自定义事件，即事件流中 type:xxx 的行为。
+
+```js
+// 注册一个type:abc事件
+core.registerEvent("abc", function (data, x, y, prefix) {
+    // 直接打出当前事件信息
+    console.log(data.name);
+    core.doAction();
+});
+
+// 执行一个abc事件
+// 控制台会打出 "hahaha"
+// core.insertAction([{"type": "abc", "name": "hahaha"}]);
+```
+
+此函数一般不是很常用，但是配合“编辑器修改”（即给事件编辑器修改或者增加事件图块）会有奇效。
+
+具体例子可参见[修改编辑器](editor)中的`demo - 增加新语句图块`。
+
+### registerResize
+
+```
+registerResize: fn(name: string, func: fn(obj: ?))
+注册一个resize函数
+name: 名称，可供注销使用
+func: 可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
+```
+
+`registerResize`允许你重写一个屏幕重定位函数。
+
+此函数会在游戏开始前，以及每次屏幕大小发生改变时调用。系统通过此函数来对游戏界面进行调整，如横竖屏自适应等。
+
+此函数会被较少用到。
+
 ## 复写函数
 
 样板的功能毕竟是写死的，有时候我们也需要修改样板的一些行为。
@@ -215,7 +625,7 @@ function () {
 - 不方便能整理成新的插件在别的塔使用（总不能让别的塔也去修改libs吧）
 - ……
 
-好消息的是，从V2.6开始，我们再也不需要开文件了，而是可以直接在插件中对原始函数进行复写。
+好消息是，从V2.6开始，我们再也不需要开文件了，而是可以直接在插件中对原始函数进行复写。
 
 函数复写的好处如下：
 
@@ -228,7 +638,7 @@ function () {
 
 **对xxx文件中的yyy函数进行复写，规则是`core.xxx.yyy = function (参数列表) { ... }`。**
 
-但是，对于`registerXXX`所注册的函数是无效的，例如直接复写`core.control._animationFrame_globalAnimate`函数是没有效果的。对于这种情况引入的函数，需要注册同名函数，可参见最下面的样例。
+但是，对于`register`系列函数是无效的，例如直接复写`core.control._animationFrame_globalAnimate`函数是没有效果的。对于这种情况引入的函数，需要注册同名函数，可参见最下面的样例。
 
 下面是几个例子，从简单到复杂。
 
@@ -264,58 +674,33 @@ core.events.useFly = function (fromUserAction) {
 
 其他的几个按钮，如快捷商店`openQuickShop`，虚拟键盘`openKeyBoard`的重写也几乎完全一样。
 
-### 楼层切换时根据flag来播放不同的音效
+### 关门时播放一个动画
 
-整体复制并重写整个楼传切换前的函数，将`core.playSound('floor.mp3')`替换成根据flag来判定。
+关门是在`events.js`中的`closeDoor`函数，因此需要对其进行重写。
+
+然而，我们只需要在这个函数执行之前插一句播放动画，所以并不需要重写整个函数，而是直接插入一行就行。
 
 ```js
-// 复制重写events.js中的_changeFloor_beforeChange，修改音效
-core.events._changeFloor_beforeChange = function (info, callback) {
-    // 直接替换原始函数中的 core.playSound('floor.mp3'); 
-    if (core.getFlag("floorSound") == 0) core.playSound('floor0.mp3');
-    if (core.getFlag("floorSound") == 1) core.playSound('floor1.mp3');
-    if (core.getFlag("floorSound") == 2) core.playSound('floor2.mp3');
-    // ...
-    
-    // 下面是原始函数中的剩余代码，保持不变
-    window.setTimeout(function () {
-        if (info.time == 0)
-            core.events._changeFloor_changing(info, callback);
-        else
-            core.showWithAnimate(core.dom.floorMsgGroup, info.time / 2, function () {
-                core.events._changeFloor_changing(info, callback);
-            });
-    }, 25)
+var closeDoor = core.events.closeDoor; // 先把原始函数用一个变量记录下来
+core.events.closeDoor = function (x, y, id, callback) {
+    core.drawAnimate('closeDoor', x, y); // 播放 closeDoor 这个动画
+    return closeDoor(x, y, id, callback); // 直接调用原始函数
 }
 ```
 
-### 每次打开全局商店时播放一个音效
+### 每次跳跃角色前播放一个音效
 
-打开全局商店是在`events.js`中的`openShop`函数，因此需要对其进行重写。
+跳跃角色在`events.js`的`jumpHero`函数，因此需要对其进行重写。
 
-然而，我们只需要在这个函数执行之前插一句音效播放，所以并不需要重写整个函数，而是直接插入一行就行。
+由于只需要额外在函数执行前增加一句音效播放，所以直接插入一行即可。
 
-```js
-var openShop = core.events.openShop; // 先把原始函数用一个变量记录下来
-core.events.openShop = function (shopId, needVisited) {
-    core.playSound("shop.mp3"); // 播放一个音效
-    return openShop(shopId, needVisited); // 直接调用原始函数
-}
-```
-
-### 每次绘制地图前在控制台打出一条信息 
-
-绘制地图在`maps.js`的`drawMap`函数，因此需要对其进行重写。
-
-由于只需要额外在函数执行前增加一句控制台输出，所以直接插入一行即可。
-
-但是需要注意的是，`drawMap`中使用了`this._drawMap_drawAll()`，因此使用函数时需要用`call`或者`apply`来告知this是什么。
+但是需要注意的是，`jumpHero`中使用了`this._jumpHero_doJump()`，因此使用函数时需要用`call`或者`apply`来告知this是什么。
 
 ```js
-var drawMap = core.maps.drawMap; // 先把原始函数用一个变量记录下来
-core.maps.drawMap = function (floorId, callback) {
-    console.log("drawMap..."); // 控制台打出一条信息
-    return drawMap.call(core.maps, floorId, callback); // 需要使用`call`来告知this是core.maps
+var jumpHero = core.events.jumpHero; // 先把原始函数用一个变量记录下来
+core.events.jumpHero = function (ex, ey, time, callback) {
+    core.playSound("jump.mp3"); // 播放一个音效
+    return jumpHero.call(core.events, ex, ey, time, callback); // 需要使用`call`来告知this是core.events
 }
 ```
 
@@ -349,6 +734,6 @@ core.registerAnimationFrame("globalAnimate", true, "myGlobalAnimate");
 
 ==========================================================================================
 
-[继续阅读下一章：API列表](api)
+[继续阅读下一章：修改编辑器](editor)
 
 

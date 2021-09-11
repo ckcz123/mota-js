@@ -18,7 +18,7 @@ editor_mode = function (editor) {
         this._ids = {}
         this.dom = {}
         this.actionList = [];
-        this.mode = '';
+        this.mode = 'tower'; // 初始默认显示全塔属性
         this.info = {};
         this.appendPic = {};
         this.doubleClickMode = 'change';
@@ -57,7 +57,25 @@ editor_mode = function (editor) {
                 printe(objs_.slice(-1)[0]);
                 throw (objs_.slice(-1)[0])
             }
-            ; printf('修改成功' + (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name == 'template' ? '\n\n请注意：全塔属性的name尚未修改，请及时予以设置' : ''));
+            ; 
+            var str = '修改成功！';
+            if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name == 'template')
+                str += '<br/>请注意：全塔属性的name尚未修改，请及时予以设置。';
+            if (mode == 'enemyitem') {
+                if (editor.info && editor.info.idnum) {
+                    var block = editor.core.maps.blocksInfo[editor.info.idnum];
+                    if (block.doorInfo != null && block.doorInfo.keys != null && Object.keys(block.doorInfo.keys).length > 0
+                        && block.trigger != 'openDoor') {
+                        str += "<br/>你修改了门信息，但触发器未改成openDoor，请修改否则无法撞击开门。"
+                    }
+                }
+                if (editor_mode.info.images == 'enemys' || editor_mode.info.images == 'enemy48') {
+                    if (core.getFaceDownId(editor_mode.info.id) != editor_mode.info.id) {
+                        str += "<br/>绑定行走图朝向后只需要对应设置朝下怪物的属性，会自动同步而无需修改其他朝向的属性。"
+                    }
+                }
+            }
+            printf(str);
             if (callback) callback();
         }
         switch (mode) {
@@ -115,7 +133,7 @@ editor_mode = function (editor) {
         editor.drawEventBlock();
         if (editor_mode[mode]) editor_mode[mode]();
         editor.dom.editModeSelect.value = mode;
-        if (!selectBox.isSelected()) tip.showHelp();
+        if (!selectBox.isSelected()) editor.uifunctions.showTips();
     }
 
     editor_mode.prototype.change = function (value) {
@@ -165,6 +183,27 @@ editor_mode = function (editor) {
             }
         });
         return true
+    }
+
+    editor_mode.prototype.checkImages = function (thiseval, directory) {
+        if (!directory) return true;
+        if (!editor_mode.checkUnique(thiseval)) return false;
+        fs.readdir(directory, function (err, data) {
+            if (err) {
+                printe(err);
+                throw Error(err);
+            }
+            var notExist = null;
+            thiseval.map(function (v) {
+                var name = v.indexOf('.') < 0 ? (v+'.png') : v;
+                if (data.indexOf(name) < 0) notExist = name;
+                return name;
+            });
+            if (notExist) {
+                alert('警告！图片' + notExist + '不存在！保存可能导致工程无法打开，请及时修改！');
+            }
+        });
+        return true;
     }
 
     editor_mode.prototype.changeDoubleClickModeByButton = function (mode) {

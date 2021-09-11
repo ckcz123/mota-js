@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 /*
 utils.js 工具类
 
@@ -13,25 +15,16 @@ function utils() {
         'down': {'x': 0, 'y': 1},
         'right': {'x': 1, 'y': 0}
     };
-    this.obliScan = {
-        'lu': {'x': -1, 'y': -1},
-        'ld': {'x': -1, 'y': 1},
-        'ru': {'x': 1, 'y': 1},
-        'rd': {'x': 1, 'y': -1}
+    this.scan2 = {
+        'up': {'x': 0, 'y': -1},
+        'left': {'x': -1, 'y': 0},
+        'down': {'x': 0, 'y': 1},
+        'right': {'x': 1, 'y': 0},
+        'leftup': {'x': -1, 'y': -1},
+        'leftdown': {'x': -1, 'y': 1},
+        'rightup': {'x': 1, 'y': -1},
+        'rightdown': {'x': 1, 'y': 1}
     };
-    this.line = {
-        'down': 0,
-        'up': 3,
-        'left': 1,
-        'right': 2
-    }
-    this.face = ['down','left','right','up'];
-    this.invDir = {
-        'left':'right',
-        'right':'left',
-        'up':'down',
-        'down': 'up',
-    }
 }
 
 utils.prototype._init = function () {
@@ -75,31 +68,86 @@ utils.prototype._init = function () {
             return this.substring(0, search.length) === search;
         }
     }
-
+    if (typeof Array.prototype.fill != "function") {
+        Array.prototype.fill = function (value) {
+            for (var i = 0; i < this.length; ++i)
+                if (this[i] == null)
+                    this[i] = value;
+            return this;
+        }
+    }
+    if (typeof Array.prototype.includes != "function") {
+        Array.prototype.includes = function (value) {
+            return this.indexOf(value) >= 0;
+        }
+    }
+    if (typeof String.prototype.includes != "function") {
+        String.prototype.includes = function (value) {
+            return this.indexOf(value) >= 0;
+        }
+    }
+    if (typeof Object.values != "function") {
+        Object.values = function (obj) {
+            return Object.keys(obj).map(function (one) { return obj[one]; });
+        }
+    }
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
-utils.prototype.replaceText = function (text, need, times) {
-    return text.replace(/\${(.*?)}/g, function (word, value) {
-        return core.calValue(value, null, need, times);
-    });
+utils.prototype.replaceText = function (text, prefix) {
+    if (typeof text != 'string') return text;
+    var index = text.indexOf("${");
+    if (index < 0) return text;
+    var cnt = 0, curr = index;
+    while (++curr < text.length) {
+        if (text.charAt(curr) == '{') cnt++;
+        if (text.charAt(curr) == '}') cnt--;
+        if (cnt == 0) break;
+    }
+    if (cnt != 0) return text;
+    var value = core.calValue(text.substring(index+2, curr), prefix);
+    if (value == null) value = "";
+    return text.substring(0, index) + value + core.replaceText(text.substring(curr + 1), prefix);
+}
+
+utils.prototype.replaceValue = function (value) {
+    if (typeof value == "string" && (value.indexOf(":") >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0)) {
+        if (value.indexOf('status:') >= 0)
+            value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
+        if (value.indexOf('buff:') >= 0)
+            value = value.replace(/buff:([a-zA-Z0-9_]+)/g, "core.getBuff('$1')");
+        if (value.indexOf('item:') >= 0)
+            value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
+        if (value.indexOf('flag:') >= 0 || value.indexOf('flag：') >= 0)
+            value = value.replace(/flag[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, "core.getFlag('$1', 0)");
+        //if (value.indexOf('switch:' >= 0))
+        //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
+        if (value.indexOf('global:') >= 0 || value.indexOf('global：') >= 0)
+            value = value.replace(/global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, "core.getGlobal('$1', 0)");
+        if (value.indexOf('enemy:')>=0)
+            value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
+        if (value.indexOf('blockId:')>=0)
+            value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
+        if (value.indexOf('blockNumber:')>=0)
+            value = value.replace(/blockNumber:(\d+),(\d+)/g, "core.getBlockNumber($1, $2)");
+        if (value.indexOf('blockCls:')>=0)
+            value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
+        if (value.indexOf('equip:')>=0)
+            value = value.replace(/equip:(\d)/g, "core.getEquip($1)");
+        if (value.indexOf('temp:')>=0)
+            value = value.replace(/temp:([a-zA-Z0-9_]+)/g, "core.getFlag('@temp@$1', 0)");
+    }
+    return value;
 }
 
 ////// 计算表达式的值 //////
-utils.prototype.calValue = function (value, prefix, need, times) {
+utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
-        if (value.indexOf(':') >= 0) {
-            if (value.indexOf('status:') >= 0)
-                value = value.replace(/status:([a-zA-Z0-9_]+)/g, "core.getStatus('$1')");
-            if (value.indexOf('item:') >= 0)
-                value = value.replace(/item:([a-zA-Z0-9_]+)/g, "core.itemCount('$1')");
-            if (value.indexOf('flag:') >= 0)
-                value = value.replace(/flag:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getFlag('$1', 0)");
+        if (value.indexOf(':') >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0) {
             if (value.indexOf('switch:' >= 0))
                 value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
-            if (value.indexOf('global:') >= 0)
-                value = value.replace(/global:([a-zA-Z0-9_\u4E00-\u9FCC]+)/g, "core.getGlobal('$1', 0)");
+            value = this.replaceValue(value);
         }
         return eval(value);
     }
@@ -166,18 +214,7 @@ utils.prototype.setLocalStorage = function (key, value) {
         var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
             return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
         });
-        var compressed = lzw_encode(str);
-
-        // test if we can save to localStorage
-        localStorage.setItem("__tmp__", compressed);
-        if (lzw_decode(localStorage.getItem("__tmp__")) == str) {
-            localStorage.setItem(core.firstData.name + "_" + key, compressed);
-        }
-        else {
-            // We cannot compress the data
-            localStorage.setItem(core.firstData.name + "_" + key, str);
-        }
-        localStorage.removeItem("__tmp__");
+        localStorage.setItem(core.firstData.name + "_" + key, str);
 
         if (key == 'autoSave') core.saves.ids[0] = true;
         else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
@@ -192,8 +229,13 @@ utils.prototype.setLocalStorage = function (key, value) {
 
 ////// 获得本地存储 //////
 utils.prototype.getLocalStorage = function (key, defaultValue) {
-    var res = this.decompress(localStorage.getItem(core.firstData.name + "_" + key));
-    return res == null ? defaultValue : res;
+    try {
+        var value = JSON.parse(localStorage.getItem(core.firstData.name + "_" + key));
+        if (value == null) return defaultValue;
+        return value;
+    } catch (e) {
+        return defaultValue;
+    }
 }
 
 ////// 移除本地存储 //////
@@ -204,27 +246,16 @@ utils.prototype.removeLocalStorage = function (key) {
 }
 
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
-
-    if (!core.platform.useLocalForage) {
-        if (this.setLocalStorage(key, value)) {
-            if (successCallback) successCallback();
-        }
-        else {
-            if (errorCallback) errorCallback();
-        }
-        return;
-    }
-
     if (value == null) {
         this.removeLocalForage(key);
         return;
     }
 
-    // Save to localforage
-    var compressed = lzw_encode(JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
+    var name = core.firstData.name + "_" + key;
+    var str = JSON.stringify(value).replace(/[\u007F-\uFFFF]/g, function (chr) {
         return "\\u" + ("0000" + chr.charCodeAt(0).toString(16)).substr(-4)
-    }));
-    localforage.setItem(core.firstData.name + "_" + key, compressed, function (err) {
+    });
+    var callback = function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
@@ -233,22 +264,31 @@ utils.prototype.setLocalForage = function (key, value, successCallback, errorCal
             else if (/^save\d+$/.test(key)) core.saves.ids[parseInt(key.substring(4))] = true;
             if (successCallback) successCallback();
         }
-    });
+    }
+    this._setLocalForage_set(name, str, callback);
+}
+
+utils.prototype._setLocalForage_set = function (name, str, callback) {
+    if (window.jsinterface && window.jsinterface.setLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        core.saves.cache[name] = str;
+        window.jsinterface.setLocalForage(id, name, str);
+    } else {
+        var compressed = str.length > 100000 ? LZString.compress(str) : lzw_encode(str);
+        core.saves.cache[name] = compressed;
+        localforage.setItem(name, compressed, callback);
+    }
 }
 
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
-
-    if (!core.platform.useLocalForage) {
-        var value = this.getLocalStorage(key, defaultValue);
-        if (successCallback) successCallback(value);
-        return;
-    }
-
-    localforage.getItem(core.firstData.name + "_" + key, function (err, value) {
+    var name = core.firstData.name + "_" + key;
+    var callback = function (err, value) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
         else {
+            core.saves.cache[name] = value;
             if (!successCallback) return;
             if (value != null) {
                 var res = core.utils.decompress(value);
@@ -257,18 +297,26 @@ utils.prototype.getLocalForage = function (key, defaultValue, successCallback, e
             }
             successCallback(defaultValue);
         }
-    })
+    };
+    if (core.saves.cache[name] != null) {
+        return callback(null, core.saves.cache[name]);
+    }
+    this._getLocalForage_get(name, callback);
+}
+
+utils.prototype._getLocalForage_get = function (name, callback) {
+    if (window.jsinterface && window.jsinterface.getLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.getLocalForage(id, name);
+    } else {
+        localforage.getItem(name, callback);
+    }
 }
 
 utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
-
-    if (!core.platform.useLocalForage) {
-        this.removeLocalStorage(key);
-        if (successCallback) successCallback();
-        return;
-    }
-
-    localforage.removeItem(core.firstData.name + "_" + key, function (err) {
+    var name = core.firstData.name + "_" + key;
+    var callback = function (err) {
         if (err) {
             if (errorCallback) errorCallback(err);
         }
@@ -277,7 +325,61 @@ utils.prototype.removeLocalForage = function (key, successCallback, errorCallbac
             else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
             if (successCallback) successCallback();
         }
-    })
+    }
+    delete core.saves.cache[name];
+    this._removeLocalForage_remove(name, callback);
+}
+
+utils.prototype._removeLocalForage_remove = function (name, callback) {
+    if (window.jsinterface && window.jsinterface.removeLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.removeLocalForage(id, name);
+    } else {
+        localforage.removeItem(name, callback);
+    }
+}
+
+utils.prototype.clearLocalForage = function (callback) {
+    core.saves.cache = {};
+    if (window.jsinterface && window.jsinterface.clearLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.clearLocalForage(id);
+    } else {
+        localforage.clear(callback);
+    }
+}
+
+utils.prototype.iterateLocalForage = function (iter, callback) {
+    if (window.jsinterface && window.jsinterface.iterateLocalForage) {
+        var id = setTimeout(null);
+        core['__iter' + id] = iter;
+        core['__callback' + id] = callback;
+        window.jsinterface.iterateLocalForage(id);
+    } else {
+        localforage.iterate(iter, callback);
+    }
+}
+
+utils.prototype.keysLocalForage = function (callback) {
+    if (window.jsinterface && window.jsinterface.keysLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.keysLocalForage(id);
+    } else {
+        localforage.keys(callback);
+    }
+}
+
+utils.prototype.lengthLocalForage = function (callback) {
+    if (window.jsinterface && window.jsinterface.lengthLocalForage) {
+        var id = setTimeout(null);
+        core['__callback' + id] = callback;
+        window.jsinterface.lengthLocalForage(id);
+    } else {
+        localforage.length(callback);
+    }
 }
 
 utils.prototype.setGlobal = function (key, value) {
@@ -292,16 +394,21 @@ utils.prototype.getGlobal = function (key, defaultValue) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("input2:") == 0) {
             value = JSON.parse(core.decodeBase64(action.substring(7)));
+            core.setFlag('__global__' + key, value);
+            core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
         }
         else {
-            core.control._replay_error(action);
-            return core.getLocalStorage(key, defaultValue);
+            // 录像兼容性：尝试从flag和localStorage获得
+            // 注意这里不再二次记录 input2: 到录像
+            core.status.replay.toReplay.unshift(action);
+            value = core.getFlag('__global__' + key, core.getLocalStorage(key, defaultValue));
         }
     }
     else {
         value = core.getLocalStorage(key, defaultValue);
+        core.setFlag('__global__' + key, value);
+        core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
     }
-    core.status.route.push("input2:" + core.encodeBase64(JSON.stringify(value)));
     return value;
 }
 
@@ -319,7 +426,7 @@ utils.prototype.clone = function (data, filter, recursion) {
         var copy = [];
         for (var i in data) {
             if (!filter || filter(i, data[i]))
-                copy[i] = core.clone(data[i], recursion ? filter : null, recursion);
+                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
         }
         return copy;
     }
@@ -332,11 +439,21 @@ utils.prototype.clone = function (data, filter, recursion) {
         var copy = {};
         for (var i in data) {
             if (data.hasOwnProperty(i) && (!filter || filter(i, data[i])))
-                copy[i] = core.clone(data[i], recursion ? filter : null, recursion);
+                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
         }
         return copy;
     }
     return data;
+}
+
+////// 深拷贝1D/2D数组优化 //////
+utils.prototype.cloneArray = function (data) {
+    if (!(data instanceof Array)) return this.clone(data);
+    if (data[0] instanceof Array) {
+        return data.map(function (one) { return one.slice(); });
+    } else {
+        return data.slice();
+    }
 }
 
 ////// 裁剪图片 //////
@@ -349,14 +466,13 @@ utils.prototype.splitImage = function (image, width, height) {
     width = width || 32;
     height = height || width;
     var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
+    var ctx = canvas.getContext("2d");
     var ans = [];
     for (var j = 0; j < image.height; j += height) {
         for (var i = 0; i < image.width; i += width) {
             var w = Math.min(width, image.width - i), h = Math.min(height, image.height - j);
-            canvas.width = w;
-            canvas.height = h;
-            context.drawImage(image, i, j, w, h, 0, 0, w, h);
+            canvas.width = w; canvas.height = h;
+            core.drawImage(ctx, image, i, j, w, h, 0, 0, w, h);
             var img = new Image();
             img.src = canvas.toDataURL("image/png");
             ans.push(img);
@@ -380,60 +496,87 @@ utils.prototype.formatDate2 = function (date) {
 }
 
 utils.prototype.formatTime = function (time) {
-    return core.setTwoDigits(parseInt(time / 3600000))
-        + ":" + core.setTwoDigits(parseInt(time / 60000) % 60)
-        + ":" + core.setTwoDigits(parseInt(time / 1000) % 60);
+    return core.setTwoDigits(parseInt(time/3600000))
+        +":"+core.setTwoDigits(parseInt(time/60000)%60)
+        +":"+core.setTwoDigits(parseInt(time/1000)%60);
 }
 
 ////// 两位数显示 //////
 utils.prototype.setTwoDigits = function (x) {
-    return parseInt(x) < 10 ? "0" + x : x;
+    return (parseInt(x) < 10 && parseInt(x) >= 0) ? "0" + x : x;
 }
 
-utils.prototype.formatBigNumber = function (x, onMap) {
-    x = Math.floor(parseFloat(x));
-    if (!core.isset(x)) return '???';
+utils.prototype.formatSize = function (size) {
+    if (size < 1024) return size + 'B';
+    else if (size < 1024 * 1024) return (size/1024).toFixed(2) + "KB";
+    else return (size/1024/1024).toFixed(2) + "MB";
+}
 
-    var c = x < 0 ? "-" : "";
-    x = Math.abs(x);
+utils.prototype.formatBigNumber = function (x, digits) {
+	if (digits === true) digits = 5; // 兼容旧版onMap参数
+	if (!digits || digits < 5) digits = 6; // 连同负号、小数点和后缀字母在内的总位数，至少需为5，默认为6
+	x = Math.trunc(parseFloat(x)); // 尝试识别为小数，然后向0取整
+	if (x == null || !Number.isFinite(x)) return '???'; // 无法识别的数或正负无穷大，显示'???'
+	var units = [ // 单位及其后缀字母，可自定义，如改成千进制下的K、M、G、T、P
+		{ "val": 1e4, "suffix": "w" },
+		{ "val": 1e8, "suffix": "e" },
+		{ "val": 1e12, "suffix": "z" },
+		{ "val": 1e16, "suffix": "j" },
+		{ "val": 1e20, "suffix": "g" },
+	];
+	if (Math.abs(x) > 1e20 * Math.pow(10, digits - 2))
+		return x.toExponential(0); // 绝对值过大以致于失去精度的数，直接使用科学记数法，系数只保留整数
+	var sign = x < 0 ? '-' : '';
+	if (sign) --digits; // 符号位单独处理，负号要占一位
+	x = Math.abs(x);
 
-    if (x <= 99999 || (!onMap && x <= 999999)) return c + x;
+    if (x < Math.pow(10, digits)) return sign + x;
 
-    var all = [
-        {"val": 1e20, "c": "g"},
-        {"val": 1e16, "c": "j"},
-        {"val": 1e12, "c": "z"},
-        {"val": 1e8, "c": "e"},
-        {"val": 1e4, "c": "w"},
-    ]
+    for (var i = 0; i < units.length; ++i) {
+        var each = units[i];
+        var u = (x / each.val).toFixed(digits).substring(0, digits);
+        if (u.indexOf('.') < 0) continue;
+        u = u.substring(0, u[u.length - 2] == '.' ? u.length - 2 : u.length - 1);
+        return sign + u + each.suffix;
+    }
+	return sign + x.toExponential(0);
+}
 
-    for (var i = 0; i < all.length; i++) {
-        var one = all[i];
-        if (onMap) {
-            if (x >= one.val) {
-                var v = x / one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(3 - Math.log10(v + 1)))) + one.c;
-            }
-        }
-        else {
-            if (x >= 10 * one.val) {
-                var v = x / one.val;
-                return c + v.toFixed(Math.max(0, Math.floor(4 - Math.log10(v + 1)))) + one.c;
-            }
+////// 变速移动 //////
+utils.prototype.applyEasing = function(name) {
+    var list = {
+        "easeIn": function(t) {
+            return Math.pow(t, 3);
+        },
+        "easeOut": function(t) {
+            return 1 - Math.pow(1 - t, 3);
+        },
+        "easeInOut": function(t) {
+            // easeInOut试了一下感觉二次方效果明显点
+            if (t < 0.5) return Math.pow(t, 2) * 2;
+            else return 1 - Math.pow(1 - t, 2) * 2;
+        },
+        "linear": function(t) {
+            return t
         }
     }
-
-    return c + x;
+    if (name == 'random') {
+        var keys = Object.keys(list);
+        name = keys[Math.floor(Math.random() * keys.length)];
+    }
+    return list[name] || list.linear;
 }
 
 ////// 数组转RGB //////
 utils.prototype.arrayToRGB = function (color) {
+    if (!(color instanceof Array)) return color;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255);
     return "#" + ((1 << 24) + (nowR << 16) + (nowG << 8) + nowB).toString(16).slice(1);
 }
 
 utils.prototype.arrayToRGBA = function (color) {
+    if (!(color instanceof Array)) return color;
     if (color[3] == null) color[3] = 1;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
         nowB = this.clamp(parseInt(color[2]), 0, 255), nowA = this.clamp(parseFloat(color[3]), 0, 1);
@@ -482,18 +625,26 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "u" + t.substring(8);
     else if (t.indexOf('equip:') == 0)
         return "e" + this._encodeRoute_id2number(t.substring(6)) + ":";
+    else if (t.indexOf('saveEquip:') == 0)
+        return "s" + t.substring(10);
+    else if (t.indexOf('loadEquip:') == 0)
+        return "l" + t.substring(10);
     else if (t.indexOf('fly:') == 0)
         return "F" + t.substring(4) + ":";
+    else if (t == 'choices:none')
+        return "c";
     else if (t.indexOf('choices:') == 0)
         return "C" + t.substring(8);
     else if (t.indexOf('shop:') == 0)
-        return "S" + t.substring(5);
+        return "S" + t.substring(5) + ":";
     else if (t == 'turn')
         return 'T';
     else if (t.indexOf('turn:') == 0)
         return "t" + t.substring(5).substring(0, 1).toUpperCase() + ":";
     else if (t == 'getNext')
         return 'G';
+    else if (t == 'input:none')
+        return 'p';
     else if (t.indexOf('input:') == 0)
         return "P" + t.substring(6);
     else if (t.indexOf('input2:') == 0)
@@ -504,9 +655,11 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return "M" + t.substring(5);
     else if (t.indexOf('key:') == 0)
         return 'K' + t.substring(4);
+    else if (t.indexOf('click:') == 0)
+        return 'k' + t.substring(6);
     else if (t.indexOf('random:') == 0)
         return 'X' + t.substring(7);
-    return '(' + t + ')';
+    return '('+t+')';
 }
 
 ////// 解密路线 //////
@@ -532,8 +685,14 @@ utils.prototype.decodeRoute = function (route) {
 
 utils.prototype._decodeRoute_getNumber = function (decodeObj, noparse) {
     var num = "";
-    while (decodeObj.index < decodeObj.route.length && !isNaN(decodeObj.route.charAt(decodeObj.index))) {
-        num += decodeObj.route.charAt(decodeObj.index++);
+    var first = true;
+    while (true) {
+        var ch = decodeObj.route.charAt(decodeObj.index);
+        if (ch >= '0' && ch <= '9') num += ch;
+        else if (ch == '-' && first) num += ch;
+        else break;
+        first = false;
+        decodeObj.index++;
     }
     if (num.length == 0) num = "1";
     return noparse ? num : parseInt(num);
@@ -587,14 +746,23 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "e":
             decodeObj.ans.push("equip:" + this._decodeRoute_number2id(nxt));
             break;
+        case "s":
+            decodeObj.ans.push("saveEquip:" + nxt);
+            break;
+        case "l":
+            decodeObj.ans.push("loadEquip:" + nxt);
+            break;
         case "F":
             decodeObj.ans.push("fly:" + nxt);
+            break;
+        case 'c':
+            decodeObj.ans.push('choices:none');
             break;
         case "C":
             decodeObj.ans.push("choices:" + nxt);
             break;
         case "S":
-            decodeObj.ans.push("shop:" + nxt + ":" + this._decodeRoute_getNumber(decodeObj, true));
+            decodeObj.ans.push("shop:" + nxt);
             break;
         case "T":
             decodeObj.ans.push("turn");
@@ -604,6 +772,9 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             break;
         case "G":
             decodeObj.ans.push("getNext");
+            break;
+        case "p":
+            decodeObj.ans.push("input:none");
             break;
         case "P":
             decodeObj.ans.push("input:" + nxt);
@@ -621,6 +792,13 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
         case "K":
             decodeObj.ans.push("key:" + nxt);
             break;
+        case "k":
+            ++decodeObj.index;
+            var px = this._decodeRoute_getNumber(decodeObj);
+            ++decodeObj.index;
+            var py = this._decodeRoute_getNumber(decodeObj);
+            decodeObj.ans.push("click:"+nxt+":"+px+":"+py);
+            break;
         case "X":
             decodeObj.ans.push("random:" + nxt);
             break;
@@ -636,11 +814,10 @@ utils.prototype.isset = function (val) {
 utils.prototype.subarray = function (a, b) {
     if (!(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
-    var na = core.clone(a), nb = core.clone(b);
-    while (nb.length > 0) {
-        if (na.shift() != nb.shift()) return null;
+    for (var i = 0; i < b.length; ++i) {
+        if (a[i] != b[i]) return null;
     }
-    return na;
+    return a.slice(b.length);
 }
 
 utils.prototype.inArray = function (array, element) {
@@ -660,24 +837,25 @@ utils.prototype.getCookie = function (name) {
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (!core.statusBar[name]) return;
-    var isNumber = false;
-    if (typeof value == 'number') {
-        value = this.formatBigNumber(value);
-        isNumber = true;
-    }
-    // 判定是否斜体
+    if (typeof value == 'number') value = this.formatBigNumber(value);
     var italic = /^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(value);
     var style = 'font-style: ' + (italic ? 'italic' : 'normal') + '; ';
+    style += 'text-shadow: #000 1px 0 0, #000 0 1px 0, #000 -1px 0 0, #000 0 -1px 0; ';
     // 判定是否需要缩放
     var length = this.strlen(value) || 1;
     style += 'font-size: ' + Math.min(1, 7 / length) + 'em; ';
     if (css) style += css;
-    if (isNumber) {
-        core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'>" + value + "</span>";
+    var _style = core.statusBar[name].getAttribute('_style');
+    var _value = core.statusBar[name].getAttribute('_value');
+    if (_style == style) {
+        if (value == _value) return;
+        core.statusBar[name].children[0].innerText = value;
     } else {
         core.statusBar[name].innerHTML = "<span class='_status' style='" + style + "'></span>";
         core.statusBar[name].children[0].innerText = value;
+        core.statusBar[name].setAttribute('_style', style);
     }
+    core.statusBar[name].setAttribute('_value', value);;
 }
 
 utils.prototype.strlen = function (str) {
@@ -688,15 +866,44 @@ utils.prototype.strlen = function (str) {
     return count;
 };
 
-utils.prototype.reverseDirection = function (direction) {
+utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
-    return {"left": "right", "right": "left", "down": "up", "up": "down"}[direction] || direction;
+    var directionList = ["left", "leftup", "up", "rightup", "right", "rightdown", "down", "leftdown"];
+    if (directionList.indexOf(turn) >= 0) return turn;
+    if (turn == ':hero') return core.getHeroLoc('direction'); 
+    if (turn == ':backhero') return this.turnDirection(':back', core.getHeroLoc('direction'));
+    if (typeof turn === 'number' && turn % 45 == 0) turn /= 45;
+    else {
+        switch (turn) {
+            case ':left': turn = 6; break; // turn left
+            case ':right': turn = 2; break; // turn right
+            case ':back': turn = 4; break; // turn back
+            default: turn = 0; break;
+        }
+    }
+    var index = directionList.indexOf(direction);
+    if (index < 0) return direction;
+    return directionList[(index + (turn || 0)) % directionList.length];
 }
 
 utils.prototype.matchWildcard = function (pattern, string) {
-    return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
-        return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-    }).join('.*') + '$').test(string);
+    try {
+        return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
+            return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+        }).join('.*') + '$').test(string);
+    } catch (e) {
+        return false;
+    }
+}
+
+utils.prototype.matchRegex = function (pattern, string) {
+    try {
+        if (pattern.startsWith("^")) pattern = pattern.substring(1);
+        if (pattern.endsWith("$")) pattern = pattern.substring(0, pattern.length - 1);
+        return new RegExp("^" + pattern + "$").test(string);
+    } catch (e) {
+        return false;
+    }
 }
 
 ////// Base64加密 //////
@@ -713,26 +920,6 @@ utils.prototype.decodeBase64 = function (str) {
     }).join(''));
 }
 
-////// 任意进制转换 //////
-utils.prototype.convertBase = function (str, fromBase, toBase) {
-    var map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~`!@#$%^&*()_-+={}[]\\|:;<>,.?/";
-    if (fromBase == toBase) return str;
-    var len = str.length, ans = "";
-    var t = [];
-    for (var i = 0; i < len; i++) t[i] = map.indexOf(str.charAt(i));
-    t[len] = 0;
-    while (len > 0) {
-        for (var i = len; i >= 1; i--) {
-            t[i - 1] += t[i] % toBase * fromBase;
-            t[i] = parseInt(t[i] / toBase);
-        }
-        ans += map.charAt(t[0] % toBase);
-        t[0] = parseInt(t[0] / toBase);
-        while (len > 0 && t[len - 1] == 0) len--;
-    }
-    return ans;
-}
-
 utils.prototype.rand = function (num) {
     var rand = core.getFlag('__rand__');
     rand = this.__next_rand(rand);
@@ -746,16 +933,21 @@ utils.prototype.rand = function (num) {
 ////// 生成随机数（录像方法） //////
 utils.prototype.rand2 = function (num) {
     num = num || 2147483648;
+    num = Math.abs(num);
 
     var value;
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf("random:") == 0) {
             value = parseInt(action.substring(7));
+            if (isNaN(value) || value >= num || value < 0) {
+                console.warn('错误！当前random:项超过范围。将重新随机生成！');
+                value = Math.floor(Math.random() * num);
+            }
         }
         else {
-            core.control._replay_error(action);
-            return 0;
+            console.warn('错误！当前需要一个random:项。将重新随机生成！');
+            value = Math.floor(Math.random() * num);
         }
     }
     else {
@@ -781,7 +973,7 @@ utils.prototype.__next_rand = function (_rand) {
 }
 
 ////// 读取一个本地文件内容 //////
-utils.prototype.readFile = function (success, error, readType) {
+utils.prototype.readFile = function (success, error, accept, readType) {
 
     core.platform.successCallback = success;
     core.platform.errorCallback = error;
@@ -821,6 +1013,8 @@ utils.prototype.readFile = function (success, error, readType) {
             core.platform.fileInput.value = '';
         }
     }
+    core.platform.fileInput.value = '';
+    if (accept) core.platform.fileInput.accept = accept;
 
     core.platform.fileInput.click();
 }
@@ -833,19 +1027,23 @@ utils.prototype.readFileContent = function (content) {
             core.platform.successCallback(content);
         return;
     }
+    // 检查base64
     try {
-        obj = JSON.parse(content);
-        if (obj) {
-            if (core.platform.successCallback)
-                core.platform.successCallback(obj);
-            return;
+        obj = JSON.parse(LZString.decompressFromBase64(content));
+    } catch (e) {}
+    if (!obj) {
+        try {
+            obj = JSON.parse(content);
+        } catch (e) {
+            main.log(e)
         }
     }
-    catch (e) {
-        main.log(e);
-        alert(e);
+
+    if (obj) {
+        if (core.platform.successCallback)
+            core.platform.successCallback(obj);
+        return;
     }
-    // alert("不是有效的JSON文件！");
 
     if (core.platform.errorCallback)
         core.platform.errorCallback();
@@ -970,7 +1168,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'block';
-    main.dom.inputBox.value = value == null ? "" : value;
+    main.dom.inputBox.value = value==null?"":value;
     main.dom.inputYes.blur();
     main.dom.inputNo.blur();
     setTimeout(function () {
@@ -1021,68 +1219,16 @@ utils.prototype.hideWithAnimate = function (obj, speed, callback) {
     }, speed);
 }
 
-utils.prototype._encodeCanvas = function (ctx) {
-    var list = [];
-    var width = ctx.canvas.width, height = ctx.canvas.height;
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.webkitImageSmoothingEnabled = false;
-    ctx.msImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-
-    var imgData = ctx.getImageData(0, 0, width, height);
-    for (var i = 0; i < imgData.data.length; i += 4) {
-        list.push(Math.sign(imgData.data[i + 3]));
-    }
-    // compress 01 to array
-    var prev = 0, cnt = 0, arr = [];
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] != prev) {
-            arr.push(cnt);
-            prev = list[i];
-            cnt = 0;
-        }
-        cnt++;
-    }
-    arr.push(cnt);
-    return arr;
-}
-
-////// 解析arr数组，并绘制到tempCanvas上 //////
-utils.prototype._decodeCanvas = function (arr, width, height) {
-    // 清空tempCanvas
-    var tempCanvas = core.bigmap.tempCanvas;
-    tempCanvas.canvas.width = width;
-    tempCanvas.canvas.height = height;
-    tempCanvas.clearRect(0, 0, width, height);
-
-    if (!arr) return null;
-    // to byte array
-    var curr = 0, list = [];
-    arr.forEach(function (x) {
-        for (var i = 0; i < x; i++) list.push(curr);
-        curr = 1 - curr;
-    })
-
-    var imgData = tempCanvas.getImageData(0, 0, width, height);
-    for (var i = 0; i < imgData.data.length; i += 4) {
-        var index = i / 4;
-        if (list[index]) {
-            imgData.data[i] = 255;
-            imgData.data[i + 3] = 255;
-        }
-    }
-    tempCanvas.putImageData(imgData, 0, 0);
-}
-
-utils.prototype.consoleOpened = function () {
-    if (!core.flags.checkConsole) return false;
-    if (window.Firebug && window.Firebug.chrome && window.Firebug.chrome.isInitialized)
-        return true;
-    if (!core.platform.isPC) return false;
-    var threshold = 160;
-    var zoom = Math.min(window.outerWidth / window.innerWidth, window.outerHeight / window.innerHeight);
-    return window.outerWidth - zoom * window.innerWidth > threshold
-        || window.outerHeight - zoom * window.innerHeight > threshold;
+////// 生成浏览器唯一的 guid //////
+utils.prototype.getGuid = function () {
+    var guid = localStorage.getItem('guid');
+    if (guid != null) return guid;
+    guid = 'xxxxxxxx_xxxx_4xxx_yxxx_xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
+    localStorage.setItem('guid', guid);
+    return guid;
 }
 
 utils.prototype.hashCode = function (obj) {
@@ -1111,10 +1257,10 @@ utils.prototype.same = function (a, b) {
         return true;
     }
     if (a instanceof Object && b instanceof Object) {
-        for (var i in a) {
-            if (!this.same(a[i], b[i])) return false;
-        }
-        for (var i in b) {
+        var obj = {};
+        for (var i in a) obj[i] = true;
+        for (var i in b) obj[i] = true;
+        for (var i in obj) {
             if (!this.same(a[i], b[i])) return false;
         }
         return true;
@@ -1122,52 +1268,55 @@ utils.prototype.same = function (a, b) {
     return false;
 }
 
-utils.prototype._export = function (floorIds) {
-    if (!floorIds) floorIds = [core.status.floorId];
-    else if (floorIds == 'all') floorIds = core.clone(core.floorIds);
-    else if (typeof floorIds == 'string') floorIds = [floorIds];
-
-    var monsterMap = {};
-
-    // map
-    var content = floorIds.length + "\n" + core.__SIZE__ + " " + core.__SIZE__ + "\n\n";
-    floorIds.forEach(function (floorId) {
-        var arr = core.maps._getMapArrayFromBlocks(core.status.maps[floorId].blocks, core.__SIZE__, core.__SIZE__);
-        content += arr.map(function (x) {
-            // check monster
-            x.forEach(function (t) {
-                var block = core.maps.getBlockByNumber(t);
-                if (block.event.cls.indexOf("enemy") == 0) {
-                    monsterMap[t] = block.event.id;
-                }
-            })
-            return x.join("\t");
-        }).join("\n") + "\n\n";
-    })
-
-    // values
-    content += ["redJewel", "blueJewel", "greenJewel", "redPotion", "bluePotion",
-        "yellowPotion", "greenPotion", "sword1", "shield1"].map(function (x) {
-        return core.values[x] || 0;
-    }).join(" ") + "\n\n";
-
-    // monster
-    content += Object.keys(monsterMap).length + "\n";
-    for (var t in monsterMap) {
-        var id = monsterMap[t], monster = core.material.enemys[id];
-        content += t + " " + monster.hp + " " + monster.atk + " " +
-            monster.def + " " + monster.money + " " + monster.special + "\n";
+utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
+    var _error = function (msg) {
+        main.log(msg);
+        if (error) error(msg);
     }
-    content += "\n0 0 0 0 0 0\n\n";
-    content += core.status.hero.hp + " " + core.status.hero.atk + " "
-        + core.status.hero.def + " " + core.status.hero.mdef + " " + core.status.hero.money + " "
-        + core.itemCount('yellowKey') + " " + core.itemCount("blueKey") + " " + core.itemCount("redKey") + " 0 "
-        + core.status.hero.loc.x + " " + core.status.hero.loc.y + "\n";
 
-    console.log(content);
+    if (!window.zip) {
+        return _error("zip.js not exists!");
+    }
+
+    if (typeof blobOrUrl == 'string') {
+        return core.http('GET', blobOrUrl, null, function (data) {
+            core.unzip(data, success, error, convertToText);
+        }, _error, null, 'blob', onprogress);
+    }
+
+    if (!(blobOrUrl instanceof Blob)) {
+        return _error("Should use Blob or URL as input");
+    }
+
+    zip.createReader(new zip.BlobReader(blobOrUrl), function (reader) {
+        reader.getEntries(function (entries) {
+            core.utils._unzip_readEntries(entries, function (data) {
+                reader.close(function () {
+                    if (success) success(data);
+                });
+            }, convertToText);
+        });
+    }, _error);
 }
 
-utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType) {
+utils.prototype._unzip_readEntries = function (entries, success, convertToText) {
+    var results = {};
+    if (entries == null || entries.length == 0) {
+        return success(results);
+    }
+    var length = entries.length;
+    entries.forEach(function (entry) {
+        entry.getData(convertToText ? new zip.TextWriter('utf8') : new zip.BlobWriter(), function (data) {
+            results[entry.filename] = data;
+            length--;
+            if (length == 0) {
+                success(results);
+            }
+        });
+    });
+}
+
+utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType, onprogress) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);
     if (mimeType) xhr.overrideMimeType(mimeType);
@@ -1180,6 +1329,11 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
             if (error) error("HTTP " + xhr.status);
         }
     };
+    xhr.onprogress = function (e) {
+        if (e.lengthComputable) {
+            if (onprogress) onprogress(e.loaded, e.total);
+        }
+    }
     xhr.onabort = function () {
         if (error) error("Abort");
     }
@@ -1246,83 +1400,4 @@ function lzw_decode(s) {
         oldPhrase = phrase;
     }
     return out.join("");
-}
-
-
-utils.prototype.concatImage = function (imgA, imgB, dir) {
-    dir = dir || 'width';
-    var inv_dir = dir=='width' ? 'height':'width';
-    if (imgA[dir] != imgB[dir]) {
-        main.log(imgA[dir]+'!='+imgB[dir]);
-        main.log('必须要'+dir+'一致才能合并');
-        return null;
-    }
-    var canvas = document.createElement("canvas");
-    var context = canvas.getContext("2d");
-    canvas[dir] = imgA[dir];
-    canvas[inv_dir] = imgA[inv_dir] + imgB[inv_dir];
-    context.drawImage(imgA, 0, 0);
-    if(dir=='width')context.drawImage(imgB, 0, imgA[inv_dir]);
-    else context.drawImage(imgB, imgA[inv_dir], 0);
-    console.log(canvas.width+','+canvas.height)
-    return canvas.toDataURL("image/png");
-}
-
-///// 将旧类型的素材批量注册到sprite
-utils.prototype.convertOldTypes = function () {
-    var _icon = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
-    var _sprite = sprite_90f36752_8815_4be8_b32b_d7fad1d0542e;
-    var oldConvert = {
-        'terrains': 'terrains',
-        'items': 'terrains',
-        'npcs': 'npcs',
-        'enemys': 'npcs',
-        'npc48': 'npc48',
-        'enemy48': 'npc48',
-        'animates': 'animates',
-    };
-    var frame = {
-        'terrains': 1,
-        'items': 1,
-        'npcs': 2,
-        'enemys': 2,
-        'npc48': 4,
-        'enemy48': 4,
-        'animates': 4,
-    }
-    var th = 0;
-    var oldType = null;
-    for (var org in oldConvert) {
-        if (oldConvert[org] != oldType) th = 0;
-        oldType = oldConvert[org];
-        var h = 32, dh = 0;
-        if (oldType.indexOf('48') >= 0) h = 48;
-        for (var k in _icon[org]) {
-            _sprite[k] = {
-                x: 0,
-                y: _icon[org][k] * h + th,
-                width: 32,
-                height: h,
-                frame: frame[org],
-                oldType: oldType,
-            };
-            dh += h;
-        }
-        console.log(h)
-        th += dh;
-    }
-    // 自动元件 16x16
-    var tx = 0;
-    for(var it in _icon.autotile){
-        var w = core.material.images.autotile[it].width;
-        _sprite[it] = {
-            x: tx,
-            y: 0,
-            width: 16,
-            height: 16,
-            frame: w/96,
-            oldType: 'autotile',
-        };
-        tx += w;
-    }
 }

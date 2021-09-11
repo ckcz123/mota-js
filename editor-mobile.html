@@ -6,7 +6,8 @@
     <link href="_server/css/editor_mobile.css" rel="stylesheet">
     <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
     <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
-    <link href="_server/css/editor_mode_mobile.css" rel="stylesheet">
+    <link id="color_css" rel="stylesheet">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
 </head>
 <body>
 <script>
@@ -28,17 +29,17 @@
             <div id="editTip">
                 <input id='newFileName' placeholder="新楼层id" style="width: 100px"/>
                 <span style="vertical-align: bottom">宽</span>
-                <input id='newMapWidth' value="13" style="width: 20px"/>
+                <input id='newMapWidth' style="width: 20px"/>
                 <span style="vertical-align: bottom">高</span>
-                <input id='newMapHeight' value="13" style="width: 20px"/>
+                <input id='newMapHeight' style="width: 20px"/>
                 <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom;'>保留楼层属性</span>
                 <br/>
                 <input type="button" value="新建空白地图" id='newMap'/>
             </div>
             <div id='editBtns'>
-                <input type="button" value="导出地图" id="exportMap"/>
-                <input type="button" value="复制地图" id="copyMap"/>
+                <input type="button" value="导出并复制地图" id="exportMap"/>
+                <input type="button" value="导入地图" id="importMap"/>
                 <input type="button" value="清除地图" id='clearMapButton'/>
                 <input type="button" value="删除地图" id="deleteMap"/>
             </div>
@@ -54,9 +55,9 @@
                 <input id='newFloorNames' style="width: 70px" value='${i}'/>
                 <br/>
                 <span style="vertical-align: bottom">宽</span>
-                <input id='newMapsWidth' value="13" style="width: 20px"/>
+                <input id='newMapsWidth' style="width: 20px"/>
                 <span style="vertical-align: bottom">高</span>
-                <input id='newMapsHeight' value="13" style="width: 20px"/>
+                <input id='newMapsHeight' style="width: 20px"/>
                 <input type="checkbox" id='newMapsStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
                 <br/>
@@ -77,6 +78,7 @@
                 <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
                 <input id="appendConfirm" type="button" value="追加"/>
                 <input id="quickAppendConfirm" type="button" value="快速追加"/>
+                <span style="font-size: 13px">自动注册</span><input id="appendRegister" type="checkbox" checked/>
             </p>
             <p>
                 色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
@@ -135,17 +137,27 @@
                         </tbody>
                     </table>
                 </div>
+                <div style="margin-top: -10px; margin-bottom: 10px">
+                    <button id="copyEnemyItem">复制属性</button>
+                    <button id="pasteEnemyItem">粘贴属性</button>
+                    <button id="clearEnemyItem">清空属性</button>
+                    <button id="clearAllEnemyItem">批量清空属性</button>
+                </div>
             </div>
             <div id='newIdIdnum'><!-- id and idnum -->
                 <input placeholder="新id（唯一标识符）"/>
                 <input placeholder="新idnum（10000以内数字）"/>
-                <button>save</button>
+                <button>确定</button>
                 <br/>
                 <button style="margin-top: 10px">自动注册</button>
+                <button style="margin-top: 10px; margin-left: 5px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">以此素材为模板追加</button>
             </div>
             <div id='changeId'><!-- id and idnum -->
-                <input placeholder="修改图块id为"/>
-                <button>save</button>
+                <input placeholder="修改图块id为" style="width: 100px"/>
+                <button>确定</button>
+                <button style="margin-left: 5px">删除此素材</button>
+                <button style="margin-left: 5px">以此素材为模板追加</button>
             </div>
         </div>
     </div>
@@ -166,7 +178,12 @@
             </div>
             <div id='changeFloorId'><!-- id and idnum -->
                 <input placeholder="修改floorId为"/>
-                <button>save</button>
+                <button>确定</button>
+            </div>
+            <div id='changeFloorSize' style="font-size: 13px;">
+                修改地图大小：宽<input style="width: 25px;" value="13" />，高<input style="width: 25px;" value="13" />，
+                偏移x<input style="width: 25px;" value="0" /> y<input style="width: 25px;" value="0" /> 
+                <button>确定</button>
             </div>
         </div>
     </div>
@@ -194,35 +211,21 @@
                 <button onclick="editor_blockly.showXML()">Show XML</button>
                 <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
                 -->
-                <select id="entryType" disabled="disabled" style="display: none">
-                    <option value="event">event</option>
-                    <option value="autoEvent">autoEvent</option>
-                    <option value="changeFloor">changeFloor</option>
-                    <option value="level">level</option>
-                    <option value="shop">shop</option>
-                    <option value="afterBattle">afterBattle</option>
-                    <option value="afterGetItem">afterGetItem</option>
-                    <option value="afterOpenDoor">afterOpenDoor</option>
-                    <option value="firstArrive">firstArrive</option>
-                    <option value="eachArrive">eachArrive</option>
-                    <option value="commonEvent">commonEvent</option>
-                </select>
                 <button onclick="editor_blockly.confirm()">确认</button>
-                <button onclick="editor_blockly.parse()">解析</button>
+                <button onclick="editor_blockly.confirm(true)">应用</button>
+                <button id='blocklyParse' onclick="editor_blockly.parse()">解析</button>
                 <button onclick="editor_blockly.cancel()">取消</button>
                 <!-- 手机端放不下，因此不显示搜索框 -->
                 <div style="display: none">
                     <div class="searchLogo"></div>
-                    <input type="text" id="searchBlock" placeholder="搜索图块"/>
+                    <input type="text" id="searchBlock" placeholder="搜索事件块..."/>
                 </div>
-                <div id="colorPanel" class="cpPanel" style="display: none">
-                    <input class="color" id="colorPicker" value="255,215,0,1"/>
-                    <button onclick="confirmColor()">确定</button>
-                </div>
-                <button class="cpPanel" onclick="editor_blockly.selectPoint()">地图选点</button>
+                <button class="cpPanel" onclick="editor_blockly.selectPointFromButton()">地图选点</button>
                 <button class="cpPanel" onclick="editor.uievent.searchUsedFlags()" style="margin-left:5px">变量出现位置搜索</button>
                 <input type="checkbox" class="cpPanel" id="blocklyReplace" onchange="editor_blockly.triggerReplace()" style="margin-left: 10px" />
                 <span class="cpPanel" style="margin-left: -4px; font-size: 13px">开启中文名替换</span>
+                <input type="checkbox" class="cpPanel" id="blocklyExpandCompare" onchange="editor_blockly.triggerExpandCompare()" style="margin-left: 10px" />
+                <span class="cpPanel" style="margin-left: -4px; font-size: 13px">展开值块逻辑运算</span>
                 <xml id="toolbox" style="display:none">
                 </xml>
             </h3>
@@ -234,14 +237,20 @@
             </div>
         </div>
     </div>
+    <div id="colorPanel" class="cpPanel" style="display: none">
+        <input class="color" id="colorPicker" value="255,215,0,1"/>
+        <button onclick="confirmColor()">确定</button>
+    </div>
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
         <button onclick="editor_multi.confirm()">确认</button>
         <button onclick="editor_multi.cancel()">取消</button>
+        <button onclick="editor_multi.confirm(true)">应用</button>
         <button onclick="editor_multi.format()">格式化</button>
+        <button id="editor_multi_preview" style="display: none;">预览</button>
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
-               style="vertical-align: bottom;margin-left:6px"/>
-        <span style="vertical-align: bottom; margin-left: -3px">语法检查</span>
-        <button onclick="editor_multi.showPlugins()" style="display: none; margin-top: 3px" id="showPlugins">显示云端插件列表</button>
+               style="vertical-align: middle;margin-left:6px"/>
+        <span style="vertical-align: middle; margin-left: -3px">语法检查</span>
+        <select id="codemirrorCommands" onchange="editor_multi.doCommand(this)" style="vertical-align: middle; margin-left: 6px;"></select>
         <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
@@ -262,7 +271,7 @@
         </div>
     </div>
     <div id="left9" class='leftTab' style="z-index:-1;opacity: 0;"><!-- commonevent -->
-        <h3 class="leftTabHeader">公共事件&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('commonevent')">配置表格</button>
+        <h3 class="leftTabHeader">公共事件&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.table.addfunc()">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('commonevent')">配置表格</button>
         </h3>
         <div class="leftTabContent">
             <div class='etable'>
@@ -279,7 +288,7 @@
         </div>
     </div>
     <div id="left10" class='leftTab' style="z-index:-1;opacity: 0;"><!-- plugins -->
-        <h3 class="leftTabHeader">插件编写&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('plugins')">配置表格</button>
+        <h3 class="leftTabHeader">插件编写&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.table.addfunc()">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('plugins')">配置表格</button>
         </h3>
         <div class="leftTabContent">
             <div class='etable'>
@@ -299,14 +308,17 @@
         <div class="col" id='mapColMark'></div>
         <div class="row" id='mapRowMark'></div>
         <div class="map" id="mapEdit">
-            <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='event' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='efg' width='416' height='416'></canvas>
-            <canvas class='gameCanvas' id='eui' width='416' height='416' style='z-index:100'></canvas>
+            <canvas class='gameCanvas' id='ebm'></canvas>
+            <canvas class='gameCanvas' id='efg'></canvas>
+            <canvas class='gameCanvas' id='eui' style='z-index:100'></canvas>
         </div>
         
+    </div>
+    <div id="mid2" style="display: none">
+        <p style="margin: 10px"><span id='lastUsedTitle'></span> <button id='clearLastUsedBtn'>清除</button></p>
+        <div class="map" style="height: 160px; margin-top: 25px" id="lastUsedDiv">
+            <canvas class='gameCanvas' id='lastUsed'></canvas>
+        </div>
     </div>
     <div id="right" style="z-index:-1;opacity: 0;">
         <div id="iconLib">
@@ -320,19 +332,7 @@
     <div id="down">
         <div style="margin:0.5rem">
             <div class="tools">
-                <div id="tip">
-                    <div id="isSelectedBlock-if" style="display:none">
-                        <p id="isClearBlock-if" style="display:none" class="infoText">当前选择为清除块，可擦除地图上块</p>
-                        <div id="isClearBlock-else"><p id="isAirwall-if" style="display:none" class="infoText">当前选择为空气墙, 在编辑器中可视, 在游戏中隐藏的墙, 用来配合前景/背景的贴图</p>
-                        <div id="isAirwall-else">
-                            
-                        </div></div>
-                    </div>
-                    <div id="isSelectedBlock-else">
-                        <p id="whichShow-if" style="display:none"></p>
-                    </div>
-                </div>
-    
+                <div id="tip"></div>
                 <span id='mobileview'>
                     <input type="button" value="数据区"/>
                     <input type="button" value="地图区"/>
@@ -346,12 +346,12 @@
                         <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
                         <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
                         <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
-                        <div id='moveLoc' class="menuitem"><div class="menuitem-content">移动此事件</div></div>
+                        <div id='pasteLoc' class="menuitem"><div class="menuitem-content">粘贴到此事件</div></div>
                         <div id='clearEvent' class="menuitem"><div class="menuitem-content">仅清空此点事件</div></div>
                         <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
                     </div>
                 </div>
-                <select id="editModeSelect">
+                <select id="editModeSelect" style="font-size: 12px">
                     <option value="map">地图编辑</option>
                     <option value="loc">地图选点</option>
                     <option value="enemyitem">图块属性</option>
@@ -362,10 +362,16 @@
                     <option value="commonevent">公共事件</option>
                     <option value="plugins">插件编写</option>
                 </select>
+                <span style="font-size: 12px"><input type="checkbox" id="showMovable"/>通行度</span>
+                <select id="editorTheme" style="font-size: 11px;">
+                    <option value="editor_color">默认白</option>
+                    <option value="editor_color_dark">夜间黑</option>
+                </select>
                 <select id="brushMod" style="clear:right">
                     <option value="line">画线</option>
                     <option value="rectangle">画矩形</option>
-                    <option value="tileset">tileset贴图</option>
+                    <option value="tileset">tile平铺</option>
+                    <option value="fill">填充模式</option>
                 </select>
                 <select id="layerMod" style="float:left;margin-right:3px">
                     <option value="bgmap">背景层</option>
@@ -377,9 +383,13 @@
                     <input type="button" style="padding:1px 6px" value="↑"/>
                     <input type="button" style="padding:1px 6px" value="↓"/>
                     <input type="button" style="padding:1px 1px" value="→"/>
+                    <input type="button" id="bigmapBtn" value="大地图" style="margin-left: 5px"/>
                 </div>
                 <select id="selectFloor" style="clear:left"></select>
+                <input type="button" value="选层" id='selectFloorBtn'/>
                 <input type="button" value="保存地图" id='saveFloor'/>
+                <input type="button" value="后退" id="undoFloor" style="display: none;"/>
+                <input type="button" value="帮助文档" id="openDoc" />
                 <span id='mobileeditdata' style="display:none">
                     <input type="button" value="编辑"/>
                     <input type="button" value="显示完整名称" style="display: none;"/>
@@ -391,166 +401,23 @@
     
 </div>
 <!-- <script>/* -->
-<div id='gameGroup' style='display:none'>
-    <p id='mainTips'>请稍后...</p>
-    <img id='musicBtn'>
-    <div id='startPanel'>
-        <div id='startTop'>
-            <div id='startTopProgressBar'>
-                <div id='startTopProgress'></div>
-            </div>
-            <p id='startTopLoadTips'>资源即将开始加载</p>
-        </div>
-        <img id='startBackground'>
-        <p id='startLogo'></p>
-        <div id='startButtonGroup'>
-            <div id='startButtons'>
-                <span class='startButton' id='playGame'>开始游戏</span>
-                <span class='startButton' id='loadGame'>载入游戏</span>
-                <span class='startButton' id='replayGame'>录像回放</span>
-            </div>
-            <div id='levelChooseButtons'></div>
-        </div>
-    </div>
-    <div id='floorMsgGroup'>
-        <p id='logoLabel'></p>
-        <p id='versionLabel'></p>
-        <p id='floorNameLabel'></p>
-    </div>
-    <div id='statusBar' class="clearfix">
-        <div class="status" id="floorCol">
-            <img id="img-floor">
-            <p class='statusLabel statusText' id='floor'></p>
-        </div>
-        <div class="status" id="nameCol">
-            <img id="img-name">
-            <p class='statusLabel statusText' id='name'></p>
-        </div>
-        <div class="status" id="lvCol">
-            <img id="img-lv">
-            <p class='statusLabel statusText' id='lv'></p>
-        </div>
-        <div class="status" id='hpmaxCol'>
-            <img id="img-hpmax">
-            <p class='statusLabel statusText' id='hpmax'></p>
-        </div>
-        <div class="status" id='hpCol'>
-            <img id="img-hp">
-            <p class='statusLabel statusText' id='hp'></p>
-        </div>
-        <div class="status" id='manaCol'>
-            <img id="img-mana">
-            <p class='statusLabel statusText' id='mana'></p>
-        </div>
-        <div class="status" id='atkCol'>
-            <img id="img-atk">
-            <p class='statusLabel statusText' id='atk'></p>
-        </div>
-        <div class="status" id='defCol'>
-            <img id="img-def">
-            <p class='statusLabel statusText' id='def'></p>
-        </div>
-        <div class="status" id="mdefCol">
-            <img id="img-mdef">
-            <p class='statusLabel statusText' id='mdef'></p>
-        </div>
-        <div class="status" id="moneyCol">
-            <img id="img-money">
-            <p class='statusLabel statusText' id='money'></p>
-        </div>
-        <div class="status" id="experienceCol">
-            <img id="img-experience">
-            <p class='statusLabel statusText' id='experience'></p>
-        </div>
-        <div class="status" id="upCol">
-            <img id="img-up">
-            <p class='statusLabel statusText' id='up'></p>
-        </div>
-        <div class="status" id="skillCol">
-            <img id="img-skill">
-            <p class='statusLabel statusText' id='skill' style='font-style: normal'></p>
-        </div>
-        <div class="status" id='keyCol'>
-            <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
-            <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
-            <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
-        </div>
-        <div class="status" id='pzfCol'>
-            <span class='statusLabel' id='pickaxe' style="color: #BC6E27"></span>
-            <span class='statusLabel' id='bomb' style="color: #FA14B9"></span>
-            <span class='statusLabel' id='fly' style="color: #8DB600"></span>
-        </div>
-        <div class="status" id="debuffCol">
-            <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
-            <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
-            <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>
-        </div>
 
-        <!-- 状态栏canvas化 -->
-        <canvas id="statusCanvas"></canvas>
-    </div>
-    <div id="toolBar" class="clearfix">
-        <img class="tools" id='img-book'>
-        <img class="tools" id='img-fly'>
-        <img class="tools" id='img-toolbox'>
-        <img class="tools" id='img-keyboard'>
-        <img class="tools" id='img-shop'>
-        <img class="tools" id='img-save'>
-        <img class="tools" id='img-load'>
-        <img class="tools" id='img-settings'>
-        <img class="tools" id='img-btn1' style='display:none'>
-        <img class="tools" id='img-btn2' style='display:none'>
-        <img class="tools" id='img-btn3' style='display:none'>
-        <img class="tools" id='img-btn4' style='display:none'>
-        <img class="tools" id='img-btn5' style='display:none'>
-        <img class="tools" id='img-btn6' style='display:none'>
-        <img class="tools" id='img-btn7' style='display:none'>
-        <img class="tools" id='img-btn8' style='display:none'>
-        <p class="statusLabel tools" id="hard"></p>
-    </div>
-    <div id="gameDraw">
-        <div id="gif"></div>
-        <div id="gif2"></div>
-        <!-- <canvas class='gameCanvas' id='bg' width='416' height='416'></canvas> -->
-        <!-- <canvas class='gameCanvas' id='event' width='416' height='416'></canvas> -->
-        <canvas class='gameCanvas' id='hero' width='416' height='416'></canvas>
-        <!-- <canvas class='gameCanvas' id='event2' width='416' height='416'></canvas> -->
-        <!-- <canvas class='gameCanvas' id='fg' width='416' height='416'></canvas> -->
-        <canvas class='gameCanvas' id='damage' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='animate' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='curtain' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='ui' width='416' height='416'></canvas>
-        <canvas class='gameCanvas' id='data' width='416' height='416'>此浏览器不支持HTML5</canvas>
-        <div id="next"></div>
-    </div>
-</div>
-<div id='inputDiv' style='display: none'>
-    <div id='inputDialog'>
-        <p id="inputMessage">请输入文字...</p>
-        <input id='inputBox' type="text"/>
-        <button id='inputYes'>确定</button>
-        <button id='inputNo'>取消</button>
-    </div>
-</div>
+<div id="gameInject" style='display: none'></div>
+
 <!-- UI预览 & 地图选点 -->
 <div id='uieventDiv' style='display: none'>
     <div id='uieventDialog'>
         <div id="uieventHead">
             <span id="uieventTitle"></span>
-            <select id="uieventBackground" style="margin-left: 20px">
-                <option value="thumbnail" selected>缩略图</option>
-                <option value="#000000">黑色</option>
-                <option value="#FFFFFF">白色</option>
-            </select>
-            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
+            <select id="uieventSelect" style="margin-left: 20px"></select>
             <button id="uieventNo">关闭</button>
             <button id="uieventYes">确定</button>
         </div>
         <hr style="clear: both; margin-top: 0"/>
         <div id='uieventBody'>
-            <canvas class='gameCanvas' id='uievent' width='416' height='416'></canvas>
+            <canvas class='gameCanvas' id='uievent'></canvas>
             <div id="selectPointBox"></div>
-            <div id="uieventUsedFlagList" style="display: none"></div>
+            <div id="uieventExtraBody" style="display: none"></div>
         </div>
         <div id="selectPoint">
             <select id="selectPointFloor"></select>
@@ -559,6 +426,8 @@
                 <input type="button" value="↑"/>
                 <input type="button" value="↓"/>
                 <input type="button" value="→"/>
+                <input type="button" value="大地图" style="margin-left: 5px"/>
+                <input type="button" value="复制楼层ID">
             </div>
         </div>
     </div>
@@ -571,21 +440,21 @@
 <!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
 <!-- <script src='_server/vendor/polyfill.min.js'></script> -->
 <script src='_server/fs.js'></script>
+<script src='_server/editor_config.js'></script>
 <script src='_server/editor_util.js'></script>
 <script src='_server/editor_game.js'></script>
 <script src='_server/editor_file.js'></script>
-<script src='_server/editor_file_unsorted.js'></script>
 <script src='_server/editor_table.js'></script>
 <script src='_server/editor_mode.js'></script>
 <script src='_server/editor_ui.js'></script>
+<script src='_server/editor_uievent.js'></script>
 <script src='_server/editor_mappanel.js'></script>
 <script src='_server/editor_datapanel.js'></script>
 <script src='_server/editor_materialpanel.js'></script>
 <script src='_server/editor_listen.js'></script>
-<script src='_server/editor_legacy.js'></script>
 <script src='libs/thirdparty/lz-string.min.js'></script>
 <script src='libs/thirdparty/localforage.min.js'></script>
-<script id='mainScript' src='main.js'></script>
+<script src='libs/thirdparty/zip.min.js'></script>
 <script src='_server/editor.js'></script>
 <script>
     editor.isMobile=true;
@@ -605,12 +474,17 @@
 <script src="_server/blockly/blocks_compressed.js"></script>
 <script src="_server/blockly/javascript_compressed.js"></script>
 <script src="_server/blockly/zh-hans.js"></script>
+<script src='_server/MotaActionParser.js'></script>
+<script src='_server/editor_blocklyconfig.js'></script>
 <script src='_server/editor_blockly.js'></script>
 <!-- codemirror -->
 <script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
-<script src="_server/CodeMirror/jshint.min.js"></script>
 <script src="_server/CodeMirror/beautify.min.js"></script>
+<script src="_server/CodeMirror/jshint.min.js"></script>
 <script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
+<script src="_server/CodeMirror/acorn.min.js"></script>
+<script src="_server/CodeMirror/defs.js"></script>
+<script src="_server/CodeMirror/tern.min.js"></script>
 <!-- thirdparty -->
 <script src="_server/thirdparty/color.all.min.js"></script>
 <script src="_server/thirdparty/awesomplete.min.js"></script>

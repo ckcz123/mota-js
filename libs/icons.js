@@ -1,3 +1,5 @@
+/// <reference path="../runtime.d.ts" />
+
 "use strict";
 
 function icons() {
@@ -13,7 +15,10 @@ icons.prototype._init = function () {
 }
 
 icons.prototype.getIcons = function () {
-    return core.clone(this.icons);
+    var icons = core.clone(this.icons);
+    icons.hero.leftup = icons.hero.leftdown = icons.hero.left;
+    icons.hero.rightup = icons.hero.rightdown = icons.hero.right;
+    return icons;
 }
 
 ////// 根据道具ID获得其cls //////
@@ -25,15 +30,21 @@ icons.prototype.getClsFromId = function (id) {
     return null;
 }
 
-icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
+icons.prototype.getAllIconIds = function () {
+    if (this.allIconIds) return this.allIconIds;
+    this.allIconIds = [];
+    for (var type in this.icons) {
+        this.allIconIds = this.allIconIds.concat(Object.keys(this.icons[type]));
+    }
+    return this.allIconIds;
+}
+
+icons.prototype._getAnimateFrames = function (cls) {
     if (cls == 'enemys' || cls == 'npcs') {
         return 2;
     }
-    if (cls == 'animates' || cls == 'enemy48') {
+    if (cls == 'animates' || cls == 'enemy48' || cls == 'npc48') {
         return 4;
-    }
-    if (cls == 'npc48') {
-        return useOriginValue ? 4 : 1;
     }
     return 1;
 }
@@ -42,6 +53,7 @@ icons.prototype._getAnimateFrames = function (cls, useOriginValue) {
 icons.prototype.getTilesetOffset = function (id) {
 
     if (typeof id == 'string') {
+        id = core.getIdOfThis(id);
         // Tileset的ID必须是 X+数字 的形式
         if (!/^X\d+$/.test(id)) return null;
         id = parseInt(id.substring(1));
@@ -55,7 +67,7 @@ icons.prototype.getTilesetOffset = function (id) {
     for (var i in core.tilesets) {
         var imgName = core.tilesets[i];
         var img = core.material.images.tilesets[imgName];
-        var width = Math.floor(img.width / 32), height = Math.floor(img.height / 32);
+        var width = Math.floor(parseInt(img.getAttribute('_width')) / 32), height = Math.floor(parseInt(img.getAttribute('_height')) / 32);
         if (id >= startOffset && id < startOffset + width * height) {
             var x = (id - startOffset) % width, y = parseInt((id - startOffset) / width);
             return {"image": imgName, "x": x, "y": y};

@@ -4,12 +4,14 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"floorIds": [
 			"sample0",
 			"sample1",
-			"sample2",
-			"sample3",
-			"MT0"
+			"sample2"
 		],
+		"floorPartitions": [],
 		"images": [
+			"bear.png",
 			"bg.jpg",
+			"dragon.png",
+			"hero.png",
 			"winskin.png"
 		],
 		"tilesets": [
@@ -24,64 +26,150 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"bgm.mp3"
 		],
 		"sounds": [
-			"floor.mp3",
 			"attack.mp3",
-			"door.mp3",
-			"item.mp3",
-			"equip.mp3",
-			"zone.mp3",
-			"jump.mp3",
-			"pickaxe.mp3",
 			"bomb.mp3",
-			"centerFly.mp3"
+			"cancel.mp3",
+			"centerFly.mp3",
+			"confirm.mp3",
+			"cursor.mp3",
+			"door.mp3",
+			"equip.mp3",
+			"error.mp3",
+			"floor.mp3",
+			"gem.mp3",
+			"icePickaxe.mp3",
+			"item.mp3",
+			"jump.mp3",
+			"load.mp3",
+			"open_ui.mp3",
+			"pickaxe.mp3",
+			"recovery.mp3",
+			"save.mp3",
+			"shop.mp3",
+			"zone.mp3"
 		],
+		"fonts": [],
 		"nameMap": {
-			"背景图.jpg": "bg.jpg",
-			"背景音乐.mp3": "bgm.mp3"
+			"确定": "confirm.mp3",
+			"取消": "cancel.mp3",
+			"操作失败": "error.mp3",
+			"光标移动": "cursor.mp3",
+			"打开界面": "open_ui.mp3",
+			"读档": "load.mp3",
+			"存档": "save.mp3",
+			"获得道具": "item.mp3",
+			"回血": "recovery.mp3",
+			"炸弹": "bomb.mp3",
+			"飞行器": "centerFly.mp3",
+			"开关门": "door.mp3",
+			"上下楼": "floor.mp3",
+			"跳跃": "jump.mp3",
+			"破墙镐": "pickaxe.mp3",
+			"破冰镐": "icePickaxe.mp3",
+			"宝石": "gem.mp3",
+			"阻激夹域": "zone.mp3",
+			"穿脱装备": "equip.mp3",
+			"背景音乐": "bgm.mp3",
+			"攻击": "attack.mp3",
+			"背景图": "bg.jpg",
+			"商店": "shop.mp3",
+			"领域": "zone"
 		},
-		"startBackground": "bg.jpg",
-		"startLogoStyle": "color: black",
 		"levelChoose": [
-			[
-				"简单",
-				"Easy"
-			],
-			[
-				"普通",
-				"Normal"
-			],
-			[
-				"困难",
-				"Hard"
-			],
-			[
-				"噩梦",
-				"Hell"
-			]
+			{
+				"title": "简单",
+				"name": "Easy",
+				"hard": 1,
+				"color": [
+					64,
+					255,
+					85,
+					1
+				],
+				"action": [
+					{
+						"type": "comment",
+						"text": "在这里写该难度需执行的事件"
+					}
+				]
+			},
+			{
+				"title": "普通",
+				"name": "Normal",
+				"hard": 2,
+				"color": [
+					255,
+					221,
+					32,
+					1
+				],
+				"action": []
+			},
+			{
+				"title": "困难",
+				"name": "Hard",
+				"hard": 3,
+				"color": [
+					255,
+					68,
+					64,
+					1
+				],
+				"action": []
+			}
 		],
 		"equipName": [
 			"武器",
 			"盾牌"
 		],
-		"startBgm": "bgm.mp3",
-		"statusLeftBackground": "url(project/images/ground.png) repeat",
-		"statusTopBackground": "url(project/images/ground.png) repeat",
-		"toolsBackground": "url(project/images/ground.png) repeat",
-		"borderColor": "#CCCCCC",
-		"statusBarColor": "white",
-		"hardLabelColor": "red",
-		"floorChangingBackground": "black",
-		"floorChangingTextColor": "white",
-		"font": "Verdana",
-		"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;"
+		"startBgm": null,
+		"styles": {
+			"startBackground": "project/images/bg.jpg",
+			"startVerticalBackground": "project/images/vertical.jpg",
+			"startLogoStyle": "display:none",
+			"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 1px solid; caret-color: #66CCFF;",
+			"statusLeftBackground": "url(project/materials/ground.png) repeat",
+			"statusTopBackground": "url(project/materials/ground.png) repeat",
+			"toolsBackground": "url(project/materials/ground.png) repeat",
+			"floorChangingStyle": "background-color: black; color: white",
+			"statusBarColor": [
+				255,
+				255,
+				255,
+				1
+			],
+			"borderColor": [
+				0,
+				0,
+				0,
+				1
+			],
+			"selectColor": [
+				102,
+				204,
+				255,
+				1
+			],
+			"font": "Consolas"
+		},
+		"splitImages": [
+			{
+				"name": "dragon.png",
+				"width": 384,
+				"height": 96,
+				"prefix": "dragon_"
+			}
+		]
 	},
 	"firstData": {
-		"title": "魔塔样板",
-		"name": "template",
-		"version": "Ver 2.6.4",
+		"title": "长方形样板",
+		"name": "rectangle",
+		"version": "Ver 2.8.2",
 		"floorId": "sample0",
 		"hero": {
-			"name": "阳光",
+			"image": "hero.png",
+			"animate": true,
+			"name": "小秋橙",
 			"lv": 1,
 			"hpmax": 9999,
 			"hp": 1000,
@@ -91,14 +179,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"def": 100,
 			"mdef": 0,
 			"money": 0,
-			"experience": 0,
+			"exp": 0,
 			"equipment": [],
 			"items": {
-				"keys": {
-					"yellowKey": 0,
-					"blueKey": 0,
-					"redKey": 0
-				},
 				"constants": {},
 				"tools": {},
 				"equips": {}
@@ -109,6 +192,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"y": 10
 			},
 			"flags": {},
+			"followers": [],
 			"steps": 0
 		},
 		"startCanvas": [
@@ -121,92 +205,263 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				"text": "也可以直接切换到其他楼层（比如某个开始剧情楼层）进行操作。"
 			},
 			{
-				"type": "showImage",
-				"code": 1,
-				"image": "bg.jpg",
-				"loc": [
-					0,
-					0
-				],
-				"dw": 100,
-				"dh": 100,
-				"opacity": 1,
-				"time": 0
+				"type": "previewUI",
+				"action": [
+					{
+						"type": "showImage",
+						"code": 1,
+						"image": "bg.jpg",
+						"sloc": [
+							0,
+							0,
+							null
+						],
+						"loc": [
+							0,
+							0,
+							"core.__PX_WIDTH__",
+							"core.__PX_HEIGHT__"
+						],
+						"opacity": 1,
+						"time": 0
+					},
+					{
+						"type": "setAttribute",
+						"align": "center"
+					},
+					{
+						"type": "fillBoldText",
+						"x": "core.__PX_WIDTH__ / 2",
+						"y": 80,
+						"style": [
+							255,
+							255,
+							255,
+							1
+						],
+						"strokeStyle": [
+							0,
+							0,
+							0,
+							1
+						],
+						"font": "bold 40px Verdana",
+						"text": "${core.firstData.title}"
+					}
+				]
+			},
+			{
+				"type": "setValue",
+				"name": "flag:selection",
+				"value": "0"
+			},
+			{
+				"type": "comment",
+				"text": "在右下方自绘一个对话框进行显示选择项"
+			},
+			{
+				"type": "previewUI",
+				"action": [
+					{
+						"type": "fillRect",
+						"x": 230,
+						"y": 250,
+						"width": 150,
+						"height": 142,
+						"radius": 10,
+						"style": [
+							50,
+							54,
+							159,
+							0.85
+						]
+					},
+					{
+						"type": "strokeRect",
+						"x": 230,
+						"y": 250,
+						"width": 150,
+						"height": 142,
+						"radius": 10,
+						"style": [
+							255,
+							255,
+							255,
+							1
+						],
+						"lineWidth": 2
+					},
+					{
+						"type": "fillBoldText",
+						"x": 305,
+						"y": 290,
+						"style": [
+							255,
+							255,
+							255,
+							1
+						],
+						"font": "bold 25px Verdana",
+						"text": "开始游戏"
+					},
+					{
+						"type": "fillBoldText",
+						"x": 305,
+						"y": 330,
+						"font": "bold 25px Verdana",
+						"text": "读取存档"
+					},
+					{
+						"type": "fillBoldText",
+						"x": 305,
+						"y": 370,
+						"font": "bold 25px Verdana",
+						"text": "回放录像"
+					}
+				]
 			},
 			{
 				"type": "while",
-				"condition": "1",
+				"condition": "true",
 				"data": [
 					{
-						"type": "comment",
-						"text": "给用户提供选择项，这里简单的使用了choices事件"
+						"type": "drawSelector",
+						"image": "winskin.png",
+						"code": 1,
+						"x": 245,
+						"y": "265 + 40*flag:selection",
+						"width": 120,
+						"height": "core.__UNIT__"
 					},
 					{
-						"type": "comment",
-						"text": "也可以贴按钮图然后使用等待操作来完成"
-					},
-					{
-						"type": "choices",
-						"choices": [
+						"type": "wait",
+						"data": [
 							{
-								"text": "开始游戏",
+								"case": "keyboard",
+								"keycode": "13,32",
+								"break": true,
 								"action": [
 									{
-										"type": "comment",
-										"text": "检查bgm状态，下同"
-									},
-									{
-										"type": "function",
-										"function": "function(){\ncore.control.checkBgm()\n}"
-									},
-									{
-										"type": "if",
-										"condition": "core.flags.startDirectly",
-										"true": [
+										"type": "switch",
+										"condition": "flag:selection",
+										"caseList": [
 											{
-												"type": "comment",
-												"text": "直接开始游戏，设置初始化数据"
+												"case": "0",
+												"action": [
+													{
+														"type": "comment",
+														"text": "在“开始游戏”确定"
+													},
+													{
+														"type": "break",
+														"n": 1
+													}
+												]
 											},
 											{
-												"type": "function",
-												"function": "function(){\ncore.events.setInitData('')\n}"
-											}
-										],
-										"false": [
-											{
-												"type": "comment",
-												"text": "动态生成难度选择项"
+												"case": "1",
+												"action": [
+													{
+														"type": "comment",
+														"text": "在“读取存档”确定"
+													},
+													{
+														"type": "callLoad"
+													}
+												]
 											},
 											{
-												"type": "function",
-												"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\"text\": one[0], \"action\": [\n\t\t{\"type\": \"function\", \"function\": \"function() { core.status.hard = '\"+one[1]+\"'; core.events.setInitData('\"+one[1]+\"'); }\"}\n\t]});\n})\ncore.insertAction({\"type\": \"choices\", \"choices\": choices});\n}"
+												"case": "2",
+												"action": [
+													{
+														"type": "comment",
+														"text": "在“回放录像”确定"
+													},
+													{
+														"type": "if",
+														"condition": "(!core.isReplaying())",
+														"true": [
+															{
+																"type": "function",
+																"function": "function(){\ncore.chooseReplayFile()\n}"
+															}
+														]
+													}
+												]
 											}
 										]
-									},
-									{
-										"type": "hideImage",
-										"code": 1,
-										"time": 0
-									},
-									{
-										"type": "comment",
-										"text": "成功选择难度"
-									},
-									{
-										"type": "break"
 									}
 								]
 							},
 							{
-								"text": "读取存档",
+								"case": "keyboard",
+								"keycode": "38",
+								"break": true,
 								"action": [
 									{
-										"type": "function",
-										"function": "function(){\ncore.control.checkBgm()\n}"
+										"type": "comment",
+										"text": "光标上键"
 									},
 									{
+										"type": "setValue",
+										"name": "flag:selection",
+										"value": "(flag:selection + 2) % 3"
+									}
+								]
+							},
+							{
+								"case": "keyboard",
+								"keycode": "40",
+								"break": true,
+								"action": [
+									{
 										"type": "comment",
-										"text": "简单的使用“呼出读档界面”来处理"
+										"text": "光标下键"
+									},
+									{
+										"type": "setValue",
+										"name": "flag:selection",
+										"value": "(flag:selection + 1) % 3"
+									}
+								]
+							},
+							{
+								"case": "mouse",
+								"px": [
+									245,
+									365
+								],
+								"py": [
+									261,
+									300
+								],
+								"break": true,
+								"action": [
+									{
+										"type": "comment",
+										"text": "点击“开始游戏”"
+									},
+									{
+										"type": "break",
+										"n": 1
+									}
+								]
+							},
+							{
+								"case": "mouse",
+								"px": [
+									245,
+									365
+								],
+								"py": [
+									301,
+									340
+								],
+								"break": true,
+								"action": [
+									{
+										"type": "comment",
+										"text": "点击“读取存档”"
 									},
 									{
 										"type": "callLoad"
@@ -214,26 +469,30 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 								]
 							},
 							{
-								"text": "回放录像",
+								"case": "mouse",
+								"px": [
+									245,
+									365
+								],
+								"py": [
+									341,
+									380
+								],
+								"break": true,
 								"action": [
 									{
-										"type": "function",
-										"function": "function(){\ncore.control.checkBgm()\n}"
-									},
-									{
 										"type": "comment",
-										"text": "这段代码会弹框选择录像文件"
+										"text": "点击“播放录像”"
 									},
 									{
 										"type": "if",
-										"condition": "!core.isReplaying()",
+										"condition": "(!core.isReplaying())",
 										"true": [
 											{
 												"type": "function",
 												"function": "function(){\ncore.chooseReplayFile()\n}"
 											}
-										],
-										"false": []
+										]
 									}
 								]
 							}
@@ -242,48 +501,175 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 				]
 			},
 			{
-				"type": "comment",
-				"text": "接下来会执行startText中的事件"
-			}
-		],
-		"startText": [
-			"Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
-			"这里游戏开始时的剧情。\n定义在data.js的startText处。\n\n你可以在这里写上自己的内容。",
-			"赶快来试一试吧！"
-		],
-		"shops": [
+				"type": "setValue",
+				"name": "flag:selection",
+				"value": "null"
+			},
 			{
-				"id": "moneyShop1",
-				"name": "贪婪之神",
-				"icon": "blueShop",
-				"textInList": "1F金币商店",
-				"commonTimes": false,
-				"mustEnable": false,
-				"use": "money",
-				"need": "20+10*times*(times+1)",
-				"text": "勇敢的武士啊，给我${need}金币就可以：",
-				"choices": [
+				"type": "drawSelector",
+				"code": 1
+			},
+			{
+				"type": "clearMap"
+			},
+			{
+				"type": "function",
+				"function": "function(){\ncore.control.checkBgm()\n}"
+			},
+			{
+				"type": "if",
+				"condition": "(main.levelChoose.length > 0)",
+				"true": [
 					{
-						"text": "生命+800",
-						"effect": "status:hp+=800"
+						"type": "comment",
+						"text": "难度选择：作为样例，这里只提供了一个显示选择项。"
+					},
+					{
+						"type": "function",
+						"function": "function(){\nvar choices = [];\nmain.levelChoose.forEach(function (one) {\n\tchoices.push({\n\t\t\"text\": one.title || '',\n\t\t\"action\": [\n\t\t\t{ \"type\": \"function\", \"function\": \"function() { core.status.hard = '\" + (one.name || '') + \"'; }\" }\n\t\t]\n\t});\n})\ncore.insertAction({ \"type\": \"choices\", \"choices\": choices });\n}"
+					},
+					{
+						"type": "comment",
+						"text": "你也可以仿照上面的样例进行自己创建等待用户操作来处理不同的难度分歧。\n如需自己处理，请设置 core.status.hard \n（例如，自定义js脚本：core.status.hard = 'Easy' ）"
 					}
 				]
 			},
 			{
-				"id": "expShop1",
-				"name": "经验之神",
-				"icon": "pinkShop",
-				"textInList": "1F经验商店",
-				"commonTimes": false,
+				"type": "hideImage",
+				"code": 1,
+				"time": 0
+			},
+			{
+				"type": "comment",
+				"text": "接下来会执行startText中的事件"
+			},
+			{
+				"type": "comment",
+				"text": "状态栏默认处于隐藏状态；可以使用“显示状态栏”事件进行显示。"
+			}
+		],
+		"startText": [
+			{
+				"type": "hideStatusBar"
+			},
+			{
+				"type": "comment",
+				"text": "初始剧情"
+			},
+			{
+				"type": "setText",
+				"title": [
+					102,
+					204,
+					255,
+					1
+				],
+				"background": "winskin.png",
+				"time": 40,
+				"animateTime": 250
+			},
+			"Hi，欢迎来到 HTML5 ${core.firstData.title}！\n本样板由${status:name}制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5长方形魔塔！",
+			"这是游戏开始时的剧情。\n你可以在这里写上自己的内容。\n赶快来试一试吧！",
+			{
+				"type": "showStatusBar"
+			}
+		],
+		"shops": [
+			{
+				"id": "shop1",
+				"text": "\t[贪婪之神,moneyShop]勇敢的武士啊, 给我${20+2*flag:shop1}金币就可以：",
+				"textInList": "1F金币商店",
 				"mustEnable": false,
-				"use": "experience",
-				"need": "-1",
-				"text": "勇敢的武士啊，给我若干经验就可以：",
+				"disablePreview": false,
 				"choices": [
 					{
-						"text": "等级+1",
-						"need": "100",
-						"effect": "status:hp+=1000"
+						"text": "生命+800",
+						"need": "status:money>=20+2*flag:shop1",
+						"action": [
+							{
+								"type": "comment",
+								"text": "新版商店中需要手动扣减金币和增加访问次数"
+							},
+							{
+								"type": "setValue",
+								"name": "status:money",
+								"operator": "-=",
+								"value": "20+2*flag:shop1"
+							},
+							{
+								"type": "setValue",
+								"name": "flag:shop1",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:hp",
+								"operator": "+=",
+								"value": "800"
+							}
+						]
+					},
+					{
+						"text": "攻击+4",
+						"need": "status:money>=20+2*flag:shop1",
+						"action": [
+							{
+								"type": "comment",
+								"text": "新版商店中需要手动扣减金币和增加访问次数"
+							},
+							{
+								"type": "setValue",
+								"name": "status:money",
+								"operator": "-=",
+								"value": "20+2*flag:shop1"
+							},
+							{
+								"type": "setValue",
+								"name": "flag:shop1",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:atk",
+								"operator": "+=",
+								"value": "4"
+							}
+						]
+					}
+				]
+			},
+			{
+				"id": "shop2",
+				"text": "\t[贪婪之神,expShop]勇敢的武士啊, 给我一定经验就可以：",
+				"textInList": "1F经验商店",
+				"mustEnable": false,
+				"disablePreview": true,
+				"choices": [
+					{
+						"text": "等级+1（100经验）",
+						"need": "status:exp>=100",
+						"action": [
+							{
+								"type": "setValue",
+								"name": "status:exp",
+								"operator": "-=",
+								"value": "100"
+							},
+							{
+								"type": "setValue",
+								"name": "status:lv",
+								"operator": "+=",
+								"value": "1"
+							},
+							{
+								"type": "setValue",
+								"name": "status:hp",
+								"operator": "+=",
+								"value": "1000"
+							}
+						]
 					}
 				]
 			},
@@ -296,12 +682,13 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					{
 						"id": "yellowKey",
 						"number": 10,
-						"money": 10
+						"money": "10",
+						"sell": "5"
 					}
 				]
 			},
 			{
-				"id": "keyShop1",
+				"id": "keyShop",
 				"textInList": "回收钥匙商店",
 				"mustEnable": false,
 				"commonEvent": "回收钥匙商店"
@@ -320,17 +707,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			},
 			{
 				"need": "20",
-				"title": "第二级",
+				"title": "",
 				"action": [
 					{
 						"type": "setValue",
 						"name": "status:atk",
-						"value": "status:atk+10"
+						"operator": "+=",
+						"value": "10"
 					},
 					{
 						"type": "setValue",
 						"name": "status:def",
-						"value": "status:def+10"
+						"operator": "+=",
+						"value": "10"
 					}
 				]
 			},
@@ -350,9 +739,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"lavaDamage": 100,
 		"poisonDamage": 10,
 		"weakValue": 20,
-		"redJewel": 3,
-		"blueJewel": 3,
-		"greenJewel": 5,
+		"redGem": 3,
+		"blueGem": 3,
+		"greenGem": 5,
 		"redPotion": 100,
 		"bluePotion": 250,
 		"yellowPotion": 500,
@@ -361,58 +750,40 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"counterAttack": 0.1,
 		"purify": 3,
 		"hatred": 2,
-		"moveSpeed": 100,
-		"animateSpeed": 400,
-		"floorChangeTime": 800
+		"animateSpeed": 300,
+		"moveSpeed": 200,
+		"statusCanvasRowsOnMobile": 5,
+		"floorChangeTime": 100
 	},
 	"flags": {
-		"mspf":30, // 全局每一帧用时的毫秒数
-		"enableFloor": true,
-		"enableName": false,
-		"enableLv": false,
-		"enableHPMax": false,
-		"enableMana": false,
-		"enableMDef": true,
-		"enableMoney": true,
-		"enableExperience": false,
-		"enableLevelUp": false,
-		"levelUpLeftMode": false,
-		"enableKeys": true,
-		"enablePZF": false,
-		"enableDebuff": false,
-		"enableSkill": false,
+		"statusBarItems": [
+			"enableFloor",
+			"enableHP",
+			"enableAtk",
+			"enableDef",
+			"enableMDef",
+			"enableMoney",
+			"enableExp",
+			"enableKeys"
+		],
+		"extendToolbar": false,
 		"flyNearStair": true,
 		"flyRecordPosition": false,
-		"pickaxeFourDirections": false,
-		"bombFourDirections": false,
-		"snowFourDirections": false,
-		"bigKeyIsBox": false,
-		"steelDoorWithoutKey": false,
-		"itemFirstText": true,
-		"equipment": false,
+		"itemFirstText": false,
 		"equipboxButton": false,
-		"iconInEquipbox": false,
 		"enableAddPoint": false,
 		"enableNegativeDamage": false,
-		"hatredDecrease": true,
-		"betweenAttackCeil": false,
 		"betweenAttackMax": false,
 		"useLoop": false,
 		"startUsingCanvas": false,
-		"startDirectly": false,
-		"statusCanvas": false,
-		"statusCanvasRowsOnMobile": 3,
-		"displayEnemyDamage": true,
-		"displayCritical": true,
-		"displayExtraDamage": true,
+		"statusCanvas": true,
+		"enableEnemyPoint": true,
 		"enableGentleClick": true,
-		"potionWhileRouting": false,
 		"ignoreChangeFloor": true,
 		"canGoDeadZone": false,
 		"enableMoveDirectly": true,
-		"enableDisabledShop": true,
+		"enableRouteFolding": true,
 		"disableShopOnDamage": false,
-		"blurFg": false,
-		"checkConsole": false
+		"blurFg": false
 	}
 }

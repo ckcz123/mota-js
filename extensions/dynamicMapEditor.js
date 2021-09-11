@@ -8,20 +8,13 @@ function dynamicMapEditor() {
 	// 所有显示的ID
 	this.displayIds = [
 		'none', 'yellowWall', 'blueWall', 'whiteWall', 'yellowDoor', 'blueDoor', 'redDoor', 'star', 'lava', 'lavaNet',
-		'yellowKey', 'blueKey', 'redKey', 'redJewel', 'blueJewel', 'greenJewel', 'yellowJewel',
+		'yellowKey', 'blueKey', 'redKey', 'redGem', 'blueGem', 'greenGem', 'yellowGem',
 		'redPotion', 'bluePotion', 'yellowPotion', 'greenPotion', 'pickaxe', 'bomb', 'centerFly',
 		'cls:autotile', 'cls:enemys', 'cls:enemy48'
 	];
-	this.userParams = {
-		hotKeys: {
-			openToolBox: 219,
-			save: 221,
-			undo: 220
-		}
-	};
 	this.items = [];
 	this.userChanged = [];
-	this.key2Function = {};
+	this.savedItems = [];
 	this.dom = null;
 	this.canvas = null;
 	this.mapRecord = {};
@@ -38,11 +31,6 @@ function dynamicMapEditor() {
 // ------ init
 
 dynamicMapEditor.prototype._init = function () {
-	var hotkeys = this.userParams.hotKeys;
-	this.key2Function[hotkeys.openToolBox] = this.openToolBox;
-	this.key2Function[hotkeys.save] = this.applyCurrentChange;
-	this.key2Function[hotkeys.undo] = this.undo;
-
 	this.dom = document.createElement("canvas");
 	this.dom.id = 'dynamicMapEditor';
 	this.dom.style.display = 'none';
@@ -51,12 +39,11 @@ dynamicMapEditor.prototype._init = function () {
 	this.dom.style.top = '3px';
 	this.dom.style.zIndex = 99999;
 	this.canvas = this.dom.getContext("2d");
-	this.canvas.font = "12px Verdana";
 	core.dom.gameGroup.appendChild(this.dom);
 
 	this.initInfos();
 	this.pageMax = Math.ceil(this.items.length / this.pageMaxItems);
-	core.registerAction('onkeyUp', 'plugin_dme_keydown', this.onKeyDown.bind(this), 200);
+	core.registerAction('onkeyUp', 'plugin_dme_keydown', this.onKeyUp.bind(this), 200);
 	core.registerAction('onclick', 'plugin_dme_click', this.onMapClick.bind(this), 200);
 	this.dom.addEventListener("click",this.onBoxClick.bind(this));
 	this.showInitHelp();
@@ -64,13 +51,16 @@ dynamicMapEditor.prototype._init = function () {
 
 dynamicMapEditor.prototype.initInfos = function () {
 	this.items = [];
+	var ids = {};
 	this.displayIds.forEach(function (v) {
 		if (v.startsWith("cls:")) {
 			var cls = v.substr(4);
 			for (var id in core.maps.blocksInfo) {
 				var u = core.maps.blocksInfo[id];
 				if (u && u.cls == cls) {
+					if (ids[u.id]) continue;
 					this.items.push(core.getBlockInfo(u.id));
+					ids[u.id] = true;
 				}
 			}
 		} else if (v == 'none') {
@@ -80,6 +70,7 @@ dynamicMapEditor.prototype.initInfos = function () {
 		}
 	}, this);
 	this.items = this.items.filter(function (v) { return v && v.id && v.number >= 0; });
+	this.savedItems = core.getLocalStorage('_dynamicMapEditor_savedItems', []);
 }
 
 // ------ bind actions
@@ -88,16 +79,37 @@ dynamicMapEditor.prototype.isValid = function () {
 	return main.mode == 'play' && core.isPlaying() && !core.isReplaying() && !core.status.lockControl;
 }
 
-dynamicMapEditor.prototype.onKeyDown = function(e) {
+dynamicMapEditor.prototype.onKeyUp = function(e) {
 	if (!this.isValid()) return false;
-	var func = this.key2Function[e.keyCode];
-	func && func.call(this);
+	if (e.keyCode == 219) {
+		this.openToolBox();
+		return true;
+	}
+	if (!this.isUsingTool) return false;
+
+	if (e.keyCode == 220) {
+		this.undo();
+		return true;
+	} else if (e.keyCode == 221) {
+		this.applyCurrentChange();
+		return true;
+	} else if (e.keyCode >= 48 && e.keyCode <= 57) {
+		// 0-9
+		if (e.altKey) {
+			this.savedItem(e.keyCode - 48);
+		} else {
+			this.loadItem(e.keyCode - 48);
+		}
+		return true;
+	}
 	return false;
 }
 
 dynamicMapEditor.prototype.onMapClick = function(x, y) {
 	if (!this.isValid()) return false;
 	if (!this.isUsingTool || !this.selectedItem) return false;
+	x += parseInt(core.bigmap.offsetX / 32);
+	y += parseInt(core.bigmap.offsetY / 32);
 	var number = this.selectedItem.number;
 	this.addOperation('put', number, x, y, core.status.floorId);
 	return true;
@@ -191,9 +203,9 @@ dynamicMapEditor.prototype.openToolBox = function() {
 	this.selectedIndex = -1;
 	this.dom.style.display = this.isUsingTool ? 'block' : 'none';
 	this.dom.style.width = core.dom.statusCanvas.style.width;
-	this.dom.width = core.dom.statusCanvas.width;
+	this.dom.width = core.dom.statusCanvas.width / core.domStyle.ratio;
 	this.dom.style.height = core.dom.statusCanvas.style.height;
-	this.dom.height = core.dom.statusCanvas.height;
+	this.dom.height = core.dom.statusCanvas.height / core.domStyle.ratio;
 	this.offsetX = this.dom.width / 2 - 60;
 	this.refreshToolBox();
 	if (this.isUsingTool) this.showHelp();
@@ -286,6 +298,23 @@ dynamicMapEditor.prototype.changePage = function(delta) {
 	this.refreshToolBox();
 }
 
+dynamicMapEditor.prototype.savedItem = function (number) {
+	if (!this.isUsingTool || this.selectedItem < 0) return;
+	this.savedItems[number] = [this.pageId, this.selectedIndex];
+	core.setLocalStorage('_dynamicMapEditor_savedItems', this.savedItems);
+	core.drawTip("已保存此图块");
+}
+
+dynamicMapEditor.prototype.loadItem = function (number) {
+	if (!this.isUsingTool) return;
+	var u = this.savedItems[number];
+	if (!u) return core.drawTip("没有保存的图块！");
+	this.pageId = u[0];
+	this.selectedIndex = u[1];
+	this.selectedItem = this.items[this.pageId * this.pageMaxItems + this.selectedIndex];
+	this.refreshToolBox();
+}
+
 // ------ draw
 
 dynamicMapEditor.prototype.itemRect = function(index) {
@@ -308,12 +337,12 @@ dynamicMapEditor.prototype.refreshToolBox = function() {
 		if (item.image) core.drawImage(this.canvas, item.image, 0, item.height * item.posY, 32, 32, rect.x + 4, rect.y, 32, 32);
 		if (item.name) {
 			this.canvas.textAlign = 'center';
-			core.fillText(this.canvas, item.name, rect.x + 20, rect.y + 44, '#FFFFFF', null, 40);
+			core.fillText(this.canvas, item.name, rect.x + 20, rect.y + 44, '#FFFFFF', '11px Verdana', 40);
 		}
 		if (core.material.enemys[item.id]) {
 			this.canvas.textAlign = 'left';
 			var damageString = core.enemys.getDamageString(item.id);
-			core.fillBoldText(this.canvas, damageString.damage, rect.x + 5, rect.y + 31, damageString.color);
+			core.fillBoldText(this.canvas, damageString.damage, rect.x + 5, rect.y + 31, damageString.color, null, '11px Verdana');
 			var critical = core.enemys.nextCriticals(item.id, 1);
 			critical = core.formatBigNumber((critical[0]||[])[0], true);
 			if (critical == '???') critical = '?';
@@ -323,25 +352,25 @@ dynamicMapEditor.prototype.refreshToolBox = function() {
 
 	this.canvas.textAlign = 'center';
 	this.canvas.fillStyle = '#FFFFFF';
-	if(this.pageId > 0) core.fillText(this.canvas, '上一页', this.offsetX + 20, 365, '#FFFFFF');
-	if(this.pageId < this.pageMax-1) core.fillText(this.canvas, '下一页',this.offsetX + 100, 365, '#FFFFFF');
+	if(this.pageId > 0) core.fillText(this.canvas, '上一页', this.offsetX + 20, 365, '#FFFFFF', '11px Verdana');
+	if(this.pageId < this.pageMax-1) core.fillText(this.canvas, '下一页',this.offsetX + 100, 365, '#FFFFFF', '11px Verdana');
 	core.fillText(this.canvas, '帮助', this.offsetX + 60, 365, '#FFFFFF');
 	var text1 = core.formatBigNumber(core.getRealStatus('hp'), true) + "/" +
 		core.formatBigNumber(core.getRealStatus('atk'), true) + "/" +
 		core.formatBigNumber(core.getRealStatus("def"), true) + "/" +
 		core.formatBigNumber(core.getRealStatus("mdef"), true);
-	core.fillText(this.canvas, text1, this.offsetX + 60, 380, '#FF7F00', 120);
+	core.fillText(this.canvas, text1, this.offsetX + 60, 380, '#FF7F00', '11px Verdana', 120);
 	var text2 = core.formatBigNumber(core.getRealStatus('money', true)) + "/" +
-		core.formatBigNumber(core.getRealStatus('experience'), true) + "/" +
+		core.formatBigNumber(core.getRealStatus('exp'), true) + "/" +
 		core.itemCount('yellowKey') + '/' + core.itemCount('blueKey') + '/' +
 		core.itemCount('redKey');
-	core.fillText(this.canvas, text2, this.offsetX + 60, 395, '#FF7F00', 120);
+	core.fillText(this.canvas, text2, this.offsetX + 60, 395, '#FF7F00', '11px Verdana', 120);
 	var text3 = core.itemCount('pickaxe') + '/' + core.itemCount('bomb') + '/' +
 		core.itemCount('centerFly');
 	if (core.hasFlag('poison')) text3 += "/毒";
 	if (core.hasFlag('weak')) text3 += "/衰";
 	if (core.hasFlag('curse')) text3 += "/咒";
-	core.fillText(this.canvas, text3, this.offsetX + 60, 410, '#FF7F00', 120);
+	core.fillText(this.canvas, text3, this.offsetX + 60, 410, '#FF7F00', '11px Verdana', 120);
 	if(this.selectedItem) {
 		var rect = this.itemRect(this.selectedIndex);
 		core.strokeRect(this.canvas, rect.x, rect.y, rect.w, rect.h, '#FF7F00', 4);
@@ -366,9 +395,10 @@ dynamicMapEditor.prototype.showHelp = function (fromButton) {
 	if (main.mode != 'play' || (!fromButton && core.getLocalStorage('_dynamicMapEditor_help'))) return;
 	var text = "欢迎使用黄鸡编写的运行时编辑拓展！你可以一边游戏一边编辑地图或者修改数据。\n\n";
 	text += "基本操作：\n - 点击图块再点地图可以放置；\n - 双击图块可以编辑数据；\n";
-	text += " - [ 键将开关此模式；\n - ] 键将会把改动保存到文件；\n - \\ 键将撤销上步操作。\n\n";
+	text += " - [ 键将开关此模式；\n - ] 键将会把改动保存到文件；\n - \\ 键将撤销上步操作。\n";
+	text +=	" - Alt+0~9 保存当前图块 \n - 0~9 读取当前图块\n";
 	text += "最下面三行数据分别是：\n"
-	text += "血攻防魔防；金经黄蓝红；破炸飞和debuff。";
+	text += "血攻防护盾；金经黄蓝红；破炸飞和debuff。";
 	if (!fromButton) text += "\n\n点取消将不再提示本页面。";
 	core.myconfirm(text, null, function () {
 		if (!fromButton) core.setLocalStorage("_dynamicMapEditor_help", true);

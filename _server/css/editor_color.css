@@ -1,0 +1,587 @@
+/** 配色文件：此文件包含了整个编辑器的全部配色 **/
+
+/** ======== 编辑器主界面相关 ======== **/
+
+/** 全局属性 **/
+body {
+    background-color: #F5F5F5;
+}
+
+/** 可自行仿照添加更多的全局属性...... */
+
+/** 颜色选择器 */ 
+#colorPanel {
+    background-color: #F5F5F5;
+}
+
+/** 所有的阴影效果（颜色选择器、数据区、地图区、素材区等） */
+#colorPanel, #left, #mid, #mid2, #right, .leftTab {
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+}
+
+/** 地图编辑的输入框 */
+#pout {
+    border: 1px solid #ddd;
+}
+
+/** 中间的消息提示框 */
+#tip {
+    border: 1px solid #ccc;
+}
+
+/** 素材区背景 */
+#iconLib, #mapEdit {
+    background-color: #F5F5F5;
+}
+
+/** 选中素材区时的方框 */
+#dataSelection, .appendSelection, #selectPointBox {
+    background-color: rgba(255, 255, 255, 0.0);
+    border: 1px solid #000;
+    box-shadow: 0 0 0 2px #fff, 0 0 0 3px #000;
+}
+
+/** 错误消息（如保存失败） */
+.warnText {
+    color: #D00;
+}
+
+/** 提示消息（如告知当前图块信息） */
+.infoText {
+    color: #39F;
+}
+
+/** 成功消息（如保存成功） */
+.successText {
+    color: #098;
+}
+
+/** 数据库的表格相关 */
+table, td {
+    border: 1px solid #fff;
+    color: #fff;
+}
+
+.coltd, .rowtd {
+    border: 0.230vw solid #fff;
+    color: #fff;
+}
+
+/** 横向标尺背景色 */
+table.col td, div.col .coltd {
+    background-color: #398;
+}
+
+/** 横向标尺选中时的背景色 */
+#mapColMark td:hover .colBlock, #mapColMark .coltd:hover .colBlock {
+    background-color: rgba(85, 204, 187, 0.5);
+}
+
+/** 纵向标尺背景色 */
+table.row td, div.row .rowtd .rowtext {
+    background-color: #379;
+}
+
+/** 纵向标尺选中时的背景色 */
+#mapRowMark td:hover .rowBlock, #mapRowMark .rowtd:hover .rowBlock {
+    background-color: rgba(102, 170, 204, 0.5);
+}
+
+/** 右键菜单栏 */
+#midMenu{
+    color: #000;
+    background-color: #fff;
+    border-color: #ccc #666 #666 #ccc;
+}
+
+#mid .tools {
+    border-top: 1px solid #ccc;
+}
+
+/** 右键菜单栏的当前选中项 */
+#midMenu .menuitem:hover{
+    background-color: #cef;
+    border-color: #bde;
+}
+
+/** 禁用的输入方框（如ID）的背景色 */
+textarea[disabled] {
+    color: #999999;
+}
+
+/** 搜索事件块的输入框 */
+#searchBlock {
+    background-color: #eeeef4;
+}
+
+/** 打开浮层（变量搜索等）时页面背景 */
+#uieventDiv {
+    background: rgba(128,128,128,0.6);
+}
+
+/** 浮层的对话框 */
+#uieventDialog {
+    background: white;
+}
+
+/** 追加素材时的编号标记 */
+#appendPicSelection span {
+    -webkit-text-stroke: 1px red;
+    text-shadow: black 1px 0, black 0 1px, black -1px 0, black 0 -1px;
+}
+
+.leftTab {
+    background-color: #F5F5F5;
+}
+
+/** 整个事件编辑器 */
+#left6 {
+    background-color: rgb(245, 245, 245);
+}
+
+/** 事件编辑器右边的文本框 */
+#left6 .CodeMirror {
+    border: 1px solid #eee;
+}
+
+/** 脚本编辑器 */
+#left7 {
+    background-color: rgb(245, 245, 245);
+}
+
+#left7 .CodeMirror {
+    border: 1px solid #eee;
+}
+
+/** 数据区的表格 */
+.etable table, .etable table td {
+    color: #000;
+}
+
+/** 数据区每行效果；2n代表偶数行，以此类推 */
+.etable table tr {
+    background-color: #fff;
+    border-top: 1px solid #ccccd4;
+}
+.etable table tr:nth-child(2n) {
+    background-color: #fafafa;
+}
+
+/** 数据区表格每列效果 */
+.etable table th, .etable table td {
+    border: 1px solid #ddd;
+}
+
+/** 鼠标悬停在数据区表格上的边框效果 */
+.etable tr:not(:first-child) > :nth-child(3):hover {
+    border: 1px solid rgb(87, 198, 232);
+    box-shadow: 0px 0px 3px rgb(87, 198, 232);
+}
+.etable tr:not(:first-child) > :nth-child(2):hover,
+.etable tr:not(:first-child) > :nth-child(1):hover {
+    border: 1px solid rgb(87, 232, 198);
+    box-shadow: 0px 0px 3px rgb(87, 232, 198);
+}
+
+/** 表格编辑的按钮颜色 */
+.editorTableEditBtn {
+    background-color: #ddf8ff;
+    border-color: #bbc9cc;
+    color: #445560;
+}
+.editorTableFoldBtn {
+    background-color: #fff4bb;
+    border-color: #d4ccbb;
+    color: #605544;
+}
+/** 保存地图的按钮颜色 */
+#saveFloor.highlight {
+    background-color: #ffd700;
+    border-color: #aa9944;
+    color: #430;
+}
+
+/** 解析按钮颜色 */
+#blocklyParse.highlight {
+    background-color: #ffd700;
+    border-color: #aa9944;
+    color: #430;
+}
+
+/** 大地图按钮颜色 */
+#bigmapBtn.highlight {
+    background-color: #ffd700;
+    border-color: #aa9944;
+    color: #430;
+}
+
+.popCheckboxItem {
+    color: black;
+}
+
+table.col td.highlight {
+    background-color: #77ddcc;
+}
+
+table.row td.highlight {
+    background-color: #88bbdd;
+}
+
+/** ======== blockly 相关 ======== */
+
+/*魔改*/
+
+.blocklyTreeLabel {
+    color: #0f0f0f !important;
+}
+
+.blocklyTreeLabel:hover {
+    /*background-color: #888 !important;*/
+    color: #0f0f0f !important;
+}
+
+.blocklyTreeSelected {
+    background-color: #5bf !important;
+    color: #fff !important;
+}
+
+.blocklyTreeRow {
+    color: #0f0f0f !important;
+}
+
+.blocklyTreeRow:hover {
+    background-color: #eee !important;
+    color: #0f0f0f !important;
+}
+/*魔改*/
+
+/** 如果需要blockly深色模式，请有选择性视情况取消注释下面几条；具体功能自行研究 */
+/*
+.blocklyToolboxDiv {
+    background-color: #ddd !important;
+    color: black;
+}
+
+.blocklySvg {
+    background-color: #000;
+}
+
+.blocklyNonEditableText>rect, .blocklyEditableText>rect {
+    fill: #000;
+    fill-opacity: .4;
+}
+
+.blocklyNonEditableText>text, .blocklyEditableText>text {
+    fill: #fff;
+}
+
+input.blocklyHtmlInput {
+    color: white;
+    background-color: black;
+}
+*/
+
+/** ======== Blockly中自动补全相关 ======== */
+.awesomplete > ul {
+    background: #fff;
+    background: hsla(0,0%,100%,.9);
+    background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.8));
+    border: 1px solid rgba(0,0,0,.3);
+    box-shadow: .05em .2em .6em rgba(0,0,0,.2);
+}
+.awesomplete > ul:before {
+    background: white;
+}
+.awesomplete > ul > li:hover {
+    background: #cef/*hsl(200, 40%, 80%)*/;
+    color: black;
+}
+.awesomplete > ul > li[aria-selected="true"] {
+    background: #39f/*hsl(205, 40%, 40%)*/;
+    color: white;
+}
+.awesomplete mark {
+    background: #cef;
+}
+.awesomplete li:hover mark {
+    background: #39f;
+    color: white;
+}
+.awesomplete li[aria-selected="true"] mark {
+    background: #06c;
+    color: inherit;
+}
+
+/** ======== 脚本编辑相关 ======== **/
+/* 很多我也不知道是干嘛的，自行根据名字猜每一项作用吧 */
+
+.CodeMirror {
+    color: black;
+    background: white;
+}
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+    background-color: white; 
+}
+.CodeMirror-gutters {
+    border-right: 1px solid #ddd;
+    background-color: #f7f7f7;
+}
+.CodeMirror-linenumber {
+    color: #999;
+}
+.CodeMirror-guttermarker {
+    color: black;
+}
+.CodeMirror-guttermarker-subtle {
+    color: #999;
+}
+.CodeMirror-cursor {
+    border-left: 1px solid black;
+}
+/* Shown when moving in bi-directional text */
+.CodeMirror div.CodeMirror-secondarycursor {
+    border-left: 1px solid silver;
+}
+.cm-fat-cursor .CodeMirror-cursor {
+    background: #7e7;
+}
+.cm-fat-cursor-mark {
+  background-color: rgba(20, 255, 20, 0.5);
+}
+.cm-animate-fat-cursor {
+    background-color: #7e7;
+}
+.CodeMirror-ruler {
+  border-left: 1px solid #ccc;
+}
+/* DEFAULT THEME */
+.cm-s-default .cm-header {
+    color: blue;
+}  
+.cm-s-default .cm-quote {
+    color: #090;
+} 
+.cm-negative {
+    color: #d44;
+} 
+.cm-positive {
+    color: #292;
+}
+.cm-s-default .cm-keyword {
+    color: #819;
+}
+.cm-s-default .cm-atom {
+    color: #219;
+}
+.cm-s-default .cm-number {
+    color: #275;
+}
+.cm-s-default .cm-def {
+    color: #00f;
+}
+.cm-s-default .cm-variable-2 {
+    color: #05a;
+}
+.cm-s-default .cm-variable-3, .cm-s-default .cm-type {
+    color: #085;
+}
+.cm-s-default .cm-comment {
+    color: #960;
+}
+.cm-s-default .cm-string {
+    color: #a11;
+}
+.cm-s-default .cm-string-2 {
+    color: #f50;
+}
+.cm-s-default .cm-meta {
+    color: #555;
+}
+.cm-s-default .cm-qualifier {
+    color: #555;
+}
+.cm-s-default .cm-builtin {
+    color: #30a;
+}
+.cm-s-default .cm-bracket {
+    color: #997;
+}
+.cm-s-default .cm-tag {
+    color: #170;
+}
+.cm-s-default .cm-attribute {
+    color: #00c;
+}
+.cm-s-default .cm-hr {
+    color: #999;
+}
+.cm-s-default .cm-link {
+    color: #00c;
+}
+.cm-s-default .cm-error {
+    color: #f00;
+}
+.cm-invalidchar {
+    color: #f00;
+}
+
+/* Default styles for common addons */
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+    color: #0b0;
+}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {
+    color: #a22;
+}
+.CodeMirror-matchingtag {
+    background: rgba(255, 150, 0, .3);
+}
+.CodeMirror-activeline-background {
+    background: #e8f2ff;
+}
+
+.CodeMirror-selected {
+    background: #d9d9d9;
+}
+.CodeMirror-focused .CodeMirror-selected {
+    background: #d7d4f0;
+}
+.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection {
+    background: #d7d4f0;
+}
+.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection {
+    background: #d7d4f0;
+}
+.cm-searching {
+    background-color: #ffa;
+    background-color: rgba(255, 255, 0, .4);
+}
+
+/* 代码补全提示相关 */
+
+.cm-matchhighlight {
+    background-color: #dedede
+}
+.CodeMirror-hints {
+    border: 1px solid silver;
+    background: white;
+    -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
+    box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
+}
+.CodeMirror-hint {
+    color: black;
+}
+li.CodeMirror-hint-active {
+    background: #08f;
+    color: white;
+}
+
+/* 代码语法检查相关相关 */
+
+.CodeMirror-lint-tooltip {
+    background-color: #ffd;
+    border: 1px solid black;
+    color: black;
+}
+
+.CodeMirror-lint-mark-error {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDw4cOCW1/KIAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAHElEQVQI12NggIL/DAz/GdA5/xkY/qPKMDAwAADLZwf5rvm+LQAAAABJRU5ErkJggg==");
+}
+
+.CodeMirror-lint-mark-warning {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII=");
+}
+
+.CodeMirror-lint-marker-error, .CodeMirror-lint-message-error {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAHlBMVEW7AAC7AACxAAC7AAC7AAAAAAC4AAC5AAD///+7AAAUdclpAAAABnRSTlMXnORSiwCK0ZKSAAAATUlEQVR42mWPOQ7AQAgDuQLx/z8csYRmPRIFIwRGnosRrpamvkKi0FTIiMASR3hhKW+hAN6/tIWhu9PDWiTGNEkTtIOucA5Oyr9ckPgAWm0GPBog6v4AAAAASUVORK5CYII=");
+}
+
+.CodeMirror-lint-marker-warning, .CodeMirror-lint-message-warning {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAANlBMVEX/uwDvrwD/uwD/uwD/uwD/uwD/uwD/uwD/uwD6twD/uwAAAADurwD2tQD7uAD+ugAAAAD/uwDhmeTRAAAADHRSTlMJ8mN1EYcbmiixgACm7WbuAAAAVklEQVR42n3PUQqAIBBFUU1LLc3u/jdbOJoW1P08DA9Gba8+YWJ6gNJoNYIBzAA2chBth5kLmG9YUoG0NHAUwFXwO9LuBQL1giCQb8gC9Oro2vp5rncCIY8L8uEx5ZkAAAAASUVORK5CYII=");
+}
+
+.CodeMirror-lint-marker-multiple {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAMAAADzjKfhAAAACVBMVEUAAAAAAAC/v7914kyHAAAAAXRSTlMAQObYZgAAACNJREFUeNo1ioEJAAAIwmz/H90iFFSGJgFMe3gaLZ0od+9/AQZ0ADosbYraAAAAAElFTkSuQmCC");
+}
+
+/* 代码补全的对话框（提供搜索功能）相关 */
+
+.CodeMirror-dialog-top {
+    border-bottom: 1px solid #eee;
+}
+  
+.CodeMirror-dialog-bottom {
+    border-top: 1px solid #eee;
+}
+
+/* 搜索项的背景色 */
+.CodeMirror-focused .cm-matchhighlight {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
+    background-position: bottom;
+    background-repeat: repeat-x;
+}
+.cm-matchhighlight {background-color: lightgreen}
+.CodeMirror-selection-highlight-scrollbar {background-color: yellowgreen}
+
+.CodeMirror-search-hint {
+    color: #888;
+}
+
+
+/* 增强的代码补全系统相关 */
+
+/* 变量类型 */
+.CodeMirror-Tern-completion:before {
+    color: white;
+}
+.CodeMirror-Tern-completion-unknown:before {
+  content: "?";
+  background: #4bb;
+}
+.CodeMirror-Tern-completion-object:before {
+  content: "O";
+  background: #77c;
+}
+.CodeMirror-Tern-completion-fn:before {
+  content: "F";
+  background: #7c7;
+}
+.CodeMirror-Tern-completion-array:before {
+  content: "A";
+  background: #c66;
+}
+.CodeMirror-Tern-completion-number:before {
+  content: "1";
+  background: #999;
+}
+.CodeMirror-Tern-completion-string:before {
+  content: "S";
+  background: #999;
+}
+.CodeMirror-Tern-completion-bool:before {
+  content: "B";
+  background: #999;
+}
+
+.CodeMirror-Tern-completion-guess {
+    color: #999;
+}
+/* 额外提示框（如文档） */
+.CodeMirror-Tern-tooltip {
+    border: 1px solid silver;
+    color: #444;
+    background-color: white;
+    -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+    -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+    box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+}
+
+.CodeMirror-Tern-fname { color: black; }
+.CodeMirror-Tern-farg { color: #70a; }
+.CodeMirror-Tern-type { color: #07c; }
+.CodeMirror-foldmarker {
+    color: blue;
+    text-shadow: #b9f 1px 1px 2px, #b9f -1px -1px 2px, #b9f 1px -1px 2px, #b9f -1px 1px 2px;
+}  
+

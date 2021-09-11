@@ -1,0 +1,756 @@
+/** 配色文件：此文件包含了整个编辑器的全部配色 **/
+
+/** ======== 编辑器主界面相关 ======== **/
+
+/** 全局属性 **/
+body {
+    background-color: #242424;
+    color: #bbb;
+    filter: brightness(0.825);
+}
+
+input {
+    background-color: #404048;
+    color: #c0c0c0;
+}
+
+button {
+    background-color: #404048;
+	border-color: #aaa;
+    color: #c0c0c0;
+}
+
+/** 可自行仿照添加更多的全局属性...... */
+
+/** 颜色选择器 */ 
+#colorPanel {
+    background-color: #333;
+}
+
+/** 所有的阴影效果（颜色选择器、数据区、地图区、素材区等） */
+#colorPanel, #left, #mid, #mid2, #right, .leftTab {
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12);
+}
+
+/** 地图编辑的输入框 */
+#pout {
+    border: 1px solid #ddd;
+}
+
+/** 中间的消息提示框 */
+#tip {
+    border: 1px solid #ccc;
+}
+
+/** 素材区背景 */
+#iconLib, #mapEdit {
+    background-color: #242424;
+}
+
+/** 选中素材区时的方框 */
+#dataSelection, .appendSelection, #selectPointBox {
+    background-color: rgba(255, 255, 255, 0.0);
+    border: 1px solid #aaa;
+    box-shadow: 0 0 0 2px #ddd, 0 0 0 3px #aaa;
+}
+
+/** 错误消息（如保存失败） */
+.warnText {
+    color: #e44;
+}
+
+/** 提示消息（如告知当前图块信息） */
+.infoText {
+    color: #7bd;
+}
+
+/** 成功消息（如保存成功） */
+.successText {
+    color: #8ca;
+}
+
+/** 数据库的表格相关 */
+table, td {
+    border: 1px solid #777;
+    color: #777;
+}
+
+.coltd, .rowtd {
+    border: 0.230vw solid #777;
+    color: #777;
+}
+
+/** 横向标尺背景色 */
+table.col td, div.col .coltd {
+    background-color: #287;
+	border-color: #ccc;
+	color: #ccc;
+}
+
+/** 横向标尺选中时的背景色 */
+#mapColMark td:hover .colBlock, #mapColMark .coltd:hover .colBlock {
+    background-color: rgba(68, 187, 170, 0.33);
+}
+
+/** 纵向标尺背景色 */
+table.row td, div.row .rowtd .rowtext {
+    background-color: #268;
+	border-color: #ccc;
+	color: #ccc;
+}
+
+/** 纵向标尺选中时的背景色 */
+#mapRowMark td:hover .rowBlock, #mapRowMark .rowtd:hover .rowBlock {
+    background-color: rgba(85, 153, 187, 0.33);
+}
+
+/** 右键菜单栏 */
+#midMenu{
+    color: #bbb;/*文字颜色*/
+    background-color: #33333c;
+    border-color: #888 #666 #666 #888;
+}
+
+#mid .tools {
+    border-top: 1px solid #555;
+}
+
+/** 右键菜单栏的当前选中项 */
+#midMenu .menuitem:hover{
+    background-color: #247;
+    border-color: #469;
+    color: #fff;
+}
+
+/*===============================自己加的东西======================================*/
+select {
+	background-color: #33333c;
+}
+
+option {
+	background-color: #33333c;
+}
+
+a {
+   color: #7bd;
+}
+
+textarea {
+   color: #bbb;
+}
+
+::-webkit-scrollbar-track
+{
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	border-radius: 8px;
+	background-color: #242424;
+}
+
+::-webkit-scrollbar
+{
+    width: 8px;
+    height: 10px;
+	background-color: #242424;
+}
+
+::-webkit-scrollbar-thumb
+{
+	border-radius: 8px;
+    -webkit-box-shadow: inset 0 0 3px rgba(0,0,0,.3);
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color: #bbb;
+}
+
+
+/** 禁用的输入方框（如ID）的背景色 */
+textarea[disabled] {
+    color: #888;
+}
+
+select {
+   color: #ccc;
+   background-color: #33333c;
+}
+
+option {
+    filter: brightness(0.8); 
+    background-color: #292930; 
+    color: #9a9a9a;
+
+}
+
+option:checked {
+    filter: brightness(0.8);
+    background-color: #555/*#358*/;
+    color: #ddd;
+}
+
+.gameCanvas, img {
+    filter: brightness(0.85);
+}
+
+/** 搜索事件块的输入框 */
+#searchBlock {
+    background-color: #bbb;
+	color: #444;
+}
+
+/** 打开浮层（变量搜索等）时页面背景 */
+#uieventDiv {
+    background: rgba(85,85,85,0.67);
+}
+
+/** 浮层的对话框 */
+#uieventDialog {
+    background: #101010;
+	color: #ccc;
+}
+
+/** 追加素材时的编号标记 */
+#appendPicSelection span {
+    -webkit-text-stroke: 1px gold;
+    text-shadow: black 1px 0, black 0 1px, black -1px 0, black 0 -1px;
+}
+
+.leftTab {
+    background-color: #242424;
+}
+
+/** 整个事件编辑器 */
+#left6 {
+    background-color: rgb(36, 36, 36);
+}
+
+/** 事件编辑器右边的文本框 */
+#left6 .CodeMirror {
+    /*border: 1px solid #eee;*/
+	border: 1px solid #666;
+	background-color: #242424;
+	/*color: #ccc;*/
+}
+
+/** 脚本编辑器 */
+#left7 {
+    background-color: rgb(36, 36, 36);
+}
+
+#left7 .CodeMirror {
+	border: 1px solid #666;
+	
+}
+
+/** 数据区的表格 */
+.etable table, .etable table td {
+    color: #bbb;
+}
+
+/** 数据区每行效果；2n代表偶数行，以此类推 */
+.etable table tr {
+    background-color: #3c3c3c;
+    border-top: 1px solid #ccccd4;
+}
+.etable table tr:nth-child(2n) {
+    background-color: #343434;
+}
+
+/** 数据区表格每列效果 */
+.etable table th, .etable table td {
+    border: 1px solid #777;
+}
+
+/** 鼠标悬停在数据区表格上的边框效果 */
+.etable tr:not(:first-child) > :nth-child(3):hover {
+    border: 1px solid #468;
+    box-shadow: 0px 0px 3px #468;
+}
+.etable tr:not(:first-child) > :nth-child(2):hover,
+.etable tr:not(:first-child) > :nth-child(1):hover {
+    border: 1px solid #375;
+    box-shadow: 0px 0px 3px #375;
+}
+
+/** 表格编辑的按钮颜色 */
+.editorTableEditBtn {
+    background-color: #389;
+	border-color: #bde;/*8cf和fd8*/
+	color: #cef;
+}
+.editorTableFoldBtn {
+    background-color: #a83;
+	border-color: #edb;	
+    color: #fec;
+    filter: brightness(0.95);
+	}
+
+/** 保存地图的按钮颜色 */
+#saveFloor {
+    background-color: #234;/*33333c*/
+	border-color: #abc;
+	color: #cdf;
+}
+#saveFloor.highlight {
+    background-color: #871;
+	border-color: #eda;
+	color: #fff4d0;
+}
+
+/** 解析按钮颜色 */
+#blocklyParse {
+    background-color: #404048;
+	color: #c0c0c0;
+}
+#blocklyParse.highlight {
+    background-color: #871;
+	border-color: #eda;
+	color: #fff4d0;
+}
+
+#bigmapBtn {
+    background-color: #234;/*33333c*/
+	border-color: #abc;
+	color: #cdf;
+}
+#bigmapBtn.highlight {
+    background-color: #871;
+	border-color: #eda;
+	color: #fff4d0;
+}
+
+.popCheckboxItem {
+    color: #bbbbbb;
+}
+
+table.col td.highlight {
+    background-color: #66ccbb;
+}
+
+table.row td.highlight {
+    background-color: #77aacc;
+}
+
+/** ======== blockly 相关 ======== */
+
+/** 
+blockly图块的的黑暗程度，用opacity表示，0到1之间；
+0表示表示纯亮色，1表示纯黑色 
+*/
+
+/** 如果需要blockly深色模式，请有选择性视情况取消注释下面几条；具体功能自行研究 */
+
+/*somethingSOMETHING*/
+/*.blocklyTreeLabel {
+    color: #ccc;
+}*/
+
+.blocklyTreeLabel:hover {
+    /*background-color: #888 !important;*/
+    color: #fff !important;
+}
+
+.blocklyTreeSelected {
+    background-color: #358 !important;
+    color: #fff !important;
+}
+
+/*.blocklyTreeSelected .blocklyTreeLabel {
+    background-color: #358 !important;
+    background: #358 !important;
+    color: #fff !important;
+ }*/
+
+ .blocklyTreeRow {
+    /*background-color: #888 !important;*/
+    color: #ccc !important;
+}
+
+.blocklyTreeRow:hover {
+    background-color: #666 !important;
+    color: #fff !important;
+}
+
+/*
+.blocklyFlyout {
+     background-color: rgba(0,0,0,1);
+}
+*/
+.blocklyFlyoutBackground {
+    fill: #666;
+    fill-opacity: 0.67;
+}
+/*somethingSOMETHING*/
+
+
+.blocklyToolboxDiv {
+    background-color: #2a2a2a !important;
+	border: 1px solid #666;
+    color: black;
+}
+
+.blocklySvg {
+    background-color: #242424;
+}
+
+.blocklyNonEditableText>rect, .blocklyEditableText>rect {
+    fill: #000;
+    fill-opacity: .3;
+}
+
+.blocklyNonEditableText>text, .blocklyEditableText>text {
+    fill: #fff;
+}
+
+input.blocklyHtmlInput {
+    color: white;
+    background-color: black;
+}
+
+.blocklyFieldRect:not(.blocklyColourFieldRect) {
+    fill: #242424 !important;
+}
+
+.blocklyEditableText > .blocklyText {
+    fill: #eee !important;
+}
+
+.blocklyHtmlInput {
+    background: rgba(36,36,36,0.6);
+    color: #eee;
+}
+
+.blocklyDropDownDiv {
+    background-color: #33333c;
+    border: 1px solid rgba(0,0,0,.3);
+	border-color: #666;
+    box-shadow: .05em .2em .6em rgba(0,0,0,.2);
+}
+
+.blocklyDropDownDiv .goog-menuitem-content {
+    color: #eee;
+}
+
+.blocklyDropDownDiv .goog-menuitem-highlight {
+    background: #247/*hsl(200, 40%, 80%)*/;
+    color: #eee;
+}
+
+.blocklyWidgetDiv .goog-option-selected .goog-menuitem-checkbox, 
+.blocklyWidgetDiv .goog-option-selected .goog-menuitem-icon, 
+.blocklyDropDownDiv .goog-option-selected .goog-menuitem-checkbox, 
+.blocklyDropDownDiv .goog-option-selected .goog-menuitem-icon {
+    background: url(../blockly/media/sprites_white.png) no-repeat -48px -16px;
+}
+
+/** ======== Blockly中自动补全相关 ======== */
+.awesomplete > ul {
+    background: #33333c;
+    /*background: hsla(0,0%,100%,.9);
+    background: linear-gradient(to bottom right, white, hsla(0,0%,100%,.8));*/
+    border: 1px solid rgba(0,0,0,.3);
+	border-color: #666;
+    box-shadow: .05em .2em .6em rgba(0,0,0,.2);
+}
+.awesomplete > ul:before {
+    background: white;
+}
+.awesomplete > ul > li:hover {
+    background: #247/*hsl(200, 40%, 80%)*/;
+    color: #fff;
+}
+.awesomplete > ul > li[aria-selected="true"] {
+    background: hsl(205, 40%, 40%);
+    color: white;
+}
+.awesomplete mark {
+    background: /*hsl(65, 100%, 50%);*/#278;
+	color: #cef;
+}
+.awesomplete li:hover mark {
+    background: /*hsl(68, 100%, 41%)*/#1a9;
+	color: #fff;
+}
+.awesomplete li[aria-selected="true"] mark {
+    background: /*hsl(86, 100%, 21%)*/#468;
+    color: inherit;
+}
+
+/** ======== 脚本编辑相关 ======== **/
+/* 很多我也不知道是干嘛的，自行根据名字猜每一项作用吧 */
+
+.CodeMirror {
+    color: #ddd;/*杨子默：我也不知道他是干啥用的*/
+    background: #242424;
+}
+.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
+    background-color: #242424; 
+}
+.CodeMirror-gutters {
+    border-right: 1px solid #666;
+    background-color: #2a2a2a;
+}
+.CodeMirror-linenumber {
+    color: #999;
+}
+.CodeMirror-guttermarker {
+    color: black;
+}
+.CodeMirror-guttermarker-subtle {
+    color: #999;
+}
+.CodeMirror-cursor {
+    border-left: 1px solid #f8f8f0;
+}
+/* Shown when moving in bi-directional text */
+.CodeMirror div.CodeMirror-secondarycursor {
+    border-left: 1px solid silver;
+}
+.cm-fat-cursor .CodeMirror-cursor {
+    background: #7e7;
+}
+.cm-fat-cursor-mark {
+  background-color: rgba(20, 255, 20, 0.5);
+}
+.cm-animate-fat-cursor {
+    background-color: #7e7;
+}
+.CodeMirror-ruler {
+  border-left: 1px solid #ccc;
+}
+/* DEFAULT THEME */
+.cm-s-default .cm-header {
+    color: #a8f;
+}  
+.cm-s-default .cm-quote {
+    color: #695;
+} 
+.cm-negative {
+    color: #f55;
+} 
+.cm-positive {
+    color: #5f5;
+}
+.cm-s-default .cm-keyword {
+    color: #d7a;
+}
+.cm-s-default .cm-atom {
+    color: #80c0ff;
+}
+.cm-s-default .cm-number {
+    color: #a0e0c0;
+}
+.cm-s-default .cm-def {
+    color: #db7; 
+}
+.cm-s-default .cm-variable-2 {
+    color: #8cd;
+}
+.cm-s-default .cm-variable-3, .cm-s-default .cm-type {
+    color: #8cd;
+}
+.cm-s-default .cm-comment {
+    color: #7a6;
+}
+.cm-s-default .cm-string {
+    color: #db7;
+}
+.cm-s-default .cm-string-2 {
+    color: #db7/*something?*/;
+}
+.cm-s-default .cm-meta {
+    color: #33333c;
+}
+.cm-s-default .cm-qualifier {
+    color: #33333c;
+}
+.cm-s-default .cm-builtin {
+    color: #66d9ef;
+}
+.cm-s-default .cm-bracket {
+    color: #f8f8f2;
+}
+.cm-s-default .cm-tag {
+    color: #f55;
+}
+.cm-s-default .cm-attribute {
+    color: #ab6;
+}
+.cm-s-default .cm-hr {
+    color: #999;
+}
+.cm-s-default .cm-link {
+    color: #a8f;
+}
+.cm-s-default .cm-error {
+	background: #f55;
+	color: #fff;
+}
+/*somethingsomething*/
+.cm-s-default .cm-matchhighlight {
+    background: #57a;
+    color: #eef8ff;
+}
+/*somethingsomething*/
+.cm-invalidchar {
+    color: #f55;
+}
+
+/* Default styles for common addons */
+
+div.CodeMirror span.CodeMirror-matchingbracket {
+    color: #5f5;
+}
+div.CodeMirror span.CodeMirror-nonmatchingbracket {
+    color: #f55;
+}
+.CodeMirror-matchingtag {
+    background: rgba(255, 150, 0, .3);
+}
+.CodeMirror-activeline-background {
+    background: #247;
+}
+
+.CodeMirror-selected {
+    background: #358;
+}
+.CodeMirror-focused .CodeMirror-selected {
+    background: #358;
+}
+.CodeMirror-line::selection, .CodeMirror-line > span::selection, .CodeMirror-line > span > span::selection {
+    background: #247;
+}
+.CodeMirror-line::-moz-selection, .CodeMirror-line > span::-moz-selection, .CodeMirror-line > span > span::-moz-selection {
+    background: #247;
+}
+.cm-searching {
+    background-color: #ffa;
+    background-color: rgba(255, 255, 0, .4);
+}
+
+/* 代码补全提示相关 */
+
+.cm-matchhighlight {
+    background-color: #247;
+}
+.CodeMirror-hints {
+    border: 1px solid #888;
+    background: #33333c;
+    -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
+    box-shadow: 2px 3px 5px rgba(0, 0, 0, .2);
+}
+.CodeMirror-hint {
+    color: #ccc;
+}
+li.CodeMirror-hint-active {
+    background: #247;
+    color: #fff;
+}
+
+/* 代码语法检查相关相关 */
+
+.CodeMirror-lint-tooltip {
+    background-color: #247;
+    border: 1px solid #135;
+    color: #fff;
+}
+
+.CodeMirror-lint-mark-error {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJDw4cOCW1/KIAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAHElEQVQI12NggIL/DAz/GdA5/xkY/qPKMDAwAADLZwf5rvm+LQAAAABJRU5ErkJggg==");
+}
+
+.CodeMirror-lint-mark-warning {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAADCAYAAAC09K7GAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9sJFhQXEbhTg7YAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAMklEQVQI12NkgIIvJ3QXMjAwdDN+OaEbysDA4MPAwNDNwMCwiOHLCd1zX07o6kBVGQEAKBANtobskNMAAAAASUVORK5CYII=");
+}
+
+.CodeMirror-lint-marker-error, .CodeMirror-lint-message-error {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAAHlBMVEW7AAC7AACxAAC7AAC7AAAAAAC4AAC5AAD///+7AAAUdclpAAAABnRSTlMXnORSiwCK0ZKSAAAATUlEQVR42mWPOQ7AQAgDuQLx/z8csYRmPRIFIwRGnosRrpamvkKi0FTIiMASR3hhKW+hAN6/tIWhu9PDWiTGNEkTtIOucA5Oyr9ckPgAWm0GPBog6v4AAAAASUVORK5CYII=");
+}
+
+.CodeMirror-lint-marker-warning, .CodeMirror-lint-message-warning {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAANlBMVEX/uwDvrwD/uwD/uwD/uwD/uwD/uwD/uwD/uwD6twD/uwAAAADurwD2tQD7uAD+ugAAAAD/uwDhmeTRAAAADHRSTlMJ8mN1EYcbmiixgACm7WbuAAAAVklEQVR42n3PUQqAIBBFUU1LLc3u/jdbOJoW1P08DA9Gba8+YWJ6gNJoNYIBzAA2chBth5kLmG9YUoG0NHAUwFXwO9LuBQL1giCQb8gC9Oro2vp5rncCIY8L8uEx5ZkAAAAASUVORK5CYII=");
+}
+
+.CodeMirror-lint-marker-multiple {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAHCAMAAADzjKfhAAAACVBMVEUAAAAAAAC/v7914kyHAAAAAXRSTlMAQObYZgAAACNJREFUeNo1ioEJAAAIwmz/H90iFFSGJgFMe3gaLZ0od+9/AQZ0ADosbYraAAAAAElFTkSuQmCC");
+}
+
+/* 代码补全的对话框（提供搜索功能）相关 */
+
+.CodeMirror-dialog-top {
+    border-bottom: 1px solid #eee;
+}
+  
+.CodeMirror-dialog-bottom {
+    border-top: 1px solid #eee;
+}
+
+/* 搜索项的背景色 */
+.CodeMirror-focused .cm-matchhighlight {
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFklEQVQI12NgYGBgkKzc8x9CMDAwAAAmhwSbidEoSQAAAABJRU5ErkJggg==);
+    background-position: bottom;
+    background-repeat: repeat-x;
+}
+.cm-matchhighlight {background-color: lightgreen}
+.CodeMirror-selection-highlight-scrollbar {background-color: yellowgreen}
+
+.CodeMirror-search-hint {
+    color: #888;
+}
+
+
+/* 增强的代码补全系统相关 */
+
+/* 变量类型 */
+.CodeMirror-Tern-completion:before {
+    color: white;
+}
+.CodeMirror-Tern-completion-unknown:before {
+  content: "?";
+  background: #4bb;
+}
+.CodeMirror-Tern-completion-object:before {
+  content: "O";
+  background: #77c;
+}
+.CodeMirror-Tern-completion-fn:before {
+  content: "F";
+  background: #7c7;
+}
+.CodeMirror-Tern-completion-array:before {
+  content: "A";
+  background: #c66;
+}
+.CodeMirror-Tern-completion-number:before {
+  content: "1";
+  background: #999;
+}
+.CodeMirror-Tern-completion-string:before {
+  content: "S";
+  background: #999;
+}
+.CodeMirror-Tern-completion-bool:before {
+  content: "B";
+  background: #999;
+}
+
+.CodeMirror-Tern-completion-guess {
+    color: #999;
+}
+/* 额外提示框（如文档） */
+.CodeMirror-Tern-tooltip {
+    border: 1px solid #aaa;
+    color: #ccc;
+    background-color: #33333c;
+    -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+    -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+    box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+}
+
+.CodeMirror-Tern-fname { color: #ddd; }
+.CodeMirror-Tern-farg { color: #d7a; }
+.CodeMirror-Tern-type { color: #db7; }
+.CodeMirror-foldmarker {
+    color: #ddd;
+    text-shadow: #b9f 1px 1px 2px, #b9f -1px -1px 2px, #b9f 1px -1px 2px, #b9f -1px 1px 2px;
+}  
+

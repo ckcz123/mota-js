@@ -2,8 +2,9 @@ function main() {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.6.4"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
-
+    this.version = "2.8.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.width = 17; // 运行时视野横向宽度的格子数，会被libs\core.js直接引用，可任意修改
+    this.height = 13; // 运行时视野纵向高度的格子数，会被libs\core.js直接引用，可任意修改
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
     // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
@@ -14,7 +15,8 @@ function main() {
 
     this.isCompetition = false; // 是否是比赛模式
 
-    this.savePages = 1000; // 存档页数，每页可存5个；默认为1000页5000个存档
+    this.savePages = 1 << 10; // 存档页数，每页可存5个；默认为1000页5000个存档
+    this.criticalUseLoop = Number.MAX_SAFE_INTEGER; // 循环临界的分界
 
     //------------------------ 用户修改内容 END ------------------------//
 
@@ -23,6 +25,7 @@ function main() {
         'gameGroup': document.getElementById('gameGroup'),
         'mainTips': document.getElementById('mainTips'),
         'musicBtn': document.getElementById('musicBtn'),
+        'enlargeBtn': document.getElementById('enlargeBtn'),
         'startPanel': document.getElementById('startPanel'),
         'startTop': document.getElementById('startTop'),
         'startTopProgressBar': document.getElementById('startTopProgressBar'),
@@ -61,7 +64,7 @@ function main() {
         'defCol': document.getElementById('defCol'),
         'mdefCol': document.getElementById('mdefCol'),
         'moneyCol': document.getElementById('moneyCol'),
-        'experienceCol': document.getElementById('experienceCol'),
+        'expCol': document.getElementById('expCol'),
         'upCol': document.getElementById('upCol'),
         'keyCol': document.getElementById('keyCol'),
         'pzfCol': document.getElementById('pzfCol'),
@@ -79,13 +82,13 @@ function main() {
     };
     this.mode = 'play';
     this.loadList = [
-        'loader', 'control', 'utils', 'items', 'icons','sprite', 'scenes', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'extensions', 'core'
+        'loader', 'control', 'utils', 'items', 'icons', 'maps', 'enemys', 'events', 'actions', 'data', 'ui', 'extensions', 'core'
     ];
     this.pureData = [ 
-        'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins', 'sprite',
+        'data', 'enemys', 'icons', 'maps', 'items', 'functions', 'events', 'plugins'
     ];
     this.materials = [
-        'animates', 'enemys', 'hero', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'sprite'
+        'animates', 'enemys', 'items', 'npcs', 'terrains', 'enemy48', 'npc48', 'icons'
     ];
 
     this.statusBar = {
@@ -100,7 +103,7 @@ function main() {
             'def': document.getElementById("img-def"),
             'mdef': document.getElementById("img-mdef"),
             'money': document.getElementById("img-money"),
-            'experience': document.getElementById("img-experience"),
+            'exp': document.getElementById("img-exp"),
             'up': document.getElementById("img-up"),
             'skill': document.getElementById('img-skill'),
             'book': document.getElementById("img-book"),
@@ -130,7 +133,7 @@ function main() {
             'def': 5,
             'mdef': 6,
             'money': 7,
-            'experience': 8,
+            'exp': 8,
             'up': 9,
             'book': 10,
             'fly': 11,
@@ -149,18 +152,14 @@ function main() {
             'equipbox': 24,
             'mana': 25,
             'skill': 26,
-            'paint': 27,
-            'erase': 28,
-            'empty': 29,
-            'exit': 30,
-            'btn1': 31,
-            'btn2': 32,
-            'btn3': 33,
-            'btn4': 34,
-            'btn5': 35,
-            'btn6': 36,
-            'btn7': 37,
-            'btn8': 38
+            'btn1': 27,
+            'btn2': 28,
+            'btn3': 29,
+            'btn4': 30,
+            'btn5': 31,
+            'btn6': 32,
+            'btn7': 33,
+            'btn8': 34
         },
         'floor': document.getElementById('floor'),
         'name': document.getElementById('name'),
@@ -172,12 +171,13 @@ function main() {
         'def': document.getElementById("def"),
         'mdef': document.getElementById('mdef'),
         'money': document.getElementById("money"),
-        'experience': document.getElementById("experience"),
+        'exp': document.getElementById("exp"),
         'up': document.getElementById('up'),
         'skill': document.getElementById('skill'),
         'yellowKey': document.getElementById("yellowKey"),
         'blueKey': document.getElementById("blueKey"),
         'redKey': document.getElementById("redKey"),
+        'greenKey': document.getElementById("greenKey"),
         'poison': document.getElementById('poison'),
         'weak':document.getElementById('weak'),
         'curse': document.getElementById('curse'),
@@ -189,8 +189,8 @@ function main() {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.6.4";
-    this.__VERSION_CODE__ = 78;
+    this.__VERSION__ = "2.8.2";
+    this.__VERSION_CODE__ = 507;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -203,21 +203,22 @@ main.prototype.init = function (mode, callback) {
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for(var ii in mainData)main[ii]=mainData[ii];
         
-        main.dom.startBackground.src="project/images/"+main.startBackground;
-        main.dom.startLogo.style=main.startLogoStyle;
-        main.dom.startButtonGroup.style = main.startButtonsStyle;
-        main.levelChoose.forEach(function(value){
+        main.dom.startLogo.style=main.styles.startLogoStyle;
+        main.dom.startButtonGroup.style = main.styles.startButtonsStyle;
+        main.levelChoose = main.levelChoose || [];
+        main.levelChoose.forEach(function (value) {
             var span = document.createElement('span');
             span.setAttribute('class','startButton');
-            span.innerText=value[0];
+            span.innerText=value.title || '';
             (function(span,str_){
                 span.onclick = function () {
                     core.events.startGame(str_);
                 }
-            })(span,value[1]);
+            })(span,value.name||'');
             main.dom.levelChooseButtons.appendChild(span);
         });
         main.createOnChoiceAnimation();
+        main.importFonts(main.fonts);
         
         main.loadJs('libs', main.loadList, function () {
             main.core = core;
@@ -231,7 +232,7 @@ main.prototype.init = function (mode, callback) {
             main.loadFloors(function() {
                 var coreData = {};
                 ["dom", "statusBar", "canvas", "images", "tilesets", "materials",
-                    "animates", "bgms", "sounds", "floorIds", "floors"].forEach(function (t) {
+                    "animates", "bgms", "sounds", "floorIds", "floors", "floorPartitions"].forEach(function (t) {
                     coreData[t] = main[t];
                 })
                 main.core.init(coreData, callback);
@@ -290,8 +291,19 @@ main.prototype.loadFloors = function (callback) {
             main.dom.mainTips.style.display = 'none';
             callback();
         }
+        return;
     }
-    else {
+
+    // 高层塔优化
+    var script = document.createElement('script');
+    script.src = '__all_floors__.js?v=' + this.version + '&id=' + main.floorIds.join(',');
+    script.onload = function () {
+        main.dom.mainTips.style.display = 'none';
+        main.supportBunch = true;
+        callback();
+    }
+    script.onerror = script.onabort = script.ontimeout = function (e) {
+        console.clear();
         for (var i = 0; i < main.floorIds.length; i++) {
             main.loadFloor(main.floorIds[i], function (modName) {
                 main.setMainTipsText("楼层 " + modName + '.js 加载完毕');
@@ -300,8 +312,9 @@ main.prototype.loadFloors = function (callback) {
                     callback();
                 }
             });
-        }
+        }    
     }
+    main.dom.body.appendChild(script);
 }
 
 ////// 加载某一个楼层 //////
@@ -374,6 +387,19 @@ main.prototype.selectButton = function (index) {
     }
 }
 
+////// 创建字体 //////
+main.prototype.importFonts = function (fonts) {
+    if (!(fonts instanceof Array) || fonts.length == 0) return;
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    var html = '';
+    fonts.forEach(function (font) {
+        html += '@font-face { font-family: "'+font+'"; src: url("project/fonts/'+font+'.ttf") format("truetype"); }';
+    });
+    style.innerHTML = html;
+    document.body.appendChild(style);
+}
+
 main.prototype.listen = function () {
 
 ////// 窗口大小变化时 //////
@@ -426,7 +452,17 @@ main.dom.body.onkeyup = function(e) {
             (main.core.isPlaying() || main.core.status.lockControl))
             main.core.onkeyUp(e);
     } catch (ee) { main.log(ee); }
-}
+};
+
+[main.dom.startButtons, main.dom.levelChooseButtons].forEach(function (dom) {
+    dom.onmousemove = function (e) {
+        for (var i = 0; i < dom.children.length; ++i) {
+            if (dom.children[i] == e.target && i != (main.selectedButton || 0)) {
+                main.selectButton(i);
+            }
+        }
+    }
+});
 
 ////// 开始选择时 //////
 main.dom.body.onselectstart = function () {
@@ -454,9 +490,12 @@ main.dom.data.onmousemove = function (e) {
 }
 
 ////// 鼠标放开时 //////
-main.dom.data.onmouseup = function () {
+main.dom.data.onmouseup = function (e) {
     try {
-        main.core.onup();
+        e.stopPropagation();
+        var loc = main.core.actions._getClickLoc(e.clientX, e.clientY);
+        if (loc == null) return;
+        main.core.onup(loc);
     }catch (e) { main.log(e); }
 }
 
@@ -476,6 +515,7 @@ main.dom.data.ontouchstart = function (e) {
         e.preventDefault();
         var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
+        main.lastTouchLoc = loc;
         main.core.ondown(loc);
     }catch (ee) { main.log(ee); }
 }
@@ -486,6 +526,7 @@ main.dom.data.ontouchmove = function (e) {
         e.preventDefault();
         var loc = main.core.actions._getClickLoc(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (loc == null) return;
+        main.lastTouchLoc = loc;
         main.core.onmove(loc);
     }catch (ee) { main.log(ee); }
 }
@@ -494,7 +535,19 @@ main.dom.data.ontouchmove = function (e) {
 main.dom.data.ontouchend = function (e) {
     try {
         e.preventDefault();
-        main.core.onup();
+        if (main.lastTouchLoc == null) return;
+        var loc = main.lastTouchLoc;
+        delete main.lastTouchLoc;
+        main.core.onup(loc);
+    } catch (e) {
+        main.log(e);
+    }
+}
+
+main.dom.statusCanvas.onclick = function (e) {
+    try {
+        e.preventDefault();
+        main.core.onStatusBarClick(e);
     } catch (e) {
         main.log(e);
     }
@@ -509,11 +562,6 @@ main.statusBar.image.book.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.setPaintMode('paint');
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.openBook(true);
 }
@@ -525,12 +573,6 @@ main.statusBar.image.fly.onclick = function (e) {
     // 播放录像时
     if (core.isReplaying()) {
         core.stopReplay();
-        return;
-    }
-
-    // 绘图模式
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.setPaintMode('erase');
         return;
     }
 
@@ -550,11 +592,6 @@ main.statusBar.image.toolbox.onclick = function (e) {
 
     if (core.isReplaying()) {
         core.rewindReplay();
-        return;
-    }
-
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.clearPaint();
         return;
     }
 
@@ -581,7 +618,7 @@ main.statusBar.image.keyboard.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.bookReplay();
+        core.control._replay_book();
         return;
     }
 
@@ -589,12 +626,12 @@ main.statusBar.image.keyboard.onclick = function (e) {
         main.core.openKeyBoard(true);
 }
 
-////// 点击状态栏中的快捷商店键盘时 //////
+////// 点击状态栏中的快捷商店时 //////
 main.statusBar.image.shop.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.viewMapReplay();
+        core.control._replay_viewMap();
         return;
     }
 
@@ -602,12 +639,21 @@ main.statusBar.image.shop.onclick = function (e) {
         main.core.openQuickShop(true);
 }
 
-////// 点击金币时也可以开启虚拟键盘 //////
+////// 点击金币时也可以开启快捷商店 //////
 main.statusBar.image.money.onclick = function (e) {
     e.stopPropagation();
 
     if (main.core.isPlaying())
         main.core.openQuickShop(true);
+}
+
+////// 点击楼梯图标也可以浏览地图 //////
+main.statusBar.image.floor.onclick = function (e) {
+    e.stopPropagation();
+
+    if (main.core && main.core.isPlaying() && !core.isMoving() && !core.status.lockControl) {
+        core.ui._drawViewMaps();
+    }
 }
 
 ////// 点击状态栏中的存档按钮时 //////
@@ -616,11 +662,6 @@ main.statusBar.image.save.onclick = function (e) {
 
     if (core.isReplaying()) {
         core.speedDownReplay();
-        return;
-    }
-
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.savePaint();
         return;
     }
 
@@ -637,11 +678,6 @@ main.statusBar.image.load.onclick = function (e) {
         return;
     }
 
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.loadPaint();
-        return;
-    }
-
     if (main.core.isPlaying())
         main.core.load(true);
 }
@@ -651,12 +687,7 @@ main.statusBar.image.settings.onclick = function (e) {
     e.stopPropagation();
 
     if (core.isReplaying()) {
-        core.saveReplay();
-        return;
-    }
-
-    if (main.core.isPlaying() && (core.status.event||{}).id=='paint') {
-        core.actions.exitPaint();
+        core.control._replay_SL();
         return;
     }
 
@@ -666,50 +697,57 @@ main.statusBar.image.settings.onclick = function (e) {
 
 ////// 点击工具栏时 //////
 main.dom.hard.onclick = function () {
-    if (core.isReplaying())
-        return;
     main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);
 }
 
 ////// 手机端的按钮1-7 //////
 main.statusBar.image.btn1.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 49});
+    main.core.onkeyUp({"keyCode": 49, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn2.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 50});
+    main.core.onkeyUp({"keyCode": 50, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn3.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 51});
+    main.core.onkeyUp({"keyCode": 51, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn4.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 52});
+    main.core.onkeyUp({"keyCode": 52, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn5.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 53});
+    main.core.onkeyUp({"keyCode": 53, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn6.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 54});
+    main.core.onkeyUp({"keyCode": 54, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn7.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 55});
+    main.core.onkeyUp({"keyCode": 55, "altKey": core.getLocalStorage('altKey')});
 };
 
 main.statusBar.image.btn8.onclick = function (e) {
     e.stopPropagation();
-    main.core.onkeyUp({"keyCode": 56});
+    if (core.getLocalStorage('altKey')) {
+        core.removeLocalStorage('altKey');
+        core.drawTip("Alt模式已关闭。");
+        main.statusBar.image.btn8.style.filter = '';
+    }
+    else {
+        core.setLocalStorage('altKey', true);
+        core.drawTip("Alt模式已开启；此模式下1~7按钮视为Alt+1~7。");
+        main.statusBar.image.btn8.style.filter = 'sepia(1) contrast(1.5)';
+    }
 };
 
 ////// 点击“开始游戏”时 //////
@@ -717,10 +755,9 @@ main.dom.playGame.onclick = function () {
     main.dom.startButtons.style.display='none';
     main.core.control.checkBgm();
 
-    if (main.core.isset(main.core.flags.startDirectly) && main.core.flags.startDirectly) {
+    if (main.levelChoose.length == 0) {
         core.events.startGame("");
-    }
-    else {
+    } else {
         main.dom.levelChooseButtons.style.display='block';
         main.selectedButton = null;
         main.selectButton(0);
@@ -744,6 +781,18 @@ main.dom.musicBtn.onclick = function () {
         if (main.core)
             main.core.triggerBgm();
     } catch (e) {main.log(e);}
+}
+
+main.dom.enlargeBtn.onclick = function () {
+    try {
+        if (main.core) {
+            main.core.setDisplayScale(1);
+            if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
+                main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
+                main.core.resize();
+            }
+        }
+    } catch (e) {main.log(e)};
 }
 
 window.onblur = function () {

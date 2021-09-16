@@ -3393,14 +3393,22 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
 }
 
 ////// canvas重定位 //////
-ui.prototype.relocateCanvas = function (name, x, y) {
+ui.prototype.relocateCanvas = function (name, x, y, useDelta) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
     if (x != null) {
+        // 增量模式
+        if (useDelta) {
+            x += parseFloat(ctx.canvas.getAttribute("_left")) || 0;
+        }
         ctx.canvas.style.left = x * core.domStyle.scale + 'px';
         ctx.canvas.setAttribute("_left", x);
     }
     if (y != null) {
+        // 增量模式
+        if (useDelta) {
+            y += parseFloat(ctx.canvas.getAttribute("_top")) || 0;
+        }
         ctx.canvas.style.top = y * core.domStyle.scale + 'px';
         ctx.canvas.setAttribute("_top", y);
     }

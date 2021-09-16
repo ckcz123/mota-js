@@ -1998,7 +1998,7 @@ getToolboxItems: fn(cls: string) -> [string]
 loadCanvas: fn(name: string|CanvasRenderingContext2D)
 加载某个canvas状态
 
-relocateCanvas: fn(name: string, x: number, y: number)
+relocateCanvas: fn(name: string, x: number, y: number, useDelta: bool)
 重新定位一个自定义画布
 
 resizeCanvas: fn(name: string, x: number, y: number)

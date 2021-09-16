@@ -2148,7 +2148,7 @@ declare class ui {
     createCanvas(name: string, x: number, y: number, width: number, height: number, zIndex: number): CanvasRenderingContext2D
 
     /** 重新定位一个自定义画布 */
-    relocateCanvas(name: string, x: number, y: number): void
+    relocateCanvas(name: string, x: number, y: number, useDelta: boolean): void
 
     /** 重新设置一个自定义画布的大小 */
     resizeCanvas(name: string, x: number, y: number): void

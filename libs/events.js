@@ -993,9 +993,9 @@ events.prototype.doAction = function () {
     core.status.event.interval = null;
     delete core.status.event.aniamteUI;
     if (core.status.gameOver || core.status.replay.failed) return;
-    core.clearUI();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
+    core.clearUI();
     var floorId = core.status.event.data.floorId || core.status.floorId;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
@@ -1016,6 +1016,7 @@ events.prototype.doAction = function () {
 }
 
 events.prototype._doAction_finishEvents = function () {
+    if (core.status.event.id != 'action') return true;
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
         // 检测并执行延迟自动事件
@@ -1535,7 +1536,7 @@ events.prototype._action_animate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_stopAnimate = function (data, x, y, prefix) {
-    core.stopAnimate(data.doCallback);
+    core.stopAnimate(null, data.doCallback);
     core.doAction();
 }
 

@@ -149,6 +149,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var bgm = core.status.maps[floorId].bgm;
 		if (bgm instanceof Array) bgm = bgm[Math.floor(Math.random() * bgm.length)]; // 多个bgm则随机播放一个
 		if (!core.hasFlag("__bgm__")) core.playBgm(bgm);
+	} else if (fromLoad && !core.hasFlag("__bgm__")) {
+		core.pauseBgm();
 	}
 	// 更改画面色调
 	var color = core.getFlag('__color__', null);

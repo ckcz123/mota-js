@@ -112,14 +112,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	//     core.deleteAllCanvas();
 	// }
 
-	// 播放换层音效
-	if (fromLoad)
-		core.playSound('读档');
-	else if (isFlying)
-		core.playSound('飞行器');
-	else if (currentId)
-	    core.playSound('上下楼');
-
 	// 根据分区信息自动砍层与恢复
 	if (core.autoRemoveMaps) core.autoRemoveMaps(floorId);
 
@@ -149,6 +141,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var bgm = core.status.maps[floorId].bgm;
 		if (bgm instanceof Array) bgm = bgm[Math.floor(Math.random() * bgm.length)]; // 多个bgm则随机播放一个
 		if (!core.hasFlag("__bgm__")) core.playBgm(bgm);
+	} else if (fromLoad && !core.hasFlag("__bgm__")) {
+		core.pauseBgm();
 	}
 	// 更改画面色调
 	var color = core.getFlag('__color__', null);
@@ -1141,11 +1135,14 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			core.setFlag('curse', true);
 		}
 	} else if (action == 'remove') {
+		var success = false;
 		if (core.inArray(type, "poison") && core.hasFlag("poison")) {
+			success = true;
 			// 移除毒效果
 			core.setFlag("poison", false);
 		}
 		if (core.inArray(type, "weak") && core.hasFlag("weak")) {
+			success = true;
 			// 移除衰效果
 			core.setFlag("weak", false);
 			if (core.values.weakValue >= 1) {
@@ -1159,9 +1156,11 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		}
 		if (core.inArray(type, "curse") && core.hasFlag("curse")) {
+			success = true;
 			// 移除咒效果
 			core.setFlag("curse", false);
 		}
+		if (success) core.playSound('回血');
 	}
 },
         "updateStatusBar": function () {

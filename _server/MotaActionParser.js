@@ -292,12 +292,12 @@ ActionParser.prototype.parseAction = function() {
         }
         data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_2_s', [
-          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, info[3], buildTextDrawing(textDrawing), this.next
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, data.async||false, info[3], buildTextDrawing(textDrawing), this.next
         ], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       } else if (info[0] || info[1] || info[2] || data.pos || data.code) {
         data.pos = data.pos || [];
         this.next = MotaActionFunctions.xmlText('text_1_s',[
-          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
+          info[0], info[1], info[2], data.pos[0], data.pos[1], data.pos[2], data.code||0, data.async||false, info[3], this.next], /* isShadow */false, /*comment*/ null, /*collapsed*/ data._collapsed, /*disabled*/ data._disabled);
       }
       else {
         this.next = MotaActionFunctions.xmlText('text_0_s', [info[3],this.next],
@@ -322,7 +322,7 @@ ActionParser.prototype.parseAction = function() {
         data.time, data.lineHeight||1.4, data.async||false, this.EvalString_Multi(data.text), this.next]);
         break;
     case "comment": // 注释
-      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next],null,data.text);
+      this.next = MotaActionBlocks['comment_s'].xmlText([this.EvalString_Multi(data.text),this.next]);
       break;
     case "setText": // 设置剧情文本的属性
       data.title=this.Colour(data.title);
@@ -559,6 +559,9 @@ ActionParser.prototype.parseAction = function() {
           data.name,data.loc[0],data.loc[1],data.alignWindow||false,data.async||false,this.next]);
       }
       break;
+    case "stopAnimate": // 停止所有动画
+      this.next = MotaActionBlocks['stopAnimate_s'].xmlText([data.doCallback||false,this.next]);
+      break;
     case "setViewport": // 设置视角
       if (data.dxy) {
         this.next = MotaActionBlocks['setViewport_1_s'].xmlText([
@@ -750,7 +753,8 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "setEnemy":
       this.next = MotaActionBlocks['setEnemy_s'].xmlText([
-        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+        MotaActionFunctions.replaceToName_token(data.id), data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
+        data.norefresh||false, this.next]);
       break;
     case "setEnemyOnPoint":
       data.loc=data.loc||[];
@@ -762,7 +766,8 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['setEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), this.next]);
+        x_str.join(','),y_str.join(','),data.floorId||'',data.name, data["operator"]||'=', this.expandEvalBlock([data.value]), 
+        data.norefresh||false, this.next]);
       break;
     case "resetEnemyOnPoint":
       data.loc=data.loc||[];
@@ -774,17 +779,17 @@ ActionParser.prototype.parseAction = function() {
         y_str.push(t[1]);
       })
       this.next = MotaActionBlocks['resetEnemyOnPoint_s'].xmlText([
-        x_str.join(','),y_str.join(','), data.floorId||'',this.next]);
+        x_str.join(','),y_str.join(','), data.floorId||'',data.norefresh||false,this.next]);
       break;
     case "moveEnemyOnPoint":
       data.from=data.from||['','']
       if (data.dxy) {
         this.next = MotaActionBlocks['moveEnemyOnPoint_1_s'].xmlText([
-          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',this.next]);
+          data.from[0], data.from[1], data.dxy[0], data.dxy[1], data.floorId||'',data.norefresh||false,this.next]);
       } else {
         data.to=data.to||['','']
         this.next = MotaActionBlocks['moveEnemyOnPoint_s'].xmlText([
-          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',this.next]);
+          data.from[0], data.from[1], data.to[0], data.to[1], data.floorId||'',data.norefresh||false,this.next]);
       }
       break;
     case "setEquip":
@@ -929,13 +934,9 @@ ActionParser.prototype.parseAction = function() {
       this.next = MotaActionBlocks['hideStatusBar_s'].xmlText([
         data.toolbox||false,this.next]);
       break;
-    case "showHero":
-      this.next = MotaActionBlocks['showHero_s'].xmlText([
-        data.time, data.async||false, this.next]);
-      break;
-    case "hideHero":
-      this.next = MotaActionBlocks['hideHero_s'].xmlText([
-        data.time, data.async||false, this.next]);
+    case "setHeroOpacity":
+      this.next = MotaActionBlocks['setHeroOpacity_s'].xmlText([
+        data.opacity, data.moveMode, data.time, data.async||false, this.next]);
       break;
     case "sleep": // 等待多少毫秒
       this.next = MotaActionBlocks['sleep_s'].xmlText([
@@ -970,6 +971,10 @@ ActionParser.prototype.parseAction = function() {
     case "waitAsync": // 等待所有异步事件执行完毕
       this.next = MotaActionBlocks['waitAsync_s'].xmlText([
         data.excludeAnimates||false, data.includeSounds||false, this.next]);
+      break;
+    case "stopAsync": // 立刻停止所有异步事件
+      this.next = MotaActionBlocks['stopAsync_s'].xmlText([
+        this.next]);
       break;
     case "callBook": // 呼出怪物手册
       this.next = MotaActionBlocks['callBook_s'].xmlText([
@@ -1464,7 +1469,7 @@ MotaActionFunctions.PosString_pre = function(PosString){
   if (!PosString || /^-?\d+$/.test(PosString)) return PosString;
   //if (!(MotaActionFunctions.pattern.id.test(PosString)))throw new Error(PosString+'中包含了0-9 a-z A-Z _ 和中文之外的字符,或者是没有以flag: 开头');
   var comma = PosString.indexOf(',');
-  if (comma >= 0 && PosString.substring(0, comma).ifndexOf('(') < 0) throw '此处不可写多点坐标';
+  if (comma >= 0 && PosString.substring(0, comma).indexOf('(') < 0) throw '此处不可写多点坐标';
   return '"'+MotaActionFunctions.replaceFromName(PosString)+'"';
 }
 

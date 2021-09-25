@@ -7,7 +7,14 @@ main.floors.sample1=
     "canFlyFrom": true,
     "canUseQuickShop": true,
     "defaultGround": "grass",
-    "images": null,
+    "images": [
+        {
+            "name": "bg.jpg",
+            "canvas": "bg",
+            "x": 0,
+            "y": 0
+        }
+    ],
     "weather": [
         "snow",
         6
@@ -441,7 +448,10 @@ main.floors.sample1=
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,trader]你的金钱不足！"
+                                                            "\t[老人,trader]你的金钱不足！",
+                                                            {
+                                                                "type": "continue"
+                                                            }
                                                         ]
                                                     }
                                                 ]
@@ -464,13 +474,13 @@ main.floors.sample1=
                                                                 "name": "item:blueKey",
                                                                 "operator": "+=",
                                                                 "value": "1"
-                                                            },
-                                                            {
-                                                                "type": "continue"
                                                             }
                                                         ],
                                                         "false": [
-                                                            "\t[老人,trader]你的金钱不足！"
+                                                            "\t[老人,trader]你的金钱不足！",
+                                                            {
+                                                                "type": "continue"
+                                                            }
                                                         ]
                                                     }
                                                 ]

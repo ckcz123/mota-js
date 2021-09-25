@@ -163,7 +163,7 @@ editor_blockly = function () {
         editor_blockly.hide();
     }
 
-    editor_blockly.confirm = function () {
+    editor_blockly.confirm = function (keep) {
         if (!editor_blockly.id) {
             editor_blockly.id = '';
             return;
@@ -186,10 +186,13 @@ editor_blockly = function () {
         }
         var setvalue = function (value) {
             var thisTr = document.getElementById(editor_blockly.id);
-            editor_blockly.id = '';
             var input = thisTr.children[2].children[0].children[0];
             input.value = value;
-            editor_blockly.hide();
+            if (!keep) {
+                editor_blockly.id = '';
+                editor_blockly.hide();
+            }
+            else alert('保存成功！');
             input.onchange();
         }
         if (codeAreaHL.getValue() === '') {
@@ -244,8 +247,8 @@ editor_blockly = function () {
                 }
             }
             if (one.type == 'previewUI' && this.checkAsync(one.action)) return true; 
-            if (one.async && one.type != 'animate' && one.type != 'function') hasAsync = true;
-            if (one.type == 'waitAsync') hasAsync = false;
+            if (one.async && one.type != 'animate' && one.type != 'function' && one.type != 'text') hasAsync = true;
+            if (one.type == 'waitAsync' || one.type == 'stopAsync') hasAsync = false;
         }
         return hasAsync;
     }
@@ -1188,4 +1191,17 @@ Blockly.FieldDropdown.prototype.doValueUpdate_ = function (newValue) {
         options.push([this.value_, this.value_]);
         this.selectedOption_ = options[options.length - 1];
     }
+};
+
+Blockly.FieldMultilineInput.prototype.getDisplayText_ = function() {
+    var value = this.value_;
+    if (!value) return Blockly.Field.NBSP;
+    var curr = '', text = '';
+    for (var i = 0; i < value.length; ++i) {
+        if (value[i] == '\n' || curr.length == this.maxDisplayLength) {
+            text += curr.replace(/\s/g, Blockly.Field.NBSP) + '\n';
+            curr = value[i] == '\n' ? '' : value[i];
+        } else curr += value[i];
+    }
+    return text + curr;
 };

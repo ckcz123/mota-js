@@ -54,7 +54,8 @@ function core() {
             'sun': null
         },
         "tip": null,
-        "asyncId": {}
+        "asyncId": {},
+        "lastAsyncId": null
     }
     this.musicStatus = {
         'audioContext': null, // WebAudioContext
@@ -82,7 +83,6 @@ function core() {
         'isQQ': false, // 是否是QQ
         'isChrome': false, // 是否是Chrome
         'supportCopy': false, // 是否支持复制到剪切板
-        'useLocalForage': true,
 
         'fileInput': null, // FileInput
         'fileReader': null, // 是否支持FileReader
@@ -126,7 +126,8 @@ function core() {
             "now": 0,
         },
         "favorite": [],
-        "favoriteName": {}
+        "favoriteName": {},
+        "cache": {}
     }
     this.initStatus = {
         'played': false,
@@ -178,6 +179,13 @@ function core() {
         // 按下键的时间：为了判定双击
         'downTime': null,
         'ctrlDown': false,
+        'preview': {
+            'enabled': false,
+            'prepareDragging': false,
+            'dragging': false,
+            'px': 0,
+            'py': 0,
+        },
 
         // 路线&回放
         'route': [],
@@ -185,6 +193,7 @@ function core() {
             'replaying': false,
             'pausing': false,
             'animate': false, // 正在某段动画中
+            'failed': false,
             'toReplay': [],
             'totalList': [],
             'speed': 1.0,
@@ -242,6 +251,11 @@ function core() {
     this.markedFloorIds = {};
     this.status = {};
     this.dymCanvas = {};
+
+    if (main.mode == 'editor') {
+        document.documentElement.style.setProperty('--size', this.__SIZE__);
+        document.documentElement.style.setProperty('--pixel', this.__PIXELS__ + 'px');
+    }
 }
 
 /////////// 系统事件相关 ///////////
@@ -402,7 +416,6 @@ core.prototype._init_platform = function () {
     core.platform.isSafari = /Safari/i.test(navigator.userAgent) && !/Chrome/i.test(navigator.userAgent);
     core.platform.isQQ = /QQ/i.test(navigator.userAgent);
     core.platform.isWeChat = /MicroMessenger/i.test(navigator.userAgent);
-    this._init_checkLocalForage();
     if (window.FileReader) {
         core.platform.fileReader = new FileReader();
         core.platform.fileReader.onload = function () {
@@ -418,37 +431,6 @@ core.prototype._init_platform = function () {
     if (main.mode != 'editor') {
         core.domStyle.scale = core.getLocalStorage('scale', 1);
         if (core.flags.enableHDCanvas) core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, core.domStyle.scale);
-    }
-}
-
-core.prototype._init_checkLocalForage = function () {
-    core.platform.useLocalForage = core.getLocalStorage('useLocalForage', true);
-    var _error = function (e) {
-        main.log(e);
-        core.platform.useLocalForage = false;
-    };
-    if (core.platform.useLocalForage) {
-        try {
-            core.setLocalForage("__test__", lzw_encode("__test__"), function () {
-                try {
-                    core.getLocalForage("__test__", null, function (data) {
-                        try {
-                            if (lzw_decode(data) != "__test__") {
-                                console.log("localForage unsupported!");
-                                core.platform.useLocalForage = false;
-                            }
-                            else {
-                                console.log("localForage supported!");
-                                core.removeLocalForage("__test__");
-                            }
-                        }
-                        catch (e) {_error(e);}
-                    }, _error)
-                }
-                catch (e) {_error(e);}
-            }, _error)
-        }
-        catch (e) {_error(e);}
     }
 }
 

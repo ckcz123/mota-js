@@ -29,9 +29,9 @@
                 <input type="button" value="新建空白地图" id='newMap'/>
                 <input id='newFileName' placeholder="新楼层id" style="width: 70px"/>
                 <span style="vertical-align: bottom">宽</span>
-                <input id='newMapWidth' value="13" style="width: 20px"/>
+                <input id='newMapWidth' style="width: 20px"/>
                 <span style="vertical-align: bottom">高</span>
-                <input id='newMapHeight' value="13" style="width: 20px"/>
+                <input id='newMapHeight' style="width: 20px"/>
                 <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
             </div>
@@ -51,9 +51,9 @@
                 <span style="vertical-align: bottom">状态栏名称: </span>
                 <input id='newFloorNames' style="width: 70px" value='${i}'/>
                 <span style="vertical-align: bottom">宽</span>
-                <input id='newMapsWidth' value="13" style="width: 20px"/>
+                <input id='newMapsWidth' style="width: 20px"/>
                 <span style="vertical-align: bottom">高</span>
-                <input id='newMapsHeight' value="13" style="width: 20px"/>
+                <input id='newMapsHeight' style="width: 20px"/>
                 <input type="checkbox" id='newMapsStatus' checked='checked' style='vertical-align: bottom'/>
                 <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
                 <br/>
@@ -147,12 +147,14 @@
                 <button>确定</button>
                 <br/>
                 <button style="margin-top: 10px">自动注册</button>
-                <button style="margin-top: 10px; margin-left: 10px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">以此素材为模板追加</button>
             </div>
             <div id='changeId'><!-- id and idnum -->
-                <input placeholder="修改图块id为"/>
+                <input placeholder="修改图块id为" style="width: 100px"/>
                 <button>确定</button>
-                <button style="margin-left: 10px">删除此素材</button>
+                <button style="margin-left: 5px">删除此素材</button>
+                <button style="margin-left: 5px">以此素材为模板追加</button>
             </div>
         </div>
     </div>
@@ -207,6 +209,7 @@
                 <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
                 -->
                 <button onclick="editor_blockly.confirm()">确认</button>
+                <button onclick="editor_blockly.confirm(true)">应用</button>
                 <button id='blocklyParse' onclick="editor_blockly.parse()">解析</button>
                 <button onclick="editor_blockly.cancel()">取消</button>
                 <div style="position: relative; display: inline-block; margin-left: 10px">
@@ -237,7 +240,9 @@
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
         <button onclick="editor_multi.confirm()">确认</button>
         <button onclick="editor_multi.cancel()">取消</button>
+        <button onclick="editor_multi.confirm(true)">应用</button>
         <button onclick="editor_multi.format()">格式化</button>
+        <button id="editor_multi_preview" style="display: none;">预览</button>
         <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
                style="vertical-align: middle;margin-left:6px"/>
         <span style="vertical-align: middle; margin-left: -3px">语法检查</span>
@@ -305,16 +310,16 @@
         </div>
         <div class="tools">
             <div id="tip"></div>
-            <select id="editModeSelect">
-                <option value="map">地图编辑Z</option>
-                <option value="loc">地图选点X</option>
-                <option value="enemyitem">图块属性C</option>
-                <option value="floor">楼层属性V</option>
-                <option value="tower">全塔属性B</option>
-                <option value="functions">脚本编辑N</option>
-                <option value="appendpic">追加素材M</option>
-                <option value="commonevent">公共事件 ,</option>
-                <option value="plugins">插件编写 .</option>
+            <select id="editModeSelect" style="font-size: 12px">
+                <option value="map">地图编辑(Z)</option>
+                <option value="loc">地图选点(X)</option>
+                <option value="enemyitem">图块属性(C)</option>
+                <option value="floor">楼层属性(V)</option>
+                <option value="tower">全塔属性(B)</option>
+                <option value="functions">脚本编辑(N)</option>
+                <option value="appendpic">追加素材(M)</option>
+                <option value="commonevent">公共事件(,)</option>
+                <option value="plugins">插件编写(.)</option>
             </select>
             <span style="font-size: 12px"><input type="checkbox" id="showMovable" style="margin-left:0;margin-right: 2px"/>通行度</span>
             <select id="editorTheme" style="margin-left: 0; font-size: 11px;">
@@ -336,17 +341,17 @@
             <input type="radio" id="layerMod3" name="layerMod" value="fgmap" style="margin-left: 5px" />前景层
             </span>
             <br>
-            <div id="viewportButtons">
+            <div id="viewportButtons" style="margin-bottom: 7px">
                 <input type="button" value="←"/>
                 <input type="button" value="↑"/>
                 <input type="button" value="↓"/>
                 <input type="button" value="→"/>
                 <input type="button" id='bigmapBtn' value="大地图" style="margin-left: 5px"/>
             </div>
-            <br>
             <select id="selectFloor" style="margin-bottom: 5px;"></select>
+            <input type="button" value="选层" id='selectFloorBtn'/>
             <input type="button" value="保存地图" id='saveFloor'/>
-            <input type="button" value="后退" id="undoFloor" />
+            <input type="button" value="后退" id="undoFloor" style="display: none;" />
             <input type="button" value="帮助文档" id="openDoc" />
             <input type="button" value="前往游戏" onclick="window.open('./index.html', '_blank')"/>
         </div>
@@ -387,12 +392,7 @@
     <div id='uieventDialog'>
         <div id="uieventHead">
             <span id="uieventTitle"></span>
-            <select id="uieventBackground" style="margin-left: 20px">
-                <option value="thumbnail" selected>缩略图</option>
-                <option value="#000000">黑色</option>
-                <option value="#FFFFFF">白色</option>
-            </select>
-            <select id="uieventUsedFlags" style="margin-left: 10px; display: none" onchange="editor.uievent.doSearchUsedFlags()"></select>
+            <select id="uieventSelect" style="margin-left: 20px"></select>
             <button id="uieventNo">关闭</button>
             <button id="uieventYes">确定</button>
         </div>
@@ -432,6 +432,7 @@
 <script src='_server/editor_table.js'></script>
 <script src='_server/editor_mode.js'></script>
 <script src='_server/editor_ui.js'></script>
+<script src='_server/editor_uievent.js'></script>
 <script src='_server/editor_mappanel.js'></script>
 <script src='_server/editor_datapanel.js'></script>
 <script src='_server/editor_materialpanel.js'></script>

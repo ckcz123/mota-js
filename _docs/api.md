@@ -56,7 +56,6 @@ core.platform
 core.platform.isPC    （是否是电脑端）
 core.platform.isAndroid    （是否是安卓端）
 core.platform.isIOS    （是否是iOS端）
-core.platform.useLocalForage    （是否开启了新版存档）
 
 
 core.domStyle
@@ -317,9 +316,6 @@ drawHero: fn(status?: string, offset?: number, frame?: number)
 status: 只能为 stop, leftFoot 和 rightFoot，不填用stop。
 offset: 相对主角逻辑位置的偏移量，不填视为无偏移。
 frame: 绘制的第几帧
-
-fillPosWithPoint: fn(pos?: ?)
-显示离散的寻路点
 
 gatherFollowers: fn()
 立刻聚集所有的跟随者
@@ -611,6 +607,9 @@ noGather: 是否聚集跟随者
 setHeroMoveInterval: fn(callback?: fn())
 设置行走的效果动画
 
+setHeroOpacity: fn(opacity?: number, moveMode?: string, time?: number, callback?: fn())
+改变勇士的不透明度
+
 setMusicBtn: fn()
 设置音乐图标的显隐状态
 
@@ -682,9 +681,6 @@ triggerDebuff: fn(action: string, type: string|[string])
 获得或移除毒衰咒效果
 action: 要获得还是移除，'get'为获得，'remove'为移除
 type: 获得或移除的内容（poison/weak/curse），可以为字符串或数组
-
-triggerHero: fn(type?: string, time?: number, callback?: fn())
-改变勇士的显隐状态
 
 triggerReplay: fn()
 播放或暂停录像回放
@@ -1212,6 +1208,9 @@ hard: 难度名，会显示在左下角（横屏）或右下角（竖屏）
 seed: 随机种子，相同的种子保证了录像的可重复性
 route: 经由base64压缩后的录像，用于从头开始的录像回放
 callback: 回调函数，可选
+
+stopAsync: fn()
+立刻停止所有正在进行的异步事件
 
 trigger: fn(x?: number, y?: number, callback?: fn())
 触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等
@@ -1810,9 +1809,9 @@ showFloorImage: fn(loc?: [number]|[[number]], floorId?: string, callback?: fn())
 stairExists: fn(x: number, y: number, floorId?: string) -> bool
 某个点是否存在楼梯
 
-stopAnimate: fn(id: number, doCallback?: bool)
+stopAnimate: fn(id?: number, doCallback?: bool)
 立刻停止一个动画播放
-id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值
+id: 播放动画的编号，即drawAnimate或drawHeroAnimate的返回值；不填视为停止所有动画
 doCallback: 是否执行该动画的回调函数
 
 terrainExists: fn(x: number, y: number, id?: string, floorId?: string) -> bool
@@ -1999,7 +1998,7 @@ getToolboxItems: fn(cls: string) -> [string]
 loadCanvas: fn(name: string|CanvasRenderingContext2D)
 加载某个canvas状态
 
-relocateCanvas: fn(name: string, x: number, y: number)
+relocateCanvas: fn(name: string, x: number, y: number, useDelta: bool)
 重新定位一个自定义画布
 
 resizeCanvas: fn(name: string, x: number, y: number)

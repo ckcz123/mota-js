@@ -35,7 +35,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"whiteHornSlime": {"name":"尖角怪","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"redSwordsman": {"name":"剑王","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[]},
 	"poisonZombie": {"name":"绿兽人","hp":100,"atk":120,"def":0,"money":13,"exp":0,"point":0,"special":[12]},
-	"octopus": {"name":"血影","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
+	"octopus": {"name":"血影","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0,"bigImage":"dragon_1.png"},
 	"princessEnemy": {"name":"假公主","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"angel": {"name":"天使","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"elemental": {"name":"元素生物","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
@@ -52,7 +52,7 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"magicMaster": {"name":"黑暗大法师","hp":100,"atk":120,"def":0,"money":12,"exp":0,"point":0,"special":11,"value":0.3333333333333333,"add":true,"notBomb":true},
 	"devilWarrior": {"name":"魔神武士","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"fairyEnemy": {"name":"仙子","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
-	"dragon": {"name":"魔龙","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
+	"dragon": {"name":"魔龙","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0,"bigImage":"dragon_0.png"},
 	"skeletonKnight": {"name":"骷髅武士","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"skeletonPresbyter": {"name":"骷髅巫师","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"ironRock": {"name":"铁面人","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
@@ -76,5 +76,9 @@ var enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80 =
 	"blueKing": {"name":"白衣武士","hp":100,"atk":120,"def":0,"money":17,"exp":0,"point":0,"special":16},
 	"keiskeiFairy": {"name":"铃兰花妖","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
 	"tulipFairy": {"name":"郁金香花妖","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
-	"purpleBowman": {"name":"高级弓兵","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0}
+	"purpleBowman": {"name":"高级弓兵","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":0},
+	"bearDown": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"},"bigImage":"bear.png"},
+	"bearLeft": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"}},
+	"bearRight": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"}},
+	"bearUp": {"name":"熊出没","hp":0,"atk":0,"def":0,"money":0,"exp":0,"point":0,"special":[],"faceIds":{"down":"bearDown","left":"bearLeft","right":"bearRight","up":"bearUp"}}
 }

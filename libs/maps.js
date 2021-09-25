@@ -385,7 +385,7 @@ maps.prototype.setBlockOpacity = function (opacity, x, y, floorId) {
         block.opacity = opacity;
         if (floorId == core.status.floorId && !block.disable) {
             if (block.event.cls == 'autotile') {
-                core.drawMap();
+                core.redrawMap();
             } else {
                 core.drawBlock(block);
                 core.addGlobalAnimate(block);
@@ -416,7 +416,7 @@ maps.prototype.setBlockFilter = function (filter, x, y, floorId) {
         block.filter = core.clone(filter);
         if (floorId == core.status.floorId && !block.disable) {
             if (block.event.cls == 'autotile') {
-                core.drawMap();
+                core.redrawMap();
             } else {
                 core.drawBlock(block);
                 core.addGlobalAnimate(block);
@@ -968,10 +968,9 @@ maps.prototype._getBigImageInfo = function (bigImage, face, animate) {
     }
     var dx, dy;
     switch (face) {
-        case "down": dx = 16 - per_width / 2; dy = 32 - per_height; break;
-        case "left": dx = 0; dy = 16 - per_height / 2; break;
-        case "right": dx = 32 - per_width; dy = 16 - per_height / 2; break;
-        case "up": dx = 16 - per_width / 2; dy = 0; break;
+        case "down": case "up": case "left": case "right": dx = 16 - per_width / 2; dy = 32 - per_height; break;
+        // case "left": dx = 0; dy = 32 - per_height; break;
+        // case "right": dx = 32 - per_width; dy = 32 - per_height; break;
     }
 
     return {sx: sx, sy: sy, per_width: per_width, per_height: per_height, face: face, dx: dx, dy: dy};
@@ -1034,43 +1033,36 @@ maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y, ctx) {
     var dx = bigImageInfo.dx, dy = bigImageInfo.dy;
 
     switch (bigImageInfo.face) {
-        case "down":
-            core.createCanvas(header, px + dx, py + dy, per_width, per_height - 32, 51);
+        case "down": case "up": case "left": case "right":
+            core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
-                core.drawImage(header, bigImage, sx, sy, per_width, per_height - 32, 0, 0, per_width, per_height - 32);
+                core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
             });
             core.createCanvas(body, px + dx, py, per_width, 32, 31);
             this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy + per_height - 32, per_width, 32, 0, 0, per_width, 32);
+                core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             })
             break;
-        case "left":
-            core.createCanvas(header, px + dx, py + dy, per_width, per_height / 2 - 16, 51);
+        /*case "left":
+            core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
-                core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
+                core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
             });
-            core.createCanvas(body, px + dx, py, per_width, per_height / 2 + 16, 31);
+            core.createCanvas(body, px + dx, py, per_width, 32, 31);
             this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
+                core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             });
             break;
         case "right":
-            core.createCanvas(header, px + dx, py + dy, per_width, per_height / 2 - 16, 51);
+            core.createCanvas(header, px + dx, py + dy, per_width, -dy, 51);
             this._drawBlockInfo_drawWithFilter(blockInfo, header, function () {
-                core.drawImage(header, bigImage, sx, sy, per_width, per_height / 2 - 16, 0, 0, per_width, per_height / 2 - 16);
+                core.drawImage(header, bigImage, sx, sy, per_width, -dy, 0, 0, per_width, -dy);
             });
             core.createCanvas(body, px + dx, py, per_width, per_height / 2 + 16, 31);
             this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy + per_height / 2 - 16, per_width, per_height / 2 + 16, 0, 0, per_width, per_height / 2 + 16);
+                core.drawImage(body, bigImage, sx, sy - dy, per_width, 32, 0, 0, per_width, 32);
             });
-            break;
-        case "up":
-            core.deleteCanvas(header);
-            core.createCanvas(body, px + dx, py, per_width, per_height, 31);
-            this._drawBlockInfo_drawWithFilter(blockInfo, body, function () {
-                core.drawImage(body, bigImage, sx, sy, per_width, per_height, 0, 0, per_width, per_height);
-            });
-            break;
+            break;*/
     }
     if (core.dymCanvas[header]) {
         core.dymCanvas[header].canvas.setAttribute('_ox', 32 * x + dx);
@@ -1684,25 +1676,28 @@ maps.prototype._makeAutotileEdges = function () {
     ctx.msImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
 
+    var first = {}, second = {};
     autotileIds.forEach(function (t) {
         var n = core.maps.getNumberById(t);
-        core.material.autotileEdges[n] = [n];
-
         core.clearMap(ctx, 0, 0, 32, 32);
         core.drawImage(ctx, core.material.images.autotile[t], 0, 0, 32, 32, 0, 0, 32, 32);
-        var data = canvas.toDataURL("image/png");
+        first[n] = canvas.toDataURL("image/png");
+        core.clearMap(ctx, 0, 0, 32, 32);
+        core.drawImage(ctx, core.material.images.autotile[t], 32, 0, 32, 32, 0, 0, 32, 32);
+        second[n] = canvas.toDataURL("image/png");
+    });
 
-        autotileIds.forEach(function (t2) {
-            if (t == t2) return;
-            var n2 = core.maps.getNumberById(t2);
-
-            core.clearMap(ctx, 0, 0, 32, 32);
-            core.drawImage(ctx, core.material.images.autotile[t2], 32, 0, 32, 32, 0, 0, 32, 32);
-            if (data == canvas.toDataURL("image/png")) {
+    for (var n in first) {
+        n = parseInt(n);
+        core.material.autotileEdges[n] = [n];
+        for (var n2 in second) {
+            n2 = parseInt(n2);
+            if (n == n2) continue;
+            if (first[n] == second[n2]) {
                 core.material.autotileEdges[n].push(n2);
             }
-        });
-    });
+        }
+    }
 }
 
 ////// 绘制缩略图 //////
@@ -1785,8 +1780,9 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
-        core.drawImage(options.ctx, core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
-            32 * options.heroLoc.x, 32 * options.heroLoc.y + 32 - height, 32, height);
+        var width = core.material.images.images[options.heroIcon].width || 32;
+        core.drawImage(options.ctx, core.material.images.images[options.heroIcon], icon.stop * width, icon.loc * height, width, height,
+            32 * options.heroLoc.x + 32 - width, 32 * options.heroLoc.y + 32 - height, width, height);
     }
     // 缩略图：前景
     this.drawFg(floorId, options);
@@ -2054,7 +2050,7 @@ maps.prototype.showBlock = function (x, y, floorId) {
         // 在本层，添加动画
         if (floorId == core.status.floorId) {
             if (block.event.cls == 'autotile') {
-                core.drawMap();
+                core.redrawMap();
             } else {
                 core.drawBlock(block);
                 core.addGlobalAnimate(block);
@@ -2104,7 +2100,7 @@ maps.prototype._removeBlockFromMap = function (floorId, block) {
     if (floorId != core.status.floorId) return;
     var filter = block.filter || {};
     if (block.event.cls == 'autotile' || filter.blur > 0 || filter.shadow > 0) {
-        core.drawMap();
+        core.redrawMap();
     } else {
         var x = block.x, y = block.y;
         var px = 32 * x - core.bigmap.posX * 32;
@@ -2193,7 +2189,7 @@ maps.prototype._triggerBgFgMap = function (type, name, loc, floorId, callback) {
     core.status[name + "maps"][floorId] = null;
 
     if (floorId == core.status.floorId) {
-        core.drawMap(floorId);
+        core.redrawMap();
     }
     if (callback) callback();
 }
@@ -2225,7 +2221,7 @@ maps.prototype._triggerFloorImage = function (type, loc, floorId, callback) {
     })
 
     if (floorId == core.status.floorId) {
-        core.drawMap(floorId);
+        core.redrawMap();
     }
     if (callback) callback();
 }
@@ -2264,7 +2260,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     if (floorId == core.status.floorId) {
         // 有任何一个是autotile直接重绘地图
         if ((originEvent != null && originEvent.cls == 'autotile') || block.event.cls == 'autotile') {
-            core.drawMap();
+            core.redrawMap();
         } else {
             if (originEvent != null) {
                 this._removeBlockFromMap(floorId, {x: x, y: y, event: originEvent});
@@ -2415,7 +2411,7 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
             this._updateMapArray(floorId, block.x, block.y);
         }
     }, this);
-    if (floorId == core.status.floorId) core.drawMap();
+    if (floorId == core.status.floorId) core.redrawMap();
 }
 
 ////// 改变前景背景的图块 //////
@@ -2461,7 +2457,7 @@ maps.prototype.resetMap = function (floorId) {
         delete (core.status.mapBlockObjs || {})[t];
         if (t == core.status.floorId) needRefresh = true;
     });
-    if (needRefresh) this.drawMap();
+    if (needRefresh) this.redrawMap();
     core.drawTip("地图重置成功");
 }
 
@@ -2522,7 +2518,18 @@ maps.prototype._moveDetachedBlock = function (blockInfo, nowX, nowY, opacity, ca
     }
     if (bodyCanvas) {
         if (blockInfo.bigImage) {
-            var bigImageInfo = this._getBigImageInfo(blockInfo.bigImage, blockInfo.face, blockInfo.posX);
+            var face = blockInfo.face;
+            if (!blockInfo.faceIds) face = 'down';
+            else if (!blockInfo.faceIds[face]) {
+                // 维持此时朝向
+                face = 'down';
+                for (var f in blockInfo.faceIds) {
+                    if (blockInfo.faceIds[f] == blockInfo.id) {
+                        face = f;
+                    }
+                }
+            }
+            var bigImageInfo = this._getBigImageInfo(blockInfo.bigImage, face, blockInfo.posX);
             var per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
             core.dymCanvas[bodyCanvas].clearRect(0, 0, bigImageInfo.per_width, bigImageInfo.per_height);
             core.dymCanvas[bodyCanvas].drawImage(blockInfo.bigImage, bigImageInfo.sx, bigImageInfo.sy, per_width, per_height, 0, 0, per_width, per_height);
@@ -2586,6 +2593,17 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
     var animateTotal = blockInfo.animate, animateTime = 0;
     var _run = function () {
+        var cb = function () {
+            core.maps._deleteDetachedBlock(canvases);
+            // 不消失
+            if (moveInfo.keep) {
+                core.setBlock(blockInfo.number, moveInfo.x, moveInfo.y);
+                core.showBlock(moveInfo.x, moveInfo.y);
+                core.moveEnemyOnPoint(moveInfo.sx, moveInfo.sy, moveInfo.x, moveInfo.y);
+            }
+            if (callback) callback();
+        }
+
         var animate = window.setInterval(function () {
             if (blockInfo.cls != 'tileset') {
                 animateTime += moveInfo.per_time;
@@ -2603,9 +2621,11 @@ maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, call
                 else core.maps._moveBlock_moving(blockInfo, canvases, moveInfo);
             }
             else
-                core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, callback);
+                core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, cb);
         }, moveInfo.per_time);
-        core.animateFrame.asyncId[animate] = true;
+        
+        core.animateFrame.lastAsyncId = animate;
+        core.animateFrame.asyncId[animate] = cb;
     }
     _run();
 }
@@ -2719,14 +2739,26 @@ maps.prototype.__generateJumpInfo = function (sx, sy, ex, ey, time) {
 }
 
 maps.prototype._jumpBlock_doJump = function (blockInfo, canvases, jumpInfo, callback) {
+    var cb = function () {
+        core.maps._deleteDetachedBlock(canvases);
+        // 不消失
+        if (jumpInfo.keep) {
+            core.setBlock(blockInfo.number, jumpInfo.ex, jumpInfo.ey);
+            core.showBlock(jumpInfo.ex, jumpInfo.ey);
+            core.moveEnemyOnPoint(jumpInfo.sx, jumpInfo.sy, jumpInfo.ex, jumpInfo.ey);
+        }
+        if (callback) callback();
+    }
+
     var animate = window.setInterval(function () {
         if (jumpInfo.jump_count > 0)
             core.maps._jumpBlock_jumping(blockInfo, canvases, jumpInfo)
         else
-            core.maps._moveJumpBlock_finished(blockInfo, canvases, jumpInfo, animate, callback);
+            core.maps._moveJumpBlock_finished(blockInfo, canvases, jumpInfo, animate, cb);
     }, jumpInfo.per_time);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.lastAsyncId = animate;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 maps.prototype.__updateJumpInfo = function (jumpInfo) {
@@ -2743,20 +2775,13 @@ maps.prototype._jumpBlock_jumping = function (blockInfo, canvases, jumpInfo) {
     core.maps._moveDetachedBlock(blockInfo, jumpInfo.px, jumpInfo.py, jumpInfo.opacity, canvases);
 }
 
-maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, animate, callback) {
+maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, animate, cb) {
     if (info.keep) info.opacity = 0;
     else info.opacity -= 0.06;
     if (info.opacity <= 0) {
         delete core.animateFrame.asyncId[animate];
         clearInterval(animate);
-        this._deleteDetachedBlock(canvases);
-        // 不消失
-        if (info.keep) {
-            core.setBlock(blockInfo.number, info.x, info.y);
-            core.showBlock(info.x, info.y);
-            core.moveEnemyOnPoint(info.sx, info.sy, info.x, info.y);
-        }
-        if (callback) callback();
+        cb();
     }
     else {
         this._moveDetachedBlock(blockInfo, info.px, info.py, info.opacity, canvases);
@@ -2784,30 +2809,35 @@ maps.prototype.animateBlock = function (loc, type, time, callback) {
 
 maps.prototype._animateBlock_doAnimate = function (loc, list, type, time, callback) {
     var step = 0, steps = Math.max(parseInt(time / 10), 1);
+    var cb = function () {
+        list.forEach(function (t) {
+            if (t.blockInfo)
+                core.maps._deleteDetachedBlock(t.canvases);
+        });
+        loc.forEach(function (t) {
+            if (type == 'show') core.showBlock(t[0], t[1]);
+            else if (type == 'hide') core.hideBlock(t[0], t[1]);
+            else if (type == 'remove') core.removeBlock(t[0], t[1]);
+            else {
+                core.setBlockOpacity(type, t[0], t[1]);
+                core.showBlock(t[0], t[1]);
+            }
+        });
+        if (callback) callback();
+    }
+
     var animate = setInterval(function () {
         step++;
         core.maps._animateBlock_drawList(list, step / steps);
         if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
-            list.forEach(function (t) {
-                if (t.blockInfo)
-                    core.maps._deleteDetachedBlock(t.canvases);
-            });
-            loc.forEach(function (t) {
-                if (type == 'show') core.showBlock(t[0], t[1]);
-                else if (type == 'hide') core.hideBlock(t[0], t[1]);
-                else if (type == 'remove') core.removeBlock(t[0], t[1]);
-                else {
-                    core.setBlockOpacity(type, t[0], t[1]);
-                    core.showBlock(t[0], t[1]);
-                }
-            });
-            if (callback) callback();
+            cb();
         }
     }, 10);
 
-    core.animateFrame.asyncId[animate] = true;
+    core.animateFrame.lastAsyncId = animate;
+    core.animateFrame.asyncId[animate] = cb;
 }
 
 maps.prototype._animateBlock_getList = function (loc, type) {
@@ -3028,7 +3058,7 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
 maps.prototype.stopAnimate = function (id, doCallback) {
     for (var i = 0; i < core.status.animateObjs.length; i++) {
         var obj = core.status.animateObjs[i];
-        if (obj.id == id) {
+        if (id == null || obj.id == id) {
             if (doCallback) {
                 (function (callback) {
                     setTimeout(function () {
@@ -3038,7 +3068,7 @@ maps.prototype.stopAnimate = function (id, doCallback) {
             }
         }
     }
-    core.status.animateObjs = core.status.animateObjs.filter(function (x) { return x.id != id });
+    core.status.animateObjs = core.status.animateObjs.filter(function (x) { return id != null && x.id != id });
     if (core.status.animateObjs.length == 0)
         core.clearMap('animate');
 }

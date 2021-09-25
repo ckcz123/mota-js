@@ -47,17 +47,13 @@ actions.prototype._init = function () {
     // --- onup注册
     this.registerAction('onup', '_sys_checkReplay', this._sys_checkReplay, 100);
     this.registerAction('onup', '_sys_onup', this._sys_onup, 0);
-    // --- onclick注册
-    this.registerAction('onclick', '_sys_checkReplay', this._sys_checkReplay, 100);
-    this.registerAction('onclick', '_sys_onclick_lockControl', this._sys_onclick_lockControl, 50);
-    this.registerAction('onclick', '_sys_onclick', this._sys_onclick, 0);
+    // --- onclick已废弃，将视为ondown
     // --- onmousewheel注册
     this.registerAction('onmousewheel', '_sys_onmousewheel', this._sys_onmousewheel, 0);
     // --- keyDownCtrl注册
     this.registerAction('keyDownCtrl', '_sys_keyDownCtrl', this._sys_keyDownCtrl, 0);
     // --- longClick注册
     this.registerAction('longClick', '_sys_longClick_lockControl', this._sys_longClick_lockControl, 50);
-    this.registerAction('longClick', '_sys_longClick', this._sys_longClick, 0);
     // --- onStatusBarClick注册
     this.registerAction('onStatusBarClick', '_sys_onStatusBarClick', this._sys_onStatusBarClick, 0);
 
@@ -66,7 +62,7 @@ actions.prototype._init = function () {
 //////  注册一个用户交互行为 //////
 /*
  * 此函数将注册一个用户交互行为。
- * action：要注册的交互类型，如 ondown, onclick, keyDown 等等。
+ * action：要注册的交互类型，如 ondown, onup, keyDown 等等。
  * name：你的自定义名称，可被注销使用；同名重复注册将后者覆盖前者。
  * func：执行函数。
  * priority：优先级；优先级高的将会被执行。此项可不填，默认为0。
@@ -75,6 +71,8 @@ actions.prototype._init = function () {
 actions.prototype.registerAction = function (action, name, func, priority) {
     if (!name || !func)
         return;
+    // 将onclick视为ondown处理
+    if (action == 'onclick') action = 'ondown';
     priority = priority || 0;
     if (!this.actions[action]) {
         this.actions[action] = [];
@@ -90,6 +88,8 @@ actions.prototype.registerAction = function (action, name, func, priority) {
 
 ////// 注销一个用户交互行为 //////
 actions.prototype.unregisterAction = function (action, name) {
+    // 将onclick视为ondown处理
+    if (action == 'onclick') action = 'ondown';
     if (!this.actions[action]) return;
     this.actions[action] = this.actions[action].filter(function (x) {
         return x.name != name;
@@ -286,6 +286,7 @@ actions.prototype._sys_keyDown_lockControl = function (keyCode) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._keyDownSL(keyCode);
             break;
         case 'selectShop':
@@ -388,6 +389,7 @@ actions.prototype._sys_keyUp_lockControl = function (keyCode, altKey) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._keyUpSL(keyCode);
             break;
         case 'keyBoard':
@@ -460,176 +462,6 @@ actions.prototype.ondown = function (loc) {
 actions.prototype._sys_ondown_lockControl = function (x, y, px, py) {
     if (core.status.played && !core.status.lockControl) return false;
 
-    core.actions.onclick(x, y, px, py, []);
-
-    // --- 长按判定
-    if (core.timeout.onDownTimeout == null) {
-        core.timeout.onDownTimeout = setTimeout(function () {
-            if (core.interval.onDownInterval == null) {
-                core.interval.onDownInterval = setInterval(function () {
-                    if (!core.actions.longClick(x, y, px, py)) {
-                        clearInterval(core.interval.onDownInterval);
-                        core.interval.onDownInterval = null;
-                    }
-                }, 40)
-            }
-        }, 500);
-    }
-    return true;
-}
-
-actions.prototype._sys_ondown = function (x, y, px, py) {
-    core.status.downTime = new Date();
-    core.deleteCanvas('route');
-    var pos = {'x': x, 'y': y}
-    core.status.stepPostfix = [];
-    core.status.stepPostfix.push(pos);
-    core.fillPosWithPoint(pos);
-}
-
-////// 当在触摸屏上滑动时 //////
-actions.prototype.onmove = function (loc) {
-    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
-    this.doRegisteredAction('onmove', x, y, px, py);
-}
-
-actions.prototype._sys_onmove_choices = function (x, y) {
-    if (!core.status.lockControl) return false;
-
-    switch (core.status.event.id) {
-        case 'action':
-            if (core.status.event.data.type == 'choices') {
-                this._onMoveChoices(x, y); 
-                return true;
-            }
-            if (core.status.event.data.type == 'confirm') {
-                this._onMoveConfirmBox(x, y);
-                return true;
-            }
-            break;
-        case 'selectShop':
-        case 'switchs':
-        case 'switchs-sounds':
-        case 'switchs-display':
-        case 'switchs-action':
-        case 'notes':
-        case 'settings':
-        case 'syncSave':
-        case 'syncSelect':
-        case 'localSaveSelect':
-        case 'storageRemove':
-        case 'replay':
-        case 'gameInfo':
-            this._onMoveChoices(x, y);
-            return true;
-        case 'confirmBox':
-            this._onMoveConfirmBox(x, y);
-            return true;
-        default:
-            break;
-    }
-    return false;
-}
-
-actions.prototype._sys_onmove = function (x, y) {
-    if ((core.status.stepPostfix || []).length > 0) {
-        var pos = {'x': x, 'y': y};
-        var pos0 = core.status.stepPostfix[core.status.stepPostfix.length - 1];
-        var directionDistance = [pos.y - pos0.y, pos0.x - pos.x, pos0.y - pos.y, pos.x - pos0.x];
-        var max = 0, index = 4;
-        for (var ii = 0; ii < 4; ii++) {
-            if (directionDistance[ii] > max) {
-                index = ii;
-                max = directionDistance[ii];
-            }
-        }
-        pos = [{'x': 0, 'y': 1}, {'x': -1, 'y': 0}, {'x': 0, 'y': -1}, {'x': 1, 'y': 0}, false][index]
-        if (pos) {
-            pos.x += pos0.x;
-            pos.y += pos0.y;
-            core.status.stepPostfix.push(pos);
-            core.fillPosWithPoint(pos);
-        }
-    }
-    return true;
-}
-
-////// 当点击（触摸）事件放开时 //////
-actions.prototype.onup = function (loc) {
-    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
-    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
-    this.doRegisteredAction('onup', x, y, px, py);
-}
-
-actions.prototype._sys_onup = function () {
-    clearTimeout(core.timeout.onDownTimeout);
-    core.timeout.onDownTimeout = null;
-    clearInterval(core.interval.onDownInterval);
-    core.interval.onDownInterval = null;
-
-    if ((core.status.stepPostfix || []).length == 0) return false;
-
-    var stepPostfix = [];
-    var direction = {'0': {'1': 'down', '-1': 'up'}, '-1': {'0': 'left'}, '1': {'0': 'right'}};
-    for (var ii = 1; ii < core.status.stepPostfix.length; ii++) {
-        var pos0 = core.status.stepPostfix[ii - 1];
-        var pos = core.status.stepPostfix[ii];
-        stepPostfix.push({
-            'direction': direction[pos.x - pos0.x][pos.y - pos0.y],
-            'x': pos.x + parseInt(core.bigmap.offsetX / 32),
-            'y': pos.y + parseInt(core.bigmap.offsetY / 32)
-        });
-    }
-    var posx = core.status.stepPostfix[0].x;
-    var posy = core.status.stepPostfix[0].y;
-    core.status.stepPostfix = [];
-    if (!core.status.lockControl) {
-        core.clearMap('ui');
-    }
-
-    // 长按
-    if (!core.status.lockControl && stepPostfix.length == 0 && core.status.downTime != null && new Date() - core.status.downTime >= 1000) {
-        core.actions.longClick(posx, posy, 32 * posx + 16, 32 * posy + 16);
-    }
-    else {
-        //posx,posy是寻路的目标点,stepPostfix是后续的移动
-        core.actions.onclick(posx, posy, 32 * posx + 16, 32 * posy + 16, stepPostfix);
-    }
-    core.status.downTime = null;
-    return true;
-}
-
-////// 获得点击事件相对左上角的坐标 //////
-actions.prototype._getClickLoc = function (x, y) {
-
-    var statusBar = {'x': 0, 'y': 0};
-    var size = 32;
-    size = size * core.domStyle.scale;
-
-    if (core.domStyle.isVertical) {
-        statusBar.x = 3;
-        statusBar.y = core.dom.statusBar.offsetHeight + 3;
-    }
-    else {
-        statusBar.x = core.dom.statusBar.offsetWidth + 3;
-        statusBar.y = 3;
-    }
-
-    var left = core.dom.gameGroup.offsetLeft + statusBar.x;
-    var top = core.dom.gameGroup.offsetTop + statusBar.y;
-    var loc = {'x': Math.max(x - left), 'y': Math.max(y - top, 0), 'size': size};
-    return loc;
-}
-
-////// 具体点击屏幕上(x,y)点时，执行的操作 //////
-actions.prototype.onclick = function (x, y, px, py, stepPostfix) {
-    // console.log("Click: (" + x + "," + y + ")");
-    return this.doRegisteredAction('onclick', x, y, px, py, stepPostfix || []);
-}
-
-actions.prototype._sys_onclick_lockControl = function (x, y, px, py) {
-    if (!core.status.lockControl) return false;
     switch (core.status.event.id) {
         case 'centerFly':
             this._clickCenterFly(x, y, px, py);
@@ -674,6 +506,7 @@ actions.prototype._sys_onclick_lockControl = function (x, y, px, py) {
         case 'load':
         case 'replayLoad':
         case 'replayRemain':
+        case 'replaySince':
             this._clickSL(x, y, px, py);
             break;
         case 'confirmBox':
@@ -717,14 +550,210 @@ actions.prototype._sys_onclick_lockControl = function (x, y, px, py) {
             core.ui.closePanel();
             break;
     }
+
+    // --- 长按判定
+    if (core.timeout.onDownTimeout == null) {
+        core.timeout.onDownTimeout = setTimeout(function () {
+            if (core.interval.onDownInterval == null) {
+                core.interval.onDownInterval = setInterval(function () {
+                    if (!core.actions.longClick(x, y, px, py)) {
+                        clearInterval(core.interval.onDownInterval);
+                        core.interval.onDownInterval = null;
+                    }
+                }, 40)
+            }
+        }, 500);
+    }
     return true;
 }
 
-actions.prototype._sys_onclick = function (x, y, px, py, stepPostfix) {
-    // 寻路
-    core.setAutomaticRoute(x + parseInt(core.bigmap.offsetX / 32), y + parseInt(core.bigmap.offsetY / 32), stepPostfix);
+actions.prototype._sys_ondown = function (x, y, px, py) {
+    if (core.status.lockControl) return false;
+    core.status.downTime = new Date();
+    core.deleteCanvas('route');
+    var pos = {'x': parseInt((px + core.bigmap.offsetX) / 32), 'y': parseInt((py + core.bigmap.offsetY) / 32)};
+    core.status.stepPostfix = [];
+    core.status.stepPostfix.push(pos);
+    core.fillRect('ui', pos.x*32+12-core.bigmap.offsetX,pos.y*32+12-core.bigmap.offsetY,8,8, '#bfbfbf');
+
+    clearTimeout(core.timeout.onDownTimeout);
+    core.timeout.onDownTimeout = null;
+    core.status.preview.prepareDragging = false;
+    if (!core.hasFlag('__lockViewport__') && (core.status.thisMap.width > core.__SIZE__ || core.status.thisMap.height > core.__SIZE__)) {
+        core.status.preview.prepareDragging = true;
+        core.status.preview.px = px;
+        core.status.preview.py = py;
+        core.timeout.onDownTimeout = setTimeout(function () {
+            core.clearMap('ui');
+            core.status.preview.prepareDragging = false;
+            core.status.preview.enabled = true;
+            core.status.preview.dragging = true;
+            core.drawTip('已进入预览模式，可直接拖动大地图');
+            core.status.stepPostfix = [];
+        }, 500);
+    } 
+}
+
+////// 当在触摸屏上滑动时 //////
+actions.prototype.onmove = function (loc) {
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
+    this.doRegisteredAction('onmove', x, y, px, py);
+}
+
+actions.prototype._sys_onmove_choices = function (x, y, px, py) {
+    if (!core.status.lockControl) return false;
+
+    switch (core.status.event.id) {
+        case 'action':
+            if (core.status.event.data.type == 'choices') {
+                this._onMoveChoices(x, y); 
+                return true;
+            }
+            if (core.status.event.data.type == 'confirm') {
+                this._onMoveConfirmBox(x, y, px, py);
+                return true;
+            }
+            break;
+        case 'selectShop':
+        case 'switchs':
+        case 'switchs-sounds':
+        case 'switchs-display':
+        case 'switchs-action':
+        case 'notes':
+        case 'settings':
+        case 'syncSave':
+        case 'syncSelect':
+        case 'localSaveSelect':
+        case 'storageRemove':
+        case 'replay':
+        case 'gameInfo':
+            this._onMoveChoices(x, y);
+            return true;
+        case 'confirmBox':
+            this._onMoveConfirmBox(x, y, px, py);
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+actions.prototype._sys_onmove = function (x, y, px, py) {
+    if (core.status.lockControl) return false;
+
+    if (core.status.preview.dragging) {
+        core.setViewport(core.bigmap.offsetX - px + core.status.preview.px, core.bigmap.offsetY - py + core.status.preview.py);
+        core.status.preview.px = px;
+        core.status.preview.py = py;
+        return true;
+    }
+    if (core.status.preview.prepareDragging) {
+        if (Math.abs(px - core.status.preview.px) <= 20 && Math.abs(py - core.status.preview.py) <= 20) 
+            return true;
+        else core.status.preview.prepareDragging = false;
+    }
+
+    clearTimeout(core.timeout.onDownTimeout);
+    core.timeout.onDownTimeout = null;
+
+    if ((core.status.stepPostfix || []).length > 0) {
+        var pos = {'x': parseInt((px + core.bigmap.offsetX) / 32), 'y': parseInt((py + core.bigmap.offsetY) / 32)};
+        var pos0 = core.status.stepPostfix[core.status.stepPostfix.length - 1];
+        var directionDistance = [pos.y - pos0.y, pos0.x - pos.x, pos0.y - pos.y, pos.x - pos0.x];
+        var max = 0, index = 4;
+        for (var ii = 0; ii < 4; ii++) {
+            if (directionDistance[ii] > max) {
+                index = ii;
+                max = directionDistance[ii];
+            }
+        }
+        pos = [{'x': 0, 'y': 1}, {'x': -1, 'y': 0}, {'x': 0, 'y': -1}, {'x': 1, 'y': 0}, false][index]
+        if (pos) {
+            pos.x += pos0.x;
+            pos.y += pos0.y;
+            core.status.stepPostfix.push(pos);
+            core.fillRect('ui', pos.x*32+12-core.bigmap.offsetX,pos.y*32+12-core.bigmap.offsetY,8,8, '#bfbfbf');
+        }
+    }
     return true;
 }
+
+////// 当点击（触摸）事件放开时 //////
+actions.prototype.onup = function (loc) {
+    var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
+    var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
+    this.doRegisteredAction('onup', x, y, px, py);
+}
+
+actions.prototype._sys_onup = function (x, y, px, py) {
+    clearTimeout(core.timeout.onDownTimeout);
+    core.timeout.onDownTimeout = null;
+    clearInterval(core.interval.onDownInterval);
+    core.interval.onDownInterval = null;
+
+    if (core.isPlaying()) {
+        core.status.preview.prepareDragging = false;
+        if (core.status.preview.dragging) {
+            core.status.preview.dragging = false;
+            return true;
+        }
+    }
+
+    if ((core.status.stepPostfix || []).length == 0) return false;
+
+    var stepPostfix = [];
+    var direction = {'0': {'1': 'down', '-1': 'up'}, '-1': {'0': 'left'}, '1': {'0': 'right'}};
+    for (var ii = 1; ii < core.status.stepPostfix.length; ii++) {
+        var pos0 = core.status.stepPostfix[ii - 1];
+        var pos = core.status.stepPostfix[ii];
+        stepPostfix.push({
+            'direction': direction[pos.x - pos0.x][pos.y - pos0.y],
+            'x': pos.x,
+            'y': pos.y
+        });
+    }
+    var posx = core.status.stepPostfix[0].x;
+    var posy = core.status.stepPostfix[0].y;
+    core.status.stepPostfix = [];
+    if (!core.status.lockControl) {
+        core.clearMap('ui');
+    }
+
+    // 长按
+    if (!core.status.lockControl && stepPostfix.length == 0 && core.status.downTime != null && new Date() - core.status.downTime >= 1000) {
+        core.actions.longClick(x, y, px, py);
+    }
+    else {
+        //posx,posy是寻路的目标点,stepPostfix是后续的移动
+        core.setAutomaticRoute(posx, posy, stepPostfix);
+    }
+    core.status.downTime = null;
+    return true;
+}
+
+////// 获得点击事件相对左上角的坐标 //////
+actions.prototype._getClickLoc = function (x, y) {
+
+    var statusBar = {'x': 0, 'y': 0};
+    var size = 32;
+    size = size * core.domStyle.scale;
+
+    if (core.domStyle.isVertical) {
+        statusBar.x = 3;
+        statusBar.y = core.dom.statusBar.offsetHeight + 3;
+    }
+    else {
+        statusBar.x = core.dom.statusBar.offsetWidth + 3;
+        statusBar.y = 3;
+    }
+
+    var left = core.dom.gameGroup.offsetLeft + statusBar.x;
+    var top = core.dom.gameGroup.offsetTop + statusBar.y;
+    var loc = {'x': Math.max(x - left), 'y': Math.max(y - top, 0), 'size': size};
+    return loc;
+}
+
 
 ////// 滑动鼠标滚轮时的操作 //////
 actions.prototype.onmousewheel = function (direct) {
@@ -766,8 +795,8 @@ actions.prototype._sys_onmousewheel = function (direct) {
 
     // 浏览地图
     if (core.status.lockControl && core.status.event.id == 'viewMaps') {
-        if (direct == 1) this._clickViewMaps(this.HSIZE, this.HSIZE - 3);
-        if (direct == -1) this._clickViewMaps(this.HSIZE, this.HSIZE + 3);
+        if (direct == 1) this._clickViewMaps(this.HSIZE, this.HSIZE - 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 1.5);
+        if (direct == -1) this._clickViewMaps(this.HSIZE, this.HSIZE + 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 3.5);
         return;
     }
 
@@ -816,9 +845,9 @@ actions.prototype._sys_keyDownCtrl = function () {
 }
 
 ////// 长按 //////
-actions.prototype.longClick = function (x, y, px, py, fromEvent) {
+actions.prototype.longClick = function (x, y, px, py) {
     if (!core.isPlaying()) return false;
-    return this.doRegisteredAction('longClick', x, y, px, py, fromEvent);
+    return this.doRegisteredAction('longClick', x, y, px, py);
 }
 
 actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
@@ -839,7 +868,7 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
         }
     }
     // 长按SL上下页快速翻页
-    if (["save","load","replayLoad","replayRemain"].indexOf(core.status.event.id) >= 0) {
+    if (["save","load","replayLoad","replayRemain","replaySince"].indexOf(core.status.event.id) >= 0) {
         if ([this.HSIZE-2, this.HSIZE-3, this.HSIZE+2, this.HSIZE+3].indexOf(x) >= 0 && y == this.LAST) {
             this._clickSL(x, y);
             return true;
@@ -856,15 +885,6 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
         }
     }
     return false;
-}
-
-actions.prototype._sys_longClick = function (x, y, px, py, fromEvent) {
-    if (core.status.lockControl) return false;
-    // 虚拟键盘
-    core.waitHeroToStop(function () {
-        core.ui._drawKeyBoard();
-    });
-    return true;
 }
 
 actions.prototype.onStatusBarClick = function (e) {
@@ -958,10 +978,12 @@ actions.prototype._keyUpCenterFly = function (keycode) {
 }
 
 ////// 点击确认框时 //////
-actions.prototype._clickConfirmBox = function (x, y) {
-    if ((x == this.HSIZE-2 || x == this.HSIZE-1) && y == this.HSIZE+1 && core.status.event.data.yes)
+actions.prototype._clickConfirmBox = function (x, y, px, py) {
+    if (px >= core.__PIXELS__ / 2 - 70 && px <= core.__PIXELS__ / 2 - 10
+        && py >= core.__PIXELS__ / 2 && py <= core.__PIXELS__ / 2 + 64 && core.status.event.data.yes)
         core.status.event.data.yes();
-    if ((x == this.HSIZE+2 || x == this.HSIZE+1) && y == this.HSIZE+1 && core.status.event.data.no)
+    if (px >= core.__PIXELS__ / 2 + 10 && px <= core.__PIXELS__ / 2 + 70
+        && py >= core.__PIXELS__ / 2 && py <= core.__PIXELS__ / 2 + 64 && core.status.event.data.no)
         core.status.event.data.no();
 }
 
@@ -990,9 +1012,9 @@ actions.prototype._keyUpConfirmBox = function (keycode) {
 }
 
 ////// 鼠标在确认框上移动时 //////
-actions.prototype._onMoveConfirmBox = function (x, y) {
-    if (y == this.HSIZE + 1) {
-        if (x == this.HSIZE - 2 || x == this.HSIZE - 1) {
+actions.prototype._onMoveConfirmBox = function (x, y, px, py) {
+    if (py >= core.__PIXELS__ / 2 && py <= core.__PIXELS__ / 2 + 64) {
+        if (px >= core.__PIXELS__ / 2 - 70 && px <= core.__PIXELS__ / 2 - 10) {
             if (core.status.event.selection != 0) {
                 core.status.event.selection = 0;
                 core.playSound('光标移动');
@@ -1004,7 +1026,7 @@ actions.prototype._onMoveConfirmBox = function (x, y) {
             }
             return;
         }
-        if (x == this.HSIZE + 2 || x == this.HSIZE + 1) {
+        if (px >= core.__PIXELS__ / 2 + 10 && px <= core.__PIXELS__ / 2 + 70) {
             if (core.status.event.selection != 1) {
                 core.status.event.selection = 1;
                 core.playSound('光标移动');
@@ -1084,7 +1106,12 @@ actions.prototype._clickAction = function (x, y, px, py) {
                 var timeout = Math.max(0, core.status.event.timeout - new Date().getTime()) || 0;
                 delete core.status.event.timeout;
                 core.setFlag('timeout', timeout);
-                core.status.route.push("choices:" + (100 * timeout + y - topIndex));
+                // 对全局商店特殊处理
+                var index = y - topIndex;
+                if (index == choices.length - 1 && core.hasFlag('@temp@shop')) {
+                    index = -1;
+                }
+                core.status.route.push("choices:" + (100 * timeout + index));
                 core.insertAction(choice.action);
                 core.doAction();
             }
@@ -1309,7 +1336,7 @@ actions.prototype._keyUpFly = function (keycode) {
 }
 
 ////// 查看地图界面时的点击操作 //////
-actions.prototype._clickViewMaps = function (x, y) {
+actions.prototype._clickViewMaps = function (x, y, px, py) {
     if (core.status.event.data == null) {
         core.ui._drawViewMaps(core.floorIds.indexOf(core.status.floorId));
         return;
@@ -1318,50 +1345,50 @@ actions.prototype._clickViewMaps = function (x, y) {
     var index = core.status.event.data.index;
     var cx = core.status.event.data.x, cy = core.status.event.data.y;
     var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
-    var per = this.HSIZE - 4;
+    var perpx = core.__PIXELS__ / 5, cornerpx = perpx * 3 / 4;
 
-    if (x <= per - 2 && y <= per - 2) {
+    if (px <= cornerpx && py <= cornerpx) {
         core.status.event.data.damage = !core.status.event.data.damage;
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
-    if (x <= per - 2 && y >= this.SIZE + 1 - per) {
+    if (px <= cornerpx && py >= core.__PIXELS__ - cornerpx) {
         if (core.markedFloorIds[floorId]) delete core.markedFloorIds[floorId];
         else core.markedFloorIds[floorId] = true;
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
-    if (x >= this.SIZE + 1 - per && y <= per - 2) {
+    if (px >= core.__PIXELS__ - cornerpx && py <= cornerpx) {
         core.status.event.data.all = !core.status.event.data.all;
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy);
         return;
     }
 
-    if (x >= per && x <= this.LAST - per && y <= per - 1 && (!core.status.event.data.all && mh > this.SIZE)) {
+    if (px >= perpx && px <= core.__PIXELS__ - perpx && py <= perpx && (!core.status.event.data.all && mh > this.SIZE)) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy - 1);
         return;
     }
-    if (x >= per && x <= this.LAST - per && y >= this.SIZE - per && (!core.status.event.data.all && mh > this.SIZE)) {
+    if (px >= perpx && px <= core.__PIXELS__ - perpx && py >= core.__PIXELS__ - perpx && (!core.status.event.data.all && mh > this.SIZE)) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx, cy + 1);
         return;
     }
-    if (x <= per - 1 && y >= per && y <= this.LAST - per) {
+    if (px <= perpx && py >= perpx && py <= core.__PIXELS__ - perpx) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx - 1, cy);
         return;
     }
-    if (x >= this.SIZE - per && y >= per && y <= this.LAST - per) {
+    if (px >= core.__PIXELS__ - perpx && py >= perpx && py <= core.__PIXELS__ - perpx) {
         core.playSound('光标移动');
         core.ui._drawViewMaps(index, cx + 1, cy);
         return;
     }
 
-    if (y <= this.HSIZE - 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+    if (py <= 2 * perpx && (mh == this.SIZE || (px >= perpx && px <= core.__PIXELS__ - perpx))) {
         core.playSound('光标移动');
         index++;
         while (index < core.floorIds.length && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
@@ -1370,7 +1397,7 @@ actions.prototype._clickViewMaps = function (x, y) {
             core.ui._drawViewMaps(index);
         return;
     }
-    if (y >= this.HSIZE + 2 && (mh == this.SIZE || (x >= per && x <= this.LAST - per))) {
+    if (py >= 3 * perpx && (mh == this.SIZE || (px >= perpx && px <= core.__PIXELS__ - perpx))) {
         core.playSound('光标移动');
         index--;
         while (index >= 0 && index != now && core.status.maps[core.floorIds[index]].cannotViewMap)
@@ -1379,7 +1406,7 @@ actions.prototype._clickViewMaps = function (x, y) {
             core.ui._drawViewMaps(index);
         return;
     }
-    if (x >= per && x <= this.LAST - per && y >= this.HSIZE - 1 && y <= this.HSIZE + 1) {
+    if (px >= perpx && px <= core.__PIXELS__ - perpx && py >= perpx * 2 && py <= perpx * 3) {
         core.clearMap('data');
         core.playSound('取消');
         core.ui.closePanel();
@@ -1393,12 +1420,12 @@ actions.prototype._keyDownViewMaps = function (keycode) {
 
     var floorId = core.floorIds[core.status.event.data.index], mh = core.floors[floorId].height;
 
-    if (keycode == 38 || keycode == 33) this._clickViewMaps(this.HSIZE, this.HSIZE - 3);
-    if (keycode == 40 || keycode == 34) this._clickViewMaps(this.HSIZE, this.HSIZE + 3);
-    if (keycode == 87 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, 0);
-    if (keycode == 65) this._clickViewMaps(0, this.HSIZE);
-    if (keycode == 83 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, this.LAST);
-    if (keycode == 68) this._clickViewMaps(this.LAST, this.HSIZE);
+    if (keycode == 38 || keycode == 33) this._clickViewMaps(this.HSIZE, this.HSIZE - 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 1.5);
+    if (keycode == 40 || keycode == 34) this._clickViewMaps(this.HSIZE, this.HSIZE + 3, core.__PIXELS__ / 2, core.__PIXELS__ / 5 * 3.5);
+    if (keycode == 87 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, 0, core.__PIXELS__ / 2, 1);
+    if (keycode == 65) this._clickViewMaps(0, this.HSIZE, 1, core.__PIXELS__ / 2);
+    if (keycode == 83 && mh > this.SIZE) this._clickViewMaps(this.HSIZE, this.LAST, core.__PIXELS__ / 2, core.__PIXELS__ - 1);
+    if (keycode == 68) this._clickViewMaps(this.LAST, this.HSIZE, core.__PIXELS__, core.__PIXELS__ / 2 - 1);
     return;
 }
 
@@ -2754,7 +2781,8 @@ actions.prototype._clickLocalSaveSelect = function (x, y) {
                         "version": core.firstData.version,
                         "data": saves
                     }
-                    core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", JSON.stringify(content));
+                    core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5save", 
+                        LZString.compressToBase64(JSON.stringify(content)));
                 }
             };
             if (selection == 0) core.getAllSaves(callback);
@@ -2804,11 +2832,13 @@ actions.prototype._clickStorageRemove = function (x, y) {
 
 actions.prototype._clickStorageRemove_all = function () {
     core.myconfirm("你确定要清除【全部游戏】的所有本地存档？\n此行为不可逆！！！", function () {
-        var done = function () {
+        core.ui.drawWaiting("正在清空，请稍候...");
+        core.clearLocalForage(function () {
             core.saves.ids = {};
             core.saves.autosave.data = null;
             core.saves.autosave.updated = false;
             core.saves.autosave.now = 0;
+            core.saves.cache = {};
             core.ui.closePanel();
             core.saves.saveIndex = 1;
             core.saves.favorite = [];
@@ -2816,15 +2846,7 @@ actions.prototype._clickStorageRemove_all = function () {
             core.control._updateFavoriteSaves();
             core.removeLocalStorage('saveIndex');
             core.drawText("\t[操作成功]你的所有存档已被清空。");
-        };
-        if (core.platform.useLocalForage) {
-            core.ui.drawWaiting("正在清空，请稍候...");
-            localforage.clear(done);
-        }
-        else {
-            localStorage.clear();
-            done();
-        }
+        });
     });
 }
 
@@ -2843,20 +2865,11 @@ actions.prototype._clickStorageRemove_current = function () {
             core.removeLocalStorage('saveIndex');
             core.drawText("\t[操作成功]当前塔的存档已被清空。");
         }
-        if (core.platform.useLocalForage) {
-            core.ui.drawWaiting("正在清空，请稍候...");
-            Object.keys(core.saves.ids).forEach(function (v) {
-                core.removeLocalForage("save" + v);
-            });
-            core.removeLocalForage("autoSave", done);
-        }
-        else {
-            Object.keys(core.saves.ids).forEach(function (v) {
-                core.removeLocalStorage("save" + v);
-            });
-            core.removeLocalStorage("autoSave");
-            done();
-        }
+        core.ui.drawWaiting("正在清空，请稍候...");
+        Object.keys(core.saves.ids).forEach(function (v) {
+            core.removeLocalForage("save" + v);
+        });
+        core.removeLocalForage("autoSave", done);
     });
 }
 
@@ -2885,9 +2898,10 @@ actions.prototype._clickReplay = function (x, y) {
             case 0: core.playSound('确定'); return this._clickReplay_fromBeginning();
             case 1: core.playSound('确定'); return this._clickReplay_fromLoad();
             case 2: core.playSound('确定'); return this._clickReplay_replayRemain();
-            case 3: core.playSound('确定'); return core.chooseReplayFile();
-            case 4: core.playSound('确定'); return this._clickReplay_download();
-            case 5: core.playSound('取消'); return core.ui.closePanel();
+            case 3: core.playSound('确定'); return this._clickReplay_replaySince();
+            case 4: core.playSound('确定'); return core.chooseReplayFile();
+            case 5: core.playSound('确定'); return this._clickReplay_download();
+            case 6: core.playSound('取消'); return core.ui.closePanel();
         }
     }
 }
@@ -2922,14 +2936,32 @@ actions.prototype._clickReplay_replayRemain = function () {
     });
 }
 
+actions.prototype._clickReplay_replaySince = function () {
+    core.closePanel();
+    core.drawText([
+        "\t[播放存档剩余录像]该功能为【接续播放录像】的简化版本，允许你播放\r[yellow]一个存档中剩余的录像\r，常常用于\r[yellow]录像局部优化\r。\n" +
+        "在录像正常播放中，你随时可以暂停并按S键进行存档；此时\r[yellow]剩余录像\r也会被记在存档中（在读档界面用\r[yellow][R]\r标识。）\n" + 
+        "之后，你可以选择在路线优化后直接播放该存档的\r[yellow]剩余录像\r，而无需再像接续播放一样选择录像起点和终点。\n\n" +
+        "详细使用方法参见露珠录制的视频教程：\n\r[yellow]https://bilibili.com/video/BV1az4y1C78x",
+        "请选择一个存档。\n\n\r[yellow]该存档需为录像播放中存的，且坐标必须和当前勇士坐标完全相同。\r\n将尝试播放此存档的剩余录像。",
+    ], function () {
+        core.status.event.id = 'replaySince';
+        core.lockControl();
+        var saveIndex = core.saves.saveIndex;
+        var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
+        core.ui._drawSLPanel(10 * page + offset);
+    });
+}
+
 actions.prototype._clickReplay_download = function () {
     // if (core.hasFlag('debug')) return core.drawText("\t[系统提示]调试模式下无法下载录像");
-    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", JSON.stringify({
-        'name': core.firstData.name,
-        'hard': core.status.hard,
-        'seed': core.getFlag('__seed__'),
-        'route': core.encodeRoute(core.status.route)
-    }));
+    core.download(core.firstData.name + "_" + core.formatDate2() + ".h5route", 
+        LZString.compressToBase64(JSON.stringify({
+            'name': core.firstData.name,
+            'hard': core.status.hard,
+            'seed': core.getFlag('__seed__'),
+            'route': core.encodeRoute(core.status.route)
+        })));
 
 }
 
@@ -3085,7 +3117,9 @@ actions.prototype._clickKeyBoard = function (x, y) {
 actions.prototype._clickCursor = function (x, y, px, py) {
     if (x == core.status.automaticRoute.cursorX && y == core.status.automaticRoute.cursorY) {
         core.ui.closePanel();
-        core.onclick(x, y, px, py, []);
+        // 视为按下再放起
+        this.doRegisteredAction('ondown', x, y, px, py);
+        this.doRegisteredAction('onup', x, y, px, py);
         return;
     }
     core.status.automaticRoute.cursorX = x;
@@ -3133,7 +3167,9 @@ actions.prototype._keyUpCursor = function (keycode) {
         core.ui.closePanel();
         var x = core.status.automaticRoute.cursorX;
         var y = core.status.automaticRoute.cursorY;
-        core.onclick(x, y, 32 * x + 16, 32 * y + 16, []);
+        // 视为按下再放起
+        this.doRegisteredAction('ondown', x, y, 32 * x + 16, 32 * y + 16);
+        this.doRegisteredAction('onup', x, y, 32 * x + 16, 32 * y + 16);
         return;
     }
 }

@@ -452,6 +452,23 @@ editor_mappanel_wrapper = function (editor) {
         editor.changeFloor(toId);
     }
 
+    editor.uifunctions.selectFloorBtn_click = function () {
+        editor.uievent.selectFloor(null, '选择楼层', function (floorId) {
+            if (!floorId || floorId == editor.currentFloorId) return;
+
+            var saveFloor = document.getElementById('saveFloor');
+            if (saveFloor && saveFloor.classList.contains('highlight')) {
+                printe('请先保存地图！');
+                return;
+            }
+
+            editor_mode.onmode('nextChange');
+            editor_mode.onmode('floor');
+            editor.dom.selectFloor.value = floorId;
+            editor.changeFloor(floorId);
+        })
+    }
+
     editor.uifunctions.editorTheme_onchange = function () {
         var theme = editor.dom.editorTheme.value;
         editor.config.set('theme', theme);

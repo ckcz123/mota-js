@@ -215,7 +215,7 @@ function () {
 ```
 registerAction: fn(action: string, name: string, func: string|fn(params: ?), priority?: number)
 此函数将注册一个用户交互行为。
-action: 要注册的交互类型，如 ondown, onclick, keyDown 等等。
+action: 要注册的交互类型，如 ondown, onup, keyDown 等等。
 name: 你的自定义名称，可被注销使用；同名重复注册将后者覆盖前者。
 func: 执行函数。
 如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
@@ -228,8 +228,8 @@ priority: 优先级；优先级高的将会被执行。此项可不填，默认�
 
 ```js
 // 当flag:abc是true时，点击屏幕左上角可以使用道具破墙镐
-// 注入一个 onclick 事件，名称为 my_pickaxe
-core.registerAction('onclick', 'my_pickaxe', function (x, y, px, py) {
+// 注入一个 ondown 事件，名称为 my_pickaxe
+core.registerAction('ondown', 'my_pickaxe', function (x, y, px, py) {
     // 如果当前正在执行某个事件，则忽略之。
     if (core.status.lockControl) return false;
     // 如果勇士正在行走中，则忽略之。
@@ -251,7 +251,7 @@ core.registerAction('onclick', 'my_pickaxe', function (x, y, px, py) {
 }, 100);
 
 // 当你不再需要上述监听时，可以通过下面这一句取消注入。
-// core.unregisterActon('onclick', 'my_pickaxe');
+// core.unregisterActon('ondown', 'my_pickaxe');
 ```
 
 下面是另一个例子：
@@ -339,12 +339,8 @@ core.registerAction('longClick', 'my_shop', '_my_shop_longClick', 100);
   - 如果是触摸屏，则只有手指按下滑动时才会触发`onmove`（并不存在什么悬浮的说法）。
 - `onup`: 当屏幕被鼠标或手指放开时
   - 对应的函数参数：`function (x, y, px, py)`，为此时放开时的格子坐标和像素坐标。
-- `onclick`: 当屏幕被鼠标或手机点击时
-  - 对应的函数参数：`function (x, y, px, py, stepPostfix)`，为此时点击的格子坐标、像素坐标，和拖动路径
-  - 此函数会在两种情况下被调用：
-    - 在锁定状态下（即角色不可以自由移动），会在`ondown`时直接触发`onclick`，此时`stepPostfix`为空数组。
-    - 在自由状态下（即角色可以自由移动），会在`onup`时触发`onclick`；此时`stepPostfix`为拖动寻路的路径数组。
-  - 推荐自定义的点击监听都使用`ondown`处理。
+- `onclick` 【已废弃】
+  - 从V2.8.2起，此交互已被废弃，注册一个`onclick`会被直接转发至`ondown`。
 - `onmousewheel`: 当鼠标滚轮滚动时
   - 对应的函数参数：`function (direct)`，为此时滚轮方向。向下滚动是-1，向上滚动是1。
   - 目前在楼传、怪物手册、存读档、浏览地图等多个地方绑定了鼠标滚轮事件。

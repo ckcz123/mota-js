@@ -282,6 +282,18 @@ editor_multi = function () {
         }).length > 0;
     }
 
+    var _previewButton = document.getElementById('editor_multi_preview');
+
+    _previewButton.onclick = function () {
+        if (!editor_multi.preview) return;
+        _format();
+        if (editor_multi.hasError()) {
+            alert("当前好像存在严重的语法错误，请处理后再预览。");
+            return;
+        }
+        editor.uievent.previewEditorMulti(editor_multi.preview, codeEditor.getValue());
+    }
+
     editor_multi.import = function (id_, args) {
         var thisTr = document.getElementById(id_);
         if (!thisTr) return false;
@@ -292,6 +304,8 @@ editor_multi = function () {
         editor_multi.id = id_;
         editor_multi.isString = false;
         editor_multi.lintAutocomplete = false;
+        editor_multi.preview = args.preview;
+        _previewButton.style.display = editor_multi.preview ? 'inline' : 'none';
         if (args.lint === true) editor_multi.lintAutocomplete = true;
         if ((!input.value || input.value == 'null') && args.template)
             input.value = '"' + args.template + '"';
@@ -318,7 +332,7 @@ editor_multi = function () {
             _setValue(tstr || '');
         }
         editor_multi.show();
-        codeEditor.scrollTo(0, lastOffset[id_] || 0);
+        codeEditor.scrollTo(0, lastOffset[editor_multi.id] || 0);
         return true;
     }
 
@@ -331,7 +345,7 @@ editor_multi = function () {
         multiLineArgs = [null, null, null];
     }
 
-    editor_multi.confirm = function () {
+    editor_multi.confirm = function (keep) {
         if (editor_multi.hasError()) {
             alert("当前好像存在严重的语法错误，请处理后再保存。\n严重的语法错误可能会导致整个编辑器的崩溃。");
             return;
@@ -345,21 +359,18 @@ editor_multi = function () {
         if (editor_multi.id === 'callFromBlockly') {
             // ----- 自动格式化
             _format();
-            editor_multi.id = '';
-            editor_multi.multiLineDone();
+            editor_multi.multiLineDone(keep);
             return;
         }
 
         if (editor_multi.id === 'importFile') {
             _format();
-            editor_multi.id = '';
-            editor_multi.writeFileDone();
+            editor_multi.writeFileDone(keep);
             return;
         }
 
         var setvalue = function (value) {
             var thisTr = document.getElementById(editor_multi.id);
-            editor_multi.id = '';
             var input = thisTr.children[2].children[0].children[0];
             if (editor_multi.isString) {
                 input.value = JSON.stringify(value);
@@ -378,7 +389,12 @@ editor_multi = function () {
                 }
                 input.value = tstr;
             }
-            editor_multi.hide();
+            if (!keep) {
+                editor_multi.id = '';
+                editor_multi.hide();
+            } else {
+                alert('写入成功！');
+            }
             input.onchange();
         }
         lastOffset[editor_multi.id] = (codeEditor.getScrollInfo() || {}).top;
@@ -410,11 +426,16 @@ editor_multi = function () {
         editor_multi.lintAutocomplete = Boolean(args.lint);
         editor_multi.show();
     }
-    editor_multi.multiLineDone = function () {
-        editor_multi.hide();
+    editor_multi.multiLineDone = function (keep) {
         if (!multiLineArgs[0] || !multiLineArgs[1] || !multiLineArgs[2]) return;
         var newvalue = codeEditor.getValue() || '';
         multiLineArgs[2](newvalue, multiLineArgs[0], multiLineArgs[1])
+        if (!keep) {
+            editor_multi.id = '';
+            editor_multi.hide();
+        } else {
+            alert('写入成功！');
+        }
     }
 
     var _fileValues = ['']
@@ -435,11 +456,16 @@ editor_multi = function () {
         })
     }
 
-    editor_multi.writeFileDone = function () {
+    editor_multi.writeFileDone = function (keep) {
         fs.writeFile(_fileValues[0], editor.util.encode64(codeEditor.getValue() || ''), 'base64', function (err, data) {
             if (err) printe('文件写入失败,请手动粘贴至' + _fileValues[0] + '\n' + err);
             else {
-                editor_multi.hide();
+                if (!keep) {
+                    editor_multi.id = '';
+                    editor_multi.hide();
+                } else {
+                    alert('写入成功！');
+                }
                 printf(_fileValues[0] + " 写入成功，F5刷新后生效");
             }
         });

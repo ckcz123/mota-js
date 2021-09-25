@@ -219,7 +219,15 @@ editor_file = function (editor, callback) {
             color: currData.color,
             weather: currData.weather,
         }:{});
-        
+        // 继承配置表格新增的基本楼层属性
+        if (saveStatus) {
+            for (var x in currData) {
+                if (editor.currentFloorData[x] == null && (typeof currData[x] == 'number' || typeof currData[x] == 'string')) {
+                    editor.currentFloorData[x] = currData[x];
+                }
+            }
+        }
+
         Object.keys(editor.currentFloorData).forEach(function (t) {
             if (editor.currentFloorData[t] == null)
                 delete editor.currentFloorData[t];
@@ -577,7 +585,7 @@ editor_file = function (editor, callback) {
                 (function () {
                     var locObj = Object.assign({}, editor.core.items.items[id]);
                     Object.keys(editor.file.comment._data.items._data).forEach(function (v) {
-                        if (!isset(editor.core.items.items[id][v]))
+                        if (!isset((editor.core.items.items[id]||{})[v]))
                             locObj[v] = null;
                     });
                     return locObj;
@@ -609,7 +617,7 @@ editor_file = function (editor, callback) {
                 (function () {
                     var locObj = Object.assign({}, editor.core.enemys.enemys[id]);
                     Object.keys(editor.file.comment._data.enemys._data).forEach(function (v) {
-                        if (!isset(editor.core.enemys.enemys[id][v]))
+                        if (!isset((editor.core.enemys.enemys[id]||{})[v]))
                         /* locObj[v]=editor.core.enemys.enemys[id][v];
                       else */
                             locObj[v] = null;

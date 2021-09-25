@@ -9,7 +9,9 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"floorPartitions": [],
 		"images": [
+			"bear.png",
 			"bg.jpg",
+			"dragon.png",
 			"hero.png",
 			"winskin.png"
 		],
@@ -150,12 +152,20 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			],
 			"floorChangingStyle": "background-color: black; color: white",
 			"font": "Verdana"
-		}
+		},
+		"splitImages": [
+			{
+				"name": "dragon.png",
+				"width": 384,
+				"height": 96,
+				"prefix": "dragon_"
+			}
+		]
 	},
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.8.1",
+		"version": "Ver 2.8.2",
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",

@@ -51,11 +51,11 @@ maps.prototype._setHDCanvasSize = function (ctx, width, height) {
 ////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
-    if (!map) map = floor.map;
+    if (!map) map = core.cloneArray(floor.map);
     if (map instanceof Array) {
         map = {"map": map};
     }
-    if (!map.map) map.map = core.clone(floor.map);
+    if (!map.map) map.map = core.cloneArray(floor.map);
     var content = {};
     var notCopy = this._loadFloor_doNotCopy();
     for (var name in floor) {

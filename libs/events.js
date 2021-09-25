@@ -3002,7 +3002,7 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
     var enemy = core.material.enemys[block.event.id];
     if (enemy == null) return;
     if (typeof value === 'string' && name == 'name') value = value.replaceAll(/\r/g, '\\r');
-    value = this._updateValueByOperator(core.calValue(value, prefix), enemy[name], operator);
+    value = this._updateValueByOperator(core.calValue(value, prefix), core.getEnemyValue(enemy, name, x, y, floorId), operator);
     flags.enemyOnPoint = flags.enemyOnPoint || {};
     flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
     flags.enemyOnPoint[floorId][x+","+y] = flags.enemyOnPoint[floorId][x+","+y] || {};

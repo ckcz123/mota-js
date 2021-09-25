@@ -3636,6 +3636,8 @@ expression
     |   isShopVisited_e
     |   hasEquip_e
     |   canBattle_e
+    |   damage_e
+    |   damage_1_e
     |   rand_e
     |   evalString_e
     
@@ -3871,6 +3873,33 @@ canBattle_e
 default : ['greenSlime']
 allEnemys : ['IdString_0']
 var code = 'core.canBattle(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+damage_e
+    :   '战斗伤害' '怪物ID' IdString
+
+/* damage_e
+default : ['greenSlime']
+allEnemys : ['IdString_0']
+var code = 'core.getDamage(\'' + IdString_0 + '\')';
+return [code, Blockly.JavaScript.ORDER_ATOMIC];
+*/;
+
+
+damage_1_e
+    :   '战斗伤害' '点坐标' 'x' PosString 'y' PosString
+
+/* damage_1_e
+default : [0, 0]
+if (PosString_0.startsWith('"')) {
+    PosString_0 = PosString_0.substring(1, PosString_0.length - 1);
+}
+if (PosString_1.startsWith('"')) {
+    PosString_1 = PosString_1.substring(1, PosString_1.length - 1);
+}
+var code = 'core.getDamage(null, ' + PosString_0 + ',' + PosString_1 + ')';
 return [code, Blockly.JavaScript.ORDER_ATOMIC];
 */;
 

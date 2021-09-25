@@ -290,6 +290,8 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['hasVisitedFloor_e'].xmlText(),
       MotaActionBlocks['isShopVisited_e'].xmlText(),
       MotaActionBlocks['canBattle_e'].xmlText(),
+      MotaActionBlocks['damage_e'].xmlText(),
+      MotaActionBlocks['damage_1_e'].xmlText(),
       MotaActionBlocks['rand_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],

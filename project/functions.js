@@ -245,6 +245,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			});
 			core.push(actions, [
 				{ "type": "waitAsync" }, // 等待所有异步事件执行完毕
+				{ "type": "setBlock", "number": enemyId, "loc": [[x, y]]}, // 重新设置怪物自身
 				{ "type": "battle", "loc": [x, y] } // 重要！重新触发本次战斗
 			]);
 			core.insertAction(actions);

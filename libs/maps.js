@@ -2592,6 +2592,8 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
     var animateTotal = blockInfo.animate, animateTime = 0;
+    // 强制npc48行走时使用四帧动画
+    if (!blockInfo.doorInfo && !blockInfo.bigImage && blockInfo.cls == 'npc48') animateTotal = 4;
     var _run = function () {
         var cb = function () {
             core.maps._deleteDetachedBlock(canvases);

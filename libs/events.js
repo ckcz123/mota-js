@@ -160,7 +160,10 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
             core.events._gameOver_doUpload("", ending, norank);
         }
         else {
-            core.myprompt("请输入你的ID：", core.getCookie('id') || "", function (username)  {
+            var id = core.getCookie('id') || "";
+            var hint = "请输入你的ID：\n（登录状态下输入数字用户编号可成为蓝名成绩并计入用户通关数）";
+            if (id) hint = "请输入你的ID：\n（输入数字用户编号"+id+ "可成为蓝名成绩并计入用户通关数）";
+            core.myprompt(hint, id, function (username)  {
                 core.events._gameOver_doUpload(username, ending, norank);
             });
         }
@@ -255,13 +258,13 @@ events.prototype._gameOver_askRate = function (ending) {
         return;
     }
 
-    core.ui.drawConfirmBox("恭喜通关！你想进行评分吗？", function () {
+    core.ui.drawConfirmBox("恭喜通关！你想查看榜单、评论，以及评分和标色投票吗？", function () {
         if (core.platform.isPC) {
-            window.open("/score.php?name=" + core.firstData.name, "_blank");
+            window.open("/tower/?name=" + core.firstData.name, "_blank");
             core.restart();
         }
         else {
-            window.location.href = "/score.php?name=" + core.firstData.name;
+            window.location.href = "/tower/?name=" + core.firstData.name;
         }
     }, function () {
         core.restart();
@@ -1133,6 +1136,7 @@ events.prototype.recoverEvents = function (data) {
 events.prototype.checkAutoEvents = function () {
     // 只有在无操作或事件流中才能执行自动事件！
     if (!core.isPlaying() || (core.status.lockControl && core.status.event.id != 'action')) return;
+    if (core.hasFlag('__doNotCheckAutoEvents__')) return;
     var todo = [], delay = [];
     core.status.autoEvents.forEach(function (autoEvent) {
         var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;

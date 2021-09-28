@@ -401,8 +401,9 @@ enemys.prototype.getDamage = function (enemy, x, y, floorId) {
 }
 
 enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
-    if (enemy == null) return null;
+    if (enemy == null) enemy = core.getBlockId(x, y, floorId);
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
+    if (enemy == null) return null;
 
     var info = this.getDamageInfo(enemy, hero, x, y, floorId);
     if (info == null) return null;

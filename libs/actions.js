@@ -1537,6 +1537,10 @@ actions.prototype._clickToolbox = function (x, y) {
     if (x >= this.LAST - 2 && y == this.LAST) {
         core.playSound('取消');
         core.ui.closePanel();
+        var last = core.status.route[core.status.route.length - 1];
+        if (last.startsWith('equip:') || last.startsWith('unEquip:')) {
+            core.status.route.push('no');
+        }
         core.checkAutoEvents();
         return;
     }
@@ -1713,6 +1717,10 @@ actions.prototype._keyUpToolbox = function (keycode) {
     if (keycode == 84 || keycode == 27 || keycode == 88) {
         core.playSound('取消');
         core.ui.closePanel();
+        var last = core.status.route[core.status.route.length - 1];
+        if (last.startsWith('equip:') || last.startsWith('unEquip:')) {
+            core.status.route.push('no');
+        }
         core.checkAutoEvents();
         return;
     }
@@ -1740,6 +1748,10 @@ actions.prototype._clickEquipbox = function (x, y) {
     if (x >= this.LAST - 2 && y == this.LAST) {
         core.playSound('取消');
         core.ui.closePanel();
+        var last = core.status.route[core.status.route.length - 1];
+        if (last.startsWith('equip:') || last.startsWith('unEquip:')) {
+            core.status.route.push('no');
+        }
         core.checkAutoEvents();
         return;
     }
@@ -1898,6 +1910,10 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
     if (keycode == 81 || keycode == 27 || keycode == 88) {
         core.playSound('取消');
         core.ui.closePanel();
+        var last = core.status.route[core.status.route.length - 1];
+        if (last.startsWith('equip:') || last.startsWith('unEquip:')) {
+            core.status.route.push('no');
+        }
         core.checkAutoEvents();
         return;
     }

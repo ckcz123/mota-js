@@ -160,7 +160,10 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
             core.events._gameOver_doUpload("", ending, norank);
         }
         else {
-            core.myprompt("请输入你的ID：", core.getCookie('id') || "", function (username)  {
+            var id = core.getCookie('id') || "";
+            var hint = "请输入你的ID：\n（登录状态下输入数字用户编号可成为蓝名成绩并计入用户通关数）";
+            if (id) hint = "请输入你的ID：\n（输入数字用户编号"+id+ "可成为蓝名成绩并计入用户通关数）";
+            core.myprompt(hint, id, function (username)  {
                 core.events._gameOver_doUpload(username, ending, norank);
             });
         }
@@ -255,13 +258,13 @@ events.prototype._gameOver_askRate = function (ending) {
         return;
     }
 
-    core.ui.drawConfirmBox("恭喜通关！你想进行评分吗？", function () {
+    core.ui.drawConfirmBox("恭喜通关！你想查看榜单、评论，以及评分和标色投票吗？", function () {
         if (core.platform.isPC) {
-            window.open("/score.php?name=" + core.firstData.name, "_blank");
+            window.open("/tower/?name=" + core.firstData.name, "_blank");
             core.restart();
         }
         else {
-            window.location.href = "/score.php?name=" + core.firstData.name;
+            window.location.href = "/tower/?name=" + core.firstData.name;
         }
     }, function () {
         core.restart();
@@ -1004,9 +1007,9 @@ events.prototype.doAction = function () {
     core.status.event.interval = null;
     delete core.status.event.aniamteUI;
     if (core.status.gameOver || core.status.replay.failed) return;
-    core.clearUI();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
+    core.clearUI();
     var floorId = core.status.event.data.floorId || core.status.floorId;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
@@ -1027,6 +1030,7 @@ events.prototype.doAction = function () {
 }
 
 events.prototype._doAction_finishEvents = function () {
+    if (core.status.event.id != 'action') return true;
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
         // 检测并执行延迟自动事件
@@ -1132,6 +1136,7 @@ events.prototype.recoverEvents = function (data) {
 events.prototype.checkAutoEvents = function () {
     // 只有在无操作或事件流中才能执行自动事件！
     if (!core.isPlaying() || (core.status.lockControl && core.status.event.id != 'action')) return;
+    if (core.hasFlag('__doNotCheckAutoEvents__')) return;
     var todo = [], delay = [];
     core.status.autoEvents.forEach(function (autoEvent) {
         var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;
@@ -1546,7 +1551,7 @@ events.prototype._action_animate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_stopAnimate = function (data, x, y, prefix) {
-    core.stopAnimate(data.doCallback);
+    core.stopAnimate(null, data.doCallback);
     core.doAction();
 }
 
@@ -3055,7 +3060,7 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
     var enemy = core.material.enemys[block.event.id];
     if (enemy == null) return;
     if (typeof value === 'string' && name == 'name') value = value.replaceAll(/\r/g, '\\r');
-    value = this._updateValueByOperator(core.calValue(value, prefix), enemy[name], operator);
+    value = this._updateValueByOperator(core.calValue(value, prefix), core.getEnemyValue(enemy, name, x, y, floorId), operator);
     flags.enemyOnPoint = flags.enemyOnPoint || {};
     flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
     flags.enemyOnPoint[floorId][x+","+y] = flags.enemyOnPoint[floorId][x+","+y] || {};

@@ -51,11 +51,11 @@ maps.prototype._setHDCanvasSize = function (ctx, width, height) {
 ////// 加载某个楼层（从剧本或存档中） //////
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
-    if (!map) map = floor.map;
+    if (!map) map = core.cloneArray(floor.map);
     if (map instanceof Array) {
         map = {"map": map};
     }
-    if (!map.map) map.map = core.clone(floor.map);
+    if (!map.map) map.map = core.cloneArray(floor.map);
     var content = {};
     var notCopy = this._loadFloor_doNotCopy();
     for (var name in floor) {
@@ -1780,8 +1780,9 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
-        core.drawImage(options.ctx, core.material.images.images[options.heroIcon], icon.stop * 32, icon.loc * height, 32, height,
-            32 * options.heroLoc.x, 32 * options.heroLoc.y + 32 - height, 32, height);
+        var width = core.material.images.images[options.heroIcon].width || 32;
+        core.drawImage(options.ctx, core.material.images.images[options.heroIcon], icon.stop * width, icon.loc * height, width, height,
+            32 * options.heroLoc.x + 32 - width, 32 * options.heroLoc.y + 32 - height, width, height);
     }
     // 缩略图：前景
     this.drawFg(floorId, options);
@@ -2591,6 +2592,8 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
 
 maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, callback) {
     var animateTotal = blockInfo.animate, animateTime = 0;
+    // 强制npc48行走时使用四帧动画
+    if (!blockInfo.doorInfo && !blockInfo.bigImage && blockInfo.cls == 'npc48') animateTotal = 4;
     var _run = function () {
         var cb = function () {
             core.maps._deleteDetachedBlock(canvases);

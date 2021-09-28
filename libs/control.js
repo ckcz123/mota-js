@@ -48,6 +48,7 @@ control.prototype._init = function () {
     this.registerReplayAction("key", this._replayAction_key);
     this.registerReplayAction("click", this._replayAction_click);
     this.registerReplayAction("ignoreInput", this._replayAction_ignoreInput);
+    this.registerReplayAction("no", this._replayAction_no);
     // --- 注册系统的resize
     this.registerResize("gameGroup", this._resize_gameGroup);
     this.registerResize("canvas", this._resize_canvas);
@@ -1751,10 +1752,24 @@ control.prototype._replayAction_equip = function (action) {
     var equipId = action.substring(6);
     var ownEquipment = core.getToolboxItems('equips');
     var index = ownEquipment.indexOf(equipId), per = core.__SIZE__-1;
-    if (index<0) return false;
+    if (index<0) {
+        core.removeFlag('__doNotCheckAutoEvents__');
+        return false;
+    }
+
+    var cb = function () {
+        var next = core.status.replay.toReplay[0]||"";
+        if (!next.startsWith('equip:') && !next.startsWith('unEquip:')) {
+            core.removeFlag('__doNotCheckAutoEvents__');
+            core.checkAutoEvents();
+        }
+        core.replay();
+    }
+    core.setFlag('__doNotCheckAutoEvents__', true);
+
     core.status.route.push(action);
     if (core.material.items[equipId].hideInReplay || core.status.replay.speed == 24) {
-        core.loadEquip(equipId, core.replay);
+        core.loadEquip(equipId, cb);
         return true;
     }
     core.status.event.data = {"page":Math.floor(index/per)+1, "selectId":null};
@@ -1762,7 +1777,7 @@ control.prototype._replayAction_equip = function (action) {
     core.ui._drawEquipbox(index);
     setTimeout(function () {
         core.ui.closePanel();
-        core.loadEquip(equipId, core.replay);
+        core.loadEquip(equipId, cb);
     }, core.control.__replay_getTimeout());
     return true;
 }
@@ -1770,16 +1785,30 @@ control.prototype._replayAction_equip = function (action) {
 control.prototype._replayAction_unEquip = function (action) {
     if (action.indexOf("unEquip:")!=0) return false;
     var equipType = parseInt(action.substring(8));
-    if (!core.isset(equipType)) return false;
+    if (!core.isset(equipType)) {
+        core.removeFlag('__doNotCheckAutoEvents__');
+        return false;
+    }
+
+    var cb = function () {
+        var next = core.status.replay.toReplay[0]||"";
+        if (!next.startsWith('equip:') && !next.startsWith('unEquip:')) {
+            core.removeFlag('__doNotCheckAutoEvents__');
+            core.checkAutoEvents();
+        }
+        core.replay();
+    }
+    core.setFlag('__doNotCheckAutoEvents__', true);
+
     core.ui._drawEquipbox(equipType);
     core.status.route.push(action);
     if (core.status.replay.speed == 24) {
-        core.unloadEquip(equipType, core.replay);
+        core.unloadEquip(equipType, cb);
         return true;
     }
     setTimeout(function () {
         core.ui.closePanel();
-        core.unloadEquip(equipType, core.replay);
+        core.unloadEquip(equipType, cb);
     }, core.control.__replay_getTimeout());
     return true;
 }
@@ -1899,6 +1928,13 @@ control.prototype._replayAction_ignoreInput = function (action) {
         return true;
     }
     return false;
+}
+
+control.prototype._replayAction_no = function (action) {
+    if (action != 'no') return false;
+    core.status.route.push(action);
+    core.replay();
+    return true;
 }
 
 // ------ 存读档相关 ------ //

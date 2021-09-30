@@ -1,6 +1,7 @@
 /* 
 main.ts 游戏开始时的资源加载
 */
+import type { Core } from './libs/core';
 
 class Main {
     version: string;
@@ -10,6 +11,7 @@ class Main {
             map: number[]
         }
     };
+    core: Core;
     constructor() {
         this.version = '3.0';
     }
@@ -44,6 +46,9 @@ class Main {
             return this.loadLibs(v, () => { });
         });
         await Promise.all(loadLibs);
+
+        // 进行全局初始化
+        this.globalInit();
     }
 
     /** 加载某一个project/.js文件 */
@@ -58,10 +63,11 @@ class Main {
     }
 
     /** 动态载入libs模块 */
-    loadLibs(module: string, callback: () => void): void {
-        import('./libs/' + module).then(
+    async loadLibs(module: string, callback: () => void): Promise<void> {
+        await import('./libs/' + module).then(
             (lib) => {
                 lib[module].init();
+                this[module] = lib[module];
                 callback();
             }
         );
@@ -69,7 +75,8 @@ class Main {
 
     /** 执行全局初始化 */
     globalInit(): void {
-
+        let core = this.core;
+        core.initCore();
     }
 }
 

@@ -12,7 +12,12 @@ class Maps {
     init(): void {
 
     }
+
+    /** 初始化所有楼层 */
+    initFloors(): void {
+
+    }
 }
 
-let maps = new Maps()
+let maps = new Maps();
 export { maps, Maps }

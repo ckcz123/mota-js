@@ -1780,7 +1780,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
-        var width = core.material.images.images[options.heroIcon].width || 32;
+        var width = (core.material.images.images[options.heroIcon].width || 128) / 4;
         core.drawImage(options.ctx, core.material.images.images[options.heroIcon], icon.stop * width, icon.loc * height, width, height,
             32 * options.heroLoc.x + 32 - width, 32 * options.heroLoc.y + 32 - height, width, height);
     }

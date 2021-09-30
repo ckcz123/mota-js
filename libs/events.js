@@ -258,7 +258,7 @@ events.prototype._gameOver_askRate = function (ending) {
         return;
     }
 
-    core.ui.drawConfirmBox("恭喜通关！你想查看榜单、评论，以及评分和标色投票吗？", function () {
+    core.ui.drawConfirmBox("恭喜通关！你想查看榜单、评论，\n以及评分和标色投票吗？", function () {
         if (core.platform.isPC) {
             window.open("/tower/?name=" + core.firstData.name, "_blank");
             core.restart();

@@ -75,6 +75,6 @@ class Main {
 
 const main = new Main();
 main.load();
-main.floors = {}
+main.floors = {};
 
 export { main, Main }

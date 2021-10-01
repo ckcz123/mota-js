@@ -10,18 +10,42 @@ class Loader {
     }
 
     /** 执行loader的load */
-    load(): void {
-        this.loadImage();
+    async load(): Promise<void> {
+        await this.loadImages();
+        this.loadBgm();
     }
 
     /** 加载图片 */
-    protected loadImage(): void {
-        let game = core.domPixi.gameDraw;
-        game.loader
-            .add(core.dataContent.images)
-            .load(() => {
-                console.log('图片资源加载完毕！');
-            });
+    protected async loadImages(): Promise<void> {
+        let load = core.dataContent.images.map((one: string) => {
+            let src = './project/images/' + one;
+            let image = new Image();
+            image.onload = () => {
+                core.material.images[one] = image;
+            }
+            image.src = src;
+            return;
+        });
+        await Promise.all(load);
+        console.log('图片加载完毕');
+    }
+
+    /** 加载背景音乐 异步加载 */
+    protected async loadBgm(): Promise<void> {
+        let all = core.dataContent.bgms;
+        let load = all.map(async (one: string) => {
+            return await this.loadBgm_loadOne(one);
+        })
+        await Promise.all(load);
+        console.log('bgm加载完毕');
+    }
+
+    protected async loadBgm_loadOne(name: string): Promise<void> {
+        let src = './project/bgms/' + name;
+        let bgm = new Audio(src);
+        bgm.preload = 'none';
+        bgm.loop = true;
+        core.material.bgms[name] = bgm;
     }
 }
 

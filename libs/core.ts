@@ -14,7 +14,10 @@ class Core {
     ui: Ui;
     dom = main.dom;
     domPixi = main.domPixi;
-    images: { [key: string]: HTMLImageElement };
+    material: {
+        images: { [key: string]: HTMLImageElement };
+        bgms: { [key: string]: HTMLAudioElement }
+    }
     dataContent: { [key: string]: any };
     __WIDTH__ = this.dom.body.offsetWidth;
     __HEIGHT__ = this.dom.body.offsetHeight;
@@ -35,6 +38,10 @@ class Core {
         // 将每个类的实例转发到core上面
         await this.forwardInstance();
         // 执行资源加载
+        this.material = {
+            images: {},
+            bgms: {}
+        };
         this.loader.load();
         // resize界面
         this.resize.resize();

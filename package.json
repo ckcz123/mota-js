@@ -9,5 +9,8 @@
   "devDependencies": {
     "typescript": "^4.3.2",
     "vite": "^2.5.4"
+  },
+  "dependencies": {
+    "pixi.js": "^6.1.3"
   }
 }

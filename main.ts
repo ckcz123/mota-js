@@ -2,6 +2,7 @@
 main.ts 游戏开始时的资源加载
 */
 import type { Core } from './libs/core';
+import * as PIXI from 'pixi.js';
 
 declare global {
     interface Window {
@@ -22,7 +23,8 @@ class Main {
     constructor() {
         this.version = '3.0';
         this.dom = {
-            'body': document.body
+            'body': document.body,
+            'gameGroup': document.getElementById('gameGroup')
         }
     }
     // ---- 加载游戏核心代码及楼层 ---- //
@@ -45,7 +47,7 @@ class Main {
             async (data) => {
                 this.floorIds = data.Data.floorIds;
                 for (let name of data.Data.floorIds) {
-                    await import('./project/floors/' + name).then(floor => {
+                    await import(/* @vite-ignore */'./project/floors/' + name).then(floor => {
                         main.floors[name] = floor.floor;
                     })
                 }
@@ -69,6 +71,12 @@ class Main {
     /** 执行全局初始化 */
     globalInit(): void {
         let core = this.core;
+        // 创建游戏相关pixi精灵
+        let gameDraw = new PIXI.Application({
+            width: 0,
+            height: 0,
+        });
+        this.dom.gameGroup.appendChild(gameDraw.view);
         core.initCore();
     }
 }

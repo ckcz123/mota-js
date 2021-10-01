@@ -11,7 +11,11 @@ class Core {
     dom = main.dom;
     __WIDTH__ = this.dom.body.offsetWidth;
     __HEIGHT__ = this.dom.body.offsetHeight;
+    readonly __UNIT_WIDTH__ = 48;
+    readonly __UNIT_HEIGHT__ = 48;
     readonly floors = main.floors;
+    // 界面的长宽比，默认为1.33
+    readonly aspect: number = 1.33;
 
     constructor() {
 

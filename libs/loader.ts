@@ -14,6 +14,8 @@ class Loader {
         this.loadSound();
         this.loadBgm();
         await this.loadImages();
+        // 加载完毕，进入游戏
+        core.control.initGame();
     }
 
     /** 加载图片 */
@@ -29,7 +31,7 @@ class Loader {
         });
         await Promise.all(load);
         console.log('图片加载完毕');
-
+        core.control.initGame();
     }
 
     /** 加载背景音乐 异步加载 */

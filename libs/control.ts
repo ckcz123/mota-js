@@ -10,9 +10,9 @@ class Control {
 
     }
 
-    /** 开始游戏 */
-    startGame(): void {
-
+    /** 初始化游戏界面 */
+    initGame(): void {
+        let gameDraw = core.domPixi.gameDraw;
     }
 }
 

@@ -3,12 +3,19 @@ core.ts 负责游戏的初始化以及核心内容
 */
 import type { Maps } from './maps';
 import type { Resize } from './resize';
+import type { Loader } from './loader';
+import type { Ui } from './Ui';
 import { main } from '../main';
 
 class Core {
     maps: Maps;
     resize: Resize;
+    loader: Loader;
+    ui: Ui;
     dom = main.dom;
+    domPixi = main.domPixi;
+    images: { [key: string]: HTMLImageElement };
+    dataContent: { [key: string]: any };
     __WIDTH__ = this.dom.body.offsetWidth;
     __HEIGHT__ = this.dom.body.offsetHeight;
     readonly __UNIT_WIDTH__ = 48;
@@ -22,11 +29,13 @@ class Core {
     }
 
     // ---- 初始化相关 ---- //
-    private list: string[] = ['maps', 'resize'];
+    private list: string[] = ['maps', 'resize', 'loader', 'ui'];
     /** 执行core的全局初始化 */
     async initCore(): Promise<void> {
         // 将每个类的实例转发到core上面
         await this.forwardInstance();
+        // 执行资源加载
+        this.loader.load();
         // resize界面
         this.resize.resize();
     }

@@ -2,7 +2,7 @@
 main.ts 游戏开始时的资源加载
 */
 import type { Core } from './libs/core';
-import * as PIXI from 'pixi.js';
+import * as PIXI from 'pixi.js-legacy';
 
 declare global {
     interface Window {
@@ -19,16 +19,18 @@ class Main {
         }
     };
     core: Core;
-    dom: { [key: string]: HTMLElement }
+    dom: { [key: string]: HTMLElement };
+    domPixi: { [key: string]: PIXI.Application }
     constructor() {
         this.version = '3.0';
         this.dom = {
             'body': document.body,
             'gameGroup': document.getElementById('gameGroup')
         }
+        this.domPixi = {};
     }
     // ---- 加载游戏核心代码及楼层 ---- //
-    private loadList: string[] = ['resize', 'maps'];
+    private loadList: string[] = ['resize', 'maps', 'loader', 'ui'];
 
     /** 开始加载游戏 */
     async load(): Promise<void> {
@@ -42,15 +44,16 @@ class Main {
         await Promise.all(loadLibs);
 
         // 加载project内的初始化文件
-        // 加载楼层文件
         await import('./project/data.js').then(
             async (data) => {
-                this.floorIds = data.Data.floorIds;
-                for (let name of data.Data.floorIds) {
+                // 加载楼层文件
+                this.floorIds = data.data.floorIds;
+                for (let name of data.data.floorIds) {
                     await import(/* @vite-ignore */'./project/floors/' + name).then(floor => {
                         main.floors[name] = floor.floor;
                     })
                 }
+                window.core.dataContent = data.data;
             }
         );
 
@@ -76,13 +79,15 @@ class Main {
             width: 0,
             height: 0,
         });
+        gameDraw.renderer.view.style.position = "absolute";
+        gameDraw.renderer.view.style.display = "block";
+        gameDraw.view.id = 'gameDraw';
         this.dom.gameGroup.appendChild(gameDraw.view);
+        this.dom.gameDraw = gameDraw.view;
+        this.domPixi.gameDraw = gameDraw;
         core.initCore();
     }
 }
 
 let main = new Main();
-main.load();
-main.floors = {};
-
 export { main, Main }

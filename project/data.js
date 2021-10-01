@@ -1,11 +1,9 @@
-class Data {
-    constructor() {
-
-    }
-    static floorIds = [
-        'sample0',
-    ];
+let data = {
+    "floorIds": [
+        "sample0"
+    ],
+    "images": [
+        "bg.jpg"
+    ]
 }
-
-let data = new Data();
-export { data, Data }
+export { data }

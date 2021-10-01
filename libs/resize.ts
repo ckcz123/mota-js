@@ -26,14 +26,12 @@ class Resize {
             let width = ~~((h - 10) * core.aspect);
             game.style.height = (h - 10) + 'px';
             game.style.width = width + 'px';
-            game.style.position = 'absolute';
             game.style.left = (w / 2 - width / 2) + 'px';
             game.style.top = '5px';
         } else {
             let height = ~~((w - 10) / core.aspect);
             game.style.width = (w - 10) + 'px';
             game.style.height = height + 'px';
-            game.style.position = 'absolute';
             game.style.left = '5px';
             game.style.top = (h / 2 - height / 2) + 'px';
         }

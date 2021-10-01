@@ -12,7 +12,7 @@ class Control {
 
     /** 初始化游戏界面 */
     initGame(): void {
-        let gameDraw = core.domPixi.gameDraw;
+        let gameDraw = core.pixi.gameDraw;
     }
 }
 

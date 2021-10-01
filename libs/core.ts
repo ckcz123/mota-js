@@ -8,6 +8,12 @@ import type { Ui } from './Ui';
 import type { Control } from './control';
 import { main } from '../main';
 
+declare global {
+    interface Window {
+        core: Core
+    }
+}
+
 class Core {
     maps: Maps;
     resize: Resize;
@@ -15,7 +21,7 @@ class Core {
     ui: Ui;
     control: Control;
     dom = main.dom;
-    domPixi = main.domPixi;
+    pixi = main.pixi;
     material: {
         images: { [key: string]: HTMLImageElement };
         bgms: { [key: string]: HTMLAudioElement };
@@ -64,14 +70,19 @@ class Core {
     /** 转发函数 */
     protected forwardFuncs(): void {
         for (let name of this.list) {
-            Object.keys(this[name]).forEach(funcname => {
+            Object.getOwnPropertyNames(Object.getPrototypeOf(core[name])).forEach((funcname) => {
+                if (funcname === 'constructor') return;
                 if (!(core[name][funcname] instanceof Function)) return;
                 if (funcname === name) return;
+                if (funcname[0] === '_') return;
                 if (core[funcname]) {
                     console.error("ERROR: 无法转发 " + name + " 中的函数 " + funcname + " 到 core 中！同名函数已存在。");
                     return;
                 }
-                let parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
+                let func: string = core[name][funcname].toString();
+                if (func.startsWith('async')) func = func.substring(5, func.length);
+                func = 'function ' + func;
+                let parameterInfo = /\s*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
                 let parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
                 core[funcname] = new Function(parameters, 'return core.' + name + '.' + funcname + '.apply(core.' + name + ', arguments);');
             });

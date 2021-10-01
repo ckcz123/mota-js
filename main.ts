@@ -4,12 +4,6 @@ main.ts 游戏开始时的资源加载
 import type { Core } from './libs/core';
 import * as PIXI from 'pixi.js-legacy';
 
-declare global {
-    interface Window {
-        core: Core
-    }
-}
-
 class Main {
     version: string;
     floorIds: string[];
@@ -20,14 +14,14 @@ class Main {
     };
     core: Core;
     dom: { [key: string]: HTMLElement };
-    domPixi: { [key: string]: PIXI.Application }
+    pixi: { [key: string]: PIXI.Application }
     constructor() {
         this.version = '3.0';
         this.dom = {
             'body': document.body,
             'gameGroup': document.getElementById('gameGroup')
         }
-        this.domPixi = {};
+        this.pixi = {};
     }
     // ---- 加载游戏核心代码及楼层 ---- //
     private loadList: string[] = ['resize', 'maps', 'loader', 'ui'];
@@ -84,7 +78,7 @@ class Main {
         gameDraw.view.id = 'gameDraw';
         this.dom.gameGroup.appendChild(gameDraw.view);
         this.dom.gameDraw = gameDraw.view;
-        this.domPixi.gameDraw = gameDraw;
+        this.pixi.gameDraw = gameDraw;
         core.initCore();
     }
 }

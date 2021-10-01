@@ -14,11 +14,11 @@ class Resize {
     resize(): void {
         core.__WIDTH__ = core.dom.body.offsetWidth;
         core.__HEIGHT__ = core.dom.body.offsetHeight;
-        this.resizeGameGroup();
+        this._resizeGameGroup();
     }
 
     /** resize游戏界面 */
-    resizeGameGroup(): void {
+    _resizeGameGroup(): void {
         let w = core.__WIDTH__,
             h = core.__HEIGHT__;
         let game = core.dom.gameGroup;

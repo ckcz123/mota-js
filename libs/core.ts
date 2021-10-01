@@ -1,8 +1,12 @@
 /*
 core.ts 负责游戏的初始化以及核心内容
 */
+import type { Maps } from './maps';
+import { main } from '../main';
 
 class Core {
+    maps: Maps;
+    floors = main.floors;
     constructor() {
 
     }
@@ -17,14 +21,16 @@ class Core {
     /** 执行core的全局初始化 */
     async initCore(): Promise<void> {
         // 将每个类的实例转发到core上面
-        this.forwardInstance();
+        await this.forwardInstance();
+        console.log(core);
+
     }
 
     /** 转发实例 */
-    protected forwardInstance(): void {
+    protected async forwardInstance(): Promise<void> {
         for (let instance of this.list) {
-            import('./' + instance).then(one => {
-                core[instance] = one[instance];
+            await import(/* @vite-ignore */'./' + instance).then(one => {
+                this[instance] = one[instance];
             });
         }
     }

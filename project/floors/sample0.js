@@ -1,7 +1,7 @@
-import { main } from '../../main.ts'
-
-main.floors.sample0 = {
+let floor = {
     map: [
         []
     ]
 };
+
+export { floor }

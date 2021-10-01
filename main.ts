@@ -3,6 +3,12 @@ main.ts 游戏开始时的资源加载
 */
 import type { Core } from './libs/core';
 
+declare global {
+    interface Window {
+        core: Core
+    }
+}
+
 class Main {
     version: string;
     floorIds: string[];
@@ -16,27 +22,19 @@ class Main {
         this.version = '3.0';
     }
     // ---- 加载游戏核心代码及楼层 ---- //
-    private loadList: string[] = ['core'];
-    private projectList: string[] = ['data'];
+    private loadList: string[] = ['core', 'maps'];
 
     /** 开始加载游戏 */
     async load(): Promise<void> {
         // 加载project内的初始化文件
-        const loadProject = this.projectList.map((v) => {
-            let src: string = 'project/' + v + '.js';
-            return this.loadJs(src, () => { }, true);
-        });
-        await Promise.all(loadProject);
-
         // 加载楼层文件
-        import('./project/data.js').then(
-            (data) => {
+        await import('./project/data.js').then(
+            async (data) => {
                 this.floorIds = data.Data.floorIds;
                 for (let name of data.Data.floorIds) {
-                    let src: string = 'project/floors/' + name + '.js';
-                    this.loadJs(src, () => {
-
-                    }, true);
+                    await import('./project/floors/' + name).then(floor => {
+                        main.floors[name] = floor.floor;
+                    })
                 }
             }
         );
@@ -51,20 +49,9 @@ class Main {
         this.globalInit();
     }
 
-    /** 加载某一个project/.js文件 */
-    loadJs(src: string, callback: () => void, isModule: boolean = false): void {
-        let script = document.createElement('script');
-        script.src = src;
-        if (isModule) script.type = 'module';
-        script.onload = () => {
-            callback();
-        }
-        document.body.appendChild(script);
-    }
-
     /** 动态载入libs模块 */
     async loadLibs(module: string, callback: () => void): Promise<void> {
-        await import('./libs/' + module).then(
+        await import(/* @vite-ignore */'./libs/' + module).then(
             (lib) => {
                 lib[module].init();
                 this[module] = lib[module];
@@ -80,7 +67,7 @@ class Main {
     }
 }
 
-const main = new Main();
+let main = new Main();
 main.load();
 main.floors = {};
 

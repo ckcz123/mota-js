@@ -11,8 +11,9 @@ class Loader {
 
     /** 执行loader的load */
     async load(): Promise<void> {
-        await this.loadImages();
+        this.loadSound();
         this.loadBgm();
+        await this.loadImages();
     }
 
     /** 加载图片 */
@@ -37,15 +38,34 @@ class Loader {
             return await this.loadBgm_loadOne(one);
         })
         await Promise.all(load);
-        console.log('bgm加载完毕');
+        console.log('音乐加载完毕');
     }
 
+    /** 加载某个背景音乐 */
     protected async loadBgm_loadOne(name: string): Promise<void> {
         let src = './project/bgms/' + name;
         let bgm = new Audio(src);
         bgm.preload = 'none';
         bgm.loop = true;
         core.material.bgms[name] = bgm;
+    }
+
+    /** 加载音效 同样异步 */
+    protected async loadSound(): Promise<void> {
+        let all = core.dataContent.sounds;
+        let load = all.map(async (one: string) => {
+            return await this.loadSound_loadOne(one);
+        })
+        await Promise.all(load);
+        console.log('音效加载完毕');
+    }
+
+    /** 加载某个音效 */
+    protected async loadSound_loadOne(name: string): Promise<void> {
+        let src = './project/sounds/' + name;
+        let bgm = new Audio(src);
+        bgm.preload = 'none';
+        core.material.sounds[name] = bgm;
     }
 }
 

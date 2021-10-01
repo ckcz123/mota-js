@@ -16,7 +16,8 @@ class Core {
     domPixi = main.domPixi;
     material: {
         images: { [key: string]: HTMLImageElement };
-        bgms: { [key: string]: HTMLAudioElement }
+        bgms: { [key: string]: HTMLAudioElement };
+        sounds: { [key: string]: HTMLAudioElement }
     }
     dataContent: { [key: string]: any };
     __WIDTH__ = this.dom.body.offsetWidth;
@@ -40,7 +41,8 @@ class Core {
         // 执行资源加载
         this.material = {
             images: {},
-            bgms: {}
+            bgms: {},
+            sounds: {}
         };
         this.loader.load();
         // resize界面

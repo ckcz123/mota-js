@@ -5,6 +5,7 @@ import type { Maps } from './maps';
 import type { Resize } from './resize';
 import type { Loader } from './loader';
 import type { Ui } from './Ui';
+import type { Control } from './control';
 import { main } from '../main';
 
 class Core {
@@ -12,6 +13,7 @@ class Core {
     resize: Resize;
     loader: Loader;
     ui: Ui;
+    control: Control;
     dom = main.dom;
     domPixi = main.domPixi;
     material: {
@@ -33,7 +35,7 @@ class Core {
     }
 
     // ---- 初始化相关 ---- //
-    private list: string[] = ['maps', 'resize', 'loader', 'ui'];
+    private list: string[] = ['maps', 'resize', 'loader', 'ui', 'control'];
     /** 执行core的全局初始化 */
     async initCore(): Promise<void> {
         // 将每个类的实例转发到core上面

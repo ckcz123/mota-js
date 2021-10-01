@@ -18,14 +18,27 @@ class Main {
         }
     };
     core: Core;
+    dom: { [key: string]: HTMLElement }
     constructor() {
         this.version = '3.0';
+        this.dom = {
+            'body': document.body
+        }
     }
     // ---- 加载游戏核心代码及楼层 ---- //
-    private loadList: string[] = ['core', 'maps'];
+    private loadList: string[] = ['resize', 'maps'];
 
     /** 开始加载游戏 */
     async load(): Promise<void> {
+        // 加载核心ts文件
+        await import('./libs/core').then(core => {
+            this.core = core.core;
+        });
+        const loadLibs = this.loadList.map((v) => {
+            return this.loadLibs(v, () => { });
+        });
+        await Promise.all(loadLibs);
+
         // 加载project内的初始化文件
         // 加载楼层文件
         await import('./project/data.js').then(
@@ -39,12 +52,6 @@ class Main {
             }
         );
 
-        // 加载核心ts文件
-        const loadLibs = this.loadList.map((v) => {
-            return this.loadLibs(v, () => { });
-        });
-        await Promise.all(loadLibs);
-
         // 进行全局初始化
         this.globalInit();
     }
@@ -53,7 +60,6 @@ class Main {
     async loadLibs(module: string, callback: () => void): Promise<void> {
         await import(/* @vite-ignore */'./libs/' + module).then(
             (lib) => {
-                lib[module].init();
                 this[module] = lib[module];
                 callback();
             }

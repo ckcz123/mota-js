@@ -12,15 +12,15 @@ class Loader {
 
     /** 执行loader的load */
     async load(): Promise<void> {
-        this._loadSound();
-        this._loadBgm();
-        await this._loadImages();
+        this.loadSound();
+        this.loadBgm();
+        await this.loadImages();
         // 加载完毕，进入游戏
         control.initGame();
     }
 
     /** 加载图片 */
-    protected async _loadImages(): Promise<void> {
+    protected async loadImages(): Promise<void> {
         let load = core.dataContent.images.map((one: string) => {
             let src = './project/images/' + one;
             let image = new Image();
@@ -35,17 +35,17 @@ class Loader {
     }
 
     /** 加载背景音乐 异步加载 */
-    protected async _loadBgm(): Promise<void> {
+    protected async loadBgm(): Promise<void> {
         let all = core.dataContent.bgms;
         let load = all.map(async (one: string) => {
-            return await this._loadBgm_loadOne(one);
+            return await this.loadBgm_loadOne(one);
         });
         await Promise.all(load);
         console.log('音乐加载完毕');
     }
 
     /** 加载某个背景音乐 */
-    protected async _loadBgm_loadOne(name: string): Promise<void> {
+    protected async loadBgm_loadOne(name: string): Promise<void> {
         let src = './project/bgms/' + name;
         let bgm = new Audio(src);
         bgm.preload = 'none';
@@ -54,7 +54,7 @@ class Loader {
     }
 
     /** 加载音效 同样异步 */
-    protected async _loadSound(): Promise<void> {
+    protected async loadSound(): Promise<void> {
         let all = core.dataContent.sounds;
         let load = all.map(async (one: string) => {
             return await this._loadSound_loadOne(one);

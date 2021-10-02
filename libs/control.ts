@@ -3,8 +3,8 @@ control.ts负责游戏内的部分逻辑
 */
 
 import * as PIXI from 'pixi.js-legacy';
+import { core } from './core';
 
-let core = window.core;
 class Control {
     constructor() {
 
@@ -18,4 +18,4 @@ class Control {
 }
 
 let control = new Control();
-export { control, Control }
+export { control }

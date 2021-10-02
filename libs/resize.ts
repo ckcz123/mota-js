@@ -1,8 +1,8 @@
 /*
 resize.ts 负责窗口界面相关内容
 */
+import { core } from './core';
 
-let core = window.core;
 class Resize {
     constructor() {
         window.onresize = () => {

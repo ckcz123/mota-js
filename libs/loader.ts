@@ -2,8 +2,9 @@
 loader.ts负责对文件的加载
 */
 import * as PIXI from 'pixi.js-legacy';
+import { control } from './control';
+import { core } from './core';
 
-let core = window.core;
 class Loader {
     constructor() {
 
@@ -15,12 +16,11 @@ class Loader {
         this._loadBgm();
         await this._loadImages();
         // 加载完毕，进入游戏
-        core.control.initGame();
+        control.initGame();
     }
 
     /** 加载图片 */
     protected async _loadImages(): Promise<void> {
-        if (true) { }
         let load = core.dataContent.images.map((one: string) => {
             let src = './project/images/' + one;
             let image = new Image();
@@ -39,7 +39,7 @@ class Loader {
         let all = core.dataContent.bgms;
         let load = all.map(async (one: string) => {
             return await this._loadBgm_loadOne(one);
-        })
+        });
         await Promise.all(load);
         console.log('音乐加载完毕');
     }
@@ -73,4 +73,4 @@ class Loader {
 }
 
 let loader = new Loader();
-export { loader, Loader }
+export { loader }

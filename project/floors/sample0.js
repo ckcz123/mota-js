@@ -4,4 +4,4 @@ let floor = {
     ]
 };
 
-export { floor }
+export { floor };

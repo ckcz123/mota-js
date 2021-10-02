@@ -12,7 +12,8 @@ class Control {
 
     /** 初始化游戏界面 */
     initGame(): void {
-        let gameDraw = core.pixi.gameDraw;
+        // 绘制边框
+
     }
 }
 

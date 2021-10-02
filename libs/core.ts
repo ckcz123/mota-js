@@ -28,10 +28,11 @@ class Core {
         sounds: { [key: string]: HTMLAudioElement }
     }
     dataContent: { [key: string]: any };
-    __WIDTH__ = this.dom.body.offsetWidth;
-    __HEIGHT__ = this.dom.body.offsetHeight;
+    scale: number;
     readonly __UNIT_WIDTH__ = 48;
     readonly __UNIT_HEIGHT__ = 48;
+    __WIDTH__: number;
+    __HEIGHT__: number;
     readonly floors = main.floors;
     // 界面的长宽比，默认为1.33
     readonly aspect: number = 1.33;

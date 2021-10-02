@@ -11,3 +11,8 @@ html,body {
     padding: 0; 
     margin: 0;
 }
+
+#gameDraw {
+    border: 1px solid #ddd;
+    z-index: 100;
+}

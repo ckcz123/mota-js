@@ -32,7 +32,6 @@ class Loader {
         });
         await Promise.all(load);
         console.log('图片加载完毕');
-        core.control.initGame();
     }
 
     /** 加载背景音乐 异步加载 */

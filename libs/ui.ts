@@ -56,10 +56,29 @@ class Ui {
         if (name instanceof PIXI.Sprite) {
             name.position.set(x, y);
             return name;
-        }
-        else {
+        } else {
             let sprite = core.dymSprites[name];
             sprite.position.set(x, y);
+            return sprite;
+        }
+    }
+
+    /** 
+     * 修改某个sprite的大小
+     * @param x 如果小于1且不为0，视为比例缩放，否则为像素缩放
+     * @param y 如果小于1且不为0，视为比例缩放，否则为像素缩放
+     */
+    resizeSprite(name: string | PIXI.Sprite, x: number, y: number): PIXI.Sprite {
+        if (name instanceof PIXI.Sprite) {
+            if (x >= 1 || x === 0) x /= name.width * core.scale;
+            if (y >= 1 || y === 0) y /= name.width * core.scale;
+            name.scale.set(x, y);
+            return name;
+        } else {
+            let sprite = core.dymSprites[name];
+            if (x >= 1 || x === 0) x /= sprite.width * core.scale;
+            if (y >= 1 || y === 0) y /= sprite.width * core.scale;
+            sprite.scale.set(x, y);
             return sprite;
         }
     }

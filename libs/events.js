@@ -42,7 +42,7 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 }
 
 events.prototype._startGame_start = function (hard, seed, route, callback) {
-    console.log('开始游戏');
+    // console.log('开始游戏');
     core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
@@ -551,13 +551,13 @@ events.prototype._openDoor_check = function (block, x, y, needKey) {
             if (!core.material.items[keyName]) {
                 core.stopSound();
                 core.playSound('操作失败');
-                core.drawTip("无法开启此门");
+                core.drawTip("无法开启此门", id);
                 return clearAndReturn();
             }
             if (core.itemCount(keyName) < keyValue) {
                 core.stopSound();
                 core.playSound('操作失败');
-                core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", null, true);
+                core.drawTip("你的" + ((core.material.items[keyName] || {}).name || "钥匙") + "不足！", keyName); // , null, true);
                 return false;
             }
         }
@@ -804,7 +804,7 @@ events.prototype._changeFloor_playSound = function () {
 		core.playSound('读档');
 	else if (core.hasFlag('__isFlying__')) // 是否是楼传造成的切换
 		core.playSound('飞行器');
-	else
+	else if (core.status.floorId)
 	    core.playSound('上下楼');
 }
 
@@ -1433,7 +1433,7 @@ events.prototype._action_setText = function (data, x, y, prefix) {
 }
 
 events.prototype._action_tip = function (data, x, y, prefix) {
-    core.drawTip(core.replaceText(data.text, prefix), data.icon);
+    core.drawTip(core.replaceText(data.text, prefix), data.icon, data.frame);
     core.doAction();
 }
 
@@ -1559,7 +1559,7 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
     if (data.dxy != null) {
         data.loc = [core.bigmap.offsetX / 32 + (core.calValue(data.dxy[0], prefix) || 0), core.bigmap.offsetY / 32 + (core.calValue(data.dxy[1], prefix) || 0)];
     } else if (data.loc == null) {
-        data.loc = [core.getHeroLoc('x') - core.__HALF_SIZE__, core.getHeroLoc('y') - core.__HALF_SIZE__];
+        data.loc = [core.getHeroLoc('x') - core.__HALF_WIDTH__, core.getHeroLoc('y') - core.__HALF_HEIGHT__];
     } else {
         data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     }
@@ -1734,7 +1734,7 @@ events.prototype._action_screenFlash = function (data, x, y, prefix) {
 
 events.prototype._action_setWeather = function (data, x, y, prefix) {
     core.setWeather(data.name, data.level);
-    if (data.keep && ['rain', 'snow', 'sun', 'fog', 'cloud'].indexOf(data.name) >= 0)
+    if (data.keep)// && ['rain', 'snow', 'sun', 'fog', 'cloud'].indexOf(data.name) >= 0)
         core.setFlag('__weather__', [data.name, data.level]);
     else core.removeFlag('__weather__');
     core.doAction();
@@ -1743,7 +1743,7 @@ events.prototype._action_setWeather = function (data, x, y, prefix) {
 events.prototype._action_openDoor = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, x, y, prefix);
     var floorId = data.floorId;
-    if (floorId == core.status.floorId) {
+    if (!floorId || floorId == core.status.floorId) {
         this.__action_doAsyncFunc(data.async, core.openDoor, loc[0], loc[1], data.needKey);
     }
     else {
@@ -1764,7 +1764,7 @@ events.prototype._action_useItem = function (data, x, y, prefix) {
     }
     else {
         core.playSound('操作失败');
-        core.drawTip("当前无法使用" + ((core.material.items[data.id] || {}).name || "未知道具"));
+        core.drawTip("当前无法使用" + ((core.material.items[data.id] || {}).name || "未知道具"), data.id);
         core.doAction();
     }
 }
@@ -1980,7 +1980,7 @@ events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
 
 events.prototype._action_input = function (data, x, y, prefix) {
     this.__action_getInput(core.replaceText(data.text, prefix), false, function (value) {
-        value = Math.abs(parseInt(value) || 0);
+        value = /*Math.abs*/(parseInt(value) || 0);
         core.status.route.push("input:" + value);
         core.setFlag("input", value);
         core.doAction();

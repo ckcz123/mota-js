@@ -4006,7 +4006,7 @@ TextAlign_List
     /*TextAlign_List ['null','left','center','right']*/;
 
 TextBaseline_List
-    :   '不改变'|'顶部'|'悬挂'|'居中'|'标准值'|'ideographic'|'底部'
+    :   '不改变'|'顶部'|'悬挂'|'居中'|'标准值'|'方块字'|'底部'
     /*TextBaseline_List ['null','top','hanging','middle','alphabetic','ideographic','bottom']*/;
 
 Reverse_List
@@ -4038,7 +4038,7 @@ B_0_List
     /*B_0_List ['null','true','false']*/;
 
 B_1_List
-    :   '不改变'|'设为粗体'|'取消粗体'
+    :   '不变'|'是'|'否'
     /*B_1_List ['null','true','false']*/;
 
 Bg_Fg_List

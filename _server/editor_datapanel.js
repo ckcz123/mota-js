@@ -154,7 +154,7 @@ editor_datapanel_wrapper = function (editor) {
             }
             var width = parseInt(document.getElementById('newMapWidth').value);
             var height = parseInt(document.getElementById('newMapHeight').value);
-            if (!core.isset(width) || !core.isset(height) || width < core.__SIZE__ || height < core.__SIZE__ || width > 128 || height > 128) {
+            if (!core.isset(width) || !core.isset(height) ||/* width < core.__SIZE__ || height < core.__SIZE__ ||*/ width > 128 || height > 128) {
                 printe("新建地图的宽高都不得小于" + core.__SIZE__ + "，且都不得大于128");
                 return;
             }
@@ -233,7 +233,7 @@ editor_datapanel_wrapper = function (editor) {
 
             var width = parseInt(document.getElementById('newMapsWidth').value);
             var height = parseInt(document.getElementById('newMapsHeight').value);
-            if (!core.isset(width) || !core.isset(height) || width < core.__SIZE__ || height < core.__SIZE__ || width > 128 || height > 128) {
+            if (!core.isset(width) || !core.isset(height) ||/* width < core.__SIZE__ || height < core.__SIZE__ ||*/ width > 128 || height > 128) {
                 printe("新建地图的宽高都不得小于" + core.__SIZE__ + "，且都不得大于128");
                 return;
             }
@@ -584,7 +584,7 @@ editor_datapanel_wrapper = function (editor) {
             var height = parseInt(children[1].value);
             var x = parseInt(children[2].value);
             var y = parseInt(children[3].value);
-            if (!(width >= core.__SIZE__ && height >= core.__SIZE__ && x >=0 && y >=0)) {
+            if (!(/*width >= core.__SIZE__ && height >= core.__SIZE__ &&*/ x >=0 && y >=0)) {
                 printe("参数错误！宽高不得小于"+core.__SIZE__+"，偏移量不得小于0");
                 return;
             }

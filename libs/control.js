@@ -286,11 +286,12 @@ control.prototype.__animateFrame_weather_image = function (timestamp, level) {
     if (!image) return;
     core.clearMap('weather');
     core.setAlpha('weather', node.level / 500);
-    var wind = 1.5;
-    var width = image.width, height = image.height;
+    var wind = 1 + level / 5;
+    var width = image.width, height = image.height, ratio = Math.max(core.__PX_WIDTH__ / width, core.__PX_HEIGHT__ / height) / 2;
+    width *= ratio; height *= ratio;
     node.x += node.dx * wind;
     node.y += (2 * node.dy - 1) * wind;
-    if (node.x + 3 * width <= core.__PIXELS__) {
+    if (node.x + 3 * width <= core.__PX_WIDTH__) {
         node.x += 4 * width;
         while (node.x > 0) node.x -= width;
     }
@@ -300,7 +301,7 @@ control.prototype.__animateFrame_weather_image = function (timestamp, level) {
     } else if (node.dy <= 0) {
         node.delta = 0.001;
     }
-    if (node.y + 3 * height <= core.__PIXELS__) {
+    if (node.y + 3 * height <= core.__PX_HEIGHT__) {
         node.y += 4 * height;
         while (node.y > 0) node.y -= height;
     }
@@ -309,10 +310,10 @@ control.prototype.__animateFrame_weather_image = function (timestamp, level) {
     }
     for (var i = 0; i < 3; ++i) {
         for (var j = 0; j < 3; ++j) {
-            if (node.x + (i + 1) * width <= 0 || node.x + i * width >= core.__PIXELS__
-                || node.y + (j + 1) * height <= 0 || node.y + j * height >= core.__PIXELS__)
+            if (node.x + (i + 1) * width <= 0 || node.x + i * width >= core.__PX_WIDTH__
+                || node.y + (j + 1) * height <= 0 || node.y + j * height >= core.__PX_HEIGHT__)
                 continue;
-            core.drawImage('weather', image, node.x + i * width, node.y + j * height);
+            core.drawImage('weather', image, 0, 0, image.width, image.height, node.x + i * width, node.y + j * height, width, height);
         }
     }
     core.setAlpha('weather',1);
@@ -339,7 +340,7 @@ control.prototype._animateFrame_tip = function (timestamp) {
 
     core.setFont('data', "16px Arial");
     core.setTextAlign('data', 'left');
-    core.clearMap('data', 0, 0, core.__PIXELS__, 50);
+    core.clearMap('data', 0, 0, core.__PX_WIDTH__, 50);
     core.ui._drawTip_drawOne(tip);
     if (tip.stage == 1) {
         tip.opacity += 0.05;
@@ -839,8 +840,8 @@ control.prototype.drawHero = function (status, offset, frame) {
 }
 
 control.prototype._drawHero_updateViewport = function (x, y, offset) {
-    core.bigmap.offsetX = core.clamp((x - core.__HALF_SIZE__) * 32 + offset.x, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp((y - core.__HALF_SIZE__) * 32 + offset.y, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    core.bigmap.offsetX = core.clamp((x - core.__HALF_WIDTH__) * 32 + offset.x, 0, 32 * core.bigmap.width - core.__PX_WIDTH__);
+    core.bigmap.offsetY = core.clamp((y - core.__HALF_HEIGHT__) * 32 + offset.y, 0, 32 * core.bigmap.height - core.__PX_HEIGHT__);
     core.control.updateViewport();
 }
 
@@ -928,10 +929,10 @@ control.prototype.setGameCanvasTranslate = function(canvas,x,y){
     c.style.OTransform='translate('+x+'px,'+y+'px)';
     c.style.MozTransform='translate('+x+'px,'+y+'px)';
     if(main.mode==='editor' && editor.isMobile){
-        c.style.transform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
-        c.style.webkitTransform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
-        c.style.OTransform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
-        c.style.MozTransform='translate('+(x/core.__PIXELS__*96)+'vw,'+(y/core.__PIXELS__*96)+'vw)';
+        c.style.transform='translate('+(x/core.__PX_WIDTH__*96)+'vw,'+(y/core.__PX_HEIGHT__*96)+'vw)';
+        c.style.webkitTransform='translate('+(x/core.__PX_WIDTH__*96)+'vw,'+(y/core.__PX_HEIGHT__*96)+'vw)';
+        c.style.OTransform='translate('+(x/core.__PX_WIDTH__*96)+'vw,'+(y/core.__PX_HEIGHT__*96)+'vw)';
+        c.style.MozTransform='translate('+(x/core.__PX_WIDTH__*96)+'vw,'+(y/core.__PX_HEIGHT__*96)+'vw)';
     }
 };
 
@@ -993,8 +994,8 @@ control.prototype.updateViewport = function() {
 ////// 设置视野范围 //////
 control.prototype.setViewport = function (px, py) {
     var originOffsetX = core.bigmap.offsetX, originOffsetY = core.bigmap.offsetY;
-    core.bigmap.offsetX = core.clamp(px, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    core.bigmap.offsetX = core.clamp(px, 0, 32 * core.bigmap.width - core.__PX_WIDTH__);
+    core.bigmap.offsetY = core.clamp(py, 0, 32 * core.bigmap.height - core.__PX_HEIGHT__);
     this.updateViewport();
     // ------ hero层也需要！
     var px = parseFloat(core.canvas.hero._px) || 0;
@@ -1016,8 +1017,8 @@ control.prototype.moveViewport = function (x, y, moveMode, time, callback) {
         if (callback) callback();
         return;
     }    
-    var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core.__PIXELS__);
-    var py = core.clamp(32 * y, 0, 32 * core.bigmap.height - core.__PIXELS__);
+    var px = core.clamp(32 * x, 0, 32 * core.bigmap.width - core.__PX_WIDTH__);
+    var py = core.clamp(32 * y, 0, 32 * core.bigmap.height - core.__PX_HEIGHT__);
     var cx = core.bigmap.offsetX;
     var cy = core.bigmap.offsetY;
     var moveFunc = core.applyEasing(moveMode);
@@ -1159,7 +1160,7 @@ control.prototype._checkBlock_repulse = function (repulse) {
     repulse.forEach(function (t) {
         actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": true, "async": true});
     });
-    actions.push({"type": "waitAsync"});
+    actions.push({"type": "waitAsync", "excludeAnimates": true});
     core.insertAction(actions);
 }
 
@@ -1171,7 +1172,7 @@ control.prototype._checkBlock_ambush = function (ambush) {
     ambush.forEach(function (t) {
         actions.push({"type": "move", "loc": [t[0],t[1]], "steps": [t[3]], "time": 250, "keep": false, "async":true});
     });
-    actions.push({"type": "waitAsync"});
+    actions.push({"type": "waitAsync", "excludeAnimates": true});
     // 强制战斗
     ambush.forEach(function (t) {
         actions.push({"type": "function", "function": "function() { "+
@@ -1211,8 +1212,8 @@ control.prototype._updateDamage_damage = function (floorId, onMap) {
 
         // v2优化，只绘制范围内的部分
         if (onMap && core.bigmap.v2) {
-            if (x < core.bigmap.posX - core.bigmap.extend || x > core.bigmap.posX + core.__SIZE__ + core.bigmap.extend
-                || y < core.bigmap.posY - core.bigmap.extend || y > core.bigmap.posY + core.__SIZE__ + core.bigmap.extend) {
+            if (x < core.bigmap.posX - core.bigmap.extend || x > core.bigmap.posX + core.__WIDTH__ + core.bigmap.extend
+                || y < core.bigmap.posY - core.bigmap.extend || y > core.bigmap.posY + core.__HEIGHT__ + core.bigmap.extend) {
                 return;
             }
         }
@@ -1238,9 +1239,9 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
     
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
     var startX = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posX - core.bigmap.extend) : 0;
-    var endX = onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + core.bigmap.extend + 1) : width;
+    var endX = onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__WIDTH__ + core.bigmap.extend + 1) : width;
     var startY = onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posY - core.bigmap.extend) : 0;
-    var endY = onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + core.bigmap.extend + 1) : height;
+    var endY = onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__HEIGHT__ + core.bigmap.extend + 1) : height;
 
     for (var x=startX;x<endX;x++) {
         for (var y=startY;y<endY;y++) {
@@ -1293,7 +1294,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
         if (onMap && core.bigmap.v2) {
             px -= core.bigmap.posX * 32;
             py -= core.bigmap.posY * 32;
-            if (px < -32 * 2 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
+            if (px < -32 * 2 || px > core.__PX_WIDTH__ + 32 || py < -32 || py > core.__PX_HEIGHT__ + 32)
                 return;
         }
         core.fillBoldText(ctx, one.text, px, py, one.color);
@@ -1305,7 +1306,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
         if (onMap && core.bigmap.v2) {
             px -= core.bigmap.posX * 32;
             py -= core.bigmap.posY * 32;   
-            if (px < -32 || px > core.__PIXELS__ + 32 || py < -32 || py > core.__PIXELS__ + 32)
+            if (px < -32 || px > core.__PX_WIDTH__ + 32 || py < -32 || py > ccore.__PX_HEIGHT__ + 32)
                 return;         
         }
         var alpha = core.setAlpha(ctx, one.alpha);
@@ -1343,7 +1344,7 @@ control.prototype.startReplay = function (list) {
     core.status.replay.totalList = core.status.route.concat(list);
     core.status.replay.steps = 0;
     core.status.replay.save = [];
-    core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
+    core.createCanvas('replay', 0, core.__PX_HEIGHT__ - 40, core.__PX_WIDTH__, 40, 199);
     core.setOpacity('replay', 0.6);
     this._replay_drawProgress();
     core.updateStatusBar();
@@ -1470,7 +1471,7 @@ control.prototype.rewindReplay = function () {
             "steps": data.replay.steps,
             "save": save
         }
-        core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
+        core.createCanvas('replay', 0, core.__PX_HEIGHT__ - 40, core.__PX_WIDTH__, 40, 199);
         core.setOpacity('replay', 0.6);
         core.control._replay_drawProgress();
         core.updateStatusBar();
@@ -1729,7 +1730,7 @@ control.prototype._replayAction_item = function (action) {
     }
     var tools = core.getToolboxItems('tools'), 
         constants = core.getToolboxItems('constants');
-    var index, per = core.__SIZE__-1;
+    var index, per = core.__WIDTH__-1;
     if ((index=tools.indexOf(itemId))>=0) {
         core.status.event.data = {"toolsPage": Math.floor(index/per)+1, "constantsPage":1};
         index = index%per;
@@ -1875,8 +1876,8 @@ control.prototype._replayAction_getNext = function (action) {
 control.prototype._replayAction_moveDirectly = function (action) {
     if (action.indexOf("move:")!=0) return false;
     // 忽略连续的瞬移事件；如果大地图某一边超过计算范围则不合并
-    if (!core.hasFlag('poison') && core.status.thisMap.width < 2 * core.bigmap.extend + core.__SIZE__
-        && core.status.thisMap.height < 2 * core.bigmap.extend + core.__SIZE__) {
+    if (!core.hasFlag('poison') && core.status.thisMap.width < 2 * core.bigmap.extend + core.__WIDTH__
+        && core.status.thisMap.height < 2 * core.bigmap.extend + core.__HEIGHT__) {
         while (core.status.replay.toReplay.length>0 &&
             core.status.replay.toReplay[0].indexOf('move:')==0) {
                 core.status.route.push(action);
@@ -2102,7 +2103,7 @@ control.prototype._doSL_replayLoad_afterGet = function (id, data) {
         core.playSound('操作失败');
         return core.drawTip("此存档可能存在风险，无法读档");
     }
-    var route = core.subarray(core.status.route, core.decodeRoute(data.route));
+    var route = core.subarray(core.status.route, core.decodeRoute(data.route)) || core.decodeRoute(data.__toReplay__);
     if (route == null) {
         core.playSound('操作失败');
         return core.drawTip("无法从此存档回放录像");
@@ -2495,6 +2496,7 @@ control.prototype.setHeroLoc = function (name, value, noGather) {
     if ((name=='x' || name=='y') && !noGather) {
         this.gatherFollowers();
     }
+    if (core.flags.statusCanvas && !core.domStyle.isVertical) core.ui.uidata.drawStatusBar(); // 横屏的自绘状态栏模式下，勇士位置一旦变化就立即重绘状态栏
 }
 
 ////// 获得勇士的位置 //////
@@ -2598,8 +2600,7 @@ control.prototype.unlockControl = function () {
 
 ////// 开启debug模式 //////
 control.prototype.debug = function() {
-    core.setFlag('debug', true);
-    core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
+    if (flags.debug =! flags.debug) core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩，如果是误按F7请立即再按一次即可关闭。");
 }
 
 control.prototype._bindRoutePush = function () {
@@ -2662,7 +2663,7 @@ control.prototype.setWeather = function (type, level) {
     if (type==core.animateFrame.weather.type && level == core.animateFrame.weather.level) return;
 
     // 计算当前的宽高
-    core.createCanvas('weather', 0, 0, core.__PIXELS__, core.__PIXELS__, 80);
+    core.createCanvas('weather', 0, 0, core.__PX_WIDTH__, core.__PX_HEIGHT__, 80);
     core.setOpacity('weather', 1.0);
     core.animateFrame.weather.type = type;
     core.animateFrame.weather.level = level;
@@ -2694,7 +2695,7 @@ control.prototype.unregisterWeather = function (name) {
 }
 
 control.prototype._weather_rain = function (level) {
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__WIDTH__*core.__HEIGHT__));
     for (var a=0;a<number;a++) {
         core.animateFrame.weather.nodes.push({
             'x': Math.random()*core.bigmap.width*32,
@@ -2707,7 +2708,7 @@ control.prototype._weather_rain = function (level) {
 }
 
 control.prototype._weather_snow = function (level) {
-    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__SIZE__*core.__SIZE__));
+    var number = level * parseInt(20*core.bigmap.width*core.bigmap.height/(core.__WIDTH__*core.__HEIGHT__));
     for (var a=0;a<number;a++) {
         core.animateFrame.weather.nodes.push({
             'x': Math.random()*core.bigmap.width*32,
@@ -2724,7 +2725,7 @@ control.prototype._weather_fog = function (level) {
         'image': core.animateFrame.weather.fog,
         'level': 40 * level,
         'x': 0,
-        'y': -core.__PIXELS__ / 2,
+        'y': -core.__PX_HEIGHT__ / 2,
         'dx': -Math.random() * 1.5,
         'dy': Math.random(),
         'delta': 0.001,
@@ -2737,7 +2738,7 @@ control.prototype._weather_cloud = function (level) {
         'image': core.animateFrame.weather.cloud,
         'level': 40 * level,
         'x': 0,
-        'y': -core.__PIXELS__ / 2,
+        'y': -core.__PX_HEIGHT__ / 2,
         'dx': -Math.random() * 1.5,
         'dy': Math.random(),
         'delta': 0.001,
@@ -2748,7 +2749,7 @@ control.prototype._weather_sun = function (level) {
     if (!core.animateFrame.weather.sun) return;
     // 直接绘制
     core.clearMap('weather');
-    core.drawImage('weather', core.animateFrame.weather.sun, 0, 0, core.animateFrame.weather.sun.width, core.animateFrame.weather.sun.height, 0, 0, core.__PIXELS__, core.__PIXELS__);
+    core.drawImage('weather', core.animateFrame.weather.sun, 0, 0, core.animateFrame.weather.sun.width, core.animateFrame.weather.sun.height, 0, 0, core.__PX_WIDTH__, core.__PX_HEIGHT__);
     core.setOpacity('weather', level / 10);
     core.animateFrame.weather.nodes = [{opacity: level / 10, delta: 0.01}];
 }
@@ -2766,7 +2767,7 @@ control.prototype.setCurtain = function(color, time, moveMode, callback) {
     if (time==0) {
         // 直接变色
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
+        core.fillRect('curtain', 0, 0, core.__PX_WIDTH__, core.__PX_HEIGHT__, core.arrayToRGBA(color));
         core.status.curtainColor = color;
         if (callback) callback();
         return;
@@ -2795,7 +2796,7 @@ control.prototype._setCurtain_animate = function (nowColor, color, time, moveMod
             nowColor[3] + (color[3] - nowColor[3]) * moveFunc(step / steps),
         ]
         core.clearMap('curtain');
-        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(curr));
+        core.fillRect('curtain', 0, 0, core.__PX_WIDTH__, core.__PX_HEIGHT__, core.arrayToRGBA(curr));
         if (step == steps) {
             delete core.animateFrame.asyncId[animate];
             clearInterval(animate);
@@ -3119,6 +3120,7 @@ control.prototype.hideStatusBar = function (showToolbox) {
     if (!core.domStyle.isVertical && !core.flags.extendToolbar) {
         core.dom.toolBar.style.display = 'none';
     }
+    if (core.flags.statusCanvas) core.ui.uidata.drawStatusBar(); // 自绘状态栏需要专门刷新一下才会清空
 }
 
 ////// 更新状态栏的勇士图标 //////
@@ -3156,7 +3158,7 @@ control.prototype.setToolbarButton = function (useButton) {
     }
 
     if (useButton == null) useButton = core.domStyle.toolbarBtn;
-    if ((!core.domStyle.isVertical && !core.flags.extendToolbar) || core.isReplaying()) useButton = false;
+    if ((!core.domStyle.isVertical && !core.flags.extendToolbar)/* || core.isReplaying()*/) useButton = false;
     core.domStyle.toolbarBtn = useButton;
 
     if (useButton) {
@@ -3248,11 +3250,11 @@ control.prototype._doResize = function (obj) {
 control.prototype.resize = function() {
     if (main.mode=='editor')return;
     var clientWidth = main.dom.body.clientWidth, clientHeight = main.dom.body.clientHeight;
-    var CANVAS_WIDTH = core.__PIXELS__, BAR_WIDTH = Math.round(core.__PIXELS__ * 0.31);
+    var CANVAS_WIDTH = core.__PX_WIDTH__, CANVAS_HEIGHT = core.__PX_HEIGHT__, BAR_WIDTH = core.flags.statusCanvas ? 0 : core.__UNIT__ * (core.__HALF_HEIGHT__ / 2 + 1);
     var BORDER = 3;
     var extendToolbar = core.flags.extendToolbar;
-
-    var horizontalMaxRatio = (clientHeight - 2 * BORDER - (extendToolbar ? BORDER : 0)) / (CANVAS_WIDTH + (extendToolbar ? 38 : 0));
+    var toolHeight = core.__UNIT__ * 9/8;
+    var horizontalMaxRatio = (clientHeight - 2 * BORDER - (extendToolbar ? BORDER : 0)) / (CANVAS_HEIGHT + (extendToolbar ? toolHeight : 0));
 
     if (clientWidth - 3 * BORDER >= CANVAS_WIDTH + BAR_WIDTH || (clientWidth > clientHeight && horizontalMaxRatio < 1)) {
         // 横屏
@@ -3289,19 +3291,21 @@ control.prototype.resize = function() {
         clientWidth: clientWidth,
         clientHeight: clientHeight,
         CANVAS_WIDTH: CANVAS_WIDTH,
+        CANVAS_HEIGHT: CANVAS_HEIGHT,
         BORDER: BORDER,
         BAR_WIDTH: BAR_WIDTH,
-        TOOLBAR_HEIGHT: 38,
-        outerSize: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
+        TOOLBAR_HEIGHT: toolHeight,
+        outerWidth: CANVAS_WIDTH * core.domStyle.scale + 2 * BORDER,
+        outerHeight: CANVAS_HEIGHT * core.domStyle.scale + 2 * BORDER,
         globalAttribute: globalAttribute,
         border: '3px ' + core.arrayToRGBA(globalAttribute.borderColor) + ' solid',
         statusDisplayArr: statusDisplayArr,
         count: count,
         col: col,
         statusBarHeightInVertical: core.domStyle.isVertical ? (32 * col + 6) * core.domStyle.scale + 2 * BORDER : 0,
-        toolbarHeightInVertical: core.domStyle.isVertical ? 38 * core.domStyle.scale + 2 * BORDER : 0,
+        toolbarHeightInVertical: core.domStyle.isVertical ? toolHeight * core.domStyle.scale + 2 * BORDER : 0,
         extendToolbar: extendToolbar,
-        is15x15: core.__SIZE__ == 15
+        is15x15: core.__HEIGHT__ == 15
     };
 
     this._doResize(obj);
@@ -3319,12 +3323,12 @@ control.prototype._resize_gameGroup = function (obj) {
     var gameGroup = core.dom.gameGroup;
     var totalWidth, totalHeight;
     if (core.domStyle.isVertical) {
-        totalWidth = obj.outerSize;
-        totalHeight = obj.outerSize + obj.statusBarHeightInVertical + obj.toolbarHeightInVertical
+        totalWidth = obj.outerWidth;
+        totalHeight = obj.outerHeight + obj.statusBarHeightInVertical + obj.toolbarHeightInVertical
     }
     else {
-        totalWidth = obj.outerSize + obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER;
-        totalHeight = obj.outerSize + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0);
+        totalWidth = obj.outerWidth + obj.BAR_WIDTH * core.domStyle.scale + (core.flags.statusCanvas ? 0 : obj.BORDER);
+        totalHeight = obj.outerHeight + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0);
     }
     gameGroup.style.width = totalWidth + "px";
     gameGroup.style.height = totalHeight + "px";
@@ -3333,7 +3337,7 @@ control.prototype._resize_gameGroup = function (obj) {
     // floorMsgGroup
     var floorMsgGroup = core.dom.floorMsgGroup;
     floorMsgGroup.style = obj.globalAttribute.floorChangingStyle;
-    floorMsgGroup.style.width = obj.outerSize - 2 * obj.BORDER + "px";
+    floorMsgGroup.style.width = obj.outerWidth - 2 * obj.BORDER + "px";
     floorMsgGroup.style.height = totalHeight - 2 * obj.BORDER + "px";
     floorMsgGroup.style.fontSize = 16 * core.domStyle.scale + "px";
     // startPanel
@@ -3353,12 +3357,17 @@ control.prototype._resize_gameGroup = function (obj) {
 }
 
 control.prototype._resize_canvas = function (obj) {
-    var innerSize = (obj.CANVAS_WIDTH * core.domStyle.scale) + "px";
-    for (var i = 0; i < core.dom.gameCanvas.length; ++i)
-        core.dom.gameCanvas[i].style.width = core.dom.gameCanvas[i].style.height = innerSize;
-    core.dom.gif.style.width = core.dom.gif.style.height = innerSize;
-    core.dom.gif2.style.width = core.dom.gif2.style.height = innerSize;
-    core.dom.gameDraw.style.width = core.dom.gameDraw.style.height = innerSize;
+    var innerWidth = (obj.CANVAS_WIDTH * core.domStyle.scale) + "px", innerHeight = (obj.CANVAS_HEIGHT * core.domStyle.scale) + "px";
+    for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
+        core.dom.gameCanvas[i].style.width = innerWidth;
+        core.dom.gameCanvas[i].style.height = innerHeight;
+    }
+    core.dom.gif.style.width = innerWidth;
+    core.dom.gif.style.height = innerHeight;
+    core.dom.gif2.style.width = innerWidth;
+    core.dom.gif2.style.height = innerHeight;
+    core.dom.gameDraw.style.width = innerWidth;
+    core.dom.gameDraw.style.height = innerHeight;
     core.dom.gameDraw.style.top = obj.statusBarHeightInVertical + "px";
     core.dom.gameDraw.style.right = 0;
     core.dom.gameDraw.style.border = obj.border;
@@ -3386,23 +3395,23 @@ control.prototype._resize_statusBar = function (obj) {
     // statusBar
     var statusBar = core.dom.statusBar;
     if (core.domStyle.isVertical) {
-        statusBar.style.width = obj.outerSize + "px";
+        statusBar.style.width = obj.outerWidth + "px";
         statusBar.style.height = obj.statusBarHeightInVertical + "px";
         statusBar.style.background = obj.globalAttribute.statusTopBackground;
         statusBar.style.fontSize = 16 * core.domStyle.scale + "px";
     }
     else {
         statusBar.style.width = (obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER) + "px";
-        statusBar.style.height = obj.outerSize + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
+        statusBar.style.height = obj.outerHeight + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
         statusBar.style.background = obj.globalAttribute.statusLeftBackground;
         // --- 计算文字大小
         if (obj.extendToolbar) {
             statusBar.style.fontSize = 16 * core.domStyle.scale + "px";
         } else {
-            statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_SIZE__ + 3) / obj.count) * core.domStyle.scale + "px";
+            statusBar.style.fontSize = 16 * Math.min(1, (core.__HALF_HEIGHT__ + 3) / obj.count) * core.domStyle.scale + "px";
         }
     }
-    statusBar.style.display = 'block';
+    statusBar.style.display = core.domStyle.isVertical || !core.flags.statusCanvas ? 'block' : 'none';
     statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
     statusBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
     statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
@@ -3414,10 +3423,10 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.style.height = obj.outerSize - 2 * obj.BORDER +  (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
-        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_WIDTH + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0));
+        core.dom.statusCanvas.style.height = obj.outerHeight - 2 * obj.BORDER +  (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, obj.CANVAS_HEIGHT + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0));
     }
-    core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
+    core.dom.statusCanvas.style.display = core.flags.statusCanvas && core.domStyle.isVertical ? "block" : "none"; // 自绘状态栏只保留竖屏，横屏画在地图上
 }
 
 control.prototype._resize_status = function (obj) {
@@ -3425,7 +3434,7 @@ control.prototype._resize_status = function (obj) {
     if (core.domStyle.isVertical) {
         statusHeight = 32 * core.domStyle.scale * 0.8;
     } else {
-        statusHeight = (obj.extendToolbar ? core.__SIZE__ : core.__HALF_SIZE__ + 3) / obj.count * 32  * core.domStyle.scale * 0.8;
+        statusHeight = (obj.extendToolbar ? core.__HEIGHT__ : core.__HALF_HEIGHT__ + 3) / obj.count * 32  * core.domStyle.scale * 0.8;
     }
     // status
     for (var i = 0; i < core.dom.status.length; ++i) {
@@ -3462,8 +3471,8 @@ control.prototype._resize_toolBar = function (obj) {
     if (core.domStyle.isVertical) {
         toolBar.style.left = 0;
         toolBar.style.right = "";
-        toolBar.style.width = obj.outerSize + "px";
-        toolBar.style.top = obj.statusBarHeightInVertical + obj.outerSize + "px";
+        toolBar.style.width = obj.outerWidth + "px";
+        toolBar.style.top = obj.statusBarHeightInVertical + obj.outerHeight + "px";
         toolBar.style.height = obj.toolbarHeightInVertical + "px";
         toolBar.style.background = obj.globalAttribute.toolsBackground;
     }
@@ -3471,16 +3480,16 @@ control.prototype._resize_toolBar = function (obj) {
         if (obj.extendToolbar) {
             toolBar.style.left = "";
             toolBar.style.right = 0;
-            toolBar.style.width = obj.outerSize + "px";
-            toolBar.style.top = obj.outerSize + "px";
+            toolBar.style.width = obj.outerWidth + "px";
+            toolBar.style.top = obj.outerHeight + "px";
             toolBar.style.height = obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER + "px";
             toolBar.style.background = obj.globalAttribute.toolsBackground;
         } else {
             toolBar.style.left = 0;
             toolBar.style.right = "";
             toolBar.style.width = obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER + "px";
-            toolBar.style.top = 0.718 * obj.outerSize + "px";
-            toolBar.style.height = 0.281 * obj.outerSize + "px";
+            toolBar.style.top = 0.75 * obj.outerHeight + "px";
+            toolBar.style.height = 0.25 * obj.outerHeight + "px";
             toolBar.style.background = 'transparent';
         }
     }
@@ -3496,10 +3505,10 @@ control.prototype._resize_toolBar = function (obj) {
 }
 
 control.prototype._resize_tools = function (obj) {
-    var toolsHeight = 32 * core.domStyle.scale * ((core.domStyle.isVertical || obj.extendToolbar) && !obj.is15x15 ? 0.95 : 1);
+    var toolsHeight = core.__UNIT__ * core.domStyle.scale; // 32 * core.domStyle.scale * ((core.domStyle.isVertical || obj.extendToolbar) && !obj.is15x15 ? 0.95 : 1);
     var toolsMarginLeft;
     if (core.domStyle.isVertical || obj.extendToolbar)
-        toolsMarginLeft = (core.__HALF_SIZE__ - 3) * 3 * core.domStyle.scale;
+        toolsMarginLeft = (core.__HALF_WIDTH__ - 3) * 3 * core.domStyle.scale;
     else
         toolsMarginLeft = (obj.BAR_WIDTH * core.domStyle.scale - 9 - toolsHeight * 3) / 4;
     for (var i = 0; i < core.dom.tools.length; ++i) {
@@ -3510,10 +3519,10 @@ control.prototype._resize_tools = function (obj) {
     }
     core.dom.hard.style.lineHeight = toolsHeight + "px";
     if (core.domStyle.isVertical || obj.extendToolbar) {
-        core.dom.hard.style.width = obj.outerSize - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + "px";
+        core.dom.hard.style.width = obj.outerWidth - 9 * toolsMarginLeft - 8.5 * toolsHeight - 12 + "px";
     }
     else {
         core.dom.hard.style.width = obj.BAR_WIDTH * core.domStyle.scale - 9 - 2 * toolsMarginLeft + "px";
-        if (!obj.is15x15) core.dom.hard.style.marginTop = 0;
+        /* if (!obj.is15x15) */ core.dom.hard.style.marginTop = 0;
     }
 }

@@ -16,7 +16,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	core.status.played = true;
 	// 初始化人物，图标，统计信息
 	core.status.hero = core.clone(hero);
-	window.hero = core.status.hero;
+	// window.hero = core.status.hero;
 	window.flags = core.status.hero.flags;
 	core.events.setHeroIcon(core.status.hero.image, true);
 	core.control._initStatistics(core.animateFrame.totalTime);
@@ -41,6 +41,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	for (var key in globalFlags)
 		core.flags[key] = globalFlags[key];
 	core._init_sys_flags();
+	core.setFlag('__statusCanvas__', core.plugin.compile(core.getCommonEvent('自绘状态栏'))); // 重新编译横屏自绘状态栏的公共事件
 	// 初始化界面，状态栏等
 	core.resize();
 	// 状态栏是否显示
@@ -131,8 +132,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			}
 		});
 		core.control.gatherFollowers();
-	}
-
+	} else core.status.curtainColor = core.getFlag('__color__');
+	// 更改画面色调，drawMap 会根据 curtainColor 绘制色调。因此只需保证“读档时优先取用flag，非读档时flag会屏蔽楼层属性但不覆盖”，与背景音乐的行为一致
+	if (!core.hasFlag('__color__')) core.status.curtainColor = core.status.maps[floorId].color;
 	// ---------- 重绘新地图；这一步将会设置core.status.floorId ---------- //
 	core.drawMap(floorId);
 
@@ -141,20 +143,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		var bgm = core.status.maps[floorId].bgm;
 		if (bgm instanceof Array) bgm = bgm[Math.floor(Math.random() * bgm.length)]; // 多个bgm则随机播放一个
 		if (!core.hasFlag("__bgm__")) core.playBgm(bgm);
-	} else if (fromLoad && !core.hasFlag("__bgm__")) {
-		core.pauseBgm();
-	}
-	// 更改画面色调
-	var color = core.getFlag('__color__', null);
-	if (!color && core.status.maps[floorId].color)
-		color = core.status.maps[floorId].color;
-	core.clearMap('curtain');
-	core.status.curtainColor = color;
-	if (color) core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
+	} else if (fromLoad && !core.hasFlag('__bgm__')) core.pauseBgm(); // 没有flag的情况下读档到静音楼层，则暂停背景音乐，以避免读档前不同的bgm继续播放
 	// 更改天气
-	var weather = core.getFlag('__weather__', null);
-	if (!weather && core.status.maps[floorId].weather)
-		weather = core.status.maps[floorId].weather;
+	var weather = core.getFlag('__weather__', core.status.maps[floorId].weather);
 	if (weather)
 		core.setWeather(weather[0], weather[1]);
 	else core.setWeather();
@@ -1552,6 +1543,9 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		core.status.hero.statistics.ignoreSteps += ignoreSteps;
 		if (core.hasFlag('poison')) {
 			core.updateStatusBar();
+		} else {
+			if (core.flags.statusCanvas && !core.domStyle.isVertical) core.ui.uidata.drawStatusBar(); // 上面更新勇士位置并没有用 setHeroLoc 函数，因此这里手动重绘横屏的自绘状态栏
+			core.checkAutoEvents();
 		}
 		core.checkRouteFolding();
 		return true;
@@ -1588,102 +1582,54 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 		.sort( /*function (id1, id2) { return core.material.items[id1].name <= core.material.items[id2].name ? -1 : 1 }*/ );
 },
         "drawStatusBar": function () {
-	// 自定义绘制状态栏，需要开启状态栏canvas化
-
-	// 如果是非状态栏canvas化，直接返回
-	if (!core.flags.statusCanvas) return;
+	// 自绘状态栏，需要全塔属性开启系统开关statusCanvas
 	var ctx = core.dom.statusCanvasCtx;
-	// 清空状态栏
-	core.clearMap(ctx);
-	// 如果是隐藏状态栏模式，直接返回
-	if (!core.domStyle.showStatusBar) return;
-
-	// 作为样板，只绘制楼层、生命、攻击、防御、护盾、金币、钥匙这七个内容
-	// 需要其他的请自行进行修改；横竖屏都需要进行适配绘制。
-	// （可以使用Chrome浏览器开控制台来模拟手机上的竖屏模式的显示效果，具体方式自行百度）
-	// 横屏模式下的画布大小是 129*416
-	// 竖屏模式下的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
-	// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
-
-	core.setFillStyle(ctx, core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor);
-
-	// 绘制一段文字，带斜体判定
-	var _fillBoldTextWithFontCheck = function (text, x, y, style) {
-		// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
-		if (!/^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(text))
-			core.setFont(ctx, 'bold 18px Verdana');
-		else core.setFont(ctx, 'italic bold 18px Verdana');
-		core.fillBoldText(ctx, text, x, y, style);
-	}
-
-	// 横竖屏需要分别绘制...
-	if (!core.domStyle.isVertical) {
-		// 横屏模式
-
-		// 绘制楼层
-		core.drawImage(ctx, core.statusBar.icons.floor, 6, 9, 25, 25);
-		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 42, 29);
-
-		// 绘制生命
-		core.drawImage(ctx, core.statusBar.icons.hp, 6, 43, 25, 25);
-		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 42, 63);
-
-		// 绘制攻击
-		core.drawImage(ctx, core.statusBar.icons.atk, 6, 77, 25, 25);
-		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 42, 97);
-
-		// 绘制防御
-		core.drawImage(ctx, core.statusBar.icons.def, 6, 111, 25, 25);
-		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 42, 131);
-
-		// 绘制护盾
-		core.drawImage(ctx, core.statusBar.icons.mdef, 6, 145, 25, 25);
-		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 42, 165);
-
-		// 绘制金币
-		core.drawImage(ctx, core.statusBar.icons.money, 6, 179, 25, 25);
-		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 42, 199);
-
-		// 绘制经验
-		core.drawImage(ctx, core.statusBar.icons.exp, 6, 213, 25, 25);
-		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 42, 233);
-
-		// 绘制三色钥匙
-		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 11, 267, '#FFCCAA');
-		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 46, 267, '#AAAADD');
-		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 81, 267, '#FF8888');
-
-	} else {
-		// 竖屏模式
-
+	core.clearMap(ctx); // 清空竖屏状态栏
+	if (!core.flags.statusCanvas || !core.status.floorId) return; // 如果未开启系统开关或在标题事件/开场剧情，则直接返回
+	if (!core.domStyle.isVertical) { // 横屏模式下，用公共事件预编译然后画在地图上
+		if (!core.domStyle.showStatusBar) // 如果状态栏已隐藏，则直接清空并返回
+			return core.clearMap('uievent', core.getFlag('__canvas_left__', 0), 0, Math.floor(core.__WIDTH__ / 4) * core.__UNIT__, core.__PX_HEIGHT__);
+		try {
+			eval(core.getFlag('__statusCanvas__', ''));
+		} catch (e) {
+			if (e != 'exit') console.log(e);
+		}
+	} else { // 竖屏模式下，和正方形样板一样用老办法绘制
+		if (!core.domStyle.showStatusBar) return; // 如果状态栏已隐藏，则直接返回
+		// 作为样板，只绘制楼层、生命、攻击、防御、护盾、金币、经验、钥匙这八个内容
+		// 需要其他的请自行进行修改；可以点击最上方的“预览”按钮设置勇士属性、道具装备、变量等并查看效果，仅供参考
+		// 需要在游戏中查看竖屏效果的话，可以使用Chrome或Edge浏览器开控制台“切换设备仿真”（Ctrl+Shift+M），或干脆将窗口拉到瘦高形状
+		// 竖屏模式下的画布大小是 core.__PX_WIDTH__ * (32 * rows + 9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值，最小为1最大为5
+		core.setFillStyle(ctx, core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor);
+		// 绘制一段文字，带斜体判定
+		var _fillBoldTextWithFontCheck = function (text, x, y, style) {
+			// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
+			if (!/^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(text))
+				core.setFont(ctx, 'bold 18px Consolas');
+			else core.setFont(ctx, 'italic bold 18px Verdana');
+			core.fillBoldText(ctx, text, x, y, style);
+		}
 		// 绘制楼层
 		core.drawImage(ctx, core.statusBar.icons.floor, 6, 6, 25, 25);
 		_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 42, 26);
-
 		// 绘制生命
 		core.drawImage(ctx, core.statusBar.icons.hp, 137, 6, 25, 25);
 		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 173, 26);
-
 		// 绘制攻击
 		core.drawImage(ctx, core.statusBar.icons.atk, 268, 6, 25, 25);
 		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 304, 26);
-
 		// 绘制防御
 		core.drawImage(ctx, core.statusBar.icons.def, 6, 38, 25, 25);
 		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 42, 58);
-
 		// 绘制护盾
 		core.drawImage(ctx, core.statusBar.icons.mdef, 137, 38, 25, 25);
 		_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 173, 58);
-
 		// 绘制金币
 		core.drawImage(ctx, core.statusBar.icons.money, 268, 38, 25, 25);
 		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 304, 58);
-
 		// 绘制经验
 		core.drawImage(ctx, core.statusBar.icons.exp, 6, 70, 25, 25);
 		_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 42, 90);
-
 		// 绘制三色钥匙
 		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 142, 90, '#FFCCAA');
 		_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 177, 90, '#AAAADD');
@@ -1714,8 +1660,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 	var left = 48,
 		top = 36,
-		right = core.__PIXELS__ - 2 * left,
-		bottom = core.__PIXELS__ - 2 * top;
+		right = core.__PX_WIDTH__ - 2 * left,
+		bottom = core.__PX_HEIGHT__ - 2 * top;
 
 	core.setAlpha('ui', 0.85);
 	core.fillRect('ui', left, top, right, bottom, '#000000');
@@ -1727,10 +1673,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 	// 名称
 	core.setTextAlign('ui', 'left');
 	var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
-	core.fillText('ui', "HTML5 魔塔样板", text_start, top + 35, globalAttribute.selectColor, "bold 22px " + globalAttribute.font);
+	core.fillText('ui', "HTML5 " + core.firstData.name, text_start, top + 35, globalAttribute.selectColor, "bold 22px " + globalAttribute.font);
 	core.fillText('ui', "版本： " + main.__VERSION__, text_start, top + 80, "#FFFFFF", "bold 17px " + globalAttribute.font);
-	core.fillText('ui', "作者： 艾之葵", text_start, top + 112);
-	core.fillText('ui', 'HTML5魔塔交流群：539113091', text_start, top + 112 + 32);
+	core.fillText('ui', "作者： 秋橙", text_start, top + 112);
+	core.fillText('ui', 'HTML5造塔技术群：959329661', text_start, top + 112 + 32);
 	// TODO: 写自己的“关于”页面，每次增加32像素即可
 	core.playSound('打开界面');
 }

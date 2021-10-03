@@ -1,20 +1,15 @@
 var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
     "init": function () {
-
-	console.log("插件编写测试");
-
+	main.log = function () {} // console.log("插件编写测试");
 	// 可以写一些直接执行的代码
 	// 在这里写的代码将会在【资源加载前】被执行，此时图片等资源尚未被加载。
 	// 请勿在这里对包括bgm，图片等资源进行操作。
-
-
 	this._afterLoadResources = function () {
 		// 本函数将在所有资源加载完毕后，游戏开启前被执行
 		// 可以在这个函数里面对资源进行一些操作。
 		// 若需要进行切分图片，可以使用 core.splitImage() 函数，或直接在全塔属性-图片切分中操作
 	}
-
 	// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为 core.plugin.xxx();
 	// 从V2.6开始，插件中用this.XXX方式定义的函数也会被转发到core中，详见文档-脚本-函数的转发。
 },
@@ -40,7 +35,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var ctx = core.getContextByName(name);
 		if (ctx == null) {
 			if (typeof name == 'string')
-				ctx = core.createCanvas(name, 0, 0, core.__PIXELS__, core.__PIXELS__, 98);
+				ctx = core.createCanvas(name, 0, 0, core.__PX_WIDTH__, core.__PX_HEIGHT__, 98);
 			else return;
 		}
 
@@ -238,7 +233,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var choices = data.choices;
 		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (keycode == 88 || keycode == 27) { // X, ESC
-			core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
+			core.actions._clickAction(core.actions.H_WIDTH, topIndex + choices.length - 1);
 			return true;
 		}
 		return false;
@@ -252,7 +247,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		var choices = data.choices;
 		var topIndex = core.actions._getChoicesTopIndex(choices.length);
 		if (keycode == 13 || keycode == 32) { // Space, Enter
-			core.actions._clickAction(core.actions.HSIZE, topIndex + core.status.event.selection);
+			core.actions._clickAction(core.actions.H_WIDTH, topIndex + core.status.event.selection);
 			_shouldProcessKeyUp = false;
 			return true;
 		}
@@ -380,8 +375,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		document.getElementById('gameDraw').appendChild(canvas);
 		var ctx = canvas.getContext('2d');
 		core.canvas[name] = ctx;
-		canvas.width = core.__PIXELS__;
-		canvas.height = core.__PIXELS__;
+		canvas.width = core.__PX_WIDTH__;
+		canvas.height = core.__PX_HEIGHT__;
 		return canvas;
 	}
 
@@ -447,16 +442,16 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			// 背景层2插入事件层前
 			parent.insertBefore(input, child);
 			// 不能直接更改背景层2的innerText 所以创建文本节点
-			var txt = document.createTextNode('bg2');
+			var txt = document.createTextNode('背景2');
 			// 插入事件层前(即新插入的背景层2前)
 			parent.insertBefore(txt, child);
 			// 向最后插入前景层2(即插入前景层后)
 			parent.appendChild(input2);
-			var txt2 = document.createTextNode('fg2');
+			var txt2 = document.createTextNode('前景2');
 			parent.appendChild(txt2);
-			parent.childNodes[2].replaceWith("bg");
-			parent.childNodes[6].replaceWith("事件");
-			parent.childNodes[8].replaceWith("fg");
+			// parent.childNodes[2].replaceWith("bg");
+			// parent.childNodes[6].replaceWith("事件");
+			// parent.childNodes[8].replaceWith("fg");
 		} else {
 			var input = createCanvasBtn_mobile('bg2');
 			var input2 = createCanvasBtn_mobile('fg2');
@@ -1123,7 +1118,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	core.ui._drawToolbox = function (index) {
 		_drawToolbox.call(this, index);
 		core.setTextAlign('ui', 'left');
-		core.fillText('ui', '类别[E]：' + (currentCategory || "全部"), 15, this.PIXEL - 13);
+		core.fillText('ui', '类别[E]：' + (currentCategory || "全部"), 15, this.PX_WIDTH - 13);
 	}
 
 	// 获得所有应该在道具栏显示的某个类型道具
@@ -1139,7 +1134,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 注入道具栏的点击事件（点击类别）
 	var _clickToolbox = core.actions._clickToolbox;
 	core.actions._clickToolbox = function (x, y) {
-		if (x >= 0 && x <= this.HSIZE - 4 && y == this.LAST) {
+		if (x >= 0 && x <= this.H_WIDTH - 4 && y == this.Y_LAST) {
 			drawToolboxCategory();
 			return;
 		}
@@ -1228,7 +1223,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	// 样板的勇士/跟随者移动时只使用2、4两帧，观感较差。本插件可以将四帧全用上。
 
 	// 是否启用本插件
-	var __enable = false;
+	var __enable = true;
 	if (!__enable) return;
 
 	["up", "down", "left", "right"].forEach(function (one) {
@@ -1332,12 +1327,12 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 
 	// 复写“开始游戏”
 	core.events._startGame_start = function (hard, seed, route, callback) {
-		console.log('开始游戏');
+		// console.log('开始游戏');
 		core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
 		core.setHeroLoc('x', -1);
 		core.setHeroLoc('y', -1);
 
-		if (seed != null) {
+		if (seed != null && seed > 0) {
 			core.setFlag('__seed__', seed);
 			core.setFlag('__rand__', seed);
 		} else core.utils.__init_seed();
@@ -1361,6 +1356,309 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 	core.control.loadData = function (data, callback) {
 		core.plugin._resetTitleCanvas();
 		_loadData.call(core.control, data, callback);
+	}
+},
+    "routeFixing": function () {
+	// 是否开启本插件，true 表示启用，false 表示禁用。
+	var __enable = true;
+	if (!__enable) return;
+	/*
+	 使用说明：启用本插件后，录像回放时您可以用数字键1或6分别切换到原速或24倍速。
+	 暂停播放时按数字键7（电脑按N）可以单步播放，数字键2-5可以进行录像自助精修。
+	 具体描述见下（实际弹窗请求您输入时不要带有任何空格）：
+	 
+	 up down left right 勇士向某个方向行走一步
+	 item:ID 使用某件道具，如item:bomb表示使用炸弹
+	 unEquip:n 卸掉身上第(n+1)件装备（n从0开始），如unEquip:1默认表示卸掉盾牌
+	 equip:ID 穿上某件装备，如equip:sword1表示装上铁剑
+	 saveEquip:n 将身上的当前套装保存到第n套快捷套装（n从0开始）
+	 loadEquip:n 快捷换上之前保存好的第n套套装
+	 fly:ID 使用楼传飞到某一层，如fly:MT10表示飞到主塔10层
+	 choices:none 确认框/选择项超时（作者未设置超时时间则此项视为缺失）
+	 choices:n 确认框/选择项选择第(n+1)项（选择项n从0开始，确认框n为0表示确定，1表示取消），n越界将会报错
+	 选择项n为负数时表示选择倒数第-n项，如-1表示最后一项（V2.8.2起标准全局商店的“离开”项）
+	 此项缺失的话，确认框将选择作者指定的默认项（初始光标位置），选择项将弹窗请求补选（后台录像验证中则选第一项0，可以复写函数来修改）
+	 shop:ID 打开某个全局商店，如shop:itemShop表示打开道具商店。因此连载塔千万不要中途修改商店ID！
+	 turn 单击勇士（Z键）转身
+	 turn:dir 勇士转向某个方向，dir可以为up down left right
+	 getNext 轻按获得身边道具，优先获得面前的，身边如果没有道具则此项会导致报错
+	 input:none “等待用户操作事件”中超时（作者未设置超时时间则此项会导致报错）
+	 input:xxx 可能表示“等待用户操作事件”的一个操作（如按键操作将直接记录input:keycode），也可能表示一个“接受用户输入数字”的输入，后者的情况下xxx为输入的数字。此项缺失的话前者将直接报错，后者将用0代替
+	 input2:xxx 可能表示“读取全局存储（core.getGlobal）”读取到的值，也可能表示一个“接受用户输入文本”的输入，两种情况下xxx都为base64编码。此项缺失的话前者将重新现场读取，后者将用空字符串代替
+	 no 可能表示走到可穿透的楼梯上不触发楼层切换事件，也可能表示在不关闭装备栏的情况下连续切装不重复触发穿脱事件
+	 move:x:y 尝试瞬移到[x,y]点
+	 key:n 按下键值为n的键，如key:49表示按下大键盘数字键1，默认会触发使用破墙镐
+	 click:n:px:py 点击自绘状态栏，n为0表示横屏1表示竖屏，[px,py]为点击的像素坐标
+	 random:n 生成了随机数n，即core.rand2(num)的返回结果，n必须在[0,num-1]范围，num必须为正整数。此项缺失将导致现场重新随机生成数值，可能导致回放结果不一致！
+	 作者自定义的新项（一般为js对象，可以先JSON.stringify()再core.encodeBase64()得到纯英文数字的内容）需要用(半角圆括弧)括起来。
+	 
+	 当您使用数字键5将一些项追加到即将播放内容的开头时，请注意要逆序逐项追加，或者每追加一项就按下数字键7或字母键N单步播放。
+	 电脑端熟练以后推荐直接在控制台操作core.status.route和core.status.replay.toReplay（后者录像回放时才有），配合var以及core.push()和core.unshift()更加灵活自由哦！
+	 */
+	core.registerAction('onkeyUp', '_sys_onkeyUp_replay', function (e) { // 重新注册录像回放时的按键处理行为，将7设为单步播放，2-5设为录像精修
+		if (this._checkReplaying()) {
+			if (e.keyCode == 27) // ESCAPE
+				core.stopReplay();
+			else if (e.keyCode == 90) // Z
+				core.speedDownReplay();
+			else if (e.keyCode == 67) // C
+				core.speedUpReplay();
+			else if (e.keyCode == 32) // SPACE
+				core.triggerReplay();
+			else if (e.keyCode == 65) // A
+				core.rewindReplay();
+			else if (e.keyCode == 83) // S
+				core.control._replay_SL();
+			else if (e.keyCode == 88) // X
+				core.control._replay_book();
+			else if (e.keyCode == 33 || e.keyCode == 34) // PgUp/PgDn
+				core.control._replay_viewMap();
+			else if (e.keyCode == 78 || e.keyCode == 55) // N/7，单步播放
+				core.stepReplay();
+			else if (e.keyCode == 84) // T
+				core.control._replay_toolbox();
+			else if (e.keyCode == 81) // Q
+				core.control._replay_equipbox();
+			else if (e.keyCode == 66) // B
+				core.ui._drawStatistics();
+			else if (e.keyCode == 49 || e.keyCode == 54) // 1/6，原速/24倍速播放
+				core.setReplaySpeed(e.keyCode == 49 ? 1 : 24);
+			else if (e.keyCode > 49 && e.keyCode < 54) { // 2-5，录像精修
+				switch (e.keyCode - 48) {
+				case 2: // pop
+					alert("您已移除已录制内容的最后一项：" + core.status.route.pop());
+					break;
+				case 3: // push
+					core.utils.myprompt("请输入您要追加到已录制内容末尾的项：", "", function (value) {
+						if (value != null) core.status.route.push(value);
+					});
+					break;
+				case 4: // shift
+					alert("您已移除即将播放内容的第一项：" + core.status.replay.toReplay.shift());
+					break;
+				case 5: // unshift
+					core.utils.myprompt("请输入您要追加到即将播放内容开头的项：", "", function (value) {
+						if (value != null) core.status.replay.toReplay.unshift(value);
+					});
+				}
+			}
+			return true;
+		}
+	}, 100);
+},
+    "myNumpad": function () {
+	// 样板自带的整数输入事件为白屏弹窗且可以误输入任意非法内容，观感较差。本插件可以将其美化成仿RM样式，同时带有音效
+	// 另一方面，4399等第三方平台不允许使用包括core.myprompt和core.myconfirm在内的弹窗，因此也需要此插件来替代，不然类似生命魔杖的道具就不好实现了
+
+	// 是否启用本插件，false表示禁用，true表示启用
+	var __enable = true;
+	if (!__enable) return;
+
+	core.events._action_input = function (data, x, y, prefix) { // 复写整数输入事件
+		if (core.isReplaying()) { // 录像回放时，处理方式不变，但增加负整数支持
+			core.events.__action_getInput(core.replaceText(data.text, prefix), false, function (value) {
+				value = parseInt(value) || 0; // 去掉了取绝对值的步骤
+				core.status.route.push("input:" + value);
+				core.setFlag("input", value);
+				core.doAction();
+			});
+		} else {
+			// 正常游戏中，采用暂停录制的方式然后用事件流循环“绘制-等待-变量操作”三板斧实现（按照13*13适配的）。
+			// 您可以自行修改下述公共事件的内容来适配15*15或其他需求，但请务必注意要在事件结尾裁剪录像。
+			core.setFlag('@temp@text', core.replaceText(data.text, prefix)); // 预替换提示文字，因为公共事件里无法引用data和prefix这两个自变量
+			core.setFlag('@temp@length', core.status.route.length); // 记录当前录像长度，公共事件结束后裁剪，达到“暂停录制”的效果
+			core.setFlag('input', 0); // 输入值归零
+			core.insertCommonEvent('整数输入', null, x, y); // 插入公共事件
+			core.events.doAction(); // 重要！继续处理刚刚插入的公共事件
+		}
+	}
+},
+    "precompile": function () {
+	// 使用说明：将原本写在core.insertAction([...])处的json事件指令数组用（即事件编辑器右侧的文本内容，如果是公共事件则可以用core.events.getCommonEvent('公共事件名')得到）
+	// var script = core.plugin.compile([...])编译成字符串，然后
+	// try { eval(script); } catch (e) { if (e != 'exit') console.log(e); }
+	// 即可，尤其适用于UI绘制事件（甚至伤害计算？）。此插件尚在公测中，如有bug请立即向群内ad、小艾、古祠、理派四阵 等技术人员反馈
+	this.compile = function (arr) { // json事件指令编译为js脚本，不能编译异步事件和独立开关，不支持“省略当前点”、地图处理、多层跳出/继续循环等
+		if (!(arr instanceof Array) || arr.length <= 0) return ''; // arr不为数组或长度不为正数，则直接返回空串
+		var s = ''; // 编译的结果，可被eval，最好套一层 try{...}catch(e){...} 并在第二对花括弧中特判 e === 'exit'
+		for (var i in arr) {
+			var data = arr[i];
+			switch (data.type) {
+				/* 显示文字 Start */
+			case 'setText': // 设置剧情文本的属性
+				s += 'core.events.setTextAttribute(' + JSON.stringify(data) + ');';
+				break;
+			case 'tip': // 左上角的气泡提示，这里提供frame参数
+				s += 'core.ui.drawTip(core.utils.replaceText("' + data.text + '"),"' + data.icon + '",' + data.frame + ');';
+				break;
+			case 'win': // 游戏胜利
+				s += 'core.events.win(core.utils.replaceText("' + data.reason + '"),' + data.norank + ',' + data.noexit + ');';
+				break;
+			case 'lose': // 游戏失败
+				s += 'core.events.lose(core.utils.replaceText("' + data.reason + '"));';
+				break;
+			case 'restart': // 重启游戏，瞬间完成且不切换背景音乐
+				s += 'core.showStartAnimate(true);';
+				break;
+				/* 显示文字 End */
+				/* 数据相关 Start */
+			case 'setValue': // 数值操作，强制不刷新状态栏
+				s += 'core.events.setValue("' + data.name + '","' + (data.operator || '=') + '","' + data.value + '");';
+				break;
+			case 'setEnemy': // 设置某个id的怪物属性
+				s += 'core.events.setEnemy("' + data.id + '","' + data.name + '","' + data.value + '","' + (data.operator || '=') + '",null,true);'; // 强制不刷新显伤
+				break; // “定点设置/重置/移动怪物属性”等可以填多个坐标的事件还在研究
+			case 'setEquip': // 设置某个id的装备属性，如果是已经穿在身上的装备则会触发【刷新状态栏】，请务必注意！
+				s += 'core.items.setEquip("' + data.id + '","' + data.valueType + '","' + data.name + '","' + data.value + '","' + (data.operator || '=') + '");';
+				break;
+			case 'setFloor': // 设置某个id或当前层的楼层属性
+				s += 'core.status.maps.' + (data.floorId || core.status.floorId) + '.' + data.name + '=' + JSON.stringify(data.value) + ';'; // 强制不刷新状态栏
+				break;
+			case 'setGlobalAttribute': // 设置全局属性/主样式
+				s += 'core.events.setGlobalAttribute("' + data.name + '","' + data.value + '");';
+				break;
+			case 'setGlobalValue': // 设置全局数值，不建议使用，因为不支持运算符且data.value只能写常数，建议直接写脚本
+				s += 'core.values.' + data.name + '=' + data.value + ';';
+				break;
+			case 'setGlobalFlag': // 设置系统开关，注意不要出现开启“自绘状态栏”却没开启“横屏底部工具栏”的情况，否则横屏工具栏会挤在左下角！
+				s += 'core.events.setGlobalFlag("' + data.name + '",' + data.value + ');';
+				break;
+			case 'setNameMap': // 设置文件别名，并计入存档
+				s += 'core.events.setNameMap("' + data.name + '","' + (data.value || '') + '");';
+				break;
+			case 'update': // 刷新状态栏和地图显伤
+				s += 'core.updateStatusBar(' + data.doNotCheckAutoEvents + ');';
+				break;
+			case 'loadEquip':
+			case 'unloadEquip':
+				s += 'core.items.' + data.type + '(' + (data.id ? '"' + data.id + '"' : data.pos) + ');'; // 穿脱装备
+				break;
+			case 'openShop':
+			case 'disableShop':
+				s += 'core.plugin.setShopVisited("' + data.id + '",' + (data.type.charAt(0) == 'o') + ');'; // 开关全局商店，注意这里不支持设为启用后立即打开
+				break;
+			case 'setHeroIcon': // 更改勇士行走图
+				s += 'core.events.setHeroIcon("' + data.name + '",true);'; // 强制不重绘
+				break;
+			case 'follow':
+			case 'unfollow':
+				s += 'core.events.' + data.type + '("' + (data.name || '') + '");'; // 跟随者入队/离队，会触发勇士重绘
+				break;
+				/* 数据相关 End */
+				// 地图处理类除了战斗、开门、移动、跳跃，都可以写多个坐标，而这四个是异步的，因此全都摸了
+				/* 事件控制 Start */
+			case 'if': // 条件分歧
+				s += 'if(core.utils.calValue("' + data.condition + '")){' + this.compile(data['true']) + '}';
+				if (data['false']) s += 'else{' + this.compile(data['false']) + '}'; // “否则”分支
+				break;
+			case 'switch': // 多重分歧，使用匿名函数闭包防止“判别值”的作用域污染，同时使得“跳出”能够用 return 关键字实现。
+				s += '(function(){var key=core.utils.calValue("' + data.condition + '");'; // “判别值”只计算一次
+				for (var i in data.caseList) {
+					s += 'if(' + (data.caseList[i].case != 'default' ? 'core.utils.calValue("' + data.caseList[i].case+'")===key' : 'true') + '){';
+					s += this.compile(data.caseList[i].action) + (data.caseList[i].nobreak ? '' : 'return') + '}';
+				}
+				s += '})();';
+				break;
+			case 'for': // 计数循环遍历
+				var temp = "'@temp@" + data.name.substring(5) + "'",
+					step = core.utils.calValue(data.step); // 循环变量的flag名和步长
+				s += 'for(core.setFlag(' + temp + ',core.utils.calValue("' + data.from + '"));';
+				if (step) s += 'core.getFlag(' + temp + ',0)' + (step > 0 ? '<=' : '>=') + 'core.utils.calValue("' + data.to + '")';
+				s += ';core.addFlag(' + temp + ',' + step + ')){' + this.compile(data.data) + '}';
+				break;
+			case 'forEach': // 数组循环遍历
+				var listName = "'@temp@forEach@" + data.name.substring(5) + "'";
+				s += 'for(core.setFlag(' + listName + ',core.clone(' + JSON.stringify(data.list) + '));core.getFlag(' + listName + ',[]).length>0;){core.setFlag(';
+				s += ("'@temp@" + data.name.substring(5) + "'") + ',core.getFlag(' + listName + ',[]).shift());' + this.compile(data.data) + '}';
+				break;
+			case 'while': // 前置条件循环
+				s += 'while(core.utils.calValue("' + data.condition + '")){' + this.compile(data.data) + '}';
+				break;
+			case 'dowhile': // 后置条件循环
+				s += 'do{' + this.compile(data.data) + '}while(core.utils.calValue("' + data.condition + '"));';
+				break;
+			case 'break':
+			case 'continue':
+				s += data.type + ';'; // 跳出/提前结束本轮的最内层循环，这里不支持指定层数
+				break;
+			case 'exit': // 立刻结束当前事件，直接抛出异常
+				s += "throw 'exit';";
+				break;
+				/* 事件控制 End */
+				/* 特效表现 Start */
+			case 'stopAsync': // 停止所有异步事件
+			case 'showStatusBar': // 显示/隐藏状态栏
+			case 'hideStatusBar':
+				s += 'core.' + data.type + '(' + data.toolbox + ');';
+				break;
+			case 'animate': // 播放动画，强制不等待执行完毕，位置不填视为勇士
+				if (!data.loc || data.loc == 'hero') s += 'core.maps.drawHeroAnimate("' + data.name + '");';
+				else s += 'core.drawAnimate("' + data.name + '",' + 'core.calValue("' + data.loc[0] + '"),' + 'core.calValue("' + data.loc[1] + '"),' + data.alignWindow + ');';
+				break;
+			case 'stopAnimate': // 停止所有动画，可以选择是否执行回调（例如不执行回调从而让自我回调的循环动画彻底停止）
+				s += 'core.stopAnimate(null,' + data.doCallback + ');';
+				break;
+			case 'lockViewport': // 锁定/解锁视角
+				s += 'core.setFlag("__lockViewport__",' + data.lock + ');';
+				break;
+			case 'setHeroOpacity': // 设置勇士不透明度，瞬间完成，强制不重绘
+				s += 'core.setFlag("__heroOpacity__",' + data.opacity + ');';
+				break;
+			case 'setCurtain': // 更改画面色调，瞬间完成
+				data.color = JSON.stringify(data.color);
+				s += 'core.clearMap("curtain");core.fillRect("curtain",0,0,core.__PX_WIDTH__,core.__PX_HEIGHT__,core.arrayToRGBA(core.status.curtainColor=';
+				s += (data.color || 'core.status.thisMap.color') + '||[0,0,0,0]));'
+				s += 'if(!' + data.color + '||' + data.keep + ')core.setFlag("__color__",' + data.color + ');';
+				break;
+			case 'setWeather': // 更改天气
+				s += data.name ? 'core.setWeather("' + data.name + '",' + data.level + ');' : 'core.setWeather();';
+				s += 'if(' + data.keep + ')core.setFlag("__weather__",["' + data.name + '",' + data.level + ']);else core.removeFlag("__weather__");';
+				break;
+			case 'autoSave': // 自动存档，强制不提示，且不能无视下面的禁止存档状态
+				s += 'core.control.autosave();';
+				break;
+			case 'forbidSave': // 是否禁止存档
+				s += 'core.setFlag("__forbidSave__",' + data.forbid + ');';
+				break;
+				/* 特效表现 End */
+				/* 音像处理 Start */
+			case 'showGif': // 显示或清空动图
+				if (data.loc) s += 'core.events.showGif("' + (data.name || '') + '",' + 'core.calValue("' + data.loc[0] + '"),' + 'core.calValue("' + data.loc[1] + '"));';
+				else s += 'core.events.showGif("' + (data.name || '') + '");'
+				break;
+			case 'playBgm': // 播放背景音乐
+				s += 'core.playBgm("' + data.name + '",' + data.startTime + ');core.setFlag("__bgm__",' + (data.keep ? '"' + data.name + '"' : null) + ');';
+				break;
+			case 'pauseBgm': // 暂停/继续背景音乐
+			case 'resumeBgm':
+			case 'loadBgm': // 预加载/释放背景音乐
+			case 'freeBgm':
+				s += 'core.' + data.type + '(' + (data.name ? '"' + data.name + '"' : data.resume) + ');'
+				break;
+			case 'playSound': // 播放音效
+				s += 'if(' + data.stop + ')core.stopSound();core.playSound("' + data.name + '",' + data.pitch + ');';
+				break;
+			case 'stopSound': // 停止所有音效
+				s += 'core.control.stopSound();';
+				break;
+			case 'setVolume': // 设置bgm音量，瞬间完成
+				s += 'core.setFlag("__volume__",' + (data.value = core.utils.clamp(parseInt(data.value) / 100, 0, 1)) + ');core.setVolume(flags.__volume__,0);';
+				break;
+			case 'setBgmSpeed': // 更改背景音乐播放速度，可以选择是否同时改变音调（由勾选框改为下拉框，确保 null false true 三种值都有效）
+				s += 'core.setBgmSpeed(' + data.value + ',' + data.pitch + ');';
+				break;
+				/* 音像处理 End */
+			case 'function': // 原生js脚本，data.function 已经是匿名函数了，直接闭包即可
+				s += '(' + data.function+')();';
+				break;
+			case 'previewUI': // UI绘制预览
+				s += this.compile(data.action);
+				break;
+			default: // UI绘制
+				if (core.ui['_uievent_' + data.type]) s += 'core.ui._uievent_' + data.type + '(' + JSON.stringify(data) + ');';
+			}
+		}
+		return s;
 	}
 }
 }

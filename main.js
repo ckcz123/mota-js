@@ -3,7 +3,8 @@ function main() {
     //------------------------ 用户修改内容 ------------------------//
 
     this.version = "2.8.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
-
+    this.width = 17; // 运行时视野横向宽度的格子数，会被libs\core.js直接引用，可任意修改
+    this.height = 13; // 运行时视野纵向高度的格子数，会被libs\core.js直接引用，可任意修改
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
     // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
@@ -14,8 +15,8 @@ function main() {
 
     this.isCompetition = false; // 是否是比赛模式
 
-    this.savePages = 1000; // 存档页数，每页可存5个；默认为1000页5000个存档
-    this.criticalUseLoop = 1; // 循环临界的分界
+    this.savePages = 1 << 10; // 存档页数，每页可存5个；默认为1000页5000个存档
+    this.criticalUseLoop = Number.MAX_SAFE_INTEGER; // 循环临界的分界
 
     //------------------------ 用户修改内容 END ------------------------//
 
@@ -696,8 +697,6 @@ main.statusBar.image.settings.onclick = function (e) {
 
 ////// 点击工具栏时 //////
 main.dom.hard.onclick = function () {
-    if (core.isReplaying())
-        return;
     main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);
 }
 

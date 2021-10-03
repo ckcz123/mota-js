@@ -351,7 +351,7 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"text": "可以开启当前层所有黄门",
 		"itemEffect": "core.addItem('yellowKey', 1);\ncore.addItem('blueKey', 1);\ncore.addItem('redKey', 1);",
 		"itemEffectTip": "，全钥匙+1",
-		"useItemEffect": "(function () {\n\tvar actions = core.searchBlock(\"yellowDoor\").map(function (block) {\n\t\treturn { \"type\": \"openDoor\", \"loc\": [block.x, block.y], \"async\": true };\n\t});\n\tactions.push({ \"type\": \"waitAsync\" });\n\tactions.push({ \"type\": \"tip\", \"text\": core.material.items[itemId].name + \"使用成功\" });\n\tcore.insertAction(actions);\n})();",
+		"useItemEffect": "(function () {\n\tvar actions = core.searchBlock(\"yellowDoor\").map(function (block) {\n\t\treturn { \"type\": \"openDoor\", \"loc\": [block.x, block.y], \"async\": true };\n\t});\n\tactions.push({'type': 'waitAsync', 'excludeAnimates': true});\n\tactions.push({ \"type\": \"tip\", \"text\": core.material.items[itemId].name + \"使用成功\" });\n\tcore.insertAction(actions);\n})();",
 		"canUseItemEffect": "(function () {\n\treturn core.searchBlock('yellowDoor').length > 0;\n})();"
 	},
 	"greenKey": {
@@ -389,8 +389,8 @@ var items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a =
 		"cls": "tools",
 		"name": "中心对称飞行器",
 		"text": "可以飞向当前楼层中心对称的位置",
-		"useItemEffect": "core.playSound('centerFly.mp3');\ncore.clearMap('hero');\ncore.setHeroLoc('x', core.bigmap.width - 1 - core.getHeroLoc('x'));\ncore.setHeroLoc('y', core.bigmap.height - 1 - core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
-		"canUseItemEffect": "(function () {\n\tvar toX = core.bigmap.width - 1 - core.getHeroLoc('x'),\n\t\ttoY = core.bigmap.height - 1 - core.getHeroLoc('y');\n\tvar id = core.getBlockId(toX, toY);\n\treturn id == null;\n})();"
+		"useItemEffect": "core.playSound('centerFly.mp3');\ncore.clearMap('hero');\nvar toX = core.bigmap.width - 1 - core.getHeroLoc('x');\nif (core.flags.statusCanvas && core.bigmap.width <= core.__WIDTH__)\n\ttoX = core.__HEIGHT__ - 1 - core.getHeroLoc('x'); // 自绘状态栏时，特判是否是横向大地图，如果不是，则横向对称的范围以视野高度为准\ncore.setHeroLoc('x', toX);\ncore.setHeroLoc('y', core.bigmap.height - 1 - core.getHeroLoc('y'));\ncore.drawHero();\ncore.drawTip(core.material.items[itemId].name + '使用成功');",
+		"canUseItemEffect": "(function () {\n\tvar toX = core.bigmap.width - 1 - core.getHeroLoc('x'),\n\t\ttoY = core.bigmap.height - 1 - core.getHeroLoc('y');\n\tif (core.flags.statusCanvas && core.bigmap.width <= core.__WIDTH__)\n\t\ttoX = core.__HEIGHT__ - 1 - core.getHeroLoc('x'); // 自绘状态栏时，特判是否是横向大地图，如果不是，则横向对称的范围以视野高度为准\n\tvar id = core.getBlockId(toX, toY);\n\treturn id == null;\n})();"
 	},
 	"upFly": {
 		"cls": "tools",

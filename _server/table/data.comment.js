@@ -218,7 +218,7 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"animate": {
 							"_leaf": true,
 							"_type": "checkbox",
-							"_docs": "帧动画",
+							"_docs": "踏步动画",
 							"_data": "是否开启停止状态和对话框的帧动画"
 						},
 						"name": {

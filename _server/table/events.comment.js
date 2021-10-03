@@ -25,6 +25,18 @@ var events_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"_event": "commonEvent",
 						"_data": "回收钥匙商店"
 					},
+					"整数输入": {
+						"_leaf": true,
+						"_type": "event",
+						"_event": "commonEvent",
+						"_data": "面板美化"
+					},
+					"自绘状态栏": {
+						"_leaf": true,
+						"_type": "event",
+						"_event": "commonEvent",
+						"_data": "横屏专用"
+					}
 				}
 				if (obj[key]) return obj[key];
 				return {

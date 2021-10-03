@@ -7,8 +7,16 @@
 "use strict";
 
 function core() {
-    this.__SIZE__ = 13;
-    this.__PIXELS__ = this.__SIZE__ * 32;
+    this.__WIDTH__ = main.width; // 宽高直接引用main.js
+    this.__HEIGHT__ = main.height;
+    this.__UNIT__ = 32; // 定义每格的像素尺寸并引用，而不是写死32，为RMMV和RMMZ的48*48素材做准备
+    this.__PX_WIDTH__ = this.__WIDTH__ * this.__UNIT__;
+    this.__PX_HEIGHT__ = this.__HEIGHT__ * this.__UNIT__;
+    this.__HALF_WIDTH__ = Math.floor(this.__WIDTH__ / 2);
+    this.__HALF_HEIGHT__ = Math.floor(this.__HEIGHT__ / 2);
+
+    this.__SIZE__ = main.mode == 'editor' ? 15 : 13; // V2.8.2起，编辑器和运行时可以指定不同的视野大小了
+    this.__PIXELS__ = this.__SIZE__ * this.__UNIT__;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
     this.material = {
         'animates': {},
@@ -105,8 +113,8 @@ function core() {
         offsetY: 0,
         posX: 0, // 
         posY: 0, 
-        width: this.__SIZE__, // map width and height
-        height: this.__SIZE__,
+        width: this.__WIDTH__, // map width and height
+        height: this.__HEIGHT__,
         v2: false,
         threshold: 1024,
         extend: 10,
@@ -273,10 +281,10 @@ core.prototype.init = function (coreData, callback) {
     // 初始化画布
     for (var name in core.canvas) {
         if (core.domStyle.hdCanvas.indexOf(name) >= 0)
-            core.maps._setHDCanvasSize(core.canvas[name], core.__PIXELS__, core.__PIXELS__);
+            core.maps._setHDCanvasSize(core.canvas[name], core.__PX_WIDTH__, core.__PX_HEIGHT__);
         else {
-            core.canvas[name].canvas.width = core.__PIXELS__;
-            core.canvas[name].canvas.height = core.__PIXELS__;
+            core.canvas[name].canvas.width = core.__PX_WIDTH__;
+            core.canvas[name].canvas.height = core.__PX_HEIGHT__;
         }
     }
 
@@ -297,14 +305,14 @@ core.prototype._init_flags = function () {
     this._init_sys_flags();
     
     // 让你总是拼错！
-    window.on = true;
-    window.off = false;
-    window.ture = true;
-    window.flase = false;
+    // window.on = true;
+    // window.off = false;
+    // window.ture = true;
+    // window.flase = false;
 
-    core.dom.versionLabel.innerText = core.firstData.version;
+    core.dom.versionLabel.innerText = 'Ver ' + main.__VERSION__; // core.firstData.version;
     core.dom.logoLabel.innerText = core.firstData.title;
-    document.title = core.firstData.title + " - HTML5魔塔";
+    document.title = core.firstData.title;// + " - HTML5魔塔";
     document.getElementById("startLogo").innerText = core.firstData.title;
     (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
 
@@ -377,12 +385,13 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', true);
     core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
-    core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 0);
+    core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 2);
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed || 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);
-    if (core.values.floorChangeTime == null) core.values.floorChangeTime = 500;
+    if (core.values.floorChangeTime == null) core.values.floorChangeTime = 100;
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
+    if (core.flags.statusCanvas) core.flags.extendToolbar = true; // 开启自绘状态栏后，也强制开启横屏底部工具栏，否则会挤在左下角
 }
 
 core.prototype._init_platform = function () {

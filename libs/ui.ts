@@ -21,8 +21,9 @@ class Ui {
     }
 
     /** 获取某个container */
-    getContainer(name: string | PIXI.Sprite): PIXI.Container {
+    getContainer(name: string | PIXI.Sprite | PIXI.Container): PIXI.Container {
         if (name instanceof PIXI.Sprite) return name.parent;
+        else if (name instanceof PIXI.Container) return name;
         else {
             let s = (core.containers[name] || {})._sprite;
             if ((s || {}).parent instanceof PIXI.Container) return s.parent;
@@ -117,6 +118,50 @@ class Ui {
             });
         } else {
             s.texture = texture.texture;
+        }
+    }
+
+    /** 
+     * 在某个container上绘制图片
+     * @param container 容器名或容器的实例，只有当该参数为string时，才会将引用存进core.containers，才能删除该图片，否则不能删除
+     */
+    drawImageOnContainer(container: string | PIXI.Container, image: string, x: number = 0, y: number = 0,
+        w?: number, h?: number): void {
+        let c = this.getContainer(container);
+        if (!c) return;
+        let id: string;
+        if (typeof container === 'string') {
+            while (true) {
+                id = image + '_' + ~~(Math.random() * 1e8);
+                if (!core.containers[container][id]) break;
+            }
+        }
+        let url = 'project/images/' + image;
+        let loader = core.pixi.gameDraw.loader;
+        let textures = loader.resources;
+        let texture = textures[url];
+        let sprite: PIXI.Sprite;
+        if (!texture) {
+            loader.add(url).load(() => {
+                texture = textures[url];
+                sprite = new PIXI.Sprite(texture.texture);
+                sprite.x = x;
+                sprite.y = y;
+                if (w) sprite.width = w;
+                if (h) sprite.height = h;
+                c.addChild(sprite);
+                if (container instanceof PIXI.Container) return;
+                core.containers[container][id] = sprite;
+            });
+        } else {
+            sprite = new PIXI.Sprite(texture.texture);
+            sprite.x = x;
+            sprite.y = y;
+            if (w) sprite.width = w;
+            if (h) sprite.height = h;
+            c.addChild(sprite);
+            if (container instanceof PIXI.Container) return;
+            core.containers[container][id] = sprite;
         }
     }
 }

@@ -14,8 +14,28 @@ class Ui {
         let game = core.pixi.gameDraw;
         let dymContainer = new PIXI.Container();
         // 动态container，用于玩家绘制
+        let _sprite = new PIXI.Sprite();
         game.stage.addChild(dymContainer);
-        core.containers.dymContainer = dymContainer;
+        dymContainer.addChild(_sprite);
+        core.containers.dymContainer = { _sprite };
+    }
+
+    /** 获取某个container */
+    getContainer(name: string | PIXI.Sprite): PIXI.Container {
+        if (name instanceof PIXI.Sprite) return name.parent;
+        else {
+            let s = (core.containers[name] || {})._sprite;
+            if ((s || {}).parent instanceof PIXI.Container) return s.parent;
+        }
+    }
+
+    /** 获取某个sprite */
+    getSprite(name: string | PIXI.Sprite): PIXI.Sprite {
+        if (name instanceof PIXI.Sprite) return name;
+        else {
+            let sprite = core.containers.dymContainer[name];
+            if (sprite) return sprite;
+        }
     }
 
     /** 
@@ -35,8 +55,9 @@ class Ui {
         sprite.width = w * core.scale;
         sprite.height = h * core.scale;
         sprite.zIndex = z * core.scale;
-        core.containers.dymContainer.addChild(sprite);
-        core.dymSprites[name] = sprite;
+        let container = this.getContainer('dymContainer')
+        container.addChild(sprite);
+        core.containers.dymContainer[name] = sprite;
         return sprite;
     }
 
@@ -44,8 +65,8 @@ class Ui {
     destroySprite(name: string | PIXI.Sprite): void {
         if (name instanceof PIXI.Sprite) name.destroy();
         else {
-            core.dymSprites[name].destroy();
-            delete core.dymSprites[name];
+            core.containers.dymSprites[name].destroy();
+            delete core.containers.dymSprites[name];
         }
     }
 
@@ -57,7 +78,7 @@ class Ui {
             name.position.set(x, y);
             return name;
         } else {
-            let sprite = core.dymSprites[name];
+            let sprite = core.containers.dymSprites[name];
             sprite.position.set(x, y);
             return sprite;
         }
@@ -75,12 +96,22 @@ class Ui {
             name.scale.set(x, y);
             return name;
         } else {
-            let sprite = core.dymSprites[name];
+            let sprite = core.containers.dymSprites[name];
             if (x >= 1 || x === 0) x /= sprite.width * core.scale;
             if (y >= 1 || y === 0) y /= sprite.width * core.scale;
             sprite.scale.set(x, y);
             return sprite;
         }
+    }
+
+    /** 更改sprite的背景图片 */
+    drawImageOnSprite(sprite: string | PIXI.Sprite, name: string): void {
+        sprite = this.getSprite(sprite);
+        if (!sprite) return;
+        let url = 'project/images/' + name;
+        let texture = PIXI.Texture.from(url);
+        console.log(texture);
+        sprite.texture = texture;
     }
 }
 

@@ -18,9 +18,7 @@ declare global {
 class Core {
     dom: { [key: string]: HTMLElement; };
     pixi: { [key: string]: PIXI.Application };
-    containers: { [key: string]: PIXI.Container };
-    gameSprites: { [key: string]: PIXI.Sprite };
-    dymSprites: { [key: string]: PIXI.Sprite };
+    containers: { [key: string]: { [key: string]: PIXI.Sprite } };
     floorIds: string[];
     material: {
         images: { [key: string]: HTMLImageElement };
@@ -44,8 +42,6 @@ class Core {
             sounds: {}
         };
         this.containers = {};
-        this.dymSprites = {};
-        this.gameSprites = {};
     }
 
     // -------- 初始化相关 -------- //

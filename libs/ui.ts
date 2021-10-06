@@ -50,10 +50,10 @@ class Ui {
      */
     createSprite(name: string, x: number, y: number, w: number, h: number, z: number): PIXI.Sprite {
         let sprite = new PIXI.Sprite();
-        sprite.x = x * core.scale;
-        sprite.y = y * core.scale;
-        sprite.width = w * core.scale;
-        sprite.height = h * core.scale;
+        sprite.x = x;
+        sprite.y = y;
+        sprite.width = w;
+        sprite.height = h;
         sprite.zIndex = z;
         let container = this.getContainer('dymContainer')
         container.addChild(sprite);
@@ -72,8 +72,6 @@ class Ui {
 
     /** 重定位某个sprite */
     relocateSprite(name: string | PIXI.Sprite, x: number, y: number): PIXI.Sprite {
-        x *= core.scale;
-        y *= core.scale;
         if (name instanceof PIXI.Sprite) {
             name.position.set(x, y);
             return name;
@@ -85,20 +83,20 @@ class Ui {
     }
 
     /** 
-     * 修改某个sprite的大小
+     * 修改某个sprite的大小，目标为相对于背景图长宽的比例缩放
      * @param x 如果小于1且不为0，视为比例缩放，否则为像素缩放
      * @param y 如果小于1且不为0，视为比例缩放，否则为像素缩放
      */
     resizeSprite(name: string | PIXI.Sprite, x: number, y: number): PIXI.Sprite {
         if (name instanceof PIXI.Sprite) {
-            if (x >= 1 || x === 0) x /= name.width * core.scale;
-            if (y >= 1 || y === 0) y /= name.width * core.scale;
+            if (x >= 1 || x === 0) x /= name.width;
+            if (y >= 1 || y === 0) y /= name.width;
             name.scale.set(x, y);
             return name;
         } else {
             let sprite = core.containers.dymSprites[name];
-            if (x >= 1 || x === 0) x /= sprite.width * core.scale;
-            if (y >= 1 || y === 0) y /= sprite.width * core.scale;
+            if (x >= 1 || x === 0) x /= sprite.width;
+            if (y >= 1 || y === 0) y /= sprite.width;
             sprite.scale.set(x, y);
             return sprite;
         }

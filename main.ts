@@ -41,6 +41,7 @@ class Main {
         gameDraw.renderer.view.style.position = "absolute";
         gameDraw.renderer.view.style.display = "block";
         gameDraw.view.id = 'gameDraw';
+        gameDraw.renderer.resize(1000, 1000 / core.aspect);
         core.dom.gameGroup.appendChild(gameDraw.view);
         core.dom.gameDraw = gameDraw.view;
         core.pixi.gameDraw = gameDraw;

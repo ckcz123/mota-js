@@ -28,15 +28,19 @@ class Ui {
             let s = (core.containers[name] || {})._sprite;
             if ((s || {}).parent instanceof PIXI.Container) return s.parent;
         }
+        return null;
     }
 
     /** 获取某个sprite */
     getSprite(name: string | PIXI.Sprite): PIXI.Sprite {
         if (name instanceof PIXI.Sprite) return name;
         else {
-            let sprite = core.containers.dymContainer[name];
-            if (sprite) return sprite;
+            for (let one in core.containers) {
+                let sprite = core.containers[one][name];
+                if (sprite) return sprite;
+            }
         }
+        return null;
     }
 
     /** 
@@ -66,41 +70,41 @@ class Ui {
     destroySprite(name: string | PIXI.Sprite): void {
         if (name instanceof PIXI.Sprite) name.destroy();
         else {
-            core.containers.dymSprites[name].destroy();
-            delete core.containers.dymSprites[name];
+            for (let one in core.containers) {
+                let sprite = core.containers[one][name];
+                if (sprite) {
+                    sprite.destroy();
+                    delete core.containers[one][name];
+                }
+            }
         }
     }
 
     /** 重定位某个sprite */
     relocateSprite(name: string | PIXI.Sprite, x: number, y: number): PIXI.Sprite {
-        if (name instanceof PIXI.Sprite) {
-            name.position.set(x, y);
-            return name;
-        } else {
-            let sprite = core.containers.dymSprites[name];
-            sprite.position.set(x, y);
-            return sprite;
-        }
+        let sprite = this.getSprite(name);
+        sprite.x = x;
+        sprite.y = y;
+        return sprite;
     }
 
     /** 
      * 修改某个sprite的大小，目标为相对于背景图长宽的比例缩放
-     * @param x 如果小于1且不为0，视为比例缩放，否则为像素缩放
-     * @param y 如果小于1且不为0，视为比例缩放，否则为像素缩放
+     * @param w 如果小于1且不为0，视为比例缩放，否则为像素缩放
+     * @param h 如果小于1且不为0，视为比例缩放，否则为像素缩放
      */
-    resizeSprite(name: string | PIXI.Sprite, x: number, y: number): PIXI.Sprite {
-        if (name instanceof PIXI.Sprite) {
-            if (x >= 1 || x === 0) x /= name.width;
-            if (y >= 1 || y === 0) y /= name.width;
-            name.scale.set(x, y);
-            return name;
-        } else {
-            let sprite = core.containers.dymSprites[name];
-            if (x >= 1 || x === 0) x /= sprite.width;
-            if (y >= 1 || y === 0) y /= sprite.width;
-            sprite.scale.set(x, y);
-            return sprite;
+    resizeSprite(name: string | PIXI.Sprite, w?: number, h?: number): PIXI.Sprite {
+        let sprite = this.getSprite(name);
+        if (!sprite) return;
+        if (w) {
+            if (w <= 1) sprite.scale.x = w;
+            else sprite.width = w;
         }
+        if (h) {
+            if (h <= 1) sprite.scale.y = h;
+            else sprite.height = h;
+        }
+        return sprite;
     }
 
     /** 更改sprite的背景图片 */
@@ -119,6 +123,25 @@ class Ui {
         } else {
             s.texture = texture.texture;
         }
+    }
+
+    /** 
+     * 创建一个container
+     * @param name 容器的名称
+     * @param x 容器的左上角横坐标
+     * @param y 容器的左上角纵坐标
+     * @param z 容器的z值
+     */
+    createContainer(name: string, x: number = 0, y: number = 0, z?: number): PIXI.Container {
+        let container = new PIXI.Container();
+        container.x = x;
+        container.y = y;
+        if (z) container.zIndex = z;
+        core.pixi.gameDraw.stage.addChild(container);
+        let _sprite = new PIXI.Sprite();
+        container.addChild(_sprite);
+        core.containers[name] = { _sprite };
+        return container;
     }
 
     /** 
@@ -141,6 +164,7 @@ class Ui {
         let textures = loader.resources;
         let texture = textures[url];
         let sprite: PIXI.Sprite;
+        // 执行绘制
         if (!texture) {
             loader.add(url).load(() => {
                 texture = textures[url];

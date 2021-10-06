@@ -29,5 +29,5 @@ let proxy = new Proxy(core, handler);
 export let drawStartUi = () => {
     // 先创建一个sprite
     let sprite = core.ui.createSprite('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
-    core.ui.drawImageOnSprite(sprite, 'bg.jpg');
+    core.ui.changeImageOnSprite(sprite, 'bg.jpg');
 }

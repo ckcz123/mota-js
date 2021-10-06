@@ -47,12 +47,12 @@ class Core {
     // -------- 初始化相关 -------- //
     /** 执行core的全局初始化 */
     initCore(): void {
+        // resize界面
+        resize.resize();
         // 初始化pixi相关内容
         ui.initPixi();
         // 执行资源加载
         loader.load();
-        // resize界面
-        resize.resize();
     }
 }
 

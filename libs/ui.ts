@@ -54,7 +54,7 @@ class Ui {
         sprite.y = y * core.scale;
         sprite.width = w * core.scale;
         sprite.height = h * core.scale;
-        sprite.zIndex = z * core.scale;
+        sprite.zIndex = z;
         let container = this.getContainer('dymContainer')
         container.addChild(sprite);
         core.containers.dymContainer[name] = sprite;
@@ -105,13 +105,21 @@ class Ui {
     }
 
     /** 更改sprite的背景图片 */
-    drawImageOnSprite(sprite: string | PIXI.Sprite, name: string): void {
-        sprite = this.getSprite(sprite);
+    changeImageOnSprite(sprite: string | PIXI.Sprite, name: string): void {
+        let s = this.getSprite(sprite);
         if (!sprite) return;
         let url = 'project/images/' + name;
-        let texture = PIXI.Texture.from(url);
-        console.log(texture);
-        sprite.texture = texture;
+        let loader = core.pixi.gameDraw.loader;
+        let textures = loader.resources;
+        let texture = textures[url];
+        if (!texture) {
+            loader.add(url).load(() => {
+                texture = textures[url];
+                s.texture = texture.texture;
+            });
+        } else {
+            s.texture = texture.texture;
+        }
     }
 }
 

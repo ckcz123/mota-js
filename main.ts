@@ -37,10 +37,12 @@ class Main {
         let gameDraw = new PIXI.Application({
             width: 0,
             height: 0,
+            resolution: 2
         });
         gameDraw.renderer.view.style.position = "absolute";
         gameDraw.renderer.view.style.display = "block";
         gameDraw.view.id = 'gameDraw';
+        // 如果需要调整游戏画面的宽度和高度请在下面调整
         gameDraw.renderer.resize(1000, 1000 / core.aspect);
         core.dom.gameGroup.appendChild(gameDraw.view);
         core.dom.gameDraw = gameDraw.view;

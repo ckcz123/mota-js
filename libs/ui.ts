@@ -146,19 +146,23 @@ class Ui {
 
     /** 
      * 在某个container上绘制图片
-     * @param container 容器名或容器的实例，只有当该参数为string时，才会将引用存进core.containers，才能删除该图片，否则不能删除
+     * @param container 容器名或容器的实例，只有当该参数为字符串时，才会将引用存进core.containers，才能通过引用
+     * 删除该图片，否则只能通过删除容器来删除图片
+     * @param self 是否使用独立名称，使用后不能同时绘制多个名称相同的独立图片，但删除时效率更高
      */
-    drawImageOnContainer(container: string | PIXI.Container, image: string, x: number = 0, y: number = 0,
-        w?: number, h?: number): void {
+    drawImageOnContainer(container: string | PIXI.Container, image: string, self: boolean = false,
+        x: number = 0, y: number = 0, w?: number, h?: number): void {
         let c = this.getContainer(container);
         if (!c) return;
         let id: string;
-        if (typeof container === 'string') {
-            while (true) {
-                id = image + '_' + ~~(Math.random() * 1e8);
-                if (!core.containers[container][id]) break;
+        if (!self) {
+            if (typeof container === 'string') {
+                while (true) {
+                    id = image + '_' + ~~(Math.random() * 1e8);
+                    if (!core.containers[container][id]) break;
+                }
             }
-        }
+        } else id = image;
         let url = 'project/images/' + image;
         let loader = core.pixi.gameDraw.loader;
         let textures = loader.resources;
@@ -186,6 +190,25 @@ class Ui {
             c.addChild(sprite);
             if (container instanceof PIXI.Container) return;
             core.containers[container][id] = sprite;
+        }
+    }
+
+    /**
+     * 删除某个由drawImageOnContainer绘制的图片，会删除所有名称相同的图片
+     * @example ui.destoryImage('container', 'bg.jpg'); // 删除container上的bg.jpg图像或container上所有bg.jpg图像
+     */
+    destoryImage(container: string, image: string): void {
+        let c = core.containers[container];
+        if (c[image]) {
+            c[image].destroy();
+            delete c[image];
+            return;
+        }
+        for (let name in c) {
+            if (name.startsWith(image)) {
+                c[name].destroy();
+                delete c[name];
+            }
         }
     }
 }

@@ -258,6 +258,22 @@ class Ui {
             tar.addChild(one);
         });
     }
+
+    /** 创建一个图形 */
+    createGraphics(): PIXI.Graphics {
+        let graphics = new PIXI.Graphics();
+        return graphics;
+    }
+
+    /** 在某个图形上绘制一个矩形 */
+    drawRectOnGraphics(graphics: PIXI.Graphics, x: number = 0, y: number = 0, w: number = 100, h: number = 100,
+        fillStyle?: number, strokeStyle?: number): PIXI.Graphics {
+        graphics.lineStyle(strokeStyle);
+        graphics.beginFill(fillStyle);
+        graphics.drawRect(x, y, w, h);
+        graphics.endFill();
+        return graphics;
+    }
 }
 
 let ui = new Ui();

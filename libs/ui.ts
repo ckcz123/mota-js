@@ -49,8 +49,8 @@ class Ui {
      * @param x 精灵左上角相对画面左上角的横坐标
      * @param y 精灵左上角相对画面左上角的纵坐标
      * @param w 精灵的宽度
-     * @param h 精灵的长度
-     * @param z 精灵的z值
+     * @param h 精灵的高度
+     * @param z 精灵的z值，z值大的会覆盖z值小的
      * @returns 返回该精灵的实例
      */
     createSprite(name: string, x: number, y: number, w: number, h: number, z: number): PIXI.Sprite {
@@ -119,10 +119,23 @@ class Ui {
             loader.add(url).load(() => {
                 texture = textures[url];
                 s.texture = texture.texture;
+                this.resizeSpriteChildren(s);
             });
         } else {
             s.texture = texture.texture;
+            this.resizeSpriteChildren(s);
         }
+    }
+
+    /** resize某个sprite的子元素，防止子元素位置偏差 */
+    resizeSpriteChildren(sprite: string | PIXI.Sprite): void {
+        let s = this.getSprite(sprite);
+        let texture = s.texture;
+        if (!texture) return;
+        s.children.forEach(child => {
+            child.position.x *= texture.width / 1000;
+            child.position.y *= texture.height / 1000;
+        })
     }
 
     /** 
@@ -210,6 +223,23 @@ class Ui {
                 delete c[name];
             }
         }
+    }
+
+    /**
+     * 在某个sprite上绘制文字
+     * @param style 绘制内容的样式，为对象形式，属性包括fill（填充颜色） stroke（边框颜色） fontFamily（字体）等，
+     * 更多内容请查看https://aitrade.ga/pixi.js-cn/PIXI.TextStyle.html
+     */
+    fillTextOnSprite(sprite: string | PIXI.Sprite, text: string, x: number = 0, y: number = 0,
+        style?: Partial<PIXI.ITextStyle>): PIXI.Text {
+        let s = this.getSprite(sprite);
+        if (!s) return;
+        let t = new PIXI.Text(text, style);
+        t.position.x = x;
+        t.position.y = y;
+        if (style.align === 'center' && !style.wordWrap) t.anchor.set(0.5, 0.5);
+        s.addChild(t);
+        return t;
     }
 }
 

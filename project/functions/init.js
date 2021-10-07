@@ -29,5 +29,10 @@ let proxy = new Proxy(core, handler);
 export let drawStartUi = () => {
     // 先创建一个sprite
     let sprite = core.ui.createSprite('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
+    // 绘制文字    在用sprite和container来绘制东西时，颜色可以通过数组的形式创建渐变，比如下面的fill参数
+    core.ui.fillTextOnSprite(sprite, '魔塔样板', 500, 250, {
+        align: 'center', fill: ['#cccccc', '#dddddd', '#eeeeee', '#ffffff'], stroke: '#000000', fontSize: 80,
+        strokeThickness: 2, dropShadow: true, dropShadowBlur: 10, dropShadowColor: '#333333', dropShadowDistance: 10
+    });
     core.ui.changeImageOnSprite(sprite, 'bg.jpg');
 }

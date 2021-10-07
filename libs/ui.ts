@@ -208,9 +208,9 @@ class Ui {
 
     /**
      * 删除某个由drawImageOnContainer绘制的图片，会删除所有名称相同的图片
-     * @example ui.destoryImage('container', 'bg.jpg'); // 删除container上的bg.jpg图像或container上所有bg.jpg图像
+     * @example ui.destroyImage('container', 'bg.jpg'); // 删除container上的bg.jpg图像或container上所有bg.jpg图像
      */
-    destoryImage(container: string, image: string): void {
+    destroyImage(container: string, image: string): void {
         let c = core.containers[container];
         if (c[image]) {
             c[image].destroy();
@@ -226,20 +226,37 @@ class Ui {
     }
 
     /**
-     * 在某个sprite上绘制文字
+     * 创建一个能在sprite或container上绘制的文本
+     * @param text 文本，可以是一个包含多个文本的数组
      * @param style 绘制内容的样式，为对象形式，属性包括fill（填充颜色） stroke（边框颜色） fontFamily（字体）等，
      * 更多内容请查看https://aitrade.ga/pixi.js-cn/PIXI.TextStyle.html
+     * @returns 如果文本只有一个，则返回创建好的文本，如果有多个，则返回文本数组
      */
-    fillTextOnSprite(sprite: string | PIXI.Sprite, text: string, x: number = 0, y: number = 0,
-        style?: Partial<PIXI.ITextStyle>): PIXI.Text {
-        let s = this.getSprite(sprite);
-        if (!s) return;
-        let t = new PIXI.Text(text, style);
-        t.position.x = x;
-        t.position.y = y;
-        if (style.align === 'center' && !style.wordWrap) t.anchor.set(0.5, 0.5);
-        s.addChild(t);
-        return t;
+    createText(text: string | string[], x: number = 0, y: number = 0, style?: Partial<PIXI.ITextStyle>): PIXI.Text[] {
+        if (!(text instanceof Array)) text = [text];
+        let texts = [];
+        text.forEach(text => {
+            let t = new PIXI.Text(text, style);
+            t.position.x = x;
+            t.position.y = y;
+            if (style.align === 'center' && !style.wordWrap) t.anchor.set(0.5, 0.5);
+            texts.push(t);
+        })
+        return texts.length === 1 ? texts[0] : texts;
+    }
+
+    /** 向某个sprite或container上绘制内容 */
+    drawContent(target: string | PIXI.Sprite | PIXI.Container, ...content: PIXI.DisplayObject[]): void {
+        let tar: PIXI.Sprite | PIXI.Container;
+        if (typeof target === 'string') {
+            tar = this.getSprite(target);
+            if (!tar) tar = this.getContainer(target);
+        } else tar = target;
+        if (!tar) return;
+        content.forEach(one => {
+            if (one instanceof Array) one.forEach(one => tar.addChild(one));
+            tar.addChild(one);
+        });
     }
 }
 

@@ -947,7 +947,7 @@ editor_uievent_wrapper = function (editor) {
         uievent.elements.extraBody.style.display = 'block';
         uievent.elements.body.style.overflow = "auto";
 
-        uievent.elements.select.innerHTML = '<option value="horizontal" selected>横屏</option><option value="vertical">竖屏</option>'
+        uievent.elements.select.innerHTML = '<option value="horizontal">横屏</option><option value="vertical" selected>竖屏</option>'
         uievent.elements.select.onchange = uievent._previewStatusBar;
 
         // 计算在自绘状态栏中使用到的所有flag
@@ -1060,7 +1060,7 @@ editor_uievent_wrapper = function (editor) {
         core.domStyle = domStyle;
         core.flags.statusCanvas = enable;
         core.status.hero = hero;
-        window.hero = hero;
+        // window.hero = hero;
         window.flags = core.status.hero.flags;
     }
 

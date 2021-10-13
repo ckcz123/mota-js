@@ -4,8 +4,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"floorIds": [
 			"sample0",
 			"sample1",
-			"sample2",
-			"MT0"
+			"sample2"
 		],
 		"floorPartitions": [],
 		"images": [
@@ -163,8 +162,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		]
 	},
 	"firstData": {
-		"title": "魔塔样板",
-		"name": "template",
+		"title": "长方形样板",
+		"name": "rectangle",
 		"version": "Ver 2.8.2",
 		"floorId": "sample0",
 		"hero": {
@@ -212,8 +211,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 						"type": "fillRect",
 						"x": 0,
 						"y": 0,
-						"width": "core.__PIXELS__",
-						"height": "core.__PIXELS__",
+						"width": "core.__PX_WIDTH__",
+						"height": "core.__PX_HEIGHT__",
 						"style": [
 							82,
 							82,
@@ -227,7 +226,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					},
 					{
 						"type": "fillBoldText",
-						"x": "core.__PIXELS__ / 2",
+						"x": "core.__PX_WIDTH__ / 2",
 						"y": 80,
 						"style": [
 							255,
@@ -550,11 +549,19 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		],
 		"startText": [
 			{
-				"type": "comment",
-				"text": "初始剧情"
+				"type": "hideStatusBar"
 			},
-			"Hi，欢迎来到 HTML5 魔塔样板！\n\n本样板由艾之葵制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5魔塔！",
-			"这里游戏开始时的剧情。\n\n你可以在这里写上自己的内容。\n赶快来试一试吧！"
+			{
+				"type": "setText",
+				"background": "winskin.png",
+				"time": 25,
+				"animateTime": 250
+			},
+			"Hi，欢迎来到 HTML5 长方形样板！\n本样板由秋橙制作，可以让你在不会写任何代码\n的情况下也能做出属于自己的H5长方形魔塔！",
+			"这是游戏开始时的剧情。\n你可以在这里写上自己的内容。\n赶快来试一试吧！",
+			{
+				"type": "showStatusBar"
+			}
 		],
 		"shops": [
 			{
@@ -734,8 +741,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"hatred": 2,
 		"animateSpeed": 300,
 		"moveSpeed": 100,
-		"statusCanvasRowsOnMobile": 3,
-		"floorChangeTime": 500
+		"statusCanvasRowsOnMobile": 5,
+		"floorChangeTime": 100
 	},
 	"flags": {
 		"statusBarItems": [
@@ -757,7 +764,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"betweenAttackMax": false,
 		"useLoop": false,
 		"startUsingCanvas": false,
-		"statusCanvas": false,
+		"statusCanvas": true,
 		"enableEnemyPoint": true,
 		"enableGentleClick": true,
 		"ignoreChangeFloor": true,

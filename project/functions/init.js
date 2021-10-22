@@ -6,6 +6,8 @@
 import * as core from '../../libs/core';
 import * as PIXI from 'pixi.js-legacy';
 
+window.core = core;
+
 // 3.0样板使用es6和ts编写，所以这里使用es6的模块化，直接把对应函数export出去
 // 注意，脚本编辑内的所有函数不会被转发至core上面！！！如需调用，请先import相应模块，再执行函数！！！
 // 举例： import * as init from './init'; init.drawStartUi();

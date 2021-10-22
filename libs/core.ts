@@ -29,6 +29,7 @@ class Core {
     scale: number;
     status: {
         hero: { now: hero.Hero, [key: string]: hero.Hero },
+        thisMap: floor.Floor
     }
     units: {
         enemy: { [key: string]: enemy.Enemy };
@@ -67,6 +68,7 @@ class Core {
         // 初始化status
         core.status = {
             hero: { now: void 0 },
+            thisMap: void 0
         }
     }
 }

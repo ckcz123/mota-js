@@ -6,24 +6,24 @@ import { core } from './core';
 type Status = {
     id: string,
     img: string,
-    hp: number,
-    atk: number,
-    def: number,
-    mana: number,
-    hpmax: number,
-    manamax: number,
+    hp: number | bigint,
+    atk: number | bigint,
+    def: number | bigint,
+    mana: number | bigint,
+    hpmax: number | bigint,
+    manamax: number | bigint,
     graph: string
 }
 
 export class Hero {
     id: string;
     img: string;
-    hp: number;
-    atk: number;
-    def: number;
-    mana: number;
-    hpmax: number;
-    manamax: number;
+    hp: number | bigint;
+    atk: number | bigint;
+    def: number | bigint;
+    mana: number | bigint;
+    hpmax: number | bigint;
+    manamax: number | bigint;
     graph: string;
     constructor(status: Status) {
         for (let one in status) {
@@ -33,12 +33,18 @@ export class Hero {
 
     /** 设置属性 */
     setStatus(status: string, value: any): Hero {
-        this[status] = value
+        if (typeof value === 'number' && value > Number.MAX_SAFE_INTEGER) value = BigInt(value);
+        this[status] = value;
         return this;
     }
 
     /** 增减属性 */
-    addStatus(status: string, delta: number): Hero {
+    addStatus(status: string, delta: number | bigint): Hero {
+        if (typeof this[status] === 'bigint') delta = BigInt(delta);
+        if (typeof this[status] === 'number' && this[status] + delta > Number.MAX_SAFE_INTEGER) {
+            this[status] = BigInt(this[status]);
+            delta = BigInt(delta);
+        }
         this[status] += delta;
         return this;
     }

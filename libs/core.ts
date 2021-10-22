@@ -9,6 +9,8 @@ import { ui, Ui } from './ui';
 import { control } from './control';
 import { listen } from './listen';
 import * as events from './events';
+import * as enemy from './enemy';
+import * as floor from './floor';
 
 declare global {
     interface Window {
@@ -37,6 +39,9 @@ class Core {
     readonly floors: { [key: string]: any } = {};
     /** 界面的长宽比，默认为1.33 */
     readonly aspect: number = 1.33;
+    units: {
+        enemy: { [key: string]: enemy.Enemy };
+    };
 
     constructor() {
         this.material = {
@@ -54,10 +59,12 @@ class Core {
         resize.resize();
         // 执行资源加载
         loader.load();
+        // 初始化所有单位
+        maps.initUnits();
     }
 }
 
 let core = new Core();
 window.core = core;
 window.ui = ui;
-export { core, maps, resize, loader, ui, control, listen, events };
+export { core, maps, resize, loader, ui, control, listen, events, floor, enemy };

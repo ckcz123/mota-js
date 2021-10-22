@@ -10,10 +10,10 @@ class Listen {
 
     }
 
-    /** 向PIXI元素添加event */
-    addEventToPIXI(ele: PIXI.DisplayObject, event: string, func: Function): void {
+    // /** 向PIXI元素添加event */
+    // addEventToPIXI(ele: PIXI.DisplayObject, event: string, func: Function): void {
 
-    }
+    // }
 }
 
 let listen = new Listen();

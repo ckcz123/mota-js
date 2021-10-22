@@ -20,10 +20,12 @@ export class Enemy {
     def: number;
     special: number[];
     vertical: boolean;
+    x: number;
+    y: number;
     [key: string]: any;
-    constructor(status: Status) {
+    constructor(status: Status | Enemy) {
         for (let one in status) {
-            this[one] = status[one];
+            if (!(status[one] instanceof Function)) this[one] = status[one];
         }
     }
 }

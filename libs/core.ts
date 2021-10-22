@@ -8,10 +8,12 @@ import { loader } from './loader';
 import { ui } from './ui';
 import { control } from './control';
 import { listen } from './listen';
+import { dict } from '../project/dict';
 import * as events from './events';
 import * as enemy from './enemy';
 import * as floor from './floor';
 import * as hero from './hero';
+import * as utils from './utils';
 
 declare global {
     interface Window {
@@ -25,8 +27,11 @@ class Core {
     containers: { [key: string]: PIXI.Container };
     sprite: { [key: string]: PIXI.Sprite };
     dataContent: { [key: string]: any };
+    dict: { [key: number]: { id: string, cls: string, img: string } } = dict;
     floorIds: string[];
     scale: number;
+    __WIDTH__: number;
+    __HEIGHT__: number;
     status: {
         hero: { now: hero.Hero, [key: string]: hero.Hero },
         thisMap: floor.Floor
@@ -39,8 +44,6 @@ class Core {
         bgms: { [key: string]: HTMLAudioElement };
         sounds: { [key: string]: HTMLAudioElement }
     }
-    __WIDTH__: number;
-    __HEIGHT__: number;
     readonly __UNIT_WIDTH__ = 48;
     readonly __UNIT_HEIGHT__ = 48;
     readonly floors: { [key: string]: any } = {};
@@ -74,4 +77,4 @@ class Core {
 }
 
 let core = new Core();
-export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero };
+export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils };

@@ -47,16 +47,18 @@ class Ui {
 
     /** 删除某个sprite */
     destroySprite(name: string | PIXI.Sprite): void {
-        if (name instanceof PIXI.Sprite) name.destroy();
-        else {
-            for (let one in core.containers) {
-                let sprite = core.containers[one][name];
-                if (sprite) {
-                    sprite.destroy();
-                    delete core.containers[one][name];
-                }
-            }
-        }
+        let s = this.getSprite(name);
+        if (!s) return;
+        s.destroy();
+        if (typeof name === 'string') delete core.sprite[name];
+    }
+
+    /** 删除某个container */
+    destoryContainer(name: string | PIXI.Container): void {
+        let c = this.getContainer(name);
+        if (!c) return;
+        c.destroy();
+        if (typeof name === 'string') delete core.containers[name];
     }
 
     /** 重定位某个sprite */
@@ -90,20 +92,13 @@ class Ui {
     changeImageOnSprite(sprite: string | PIXI.Sprite, name: string): void {
         let s = this.getSprite(sprite);
         if (!sprite) return;
-        let url = 'project/images/' + name;
-        let loader = core.pixi.game.loader;
-        let textures = loader.resources;
-        let texture = textures[url];
+        let texture = PIXI.utils.TextureCache[name];
         if (!texture) {
-            loader.add(url).load(() => {
-                texture = textures[url];
-                s.texture = texture.texture;
-                this.resizeSpriteChildren(s);
-            });
-        } else {
-            s.texture = texture.texture;
-            this.resizeSpriteChildren(s);
+            texture = PIXI.Texture.from(core.material.images[name]);
+            PIXI.Texture.addToCache(texture, name);
         }
+        s.texture = texture;
+        this.resizeSpriteChildren(s);
     }
 
     /** resize某个sprite的子元素，防止子元素位置偏差 */
@@ -156,7 +151,7 @@ class Ui {
         let texture = PIXI.utils.TextureCache[image];
         if (!texture) {
             texture = PIXI.Texture.from(core.material.images[image]);
-            PIXI.Texture.addToCache(texture, id);
+            PIXI.Texture.addToCache(texture, image);
         }
         let sprite = new PIXI.Sprite(texture);
         sprite.x = x;
@@ -218,25 +213,28 @@ class Ui {
         } else tar = target;
         if (!tar) return;
         content.forEach(one => {
-            if (one instanceof Array) one.forEach(one => tar.addChild(one));
+            if (one instanceof Array) return one.forEach(one => tar.addChild(one));
             tar.addChild(one);
         });
     }
 
     /** 创建一个图形 */
-    createGraphics(): PIXI.Graphics {
+    createGraphics(z: number): PIXI.Graphics {
         let graphics = new PIXI.Graphics();
+        graphics.zIndex = z;
         return graphics;
     }
 
     /** 
      * 在某个图形上绘制一个矩形
-     * @param fillStyle 填充颜色，使用0xRRGGBB的十六进制格式
+     * @param option 配置参数，可以设置图形的边框宽度、颜色、不透明度及填充的颜色、不透明度
      */
     drawRectOnGraphics(graphics: PIXI.Graphics, x: number = 0, y: number = 0, w: number = 100, h: number = 100,
-        fillStyle?: number, strokeStyle?: number): PIXI.Graphics {
-        graphics.lineStyle(strokeStyle);
-        graphics.beginFill(fillStyle);
+        option: {
+            strokeWidth: number, strokeStyle: number, strokeAlpha: number, fillStyle: number, fillAlpha: number
+        }): PIXI.Graphics {
+        graphics.lineStyle(option.strokeWidth, option.strokeStyle, option.strokeAlpha);
+        graphics.beginFill(option.fillStyle, option.fillAlpha);
         graphics.drawRect(x, y, w, h);
         graphics.endFill();
         return graphics;

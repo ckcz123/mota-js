@@ -1,3 +1,4 @@
+"use strict";
 // es6模块化引入模块 简单说明一下
 // import { xxx } from 'url' 引入对应模块，可引入多个
 // import { xxx as yyy } from 'url' 引入对应模块，可引入多个，并重命名某些模块
@@ -11,7 +12,7 @@ import * as PIXI from 'pixi.js-legacy';
 
 /** 绘制初始游戏界面 */
 export function drawStartUi () {
-    // 先创建一个sprite
+    // 先创建一个container
     let container = core.ui.createContainer('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
     core.ui.drawImageOnContainer(container, 'bg.jpg', true, 0, 0, 1000, 1000 / core.core.aspect);
     // 创建文字    在用sprite和container来绘制东西时，颜色可以通过数组的形式创建渐变，比如下面的fill参数
@@ -21,4 +22,14 @@ export function drawStartUi () {
     });
     // 把所有东西都画到container上
     core.ui.drawContent(container, title);
+
+    // 添加玩家交互
+    container.interactive = true;
+    container.addListener('click', e => {
+        let data = e.data;
+        let x = data.global.x,
+            y = data.global.y;
+        // 进入游戏
+        if (x >= 300 && x <= 700 && y >= 600 && y <= 750) core.events.startGame();
+    });
 }

@@ -7,6 +7,8 @@ import { resize } from './resize';
 import { loader } from './loader';
 import { ui, Ui } from './ui';
 import { control } from './control';
+import { listen } from './listen';
+import * as events from './events';
 
 declare global {
     interface Window {
@@ -58,4 +60,4 @@ class Core {
 let core = new Core();
 window.core = core;
 window.ui = ui;
-export { core, maps, resize, loader, ui, control };
+export { core, maps, resize, loader, ui, control, listen, events };

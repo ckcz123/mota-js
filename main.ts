@@ -38,6 +38,7 @@ class Main {
         let game = new PIXI.Application({
             width: 0,
             height: 0,
+            // 分辨率，不要调的过大，建议不超过4，否则会很卡
             resolution: 2,
         });
         game.renderer.view.style.position = "absolute";

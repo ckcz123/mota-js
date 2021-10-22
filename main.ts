@@ -11,7 +11,8 @@ class Main {
         this.version = '3.0';
         core.dom = {
             'body': document.body,
-            'gameGroup': document.getElementById('gameGroup')
+            'gameGroup': document.getElementById('gameGroup'),
+            'gameDraw': document.getElementById('gameDraw')
         }
         core.pixi = {};
     }
@@ -34,19 +35,19 @@ class Main {
     /** 执行全局初始化 */
     globalInit(): void {
         // 创建游戏相关pixi精灵
-        let gameDraw = new PIXI.Application({
+        let game = new PIXI.Application({
             width: 0,
             height: 0,
-            resolution: 2
+            resolution: 2,
         });
-        gameDraw.renderer.view.style.position = "absolute";
-        gameDraw.renderer.view.style.display = "block";
-        gameDraw.view.id = 'gameDraw';
-        // 如果需要调整游戏画面的宽度和高度请在下面调整
-        gameDraw.renderer.resize(1000, 1000 / core.aspect);
-        core.dom.gameGroup.appendChild(gameDraw.view);
-        core.dom.gameDraw = gameDraw.view;
-        core.pixi.gameDraw = gameDraw;
+        game.renderer.view.style.position = "absolute";
+        game.renderer.view.style.display = "block";
+        game.view.id = 'game';
+        // 如果需要调整游戏画面的宽度和高度的值请在下面调整
+        game.renderer.resize(1000, 1000 / core.aspect);
+        core.dom.gameDraw.appendChild(game.view);
+        core.dom.game = game.view;
+        core.pixi.game = game;
         core.initCore();
     }
 }

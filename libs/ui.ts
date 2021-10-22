@@ -9,38 +9,17 @@ class Ui {
 
     }
 
-    /** 初始化游戏pixi */
-    initPixi(): void {
-        let game = core.pixi.gameDraw;
-        let dymContainer = new PIXI.Container();
-        // 动态container，用于玩家绘制
-        let _sprite = new PIXI.Sprite();
-        game.stage.addChild(dymContainer);
-        dymContainer.addChild(_sprite);
-        core.containers.dymContainer = { _sprite };
-    }
-
     /** 获取某个container */
     getContainer(name: string | PIXI.Sprite | PIXI.Container): PIXI.Container {
         if (name instanceof PIXI.Sprite) return name.parent;
-        else if (name instanceof PIXI.Container) return name;
-        else {
-            let s = (core.containers[name] || {})._sprite;
-            if ((s || {}).parent instanceof PIXI.Container) return s.parent;
-        }
-        return null;
+        if (name instanceof PIXI.Container) return name;
+        return core.containers[name] || null;
     }
 
     /** 获取某个sprite */
     getSprite(name: string | PIXI.Sprite): PIXI.Sprite {
         if (name instanceof PIXI.Sprite) return name;
-        else {
-            for (let one in core.containers) {
-                let sprite = core.containers[one][name];
-                if (sprite) return sprite;
-            }
-        }
-        return null;
+        return core.sprite[name] || null;
     }
 
     /** 
@@ -112,7 +91,7 @@ class Ui {
         let s = this.getSprite(sprite);
         if (!sprite) return;
         let url = 'project/images/' + name;
-        let loader = core.pixi.gameDraw.loader;
+        let loader = core.pixi.game.loader;
         let textures = loader.resources;
         let texture = textures[url];
         if (!texture) {
@@ -150,10 +129,8 @@ class Ui {
         container.x = x;
         container.y = y;
         if (z) container.zIndex = z;
-        core.pixi.gameDraw.stage.addChild(container);
-        let _sprite = new PIXI.Sprite();
-        container.addChild(_sprite);
-        core.containers[name] = { _sprite };
+        core.pixi.game.stage.addChild(container);
+        core.containers[name] = container;
         return container;
     }
 
@@ -164,7 +141,7 @@ class Ui {
      * @param self 是否使用独立名称，使用后不能同时绘制多个名称相同的独立图片，但删除时效率更高
      */
     drawImageOnContainer(container: string | PIXI.Container, image: string, self: boolean = false,
-        x: number = 0, y: number = 0, w?: number, h?: number): void {
+        x: number = 0, y: number = 0, w?: number, h?: number, z?: number): void {
         let c = this.getContainer(container);
         if (!c) return;
         let id: string;
@@ -176,34 +153,20 @@ class Ui {
                 }
             }
         } else id = image;
-        let url = 'project/images/' + image;
-        let loader = core.pixi.gameDraw.loader;
-        let textures = loader.resources;
-        let texture = textures[url];
-        let sprite: PIXI.Sprite;
-        // 执行绘制
+        let texture = PIXI.utils.TextureCache[image];
         if (!texture) {
-            loader.add(url).load(() => {
-                texture = textures[url];
-                sprite = new PIXI.Sprite(texture.texture);
-                sprite.x = x;
-                sprite.y = y;
-                if (w) sprite.width = w;
-                if (h) sprite.height = h;
-                c.addChild(sprite);
-                if (container instanceof PIXI.Container) return;
-                core.containers[container][id] = sprite;
-            });
-        } else {
-            sprite = new PIXI.Sprite(texture.texture);
-            sprite.x = x;
-            sprite.y = y;
-            if (w) sprite.width = w;
-            if (h) sprite.height = h;
-            c.addChild(sprite);
-            if (container instanceof PIXI.Container) return;
-            core.containers[container][id] = sprite;
+            texture = PIXI.Texture.from(core.material.images[image]);
+            PIXI.Texture.addToCache(texture, id);
         }
+        let sprite = new PIXI.Sprite(texture);
+        sprite.x = x;
+        sprite.y = y;
+        if (z) sprite.zIndex = z;
+        if (w) sprite.width = w;
+        if (h) sprite.height = h;
+        c.addChild(sprite);
+        if (container instanceof PIXI.Container) return;
+        core.sprite[id] = sprite;
     }
 
     /**
@@ -232,7 +195,7 @@ class Ui {
      * 更多内容请查看https://aitrade.ga/pixi.js-cn/PIXI.TextStyle.html
      * @returns 如果文本只有一个，则返回创建好的文本，如果有多个，则返回文本数组
      */
-    createText(text: string | string[], x: number = 0, y: number = 0, style?: Partial<PIXI.ITextStyle>): PIXI.Text[] {
+    createText(text: string | string[], x: number = 0, y: number = 0, z?: number, style?: Partial<PIXI.ITextStyle>): PIXI.Text[] {
         if (!(text instanceof Array)) text = [text];
         let texts = [];
         text.forEach(text => {
@@ -241,6 +204,7 @@ class Ui {
             t.position.y = y;
             if (style.align === 'center' && !style.wordWrap) t.anchor.set(0.5, 0.5);
             texts.push(t);
+            t.zIndex = z || 0;
         })
         return texts.length === 1 ? texts[0] : texts;
     }
@@ -265,7 +229,10 @@ class Ui {
         return graphics;
     }
 
-    /** 在某个图形上绘制一个矩形 */
+    /** 
+     * 在某个图形上绘制一个矩形
+     * @param fillStyle 填充颜色，使用0xRRGGBB的十六进制格式
+     */
     drawRectOnGraphics(graphics: PIXI.Graphics, x: number = 0, y: number = 0, w: number = 100, h: number = 100,
         fillStyle?: number, strokeStyle?: number): PIXI.Graphics {
         graphics.lineStyle(strokeStyle);

@@ -5,35 +5,20 @@
 import * as core from '../../libs/core';
 import * as PIXI from 'pixi.js-legacy';
 
-// 转发非函数至proxy，意味着可以直接proxy.xxx来获取core.yyy.xxx
-const handler = {
-    set: (target, key, value) => {
-        for (let one in target) {
-            if (key in target[one]) target[one] = value;
-            return true;
-        }
-    },
-    get: (target, key) => {
-        for (let one in target) {
-            if (key in target[one]) return target[one];
-        }
-    },
-}
-let proxy = new Proxy(core, handler);
-
 // 3.0样板使用es6和ts编写，所以这里使用es6的模块化，直接把对应函数export出去
 // 注意，脚本编辑内的所有函数不会被转发至core上面！！！如需调用，请先import相应模块，再执行函数！！！
 // 举例： import * as init from './init'; init.drawStartUi();
-// ---- sprite 绘制初始界面 ---- //
+
 /** 绘制初始游戏界面 */
-export let drawStartUi = () => {
+export function drawStartUi () {
     // 先创建一个sprite
-    let sprite = core.ui.createSprite('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
-    // 绘制文字    在用sprite和container来绘制东西时，颜色可以通过数组的形式创建渐变，比如下面的fill参数
-    core.ui.changeImageOnSprite(sprite, 'bg.jpg');
-    let title = core.ui.createText('魔塔样板', 500, 250, {
-        align: 'center', fill: ['#cccccc', '#dddddd', '#eeeeee', '#ffffff'], stroke: '#000000', fontSize: 80,
-        strokeThickness: 2, dropShadow: true, dropShadowBlur: 10, dropShadowColor: '#333333', dropShadowDistance: 10
+    let container = core.ui.createContainer('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
+    core.ui.drawImageOnContainer(container, 'bg.jpg', true, 0, 0, 1000, 1000 / core.core.aspect);
+    // 创建文字    在用sprite和container来绘制东西时，颜色可以通过数组的形式创建渐变，比如下面的fill参数
+    let title = core.ui.createText('魔塔样板', 500, 200, 50, {
+        align: 'center', fill: ['#cccccc', '#dddddd', '#eeeeee', '#ffffff'], stroke: '#000000', fontSize: 140,
+        strokeThickness: 3, dropShadow: true, dropShadowBlur: 30, dropShadowColor: '#333333', dropShadowDistance: 20
     });
-    core.ui.drawContent(sprite, title);
+    // 把所有东西都画到container上
+    core.ui.drawContent(container, title);
 }

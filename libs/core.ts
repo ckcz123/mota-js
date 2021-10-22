@@ -18,7 +18,8 @@ declare global {
 class Core {
     dom: { [key: string]: HTMLElement; };
     pixi: { [key: string]: PIXI.Application };
-    containers: { [key: string]: { [key: string]: PIXI.Sprite } };
+    containers: { [key: string]: PIXI.Container };
+    sprite: { [key: string]: PIXI.Sprite };
     floorIds: string[];
     material: {
         images: { [key: string]: HTMLImageElement };
@@ -49,8 +50,6 @@ class Core {
     initCore(): void {
         // resize界面
         resize.resize();
-        // 初始化pixi相关内容
-        ui.initPixi();
         // 执行资源加载
         loader.load();
     }

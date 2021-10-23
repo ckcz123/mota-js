@@ -34,6 +34,7 @@ class Core {
     __HEIGHT__: number;
     status: {
         hero: { now: hero.Hero, [key: string]: hero.Hero },
+        maps: { [key: string]: floor.Floor },
         thisMap: floor.Floor
     }
     units: {
@@ -71,6 +72,7 @@ class Core {
         // 初始化status
         core.status = {
             hero: { now: void 0 },
+            maps: {},
             thisMap: void 0
         }
     }

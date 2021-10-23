@@ -2,18 +2,24 @@
 floor.ts负责楼层相关内容
 */
 import { core } from './core';
-import * as enemy from './enemy';
+import * as block from './block';
 
 export class Floor {
     floorId: string;
     map: number[][];
     bg: number[][];
     fg: number[][];
+    block: {
+        event: { [key: string]: block.Block };
+        fg: { [key: string]: block.Block };
+        bg: { [key: string]: block.Block };
+    }
+
     constructor(floorId: string) {
         this.floorId = floorId;
         let floor = core.floors[floorId];
         for (let one in floor) this[one] = floor[one];
-        core.status.thisMap = this;
+        core.status.maps[floorId] = core.status.thisMap = this;
     }
 
     /** 解析楼层 */
@@ -26,22 +32,26 @@ export class Floor {
         if (layer === 'event') map = this.map;
         else if (layer === 'fg') map = this.fg;
         else if (layer === 'bg') map = this.bg;
+        this.block[layer] = {};
         // 进行解析
-        for (let y in map) {
-            for (let x in map) {
+        let h = map.length;
+        let w = map[0].length;
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
                 if (map[y][x] !== -2) continue;
                 let num = map[y][x];
                 let cls = core.dict[num].cls;
+                let id = core.dict[num].id
+                if (cls === 'enemy') this.extractEnemy(id, layer, x, y);
             }
         }
         return this;
     }
 
     /** 解析某个怪物 */
-    extractEnemy(id: string, x: number, y: number): enemy.Enemy {
-        let e = new enemy.Enemy(core.units.enemy[id]);
-        e.x = x;
-        e.y = y;
-        return e;
+    extractEnemy(id: string, layer: string, x: number, y: number): Floor {
+        let e = new block.Block(core.units.enemy[id], x, y);
+        this.block[layer][x + ',' + y] = e;
+        return this;
     }
 }

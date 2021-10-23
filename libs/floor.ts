@@ -31,7 +31,7 @@ export class Floor {
         this.unit_height = core.__UNIT_HEIGHT__;
         core.status.maps[floorId] = core.status.thisMap = this;
         if (area) {
-            if (!core.status.areas[area]) core.status.areas[area].floorIds = [];
+            if (!core.status.areas[area]) core.status.areas[area] = { floorIds: [], data: {} };
             let areas = core.status.areas[area];
             if (!areas.floorIds.includes(floorId)) areas.floorIds.push(floorId);
         }
@@ -40,10 +40,11 @@ export class Floor {
     /** 解析楼层 */
     extract(layer?: string): Floor {
         if (!layer) {
-            ['fg', 'bg', 'event'].forEach(one => { this.extract(one); });
+            ['fg', 'bg', 'event'].forEach(one => { return this.extract(one); });
             return this;
         }
         let map: number[][];
+        this.block = { fg: {}, bg: {}, event: {} };
         if (layer === 'event') map = this.map;
         else if (layer === 'fg') map = this.fg;
         else if (layer === 'bg') map = this.bg;
@@ -53,7 +54,7 @@ export class Floor {
         let w = map[0].length;
         for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
-                if (map[y][x] !== -2) continue;
+                if (map[y][x] === -2) continue;
                 let num = map[y][x];
                 let cls = core.dict[num].cls;
                 let id = core.dict[num].id
@@ -79,7 +80,10 @@ export class Floor {
         let main = core.containers.map;
         main.x = -view.width;
         main.y = -view.height;
-        this.extract().drawBg();
+        this.extract();
+        this.drawBg();
+        this.drawEvent();
+        this.drawFg();
         return this;
     }
 
@@ -93,9 +97,29 @@ export class Floor {
         return this;
     }
 
+    /** 绘制事件层 */
+    drawEvent(): Floor {
+        let event = new PIXI.Container();
+        event.zIndex = 30;
+        core.containers.event = event;
+        core.containers.map.addChild(event);
+        this.drawContent('event', event);
+        return this;
+    }
+
+    /** 绘制前景层 */
+    drawFg(): Floor {
+        let fg = new PIXI.Container();
+        fg.zIndex = 40;
+        core.containers.fg = fg;
+        core.containers.map.addChild(fg);
+        this.drawContent('fg', fg);
+        return this;
+    }
+
     /** 把地图绘制到目标container上 */
     drawContent(layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
-        let map: number[][] = this[layer];
+        let map: number[][] = this[layer === 'event' ? 'map' : layer];
         let h: number = map.length;
         let w: number = map[0].length;
         for (let y = 0; y < h; y++) {
@@ -104,7 +128,13 @@ export class Floor {
                 if (n === -2) {
                     // 单独处理项
                     let block = this.block[layer][x + ',' + y];
-
+                    block.generateTexture();
+                    // 获取图像
+                    let texture = PIXI.utils.TextureCache[block.graph];
+                    texture.frame = block.node[1];
+                    let sprite = new PIXI.Sprite(texture);
+                    sprite.anchor.set(0.5, 1);
+                    container.addChild(sprite);
                 }
             }
         }

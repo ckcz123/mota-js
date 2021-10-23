@@ -28,9 +28,9 @@ export class Enemy {
     graph: string;
     [key: string]: any;
 
-    constructor(status: Status | Enemy) {
+    constructor(status: Status) {
         for (let one in status) {
-            if (!(status[one] instanceof Function)) this[one] = status[one];
+            this[one] = status[one];
         }
     }
 }

@@ -20,7 +20,8 @@ class Maps {
 
     /** 切换楼层 */
     changeFloor(floorId: string, x: number, y: number): void {
-
+        let f = new floor.Floor(floorId, 'test');
+        f.draw();
     }
 }
 

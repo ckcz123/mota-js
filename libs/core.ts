@@ -88,6 +88,13 @@ class Core {
             views: {},
             nowView: void 0
         }
+        this.initView();
+    }
+
+    /** 初始化main视角 */
+    initView(): void {
+        let v = new view.View('main', 0, 0, 1);
+        this.status.views.main = this.status.nowView = v;
     }
 }
 

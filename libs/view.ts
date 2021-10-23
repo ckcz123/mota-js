@@ -43,12 +43,14 @@ export class View {
         this.calPixel();
         let x = 0;
         let y = 0;
-        if (core.status.thisMap.width * core.__UNIT_WIDTH__ > this.width) x = -this.width / 2;
+        if (core.status.thisMap.width * core.__UNIT_WIDTH__ < this.width)
+            x = -this.width / 2 + core.status.thisMap.width * core.__UNIT_WIDTH__ / 2;
         else {
             x = core.status.nowHero.x * core.__UNIT_WIDTH__ - this.width / 2;
             if (x < 0) x = 0;
         }
-        if (core.status.thisMap.height * core.__UNIT_HEIGHT__ > this.height) y = -this.height / 2;
+        if (core.status.thisMap.height * core.__UNIT_HEIGHT__ < this.height)
+            y = -this.height / 2 + core.status.thisMap.height * core.__UNIT_HEIGHT__ / 2;
         else {
             y = core.status.nowHero.y * core.__UNIT_HEIGHT__ - this.height / 2;
             if (y < 0) y = 0;

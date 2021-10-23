@@ -50,9 +50,6 @@ class Main {
         core.dom.game = game.view;
         core.pixi.game = game;
         core.timestamp = 0;
-        game.ticker.add(dt => {
-            core.timestamp += 16.6;
-        });
         core.initCore();
     }
 }

@@ -9,10 +9,10 @@ type Status = {
     hp: number | bigint,
     atk: number | bigint,
     def: number | bigint,
-    mana: number | bigint,
-    hpmax: number | bigint,
-    manamax: number | bigint,
-    graph: string
+    mana?: number | bigint,
+    hpmax?: number | bigint,
+    manamax?: number | bigint,
+    graph?: string
 }
 
 export class Hero {
@@ -31,6 +31,8 @@ export class Hero {
         for (let one in status) {
             this[one] = status[one];
         }
+        this.x = 0;
+        this.y = 0;
     }
 
     /** 设置属性 */
@@ -63,7 +65,7 @@ export function createHero(id: string, status: Status): Hero {
     deleteHero(id);
     status.id = id;
     let hero = new Hero(status);
-    core.status.hero[status.id] = hero;
+    core.status.hero[id] = hero;
     return hero;
 }
 

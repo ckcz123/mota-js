@@ -40,11 +40,11 @@ export class Floor {
     /** 解析楼层 */
     extract(layer?: string): Floor {
         if (!layer) {
+            this.block = { fg: {}, bg: {}, event: {} };
             ['fg', 'bg', 'event'].forEach(one => { return this.extract(one); });
             return this;
         }
         let map: number[][];
-        this.block = { fg: {}, bg: {}, event: {} };
         if (layer === 'event') map = this.map;
         else if (layer === 'fg') map = this.fg;
         else if (layer === 'bg') map = this.bg;
@@ -78,8 +78,8 @@ export class Floor {
         // 如果是main视角，重定位至以勇士为中心的位置
         if (view.id === 'main') view.center();
         let main = core.containers.map;
-        main.x = -view.width;
-        main.y = -view.height;
+        main.x = -view.x;
+        main.y = -view.y;
         this.extract();
         this.drawBg();
         this.drawEvent();
@@ -131,9 +131,11 @@ export class Floor {
                     block.generateTexture();
                     // 获取图像
                     let texture = PIXI.utils.TextureCache[block.graph];
-                    texture.frame = block.node[1];
+                    texture.frame = block.node[0];
+                    block.node.now = 0;
                     let sprite = new PIXI.Sprite(texture);
                     sprite.anchor.set(0.5, 1);
+                    sprite.position.set(x * 32 + this.unit_width / 2, y * 32 + this.unit_height);
                     container.addChild(sprite);
                 }
             }

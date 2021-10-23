@@ -16,6 +16,7 @@ import * as hero from './hero';
 import * as utils from './utils';
 import * as view from './view';
 import * as block from './block';
+import * as animate from './animate';
 
 declare global {
     interface Window {
@@ -58,6 +59,7 @@ class Core {
     /** 界面的长宽比，默认为1.33 */
     readonly aspect: number = 1.33;
     timestamp: number;
+    timeCycle: number;
 
     constructor() {
         this.material = {
@@ -80,7 +82,7 @@ class Core {
         maps.initUnits();
         // 初始化status
         core.status = {
-            hero: { now: void 0 },
+            hero: {},
             maps: {},
             thisMap: void 0,
             nowHero: void 0,
@@ -88,13 +90,23 @@ class Core {
             views: {},
             nowView: void 0
         }
+        core.timeCycle = 0;
+        animate.initAnimate();
         this.initView();
+        this.initHero();
     }
 
     /** 初始化main视角 */
     initView(): void {
         let v = new view.View('main', 0, 0, 1);
         this.status.views.main = this.status.nowView = v;
+        v.to();
+    }
+
+    /** 初始化勇士 */
+    initHero(): void {
+        hero.createHero('hero', { hp: 1000, atk: 10, def: 5, id: 'hero', img: 'hero.png' });
+        hero.changeHero('hero');
     }
 }
 

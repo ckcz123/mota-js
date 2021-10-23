@@ -57,7 +57,7 @@ class Core {
     readonly __UNIT_HEIGHT__ = 48;
     readonly floors: { [key: string]: any } = {};
     /** 界面的长宽比，默认为1.33 */
-    readonly aspect: number = 1.33;
+    readonly aspect: number = 1.33
     timestamp: number;
     timeCycle: number;
 

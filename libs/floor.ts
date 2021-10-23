@@ -135,7 +135,10 @@ export class Floor {
                     block.node.now = 0;
                     let sprite = new PIXI.Sprite(texture);
                     sprite.anchor.set(0.5, 1);
-                    sprite.position.set(x * 32 + this.unit_width / 2, y * 32 + this.unit_height);
+                    sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
+                    let sx = this.unit_width / sprite.width;
+                    let sy = this.unit_height / sprite.height;
+                    sprite.scale.set(Math.min(sx, sy));
                     container.addChild(sprite);
                 }
             }

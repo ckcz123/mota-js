@@ -22,17 +22,24 @@ export class View {
     relocate(x: number, y: number): View {
         this.x = x;
         this.y = y;
+        core.containers.map.position.set(x, y);
         return this;
     }
 
     /** 重新修改视角的视野范围 */
     resize(scale: number): View {
         this.scale = scale;
+        if (core.status.nowView.id === this.id) {
+            if (this.id === 'main') this.center();
+            core.containers.map.scale.set(scale);
+            core.containers.map.position.set(-this.x, -this.y);
+        }
         return this;
     }
 
     /** 切换成该视角 */
     to(): View {
+        if (core.status.thisMap) core.status.thisMap.draw(this);
         return core.status.nowView = this;
     }
 
@@ -43,16 +50,16 @@ export class View {
         this.calPixel();
         let x = 0;
         let y = 0;
-        if (core.status.thisMap.width * core.__UNIT_WIDTH__ < this.width)
-            x = -this.width / 2 + core.status.thisMap.width * core.__UNIT_WIDTH__ / 2;
+        let dw = core.status.thisMap.width * core.status.thisMap.unit_width;
+        let dh = core.status.thisMap.height * core.status.thisMap.unit_height;
+        if (dw < this.width / this.scale) x = (-this.width / 2 + dw / 2) * this.scale;
         else {
-            x = core.status.nowHero.x * core.__UNIT_WIDTH__ - this.width / 2;
+            x = core.status.nowHero.x * core.status.thisMap.unit_width - this.width * this.scale / 2;
             if (x < 0) x = 0;
         }
-        if (core.status.thisMap.height * core.__UNIT_HEIGHT__ < this.height)
-            y = -this.height / 2 + core.status.thisMap.height * core.__UNIT_HEIGHT__ / 2;
+        if (dh < this.height / this.scale) y = (-this.height / 2 + dh / 2) * this.scale;
         else {
-            y = core.status.nowHero.y * core.__UNIT_HEIGHT__ - this.height / 2;
+            y = core.status.nowHero.y * core.status.thisMap.unit_height - this.height * this.scale / 2;
             if (y < 0) y = 0;
         }
         this.relocate(x, y);

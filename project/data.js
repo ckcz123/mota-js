@@ -28,6 +28,9 @@ let data = {
         "Monster10-01.png",
         "Monster11-01.png",
         "Monster12-01.png",
+    ],
+    "tileset": [
+        "magictower.png"
     ]
 }
 export { data }

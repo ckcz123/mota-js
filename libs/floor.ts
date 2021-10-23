@@ -126,13 +126,38 @@ export class Floor {
             for (let x = 0; x < w; x++) {
                 let n = map[y][x];
                 if (n === -2) {
-                    // 单独处理项
+                    // 单独处理项 带动画的都在这里绘制
                     let block = this.block[layer][x + ',' + y];
                     block.generateTexture();
                     // 获取图像
                     let texture = PIXI.utils.TextureCache[block.graph];
                     texture.frame = block.node[0];
                     block.node.now = 0;
+                    let sprite = new PIXI.Sprite(texture);
+                    sprite.anchor.set(0.5, 1);
+                    sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
+                    let sx = this.unit_width / sprite.width;
+                    let sy = this.unit_height / sprite.height;
+                    sprite.scale.set(Math.min(sx, sy));
+                    container.addChild(sprite);
+                } else {
+                    // 正常项
+                    let img = core.dict[n].img;
+                    let s = img.split('.');
+                    let id = s[0] + '.' + s[s.length - 1];
+                    let texture = PIXI.utils.TextureCache[img];
+                    if (!texture) {
+                        texture = PIXI.Texture.from(core.material.tileset[id]);
+                        PIXI.Texture.addToCache(texture, img);
+                        // 切割素材
+                        let data = s[s.length - 2];
+                        let aspect = /[0-9]+x[0-9]+/.exec(data)[0].match(/[0-9]+/g);
+                        let w = ~~(texture.width / parseInt(aspect[0]));
+                        let h = ~~(texture.height / parseInt(aspect[1]));
+                        let rect = new PIXI.Rectangle((parseInt(/@x[0-9]/.exec(data)[0][2]) - 1) * w,
+                            (parseInt(/@y[0-9]/.exec(data)[0][2]) - 1) * h, w, h);
+                        texture.frame = rect;
+                    }
                     let sprite = new PIXI.Sprite(texture);
                     sprite.anchor.set(0.5, 1);
                     sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);

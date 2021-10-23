@@ -15,6 +15,7 @@ class Loader {
         this.loadSound();
         this.loadBgm();
         this.loadEnemy();
+        this.loadTileset();
         await this.loadImages();
         // 加载完毕，进入游戏
         control.initGame();
@@ -86,6 +87,24 @@ class Loader {
         let enemy = new Image();
         enemy.src = src;
         core.material.enemy[name] = enemy;
+    }
+
+    /** 加载tileset */
+    async loadTileset(): Promise<void> {
+        let all = core.dataContent.tileset;
+        let load = all.map(async (one: string) => {
+            return await this.loadTileset_loadOne(one);
+        })
+        await Promise.all(load);
+        console.log('tileset加载完毕');
+    }
+
+    /** 加载某个tileset */
+    async loadTileset_loadOne(name: string): Promise<void> {
+        let src = 'project/tileset/' + name;
+        let tile = new Image();
+        tile.src = src;
+        core.material.tileset[name] = tile;
     }
 }
 

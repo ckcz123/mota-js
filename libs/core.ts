@@ -50,8 +50,9 @@ class Core {
     material: {
         images: { [key: string]: HTMLImageElement };
         bgms: { [key: string]: HTMLAudioElement };
-        sounds: { [key: string]: HTMLAudioElement }
+        sounds: { [key: string]: HTMLAudioElement };
         enemy: { [key: string]: HTMLImageElement };
+        tileset: { [key: string]: HTMLImageElement };
     }
     readonly __UNIT_WIDTH__ = 48;
     readonly __UNIT_HEIGHT__ = 48;
@@ -66,7 +67,8 @@ class Core {
             images: {},
             bgms: {},
             sounds: {},
-            enemy: {}
+            enemy: {},
+            tileset: {}
         };
         this.containers = {};
     }

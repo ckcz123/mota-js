@@ -15,6 +15,7 @@ import * as floor from './floor';
 import * as hero from './hero';
 import * as utils from './utils';
 import * as view from './view';
+import * as block from './block';
 
 declare global {
     interface Window {
@@ -55,6 +56,7 @@ class Core {
     readonly floors: { [key: string]: any } = {};
     /** 界面的长宽比，默认为1.33 */
     readonly aspect: number = 1.33;
+    timestamp: number;
 
     constructor() {
         this.material = {
@@ -88,4 +90,4 @@ class Core {
 }
 
 let core = new Core();
-export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils, view };
+export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils, view, block };

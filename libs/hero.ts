@@ -25,6 +25,8 @@ export class Hero {
     hpmax: number | bigint;
     manamax: number | bigint;
     graph: string;
+    x: number;
+    y: number;
     constructor(status: Status) {
         for (let one in status) {
             this[one] = status[one];

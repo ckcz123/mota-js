@@ -12,4 +12,5 @@ export class Event {
 
 export function startGame() {
     ui.destoryContainer('start');
+    ui.createContainer('map');
 }

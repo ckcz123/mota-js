@@ -1,6 +1,9 @@
 /*
 enemy.ts负责怪物相关内容
 */
+
+import { core } from "./core";
+
 type Status = {
     readonly id: string,
     readonly number: number,
@@ -22,7 +25,9 @@ export class Enemy {
     vertical: boolean;
     x: number;
     y: number;
+    graph: string;
     [key: string]: any;
+
     constructor(status: Status | Enemy) {
         for (let one in status) {
             if (!(status[one] instanceof Function)) this[one] = status[one];

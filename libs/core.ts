@@ -14,6 +14,7 @@ import * as enemy from './enemy';
 import * as floor from './floor';
 import * as hero from './hero';
 import * as utils from './utils';
+import * as view from './view';
 
 declare global {
     interface Window {
@@ -33,9 +34,13 @@ class Core {
     __WIDTH__: number;
     __HEIGHT__: number;
     status: {
-        hero: { now: hero.Hero, [key: string]: hero.Hero },
+        hero: { [key: string]: hero.Hero },
+        nowHero: hero.Hero,
         maps: { [key: string]: floor.Floor },
-        thisMap: floor.Floor
+        thisMap: floor.Floor,
+        areas: { [key: string]: { floorIds: string[], data: { [key: string]: any } } },
+        views: { [key: string]: view.View },
+        nowView: view.View
     }
     units: {
         enemy: { [key: string]: enemy.Enemy };
@@ -73,10 +78,14 @@ class Core {
         core.status = {
             hero: { now: void 0 },
             maps: {},
-            thisMap: void 0
+            thisMap: void 0,
+            nowHero: void 0,
+            areas: {},
+            views: {},
+            nowView: void 0
         }
     }
 }
 
 let core = new Core();
-export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils };
+export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils, view };

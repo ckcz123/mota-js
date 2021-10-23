@@ -74,6 +74,6 @@ export function deleteHero(id: string): void {
 /** 切换勇士 */
 export function changeHero(id: string): Hero {
     if (core.status.hero[id]) {
-        return core.status.hero.now = core.status.hero[id];
+        return core.status.nowHero = core.status.hero[id];
     }
 }

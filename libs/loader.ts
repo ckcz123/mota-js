@@ -14,6 +14,7 @@ class Loader {
     async load(): Promise<void> {
         this.loadSound();
         this.loadBgm();
+        this.loadEnemy();
         await this.loadImages();
         // 加载完毕，进入游戏
         control.initGame();
@@ -25,7 +26,6 @@ class Loader {
             let src = 'project/images/' + one;
             let image = new Image();
             image.src = src;
-            image.onload = () => { }
             core.material.images[one] = image;
             return;
         });
@@ -56,18 +56,36 @@ class Loader {
     async loadSound(): Promise<void> {
         let all = core.dataContent.sounds;
         let load = all.map(async (one: string) => {
-            return await this._loadSound_loadOne(one);
+            return await this.loadSound_loadOne(one);
         })
         await Promise.all(load);
         console.log('音效加载完毕');
     }
 
     /** 加载某个音效 */
-    async _loadSound_loadOne(name: string): Promise<void> {
+    async loadSound_loadOne(name: string): Promise<void> {
         let src = 'project/sounds/' + name;
         let bgm = new Audio(src);
         bgm.preload = 'none';
         core.material.sounds[name] = bgm;
+    }
+
+    /** 加载怪物图片 */
+    async loadEnemy(): Promise<void> {
+        let all = core.dataContent.enemy;
+        let load = all.map(async (one: string) => {
+            return await this.loadEnemy_loadOne(one);
+        })
+        await Promise.all(load);
+        console.log('怪物图片加载完毕');
+    }
+
+    /** 加载某个怪物图片 */
+    async loadEnemy_loadOne(name: string): Promise<void> {
+        let src = 'project/enemy/' + name;
+        let enemy = new Image();
+        enemy.src = src;
+        core.material.enemy[name] = enemy;
     }
 }
 

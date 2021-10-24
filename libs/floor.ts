@@ -80,10 +80,7 @@ export class Floor {
         let main = core.containers.map;
         main.x = -view.x;
         main.y = -view.y;
-        this.extract();
-        this.drawBg();
-        this.drawEvent();
-        this.drawFg();
+        this.extract().drawBg().drawEvent().drawFg();
         return this;
     }
 
@@ -133,13 +130,7 @@ export class Floor {
                     let texture = PIXI.utils.TextureCache[block.graph];
                     texture.frame = block.node[0];
                     block.node.now = 0;
-                    let sprite = new PIXI.Sprite(texture);
-                    sprite.anchor.set(0.5, 1);
-                    sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
-                    let sx = this.unit_width / sprite.width;
-                    let sy = this.unit_height / sprite.height;
-                    sprite.scale.set(Math.min(sx, sy));
-                    container.addChild(sprite);
+                    this.drawOne(texture, x, y, container);
                 } else {
                     // 正常项
                     let img = core.dict[n].img;
@@ -158,16 +149,22 @@ export class Floor {
                             (parseInt(/@y[0-9]/.exec(data)[0][2]) - 1) * h, w, h);
                         texture.frame = rect;
                     }
-                    let sprite = new PIXI.Sprite(texture);
-                    sprite.anchor.set(0.5, 1);
-                    sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
-                    let sx = this.unit_width / sprite.width;
-                    let sy = this.unit_height / sprite.height;
-                    sprite.scale.set(Math.min(sx, sy));
-                    container.addChild(sprite);
+                    this.drawOne(texture, x, y, container);
                 }
             }
         }
+        return this;
+    }
+
+    /** 绘制单个图块到sprite */
+    drawOne(texture: PIXI.Texture, x: number, y: number, container: PIXI.Container): Floor {
+        let sprite = new PIXI.Sprite(texture);
+        sprite.anchor.set(0.5, 1);
+        sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
+        let sx = this.unit_width / sprite.width;
+        let sy = this.unit_height / sprite.height;
+        sprite.scale.set(Math.min(sx, sy));
+        container.addChild(sprite);
         return this;
     }
 }

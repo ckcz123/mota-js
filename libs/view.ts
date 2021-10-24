@@ -22,7 +22,7 @@ export class View {
     relocate(x: number, y: number): View {
         this.x = x;
         this.y = y;
-        core.containers.map.position.set(x, y);
+        if (core.status.nowView.id === this.id) core.containers.map.position.set(x, y);
         return this;
     }
 
@@ -75,7 +75,7 @@ export class View {
 }
 
 /**
- * 创建一个新的视角，不会切换至该视角
+ * 创建一个新的视角，不会切换至该视角，视角会存进core.status.views
  * @param id 视角id，不能是main
  */
 export function createView(id: string, x: number, y: number, scale: number): View | void {

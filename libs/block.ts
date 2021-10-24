@@ -58,8 +58,11 @@ export class Block {
     /** 生成texture */
     generateTexture(): Block {
         this.extractGraph();
-        let texture = PIXI.Texture.from(core.material[this.cls][this.node.img]);
-        if (!PIXI.utils.TextureCache[this.graph]) PIXI.Texture.addToCache(texture, this.graph);
+        let texture = PIXI.utils.TextureCache[this.graph];
+        if (!texture) {
+            let texture = PIXI.Texture.from(core.material[this.cls][this.node.img]);
+            if (!PIXI.utils.TextureCache[this.graph]) PIXI.Texture.addToCache(texture, this.graph);
+        }
         return this;
     }
 }

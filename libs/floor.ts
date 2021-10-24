@@ -122,6 +122,7 @@ export class Floor {
         for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
                 let n = map[y][x];
+                if (n === 1 || n === 2) continue;
                 if (n === -2) {
                     // 单独处理项 带动画的都在这里绘制
                     let block = this.block[layer][x + ',' + y];

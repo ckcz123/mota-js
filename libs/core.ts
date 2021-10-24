@@ -113,4 +113,4 @@ class Core {
 }
 
 let core = new Core();
-export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils, view, block };
+export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils, view, block, animate };

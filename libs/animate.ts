@@ -24,6 +24,7 @@ export function blockAnimate(): void {
         let block: { [key: string]: Block } = floor.block[layer];
         for (let loc in block) {
             let one = block[loc];
+            if (!one.inView()) continue;
             if (one.node) {
                 let to = one.node[one.node.now + 1] ? one.node.now + 1 : 0;
                 let next = one.node[to];

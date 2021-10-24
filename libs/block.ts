@@ -5,6 +5,7 @@ import { core } from './core';
 import * as enemy from './enemy';
 import * as utils from './utils'
 import * as PIXI from 'pixi.js-legacy';
+import * as view from './view';
 
 export class Block {
     data: enemy.Enemy;
@@ -64,5 +65,15 @@ export class Block {
             if (!PIXI.utils.TextureCache[this.graph]) PIXI.Texture.addToCache(texture, this.graph);
         }
         return this;
+    }
+
+    /** 是否在视野范围内 */
+    inView(view?: view.View): boolean {
+        if (!view) view = core.status.views.main;
+        let floor = core.status.thisMap;
+        let dx = this.x * floor.unit_width - view.x;
+        let dy = this.y * floor.unit_height - view.y;
+        view.calPixel();
+        return dx > -floor.unit_width && dy > -floor.unit_height && dx < view.width && dy < view.height;
     }
 }

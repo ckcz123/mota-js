@@ -38,9 +38,14 @@ export class View {
     }
 
     /** 切换成该视角 */
-    to(): View {
-        if (core.status.thisMap) core.status.thisMap.draw(this);
-        return core.status.nowView = this;
+    to(redraw?: boolean): View {
+        core.status.nowView = this;
+        if (redraw) {
+            if (core.status.thisMap) core.status.thisMap.draw(this);
+        } else {
+            if (core.containers.map) this.relocate(this.x, this.y).resize(this.scale);
+        }
+        return this;
     }
 
     /** 切换视角至以勇士为中心 */

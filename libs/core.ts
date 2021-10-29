@@ -1,7 +1,6 @@
 /*
 core.ts 负责游戏的初始化以及核心内容
 */
-import * as PIXI from 'pixi.js-legacy';
 import { maps } from './maps';
 import { resize } from './resize';
 import { loader } from './loader';
@@ -9,6 +8,7 @@ import { ui } from './ui';
 import { control } from './control';
 import { listen } from './listen';
 import { dict } from '../project/dict';
+import * as PIXI from 'pixi.js-legacy';
 import * as events from './events';
 import * as enemy from './enemy';
 import * as floor from './floor';

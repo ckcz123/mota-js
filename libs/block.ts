@@ -6,17 +6,23 @@ import * as enemy from './enemy';
 import * as utils from './utils'
 import * as view from './view';
 
+type defaultUnit = {
+    readonly id: string
+    readonly number: number
+    [key: string]: any
+}
+
 export class Block {
-    data: enemy.Enemy;
+    data: enemy.Enemy | defaultUnit;
     x: number;
     y: number;
     graph: string;
     cls: string;
 
-    constructor(unit: enemy.Enemy, x: number, y: number) {
+    constructor(unit: enemy.Enemy | defaultUnit, x: number, y: number) {
+        this.data = utils.clone(unit, (name, data) => (!(data instanceof Function)));
         if (unit instanceof enemy.Enemy) {
             // 图块是怪物
-            this.data = utils.clone(unit);
             this.x = x;
             this.y = y;
             this.graph = core.dict[unit.number].img;

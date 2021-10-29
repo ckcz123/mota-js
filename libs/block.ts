@@ -71,8 +71,8 @@ export class Block {
     inView(view?: view.View): boolean {
         if (!view) view = core.status.views.main;
         let floor = core.status.thisMap;
-        let dx = this.x * floor.unit_width - view.x;
-        let dy = this.y * floor.unit_height - view.y;
+        let dx = this.x * floor.unit_width - view.x - view.width * view.anchor.x;
+        let dy = this.y * floor.unit_height - view.y - view.height * view.anchor.y;
         view.calPixel();
         return dx > -floor.unit_width && dy > -floor.unit_height && dx < view.width && dy < view.height;
     }

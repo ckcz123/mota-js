@@ -38,37 +38,38 @@ export class View {
     }
 
     /** 视角的锚点 */
-    anchor = {
-        x: 0,
-        y: 0,
+    anchor: {
+        x: number,
+        y: number,
         /** 设置视角的锚点 参数为小数形式 比如0.5就表示中心的位置 1就表示最靠右最靠下的位置
          * @param keep 是否保持视角位置不动
          */
-        set: (x: number = this.anchor.x, y: number = this.anchor.y, keep?: boolean) => {
-            this.calPixel();
-            let dx = x - this.anchor.x;
-            let dy = y - this.anchor.y;
-            if (keep) {
-                this.x -= dx * this.width;
-                this.y -= dy * this.height;
+        set: (x?: number, y?: number, keep?: boolean) => View
+    } = {
+            x: 0,
+            y: 0,
+            set: (x: number = this.anchor.x, y: number = this.anchor.y, keep?: boolean) => {
+                this.calPixel();
+                let dx = x - this.anchor.x;
+                let dy = y - this.anchor.y;
+                if (keep) {
+                    this.x -= dx * this.width;
+                    this.y -= dy * this.height;
+                }
+                this.anchor.x = x;
+                this.anchor.y = y;
+                if (core.status.nowView.id === this.id) {
+                    core.containers.map.position.set(-this.x - x * this.width, -this.y - y * this.height);
+                }
+                return this;
             }
-            this.anchor.x = x;
-            this.anchor.y = y;
-            if (core.status.nowView.id === this.id) {
-                core.containers.map.position.set(-this.x - x * this.width, -this.y - y * this.height);
-            }
-            return this;
-        }
-    };
+        };
 
     /** 切换成该视角 */
     to(redraw?: boolean): View {
         core.status.nowView = this;
-        if (redraw) {
-            if (core.status.thisMap) core.status.thisMap.draw(this);
-        } else {
-            if (core.containers.map) this.relocate(this.x, this.y).resize(this.scale);
-        }
+        if (redraw) if (core.status.thisMap) core.status.thisMap.draw(this);
+        if (core.containers.map) this.relocate(this.x, this.y).resize(this.scale).anchor.set();
         return this;
     }
 

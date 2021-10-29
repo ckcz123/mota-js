@@ -122,36 +122,17 @@ export class Floor {
         for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
                 let n = map[y][x];
-                if (n === 1 || n === 2) continue;
-                if (n === -2) {
-                    // 单独处理项 带动画的都在这里绘制
-                    let block = this.block[layer][x + ',' + y];
-                    block.generateTexture();
-                    // 获取图像
-                    let texture = PIXI.utils.TextureCache[block.graph];
-                    texture.frame = block.node[0];
-                    block.node.now = 0;
-                    this.drawOne(texture, x, y, container);
-                } else {
-                    // 正常项
-                    let img = core.dict[n].img;
-                    let s = img.split('.');
-                    let id = s[0] + '.' + s[s.length - 1];
-                    let texture = PIXI.utils.TextureCache[img];
-                    if (!texture) {
-                        texture = PIXI.Texture.from(core.material.tileset[id]);
-                        PIXI.Texture.addToCache(texture, img);
-                        // 切割素材
-                        let data = s[s.length - 2];
-                        let aspect = /[0-9]+x[0-9]+/.exec(data)[0].match(/[0-9]+/g);
-                        let w = ~~(texture.width / parseInt(aspect[0]));
-                        let h = ~~(texture.height / parseInt(aspect[1]));
-                        let rect = new PIXI.Rectangle((parseInt(/@x[0-9]/.exec(data)[0][2]) - 1) * w,
-                            (parseInt(/@y[0-9]/.exec(data)[0][2]) - 1) * h, w, h);
-                        texture.frame = rect;
-                    }
-                    this.drawOne(texture, x, y, container);
-                }
+                let nn: number
+                if (n === 1) continue;
+                // -2的数字单独处理
+                if (n === -2) nn = this.block[layer][x + ',' + y].data.number;
+                else nn = n;
+                // 开始绘制
+                let animate = core.dict[nn].animate;
+                let texture = PIXI.utils.TextureCache[animate.node];
+                texture.frame = animate.data[0];
+                animate.data.now = 0;
+                this.drawOne(texture, x, y, container);
             }
         }
         return this;

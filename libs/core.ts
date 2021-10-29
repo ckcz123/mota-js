@@ -30,11 +30,13 @@ class Core {
     containers: { [key: string]: PIXI.Container };
     sprite: { [key: string]: PIXI.Sprite };
     dataContent: { [key: string]: any };
-    dict: { [key: number]: { id: string, cls: string, img: string } } = dict;
+    dict: { [key: number]: { id: string, cls: string, img: string, animate?: animate.Animate } } = dict;
     floorIds: string[];
     scale: number;
     __WIDTH__: number;
     __HEIGHT__: number;
+    timestamp: number;
+    timeCycle: number;
     status: {
         hero: { [key: string]: hero.Hero },
         nowHero: hero.Hero,
@@ -59,8 +61,6 @@ class Core {
     readonly floors: { [key: string]: any } = {};
     /** 界面的长宽比，默认为1.33 */
     readonly aspect: number = 1.33
-    timestamp: number;
-    timeCycle: number;
 
     constructor() {
         this.material = {

@@ -20,7 +20,7 @@ export class Block {
     cls: string;
 
     constructor(unit: enemy.Enemy | defaultUnit, x: number, y: number) {
-        this.data = utils.clone(unit, (name, data) => (!(data instanceof Function)));
+        this.data = utils.clone(unit, (name, data) => (!(data instanceof Function) && name !== 'data'));
         if (unit instanceof enemy.Enemy) {
             // 图块是怪物
             this.x = x;

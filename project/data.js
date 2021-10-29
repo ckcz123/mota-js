@@ -30,7 +30,11 @@ let data = {
         "Monster12-01.png",
     ],
     "tileset": [
-        "magictower.png"
+        "magictower.png",
+    ],
+    "autotile": [
+        "autotile.png",
+        "autotile1.png",
     ]
 }
 export { data }

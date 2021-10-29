@@ -65,6 +65,7 @@ export function extractAll(): void {
     let all = core.dict;
     for (let id in all) {
         let one = all[id];
+        if (one.cls === 'autotile') continue;
         one.animate = new Animate(one.img, one.cls);
     }
 }

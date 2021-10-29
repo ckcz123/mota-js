@@ -4,6 +4,7 @@ floor.ts负责楼层相关内容
 import { core } from './core';
 import * as block from './block';
 import * as view from './view';
+import * as autotile from './autotile';
 import * as PIXI from 'pixi.js-legacy';
 
 export class Floor {
@@ -86,6 +87,7 @@ export class Floor {
 
     /** 绘制背景层 */
     drawBg(): Floor {
+        if (core.containers.bg) core.containers.bg.destroy({ children: true });
         let bg = new PIXI.Container();
         bg.zIndex = 20;
         core.containers.bg = bg;
@@ -96,6 +98,7 @@ export class Floor {
 
     /** 绘制事件层 */
     drawEvent(): Floor {
+        if (core.containers.event) core.containers.event.destroy({ children: true });
         let event = new PIXI.Container();
         event.zIndex = 30;
         core.containers.event = event;
@@ -106,6 +109,7 @@ export class Floor {
 
     /** 绘制前景层 */
     drawFg(): Floor {
+        if (core.containers.fg) core.containers.fg.destroy({ children: true });
         let fg = new PIXI.Container();
         fg.zIndex = 40;
         core.containers.fg = fg;
@@ -119,6 +123,7 @@ export class Floor {
         let map: number[][] = this[layer === 'event' ? 'map' : layer];
         let h: number = map.length;
         let w: number = map[0].length;
+        let dict = core.dict;
         for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
                 let n = map[y][x];
@@ -127,12 +132,17 @@ export class Floor {
                 // -2的数字单独处理
                 if (n === -2) nn = this.block[layer][x + ',' + y].data.number;
                 else nn = n;
+                let cls = dict[nn].cls;
                 // 开始绘制
-                let animate = core.dict[nn].animate;
-                let texture = PIXI.utils.TextureCache[animate.node];
-                texture.frame = animate.data[0];
-                animate.data.now = 0;
-                this.drawOne(texture, x, y, container);
+                if (cls !== 'autotile') {
+                    let animate = core.dict[nn].animate;
+                    let texture = PIXI.utils.TextureCache[animate.node];
+                    texture.frame = animate.data[0];
+                    animate.data.now = 0;
+                    this.drawOne(texture, x, y, container);
+                } else {
+                    this.drawAutotile(nn, x, y, layer, container);
+                }
             }
         }
         return this;
@@ -145,8 +155,15 @@ export class Floor {
         sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
         let sx = this.unit_width / sprite.width;
         let sy = this.unit_height / sprite.height;
-        sprite.scale.set(Math.min(sx, sy));
+        if (sx < 1 && sy < 1) sprite.scale.set(Math.min(sx, sy));
         container.addChild(sprite);
+        return this;
+    }
+
+    /** 绘制autotile */
+    drawAutotile(number: number, x: number, y: number, layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
+        // 解析autotile
+        let tile = new autotile.Autotile(number, x, y, layer, this.floorId);
         return this;
     }
 }

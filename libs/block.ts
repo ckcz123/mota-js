@@ -5,6 +5,7 @@ import { core } from './core';
 import * as enemy from './enemy';
 import * as utils from './utils'
 import * as view from './view';
+import * as autotile from './autotile';
 
 type defaultUnit = {
     readonly id: string
@@ -13,21 +14,18 @@ type defaultUnit = {
 }
 
 export class Block {
-    data: enemy.Enemy | defaultUnit;
+    data: enemy.Enemy | autotile.Autotile | defaultUnit;
     x: number;
     y: number;
     graph: string;
     cls: string;
 
-    constructor(unit: enemy.Enemy | defaultUnit, x: number, y: number) {
+    constructor(unit: enemy.Enemy | autotile.Autotile | defaultUnit, x: number, y: number) {
         this.data = utils.clone(unit, (name, data) => (!(data instanceof Function) && name !== 'data'));
-        if (unit instanceof enemy.Enemy) {
-            // 图块是怪物
-            this.x = x;
-            this.y = y;
-            this.graph = core.dict[unit.number].img;
-            this.cls = core.dict[unit.number].cls;
-        }
+        this.x = x;
+        this.y = y;
+        this.graph = core.dict[unit.number].img;
+        this.cls = core.dict[unit.number].cls;
     }
 
     /** 是否在视野范围内 */

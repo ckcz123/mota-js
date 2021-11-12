@@ -5,8 +5,8 @@ utils.ts负责各种辅助函数
 export let dirs = {
     left: [-1, 0],
     up: [0, -1],
-    right: [0, 1],
-    down: [1, 0],
+    right: [1, 0],
+    down: [0, 1],
     leftup: [-1, -1],
     leftdown: [-1, 1],
     rightup: [1, -1],

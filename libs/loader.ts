@@ -1,9 +1,9 @@
 /*
 loader.ts负责对文件的加载
 */
-import * as PIXI from 'pixi.js-legacy';
 import { control } from './control';
 import { core } from './core';
+import * as animate from './animate';
 
 class Loader {
     constructor() {
@@ -14,10 +14,10 @@ class Loader {
     async load(): Promise<void> {
         this.loadSound();
         this.loadBgm();
-        this.loadEnemy();
-        this.loadTileset();
+        this.loadMaterial();
         await this.loadImages();
         // 加载完毕，进入游戏
+        animate.initAnimate();
         control.initGame();
     }
 
@@ -71,42 +71,25 @@ class Loader {
         core.material.sounds[name] = bgm;
     }
 
-    /** 加载怪物图片 */
-    async loadEnemy(): Promise<void> {
-        let all = core.dataContent.enemy;
-        let load = all.map(async (one: string) => {
-            return await this.loadEnemy_loadOne(one);
-        })
-        await Promise.all(load);
-        console.log('怪物图片加载完毕');
-    }
-
-    /** 加载某个怪物图片 */
-    async loadEnemy_loadOne(name: string): Promise<void> {
-        let src = 'project/enemy/' + name;
-        let enemy = new Image();
-        enemy.src = src;
-        core.material.enemy[name] = enemy;
-    }
-
-    /** 加载tileset */
-    async loadTileset(): Promise<void> {
-        let all = core.dataContent.tileset;
-        let load = all.map(async (one: string) => {
-            return await this.loadTileset_loadOne(one);
-        })
-        await Promise.all(load);
-        console.log('tileset加载完毕');
-    }
-
-    /** 加载某个tileset */
-    async loadTileset_loadOne(name: string): Promise<void> {
-        let src = 'project/tileset/' + name;
-        let tile = new Image();
-        tile.src = src;
-        core.material.tileset[name] = tile;
+    /** 加载某个素材图片 */
+    async loadMaterial(): Promise<void> {
+        const loadOne = async (src: string) => {
+            let all = core.dataContent[src];
+            for (let one in all) {
+                let name = all[one];
+                let s = 'project/' + src + '/' + name;
+                let img = new Image();
+                img.src = s;
+                core.material[src][name] = img;
+            }
+            console.log(src + '加载完毕');
+        }
+        let list = ['enemy', 'tileset', 'autotile'];
+        for (let one of list) {
+            await loadOne(one);
+        }
     }
 }
 
 let loader = new Loader();
-export { loader }
+export { loader };

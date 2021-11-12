@@ -55,7 +55,7 @@ export class Floor {
         let w = map[0].length;
         for (let y = 0; y < h; y++) {
             for (let x = 0; x < w; x++) {
-                if (map[y][x] === -2) continue;
+                if (map[y][x] === -2 || map[y][x] === 0) continue;
                 let num = map[y][x];
                 let cls = core.dict[num].cls;
                 let id = core.dict[num].id
@@ -128,7 +128,7 @@ export class Floor {
             for (let x = 0; x < w; x++) {
                 let n = map[y][x];
                 let nn: number
-                if (n === 1) continue;
+                if (n === 1 || n === 0) continue;
                 // -2的数字单独处理
                 if (n === -2) nn = this.block[layer][x + ',' + y].data.number;
                 else nn = n;
@@ -155,7 +155,7 @@ export class Floor {
         sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
         let sx = this.unit_width / sprite.width;
         let sy = this.unit_height / sprite.height;
-        if (sx < 1 && sy < 1) sprite.scale.set(Math.min(sx, sy));
+        if (sx > 1 && sy > 1) sprite.scale.set(Math.min(sx, sy));
         container.addChild(sprite);
         return this;
     }
@@ -164,6 +164,7 @@ export class Floor {
     drawAutotile(number: number, x: number, y: number, layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
         // 解析autotile
         let tile = new autotile.Autotile(number, x, y, layer, this.floorId);
+        tile.draw();
         return this;
     }
 }

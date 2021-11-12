@@ -55,6 +55,7 @@ class Core {
         sounds: { [key: string]: HTMLAudioElement };
         enemy: { [key: string]: HTMLImageElement };
         tileset: { [key: string]: HTMLImageElement };
+        autotile: { [key: string]: HTMLImageElement };
     }
     readonly __UNIT_WIDTH__ = 48;
     readonly __UNIT_HEIGHT__ = 48;
@@ -68,7 +69,8 @@ class Core {
             bgms: {},
             sounds: {},
             enemy: {},
-            tileset: {}
+            tileset: {},
+            autotile: {}
         };
         this.containers = {};
     }
@@ -93,7 +95,6 @@ class Core {
             nowView: void 0
         }
         core.timeCycle = 0;
-        animate.initAnimate();
         this.initView();
         this.initHero();
     }

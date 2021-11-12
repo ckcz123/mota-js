@@ -5,7 +5,6 @@ autotile.ts负责autotile相关内容
 import { core } from './core';
 import * as utils from './utils';
 import * as PIXI from 'pixi.js-legacy';
-import { Texture } from 'pixi.js-legacy/dist/browser/pixi-legacy';
 
 export class Autotile {
     x: number;
@@ -132,7 +131,7 @@ export class Autotile {
             ------------
             |  |    |  |  +1
             ------------
-            稍微说一下原理
+            稍微说一下原理，方便想要复写的作者
             对于左上角的16x16（1/4格）：如果左边有该自动元件或子组件，则向右移动2格，如果左边有，则向左移动1格，
                                     如果上边有，则向下移动2格，如果下边有，则向上移动1格
             对于左下角的16x16（1/4格）：如果左边有该自动元件或子组件，则向右移动2格，如果左边有，则向左移动1格，
@@ -146,10 +145,10 @@ export class Autotile {
                 // 解析每一个方向
                 let [x, y] = [0, 0];
                 // 判断拐角
-                if (dir & 0b10000000 && dir & 0b100000 && dirs === 'leftup') { x = 1; y = -2; }
-                if (dir & 0b100000 && dir & 0b1000 && dirs === 'leftdown') { x = 1; y = -2; }
-                if (dir & 0b10000000 && dir & 0b10 && dirs === 'rightup') { x = 1; y = -2; }
-                if (dir & 0b1000 && dir & 0b10 && dirs === 'rightdown') { x = 1; y = -2; }
+                if (dir & 0b10000000 && dir & 0b100000 && !(dir & 0b1000000) && dirs === 'leftup') { x = 1; y = -2; }
+                if (dir & 0b100000 && dir & 0b1000 && !(dir & 0b10000) && dirs === 'leftdown') { x = 1; y = -2; }
+                if (dir & 0b10000000 && dir & 0b10 && !(dir & 0b1) && dirs === 'rightup') { x = 1; y = -2; }
+                if (dir & 0b1000 && dir & 0b10 && !(dir & 0b100) && dirs === 'rightdown') { x = 1; y = -2; }
                 if (y !== -2) {
                     x = dirs.includes('right') ? 1 : -1;
                     y = dirs.includes('down') ? 1 : -1;

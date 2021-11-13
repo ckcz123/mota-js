@@ -164,6 +164,7 @@ export class Floor {
     drawAutotile(number: number, x: number, y: number, layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
         // 解析autotile
         let tile = new autotile.Autotile(number, x, y, layer, this.floorId);
+        // 绘制
         tile.draw();
         return this;
     }

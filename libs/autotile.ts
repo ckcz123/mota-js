@@ -174,10 +174,13 @@ export class Autotile {
                     y = Math.min(1, y);
                 }
                 let [px, py] = this.getPixel(x, y, dirs);
-                let rect = new PIXI.Rectangle(px, py, this.data.unit.width / 2, this.data.unit.height / 2);
-                this.data.graphs[dirs] = rect;
-                // 获取texture
-                let texture = this.generateTexture(rect);
+                let texture: PIXI.Texture = PIXI.utils.TextureCache[this.data.img + '@' + px + '@' + py];
+                if (!texture) {
+                    let rect = new PIXI.Rectangle(px, py, this.data.unit.width / 2, this.data.unit.height / 2);
+                    this.data.graphs[dirs] = rect;
+                    // 获取texture
+                    texture = this.generateTexture(rect);
+                }
                 this.data.textures[dirs] = texture;
             }
         } else {

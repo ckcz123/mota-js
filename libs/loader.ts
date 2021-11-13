@@ -85,9 +85,8 @@ class Loader {
             console.log(src + '加载完毕');
         }
         let list = ['enemy', 'tileset', 'autotile'];
-        for (let one of list) {
-            await loadOne(one);
-        }
+        const load = list.map(e => loadOne(e));
+        await Promise.all(load);
     }
 }
 

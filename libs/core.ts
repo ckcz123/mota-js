@@ -39,11 +39,12 @@ class Core {
     timeCycle: number;
     status: {
         hero: { [key: string]: hero.Hero },
-        nowHero: hero.Hero,
         maps: { [key: string]: floor.Floor },
-        thisMap: floor.Floor,
-        areas: { [key: string]: { floorIds: string[], data: { [key: string]: any } } },
         views: { [key: string]: view.View },
+        heroContainer: { [key: string]: PIXI.Container },
+        areas: { [key: string]: { floorIds: string[], data: { [key: string]: any } } },
+        thisMap: floor.Floor,
+        nowHero: hero.Hero,
         nowView: view.View
     }
     units: {
@@ -92,7 +93,8 @@ class Core {
             nowHero: void 0,
             areas: {},
             views: {},
-            nowView: void 0
+            nowView: void 0,
+            heroContainer: {}
         }
         core.timeCycle = 0;
         this.initView();
@@ -108,7 +110,7 @@ class Core {
 
     /** 初始化勇士 */
     initHero(): void {
-        hero.createHero('hero', { hp: 1000, atk: 10, def: 5, id: 'hero', img: 'hero.png' });
+        hero.createHero('hero', { hp: 1000, atk: 10, def: 5, id: 'hero', img: 'hero.png', autoScale: true });
         hero.changeHero('hero');
     }
 }

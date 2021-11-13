@@ -3,7 +3,8 @@ let data = {
         "sample0"
     ],
     "images": [
-        "bg.jpg"
+        "bg.jpg",
+        "hero.png"
     ],
     "bgms": [
         "bgm.mp3"

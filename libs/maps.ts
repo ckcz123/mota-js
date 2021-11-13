@@ -21,8 +21,13 @@ class Maps {
 
     /** 切换楼层 */
     changeFloor(floorId: string, x: number, y: number): void {
+        // 绘制楼层
         let f = new floor.Floor(floorId, 'test');
         f.draw();
+        // 勇士
+        let hero = core.status.nowHero;
+        hero.floor = floorId;
+        hero.draw();
     }
 
     /** 单独解析某个图块 */

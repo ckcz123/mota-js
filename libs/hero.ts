@@ -40,10 +40,14 @@ interface LocationEvent {
     readonly dir: 'left' | 'right' | 'up' | 'down'
     readonly x: number
     readonly y: number
+    readonly toDir: 'left' | 'right' | 'up' | 'down'
+    readonly toX: number
+    readonly toY: number
 }
 
 interface MoveEvent extends LocationEvent {
     readonly speed: number
+    readonly steps: string[]
 }
 
 interface JumpEvent extends LocationEvent {
@@ -83,7 +87,7 @@ export class Hero {
     followers: View[];
     /** 专属container */
     container: PIXI.Container;
-    listener: Function[];
+    listener: { [key: string]: Function[] };
     data: {
         /** 单位格的长宽 */
         unit: {
@@ -147,6 +151,7 @@ export class Hero {
 
     /** 转向 */
     turn(dir?: "left" | "right" | "up" | "down"): Hero {
+        let oriDir = this.dir;
         // 默认转向只能顺时针转动...
         if (!dir) {
             switch (this.dir) {
@@ -167,14 +172,30 @@ export class Hero {
         } else {
             this.dir = dir;
         }
+        // ----- listen turn ----- //
+        const ev: LocationEvent = {
+            dir: oriDir, x: this.x, y: this.y,
+            toDir: this.dir, toX: this.x, toY: this.y
+        };
+        this.listen('turn', ev);
+        // ----- listen end ----- //
         return this;
     }
 
     /** 设置位置 */
     setLoc(x?: number, y?: number): Hero {
+        let ox = this.x;
+        let oy = this.y;
         if (x) this.x = x;
         if (y) this.y = y;
         this.resetContainerLoc().setFollowers();
+        // ----- listen locationset ----- //
+        const ev: LocationEvent = {
+            dir: this.dir, x: ox, y: oy,
+            toDir: this.dir, toX: this.x, toY: this.y
+        };
+        this.listen('locationset', ev);
+        // ----- listen end ----- //
         return this;
     }
 
@@ -197,7 +218,7 @@ export class Hero {
     }
 
     /** 解析素材 */
-    extractGraph(): Hero {
+    private extractGraph(): Hero {
         if (this.data.width !== 0) return this;
         let [w, h] = this.aspect.split('x');
         let img = core.material.images[this.graph];
@@ -209,7 +230,7 @@ export class Hero {
     }
 
     /** 分割成多个rectangle */
-    generateRect(): Hero {
+    private generateRect(): Hero {
         if (this.data.rects.length !== 0) return this;
         let w = this.data.unit.width;
         let h = this.data.unit.height;
@@ -273,6 +294,7 @@ export class Hero {
 
     /** 移动勇士 */
     move(route: ('left' | 'right' | 'up' | 'down' | 'forward' | 'backward')[], speed: number = core.settings.heroSpeed): Hero {
+        if (this.moving) return;
         this.moving = true;
         let start = 0;
         let now = 0;
@@ -284,9 +306,20 @@ export class Hero {
         let [nx, ny] = this.nextStep(route[0]);
         let floor = core.status.maps[this.floor];
         if (!(sprite instanceof PIXI.Sprite)) return;
+        let oriDir = this.dir;
         this.turn((route[0] === 'forward' || route[0] === 'backward') ? this.dir : route[0]);
         sprite.texture = texture;
         texture.frame = this.data.rects[nowIndex];
+
+        // ----- listen movingstart ----- //
+        const ev: MoveEvent = {
+            speed,
+            x: this.x, y: this.y, dir: oriDir,
+            toX: nx, toY: ny, toDir: this.dir,
+            steps: route
+        };
+        this.listen('movingstart', ev);
+        // ----- listen end ----- //
 
         /** 执行下一帧动画 */
         const next = (step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward') => {
@@ -312,14 +345,35 @@ export class Hero {
                 now++;
                 // 到达下一格
                 let step = route[now];
+                let oriX = this.x;
+                let oriY = this.y;
+                let oriDir = this.dir;
                 this.setLoc(nx, ny);
                 if (!step) {
+                    // ----- listen movingend ----- //
+                    const ev: MoveEvent = {
+                        speed,
+                        x: oriX, y: oriY, dir: this.dir,
+                        toX: nx, toY: ny, toDir: this.dir,
+                        steps: route
+                    };
+                    this.listen('movingend', ev);
+                    // ----- listen end ----- //
                     core.pixi.game.ticker.remove(ticker);
                     this.moving = false;
                     if (this.isCurrent()) this.draw();
                     return;
                 }
                 next(step);
+                // ----- listen moving ----- //
+                const ev: MoveEvent = {
+                    speed,
+                    x: oriX, y: oriY, dir: oriDir,
+                    toX: nx, toY: ny, toDir: this.dir,
+                    steps: route
+                };
+                this.listen('moving', ev);
+                // ----- listen end ----- //
                 [nx, ny] = this.nextStep(step);
             }
         }
@@ -327,15 +381,8 @@ export class Hero {
         return this;
     }
 
-    /** 获取帧的索引位置 */
-    getFrameIndex(dir: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward'): number {
-        if (dir.endsWith('ward')) dir = this.dir;
-        let line = this.getLineByDir(dir);
-        return (line - 1) * 4;
-    }
-
     /** 获取下一帧索引 */
-    getNextFrame(index: number, dir: 'left' | 'right' | 'up' | 'down'): number {
+    private getNextFrame(index: number, dir: 'left' | 'right' | 'up' | 'down'): number {
         let i = 0;
         if (dir !== this.dir) {
             // 需要转向
@@ -361,7 +408,7 @@ export class Hero {
     }
 
     /** 获取下一步的坐标 */
-    nextStep(step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward'): [number, number] {
+    private nextStep(step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward'): [number, number] {
         let loc: [number, number];
         if (step === 'forward') loc = this.next();
         else if (step === 'backward') loc = this.next(-1);
@@ -375,14 +422,24 @@ export class Hero {
     }
 
     /** 为勇士添加事件监听器 */
-    addListener<K extends keyof HeroEvent>(event: K, listener: (this: Hero, ex: HeroEvent[K]) => void): Hero {
+    addListener<K extends keyof HeroEvent>(event: K, listener: (this: Hero, ev: HeroEvent[K]) => void): Hero {
+        this.removeListener(listener);
+        this.listener[event].push(listener);
         return this;
     }
 
     /** 移除事件监听器 */
     removeListener(listener: Function): Hero {
-        this.listener = this.listener.filter(f => f !== listener);
+        for (let one in this.listener) {
+            let l = this.listener[one];
+            l = l.filter(f => f !== listener);
+        }
         return this;
+    }
+
+    /** 执行事件监听器的内容 */
+    private listen<K extends keyof HeroEvent>(event: K, ev: HeroEvent[K]): void {
+        this.listener[event].forEach(f => f.call(this, ev));
     }
 }
 

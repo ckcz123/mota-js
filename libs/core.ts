@@ -58,6 +58,9 @@ class Core {
         tileset: { [key: string]: HTMLImageElement };
         autotile: { [key: string]: HTMLImageElement };
     }
+    settings: {
+        heroSpeed: number;
+    }
     readonly __UNIT_WIDTH__ = 48;
     readonly __UNIT_HEIGHT__ = 48;
     readonly floors: { [key: string]: any } = {};
@@ -95,6 +98,9 @@ class Core {
             views: {},
             nowView: void 0,
             heroContainer: {}
+        }
+        core.settings = {
+            heroSpeed: 100
         }
         core.timeCycle = 0;
         this.initView();

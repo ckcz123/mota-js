@@ -1,8 +1,10 @@
 /*
 hero.ts负责勇士相关内容
 */
-import { core } from './core';
+import { animate, core } from './core';
 import * as PIXI from 'pixi.js-legacy';
+import { View } from './view';
+import * as utils from './utils';
 
 type Status = {
     id: string,
@@ -16,7 +18,7 @@ type Status = {
     manamax?: number | bigint,
     graph?: string,
     floor?: string,
-    dir?: string,
+    dir?: 'left' | 'right' | 'up' | 'down',
     autoScale?: boolean
 }
 
@@ -32,17 +34,24 @@ export class Hero {
     graph: string;
     x: number;
     y: number;
-    dir: string;
+    dir: 'left' | 'right' | 'up' | 'down';
     floor: string;
     aspect: string;
     autoScale: boolean;
+    /** 正在移动 */
+    moving: boolean;
+    followers: View[];
     data: {
+        /** 单位格的长宽 */
         unit: {
             width: number
             height: number
         }
+        /** 图片的长 */
         width: number
+        /** 图片的宽 */
         height: number
+        rects: PIXI.Rectangle[]
     }
 
     constructor(status: Status) {
@@ -61,9 +70,12 @@ export class Hero {
                 height: 0
             },
             width: 0,
-            height: 0
+            height: 0,
+            rects: []
         };
         this.autoScale = status.autoScale || false;
+        this.moving = false;
+        this.followers = [];
     }
 
     /** 设置属性 */
@@ -84,30 +96,34 @@ export class Hero {
         return this;
     }
 
-    /** 切换行走图 */
+    /** 切换行走图，注意两个勇士的行走图不能一样，否则两个勇士的动画将会同步233 */
     changeGraph(graph: string): Hero {
         this.graph = graph;
         return this;
     }
 
     /** 转向 */
-    turn(): Hero {
-        // 转向只能顺时针转动...
-        switch (this.dir) {
-            case 'down':
-                this.dir = 'left';
-                break;
-            case 'left':
-                this.dir = 'up';
-                break;
-            case 'up':
-                this.dir = 'right';
-                break;
-            case 'right':
-                this.dir = 'down';
-                break;
+    turn(dir?: "left" | "right" | "up" | "down"): Hero {
+        // 默认转向只能顺时针转动...
+        if (!dir) {
+            switch (this.dir) {
+                case 'down':
+                    this.dir = 'left';
+                    break;
+                case 'left':
+                    this.dir = 'up';
+                    break;
+                case 'up':
+                    this.dir = 'right';
+                    break;
+                case 'right':
+                    this.dir = 'down';
+                    break;
+            }
+            this.draw();
+        } else {
+            this.dir = dir;
         }
-        this.draw();
         return this;
     }
 
@@ -115,7 +131,7 @@ export class Hero {
     setLoc(x?: number, y?: number): Hero {
         if (x) this.x = x;
         if (y) this.y = y;
-        this.resetContainerLoc();
+        this.resetContainerLoc().setFollowers();
         return this;
     }
 
@@ -130,6 +146,7 @@ export class Hero {
 
     /** 根据方向获取行数 */
     getLineByDir(dir: string = this.dir): number {
+        if (dir.endsWith('ward')) dir = this.dir;
         if (dir === 'down') return 1;
         if (dir === 'left') return 2;
         if (dir === 'right') return 3;
@@ -138,6 +155,7 @@ export class Hero {
 
     /** 解析素材 */
     extractGraph(): Hero {
+        if (this.data.width !== 0) return this;
         let [w, h] = this.aspect.split('x');
         let img = core.material.images[this.graph];
         this.data.unit.width = img.width / parseInt(w);
@@ -147,19 +165,35 @@ export class Hero {
         return this;
     }
 
+    /** 分割成多个rectangle */
+    generateRect(): Hero {
+        if (this.data.rects.length !== 0) return this;
+        let w = this.data.unit.width;
+        let h = this.data.unit.height;
+        for (let y = 0; y < this.data.height; y++) {
+            for (let x = 0; x < this.data.width; x++) {
+                this.data.rects.push(new PIXI.Rectangle(x * w, y * h, w, h));
+            }
+        }
+        return this;
+    }
+
     /** 绘制勇士 */
     draw(): Hero {
         let container = this.createOwnContainer();
-        this.extractGraph().resetContainerLoc();
+        this.extractGraph().generateRect().resetContainerLoc();
         let sprite = container.getChildByName('hero');
         if (sprite) sprite.destroy();
         // 获得texture
         let line = this.getLineByDir();
         let img = core.material.images[this.graph];
-        let texture = PIXI.Texture.from(img);
+        let texture = PIXI.utils.TextureCache[this.graph];
+        if (!texture) {
+            texture = PIXI.Texture.from(img);
+            PIXI.Texture.addToCache(texture, this.graph);
+        }
         let w = this.data.unit.width;
-        let h = this.data.unit.height;
-        let rect = new PIXI.Rectangle(0, (line - 1) * h, w, h);
+        let rect = this.data.rects[(line - 1) * 4];
         texture.frame = rect;
         // 创建sprite
         let floor = core.status.maps[this.floor];
@@ -170,7 +204,7 @@ export class Hero {
         s.position.set(width / 2, height);
         s.name = 'hero';
         // 缩放
-        if (this.autoScale) s.scale.set(width / this.data.unit.width)
+        if (this.autoScale) s.scale.set(width / w);
         container.addChild(s);
         return this;
     }
@@ -186,6 +220,115 @@ export class Hero {
         } else {
             return core.status.heroContainer[this.id];
         }
+    }
+
+    /** 设置跟随视角 */
+    setFollowers(): Hero {
+        this.followers.forEach(v => v.center());
+        return this;
+    }
+
+    /** 移动勇士 */
+    move(route: ('left' | 'right' | 'up' | 'down' | 'forward' | 'backward')[], speed: number = core.settings.heroSpeed): Hero {
+        this.moving = true;
+        let start = 0;
+        let now = 0;
+        let animation = 1;
+        let texture = PIXI.utils.TextureCache[this.graph];
+        let container = this.createOwnContainer();
+        let sprite = container.getChildByName('hero');
+        let nowIndex = (this.getLineByDir(route[0]) - 1) * this.data.width;
+        let [nx, ny] = this.nextStep(route[0]);
+        let floor = core.status.maps[this.floor];
+        if (!(sprite instanceof PIXI.Sprite)) return;
+        this.turn((route[0] === 'forward' || route[0] === 'backward') ? this.dir : route[0]);
+        sprite.texture = texture;
+        texture.frame = this.data.rects[nowIndex];
+
+        /** 执行下一帧动画 */
+        const next = (step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward') => {
+            let next = 0;
+            if (step === 'forward' || step === 'backward') next = this.getNextFrame(nowIndex, this.dir);
+            else next = this.getNextFrame(nowIndex, step);
+            texture.frame = this.data.rects[next];
+            nowIndex = next;
+            animation++;
+        }
+
+        const ticker = () => {
+            // 移动
+            container.x += ((nx - this.x) * floor.unit_width) / (speed / 16.6);
+            container.y += ((ny - this.y) * floor.unit_height) / (speed / 16.6);
+            start += 16.6;
+            if (start / animation > speed * 1.5 && this.isCurrent()) {
+                // 执行动画
+                let step = route[now];
+                next(step);
+            }
+            if (start - (now * speed) > speed) {
+                now++;
+                // 到达下一格
+                let step = route[now];
+                this.setLoc(nx, ny);
+                if (!step) {
+                    core.pixi.game.ticker.remove(ticker);
+                    this.moving = false;
+                    if (this.isCurrent()) this.draw();
+                    return;
+                }
+                next(step);
+                [nx, ny] = this.nextStep(step);
+            }
+        }
+        core.pixi.game.ticker.add(ticker);
+        return this;
+    }
+
+    /** 获取帧的索引位置 */
+    getFrameIndex(dir: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward'): number {
+        if (dir.endsWith('ward')) dir = this.dir;
+        let line = this.getLineByDir(dir);
+        return (line - 1) * 4;
+    }
+
+    /** 获取下一帧索引 */
+    getNextFrame(index: number, dir: 'left' | 'right' | 'up' | 'down'): number {
+        let i = 0;
+        if (dir !== this.dir) {
+            // 需要转向
+            this.turn(dir);
+            i = (this.getLineByDir(dir) - 1) * this.data.width;
+        } else {
+            // 不需要转向
+            let line = this.getLineByDir(dir);
+            if (index + 1 >= line * this.data.width) i = (line - 1) * this.data.width;
+            else i = index + 1;
+        }
+        return i;
+    }
+
+    /** 获取面前n个格子的坐标 */
+    next(n: number = 1): [number, number] {
+        let [x, y] = [this.x, this.y];
+        if (this.dir === 'left') x -= n;
+        if (this.dir === 'right') x += n;
+        if (this.dir === 'up') y -= n;
+        if (this.dir === 'down') y += n;
+        return [x, y];
+    }
+
+    /** 获取下一步的坐标 */
+    nextStep(step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward'): [number, number] {
+        let loc: [number, number];
+        if (step === 'forward') loc = this.next();
+        else if (step === 'backward') loc = this.next(-1);
+        else loc = [this.x + utils.dirs[step][0], this.y + utils.dirs[step][1]];
+        return loc;
+    }
+
+    /** 是否是当前勇士 */
+    isCurrent(): boolean {
+        return core.status.nowHero.id === this.id;
     }
 }
 

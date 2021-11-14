@@ -73,19 +73,24 @@ class Loader {
 
     /** 加载某个素材图片 */
     async loadMaterial(): Promise<void> {
-        const loadOne = async (src: string) => {
+        const loadOne = async (dir: string, name: string) => {
+            let img = new Image();
+            return new Promise((res, rej) => {
+                img.onload = res;
+                img.onerror = rej;
+                img.src = 'project/' + dir + '/' + name;
+                core.material[dir][name] = img;
+            });
+        }
+
+        const loadDir = async (src: string) => {
             let all = core.dataContent[src];
-            for (let one in all) {
-                let name = all[one];
-                let s = 'project/' + src + '/' + name;
-                let img = new Image();
-                img.src = s;
-                core.material[src][name] = img;
-            }
+            const load = all.map(e => loadOne(src, e));
             console.log(src + '加载完毕');
+            await Promise.all(load);
         }
         let list = ['enemy', 'tileset', 'autotile'];
-        const load = list.map(e => loadOne(e));
+        const load = list.map(e => loadDir(e));
         await Promise.all(load);
     }
 }

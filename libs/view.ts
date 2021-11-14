@@ -2,6 +2,7 @@
 view.ts负责视角相关内容
 */
 import { core } from './core';
+import { Hero } from './hero';
 
 export class View {
     x: number;
@@ -10,6 +11,7 @@ export class View {
     id: string;
     width: number;
     height: number;
+    followHero: Hero;
 
     constructor(id: string, x: number, y: number, scale: number) {
         this.x = x;
@@ -41,7 +43,7 @@ export class View {
     anchor: {
         x: number,
         y: number,
-        /** 设置视角的锚点 参数为小数形式 比如0.5就表示中心的位置 1就表示最靠右最靠下的位置
+        /** 设置视角的锚点 参数为小数形式 比如0.5就表示中心的位置 1就表示最靠右或最靠下的位置
          * @param keep 是否保持视角位置不动
          */
         set: (x?: number, y?: number, keep?: boolean) => View
@@ -74,8 +76,8 @@ export class View {
     }
 
     /** 切换视角至以勇士为中心 */
-    center(): View {
-        let hero = core.status.nowHero;
+    center(hero: string | Hero = core.status.nowHero): View {
+        if (!(hero instanceof Hero)) hero = core.status.hero[hero];
         if (!hero) return;
         this.calPixel();
         let x = 0;
@@ -100,6 +102,24 @@ export class View {
     calPixel(): View {
         this.width = 1000 / this.scale;
         this.height = 1000 / core.aspect / this.scale;
+        return this;
+    }
+
+    /** 跟随某个勇士 */
+    follow(hero: string | Hero): View {
+        if (!(hero instanceof Hero)) hero = core.status.hero[hero];
+        if (!hero) return;
+        this.followHero = hero;
+        hero.followers.push(this);
+        return this;
+    }
+
+    /** 取消跟随某个勇士 */
+    unfollow(hero: string | Hero): View {
+        if (!(hero instanceof Hero)) hero = core.status.hero[hero];
+        if (!hero) return;
+        this.followHero = void 0;
+        hero.followers = hero.followers.filter(v => v.id !== this.id);
         return this;
     }
 }

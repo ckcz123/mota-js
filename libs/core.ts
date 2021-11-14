@@ -41,7 +41,6 @@ class Core {
         hero: { [key: string]: hero.Hero },
         maps: { [key: string]: floor.Floor },
         views: { [key: string]: view.View },
-        heroContainer: { [key: string]: PIXI.Container },
         areas: { [key: string]: { floorIds: string[], data: { [key: string]: any } } },
         thisMap: floor.Floor,
         nowHero: hero.Hero,
@@ -97,7 +96,6 @@ class Core {
             areas: {},
             views: {},
             nowView: void 0,
-            heroContainer: {}
         }
         core.settings = {
             heroSpeed: 100

@@ -1,7 +1,7 @@
 /*
 hero.ts负责勇士相关内容
 */
-import { animate, core } from './core';
+import { core } from './core';
 import * as PIXI from 'pixi.js-legacy';
 import { View } from './view';
 import * as utils from './utils';
@@ -20,6 +20,46 @@ type Status = {
     floor?: string,
     dir?: 'left' | 'right' | 'up' | 'down',
     autoScale?: boolean
+}
+
+interface HeroEvent {
+    movingstart: MoveEvent
+    movingend: MoveEvent
+    moving: MoveEvent
+    animationstart: AnimationEvent
+    animationend: AnimationEvent
+    statuschange: StatusEvent
+    turn: LocationEvent
+    locationset: LocationEvent
+    draw: DrawEvent
+    jumpstart: JumpEvent
+    jumpend: JumpEvent
+}
+
+interface LocationEvent {
+    readonly dir: 'left' | 'right' | 'up' | 'down'
+    readonly x: number
+    readonly y: number
+}
+
+interface MoveEvent extends LocationEvent {
+    readonly speed: number
+}
+
+interface JumpEvent extends LocationEvent {
+
+}
+
+interface AnimationEvent {
+
+}
+
+interface StatusEvent {
+
+}
+
+interface DrawEvent {
+
 }
 
 export class Hero {
@@ -41,6 +81,9 @@ export class Hero {
     /** 正在移动 */
     moving: boolean;
     followers: View[];
+    /** 专属container */
+    container: PIXI.Container;
+    listener: Function[];
     data: {
         /** 单位格的长宽 */
         unit: {
@@ -211,14 +254,14 @@ export class Hero {
 
     /** 创建专属container */
     createOwnContainer(): PIXI.Container {
-        if (!core.status.heroContainer[this.id]) {
+        if (!this.container) {
             let container = new PIXI.Container();
-            core.status.heroContainer[this.id] = container;
+            this.container = container;
             container.zIndex = 25;
             core.containers.map.addChild(container);
             return container;
         } else {
-            return core.status.heroContainer[this.id];
+            return this.container;
         }
     }
 
@@ -329,6 +372,17 @@ export class Hero {
     /** 是否是当前勇士 */
     isCurrent(): boolean {
         return core.status.nowHero.id === this.id;
+    }
+
+    /** 为勇士添加事件监听器 */
+    addListener<K extends keyof HeroEvent>(event: K, listener: (this: Hero, ex: HeroEvent[K]) => void): Hero {
+        return this;
+    }
+
+    /** 移除事件监听器 */
+    removeListener(listener: Function): Hero {
+        this.listener = this.listener.filter(f => f !== listener);
+        return this;
     }
 }
 

@@ -27,16 +27,18 @@ interface HeroEvent {
     movingend: MoveEvent
     moving: MoveEvent
     animationstart: AnimationEvent
-    animationend: AnimationEvent
+    animating: AnimationEvent
+    animationend: null
     statuschange: StatusEvent
     turn: LocationEvent
     locationset: LocationEvent
     draw: DrawEvent
     jumpstart: JumpEvent
     jumpend: JumpEvent
+    shifting: ShiftEvent
 }
 
-interface LocationEvent {
+export interface LocationEvent {
     readonly dir: 'left' | 'right' | 'up' | 'down'
     readonly x: number
     readonly y: number
@@ -45,25 +47,40 @@ interface LocationEvent {
     readonly toY: number
 }
 
-interface MoveEvent extends LocationEvent {
+export interface DrawEvent {
+    readonly x: number
+    readonly y: number
+    readonly dir: 'left' | 'right' | 'up' | 'down'
+    readonly line: number
+    readonly index: number
+    readonly rect: PIXI.Rectangle
+    readonly texture: PIXI.Texture
+}
+
+export interface MoveEvent extends LocationEvent {
     readonly speed: number
     readonly steps: string[]
 }
 
-interface JumpEvent extends LocationEvent {
+export interface JumpEvent extends LocationEvent {
 
 }
 
-interface AnimationEvent {
-
+export interface AnimationEvent extends DrawEvent {
+    readonly row: number
 }
 
-interface StatusEvent {
-
+export interface StatusEvent {
+    readonly before: any
+    readonly after: any
+    readonly status: string
 }
 
-interface DrawEvent {
-
+export interface ShiftEvent {
+    readonly px: number
+    readonly py: number
+    readonly dx: number
+    readonly dy: number
 }
 
 export class Hero {
@@ -85,6 +102,8 @@ export class Hero {
     /** 正在移动 */
     moving: boolean;
     followers: View[];
+    /** 移动状态 */
+    moveStatus: string
     /** 专属container */
     container: PIXI.Container;
     listener: { [key: string]: Function[] };
@@ -123,23 +142,49 @@ export class Hero {
         this.autoScale = status.autoScale || false;
         this.moving = false;
         this.followers = [];
+        this.listener = {
+            movingstart: [],
+            movingend: [],
+            moving: [],
+            animationstart: [],
+            animating: [],
+            animationend: [],
+            statuschange: [],
+            turn: [],
+            locationset: [],
+            draw: [],
+            jumpstart: [],
+            jumpend: [],
+            shifting: []
+        }
+        this.moveStatus = 'none';
     }
 
     /** 设置属性 */
     setStatus(status: string, value: any): Hero {
+        let before = utils.clone(this[status]);
         if (typeof value === 'number' && value > Number.MAX_SAFE_INTEGER) value = BigInt(value);
         this[status] = value;
+        // ----- listen statuschange ----- //
+        const ev: StatusEvent = { before, after: value, status };
+        this.listen('statuschange', ev);
+        // ----- listen end ----- //
         return this;
     }
 
     /** 增减属性 */
     addStatus(status: string, delta: number | bigint): Hero {
+        let before = utils.clone(this[status]);
         if (typeof this[status] === 'bigint') delta = BigInt(delta);
         if (typeof this[status] === 'number' && this[status] + delta > Number.MAX_SAFE_INTEGER) {
             this[status] = BigInt(this[status]);
             delta = BigInt(delta);
         }
         this[status] += delta;
+        // ----- listen statuschange ----- //
+        const ev: StatusEvent = { before, after: this[status], status };
+        this.listen('statuschange', ev);
+        // ----- listen end ----- //
         return this;
     }
 
@@ -186,8 +231,8 @@ export class Hero {
     setLoc(x?: number, y?: number): Hero {
         let ox = this.x;
         let oy = this.y;
-        if (x) this.x = x;
-        if (y) this.y = y;
+        if (x !== void 0) this.x = x;
+        if (y !== void 0) this.y = y;
         this.resetContainerLoc().setFollowers();
         // ----- listen locationset ----- //
         const ev: LocationEvent = {
@@ -270,6 +315,12 @@ export class Hero {
         // 缩放
         if (this.autoScale) s.scale.set(width / w);
         container.addChild(s);
+        // ----- listen draw ----- //
+        const ev: DrawEvent = {
+            x: this.x, y: this.y, dir: this.dir, line, rect, texture, index: (line - 1) * 4
+        };
+        this.listen('draw', ev);
+        // ----- listen end ----- //
         return this;
     }
 
@@ -278,7 +329,7 @@ export class Hero {
         if (!this.container) {
             let container = new PIXI.Container();
             this.container = container;
-            container.zIndex = 25;
+            container.zIndex = 35;
             core.containers.map.addChild(container);
             return container;
         } else {
@@ -302,7 +353,8 @@ export class Hero {
         let texture = PIXI.utils.TextureCache[this.graph];
         let container = this.createOwnContainer();
         let sprite = container.getChildByName('hero');
-        let nowIndex = (this.getLineByDir(route[0]) - 1) * this.data.width;
+        let line = this.getLineByDir(route[0])
+        let nowIndex = (line - 1) * this.data.width;
         let [nx, ny] = this.nextStep(route[0]);
         let floor = core.status.maps[this.floor];
         if (!(sprite instanceof PIXI.Sprite)) return;
@@ -310,8 +362,7 @@ export class Hero {
         this.turn((route[0] === 'forward' || route[0] === 'backward') ? this.dir : route[0]);
         sprite.texture = texture;
         texture.frame = this.data.rects[nowIndex];
-
-        // ----- listen movingstart ----- //
+        // ----- listen movingstart & animationstart ----- //
         const ev: MoveEvent = {
             speed,
             x: this.x, y: this.y, dir: oriDir,
@@ -319,8 +370,11 @@ export class Hero {
             steps: route
         };
         this.listen('movingstart', ev);
+        const ev2: AnimationEvent = {
+            x: this.x, y: this.y, dir: this.dir, line, index: nowIndex, texture, rect: texture.frame, row: 1
+        };
+        this.listen('animationstart', ev2)
         // ----- listen end ----- //
-
         /** 执行下一帧动画 */
         const next = (step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward') => {
             let next = 0;
@@ -329,12 +383,27 @@ export class Hero {
             texture.frame = this.data.rects[next];
             nowIndex = next;
             animation++;
+            // ----- listen animating ----- //
+            const ev: AnimationEvent = {
+                x: this.x, y: this.y, dir: this.dir, index: nowIndex,
+                line: ~~(nowIndex / 4) + 1, row: nowIndex % 4, texture, rect: texture.frame
+            };
+            this.listen('animating', ev);
+            // ----- listen end ----- //
         }
 
         const ticker = () => {
             // 移动
-            container.x += ((nx - this.x) * floor.unit_width) / (speed / 16.6);
-            container.y += ((ny - this.y) * floor.unit_height) / (speed / 16.6);
+            let dx = ((nx - this.x) * floor.unit_width) / (speed / 16.6);
+            let dy = ((ny - this.y) * floor.unit_height) / (speed / 16.6);
+            container.x += dx;
+            container.y += dy;
+            // ----- listen shifting ----- //
+            const ev: ShiftEvent = {
+                px: container.x, py: container.y, dx, dy
+            };
+            this.listen('shifting', ev);
+            // ----- listen end ----- //
             start += 16.6;
             if (start / animation > speed * 1.5 && this.isCurrent()) {
                 // 执行动画
@@ -350,19 +419,25 @@ export class Hero {
                 let oriDir = this.dir;
                 this.setLoc(nx, ny);
                 if (!step) {
-                    // ----- listen movingend ----- //
-                    const ev: MoveEvent = {
-                        speed,
-                        x: oriX, y: oriY, dir: this.dir,
-                        toX: nx, toY: ny, toDir: this.dir,
-                        steps: route
-                    };
-                    this.listen('movingend', ev);
-                    // ----- listen end ----- //
-                    core.pixi.game.ticker.remove(ticker);
-                    this.moving = false;
-                    if (this.isCurrent()) this.draw();
-                    return;
+                    if (this.moveStatus === 'none' || this.dir !== this.moveStatus) {
+                        // ----- listen movingend & animationend ----- //
+                        const ev: MoveEvent = {
+                            speed,
+                            x: oriX, y: oriY, dir: this.dir,
+                            toX: nx, toY: ny, toDir: this.dir,
+                            steps: route
+                        };
+                        this.listen('movingend', ev);
+                        this.listen('animationend', null);
+                        // ----- listen end ----- //
+                        core.pixi.game.ticker.remove(ticker);
+                        this.moving = false;
+                        if (this.isCurrent()) this.draw();
+                        return;
+                    } else {
+                        route.push(this.dir);
+                        step = this.dir;
+                    }
                 }
                 next(step);
                 // ----- listen moving ----- //
@@ -422,14 +497,14 @@ export class Hero {
     }
 
     /** 为勇士添加事件监听器 */
-    addListener<K extends keyof HeroEvent>(event: K, listener: (this: Hero, ev: HeroEvent[K]) => void): Hero {
-        this.removeListener(listener);
+    addEventListener<K extends keyof HeroEvent>(event: K, listener: (this: Hero, ev?: HeroEvent[K]) => void): Hero {
+        this.removeEventListener(listener);
         this.listener[event].push(listener);
         return this;
     }
 
     /** 移除事件监听器 */
-    removeListener(listener: Function): Hero {
+    removeEventListener(listener: Function): Hero {
         for (let one in this.listener) {
             let l = this.listener[one];
             l = l.filter(f => f !== listener);
@@ -440,6 +515,18 @@ export class Hero {
     /** 执行事件监听器的内容 */
     private listen<K extends keyof HeroEvent>(event: K, ev: HeroEvent[K]): void {
         this.listener[event].forEach(f => f.call(this, ev));
+    }
+
+    /** 添加操作监听器 */
+    addActionListener(action: string, func: (...para: any[]) => void): Hero {
+        this.createOwnContainer().addListener(action, func);
+        return this;
+    }
+
+    /** 移除操作监听器 */
+    removeActionListener(action: string, func: (...para: any[]) => void): Hero {
+        this.createOwnContainer().removeListener(action, func);
+        return this;
     }
 }
 

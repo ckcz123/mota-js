@@ -4,6 +4,19 @@ view.ts负责视角相关内容
 import { core } from './core';
 import { Hero } from './hero';
 
+interface ViewEvent {
+    locationset: LocationEvent
+    follow: FollowEvent
+}
+
+interface LocationEvent {
+
+}
+
+interface FollowEvent {
+
+}
+
 export class View {
     x: number;
     y: number;
@@ -12,18 +25,24 @@ export class View {
     width: number;
     height: number;
     followHero: Hero;
+    listener: { [key: string]: Function[] };
 
     constructor(id: string, x: number, y: number, scale: number) {
         this.x = x;
         this.y = y;
         this.scale = scale;
         this.id = id;
+        this.listener = {
+            locationset: []
+        };
     }
 
     /** 重新定位视角 */
     relocate(x: number, y: number): View {
         this.x = x;
         this.y = y;
+        x += this.width * this.anchor.x;
+        y += this.height * this.anchor.y;
         if (core.status.nowView.id === this.id) core.containers.map.position.set(-x, -y);
         return this;
     }
@@ -77,22 +96,62 @@ export class View {
 
     /** 切换视角至以勇士为中心 */
     center(hero: string | Hero = core.status.nowHero): View {
+        // 我已经看不懂了...
         if (!(hero instanceof Hero)) hero = core.status.hero[hero];
-        if (!hero) return;
+        if (!hero) return this;
         this.calPixel();
         let x = 0;
         let y = 0;
-        let dw = core.status.thisMap.width * core.status.thisMap.unit_width;
-        let dh = core.status.thisMap.height * core.status.thisMap.unit_height;
+        let uw = core.status.thisMap.unit_width;
+        let uh = core.status.thisMap.unit_height
+        let dw = core.status.thisMap.width * uw;
+        let dh = core.status.thisMap.height * uh;
+        let ax = this.width * this.anchor.x;
+        let ay = this.width * this.anchor.y;
+        // 地图可以在视角内塞下
         if (dw < this.width / this.scale) x = (-this.width / 2 + dw / 2) * this.scale;
-        else {
-            x = core.status.nowHero.x * core.status.thisMap.unit_width - this.width * this.scale / 2;
-            if (x < 0) x = 0;
+        else { // 塞不下
+            x = hero.x * uw + uw / 2 - this.width * this.scale / 2 - ax;
+            if (x < -ax) x = -ax;
+            if (x > dw - this.width - ax) x = dw - ax - this.width;
         }
+        // 同上
         if (dh < this.height / this.scale) y = (-this.height / 2 + dh / 2) * this.scale;
         else {
-            y = core.status.nowHero.y * core.status.thisMap.unit_height - this.height * this.scale / 2;
-            if (y < 0) y = 0;
+            y = hero.y * uh + uh / 2 - this.height * this.scale / 2 - ay;
+            if (y < -ay) y = -ay;
+            if (y > dh - this.height - ay) x = dh - ay - this.height;
+        }
+        this.relocate(x, y);
+        return this;
+    }
+
+    /** 跟随勇士时以勇士像素位置居中 */
+    center2(hero: string | Hero = core.status.nowHero): View {
+        if (!(hero instanceof Hero)) hero = core.status.hero[hero];
+        if (!hero) return this;
+        this.calPixel();
+        let x = 0;
+        let y = 0;
+        let uw = core.status.thisMap.unit_width;
+        let uh = core.status.thisMap.unit_height
+        let dw = core.status.thisMap.width * uw;
+        let dh = core.status.thisMap.height * uh;
+        let ax = this.width * this.anchor.x;
+        let ay = this.width * this.anchor.y;
+        // 地图可以在视角内塞下
+        if (dw < this.width / this.scale) x = (-this.width / 2 + dw / 2) * this.scale;
+        else { // 塞不下
+            x = hero.createOwnContainer().x + uw / 2 - this.width * this.scale / 2 - ax;
+            if (x < -ax) x = -ax;
+            if (x > dw - this.width - ax) x = dw - ax - this.width;
+        }
+        // 同上
+        if (dh < this.height / this.scale) y = (-this.height / 2 + dh / 2) * this.scale;
+        else {
+            y = hero.createOwnContainer().y + uh / 2 - this.height * this.scale / 2 - ay;
+            if (y < -ay) y = -ay;
+            if (y > dh - this.height - ay) x = dh - ay - this.height;
         }
         this.relocate(x, y);
         return this;
@@ -121,6 +180,27 @@ export class View {
         this.followHero = void 0;
         hero.followers = hero.followers.filter(v => v.id !== this.id);
         return this;
+    }
+
+    /** 给视角添加事件监听器 */
+    addEventListener<K extends keyof ViewEvent>(event: K, func: (this: View, ev: ViewEvent[K]) => void): View {
+        this.removeEventListener(func);
+        this.listener[event].push(func);
+        return this;
+    }
+
+    /** 移除事件监听器 */
+    removeEventListener(listener: Function): View {
+        for (let one in this.listener) {
+            let l = this.listener[one];
+            l = l.filter(f => f !== listener);
+        }
+        return this;
+    }
+
+    /** 执行事件监听器的内容 */
+    private listen<K extends keyof ViewEvent>(event: K, ev: ViewEvent[K]): void {
+        this.listener[event].forEach(f => f.call(this, ev));
     }
 }
 

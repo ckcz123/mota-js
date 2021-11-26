@@ -4,7 +4,6 @@
 // import { xxx as yyy } from 'url' 引入对应模块，可引入多个，并重命名某些模块
 // import * as xxx from 'url' 引入某个文件或模块内的所有内容，并赋给对象xxx
 import * as core from '../../libs/core';
-import * as PIXI from 'pixi.js-legacy';
 
 window.core = core;
 
@@ -15,10 +14,10 @@ window.core = core;
 /** 绘制初始游戏界面 */
 export function drawStartUi () {
     // 先创建一个container
-    let container = core.ui.createContainer('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
+    const container = core.ui.createContainer('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
     core.ui.drawImageOnContainer(container, 'bg.jpg', true, 0, 0, 1000, 1000 / core.core.aspect);
     // 创建文字    在用sprite和container来绘制东西时，颜色可以通过数组的形式创建渐变，比如下面的fill参数
-    let title = core.ui.createText('魔塔样板', 500, 200, 50, {
+    const title = core.ui.createText('魔塔样板', 500, 200, 50, {
         align: 'center', fill: ['#cccccc', '#dddddd', '#eeeeee', '#ffffff'], stroke: '#000000', fontSize: 140,
         strokeThickness: 3, dropShadow: true, dropShadowBlur: 30, dropShadowColor: '#333333', dropShadowDistance: 20
     });

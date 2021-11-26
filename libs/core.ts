@@ -1,13 +1,12 @@
 /*
 core.ts 负责游戏的初始化以及核心内容
 */
-import { maps } from './maps';
-import { resize } from './resize';
-import { loader } from './loader';
-import { ui } from './ui';
-import { control } from './control';
-import { listen } from './listen';
 import { dict } from '../project/dict';
+import * as resize from './resize';
+import * as ui from './ui';
+import * as maps from './maps';
+import * as loader from './loader';
+import * as control from './control';
 import * as PIXI from 'pixi.js-legacy';
 import * as events from './events';
 import * as enemy from './enemy';
@@ -83,6 +82,7 @@ class Core {
     initCore(): void {
         // resize界面
         resize.resize();
+        window.onresize = () => { resize.resize(); };
         // 执行资源加载
         loader.load();
         // 初始化所有单位
@@ -120,4 +120,4 @@ class Core {
 }
 
 let core = new Core();
-export { core, maps, resize, loader, ui, control, listen, events, floor, enemy, hero, utils, view, block, animate };
+export { core, maps, resize, loader, ui, control, events, floor, enemy, hero, utils, view, block, animate };

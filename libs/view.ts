@@ -35,6 +35,7 @@ export class View {
         this.listener = {
             locationset: []
         };
+        this.calPixel();
     }
 
     /** 重新定位视角 */

@@ -98,23 +98,30 @@ export function unregisterTicker(name: string): void {
 
 // ----------- 全局图块动画相关内容
 /** 所有图块的全局动画 */
-export function blockAnimate(): void {
+function blockAnimate(): void {
     if (core.timestamp - core.timeCycle <= 400) return;
     core.timeCycle = core.timestamp;
     if (!core.status.thisMap) return;
     let floor = core.status.thisMap;
+    let view = core.status.nowView;
     let animated: { [key: string]: boolean } = {};
+    let ax = view.anchor.x * view.width;
+    let ay = view.anchor.y * view.height;
     for (let layer in floor.block) {
         let block: { [key: string]: Block } = floor.block[layer];
-        for (let loc in block) {
-            let one = block[loc];
-            if (!animated[one.data.id] && one.inView()) {
-                let animate = core.dict[one.data.number].animate;
-                animated[one.data.id] = true;
-                let to = animate.data[animate.data.now + 1] ? animate.data.now + 1 : 0;
-                let next = animate.data[to];
-                animate.data.now = to;
-                PIXI.utils.TextureCache[animate.node].frame = next;
+        for (let x = ~~((view.x - ax) / floor.unit_width); x <= ~~((view.x - ax + view.width) / floor.unit_width); x++) {
+            for (let y = ~~((view.y - ay) / floor.unit_height); y <= ~~((view.y - ay + view.height) / floor.unit_height); y++) {
+                let loc = x + ',' + y;
+                let one = block[loc];
+                if (!one) continue;
+                if (!animated[one.data.id]) {
+                    let animate = core.dict[one.data.number].animate;
+                    animated[one.data.id] = true;
+                    let to = animate.data[animate.data.now + 1] ? animate.data.now + 1 : 0;
+                    let next = animate.data[to];
+                    animate.data.now = to;
+                    PIXI.utils.TextureCache[animate.node].frame = next;
+                }
             }
         }
     }

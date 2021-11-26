@@ -59,6 +59,9 @@ class Core {
     settings: {
         heroSpeed: number;
     }
+    worker: {
+        damage: Worker
+    }
     readonly __UNIT_WIDTH__ = 48;
     readonly __UNIT_HEIGHT__ = 48;
     readonly floors: { [key: string]: any } = {};
@@ -101,6 +104,9 @@ class Core {
             heroSpeed: 100
         }
         core.timeCycle = 0;
+        core.worker = {
+            damage: new Worker('../project/functions/damage.ts')
+        }
         this.initView();
         this.initHero();
     }
@@ -114,7 +120,7 @@ class Core {
 
     /** 初始化勇士 */
     initHero(): void {
-        hero.createHero('hero', { hp: 1000, atk: 10, def: 5, id: 'hero', img: 'hero.png', autoScale: true });
+        hero.createHero('hero', { hp: 1000n, atk: 10n, def: 5n, id: 'hero', img: 'hero.png', autoScale: true });
         hero.changeHero('hero');
     }
 }

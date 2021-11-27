@@ -121,7 +121,7 @@ export class View {
         else {
             y = hero.y * uh + uh / 2 - this.height * this.scale / 2 - ay;
             if (y < -ay) y = -ay;
-            if (y > dh - this.height - ay) x = dh - ay - this.height;
+            if (y > dh - this.height - ay) y = dh - ay - this.height;
         }
         this.relocate(x, y);
         return this;
@@ -152,7 +152,7 @@ export class View {
         else {
             y = hero.createOwnContainer().y + uh / 2 - this.height * this.scale / 2 - ay;
             if (y < -ay) y = -ay;
-            if (y > dh - this.height - ay) x = dh - ay - this.height;
+            if (y > dh - this.height - ay) y = dh - ay - this.height;
         }
         this.relocate(x, y);
         return this;

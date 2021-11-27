@@ -9,12 +9,12 @@ import * as utils from './utils';
 type Status = {
     id: string,
     img: string,
-    hp: bigint,
-    atk: bigint,
-    def: bigint,
+    hp: number,
+    atk: number,
+    def: number,
     aspect?: string,
     mana?: number,
-    hpmax?: bigint,
+    hpmax?: number,
     manamax?: number,
     graph?: string,
     floor?: string,
@@ -86,12 +86,12 @@ export interface ShiftEvent {
 export class Hero {
     id: string;
     img: string;
-    hp: number | bigint;
-    atk: number | bigint;
-    def: number | bigint;
-    mana: number | bigint;
-    hpmax: number | bigint;
-    manamax: number | bigint;
+    hp: number;
+    atk: number;
+    def: number;
+    mana: number;
+    hpmax: number;
+    manamax: number;
     graph: string;
     x: number;
     y: number;
@@ -163,7 +163,6 @@ export class Hero {
     /** 设置属性 */
     setStatus(status: string, value: any): Hero {
         let before = utils.clone(this[status]);
-        if (typeof value === 'number' && value > Number.MAX_SAFE_INTEGER) value = BigInt(value);
         this[status] = value;
         // ----- listen statuschange ----- //
         const ev: StatusEvent = { before, after: value, status };
@@ -173,13 +172,8 @@ export class Hero {
     }
 
     /** 增减属性 */
-    addStatus(status: string, delta: number | bigint): Hero {
+    addStatus(status: string, delta: number): Hero {
         let before = utils.clone(this[status]);
-        if (typeof this[status] === 'bigint') delta = BigInt(delta);
-        if (typeof this[status] === 'number' && this[status] + delta > Number.MAX_SAFE_INTEGER) {
-            this[status] = BigInt(this[status]);
-            delta = BigInt(delta);
-        }
         this[status] += delta;
         // ----- listen statuschange ----- //
         const ev: StatusEvent = { before, after: this[status], status };

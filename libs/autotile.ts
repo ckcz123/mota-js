@@ -12,6 +12,7 @@ export class Autotile {
     floorId: string;
     layer: 'bg' | 'fg' | 'event';
     edge: boolean;
+    readonly type: 'autotile' = 'autotile';
     readonly number: number;
     readonly id: string;
     /** 图片详细信息字符串 */

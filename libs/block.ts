@@ -10,6 +10,7 @@ import * as autotile from './autotile';
 type defaultUnit = {
     readonly id: string
     readonly number: number
+    readonly type: 'default'
     [key: string]: any
 }
 

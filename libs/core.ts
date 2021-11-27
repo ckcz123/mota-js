@@ -120,7 +120,7 @@ class Core {
 
     /** 初始化勇士 */
     initHero(): void {
-        hero.createHero('hero', { hp: 1000n, atk: 10n, def: 5n, id: 'hero', img: 'hero.png', autoScale: true });
+        hero.createHero('hero', { hp: 1000, atk: 10, def: 5, id: 'hero', img: 'hero.png', autoScale: true });
         hero.changeHero('hero');
     }
 }

@@ -20,15 +20,15 @@ type Status = {
 export class Enemy {
     readonly id: string;
     readonly number: number;
-    hp: bigint;
-    atk: bigint;
-    def: bigint;
+    hp: number;
+    atk: number;
+    def: number;
     special: number[];
     vertical: boolean;
     x: number;
     y: number;
     graph: string;
-    type: 'enemy';
+    readonly type: 'enemy' = 'enemy';
     [key: string]: any;
 
     constructor(status: Status) {

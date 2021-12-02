@@ -3,7 +3,7 @@ block.ts负责图块相关内容
 */
 import { core } from './core';
 import * as enemy from './enemy';
-import * as utils from './utils'
+import * as utils from './utils';
 import * as view from './view';
 import * as autotile from './autotile';
 
@@ -22,7 +22,8 @@ export class Block {
     cls: string;
 
     constructor(unit: enemy.Enemy | autotile.Autotile | defaultUnit, x: number, y: number) {
-        this.data = utils.clone(unit, (name, data) => (!(data instanceof Function) && name !== 'data'));
+        if (unit instanceof enemy.Enemy) this.data = new enemy.Enemy(unit);
+        if (unit instanceof autotile.Autotile) this.data = new autotile.Autotile(unit);
         this.x = x;
         this.y = y;
         this.graph = core.dict[unit.number].img;

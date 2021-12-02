@@ -6,6 +6,7 @@ import * as block from './block';
 import * as view from './view';
 import * as autotile from './autotile';
 import * as PIXI from 'pixi.js-legacy';
+import { Enemy } from './enemy';
 
 export class Floor {
     floorId: string;
@@ -60,6 +61,7 @@ export class Floor {
                 let cls = core.dict[num].cls;
                 let id = core.dict[num].id
                 if (cls === 'enemy') this.extractEnemy(id, layer, x, y);
+                if (cls === 'autotile') this.extractAutotile(num, x, y, layer);
                 if (this.block[layer][x + ',' + y]) map[y][x] = -2;
             }
         }
@@ -68,8 +70,18 @@ export class Floor {
 
     /** 解析某个怪物 */
     extractEnemy(id: string, layer: string, x: number, y: number): Floor {
-        let e = new block.Block(core.units.enemy[id], x, y);
+        let enemy = new Enemy(core.units.enemy[id], x, y)
+        let e = new block.Block(enemy, x, y);
         this.block[layer][x + ',' + y] = e;
+        return this;
+    }
+
+    /** 解析某个autotile */
+    extractAutotile(number: number, x: number, y: number, layer: string): Floor {
+        if (!(layer === 'fg' || layer === 'bg' || layer === 'event')) return this;
+        let tile = new autotile.Autotile(number, x, y, layer);
+        let b = new block.Block(tile, x, y);
+        this.block[layer][x + ',' + y] = b;
         return this;
     }
 

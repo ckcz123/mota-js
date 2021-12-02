@@ -22,8 +22,7 @@ export class Block {
     cls: string;
 
     constructor(unit: enemy.Enemy | autotile.Autotile | defaultUnit, x: number, y: number) {
-        if (unit instanceof enemy.Enemy) this.data = new enemy.Enemy(unit);
-        if (unit instanceof autotile.Autotile) this.data = new autotile.Autotile(unit);
+        this.data = unit;
         this.x = x;
         this.y = y;
         this.graph = core.dict[unit.number].img;

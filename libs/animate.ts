@@ -116,6 +116,7 @@ function blockAnimate(): void {
                 if (!one) continue;
                 if (!animated[one.data.id]) {
                     let animate = core.dict[one.data.number].animate;
+                    if (!animate) continue;
                     animated[one.data.id] = true;
                     let to = animate.data[animate.data.now + 1] ? animate.data.now + 1 : 0;
                     let next = animate.data[to];

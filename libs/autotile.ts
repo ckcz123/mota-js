@@ -58,12 +58,7 @@ export class Autotile {
         }
     }
 
-    constructor(number: number | Autotile, x?: number, y?: number, layer?: 'bg' | 'fg' | 'event', floor?: string) {
-        if (number instanceof Autotile) {
-            let o = utils.clone(number, (index, data) => !(data instanceof Function));
-            for (let one in o) this[one] = o;
-            return;
-        }
+    constructor(number: number, x?: number, y?: number, layer?: 'bg' | 'fg' | 'event', floor?: string) {
         let tile = core.dict[number];
         if (tile.cls !== 'autotile') return;
         this.node = tile.img;

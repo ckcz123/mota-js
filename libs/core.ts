@@ -46,7 +46,7 @@ class Core {
         nowView: view.View
     }
     units: {
-        enemy: { [key: string]: enemy.Enemy };
+        enemy: { [key: string]: enemy.Status };
     };
     material: {
         images: { [key: string]: HTMLImageElement };

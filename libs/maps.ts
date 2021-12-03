@@ -6,6 +6,7 @@ import { core } from './core';
 import { enemies } from '../project/enemies';
 import * as floor from './floor';
 import * as block from './block';
+import * as enemy from '../project/functions/enemy';
 
 /** 初始化所有单位 */
 export function initUnits(): void {
@@ -23,6 +24,8 @@ export function changeFloor(floorId: string, x: number, y: number): void {
     let hero = core.status.nowHero;
     hero.floor = floorId;
     hero.draw();
+    // 计算伤害
+    enemy.calculateAll(floorId, hero, {});
 }
 
 /** 单独解析某个图块 */
@@ -41,7 +44,7 @@ export function extractBlock(floorId: string | floor.Floor, layer: 'bg' | 'event
     // 剩下的没有解析的只能是tileset了
     let data = core.dict[n];
     if (data.cls !== 'tileset') return console.error('单独解析了一个不是tileset图块！');
-    b = new block.Block({ id: data.id, number: n }, x, y);
+    b = new block.Block({ id: data.id, number: n, type: 'default' }, x, y);
     if (floorId instanceof floor.Floor) floorId.block[layer][x + ',' + y] = b;
     else core.status.maps[floorId].block[layer][x + ',' + y] = b;
     return b;

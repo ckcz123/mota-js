@@ -109,8 +109,8 @@ function blockAnimate(): void {
     let ay = view.anchor.y * view.height;
     for (let layer in floor.block) {
         let block: { [key: string]: Block } = floor.block[layer];
-        for (let x = ~~((view.x - ax) / floor.unit_width); x <= ~~((view.x - ax + view.width) / floor.unit_width); x++) {
-            for (let y = ~~((view.y - ay) / floor.unit_height); y <= ~~((view.y - ay + view.height) / floor.unit_height); y++) {
+        for (let x = ~~((view.x - ax) / view.scale / floor.unit_width); x <= ~~((view.x - ax + view.width) / view.scale / floor.unit_width); x++) {
+            for (let y = ~~((view.y - ay) / view.scale / floor.unit_height); y <= ~~((view.y - ay + view.height) / view.scale / floor.unit_height); y++) {
                 let loc = x + ',' + y;
                 let one = block[loc];
                 if (!one) continue;

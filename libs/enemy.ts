@@ -2,10 +2,8 @@
 enemy.ts负责怪物相关内容
 */
 
-import { core } from "./core";
 import * as enemy from '../project/functions/enemy';
 import { Hero } from "./hero";
-import * as utils from './utils';
 
 export type Status = {
     readonly id: string,
@@ -14,7 +12,7 @@ export type Status = {
     atk: number,
     def: number,
     special: number[],
-    vertical: boolean,
+    vertical?: boolean,
     useLoop?: boolean;
     [key: string]: any
 }
@@ -31,6 +29,7 @@ export class Enemy {
     y: number;
     graph: string;
     useLoop: boolean;
+    damage: enemy.Damage;
     readonly type: 'enemy' = 'enemy';
     [key: string]: any;
 

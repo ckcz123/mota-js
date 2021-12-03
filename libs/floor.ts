@@ -6,7 +6,10 @@ import * as block from './block';
 import * as view from './view';
 import * as autotile from './autotile';
 import * as PIXI from 'pixi.js-legacy';
+import * as enemy from '../project/functions/enemy';
+import * as utils from '../project/functions/utils';
 import { Enemy } from './enemy';
+import * as ui from './ui';
 
 export class Floor {
     floorId: string;
@@ -22,6 +25,9 @@ export class Floor {
         fg: { [key: string]: block.Block };
         bg: { [key: string]: block.Block };
     }
+    damages: {
+        [key: string]: { damage: number, critical?: number }
+    }
 
     constructor(floorId: string, area?: string) {
         this.floorId = floorId;
@@ -31,6 +37,7 @@ export class Floor {
         this.height = this.map.length;
         this.unit_width = core.__UNIT_WIDTH__;
         this.unit_height = core.__UNIT_HEIGHT__;
+        this.damages = {};
         core.status.maps[floorId] = core.status.thisMap = this;
         if (area) {
             if (!core.status.areas[area]) core.status.areas[area] = { floorIds: [], data: {} };
@@ -69,17 +76,18 @@ export class Floor {
     }
 
     /** 解析某个怪物 */
-    extractEnemy(id: string, layer: string, x: number, y: number): Floor {
+    private extractEnemy(id: string, layer: string, x: number, y: number): Floor {
         let enemy = new Enemy(core.units.enemy[id], x, y)
         let e = new block.Block(enemy, x, y);
         this.block[layer][x + ',' + y] = e;
+        this.damages[x + ',' + y] = { damage: null };
         return this;
     }
 
     /** 解析某个autotile */
-    extractAutotile(number: number, x: number, y: number, layer: string): Floor {
+    private extractAutotile(number: number, x: number, y: number, layer: string): Floor {
         if (!(layer === 'fg' || layer === 'bg' || layer === 'event')) return this;
-        let tile = new autotile.Autotile(number, x, y, layer);
+        let tile = new autotile.Autotile(number, x, y, layer, this.floorId);
         let b = new block.Block(tile, x, y);
         this.block[layer][x + ',' + y] = b;
         return this;
@@ -91,14 +99,15 @@ export class Floor {
         // 如果是main视角，重定位至以勇士为中心的位置
         if (view.id === 'main') view.center();
         let main = core.containers.map;
+        main.scale.set(view.scale);
         main.x = -view.x;
         main.y = -view.y;
-        this.extract().drawBg().drawEvent().drawFg();
+        this.extract().drawBg().drawEvent().drawFg().drawDamage();
         return this;
     }
 
     /** 绘制背景层 */
-    drawBg(): Floor {
+    private drawBg(): Floor {
         if (core.containers.bg) core.containers.bg.destroy({ children: true });
         let bg = new PIXI.Container();
         bg.zIndex = 20;
@@ -109,7 +118,7 @@ export class Floor {
     }
 
     /** 绘制事件层 */
-    drawEvent(): Floor {
+    private drawEvent(): Floor {
         if (core.containers.event) core.containers.event.destroy({ children: true });
         let event = new PIXI.Container();
         event.zIndex = 30;
@@ -120,7 +129,7 @@ export class Floor {
     }
 
     /** 绘制前景层 */
-    drawFg(): Floor {
+    private drawFg(): Floor {
         if (core.containers.fg) core.containers.fg.destroy({ children: true });
         let fg = new PIXI.Container();
         fg.zIndex = 40;
@@ -131,7 +140,7 @@ export class Floor {
     }
 
     /** 把地图绘制到目标container上 */
-    drawContent(layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
+    private drawContent(layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
         let map: number[][] = this[layer === 'event' ? 'map' : layer];
         let h: number = map.length;
         let w: number = map[0].length;
@@ -151,7 +160,7 @@ export class Floor {
                     let texture = PIXI.utils.TextureCache[animate.node];
                     texture.frame = animate.data[0];
                     animate.data.now = 0;
-                    this.drawOne(texture, x, y, container);
+                    this.drawOne(texture, x, y, container, nn.toString());
                 } else {
                     this.drawAutotile(nn, x, y, layer, container);
                 }
@@ -161,7 +170,7 @@ export class Floor {
     }
 
     /** 绘制单个图块到sprite */
-    drawOne(texture: PIXI.Texture, x: number, y: number, container: PIXI.Container): Floor {
+    private drawOne(texture: PIXI.Texture, x: number, y: number, container: PIXI.Container, number: string): Floor {
         let sprite = new PIXI.Sprite(texture);
         sprite.anchor.set(0.5, 1);
         sprite.position.set(x * this.unit_width + this.unit_width / 2, y * this.unit_height + this.unit_height);
@@ -169,15 +178,41 @@ export class Floor {
         let sy = this.unit_height / sprite.height;
         if (sx > 1 && sy > 1) sprite.scale.set(Math.min(sx, sy));
         container.addChild(sprite);
+        sprite.name = number + '@' + x + ',' + y;
         return this;
     }
 
     /** 绘制autotile */
-    drawAutotile(number: number, x: number, y: number, layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
+    private drawAutotile(number: number, x: number, y: number, layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
         // 解析autotile
-        let tile = new autotile.Autotile(number, x, y, layer, this.floorId);
+        let tile = this.block[layer][x + ',' + y].data;
         // 绘制
         tile.draw();
+        return this;
+    }
+
+    /** 绘制伤害 */
+    drawDamage(): Floor {
+        let container = core.containers.damage;
+        if (!container) {
+            container = new PIXI.Container();
+            core.containers.map.addChild(container);
+            container.zIndex = 50;
+            core.containers.damage = container;
+            container.x = 0;
+            container.y = 0;
+        }
+        enemy.calculateAll(this.floorId, core.status.nowHero);
+        for (let loc in this.damages) {
+            let [x, y] = loc.split(',');
+            // 创建text
+            let damage = utils.format(this.damages[loc].damage);
+            let text = ui.createText(damage, 2 + this.unit_width * parseInt(x), this.unit_height * (parseInt(y) + 1) - 2, 0, {
+                fontSize: this.unit_width / 3, fontFamily: 'Arial', fill: '#ffffff', stroke: '#000000', strokeThickness: 2
+            });
+            text.anchor.set(0, 1);
+            ui.drawContent(container, text);
+        }
         return this;
     }
 }

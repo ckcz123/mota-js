@@ -14,7 +14,7 @@ window.core = core;
 /** 绘制初始游戏界面 */
 export function drawStartUi () {
     // 先创建一个container
-    const container = core.ui.createContainer('start', 0, 0, 1000, 1000 / core.core.aspect, 100);
+    const container = core.ui.createContainer('start', 0, 0, 100);
     core.ui.drawImageOnContainer(container, 'bg.jpg', true, 0, 0, 1000, 1000 / core.core.aspect);
     // 创建文字    在用sprite和container来绘制东西时，颜色可以通过数组的形式创建渐变，比如下面的fill参数
     const title = core.ui.createText('魔塔样板', 500, 200, 50, {

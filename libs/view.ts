@@ -53,8 +53,11 @@ export class View {
         this.scale = scale;
         if (core.status.nowView.id === this.id) {
             if (this.id === 'main') this.center();
+            let ax = this.width * this.anchor.x;
+            let ay = this.height * this.anchor.y;
+            if (!core.containers.map) return;
             core.containers.map.scale.set(scale);
-            core.containers.map.position.set(-this.x, -this.y);
+            core.containers.map.position.set(-this.x - ax, -this.y - ay);
         }
         return this;
     }
@@ -104,7 +107,7 @@ export class View {
         let x = 0;
         let y = 0;
         let uw = core.status.thisMap.unit_width;
-        let uh = core.status.thisMap.unit_height
+        let uh = core.status.thisMap.unit_height;
         let dw = core.status.thisMap.width * uw;
         let dh = core.status.thisMap.height * uh;
         let ax = this.width * this.anchor.x;
@@ -112,16 +115,18 @@ export class View {
         // 地图可以在视角内塞下
         if (dw < this.width / this.scale) x = (-this.width / 2 + dw / 2) * this.scale;
         else { // 塞不下
-            x = hero.x * uw + uw / 2 - this.width * this.scale / 2 - ax;
+            x = hero.x * uw + uw / 2 - this.width / 2 - ax;
+            x *= this.scale;
             if (x < -ax) x = -ax;
-            if (x > dw - this.width - ax) x = dw - ax - this.width;
+            if (x / this.scale > dw - this.width - ax) x = (dw - ax - this.width) * this.scale;
         }
         // 同上
         if (dh < this.height / this.scale) y = (-this.height / 2 + dh / 2) * this.scale;
         else {
-            y = hero.y * uh + uh / 2 - this.height * this.scale / 2 - ay;
+            y = hero.y * uh + uh / 2 - this.height / 2 - ay;
+            y *= this.scale
             if (y < -ay) y = -ay;
-            if (y > dh - this.height - ay) y = dh - ay - this.height;
+            if (y / this.scale > dh - this.height - ay) y = (dh - ay - this.height) * this.scale;
         }
         this.relocate(x, y);
         return this;
@@ -135,7 +140,7 @@ export class View {
         let x = 0;
         let y = 0;
         let uw = core.status.thisMap.unit_width;
-        let uh = core.status.thisMap.unit_height
+        let uh = core.status.thisMap.unit_height;
         let dw = core.status.thisMap.width * uw;
         let dh = core.status.thisMap.height * uh;
         let ax = this.width * this.anchor.x;
@@ -143,16 +148,18 @@ export class View {
         // 地图可以在视角内塞下
         if (dw < this.width / this.scale) x = (-this.width / 2 + dw / 2) * this.scale;
         else { // 塞不下
-            x = hero.createOwnContainer().x + uw / 2 - this.width * this.scale / 2 - ax;
+            x = hero.createOwnContainer().x + uw / 2 - this.width / 2 - ax;
+            x *= this.scale;
             if (x < -ax) x = -ax;
-            if (x > dw - this.width - ax) x = dw - ax - this.width;
+            if (x / this.scale > dw - this.width - ax) x = (dw - ax - this.width) * this.scale;
         }
         // 同上
         if (dh < this.height / this.scale) y = (-this.height / 2 + dh / 2) * this.scale;
         else {
-            y = hero.createOwnContainer().y + uh / 2 - this.height * this.scale / 2 - ay;
+            y = hero.createOwnContainer().y + uh / 2 - this.height / 2 - ay;
+            y *= this.scale;
             if (y < -ay) y = -ay;
-            if (y > dh - this.height - ay) y = dh - ay - this.height;
+            if (y / this.scale > dh - this.height - ay) y = (dh - ay - this.height) * this.scale;
         }
         this.relocate(x, y);
         return this;

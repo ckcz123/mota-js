@@ -121,6 +121,7 @@ export function createContainer(name: string, x: number = 0, y: number = 0, z?: 
     if (z) container.zIndex = z;
     core.pixi.game.stage.addChild(container);
     core.containers[name] = container;
+    container.sortableChildren = true;
     return container;
 }
 
@@ -185,13 +186,14 @@ export function destroyImage(container: string, image: string): void {
  * 更多内容请查看https://aitrade.ga/pixi.js-cn/PIXI.TextStyle.html
  * @returns 如果文本只有一个，则返回创建好的文本，如果有多个，则返回文本数组
  */
-export function createText(text: string | string[], x: number = 0, y: number = 0, z?: number, style?: Partial<PIXI.ITextStyle>): PIXI.Text[] {
+export function createText(text: string, x?: number, y?: number, z?: number, style?: Partial<PIXI.ITextStyle>): PIXI.Text
+export function createText(text: string[], x?: number, y?: number, z?: number, style?: Partial<PIXI.ITextStyle>): PIXI.Text[]
+export function createText(text: string | string[], x: number = 0, y: number = 0, z?: number, style?: Partial<PIXI.ITextStyle>): PIXI.Text | PIXI.Text[] {
     if (!(text instanceof Array)) text = [text];
     let texts = [];
     text.forEach(text => {
         let t = new PIXI.Text(text, style);
-        t.position.x = x;
-        t.position.y = y;
+        t.position.set(x, y);
         if (style.align === 'center' && !style.wordWrap) t.anchor.set(0.5, 0.5);
         texts.push(t);
         t.zIndex = z || 0;

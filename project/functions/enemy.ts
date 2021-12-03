@@ -9,7 +9,7 @@ type Option = {
     useLoop?: boolean;
 }
 
-interface Damage {
+export interface Damage {
     damage: number;
     turn: number;
 }
@@ -25,8 +25,21 @@ function addTask(task) {
 }
 
 /** 计算楼层全部怪物的伤害 */
-export function calculateAll(floor, hero, option) {
-
+export function calculateAll(floor: Floor | string, hero: Hero | string, option: Option = {}): void {
+    let f: Floor;
+    if (typeof floor === 'string') f = core.core.status.maps[floor];
+    if (!f) f = core.core.status.thisMap;
+    let blocks = f.block.event;
+    for (let loc in blocks) {
+        let block = blocks[loc];
+        if (block.data.type !== 'enemy') continue;
+        let [x, y] = loc.split(',');
+        let dx = parseInt(x);
+        let dy = parseInt(y);
+        let damage = getDamage(floor, hero, dx, dy, option);
+        block.data.damage = damage;
+        f.damages[x + ',' + y].damage = damage.damage;
+    }
 }
 
 /**
@@ -36,7 +49,7 @@ export function calculateAll(floor, hero, option) {
  * @param x 怪物横坐标
  * @param y 怪物纵坐标
  */
-export async function getDamage(floor: Floor | string, hero: Hero | string, x: number, y: number, option: Option) {
+export function getDamage(floor: Floor | string, hero: Hero | string, x: number, y: number, option: Option): Damage {
     if (!hero) hero = core.core.status.nowHero;
     if (typeof hero === 'string') hero = core.core.status.hero[hero];
     if (!floor) floor = core.core.status.thisMap.floorId;
@@ -45,9 +58,11 @@ export async function getDamage(floor: Floor | string, hero: Hero | string, x: n
     let enemy = core.core.status.maps[floor].block.event[x + ',' + y].data;
     if (!(enemy instanceof Enemy)) return;
     if (option.useLoop || enemy.useLoop) {
-
+        let damage = loop(hero, enemy, option);
+        return damage;
     } else {
         let damage = normal(hero, enemy, option);
+        return damage;
     }
 }
 
@@ -72,8 +87,12 @@ function normal(hero: Hero, enemy: Enemy, option: Option): Damage {
     // 回合数
     let turn = Math.ceil(enemy.hp / heroPerDamage);
 
-    damage += turn * enemyPerDamage;
+    damage += (turn - 1) * enemyPerDamage;
     return {
         damage: Math.floor(damage), turn
     };
+}
+
+function loop(hero: Hero, enemy: Enemy, option: Option): Damage {
+    return;
 }

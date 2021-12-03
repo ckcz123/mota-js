@@ -210,10 +210,14 @@ export class Autotile {
 
     /** 生成texture */
     generateTexture(rect: PIXI.Rectangle): PIXI.Texture {
-        let texture = new PIXI.Texture(new PIXI.BaseTexture(core.material.autotile[this.data.img]));
-        texture.frame = rect;
         let id = this.data.img + '@' + rect.x + '@' + rect.y;
-        if (!PIXI.utils.TextureCache[id]) PIXI.Texture.addToCache(texture, id);
+        let texture = PIXI.utils.TextureCache[id]
+        if (!texture) {
+            let texture = new PIXI.Texture(new PIXI.BaseTexture(core.material.autotile[this.data.img]));
+            texture.frame = rect;
+            PIXI.Texture.addToCache(texture, id);
+            return texture;
+        }
         return texture;
     }
 

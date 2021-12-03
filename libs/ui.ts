@@ -201,6 +201,21 @@ export function createText(text: string | string[], x: number = 0, y: number = 0
     return texts.length === 1 ? texts[0] : texts;
 }
 
+export function createBitmapText(text: string, x?: number, y?: number, z?: number, style?: Partial<PIXI.IBitmapTextStyle>): PIXI.Text
+export function createBitmapText(text: string[], x?: number, y?: number, z?: number, style?: Partial<PIXI.IBitmapTextStyle>): PIXI.Text[]
+export function createBitmapText(text: string | string[], x: number = 0, y: number = 0, z?: number, style?: Partial<PIXI.IBitmapTextStyle>): PIXI.Text | PIXI.Text[] {
+    if (!(text instanceof Array)) text = [text];
+    let texts = [];
+    text.forEach(text => {
+        let t = new PIXI.BitmapText(text, style);
+        t.position.set(x, y);
+        texts.push(t);
+        t.zIndex = z || 0;
+    })
+    return texts.length === 1 ? texts[0] : texts;
+}
+
+
 /** 向某个sprite或container上绘制内容 */
 export function drawContent(target: string | PIXI.Sprite | PIXI.Container, ...content: PIXI.DisplayObject[]): void {
     let tar: PIXI.Sprite | PIXI.Container;

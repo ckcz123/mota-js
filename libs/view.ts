@@ -113,7 +113,7 @@ export class View {
         let ax = this.width * this.anchor.x;
         let ay = this.width * this.anchor.y;
         // 地图可以在视角内塞下
-        if (dw < this.width / this.scale) x = (-this.width / 2 + dw / 2) * this.scale;
+        if (dw < this.width) x = (-this.width / 2 + dw / 2 + ax) * this.scale;
         else { // 塞不下
             x = hero.x * uw + uw / 2 - this.width / 2 - ax;
             x *= this.scale;
@@ -121,7 +121,7 @@ export class View {
             if (x / this.scale > dw - this.width - ax) x = (dw - ax - this.width) * this.scale;
         }
         // 同上
-        if (dh < this.height / this.scale) y = (-this.height / 2 + dh / 2) * this.scale;
+        if (dh < this.height) y = (-this.height / 2 + dh / 2 + ay) * this.scale;
         else {
             y = hero.y * uh + uh / 2 - this.height / 2 - ay;
             y *= this.scale
@@ -136,7 +136,6 @@ export class View {
     center2(hero: string | Hero = core.status.nowHero): View {
         if (!(hero instanceof Hero)) hero = core.status.hero[hero];
         if (!hero) return this;
-        this.calPixel();
         let x = 0;
         let y = 0;
         let uw = core.status.thisMap.unit_width;
@@ -146,7 +145,7 @@ export class View {
         let ax = this.width * this.anchor.x;
         let ay = this.width * this.anchor.y;
         // 地图可以在视角内塞下
-        if (dw < this.width / this.scale) x = (-this.width / 2 + dw / 2) * this.scale;
+        if (dw < this.width) x = (-this.width / 2 + dw / 2 + ax) * this.scale;
         else { // 塞不下
             x = hero.createOwnContainer().x + uw / 2 - this.width / 2 - ax;
             x *= this.scale;
@@ -154,7 +153,7 @@ export class View {
             if (x / this.scale > dw - this.width - ax) x = (dw - ax - this.width) * this.scale;
         }
         // 同上
-        if (dh < this.height / this.scale) y = (-this.height / 2 + dh / 2) * this.scale;
+        if (dh < this.height) y = (-this.height / 2 + dh / 2 + ay) * this.scale;
         else {
             y = hero.createOwnContainer().y + uh / 2 - this.height / 2 - ay;
             y *= this.scale;

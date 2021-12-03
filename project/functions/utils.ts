@@ -1,5 +1,7 @@
 "use strict";
 // 该文件负责杂七杂八的功能
+import * as PIXI from 'pixi.js-legacy';
+import * as core from '../../libs/core';
 
 /**
  * 格式化数字
@@ -28,3 +30,21 @@ export function format(number: number, digit = 6, option = { useChinese: false }
     }
     return number.toString();
 }
+
+// /** 初始化伤害字符 */
+// export function initChar(): void {
+//     const all = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', 'w', 'e', 'z', '万', '亿', '兆'];
+//     all.forEach(v => getText(v));
+// }
+
+// /** 获取某个字符的Text实例 */
+// export function getText(text: string): PIXI.Text {
+//     let t = core.core.cache.char[text];
+//     if (!t) {
+//         t = new PIXI.Text(text, {
+//             fontSize: core.core.__UNIT_WIDTH__ / 3, fontFamily: 'Arial', fill: '#ffffff', stroke: '#000000', strokeThickness: 2
+//         });
+//         core.core.cache[text] = t;
+//     }
+//     return t;
+// }

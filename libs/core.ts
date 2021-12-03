@@ -66,7 +66,7 @@ class Core {
     readonly __UNIT_HEIGHT__ = 48;
     readonly floors: { [key: string]: any } = {};
     /** 界面的长宽比，默认为1.33 */
-    readonly aspect: number = 1.33
+    readonly aspect: number = 4 / 3
 
     constructor() {
         this.material = {
@@ -116,6 +116,7 @@ class Core {
         let v = new view.View('main', 0, 0, 1);
         this.status.views.main = this.status.nowView = v;
         v.to();
+        v.resize(1.5);
     }
 
     /** 初始化勇士 */

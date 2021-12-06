@@ -6,6 +6,8 @@ import { core } from './core';
 import * as PIXI from 'pixi.js-legacy';
 
 let animations: { [key: string]: { func: (dt?: number) => void, onStart: boolean } } = {};
+/** 在视野范围内的动画 */
+export let inViewAnimations: number[] = [];
 
 export class Animate {
     node: string;
@@ -15,6 +17,7 @@ export class Animate {
         img: string
         [key: number]: PIXI.Rectangle
     }
+    texture: PIXI.Texture
 
     constructor(node: string, cls: string) {
         this.node = node;
@@ -51,11 +54,20 @@ export class Animate {
     /** 生成texture */
     generateTexture(): Animate {
         this.extractGraph();
-        let texture = PIXI.utils.TextureCache[this.node];
-        if (!texture) {
+        if (!this.texture) {
             let texture = PIXI.Texture.from(core.material[this.cls][this.data.img]);
-            if (!PIXI.utils.TextureCache[this.node]) PIXI.Texture.addToCache(texture, this.node);
+            this.texture = texture;
+            return this;
         }
+        return this;
+    }
+
+    /** 执行下一帧动画 */
+    next(): Animate {
+        let next = this.data.now + 1;
+        if (!this.data[next]) next = 0;
+        this.data.now = next;
+        this.texture.frame = this.data[next];
         return this;
     }
 }
@@ -96,34 +108,44 @@ export function unregisterTicker(name: string): void {
     delete animations[name];
 }
 
+/** 计算在视野内的所有animate */
+export function calInView() {
+    inViewAnimations = [];
+    let view = core.status.nowView;
+    let added = {};
+    let floor = core.status.thisMap;
+    const ax = view.anchor.x * view.width;
+    const ay = view.anchor.y * view.height;
+    const leftX = Math.max(0, Math.floor((view.x - ax) / floor.unit_width) - 2);
+    const topY = Math.max(0, Math.floor((view.y - ay) / floor.unit_height) - 2);
+    const rightX = Math.min(floor.width, Math.floor((view.x - ax + view.width) / floor.unit_width) + 2);
+    const bottomY = Math.min(floor.height, Math.floor((view.y - ay + view.height) / floor.unit_height) + 2);
+    // 开始搜索
+    Object.keys(floor.block).forEach((layer) => {
+        let block: { [key: string]: Block } = floor.block[layer];
+        for (let x = leftX; x <= rightX; x++) {
+            for (let y = topY; y <= bottomY; y++) {
+                let loc = x + ',' + y;
+                let one = block[loc];
+                if (!one) continue;
+                let n = one.data.number;
+                if (added[n]) continue;
+                added[n] = true;
+                inViewAnimations.push(n);
+            }
+        }
+    });
+}
+
 // ----------- 全局图块动画相关内容
 /** 所有图块的全局动画 */
 function blockAnimate(): void {
     if (core.timestamp - core.timeCycle <= 400) return;
     core.timeCycle = core.timestamp;
     if (!core.status.thisMap) return;
-    let floor = core.status.thisMap;
-    let view = core.status.nowView;
-    let animated: { [key: string]: boolean } = {};
-    let ax = view.anchor.x * view.width;
-    let ay = view.anchor.y * view.height;
-    for (let layer in floor.block) {
-        let block: { [key: string]: Block } = floor.block[layer];
-        for (let x = ~~((view.x - ax) / view.scale / floor.unit_width); x <= ~~((view.x - ax + view.width) / view.scale / floor.unit_width); x++) {
-            for (let y = ~~((view.y - ay) / view.scale / floor.unit_height); y <= ~~((view.y - ay + view.height) / view.scale / floor.unit_height); y++) {
-                let loc = x + ',' + y;
-                let one = block[loc];
-                if (!one) continue;
-                if (!animated[one.data.id]) {
-                    let animate = core.dict[one.data.number].animate;
-                    if (!animate) continue;
-                    animated[one.data.id] = true;
-                    let to = animate.data[animate.data.now + 1] ? animate.data.now + 1 : 0;
-                    let next = animate.data[to];
-                    animate.data.now = to;
-                    PIXI.utils.TextureCache[animate.node].frame = next;
-                }
-            }
-        }
-    }
+    inViewAnimations.forEach(one => {
+        let animate = core.dict[one].animate;
+        if (!animate) return;
+        animate.next();
+    })
 }

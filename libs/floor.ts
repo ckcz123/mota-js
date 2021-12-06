@@ -157,7 +157,7 @@ export class Floor {
                 // 开始绘制
                 if (cls !== 'autotile') {
                     let animate = core.dict[nn].animate;
-                    let texture = PIXI.utils.TextureCache[animate.node];
+                    let texture = core.dict[nn].animate.texture;
                     texture.frame = animate.data[0];
                     animate.data.now = 0;
                     this.drawOne(texture, x, y, container, nn.toString());

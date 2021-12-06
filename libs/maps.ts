@@ -23,6 +23,7 @@ export function changeFloor(floorId: string, x: number, y: number): void {
     // 勇士
     let hero = core.status.nowHero;
     hero.floor = floorId;
+    hero.setLoc(x, y);
     hero.draw();
     // 计算伤害
     enemy.calculateAll(floorId, hero, {});

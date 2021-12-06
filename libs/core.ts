@@ -121,8 +121,11 @@ class Core {
 
     /** 初始化勇士 */
     initHero(): void {
-        hero.createHero('hero', { hp: 1000, atk: 10, def: 5, id: 'hero', img: 'hero.png', autoScale: true });
+        let h = hero.createHero('hero', { hp: 1000, atk: 10, def: 5, id: 'hero', img: 'hero.png', autoScale: true });
         hero.changeHero('hero');
+        h.addEventListener('locationset', (ev) => {
+            animate.calInView();
+        });
     }
 }
 

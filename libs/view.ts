@@ -83,9 +83,7 @@ export class View {
                 }
                 this.anchor.x = x;
                 this.anchor.y = y;
-                if (core.status.nowView.id === this.id) {
-                    core.containers.map.position.set(-this.x - x * this.width, -this.y - y * this.height);
-                }
+                this.relocate(this.x, this.y);
                 return this;
             }
         };

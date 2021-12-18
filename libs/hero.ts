@@ -386,34 +386,43 @@ export class Hero {
             // ----- listen end ----- //
         }
 
+        let pass = this.canPass(nx, ny);
         const ticker = () => {
-            // 移动
-            let dx = ((nx - this.x) * floor.unit_width) / (speed / 16.6);
-            let dy = ((ny - this.y) * floor.unit_height) / (speed / 16.6);
-            container.x += dx;
-            container.y += dy;
-            // ----- listen shifting ----- //
-            const ev: ShiftEvent = {
-                px: container.x, py: container.y, dx, dy
-            };
-            this.listen('shifting', ev);
-            // ----- listen end ----- //
-            start += 16.6;
-            if (start / animation > speed * 1.5 && this.isCurrent()) {
-                // 执行动画
-                let step = route[now];
-                next(step);
+            if (pass) {
+                // 移动
+                let dx = ((nx - this.x) * floor.unit_width) / (speed / 16.6);
+                let dy = ((ny - this.y) * floor.unit_height) / (speed / 16.6);
+                container.x += dx;
+                container.y += dy;
+                // ----- listen shifting ----- //
+                const ev: ShiftEvent = {
+                    px: container.x, py: container.y, dx, dy
+                };
+                this.listen('shifting', ev);
+                // ----- listen end ----- //
+                start += 16.6;
+                if (start / animation > speed * 1.5 && this.isCurrent()) {
+                    // 执行动画
+                    let step = route[now];
+                    next(step);
+                }
             }
-            if (start - (now * speed) > speed) {
-                now++;
-                // 到达下一格
+            if (start - (now * speed) > speed || !pass) {
                 let step = route[now];
                 let oriX = this.x;
                 let oriY = this.y;
                 let oriDir = this.dir;
-                this.setLoc(nx, ny);
-                if (!step) {
-                    if (this.moveStatus === 'none' || this.dir !== this.moveStatus) {
+                if (pass) {
+                    // 到达下一格
+                    now++;
+                    this.setLoc(nx, ny);
+                }
+                if (!step || !pass) {
+                    if (this.moveStatus === 'none' || this.dir !== this.moveStatus || !pass) {
+                        if (!pass) {
+                            let block = core.status.thisMap.block.event[nx + ',' + ny];
+                            if (block) block.trigger();
+                        }
                         // ----- listen movingend & animationend ----- //
                         const ev: MoveEvent = {
                             speed,
@@ -444,6 +453,7 @@ export class Hero {
                 this.listen('moving', ev);
                 // ----- listen end ----- //
                 [nx, ny] = this.nextStep(step);
+                pass = this.canPass(nx, ny);
             }
         }
         core.pixi.game.ticker.add(ticker);
@@ -483,6 +493,11 @@ export class Hero {
         else if (step === 'backward') loc = this.next(-1);
         else loc = [this.x + utils.dirs[step][0], this.y + utils.dirs[step][1]];
         return loc;
+    }
+
+    /** 检查是否可通行 */
+    private canPass(x: number, y: number): boolean {
+        return false;
     }
 
     /** 是否是当前勇士 */

@@ -4,9 +4,15 @@ import { Floor } from "../../libs/floor";
 import * as core from '../../libs/core';
 import { Hero } from "../../libs/hero";
 import { Enemy } from '../../libs/enemy';
+import * as utils from './utils';
 
 type Option = {
     useLoop?: boolean;
+}
+
+export type DamageStyle = {
+    color: string | string[]
+    damage: string
 }
 
 export interface Damage {
@@ -49,7 +55,7 @@ export function calculateAll(floor: Floor | string, hero: Hero | string, option:
  * @param x 怪物横坐标
  * @param y 怪物纵坐标
  */
-export function getDamage(floor: Floor | string, hero: Hero | string, x: number, y: number, option: Option): Damage {
+export function getDamage(floor: Floor | string, hero: Hero | string, x: number, y: number, option: Option = {}): Damage {
     if (!hero) hero = core.core.status.nowHero;
     if (typeof hero === 'string') hero = core.core.status.hero[hero];
     if (!floor) floor = core.core.status.thisMap.floorId;
@@ -93,6 +99,35 @@ function normal(hero: Hero, enemy: Enemy, option: Option): Damage {
     };
 }
 
+/** 循环计算伤害 */
 function loop(hero: Hero, enemy: Enemy, option: Option): Damage {
     return;
+}
+
+/** 获得伤害样式 */
+export function getDamageStyle(floor: string | Floor, x: number, y: number, hero?: string | Hero): DamageStyle
+export function getDamageStyle(damage: number | string, option?: utils.FormatOption): DamageStyle
+export function getDamageStyle(floor: string | Floor | number, x?: number | utils.FormatOption, y?: number,
+    hero: string | Hero = core.core.status.nowHero, option: utils.FormatOption = {}): DamageStyle {
+    let result: number;
+    if (!isNaN(Number(floor))) result = typeof floor === 'number' ? floor : Number(floor);
+    if (typeof floor !== 'number' && typeof x === 'number') result = getDamage(floor, hero, x, y).damage;
+
+    let o: utils.FormatOption = option;
+    if (typeof x !== 'number') o = x;
+
+    let re: DamageStyle = { damage: utils.format(result, 6, o), color: '#ffffff' };
+    let h: Hero;
+    if (typeof hero === 'string') h = core.core.status.hero[hero] || core.core.status.nowHero;
+    else h = hero;
+
+    // 判断颜色
+    let hp = h.hp;
+    if (result <= 0) re.color = '#33ff33';
+    else if (result < hp / 3) re.color = '#ffffff';
+    else if (result < hp * 2 / 3) re.color = '#ffff77';
+    else if (result < hp) re.color = '#ff7777';
+    else re.color = 'ff22ff';
+
+    return re;
 }

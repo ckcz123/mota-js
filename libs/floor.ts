@@ -7,7 +7,6 @@ import * as view from './view';
 import * as autotile from './autotile';
 import * as PIXI from 'pixi.js-legacy';
 import * as enemy from '../project/functions/enemy';
-import * as utils from '../project/functions/utils';
 import { Enemy } from './enemy';
 import * as ui from './ui';
 
@@ -77,7 +76,7 @@ export class Floor {
 
     /** 解析某个怪物 */
     private extractEnemy(id: string, layer: string, x: number, y: number): Floor {
-        let enemy = new Enemy(core.units.enemy[id], x, y)
+        let enemy = new Enemy(core.units.enemy[id], x, y, this.floorId)
         let e = new block.Block(enemy, x, y);
         this.block[layer][x + ',' + y] = e;
         this.damages[x + ',' + y] = { damage: null };
@@ -206,13 +205,21 @@ export class Floor {
         for (let loc in this.damages) {
             let [x, y] = loc.split(',');
             // 创建text
-            let damage = utils.format(this.damages[loc].damage);
-            let text = ui.createText(damage, 2 + this.unit_width * parseInt(x), this.unit_height * (parseInt(y) + 1) - 2, 0, {
-                fontSize: this.unit_width / 3, fontFamily: 'Arial', fill: '#ffffff', stroke: '#000000', strokeThickness: 2
+            let damage = enemy.getDamageStyle(this.damages[loc].damage);
+            let text = ui.createText(damage.damage, 2 + this.unit_width * parseInt(x), this.unit_height * (parseInt(y) + 1) - 2, 0, {
+                fontSize: this.unit_width / 3, fontFamily: 'Arial', fill: damage.color, stroke: '#000000', strokeThickness: 2
             });
             text.anchor.set(0, 1);
             ui.drawContent(container, text);
         }
+        return this;
+    }
+
+    /** 移除图块 */
+    removeBlock(x: number, y: number, layer: 'bg' | 'event' | 'fg'): Floor {
+        let block = this.block[layer][x + ',' + y];
+        if (block) block = void 0;
+        this[layer === 'event' ? 'map' : layer][y][x] = 0;
         return this;
     }
 }

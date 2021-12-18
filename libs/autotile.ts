@@ -5,19 +5,21 @@ autotile.ts负责autotile相关内容
 import { core } from './core';
 import * as utils from './utils';
 import * as PIXI from 'pixi.js-legacy';
+import { Block } from './block';
 
 export class Autotile {
-    x: number;
-    y: number;
-    floorId: string;
-    layer: 'bg' | 'fg' | 'event';
-    edge: boolean;
     readonly type: 'autotile' = 'autotile';
     readonly number: number;
     readonly id: string;
+    readonly floorId: string;
+    x: number;
+    y: number;
+    layer: 'bg' | 'fg' | 'event';
+    edge: boolean;
     /** 图片详细信息字符串 */
     node: string;
     content: PIXI.Container;
+    block: Block;
     data: {
         /** 当前帧数 */
         now?: number
@@ -261,5 +263,15 @@ export class Autotile {
         }
         container.scale.set(floor.unit_width / this.data.unit.width, floor.unit_height / this.data.unit.height);
         return this;
+    }
+
+    /** 触发器 */
+    trigger(): Autotile {
+        return this;
+    }
+
+    /** 销毁这个自动元件 */
+    destroy(): void {
+
     }
 }

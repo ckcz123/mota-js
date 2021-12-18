@@ -14,7 +14,7 @@ export class Autotile {
     readonly floorId: string;
     x: number;
     y: number;
-    layer: 'bg' | 'fg' | 'event';
+    layer: number;
     edge: boolean;
     /** 图片详细信息字符串 */
     node: string;
@@ -60,7 +60,7 @@ export class Autotile {
         }
     }
 
-    constructor(number: number, x?: number, y?: number, layer?: 'bg' | 'fg' | 'event', floor?: string) {
+    constructor(number: number, x?: number, y?: number, layer?: number, floor?: string) {
         let tile = core.dict[number];
         if (tile.cls !== 'autotile') return;
         this.node = tile.img;
@@ -76,7 +76,7 @@ export class Autotile {
 
     /** 解析方向 */
     extractDir(): Autotile {
-        let map = core.status.maps[this.floorId][this.layer === 'event' ? 'map' : this.layer];
+        let map = core.status.maps[this.floorId].map[this.layer];
         for (let dir in utils.dirs) {
             let x = this.x + utils.dirs[dir][0];
             let y = this.y + utils.dirs[dir][1];
@@ -121,8 +121,6 @@ export class Autotile {
 
     /** 判断四个角应该绘制的内容 */
     getEdge(dir: number): Autotile {
-        // 判断四个正对的边是否有autotile，从而进行大致定位
-        // 只需要判定左上角，左下角为上下对称位置，右上角为左右对称位置，右下角为中心对称位置
         /* 稍微画一下3x4的图... 
              -1   0  +1
             ----    ----
@@ -135,9 +133,9 @@ export class Autotile {
             |  |    |  |  +1
             ------------
             稍微说一下原理，方便想要复写的作者
-            对于左上角的16x16（1/4格）：如果左边有该自动元件或子组件，则向右移动2格，如果左边有，则向左移动1格，
+            对于左上角的16x16（1/4格）：如果左边有该自动元件或子组件，则向右移动2格，如果右边有，则向左移动1格，
                                     如果上边有，则向下移动2格，如果下边有，则向上移动1格
-            对于左下角的16x16（1/4格）：如果左边有该自动元件或子组件，则向右移动2格，如果左边有，则向左移动1格，
+            对于左下角的16x16（1/4格）：如果左边有该自动元件或子组件，则向右移动2格，如果右边有，则向左移动1格，
                                     如果上边有，则向下移动1格，如果下边有，则向上移动2格
             以此类推，在左上角，则左边/上边移动两格......即在哪个角落，在哪个方向就移动2格
         */
@@ -242,7 +240,7 @@ export class Autotile {
         // 用container来绘制
         let container = new PIXI.Container();
         this.content = container;
-        core.containers[this.layer].addChild(container);
+        core.containers['_map' + this.layer].addChild(container);
         let floor = core.status.maps[this.floorId];
         container.position.set(floor.unit_width * this.x, floor.unit_height * this.y);
         if (this.data.graphs.all) {

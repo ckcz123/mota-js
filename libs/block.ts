@@ -74,8 +74,6 @@ export class Block {
     destroy(root: boolean = false): void {
         if (root) this.data.destroy();
         let floor = core.status.maps[this.floorId];
-        console.log(this.floorId, floor);
-
         floor.removeBlock(this.x, this.y, this.data.layer || 'event');
     }
 }

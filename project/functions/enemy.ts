@@ -35,7 +35,7 @@ export function calculateAll(floor: Floor | string, hero: Hero | string, option:
     let f: Floor;
     if (typeof floor === 'string') f = core.core.status.maps[floor];
     if (!f) f = core.core.status.thisMap;
-    let blocks = f.block.event;
+    let blocks = f.block[f.event];
     for (let loc in blocks) {
         let block = blocks[loc];
         if (block.data.type !== 'enemy') continue;
@@ -61,7 +61,8 @@ export function getDamage(floor: Floor | string, hero: Hero | string, x: number,
     if (!floor) floor = core.core.status.thisMap.floorId;
     if (floor instanceof Floor) floor = floor.floorId;
     if (!check(floor, hero, x, y)) return null;
-    let enemy = core.core.status.maps[floor].block.event[x + ',' + y].data;
+    let f = core.core.status.maps[floor]
+    let enemy = f.block[f.event][x + ',' + y].data;
     if (!(enemy instanceof Enemy)) return;
     if (option.useLoop || enemy.useLoop) {
         let damage = loop(hero, enemy, option);
@@ -76,7 +77,8 @@ export function getDamage(floor: Floor | string, hero: Hero | string, x: number,
 function check(floor: string, hero: Hero | string, x: number, y: number) {
     if (!core.core.floors[floor]) return false;
     if (!hero) return false;
-    let enemy = core.core.status.maps[floor].block.event[x + ',' + y];
+    let f = core.core.status.maps[floor]
+    let enemy = f.block[f.event][x + ',' + y];
     if (enemy.data.type != 'enemy') return false;
     return true;
 }

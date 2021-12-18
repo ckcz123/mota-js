@@ -12,17 +12,16 @@ import * as ui from './ui';
 
 export class Floor {
     floorId: string;
-    map: number[][];
-    bg: number[][];
-    fg: number[][];
     width: number;
     height: number;
     unit_width: number;
     unit_height: number;
+    event: number;
+    map: {
+        [key: number]: number[][]
+    }
     block: {
-        event: { [key: string]: block.Block };
-        fg: { [key: string]: block.Block };
-        bg: { [key: string]: block.Block };
+        [key: number]: { [key: string]: block.Block };
     }
     damages: {
         [key: string]: { damage: number, critical?: number }
@@ -32,11 +31,12 @@ export class Floor {
         this.floorId = floorId;
         let floor = core.floors[floorId];
         for (let one in floor) this[one] = floor[one];
-        this.width = this.map[0].length;
-        this.height = this.map.length;
+        this.width = this.map[0][0].length;
+        this.height = this.map[0].length;
         this.unit_width = core.__UNIT_WIDTH__;
         this.unit_height = core.__UNIT_HEIGHT__;
         this.damages = {};
+        this.event = floor.eventLayer;
         core.status.maps[floorId] = core.status.thisMap = this;
         if (area) {
             if (!core.status.areas[area]) core.status.areas[area] = { floorIds: [], data: {} };
@@ -46,16 +46,13 @@ export class Floor {
     }
 
     /** 解析楼层 */
-    extract(layer?: string): Floor {
-        if (!layer) {
-            this.block = { fg: {}, bg: {}, event: {} };
-            ['fg', 'bg', 'event'].forEach(one => { return this.extract(one); });
+    extract(layer?: number): Floor {
+        if (layer == void 0) {
+            this.block = {};
+            Object.keys(this.map).forEach(v => this.extract(parseInt(v)));
             return this;
         }
-        let map: number[][];
-        if (layer === 'event') map = this.map;
-        else if (layer === 'fg') map = this.fg;
-        else if (layer === 'bg') map = this.bg;
+        let map: number[][] = this.map[layer];
         this.block[layer] = {};
         // 进行解析
         let h = map.length;
@@ -75,8 +72,9 @@ export class Floor {
     }
 
     /** 解析某个怪物 */
-    private extractEnemy(id: string, layer: string, x: number, y: number): Floor {
-        let enemy = new Enemy(core.units.enemy[id], x, y, this.floorId)
+    private extractEnemy(id: string, layer: number, x: number, y: number): Floor {
+        if (!this.map[layer]) return this;
+        let enemy = new Enemy(core.units.enemy[id], x, y, layer, this.floorId)
         let e = new block.Block(enemy, x, y);
         this.block[layer][x + ',' + y] = e;
         this.damages[x + ',' + y] = { damage: null };
@@ -84,8 +82,8 @@ export class Floor {
     }
 
     /** 解析某个autotile */
-    private extractAutotile(number: number, x: number, y: number, layer: string): Floor {
-        if (!(layer === 'fg' || layer === 'bg' || layer === 'event')) return this;
+    private extractAutotile(number: number, x: number, y: number, layer: number): Floor {
+        if (!this.map[layer]) return this;
         let tile = new autotile.Autotile(number, x, y, layer, this.floorId);
         let b = new block.Block(tile, x, y);
         this.block[layer][x + ',' + y] = b;
@@ -101,46 +99,24 @@ export class Floor {
         main.scale.set(view.scale);
         main.x = -view.x;
         main.y = -view.y;
-        this.extract().drawBg().drawEvent().drawFg().drawDamage();
+        this.extract().drawDamage();
+        Object.keys(this.map).forEach(v => this.drawOneLayer(parseInt(v)));
         return this;
     }
 
-    /** 绘制背景层 */
-    private drawBg(): Floor {
-        if (core.containers.bg) core.containers.bg.destroy({ children: true });
-        let bg = new PIXI.Container();
-        bg.zIndex = 20;
-        core.containers.bg = bg;
-        core.containers.map.addChild(bg);
-        this.drawContent('bg', bg);
-        return this;
-    }
-
-    /** 绘制事件层 */
-    private drawEvent(): Floor {
-        if (core.containers.event) core.containers.event.destroy({ children: true });
-        let event = new PIXI.Container();
-        event.zIndex = 30;
-        core.containers.event = event;
-        core.containers.map.addChild(event);
-        this.drawContent('event', event);
-        return this;
-    }
-
-    /** 绘制前景层 */
-    private drawFg(): Floor {
-        if (core.containers.fg) core.containers.fg.destroy({ children: true });
-        let fg = new PIXI.Container();
-        fg.zIndex = 40;
-        core.containers.fg = fg;
-        core.containers.map.addChild(fg);
-        this.drawContent('fg', fg);
+    private drawOneLayer(layer: number): Floor {
+        if (core.containers['_map' + layer]) core.containers['_map' + layer].destroy({ children: true });
+        let container = new PIXI.Container();
+        container.zIndex = layer * 10;
+        core.containers['_map' + layer] = container;
+        core.containers.map.addChild(container);
+        this.drawContent(layer, container);
         return this;
     }
 
     /** 把地图绘制到目标container上 */
-    private drawContent(layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
-        let map: number[][] = this[layer === 'event' ? 'map' : layer];
+    private drawContent(layer: number, container: PIXI.Container): Floor {
+        let map: number[][] = this.map[layer];
         let h: number = map.length;
         let w: number = map[0].length;
         let dict = core.dict;
@@ -182,8 +158,7 @@ export class Floor {
     }
 
     /** 绘制autotile */
-    private drawAutotile(number: number, x: number, y: number, layer: 'bg' | 'fg' | 'event', container: PIXI.Container): Floor {
-        // 解析autotile
+    private drawAutotile(number: number, x: number, y: number, layer: number, container: PIXI.Container): Floor {
         let tile = this.block[layer][x + ',' + y].data;
         // 绘制
         tile.draw();
@@ -196,7 +171,7 @@ export class Floor {
         if (!container) {
             container = new PIXI.Container();
             core.containers.map.addChild(container);
-            container.zIndex = 50;
+            container.zIndex = Object.keys(this.map).length * 10 + 20;
             core.containers.damage = container;
             container.x = 0;
             container.y = 0;

@@ -420,7 +420,8 @@ export class Hero {
                 if (!step || !pass) {
                     if (this.moveStatus === 'none' || this.dir !== this.moveStatus || !pass) {
                         if (!pass) {
-                            let block = core.status.thisMap.block.event[nx + ',' + ny];
+                            let f = core.status.thisMap
+                            let block = f.block[f.event][nx + ',' + ny];
                             if (block) block.trigger();
                         }
                         // ----- listen movingend & animationend ----- //

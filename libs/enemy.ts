@@ -36,9 +36,10 @@ export class Enemy {
     useLoop: boolean;
     damage: enemy.Damage;
     block: Block;
+    layer: number;
     [key: string]: any;
 
-    constructor(status: Status, x: number, y: number, floorId: string) {
+    constructor(status: Status, x: number, y: number, layer: number, floorId: string) {
         for (let one in status) {
             this[one] = status[one];
         }
@@ -46,6 +47,7 @@ export class Enemy {
         this.x = x;
         this.y = y;
         this.floorId = floorId;
+        this.layer = layer;
     }
 
     /** 获得该怪物的伤害信息 */

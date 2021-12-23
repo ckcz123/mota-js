@@ -12,14 +12,16 @@ interface Returns {
     enemy: enemy.Enemy
 }
 
-type defaultUnit = {
+export interface defaultUnit {
     readonly id: string
     readonly number: number
-    readonly type: 'default'
+    readonly type: string
     readonly x: number
     readonly y: number
     readonly floorId: string
     readonly cls?: string
+    layer: number
+    pass: boolean
     graph?: string
     block?: Block
     trigger?: () => any
@@ -33,7 +35,7 @@ export class Block {
     readonly y: number;
     readonly cls: string;
     readonly floorId: string;
-    noPass: boolean;
+    pass: boolean;
     graph: string;
     sprite: PIXI.Sprite;
 
@@ -45,7 +47,7 @@ export class Block {
         this.cls = core.dict[unit.number].cls;
         this.data.block = this;
         this.floorId = unit.floorId;
-        this.noPass = true;
+        this.pass = core.dict[unit.number].pass;
     }
 
     /** 是否在视野范围内 */
@@ -74,6 +76,12 @@ export class Block {
     destroy(root: boolean = false): void {
         if (root) this.data.destroy();
         let floor = core.status.maps[this.floorId];
-        floor.removeBlock(this.x, this.y, this.data.layer || 'event');
+        floor.removeBlock(this.x, this.y, this.data.layer);
     }
+}
+
+/** 由默认图块类型生成block */
+export function generateBlock(unit: defaultUnit, x: number = unit.x, y: number = unit.y): Block {
+    const block = new Block(unit, x, y);
+    return block;
 }

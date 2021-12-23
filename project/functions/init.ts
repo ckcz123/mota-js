@@ -5,6 +5,12 @@
 // import * as xxx from 'url' 引入某个文件或模块内的所有内容，并赋给对象xxx
 import * as core from '../../libs/core';
 
+declare global {
+    interface Window {
+        core: any
+    }
+}
+
 window.core = core;
 
 // 3.0样板使用es6和ts编写，所以这里使用es6的模块化，直接把对应函数export出去
@@ -12,7 +18,7 @@ window.core = core;
 // 举例： import * as init from './init'; init.drawStartUi();
 
 /** 绘制初始游戏界面 */
-export function drawStartUi () {
+export function drawStartUi() {
     // 先创建一个container
     const container = core.ui.createContainer('start', 0, 0, 100);
     core.ui.drawImageOnContainer(container, 'bg.jpg', true, 0, 0, 1000, 1000 / core.core.aspect);

@@ -1,10 +1,15 @@
 /*
 hero.ts负责勇士相关内容
 */
-import { core } from './core';
+import { animate, core } from './core';
 import * as PIXI from 'pixi.js-legacy';
 import { View } from './view';
 import * as utils from './utils';
+
+/** 方向 */
+type Direction = 'left' | 'right' | 'up' | 'down';
+/** 粗略方向 */
+type RoughDir = 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward'
 
 type Status = {
     id: string,
@@ -18,7 +23,7 @@ type Status = {
     manamax?: number,
     graph?: string,
     floor?: string,
-    dir?: 'left' | 'right' | 'up' | 'down',
+    dir?: Direction,
     autoScale?: boolean
 }
 
@@ -28,7 +33,6 @@ interface HeroEvent {
     moving: MoveEvent
     animationstart: AnimationEvent
     animating: AnimationEvent
-    animationend: null
     statuschange: StatusEvent
     turn: LocationEvent
     locationset: LocationEvent
@@ -39,10 +43,9 @@ interface HeroEvent {
 }
 
 export interface LocationEvent {
-    readonly dir: 'left' | 'right' | 'up' | 'down'
+    readonly dir: Direction
     readonly x: number
     readonly y: number
-    readonly toDir: 'left' | 'right' | 'up' | 'down'
     readonly toX: number
     readonly toY: number
 }
@@ -50,7 +53,7 @@ export interface LocationEvent {
 export interface DrawEvent {
     readonly x: number
     readonly y: number
-    readonly dir: 'left' | 'right' | 'up' | 'down'
+    readonly dir: Direction
     readonly line: number
     readonly index: number
     readonly rect: PIXI.Rectangle
@@ -59,7 +62,6 @@ export interface DrawEvent {
 
 export interface MoveEvent extends LocationEvent {
     readonly speed: number
-    readonly steps: string[]
 }
 
 export interface JumpEvent extends LocationEvent {
@@ -95,7 +97,7 @@ export class Hero {
     graph: string;
     x: number;
     y: number;
-    dir: 'left' | 'right' | 'up' | 'down';
+    dir: Direction;
     floor: string;
     aspect: string;
     autoScale: boolean;
@@ -104,6 +106,8 @@ export class Hero {
     followers: View[];
     /** 移动状态 */
     moveStatus: string
+    /** 移动方向 */
+    moveDir: Direction
     /** 专属container */
     container: PIXI.Container;
     listener: { [key: string]: Function[] };
@@ -118,6 +122,7 @@ export class Hero {
         /** 图片的宽 */
         height: number
         rects: PIXI.Rectangle[]
+        now?: number
     }
 
     constructor(status: Status) {
@@ -185,11 +190,12 @@ export class Hero {
     /** 切换行走图，注意两个勇士的行走图不能一样，否则两个勇士的动画将会同步233 */
     changeGraph(graph: string): Hero {
         this.graph = graph;
+        this.draw();
         return this;
     }
 
     /** 转向 */
-    turn(dir?: "left" | "right" | "up" | "down"): Hero {
+    turn(dir?: Direction): Hero {
         let oriDir = this.dir;
         // 默认转向只能顺时针转动...
         if (!dir) {
@@ -210,12 +216,10 @@ export class Hero {
             this.draw();
         } else {
             this.dir = dir;
+            this.draw();
         }
         // ----- listen turn ----- //
-        const ev: LocationEvent = {
-            dir: oriDir, x: this.x, y: this.y,
-            toDir: this.dir, toX: this.x, toY: this.y
-        };
+        const ev: LocationEvent = { dir: oriDir, x: this.x, y: this.y, toX: this.x, toY: this.y };
         this.listen('turn', ev);
         // ----- listen end ----- //
         return this;
@@ -229,10 +233,7 @@ export class Hero {
         if (y !== void 0) this.y = y;
         this.resetContainerLoc().setFollowers();
         // ----- listen locationset ----- //
-        const ev: LocationEvent = {
-            dir: this.dir, x: ox, y: oy,
-            toDir: this.dir, toX: this.x, toY: this.y
-        };
+        const ev: LocationEvent = { dir: this.dir, x: ox, y: oy, toX: this.x, toY: this.y };
         this.listen('locationset', ev);
         // ----- listen end ----- //
         return this;
@@ -248,7 +249,7 @@ export class Hero {
     }
 
     /** 根据方向获取行数 */
-    getLineByDir(dir: string = this.dir): number {
+    getLineByDir(dir: RoughDir = this.dir): number {
         if (dir.endsWith('ward')) dir = this.dir;
         if (dir === 'down') return 1;
         if (dir === 'left') return 2;
@@ -337,173 +338,105 @@ export class Hero {
         return this;
     }
 
-    /** 移动勇士 */
-    move(route: ('left' | 'right' | 'up' | 'down' | 'forward' | 'backward')[], speed: number = core.settings.heroSpeed): Hero {
-        if (this.moving) return;
-        this.moving = true;
-        let start = 0;
-        let now = 0;
-        let animation = 1;
-        let texture = PIXI.utils.TextureCache[this.graph];
-        let container = this.createOwnContainer();
-        let sprite = container.getChildByName('hero');
-        let line = this.getLineByDir(route[0])
-        let nowIndex = (line - 1) * this.data.width;
-        let [nx, ny] = this.nextStep(route[0]);
-        let floor = core.status.maps[this.floor];
-        if (!(sprite instanceof PIXI.Sprite)) return;
-        let oriDir = this.dir;
-        this.turn((route[0] === 'forward' || route[0] === 'backward') ? this.dir : route[0]);
-        sprite.texture = texture;
-        texture.frame = this.data.rects[nowIndex];
-        // ----- listen movingstart & animationstart ----- //
-        const ev: MoveEvent = {
-            speed,
-            x: this.x, y: this.y, dir: oriDir,
-            toX: nx, toY: ny, toDir: this.dir,
-            steps: route
-        };
-        this.listen('movingstart', ev);
-        const ev2: AnimationEvent = {
-            x: this.x, y: this.y, dir: this.dir, line, index: nowIndex, texture, rect: texture.frame, row: 1
-        };
-        this.listen('animationstart', ev2)
-        // ----- listen end ----- //
-        /** 执行下一帧动画 */
-        const next = (step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward') => {
-            let next = 0;
-            if (step === 'forward' || step === 'backward') next = this.getNextFrame(nowIndex, this.dir);
-            else next = this.getNextFrame(nowIndex, step);
-            texture.frame = this.data.rects[next];
-            nowIndex = next;
-            animation++;
-            // ----- listen animating ----- //
-            const ev: AnimationEvent = {
-                x: this.x, y: this.y, dir: this.dir, index: nowIndex,
-                line: ~~(nowIndex / 4) + 1, row: nowIndex % 4, texture, rect: texture.frame
-            };
-            this.listen('animating', ev);
-            // ----- listen end ----- //
+    /** 解析方向 */
+    extractDir(dir: RoughDir): Direction {
+        if (dir === 'forward') return this.dir;
+        if (dir === 'backward') {
+            switch (this.dir) {
+                case 'left': return 'right';
+                case 'right': return 'left';
+                case 'up': return 'down';
+                case 'down': return 'up';
+            }
         }
+        return dir;
+    }
 
-        let pass = this.canPass(nx, ny);
-        const ticker = () => {
-            if (pass) {
-                // 移动
-                let dx = ((nx - this.x) * floor.unit_width) / (speed / 16.6);
-                let dy = ((ny - this.y) * floor.unit_height) / (speed / 16.6);
-                container.x += dx;
-                container.y += dy;
-                // ----- listen shifting ----- //
-                const ev: ShiftEvent = {
-                    px: container.x, py: container.y, dx, dy
-                };
-                this.listen('shifting', ev);
-                // ----- listen end ----- //
-                start += 16.6;
-                if (start / animation > speed * 1.5 && this.isCurrent()) {
-                    // 执行动画
-                    let step = route[now];
-                    next(step);
-                }
-            }
-            if (start - (now * speed) > speed || !pass) {
-                let step = route[now];
-                let oriX = this.x;
-                let oriY = this.y;
-                let oriDir = this.dir;
-                if (pass) {
-                    // 到达下一格
-                    now++;
-                    this.setLoc(nx, ny);
-                }
-                if (!step || !pass) {
-                    if (this.moveStatus === 'none' || this.dir !== this.moveStatus || !pass) {
-                        if (!pass) {
-                            let f = core.status.thisMap
-                            let block = f.block[f.event][nx + ',' + ny];
-                            if (block) block.trigger();
-                        }
-                        // ----- listen movingend & animationend ----- //
-                        const ev: MoveEvent = {
-                            speed,
-                            x: oriX, y: oriY, dir: this.dir,
-                            toX: nx, toY: ny, toDir: this.dir,
-                            steps: route
-                        };
-                        this.listen('movingend', ev);
-                        this.listen('animationend', null);
-                        // ----- listen end ----- //
-                        core.pixi.game.ticker.remove(ticker);
-                        this.moving = false;
-                        if (this.isCurrent()) this.draw();
-                        return;
-                    } else {
-                        route.push(this.dir);
-                        step = this.dir;
-                    }
-                }
-                next(step);
-                // ----- listen moving ----- //
-                const ev: MoveEvent = {
-                    speed,
-                    x: oriX, y: oriY, dir: oriDir,
-                    toX: nx, toY: ny, toDir: this.dir,
-                    steps: route
-                };
-                this.listen('moving', ev);
-                // ----- listen end ----- //
-                [nx, ny] = this.nextStep(step);
-                pass = this.canPass(nx, ny);
-            }
+    /** 朝某个方向移动勇士 */
+    move(dir: RoughDir, speed: number = core.settings.heroSpeed): Hero {
+        if (this.moving) return this;
+        this.moving = true;
+        const direction = this.extractDir(dir);
+        const [dx, dy] = [utils.dirs[direction][0], utils.dirs[direction][1]];
+        if (!this.inThisMap()) { // 不在当前层，瞬移就行
+            this.turn(dir === 'backward' ? this.dir : direction);
+            if (core.status.maps[this.floor].canArrive(dx + this.x, dy + this.y))
+                this.setLoc(dx + this.x, dy + this.y);
+            return;
         }
-        core.pixi.game.ticker.add(ticker);
+        const texture = PIXI.utils.TextureCache[this.graph];
+        const container = this.createOwnContainer();
+        const sprite = container.getChildByName('hero');
+        const line = this.getLineByDir(dir);
+        const floor = core.status.maps[this.floor];
+        const v = 16.6 / speed * (dx !== 0 ? floor.unit_width : floor.unit_height);
+        // 开始移动 先转向对应方向
+        this.turn(dir === 'backward' ? this.dir : direction);
+        // 判断是否可以通行
+        if (!floor.canArrive(dx + this.x, dy + this.y)) return this;
+        // 移动函数
+        let frames = 0;
+        const total = Math.ceil((dx === 0 ? floor.unit_height : floor.unit_width) / v);
+        const quarter = Math.floor(total / 2);
+        const doMove = () => {
+            container.x += dx * v;
+            container.y += dy * v;
+            frames++;
+            // ----- listen shifting ----- //
+            const ev: ShiftEvent = { px: container.x, py: container.y, dx, dy };
+            this.listen('shifting', ev);
+            // ----- listen end ----- //
+            // 切换下一帧动画
+            if (frames % quarter === 0) {
+                const rectangle = this.getNextFrame(line);
+                texture.frame = rectangle;
+                // ----- listen animating ----- //
+                const ev: AnimationEvent = {
+                    row: this.data.now % this.data.width, line: Math.ceil(this.data.now / this.data.height),
+                    index: this.data.now, x: this.x, y: this.y, dir: this.dir, rect: rectangle, texture
+                }
+                this.listen('animating', ev);
+                // ----- listen end ----- //
+            }
+            // 停止移动
+            if (frames + 1 === total) {
+                core.pixi.game.ticker.remove(doMove);
+                this.setLoc(this.x + dx, this.y + dy);
+                this.moving = false;
+                // ----- listen movingend ----- //
+                const ev: MoveEvent = {
+                    speed, dir: this.dir, x: this.x - dx, y: this.y - dy, toX: this.x, toY: this.y
+                }
+                this.listen('movingend', ev);
+                // ----- listen end ----- //
+                if (this.moveStatus === 'constant') return this.move(this.moveDir || 'forward', speed);
+                this.data.now = (this.getLineByDir() - 1) * this.data.width;
+                texture.frame = this.data.rects[this.data.now];
+            }
+        };
+        core.pixi.game.ticker.add(doMove);
         return this;
     }
 
-    /** 获取下一帧索引 */
-    private getNextFrame(index: number, dir: 'left' | 'right' | 'up' | 'down'): number {
-        let i = 0;
-        if (dir !== this.dir) {
-            // 需要转向
-            this.turn(dir);
-            i = (this.getLineByDir(dir) - 1) * this.data.width;
-        } else {
-            // 不需要转向
-            let line = this.getLineByDir(dir);
-            if (index + 1 >= line * this.data.width) i = (line - 1) * this.data.width;
-            else i = index + 1;
-        }
-        return i;
-    }
-
-    /** 获取面前n个格子的坐标 */
-    next(n: number = 1): [number, number] {
-        let [x, y] = [this.x, this.y];
-        if (this.dir === 'left') x -= n;
-        if (this.dir === 'right') x += n;
-        if (this.dir === 'up') y -= n;
-        if (this.dir === 'down') y += n;
-        return [x, y];
-    }
-
-    /** 获取下一步的坐标 */
-    private nextStep(step: 'left' | 'right' | 'up' | 'down' | 'forward' | 'backward'): [number, number] {
-        let loc: [number, number];
-        if (step === 'forward') loc = this.next();
-        else if (step === 'backward') loc = this.next(-1);
-        else loc = [this.x + utils.dirs[step][0], this.y + utils.dirs[step][1]];
-        return loc;
-    }
-
-    /** 检查是否可通行 */
-    private canPass(x: number, y: number): boolean {
-        return false;
+    /** 获取下一帧的rectangle */
+    private getNextFrame(line: number = this.getLineByDir()): PIXI.Rectangle {
+        if (!this.data.now || this.data.now % this.data.width === 0)
+            this.data.now = this.data.width * (line - 1);
+        let now = this.data.now;
+        if ((now + 1) % this.data.width === 0) now -= this.data.width - 1;
+        else now++;
+        this.data.now = now;
+        return this.data.rects[now];
     }
 
     /** 是否是当前勇士 */
     isCurrent(): boolean {
         return core.status.nowHero.id === this.id;
+    }
+
+    /** 是否在当前层 */
+    inThisMap(): boolean {
+        return core.status.thisMap.floorId === this.floor;
     }
 
     /** 为勇士添加事件监听器 */

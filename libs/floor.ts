@@ -190,11 +190,38 @@ export class Floor {
         return this;
     }
 
+    /** 获取block */
+    getBlock(x: number, y: number, layer: number = this.event): block.Block {
+        if (x < 0 || y < 0) return null;
+        let b = this.block[layer][x + ',' + y];
+        if (b) return b;
+        else {
+            let dict = core.dict[this.map[layer][y][x]];
+            const unit: block.defaultUnit = {
+                id: dict.id, number: this.map[layer][y][x], x, y, type: dict.cls,
+                floorId: this.floorId, layer, pass: dict.pass
+            }
+            return block.generateBlock(unit);
+        }
+    }
+
     /** 移除图块 */
-    removeBlock(x: number, y: number, layer: 'bg' | 'event' | 'fg'): Floor {
+    removeBlock(x: number, y: number, layer: number): Floor {
         let block = this.block[layer][x + ',' + y];
         if (block) block = void 0;
-        this[layer === 'event' ? 'map' : layer][y][x] = 0;
+        this[layer][y][x] = 0;
         return this;
+    }
+
+    /** 获取某个图块的通行情况 */
+    pass(x: number, y: number, layer: number = this.event): boolean {
+        // return (this.getBlock(x, y, layer) || {}).pass;
+        return true;
+    }
+
+    /** 是否可以前往某个图块 */
+    canArrive(x: number, y: number, layer: number = this.event): boolean {
+        if (!this.pass(x, y, layer)) return false;
+        return true;
     }
 }

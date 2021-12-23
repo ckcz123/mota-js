@@ -17,19 +17,13 @@ import * as view from './view';
 import * as block from './block';
 import * as animate from './animate';
 
-declare global {
-    interface Window {
-        core: Core
-    }
-}
-
-class Core {
+export class Core {
     dom: { [key: string]: HTMLElement; };
     pixi: { [key: string]: PIXI.Application };
     containers: { [key: string]: PIXI.Container };
     sprite: { [key: string]: PIXI.Sprite };
     dataContent: { [key: string]: any };
-    dict: { [key: number]: { id: string, cls: string, img: string, animate?: animate.Animate } } = dict;
+    dict: { [key: number]: { id: string, cls: string, img: string, animate?: animate.Animate, pass?: boolean } } = dict;
     floorIds: string[];
     scale: number;
     __WIDTH__: number;

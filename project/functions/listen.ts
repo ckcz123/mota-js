@@ -14,9 +14,8 @@ export function addHeroListener() {
 
 /**
  * 视角跟随勇士
- * @this {hero.Hero}
  */
-export function follow() {
+export function follow(this: hero.Hero) {
     // 直接center2视角就行了
     this.followers.forEach((v: View) => v.center2(this));
 }

@@ -239,6 +239,7 @@ export class Autotile {
         if (core.status.thisMap.floorId !== this.floorId) return this;
         // 用container来绘制
         let container = new PIXI.Container();
+        core.status.thisMap.sprites[this.x + ',' + this.y] = container;
         this.content = container;
         core.containers['_map' + this.layer].addChild(container);
         let floor = core.status.maps[this.floorId];

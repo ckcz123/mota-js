@@ -362,6 +362,7 @@ export class Hero {
             this.turn(dir === 'backward' ? this.dir : direction);
             if (core.status.maps[this.floor].canArrive(dx + this.x, dy + this.y))
                 this.setLoc(dx + this.x, dy + this.y);
+            this.moving = false;
             return;
         }
         const texture = PIXI.utils.TextureCache[this.graph];
@@ -370,10 +371,17 @@ export class Hero {
         const line = this.getLineByDir(dir);
         const floor = core.status.maps[this.floor];
         const v = 16.6 / speed * (dx !== 0 ? floor.unit_width : floor.unit_height);
+        const [tx, ty] = [dx + this.x, dy + this.y]
         // 开始移动 先转向对应方向
         this.turn(dir === 'backward' ? this.dir : direction);
         // 判断是否可以通行
-        if (!floor.canArrive(dx + this.x, dy + this.y)) return this;
+        if (!floor.canArrive(dx + this.x, dy + this.y)) {
+            if (floor.inMap(tx, ty)) {
+                floor.getBlock(tx, ty).trigger();
+            }
+            this.moving = false;
+            return this;
+        }
         // 移动函数
         let frames = 0;
         const total = Math.ceil((dx === 0 ? floor.unit_height : floor.unit_width) / v);
@@ -401,8 +409,11 @@ export class Hero {
             // 停止移动
             if (frames + 1 === total) {
                 core.pixi.game.ticker.remove(doMove);
-                this.setLoc(this.x + dx, this.y + dy);
+                this.setLoc(tx, ty);
                 this.moving = false;
+                if (floor.block[floor.event][this.x + this.y]) {
+                    floor.getBlock(this.x, this.y).trigger();
+                }
                 // ----- listen movingend ----- //
                 const ev: MoveEvent = {
                     speed, dir: this.dir, x: this.x - dx, y: this.y - dy, toX: this.x, toY: this.y

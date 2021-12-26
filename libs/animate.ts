@@ -129,6 +129,7 @@ export function calInView() {
                 let one = block[loc];
                 if (!one) continue;
                 let n = one.data.number;
+                if (n === 0) continue;
                 if (added[n]) continue;
                 added[n] = true;
                 inViewAnimations.push(n);

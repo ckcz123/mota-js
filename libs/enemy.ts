@@ -51,7 +51,7 @@ export class Enemy {
     }
 
     /** 获得该怪物的伤害信息 */
-    getDamage(hero: string | Hero): any {
+    getDamage(hero: string | Hero): enemy.Damage {
         return enemy.getDamage(this.floor, hero, this.x, this.y, {});
     }
 
@@ -66,7 +66,7 @@ export class Enemy {
         let damage = this.getDamage(hero);
         this.damage = damage;
         // 扣血并删除当前图块
-        hero.addStatus('hp', -damage);
+        hero.addStatus('hp', -damage.damage);
         if (this.block) this.block.destroy(true);
         else this.destroy();
         return this;

@@ -64,8 +64,11 @@ export class Block {
      * 执行相应的触发器
      * @param type 触发器的种类，可选，填入后会有相应的类型标注，如果实际触发时和传入的type不同，则会报错
      */
-    trigger<K extends keyof Returns>(type?: K): Returns[K] | void {
-        if (type && type !== this.cls) return console.error('传入的类型与实际不同！传入的类型为：' + type + '；而实际的类型为：' + this.cls);
+    trigger<K extends keyof Returns>(type?: K): Returns[K] {
+        if (type && type !== this.cls) {
+            console.error('传入的类型与实际不同！传入的类型为：' + type + '；而实际的类型为：' + this.cls);
+            return;
+        }
         return this.data.trigger();
     }
 

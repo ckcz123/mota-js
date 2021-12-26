@@ -26,6 +26,9 @@ export class Floor {
     damages: {
         [key: string]: { damage: number, critical?: number }
     }
+    sprites: {
+        [key: number]: { [key: string]: PIXI.DisplayObject }
+    }
 
     constructor(floorId: string, area?: string) {
         this.floorId = floorId;
@@ -37,6 +40,7 @@ export class Floor {
         this.unit_height = core.__UNIT_HEIGHT__;
         this.damages = {};
         this.event = floor.eventLayer;
+        this.sprites = {};
         core.status.maps[floorId] = core.status.thisMap = this;
         if (area) {
             if (!core.status.areas[area]) core.status.areas[area] = { floorIds: [], data: {} };
@@ -105,10 +109,12 @@ export class Floor {
     }
 
     private drawOneLayer(layer: number): Floor {
+        this.sprites[layer] = {};
         if (core.containers['_map' + layer]) core.containers['_map' + layer].destroy({ children: true });
         let container = new PIXI.Container();
         container.zIndex = layer * 10;
         core.containers['_map' + layer] = container;
+        container.name = '_map' + layer;
         core.containers.map.addChild(container);
         this.drawContent(layer, container);
         return this;
@@ -153,6 +159,7 @@ export class Floor {
         let sy = this.unit_height / sprite.height;
         if (sx > 1 && sy > 1) sprite.scale.set(Math.min(sx, sy));
         container.addChild(sprite);
+        this.sprites[container.name.match(/[0-9]+/)[0]][x + ',' + y] = sprite;
         sprite.name = number + '@' + x + ',' + y;
         return this;
     }
@@ -167,6 +174,7 @@ export class Floor {
 
     /** 绘制伤害 */
     drawDamage(): Floor {
+        this.sprites[-1] = {};
         let container = core.containers.damage;
         if (!container) {
             container = new PIXI.Container();
@@ -185,6 +193,7 @@ export class Floor {
                 fontSize: this.unit_width / 3, fontFamily: 'Arial', fill: damage.color, stroke: '#000000', strokeThickness: 2
             });
             text.anchor.set(0, 1);
+            this.sprites[-1][loc] = text;
             ui.drawContent(container, text);
         }
         return this;
@@ -206,21 +215,36 @@ export class Floor {
     }
 
     /** 移除图块 */
-    removeBlock(x: number, y: number, layer: number): Floor {
+    removeBlock(x: number, y: number, layer: number = this.event): Floor {
         let block = this.block[layer][x + ',' + y];
-        if (block) block = void 0;
-        this[layer][y][x] = 0;
+        if (block) delete this.block[layer][x + ',' + y];
+        this.map[layer][y][x] = 0;
+        if (this.sprites[layer][x + ',' + y]) {
+            this.sprites[layer][x + ',' + y].destroy();
+            delete this.sprites[layer][x + ',' + y];
+        }
+        if (this.sprites[-1][x + ',' + y]) {
+            this.sprites[-1][x + ',' + y].destroy();
+            delete this.sprites[-1][x + ',' + y];
+        }
         return this;
+    }
+
+    /** 是否在地图内 */
+    inMap(x: number, y: number): boolean {
+        return x >= 0 && y >= 0 && x < this.width && y < this.height;
     }
 
     /** 获取某个图块的通行情况 */
     pass(x: number, y: number, layer: number = this.event): boolean {
-        // return (this.getBlock(x, y, layer) || {}).pass;
-        return true;
+        if (!this.inMap(x, y)) return false;
+        if (this.map[layer][y][x] === 0) return true;
+        return (this.getBlock(x, y, layer) || {}).pass;
     }
 
     /** 是否可以前往某个图块 */
     canArrive(x: number, y: number, layer: number = this.event): boolean {
+        if (!this.inMap(x, y)) return false;
         if (!this.pass(x, y, layer)) return false;
         return true;
     }

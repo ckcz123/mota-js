@@ -5,6 +5,7 @@ import { animate, core } from './core';
 import * as PIXI from 'pixi.js-legacy';
 import { View } from './view';
 import * as utils from './utils';
+import * as _ from 'lodash';
 
 /** 方向 */
 type Direction = 'left' | 'right' | 'up' | 'down';
@@ -167,7 +168,7 @@ export class Hero {
 
     /** 设置属性 */
     setStatus(status: string, value: any): Hero {
-        let before = utils.clone(this[status]);
+        let before = _.cloneDeep(this[status]);
         this[status] = value;
         // ----- listen statuschange ----- //
         const ev: StatusEvent = { before, after: value, status };
@@ -178,7 +179,7 @@ export class Hero {
 
     /** 增减属性 */
     addStatus(status: string, delta: number): Hero {
-        let before = utils.clone(this[status]);
+        let before = _.cloneDeep(this[status]);
         this[status] += delta;
         // ----- listen statuschange ----- //
         const ev: StatusEvent = { before, after: this[status], status };

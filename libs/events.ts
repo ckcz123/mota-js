@@ -62,4 +62,5 @@ export function startGame() {
     maps.changeFloor('sample0', 0, 0);
     listen.addHeroListener();
     core.status.views.main.follow('hero');
+    import('../project/ui/status/main');
 }

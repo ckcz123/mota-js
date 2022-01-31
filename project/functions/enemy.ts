@@ -20,11 +20,20 @@ export interface Damage {
     turn: number;
 }
 
+export interface CEnemy {
+    readonly enemy: Enemy
+    readonly hero: Hero
+    readonly n: number
+    readonly option: Option
+    normal: (hero: Hero, enemy: Enemy, option: Option) => Damage
+    loop: (hero: Hero, enemy: Enemy, option: Option) => Damage
+}
+
 /** 任务队列 */
 let tasks = [];
 
-/** 添加任务
- * @param {any} task
+/** 
+ * 添加任务
  */
 function addTask(task) {
 
@@ -91,6 +100,8 @@ function normal(hero: Hero, enemy: Enemy, option: Option): Damage {
     // 对双方造成的伤害
     let heroPerDamage = hero.atk - enemy.def;
     let enemyPerDamage = enemy.atk - hero.def;
+
+    if (heroPerDamage <= 0) return { damage: null, turn: null };
 
     // 回合数
     let turn = Math.ceil(enemy.hp / heroPerDamage);

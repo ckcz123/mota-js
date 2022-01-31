@@ -21,12 +21,14 @@
         <meta name="x5-page-mode" content="app" />
         <link rel="icon" type="image/svg+xml" href="favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link href="styles.css" rel="stylesheet" />
+        <link href="styles.less" rel="stylesheet" />
     </head>
     <body>
         <script type="module" src="./index.ts"></script>
         <div id="gameGroup" style="position: absolute;">
-            <div id = gameDraw></div>
+            <div id='gameDraw'>
+                <div id='statusBar' style="z-index: 999;"></div>
+            </div>
         </div>
     </body>
 </html>

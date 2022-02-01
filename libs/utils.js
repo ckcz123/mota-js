@@ -7,23 +7,23 @@ utils.js 工具类
 
 "use strict";
 
-function utils() {
+function utils () {
     this._init();
     this.scan = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0}
+        'up': { 'x': 0, 'y': -1 },
+        'left': { 'x': -1, 'y': 0 },
+        'down': { 'x': 0, 'y': 1 },
+        'right': { 'x': 1, 'y': 0 }
     };
     this.scan2 = {
-        'up': {'x': 0, 'y': -1},
-        'left': {'x': -1, 'y': 0},
-        'down': {'x': 0, 'y': 1},
-        'right': {'x': 1, 'y': 0},
-        'leftup': {'x': -1, 'y': -1},
-        'leftdown': {'x': -1, 'y': 1},
-        'rightup': {'x': 1, 'y': -1},
-        'rightdown': {'x': 1, 'y': 1}
+        'up': { 'x': 0, 'y': -1 },
+        'left': { 'x': -1, 'y': 0 },
+        'down': { 'x': 0, 'y': 1 },
+        'right': { 'x': 1, 'y': 0 },
+        'leftup': { 'x': -1, 'y': -1 },
+        'leftdown': { 'x': -1, 'y': 1 },
+        'rightup': { 'x': 1, 'y': -1 },
+        'rightdown': { 'x': 1, 'y': 1 }
     };
 }
 
@@ -105,7 +105,7 @@ utils.prototype.replaceText = function (text, prefix) {
         if (cnt == 0) break;
     }
     if (cnt != 0) return text;
-    var value = core.calValue(text.substring(index+2, curr), prefix);
+    var value = core.calValue(text.substring(index + 2, curr), prefix);
     if (value == null) value = "";
     return text.substring(0, index) + value + core.replaceText(text.substring(curr + 1), prefix);
 }
@@ -124,17 +124,17 @@ utils.prototype.replaceValue = function (value) {
         //    value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
         if (value.indexOf('global:') >= 0 || value.indexOf('global：') >= 0)
             value = value.replace(/global[:：]([a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]+)/g, "core.getGlobal('$1', 0)");
-        if (value.indexOf('enemy:')>=0)
+        if (value.indexOf('enemy:') >= 0)
             value = value.replace(/enemy:([a-zA-Z0-9_]+)[\.:]([a-zA-Z0-9_]+)/g, "core.material.enemys['$1'].$2");
-        if (value.indexOf('blockId:')>=0)
+        if (value.indexOf('blockId:') >= 0)
             value = value.replace(/blockId:(\d+),(\d+)/g, "core.getBlockId($1, $2)");
-        if (value.indexOf('blockNumber:')>=0)
+        if (value.indexOf('blockNumber:') >= 0)
             value = value.replace(/blockNumber:(\d+),(\d+)/g, "core.getBlockNumber($1, $2)");
-        if (value.indexOf('blockCls:')>=0)
+        if (value.indexOf('blockCls:') >= 0)
             value = value.replace(/blockCls:(\d+),(\d+)/g, "core.getBlockCls($1, $2)");
-        if (value.indexOf('equip:')>=0)
+        if (value.indexOf('equip:') >= 0)
             value = value.replace(/equip:(\d)/g, "core.getEquip($1)");
-        if (value.indexOf('temp:')>=0)
+        if (value.indexOf('temp:') >= 0)
             value = value.replace(/temp:([a-zA-Z0-9_]+)/g, "core.getFlag('@temp@$1', 0)");
     }
     return value;
@@ -145,7 +145,7 @@ utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
         if (value.indexOf(':') >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0) {
-            if (value.indexOf('switch:' >= 0))
+            if (value.indexOf('switch:') >= 0)
                 value = value.replace(/switch:([a-zA-Z0-9_]+)/g, "core.getFlag('" + (prefix || ":f@x@y") + "@$1', 0)");
             value = this.replaceValue(value);
         }
@@ -426,7 +426,7 @@ utils.prototype.clone = function (data, filter, recursion) {
         var copy = [];
         for (var i in data) {
             if (!filter || filter(i, data[i]))
-                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
+                copy[i] = core.clone(data[i], recursion ? filter : null, recursion);
         }
         return copy;
     }
@@ -439,7 +439,7 @@ utils.prototype.clone = function (data, filter, recursion) {
         var copy = {};
         for (var i in data) {
             if (data.hasOwnProperty(i) && (!filter || filter(i, data[i])))
-                copy[i] = core.clone(data[i], recursion?filter:null, recursion);
+                copy[i] = core.clone(data[i], recursion ? filter : null, recursion);
         }
         return copy;
     }
@@ -496,9 +496,9 @@ utils.prototype.formatDate2 = function (date) {
 }
 
 utils.prototype.formatTime = function (time) {
-    return core.setTwoDigits(parseInt(time/3600000))
-        +":"+core.setTwoDigits(parseInt(time/60000)%60)
-        +":"+core.setTwoDigits(parseInt(time/1000)%60);
+    return core.setTwoDigits(parseInt(time / 3600000))
+        + ":" + core.setTwoDigits(parseInt(time / 60000) % 60)
+        + ":" + core.setTwoDigits(parseInt(time / 1000) % 60);
 }
 
 ////// 两位数显示 //////
@@ -508,27 +508,27 @@ utils.prototype.setTwoDigits = function (x) {
 
 utils.prototype.formatSize = function (size) {
     if (size < 1024) return size + 'B';
-    else if (size < 1024 * 1024) return (size/1024).toFixed(2) + "KB";
-    else return (size/1024/1024).toFixed(2) + "MB";
+    else if (size < 1024 * 1024) return (size / 1024).toFixed(2) + "KB";
+    else return (size / 1024 / 1024).toFixed(2) + "MB";
 }
 
 utils.prototype.formatBigNumber = function (x, digits) {
-	if (digits === true) digits = 5; // 兼容旧版onMap参数
-	if (!digits || digits < 5) digits = 6; // 连同负号、小数点和后缀字母在内的总位数，至少需为5，默认为6
-	x = Math.trunc(parseFloat(x)); // 尝试识别为小数，然后向0取整
-	if (x == null || !Number.isFinite(x)) return '???'; // 无法识别的数或正负无穷大，显示'???'
-	var units = [ // 单位及其后缀字母，可自定义，如改成千进制下的K、M、G、T、P
-		{ "val": 1e4, "suffix": "w" },
-		{ "val": 1e8, "suffix": "e" },
-		{ "val": 1e12, "suffix": "z" },
-		{ "val": 1e16, "suffix": "j" },
-		{ "val": 1e20, "suffix": "g" },
-	];
-	if (Math.abs(x) > 1e20 * Math.pow(10, digits - 2))
-		return x.toExponential(0); // 绝对值过大以致于失去精度的数，直接使用科学记数法，系数只保留整数
-	var sign = x < 0 ? '-' : '';
-	if (sign) --digits; // 符号位单独处理，负号要占一位
-	x = Math.abs(x);
+    if (digits === true) digits = 5; // 兼容旧版onMap参数
+    if (!digits || digits < 5) digits = 6; // 连同负号、小数点和后缀字母在内的总位数，至少需为5，默认为6
+    x = Math.trunc(parseFloat(x)); // 尝试识别为小数，然后向0取整
+    if (x == null || !Number.isFinite(x)) return '???'; // 无法识别的数或正负无穷大，显示'???'
+    var units = [ // 单位及其后缀字母，可自定义，如改成千进制下的K、M、G、T、P
+        { "val": 1e4, "suffix": "w" },
+        { "val": 1e8, "suffix": "e" },
+        { "val": 1e12, "suffix": "z" },
+        { "val": 1e16, "suffix": "j" },
+        { "val": 1e20, "suffix": "g" },
+    ];
+    if (Math.abs(x) > 1e20 * Math.pow(10, digits - 2))
+        return x.toExponential(0); // 绝对值过大以致于失去精度的数，直接使用科学记数法，系数只保留整数
+    var sign = x < 0 ? '-' : '';
+    if (sign) --digits; // 符号位单独处理，负号要占一位
+    x = Math.abs(x);
 
     if (x < Math.pow(10, digits)) return sign + x;
 
@@ -539,24 +539,24 @@ utils.prototype.formatBigNumber = function (x, digits) {
         u = u.substring(0, u[u.length - 2] == '.' ? u.length - 2 : u.length - 1);
         return sign + u + each.suffix;
     }
-	return sign + x.toExponential(0);
+    return sign + x.toExponential(0);
 }
 
 ////// 变速移动 //////
-utils.prototype.applyEasing = function(name) {
+utils.prototype.applyEasing = function (name) {
     var list = {
-        "easeIn": function(t) {
+        "easeIn": function (t) {
             return Math.pow(t, 3);
         },
-        "easeOut": function(t) {
+        "easeOut": function (t) {
             return 1 - Math.pow(1 - t, 3);
         },
-        "easeInOut": function(t) {
+        "easeInOut": function (t) {
             // easeInOut试了一下感觉二次方效果明显点
             if (t < 0.5) return Math.pow(t, 2) * 2;
             else return 1 - Math.pow(1 - t, 2) * 2;
         },
-        "linear": function(t) {
+        "linear": function (t) {
             return t
         }
     }
@@ -659,7 +659,7 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
         return 'k' + t.substring(6);
     else if (t.indexOf('random:') == 0)
         return 'X' + t.substring(7);
-    return '('+t+')';
+    return '(' + t + ')';
 }
 
 ////// 解密路线 //////
@@ -676,7 +676,7 @@ utils.prototype.decodeRoute = function (route) {
     } catch (e) {
     }
 
-    var decodeObj = {route: route, index: 0, ans: []};
+    var decodeObj = { route: route, index: 0, ans: [] };
     while (decodeObj.index < decodeObj.route.length) {
         this._decodeRoute_decodeOne(decodeObj, decodeObj.route.charAt(decodeObj.index++));
     }
@@ -728,7 +728,7 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
     var nxt = (c == 'I' || c == 'e' || c == 'F' || c == 'S' || c == 'Q' || c == 't') ?
         this._decodeRoute_getString(decodeObj) : this._decodeRoute_getNumber(decodeObj);
 
-    var mp = {"U": "up", "D": "down", "L": "left", "R": "right"};
+    var mp = { "U": "up", "D": "down", "L": "left", "R": "right" };
 
     switch (c) {
         case "U":
@@ -797,7 +797,7 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
             var px = this._decodeRoute_getNumber(decodeObj);
             ++decodeObj.index;
             var py = this._decodeRoute_getNumber(decodeObj);
-            decodeObj.ans.push("click:"+nxt+":"+px+":"+py);
+            decodeObj.ans.push("click:" + nxt + ":" + px + ":" + py);
             break;
         case "X":
             decodeObj.ans.push("random:" + nxt);
@@ -870,7 +870,7 @@ utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
     var directionList = ["left", "leftup", "up", "rightup", "right", "rightdown", "down", "leftdown"];
     if (directionList.indexOf(turn) >= 0) return turn;
-    if (turn == ':hero') return core.getHeroLoc('direction'); 
+    if (turn == ':hero') return core.getHeroLoc('direction');
     if (turn == ':backhero') return this.turnDirection(':back', core.getHeroLoc('direction'));
     if (typeof turn === 'number' && turn % 45 == 0) turn /= 45;
     else {
@@ -1030,7 +1030,7 @@ utils.prototype.readFileContent = function (content) {
     // 检查base64
     try {
         obj = JSON.parse(LZString.decompressFromBase64(content));
-    } catch (e) {}
+    } catch (e) { }
     if (!obj) {
         try {
             obj = JSON.parse(content);
@@ -1090,7 +1090,7 @@ utils.prototype.download = function (filename, content) {
     // Step 3: 如果是Safari浏览器，则提示并打开新窗口
     if (core.platform.isSafari) {
         alert("你当前使用的是Safari浏览器，不支持直接下载文件。\n即将打开一个新窗口为应下载内容，请自行全选复制然后创建空白文件并粘贴。");
-        var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+        var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
         var href = window.URL.createObjectURL(blob);
         var opened = window.open(href, "_blank");
         window.URL.revokeObjectURL(href);
@@ -1098,7 +1098,7 @@ utils.prototype.download = function (filename, content) {
     }
 
     // Step 4: 下载
-    var blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+    var blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     if (window.navigator.msSaveOrOpenBlob) {
         window.navigator.msSaveBlob(blob, filename);
     }
@@ -1168,7 +1168,7 @@ utils.prototype.myprompt = function (hint, value, callback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
     main.dom.inputBox.style.display = 'block';
-    main.dom.inputBox.value = value==null?"":value;
+    main.dom.inputBox.value = value == null ? "" : value;
     main.dom.inputYes.blur();
     main.dom.inputNo.blur();
     setTimeout(function () {
@@ -1350,7 +1350,7 @@ utils.prototype.http = function (type, url, formData, success, error, mimeType, 
 
 // LZW-compress
 // https://gist.github.com/revolunet/843889
-function lzw_encode(s) {
+function lzw_encode (s) {
     var dict = {};
     var data = (s + "").split("");
     var out = [];
@@ -1377,7 +1377,7 @@ function lzw_encode(s) {
 }
 
 // Decompress an LZW-encoded string
-function lzw_decode(s) {
+function lzw_decode (s) {
     var dict = {};
     var data = (s + "").split("");
     var currChar = data[0];

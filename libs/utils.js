@@ -198,7 +198,7 @@ utils.prototype.decompress = function (value) {
         return JSON.parse(value);
     }
     catch (e) {
-        main.log(e);
+        console.error(e);
     }
     return null;
 }
@@ -222,7 +222,7 @@ utils.prototype.setLocalStorage = function (key, value) {
         return true;
     }
     catch (e) {
-        main.log(e);
+        console.error(e);
         return false;
     }
 }
@@ -1035,7 +1035,7 @@ utils.prototype.readFileContent = function (content) {
         try {
             obj = JSON.parse(content);
         } catch (e) {
-            main.log(e)
+            console.error(e)
         }
     }
 

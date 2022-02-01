@@ -2924,6 +2924,13 @@ type core = {
 
 } & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugins
 
+declare class main {
+    readonly core: core
+
+    /** 输出内容（极不好用，建议换成console）*/
+    log(e: string | Error, error: boolean): void
+}
+
 declare let core: core
 declare let flags: { [x: string]: any }
 declare let hero = core.status.hero

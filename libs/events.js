@@ -312,7 +312,7 @@ events.prototype.doSystemEvent = function (type, data, callback) {
             return core.doFunc(this.systemEvents[type], this, data, callback);
         }
         catch (e) {
-            main.log(e);
+            console.error(e);
             main.log("ERROR in systemEvents[" + type + "]");
         }
     }
@@ -347,7 +347,7 @@ events.prototype.trigger = function (x, y, callback) {
         core.clearRouteFolding();
         try {
             eval(block.event.script);
-        } catch (e) { main.log(e); }
+        } catch (ee) { console.error(ee) }
     }
 
     // 碰触事件
@@ -380,7 +380,7 @@ events.prototype._trigger_inAction = function (x, y) {
     // 执行该点的脚本
     try {
         eval(block.event.script);
-    } catch (e) { main.log(e); }
+    } catch (ee) { console.error(ee) }
 
     // 碰触事件
     if (block.event.event) {
@@ -952,7 +952,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
             return core.doFunc(this.actions[type], this, data, x, y, prefix);
         }
         catch (e) {
-            main.log(e);
+            console.error(e);
             main.log("ERROR in actions[" + type + "]");
         }
     }
@@ -1104,7 +1104,7 @@ events.prototype.insertCommonEvent = function (name, args, x, y, callback, addTo
             try {
                 if (args[i] != null)
                     core.setFlag('arg' + (i + 1), args[i]);
-            } catch (e) { main.log(e); }
+            } catch (ee) { console.error(ee) }
         }
     }
 
@@ -1826,7 +1826,7 @@ events.prototype._action_insert = function (data, x, y, prefix) {
                 try {
                     if (data.args[i] != null)
                         core.setFlag('arg' + (i + 1), data.args[i]);
-                } catch (e) { main.log(e); }
+                } catch (ee) { console.error(ee) }
             }
         }
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
@@ -2363,7 +2363,7 @@ events.prototype._action_function = function (data, x, y, prefix) {
             eval('(' + func + ')()');
         }
     } catch (e) {
-        main.log(e);
+        console.error(e);
     }
     if (!data.async)
         core.doAction();

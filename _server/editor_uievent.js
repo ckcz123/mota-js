@@ -41,7 +41,7 @@ editor_uievent_wrapper = function (editor) {
         // 绘制UI
         var background = uievent.elements.select.value;
         if (background == 'thumbnail') {
-            core.drawThumbnail(editor.currentFloorId, null, {ctx: 'uievent'});
+            core.drawThumbnail(editor.currentFloorId, null, { ctx: 'uievent' });
         }
         else {
             core.fillRect('uievent', 0, 0, core.__PIXELS__, core.__PIXELS__, background);
@@ -61,7 +61,7 @@ editor_uievent_wrapper = function (editor) {
                 else if (type == "choices") {
                     for (var i = 0; i < data.choices.length; i++) {
                         if (typeof data.choices[i] === 'string')
-                            data.choices[i] = {"text": data.choices[i]};
+                            data.choices[i] = { "text": data.choices[i] };
                         data.choices[i].text = core.replaceText(data.choices[i].text);
                     }
                     core.saveCanvas('uievent');
@@ -72,7 +72,7 @@ editor_uievent_wrapper = function (editor) {
                     return;
                 } else if (type == "confirm") {
                     core.saveCanvas('uievent');
-                    core.drawConfirmBox(data.text, null, null, 'uievent');                    
+                    core.drawConfirmBox(data.text, null, null, 'uievent');
                     core.loadCanvas('uievent');
                 } else if (core.ui["_uievent_" + type])
                     core.ui["_uievent_" + type](data);
@@ -94,9 +94,9 @@ editor_uievent_wrapper = function (editor) {
         uievent.elements.extraBody.style.display = 'none';
         uievent.elements.body.style.overflow = "hidden";
 
-        uievent.elements.select.innerHTML = 
-            '<option value="thumbnail" selected>缩略图</option>' + 
-            '<option value="#000000">黑色</option>' + 
+        uievent.elements.select.innerHTML =
+            '<option value="thumbnail" selected>缩略图</option>' +
+            '<option value="#000000">黑色</option>' +
             '<option value="#FFFFFF">白色</option>';
         uievent.elements.select.onchange = function () {
             uievent.drawPreviewUI();
@@ -127,8 +127,8 @@ editor_uievent_wrapper = function (editor) {
             uievent.close();
             if (callback) {
                 if (multipoints.length > 0) {
-                    callback(floorId, multipoints.map(function (one) { return one.split(',')[0]}).join(','),
-                    multipoints.map(function (one) { return one.split(',')[1]}).join(','));
+                    callback(floorId, multipoints.map(function (one) { return one.split(',')[0] }).join(','),
+                        multipoints.map(function (one) { return one.split(',')[1] }).join(','));
                 } else {
                     callback(floorId, x, y);
                 }
@@ -157,7 +157,7 @@ editor_uievent_wrapper = function (editor) {
     uievent.updateSelectPoint = function (redraw) {
         uievent.elements.title.innerText = '地图选点【右键多选】 (' + uievent.values.x + "," + uievent.values.y + ')';
         // 计算size
-        uievent.values.boxSize = uievent.values.size * 
+        uievent.values.boxSize = uievent.values.size *
             (uievent.values.bigmap ? (core.__SIZE__ / Math.max(uievent.values.width, uievent.values.height)) : 1);
         uievent.values.boxLeft = uievent.values.bigmap ?
             (core.__PIXELS__ * Math.max(0, (1 - uievent.values.width / uievent.values.height) / 2)) : 0;
@@ -186,7 +186,7 @@ editor_uievent_wrapper = function (editor) {
             for (var i = 0; i < uievent.values.multipoints.length; ++i) {
                 var xy = uievent.values.multipoints[i].split(","), x = parseInt(xy[0]), y = parseInt(xy[1]);
                 core.fillBoldText('uievent', i + 1,
-                    32 * (x - uievent.values.left) + 28 , 32 * (y - uievent.values.top) + 26, '#FF7F00', null, '14px Verdana');
+                    32 * (x - uievent.values.left) + 28, 32 * (y - uievent.values.top) + 26, '#FF7F00', null, '14px Verdana');
             }
             core.setTextAlign('uievent', 'left');
         }
@@ -228,17 +228,17 @@ editor_uievent_wrapper = function (editor) {
         uievent.updateSelectPoint(false);
     }
 
-    uievent.elements.body.oncontextmenu = function (e) { 
+    uievent.elements.body.oncontextmenu = function (e) {
         e.preventDefault();
         e.stopPropagation();
         if (uievent.mode != 'selectPoint' || uievent.values.bigmap) return;
         var x = uievent.values.left + Math.floor(e.offsetX / uievent.values.size);
         var y = uievent.values.top + Math.floor(e.offsetY / uievent.values.size);
         uievent.values.multipoints = uievent.values.multipoints || [];
-        if (uievent.values.multipoints.indexOf(x+","+y) >= 0) {
-            uievent.values.multipoints = uievent.values.multipoints.filter(function (o) { return o != x+","+y;})
+        if (uievent.values.multipoints.indexOf(x + "," + y) >= 0) {
+            uievent.values.multipoints = uievent.values.multipoints.filter(function (o) { return o != x + "," + y; })
         } else {
-            uievent.values.multipoints.push(x+","+y);
+            uievent.values.multipoints.push(x + "," + y);
         }
         uievent.values.x = x;
         uievent.values.y = y;
@@ -272,7 +272,7 @@ editor_uievent_wrapper = function (editor) {
             }
             if (ii == 5) {
                 node.onclick = function () {
-                    alert(core.copy(uievent.values.floorId) ? ('楼层ID '+uievent.values.floorId+' 已成功复制到剪切板') : '无法复制楼层ID');
+                    alert(core.copy(uievent.values.floorId) ? ('楼层ID ' + uievent.values.floorId + ' 已成功复制到剪切板') : '无法复制楼层ID');
                 }
             }
             (function (x, y) {
@@ -311,7 +311,7 @@ editor_uievent_wrapper = function (editor) {
                 index += Math.sign(e.wheelDelta);
             else if (e.detail)
                 index += Math.sign(e.detail);
-        } catch (ee) { main.log(ee); }
+        } catch (ee) { console.error(ee) }
         index = core.clamp(index, 0, core.floorIds.length - 1);
         uievent.values.multipoints = [];
         uievent.setPoint(core.floorIds[index]);
@@ -410,7 +410,7 @@ editor_uievent_wrapper = function (editor) {
                 list.push("道具 " + (item.name || id) + " 的装备属性");
             }
             // 使用事件
-            if (hasUsedFlags(item.useItemEvent, flag)) { 
+            if (hasUsedFlags(item.useItemEvent, flag)) {
                 list.push("道具 " + (item.name || id) + " 的使用事件");
             }
         }
@@ -492,12 +492,12 @@ editor_uievent_wrapper = function (editor) {
             var checked = one == uievent.values.floorId;
             var floor = core.floors[one];
             if (floor == null) return;
-            if (!one.includes(value) && !(floor.title||"").includes(value) && !(floor.name||"").includes(value)) return;
-            html += "<input type='radio' name='uievent_selectFloor' onchange='editor.uievent.values.floorId=\""+one+"\"'" + (checked ? ' checked' : '') + ">";
-            html += "<span onclick='this.previousElementSibling.checked=true;editor.uievent.values.floorId=\""+one+"\"' style='cursor: default'>" 
+            if (!one.includes(value) && !(floor.title || "").includes(value) && !(floor.name || "").includes(value)) return;
+            html += "<input type='radio' name='uievent_selectFloor' onchange='editor.uievent.values.floorId=\"" + one + "\"'" + (checked ? ' checked' : '') + ">";
+            html += "<span onclick='this.previousElementSibling.checked=true;editor.uievent.values.floorId=\"" + one + "\"' style='cursor: default'>"
                 + one + '（' + floor.title + '）' + "</span>";
             html += "<button onclick='editor.uievent._selectFloor_preview(this)' style='margin-left: 10px'>预览</button>";
-            html += "<span style='display:none;' key='"+one+"'></span>";
+            html += "<span style='display:none;' key='" + one + "'></span>";
             html += '<br/>';
         });
         floorList.innerHTML = html;
@@ -522,7 +522,7 @@ editor_uievent_wrapper = function (editor) {
             }
             span.appendChild(uievent.values.dom);
             core.clearMap(uievent.values.ctx);
-            core.drawThumbnail(floorId, null, {ctx: uievent.values.ctx, all: true});
+            core.drawThumbnail(floorId, null, { ctx: uievent.values.ctx, all: true });
         } else {
             button.innerText = '预览';
             span.style.display = 'none';
@@ -545,7 +545,7 @@ editor_uievent_wrapper = function (editor) {
                 return;
             }
             value = value || [];
-            data = (transform ? data.map(transform) : data).filter(function (one) {return one;}).sort();
+            data = (transform ? data.map(transform) : data).filter(function (one) { return one; }).sort();
             var data2 = Object.keys(appendedImages);
             data2 = (transform ? data2.map(transform) : data2).filter(function (one) {
                 return one && data.indexOf(one) < 0;
@@ -567,7 +567,7 @@ editor_uievent_wrapper = function (editor) {
             uievent.elements.yes.onclick = function () {
                 var list = Array.from(document.getElementsByClassName('materialCheckbox')).filter(function (one) {
                     return one.checked;
-                }).map(function (one) {return one.getAttribute('key'); });
+                }).map(function (one) { return one.getAttribute('key'); });
                 uievent.close();
                 if (callback) callback(list);
             }
@@ -576,44 +576,44 @@ editor_uievent_wrapper = function (editor) {
 
             // 显示每一项内容
             var html = "<p style='margin-left: 10px; line-height: 25px'>";
-            html += "<button onclick='editor.uievent._selectAllMaterial(true)'>全选</button>"+
-                    "<button style='margin-left: 10px' onclick='editor.uievent._selectAllMaterial(false)'>全不选</button><br/>";
+            html += "<button onclick='editor.uievent._selectAllMaterial(true)'>全选</button>" +
+                "<button style='margin-left: 10px' onclick='editor.uievent._selectAllMaterial(false)'>全不选</button><br/>";
             if (_isTileset) {
                 html += "<b style='margin-top: 5px;'>警告！额外素材一旦注册成功将不可删除，否则可能会导致素材错位风险！如果你不再想用某个额外素材，"
-                    +"但又不想让它出现在素材区，可以考虑使用空气墙同名替换该额外素材文件。</b><br/>"
+                    + "但又不想让它出现在素材区，可以考虑使用空气墙同名替换该额外素材文件。</b><br/>"
             }
             data.forEach(function (one) {
-                var checked = value.indexOf(one) >= 0? 'checked' : '';
+                var checked = value.indexOf(one) >= 0 ? 'checked' : '';
                 var disabled = _isTileset && value.indexOf(one) >= 0 ? 'disabled' : ''
                 html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${checked} ${disabled}/> ${one}`;
                 // 预览图片
                 if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
                     html += "<button onclick='editor.uievent._previewMaterialImage(this)' style='margin-left: 10px'>预览</button>";
-                    html += '<br style="display:none"/><img key="'+directory+one+'" style="display:none; max-width: 100%"/>';
+                    html += '<br style="display:none"/><img key="' + directory + one + '" style="display:none; max-width: 100%"/>';
                 }
                 // 试听音频
                 if (one.endsWith('.mp3') || one.endsWith('.ogg') || one.endsWith('.wav') || one.endsWith('.m4a') || one.endsWith('.flac')) {
                     html += "<button onclick='editor.uievent._previewMaterialAudio(this)' style='margin-left: 10px'>播放</button>"
                     html += "<small> 音调：<input value='100' style='width:28px' onchange='editor.uievent._previewMaterialAudio_onPitchChange(this)'></small>";
                     html += `<small style='display:none; margin-left: 15px'>0:00 / 0:00</small><br style="display:none"/>
-                        <audio preload="none" src="${directory+one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
+                        <audio preload="none" src="${directory + one}" ontimeupdate="editor.uievent._previewMaterialAudio_onTimeUpdate(this)"></audio>
                         <progress value="0" max="1" style="display:none; width:100%" onclick="editor.uievent._previewMaterialAudio_seek(this, event)"></progress>`;
                 }
                 // 预览动画
                 if (directory.indexOf('animates') >= 0) {
                     html += "<button onclick='editor.uievent._previewMaterialAnimate(this)' style='margin-left: 10px'>预览</button>";
-                    html += "<span style='display:none; margin-left: 10px' key='"+directory+one+".animate'></span>";
+                    html += "<span style='display:none; margin-left: 10px' key='" + directory + one + ".animate'></span>";
                 }
                 html += '<br/>';
             });
             data2.forEach(function (one) {
-                var checked = value.indexOf(one) >= 0? 'checked' : '';
+                var checked = value.indexOf(one) >= 0 ? 'checked' : '';
                 var disabled = _isTileset && value.indexOf(one) >= 0 ? 'disabled' : '';
                 html += `<input type="checkbox" key="${one}" class="materialCheckbox" ${checked} ${disabled}/> ${one}`;
                 // 预览图片
                 if (one.endsWith('.png') || one.endsWith('.jpg') || one.endsWith('.jpeg') || one.endsWith('.gif')) {
                     html += "<button onclick='editor.uievent._previewMaterialImage2(this)' style='margin-left: 10px'>预览</button>";
-                    html += '<br style="display:none" key="'+one+'"/><br/>';
+                    html += '<br style="display:none" key="' + one + '"/><br/>';
                 }
             })
             html += "</p>";
@@ -670,7 +670,7 @@ editor_uievent_wrapper = function (editor) {
         } else {
             button.innerText = '播放';
             br.style.display = 'none';
-            progress.style.display='none';
+            progress.style.display = 'none';
             span.style.display = 'none';
             audio.pause();
         }
@@ -683,7 +683,7 @@ editor_uievent_wrapper = function (editor) {
     }
 
     uievent._previewMaterialAudio_onTimeUpdate = function (audio) {
-        var _format = function (time) { return parseInt(time/60) + ":" + core.setTwoDigits(parseInt(time) % 60); }
+        var _format = function (time) { return parseInt(time / 60) + ":" + core.setTwoDigits(parseInt(time) % 60); }
         if (audio.duration > 0) {
             audio.previousElementSibling.previousElementSibling.innerText = _format(audio.currentTime) + " / " + _format(audio.duration);
             audio.nextElementSibling.setAttribute('value', audio.currentTime / audio.duration);
@@ -709,7 +709,7 @@ editor_uievent_wrapper = function (editor) {
             var canvas = document.createElement('canvas');
             canvas.width = canvas.height = core.__PIXELS__;
             canvas.style.position = 'absolute';
-            core.drawThumbnail(editor.currentFloorId, null, {ctx: canvas.getContext('2d')});
+            core.drawThumbnail(editor.currentFloorId, null, { ctx: canvas.getContext('2d') });
             dom.appendChild(canvas);
             var canvas2 = document.createElement('canvas');
             canvas2.style.position = 'absolute';
@@ -738,7 +738,7 @@ editor_uievent_wrapper = function (editor) {
 
     var _previewMaterialAnimate_buildSounds = function (span, content) {
         var sounds = content.se || {};
-        if (typeof sounds == 'string') sounds = {1: sounds};
+        if (typeof sounds == 'string') sounds = { 1: sounds };
         var pitch = content.pitch || {};
 
         span.appendChild(document.createElement('br'));
@@ -761,14 +761,14 @@ editor_uievent_wrapper = function (editor) {
         var html = "";
         html += "第 <select>";
         for (var i = 1; i <= frames; ++i) {
-            html += "<option value="+i;
+            html += "<option value=" + i;
             if (index == i) html += " selected";
-            html += ">"+i+"</option>";
+            html += ">" + i + "</option>";
         }
         html += "</select> 帧：";
-        html += '<input type="text" class="_audio" data-list="'+audios+'" data-minchars="1" data-autofirst="true" style="width: 110px" value="'+se+'"/>';
+        html += '<input type="text" class="_audio" data-list="' + audios + '" data-minchars="1" data-autofirst="true" style="width: 110px" value="' + se + '"/>';
         html += '<button onclick="editor.uievent._previewMaterialAnimate_previewSound(this)" style="margin-left: 10px">试听</button>';
-        html += "<small> 音调：<input value='"+(pitch||100)+"' style='width:28px'></small>";
+        html += "<small> 音调：<input value='" + (pitch || 100) + "' style='width:28px'></small>";
         html += '<button onclick="editor.uievent._previewMaterialAnimate_deleteSound(this)" style="margin-left: 10px">删除</button>';
         html += '<br/>';
         return html;
@@ -798,7 +798,7 @@ editor_uievent_wrapper = function (editor) {
             } else {
                 fs.readFile(filename, 'utf-8', function (e, d) {
                     if (e) {
-                        alert('无法打开动画文件！'+e); return;
+                        alert('无法打开动画文件！' + e); return;
                     }
                     uievent.values.animates[filename] = core.loader._loadAnimate(d);
                     if (uievent.values.animates[filename]) {
@@ -856,11 +856,11 @@ editor_uievent_wrapper = function (editor) {
             }
         }
         uievent.values.animates[filename].se = se;
-        uievent.values.animates[filename+':raw'].se = se;
+        uievent.values.animates[filename + ':raw'].se = se;
         uievent.values.animates[filename].pitch = pitch;
-        uievent.values.animates[filename+':raw'].pitch = pitch;
-        fs.writeFile(filename, JSON.stringify(uievent.values.animates[filename+':raw']), 'utf-8', function (e, d) {
-            if (e) alert('无法修改音效文件！'+e);
+        uievent.values.animates[filename + ':raw'].pitch = pitch;
+        fs.writeFile(filename, JSON.stringify(uievent.values.animates[filename + ':raw']), 'utf-8', function (e, d) {
+            if (e) alert('无法修改音效文件！' + e);
             else {
                 alert('动画音效修改成功！别忘了在全塔属性中注册音效哦！');
             }
@@ -894,17 +894,17 @@ editor_uievent_wrapper = function (editor) {
             }).map(function (one) {
                 var value = one.getAttribute('key');
                 if (one.getAttribute('_type') == 'number') value = parseFloat(value);
-                return value; 
+                return value;
             });
             uievent.close();
             if (callback) callback(list);
         }
 
-        var keys=Array.from(comments.key)
-        var prefixStrings=Array.from(comments.prefix)
+        var keys = Array.from(comments.key)
+        var prefixStrings = Array.from(comments.prefix)
         for (var index = 0; index < value.length; index++) {
-            if (keys.indexOf(value[index])==-1) {
-                prefixStrings.push(value[index]+': ')
+            if (keys.indexOf(value[index]) == -1) {
+                prefixStrings.push(value[index] + ': ')
                 keys.push(value[index])
             }
         }
@@ -915,7 +915,7 @@ editor_uievent_wrapper = function (editor) {
             if (index % 3 == 0) {
                 table += '<tr>';
             }
-            table += `<td class='popCheckboxItem'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0? 'checked' : ''}/></td>`;
+            table += `<td class='popCheckboxItem'>${prefixStrings[index]}<input type="checkbox" _type="${typeof one}" key="${one}" class="uieventCheckboxSet" ${value.indexOf(one) >= 0 ? 'checked' : ''}/></td>`;
             if (index % 3 == 2) {
                 table += '</tr>';
             }
@@ -923,7 +923,7 @@ editor_uievent_wrapper = function (editor) {
         if (keys.length % 3 != 0) table += '</tr>';
         table += '</table>';
 
-        uievent.elements.extraBody.innerHTML = "<p>"+table+"</p>";
+        uievent.elements.extraBody.innerHTML = "<p>" + table + "</p>";
     }
 
     uievent.previewEditorMulti = function (mode, code) {
@@ -974,7 +974,7 @@ editor_uievent_wrapper = function (editor) {
         html += "魔力:<input value='0'> 上限:<input value='-1'> 金币:<input value='0'> 经验:<input value='0'> 等级:<input value='1'> ";
         html += "<br/>当前道具ID（以逗号分隔)：<br/><textarea style='width:300px;height:40px'>yellowKey,yellowKey,blueKey</textarea>";
         html += "<br/>当前装备ID（以逗号分隔)：<br/><textarea style='width:300px;height:40px'>sword1,sheild1</textarea>";
-        html += "<br/>当前变量值（JSON格式）：<br/><textarea style='width:300px;height:80px'>"+JSON.stringify(flags)+"</textarea>";
+        html += "<br/>当前变量值（JSON格式）：<br/><textarea style='width:300px;height:80px'>" + JSON.stringify(flags) + "</textarea>";
         html += "</span></p>"
         uievent.elements.extraBody.innerHTML = html;
 
@@ -1020,8 +1020,8 @@ editor_uievent_wrapper = function (editor) {
         values[11].split(',').forEach(function (itemId) {
             if (!core.material.items[itemId]) return;
             var itemCls = core.material.items[itemId].cls;
-            if (itemCls == 'items') return;        
-            core.status.hero.items[itemCls][itemId] = (core.status.hero.items[itemCls][itemId]||0) + 1;
+            if (itemCls == 'items') return;
+            core.status.hero.items[itemCls][itemId] = (core.status.hero.items[itemCls][itemId] || 0) + 1;
         });
         core.status.hero.equipment = values[12].split(',');
         try {
@@ -1029,13 +1029,13 @@ editor_uievent_wrapper = function (editor) {
             for (var flag in flags) {
                 core.status.hero.flags[flag] = flags[flag];
             }
-        } catch (e) {}
-        
+        } catch (e) { }
+
         var ctx = canvas2.getContext('2d');
 
         if (core.domStyle.isVertical) {
             canvas.width = canvas2.width = core.__PIXELS__;
-            canvas.height = canvas2.height = 32*(core.values.statusCanvasRowsOnMobile||3)+9;
+            canvas.height = canvas2.height = 32 * (core.values.statusCanvasRowsOnMobile || 3) + 9;
         } else if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.flags.extendToolbar) {
             canvas.width = canvas2.width = Math.round(core.__PIXELS__ * 0.31);
             canvas.height = canvas2.height = core.__PIXELS__ + 3 + 38;
@@ -1064,5 +1064,5 @@ editor_uievent_wrapper = function (editor) {
         window.flags = core.status.hero.flags;
     }
 
-    editor.constructor.prototype.uievent=uievent;
+    editor.constructor.prototype.uievent = uievent;
 }

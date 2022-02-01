@@ -88,7 +88,7 @@ control.prototype._setRequestAnimationFrame = function () {
                         core.doFunc(b.func, core.control, timestamp);
                 }
                 catch (e) {
-                    main.log(e);
+                    console.error(e);
                     main.log("ERROR in requestAnimationFrame[" + b.name + "]：已自动注销该项。");
                     core.unregisterAnimationFrame(b.name);
                 }
@@ -215,7 +215,7 @@ control.prototype._animationFrame_weather = function (timestamp) {
     try {
         core.doFunc(core.control.weathers[type].frameFunc, core.control, timestamp, core.animateFrame.weather.level);
     } catch (e) {
-        main.log(e);
+        console.error(e);
         main.log("ERROR in weather[" + type + "]：已自动注销该项。");
         core.unregisterWeather(type);
     }
@@ -1626,7 +1626,7 @@ control.prototype._doReplayAction = function (action) {
         try {
             if (core.doFunc(this.replayActions[i].func, this, action)) return true;
         } catch (e) {
-            main.log(e);
+            console.error(e);
             main.log("ERROR in replayActions[" + this.replayActions[i].name + "]：已自动注销该项。");
             core.unregisterReplayAction(this.replayActions[i].name);
         }
@@ -2677,7 +2677,7 @@ control.prototype.setWeather = function (type, level) {
     try {
         core.doFunc(this.weathers[type].initFunc, this, level);
     } catch (e) {
-        main.log(e);
+        console.error(e);
         main.log("ERROR in weather[" + type + "]：已自动注销该项。");
         core.unregisterWeather(type);
     }
@@ -2842,7 +2842,7 @@ control.prototype.playBgm = function (bgm, startTime) {
             core.material.bgms[bgm].pause();
         }
         catch (e) {
-            main.log(e);
+            console.error(e);
         }
         return;
     }
@@ -3002,7 +3002,7 @@ control.prototype.stopSound = function (id) {
         else if (source.noteOff) source.noteOff();
     }
     catch (e) {
-        main.log(e);
+        console.error(e);
     }
     delete core.musicStatus.playingSounds[id];
 }
@@ -3060,7 +3060,7 @@ control.prototype.updateStatusBar_update = function () {
         if (!core.control.noAutoEvents) core.checkAutoEvents();
         core.control._updateStatusBar_setToolboxIcon();
         core.clearRouteFolding();
-    });
+    })
     core.control.needUpdate = false;
     core.control.noAutoEvents = true;
 }
@@ -3253,7 +3253,7 @@ control.prototype._doResize = function (obj) {
         try {
             if (core.doFunc(this.resizes[i].func, this, obj)) return true;
         } catch (e) {
-            main.log(e);
+            console.error(e);
             main.log("ERROR in resizes[" + this.resizes[i].name + "]：已自动注销该项。");
             this.unregisterResize(this.resizes[i].name);
         }

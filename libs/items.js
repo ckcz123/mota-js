@@ -2,7 +2,7 @@
 
 "use strict";
 
-function items() {
+function items () {
     this._init();
 }
 
@@ -39,7 +39,7 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
                     eval(itemEffect);
             }
             catch (e) {
-                main.log(e);
+                console.error(e);
             }
         }
         core.status.hero.statistics.hp += core.status.hero.hp - curr_hp;
@@ -50,7 +50,7 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
                 core.insertAction(useItemEvent);
             }
             catch (e) {
-                main.log(e);
+                console.error(e);
             }
         }
         core.updateStatusBar();
@@ -70,7 +70,7 @@ items.prototype.getItemEffectTip = function (itemId) {
             try {
                 return core.replaceText(itemEffectTip) || "";
             } catch (e) {
-                main.log(e);
+                console.error(e);
                 return "";
             }
         }
@@ -100,7 +100,7 @@ items.prototype._useItemEffect = function (itemId) {
             eval(useItemEffect);
         }
         catch (e) {
-            main.log(e);
+            console.error(e);
         }
     }
     var useItemEvent = core.material.items[itemId].useItemEvent;
@@ -109,7 +109,7 @@ items.prototype._useItemEffect = function (itemId) {
             core.insertAction(useItemEvent);
         }
         catch (e) {
-            main.log(e);
+            console.error(e);
         }
     }
 }
@@ -128,14 +128,14 @@ items.prototype._afterUseItem = function (itemId) {
 items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
-    
+
     var canUseItemEffect = core.material.items[itemId].canUseItemEffect;
     if (canUseItemEffect) {
         try {
             return eval(canUseItemEffect);
         }
         catch (e) {
-            main.log(e);
+            console.error(e);
             return false;
         }
     }
@@ -269,7 +269,7 @@ items.prototype.canEquip = function (equipId, hint) {
             }
         }
         catch (e) {
-            console.log(e);
+            console.error(e);
             return false;
         }
     }
@@ -307,7 +307,7 @@ items.prototype.unloadEquip = function (equipType, callback) {
 }
 
 items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
-    var result = {"value": {}, "percentage": {}};
+    var result = { "value": {}, "percentage": {} };
     var first = core.material.items[compareEquipId], second = core.material.items[beComparedEquipId];
     for (var one in result) {
         for (var name in core.status.hero) {
@@ -366,7 +366,7 @@ items.prototype.quickSaveEquip = function (index) {
     var saveEquips = core.getFlag("saveEquips", []);
     saveEquips[index] = core.clone(core.status.hero.equipment);
     core.setFlag("saveEquips", saveEquips);
-    core.status.route.push("saveEquip:"+index);
+    core.status.route.push("saveEquip:" + index);
     core.drawTip("已保存" + index + "号套装");
 }
 
@@ -385,7 +385,7 @@ items.prototype.quickLoadEquip = function (index) {
         if (v && !this.canEquip(v, true))
             return;
     }
-    core.status.route.push("loadEquip:"+index);
+    core.status.route.push("loadEquip:" + index);
     core.setFlag("__quickLoadEquip__", true);
     // 快速换装
     var toEquip = [];
@@ -415,7 +415,7 @@ items.prototype.quickLoadEquip = function (index) {
 ////// 设置装备属性 //////
 items.prototype.setEquip = function (equipId, valueType, name, value, operator, prefix) {
     var equip = core.material.items[equipId];
-    if (!equip || equip.cls != 'equips') return; 
+    if (!equip || equip.cls != 'equips') return;
     var equipInfo = equip.equip || {};
     if (!equipInfo[valueType]) equipInfo[valueType] = {};
     var toEquipInfo = core.clone(equipInfo);
@@ -424,7 +424,7 @@ items.prototype.setEquip = function (equipId, valueType, name, value, operator, 
     if (core.hasEquip(equipId)) {
         // 设置一个临时装备，然后模拟换装操作
         var tempId = 'temp:' + equipId;
-        core.material.items[tempId] = {'cls': 'equips', 'equip': core.clone(toEquipInfo)};
+        core.material.items[tempId] = { 'cls': 'equips', 'equip': core.clone(toEquipInfo) };
         this._loadEquipEffect(tempId, equipId);
         delete core.material.items[tempId];
         core.updateStatusBar();

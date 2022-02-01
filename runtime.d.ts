@@ -209,7 +209,7 @@ type gameStatus = {
                 hp_buff: number
                 atk_buff: number
                 def_buff: number
-                guards: [number, number, string]
+                guards: Array<[number, number, string]>
             }
         }
     }
@@ -1503,19 +1503,40 @@ declare class enemys {
     getEnemys(): any
 
     /** 获得所有特殊属性定义 */
-    getSpecials(): void
+    getSpecials(): Array<number, string | ((enemy: Enemy) => string), string | ((enemy: Enemy) => string),
+        string | [number, number, number, number?], number?>[]
 
     /** 获得所有特殊属性的颜色 */
-    getSpecialColor(enemy: string | Enemy): void
+    getSpecialColor(enemy: string | Enemy): Array<string | [number, number, number, number?]>
 
     /** 获得所有特殊属性的额外标记 */
-    getSpecialFlag(enemy: string | Enemy): void
+    getSpecialFlag(enemy: string | Enemy): Array<number>
 
     /** 获得怪物真实属性 */
-    getEnemyInfo(enemy: string | Enemy, hero?: any, x?: number, y?: number, floorId?: string): void
+    getEnemyInfo(enemy: string | Enemy, hero?: any, x?: number, y?: number, floorId?: string): {
+        hp: number
+        def: number
+        atk: number
+        money: number
+        exp: number
+        point: number
+        special: number | number[]
+        guards: Array<[number, number, string]>
+        [x: string]: any
+    }
 
     /** 获得战斗伤害信息（实际伤害计算函数） */
-    getDamageInfo(enemy: string | Enemy, hero?: any, x?: number, y?: number, floorId?: string): void
+    getDamageInfo(enemy: string | Enemy, hero?: any, x?: number, y?: number, floorId?: string): {
+        mon_hp: number
+        mon_atk: number
+        mon_def: number
+        init_damage: number
+        per_damage: number
+        hero_per_damage: number
+        turn: number
+        damage: number
+        [x: string]: any
+    }
 }
 
 /** @file maps.js负责一切和地图相关的处理内容 */
@@ -1656,7 +1677,25 @@ declare class maps {
      * @param blocks 一般不需要
      * @param options 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
      */
-    drawThumbnail(floorId?: string, blocks?: Block[], options?: object): void
+    drawThumbnail(floorId?: string, blocks?: Block[], options?: {
+        heroLoc?: [number, number]
+        heroIcon?: string
+        /** 是否绘制显伤 */
+        damage?: boolean
+        /** 存读档时使用，可以无视 */
+        flags?: { [x: string]: any }
+        ctx?: CtxRefer
+        x?: number
+        y?: number
+        /** 绘制大小 */
+        size?: number
+        /** 绘制全图 */
+        all?: boolean
+        /** 绘制的视野中心 */
+        centerX?: number
+        /** 绘制的视野中心 */
+        centerY?: number
+    }): void
 
     /**
      * 判定某个点是否不可被踏入（不基于主角生命值和图块cannotIn属性）
@@ -1711,7 +1750,7 @@ declare class maps {
      * @param showDisable 隐藏点是否计入，true表示计入
      * @returns 一个详尽的数组
      */
-    searchBlockWithFilter(blockFilter: (Block) => boolean, floorId?: string | Array<string>, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
+    searchBlockWithFilter(blockFilter: (block: Block) => boolean, floorId?: string | Array<string>, showDisable?: boolean): Array<{ floorId: string, index: number, x: number, y: number, block: Block }>
 
     /**
      * 显示（隐藏或显示的）图块，此函数将被“显示事件”指令和勾选了“不消失”的“移动/跳跃事件”指令（如阻击怪）的终点调用
@@ -1739,27 +1778,6 @@ declare class maps {
      * @param floorId 地图id，不填视为当前地图
      */
     removeBlock(x: number, y: number, floorId?: string): void
-
-    /**
-     * 显隐背景/前景层图块
-     * @example core.maps._triggerBgFgMap('show', 'fg', [0, 0]); // 显示地图左上角的前景层图块
-     * @param type 显示还是隐藏
-     * @param name 背景还是前景
-     * @param loc 两列的自然数数组，表示要显隐的点的坐标
-     * @param floorId 地图id，不填视为当前地图
-     * @param callback 显隐完毕后的回调函数，可选
-     */
-    //_triggerBgFgMap(type: 'show' | 'hide', name: 'bg' | 'fg', loc: [number, number] | Array<[number, number]>, floorId?: string, callback?: () => void): void
-
-    /**
-     * 显隐楼层贴图
-     * @example core.maps._triggerFloorImage('show', [0, 0]); // 显示当前地图以左上角为左上角的贴图
-     * @param type 显示还是隐藏
-     * @param loc 两列的自然数数组，表示要显隐的点的坐标，坐标的单位为像素！！！
-     * @param floorId 地图id，不填视为当前地图
-     * @param callback 显隐完毕后的回调函数，可选
-     */
-    //_triggerFloorImage(type: 'show' | 'hide', loc: [number, number] | Array<[number, number]>, floorId?: string, callback?: () => void): void
 
     /**
      * 转变图块
@@ -1847,7 +1865,7 @@ declare class maps {
     getPlayingAnimates(name?: string): Array<number>
 
     /** 加载某个楼层（从剧本或存档中） */
-    loadFloor(floorId?: string, map?: any): any
+    loadFloor(floorId?: string, map?: any): ResolvedMap
 
     /** 根据需求解析出blocks */
     extractBlocks(map?: any): void
@@ -1856,37 +1874,37 @@ declare class maps {
     extractBlocks(map?: any, flags?: any): void
 
     /** 根据数字获得图块 */
-    getBlockByNumber(number: number): any
+    getBlockByNumber(number: number): Block
 
     /** 根据ID获得图块 */
-    getBlockById(id: string): any
+    getBlockById(id: string): Block
 
     /** 获得当前事件点的ID */
     getIdOfThis(id?: string): string
 
     /** 初始化一个图块 */
-    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any): any
+    initBlock(x?: number, y?: number, id?: string | number, addInfo?: boolean, eventFloor?: any): Block
 
     /** 压缩地图 */
-    compressMap(mapArr?: any, floorId?: string): any
+    compressMap(mapArr?: any, floorId?: string): object
 
     /** 解压缩地图 */
-    decompressMap(mapArr?: any, floorId?: string): any
+    decompressMap(mapArr?: any, floorId?: string): object
 
     /** 将当前地图重新变成数字，以便于存档 */
     saveMap(floorId?: string): any
 
     /** 将存档中的地图信息重新读取出来 */
-    loadMap(data?: any, floorId?: string, flags?: any): any
+    loadMap(data?: any, floorId?: string, flags?: any): object
 
     /** 更改地图画布的尺寸 */
     resizeMap(floorId?: string): void
 
     /** 以x,y的形式返回每个点的事件 */
-    getMapBlocksObj(floorId?: string, noCache?: boolean): any
+    getMapBlocksObj(floorId?: string, noCache?: boolean): object
 
     /** 获得某些点可否通行的信息 */
-    canMoveDirectlyArray(locs?: any): any
+    canMoveDirectlyArray(locs?: any): object
 
     /** 绘制一个图块 */
     drawBlock(block?: any, animate?: any): void
@@ -2081,7 +2099,7 @@ declare class items {
      * @param equipId 装备id
      * @returns 类型编号，自然数
      */
-    getEquipTypeById(equipId: string): number
+    getEquipTypeById(equipId: string): number | string
 
     /**
      * 检查能否穿上某件装备
@@ -2753,39 +2771,43 @@ declare class icons {
     getTilesetOffset(id?: string): void
 }
 
+class plugins {
+
+}
+
 type core = {
     /** 地图可视部分大小 */
-    __SIZE__: number;
+    readonly __SIZE__: number;
     /** 地图像素 */
-    __PIXELS__: number;
+    readonly __PIXELS__: number;
     /** 地图像素的一半 */
-    __HALF_SIZE__: number;
+    readonly __HALF_SIZE__: number;
     /** 游戏素材 */
-    material: {
-        animates: { [key: string]: Animate },
-        images: {},
-        bgms: { [key: string]: HTMLAudioElement },
-        sounds: { [key: string]: HTMLAudioElement },
-        ground: CanvasRenderingContext2D
+    readonly material: {
+        readonly animates: { [key: string]: Animate },
+        readonly images: {},
+        readonly bgms: { [key: string]: HTMLAudioElement },
+        readonly sounds: { [key: string]: HTMLAudioElement },
+        readonly ground: CanvasRenderingContext2D
         /**
          * 怪物信息
          * @example core.material.enemys.greenSlime // 获得绿色史莱姆的属性数据
          */
-        enemys: { [key: string]: Enemy },
+        readonly enemys: { [key: string]: Enemy },
         /** 道具信息 */
-        items: { [key: string]: Item }
-        icons: {},
+        readonly items: { [key: string]: Item }
+        readonly icons: {},
     }
-    timeout: {
+    readonly timeout: {
         turnHeroTimeout: any,
         onDownTimeout: any,
         sleepTimeout: any,
     }
-    interval: {
+    readonly interval: {
         heroMoveInterval: any,
         onDownInterval: any,
     }
-    animateFrame: {
+    readonly animateFrame: {
         totalTime: number
         totalTimeStart: number
         globalAnimate: boolean,
@@ -2796,7 +2818,7 @@ type core = {
         moveTime: number
         lastLegTime: number
         leftLeg: boolean,
-        weather: {
+        readonly weather: {
             time: number
             type: any
             nodes: [],
@@ -2804,15 +2826,15 @@ type core = {
             fog: any,
             cloud: any,
         },
-        tips: {
+        readonly tips: {
             time: number
             offset: number
             list: [],
             lastSize: number
         },
-        asyncId: {}
+        readonly asyncId: {}
     }
-    musicStatus: {
+    readonly musicStatus: {
         audioContext: AudioContext,
         /** 是否播放BGM */bgmStatus: boolean
         /** 是否播放SE */soundStatus: boolean
@@ -2824,7 +2846,7 @@ type core = {
         /** 缓存BGM内容 */cachedBgms: string[]
         /** 缓存的bgm数量 */cachedBgmCount: number
     }
-    platform: {
+    readonly platform: {
         /** 是否http */isOnline: boolean
         /** 是否是PC */isPC: boolean
         /** 是否是Android */isAndroid: boolean
@@ -2840,15 +2862,15 @@ type core = {
         /** 读取成功 */successCallback: null
         /** 读取失败 */errorCallback: null
     }
-    dom: { [key: string]: HTMLElement }
+    readonly dom: { [key: string]: HTMLElement }
     /** dom样式 */
-    domStyle: {
+    readonly domStyle: {
         scale: number,
         isVertical: boolean,
         showStatusBar: boolean,
         toolbarBtn: boolean,
     }
-    bigmap: {
+    readonly bigmap: {
         canvas: string[],
         offsetX: number // in pixel
         offsetY: number
@@ -2863,9 +2885,9 @@ type core = {
         tempCanvas: CanvasRenderingContext2D // A temp canvas for drawing
         cacheCanvas: CanvasRenderingContext2D
     }
-    saves: {
+    readonly saves: {
         saveIndex: number
-        ids: { [key: number]: boolean }
+        readonly ids: { [key: number]: boolean }
         autosave: {
             data: Save[]
             max: number
@@ -2874,30 +2896,34 @@ type core = {
             updated: boolean
         }
         favorite: []
-        favoriteName: {}
+        readonly favoriteName: {}
     }
-    initStatus: gameStatus;
-    dymCanvas: { [key: string]: CanvasRenderingContext2D }
+    readonly initStatus: gameStatus;
+    readonly dymCanvas: { [key: string]: CanvasRenderingContext2D }
     /** 游戏状态 */
-    status: gameStatus
+    readonly status: gameStatus
 
     /** 
      * 获得所有楼层的信息
      * @example core.floors[core.status.floorId].events // 获得本楼层的所有自定义事件
      */
-    floors: { [key: string]: Floor }
+    readonly floors: { [key: string]: ResolvedMap }
+    readonly floorIds: string[]
 
-    control: control
-    loader: loader
-    events: events
-    enemys: enemys
-    items: items
-    maps: maps
-    ui: ui
-    utils: utils
-    icons: icons
-    actions: actions
+    readonly control: control
+    readonly loader: loader
+    readonly events: events
+    readonly enemys: enemys
+    readonly items: items
+    readonly maps: maps
+    readonly ui: ui
+    readonly utils: utils
+    readonly icons: icons
+    readonly actions: actions
+    readonly plugins: plugins
 
-} & control & events & loader & enemys & items & maps & ui & utils & icons & actions
+} & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugins
 
-declare var core: core
+declare let core: core
+declare let flags: { [x: string]: any }
+declare let hero = core.status.hero

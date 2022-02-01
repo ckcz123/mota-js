@@ -521,9 +521,6 @@ core.prototype._forwardFunc = function (name, funcname) {
     var parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
     eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
-    if (name == 'plugin') {
-        console.error("插件函数转发：core." + funcname + " = core.plugin." + funcname);
-    }
 }
 
 core.prototype.doFunc = function (func, _this) {

@@ -1244,7 +1244,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 			// 更新阻激夹域的伤害值
 			core.updateCheckBlock();
-			// 更新全地图显伤
+			// updateDamage只能在此处执行！！更新全地图显伤
 			core.updateDamage();
 		},
 		"updateCheckBlock": function (floorId) {

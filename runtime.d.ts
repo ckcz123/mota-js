@@ -1865,7 +1865,7 @@ declare class maps {
     getPlayingAnimates(name?: string): Array<number>
 
     /** 加载某个楼层（从剧本或存档中） */
-    loadFloor(floorId?: string, map?: any): ResolvedMap
+    loadFloor(floorId: string, map?: any): ResolvedMap
 
     /** 根据需求解析出blocks */
     extractBlocks(map?: any): void

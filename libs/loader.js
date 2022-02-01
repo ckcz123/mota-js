@@ -325,7 +325,7 @@ loader.prototype._loadAnimates_sync = function () {
         core.http('GET', 'project/animates/' + t + ".animate?v=" + main.version, null, function (content) {
             core.material.animates[t] = core.loader._loadAnimate(content);
         }, function (e) {
-            main.log(e);
+            console.error(e);
             core.material.animates[t] = null;
         }, "text/plain; charset=x-user-defined")
     });
@@ -439,7 +439,7 @@ loader.prototype.loadOneSound = function (name) {
     core.http('GET', 'project/sounds/' + name + "?v=" + main.version, null, function (data) {
         core.loader._loadOneSound_decodeData(name, data);
     }, function (e) {
-        main.log(e);
+        console.error(e);
         core.material.sounds[name] = null;
     }, null, 'arraybuffer');
 }
@@ -458,7 +458,7 @@ loader.prototype._loadOneSound_decodeData = function (name, data) {
         core.musicStatus.audioContext.decodeAudioData(data, function (buffer) {
             core.material.sounds[name] = buffer;
         }, function (e) {
-            main.log(e);
+            console.error(e);
             core.material.sounds[name] = null;
         })
     }

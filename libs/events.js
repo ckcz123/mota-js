@@ -313,11 +313,11 @@ events.prototype.doSystemEvent = function (type, data, callback) {
         }
         catch (e) {
             console.error(e);
-            main.log("ERROR in systemEvents[" + type + "]");
+            console.error("ERROR in systemEvents[" + type + "]");
         }
     }
     if (this["_sys_" + type]) return this["_sys_" + type](data, callback);
-    main.log("未知的系统事件: " + type + "！");
+    console.error("未知的系统事件: " + type + "！");
     if (callback) callback();
 }
 
@@ -731,7 +731,7 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
         floorId = core.status.floorId;
     }
     if (!core.status.maps[floorId]) {
-        main.log("不存在的楼层：" + floorId);
+        console.error("不存在的楼层：" + floorId);
         return null;
     }
 
@@ -953,7 +953,7 @@ events.prototype.doEvent = function (data, x, y, prefix) {
         }
         catch (e) {
             console.error(e);
-            main.log("ERROR in actions[" + type + "]");
+            console.error("ERROR in actions[" + type + "]");
         }
     }
     if (this["_action_" + type]) return this["_action_" + type](data, x, y, prefix);

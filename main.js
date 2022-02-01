@@ -794,7 +794,7 @@ main.prototype.listen = function () {
                     main.core.resize();
                 }
             }
-        } catch (e) { main.log(e) };
+        } catch (e) { console.error(e) };
     }
 
     window.onblur = function () {

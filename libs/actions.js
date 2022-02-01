@@ -107,7 +107,7 @@ actions.prototype.doRegisteredAction = function (action) {
         }
         catch (e) {
             console.error(e);
-            main.log("ERROR in actions[" + actions[i].name + "].");
+            console.error("ERROR in actions[" + actions[i].name + "].");
         }
     }
     return false;

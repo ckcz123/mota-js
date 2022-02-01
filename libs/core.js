@@ -487,7 +487,7 @@ core.prototype._init_plugins = function () {
             }
             catch (e) {
                 console.error(e);
-                main.log("无法初始化插件" + name);
+                console.error("无法初始化插件" + name);
             }
         }
     }
@@ -522,7 +522,7 @@ core.prototype._forwardFunc = function (name, funcname) {
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
     eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
     if (name == 'plugin') {
-        main.log("插件函数转发：core." + funcname + " = core.plugin." + funcname);
+        console.error("插件函数转发：core." + funcname + " = core.plugin." + funcname);
     }
 }
 

@@ -89,7 +89,7 @@ control.prototype._setRequestAnimationFrame = function () {
                 }
                 catch (e) {
                     console.error(e);
-                    main.log("ERROR in requestAnimationFrame[" + b.name + "]：已自动注销该项。");
+                    console.error("ERROR in requestAnimationFrame[" + b.name + "]：已自动注销该项。");
                     core.unregisterAnimationFrame(b.name);
                 }
             }
@@ -216,7 +216,7 @@ control.prototype._animationFrame_weather = function (timestamp) {
         core.doFunc(core.control.weathers[type].frameFunc, core.control, timestamp, core.animateFrame.weather.level);
     } catch (e) {
         console.error(e);
-        main.log("ERROR in weather[" + type + "]：已自动注销该项。");
+        console.error("ERROR in weather[" + type + "]：已自动注销该项。");
         core.unregisterWeather(type);
     }
 }
@@ -1627,7 +1627,7 @@ control.prototype._doReplayAction = function (action) {
             if (core.doFunc(this.replayActions[i].func, this, action)) return true;
         } catch (e) {
             console.error(e);
-            main.log("ERROR in replayActions[" + this.replayActions[i].name + "]：已自动注销该项。");
+            console.error("ERROR in replayActions[" + this.replayActions[i].name + "]：已自动注销该项。");
             core.unregisterReplayAction(this.replayActions[i].name);
         }
     }
@@ -1675,9 +1675,9 @@ control.prototype._replay_error = function (action, callback) {
     var len = core.status.replay.toReplay.length;
     var prevList = core.status.replay.totalList.slice(-len - 11, -len - 1);
     var nextList = core.status.replay.toReplay.slice(0, 10);
-    main.log("录像文件出错，当前操作：" + action);
-    main.log("之前的10个操作是：\n" + prevList.toString());
-    main.log("接下来10个操作是：\n" + nextList.toString());
+    console.log("录像文件出错，当前操作：" + action);
+    console.log("之前的10个操作是：\n" + prevList.toString());
+    console.log("接下来10个操作是：\n" + nextList.toString());
     core.ui.drawConfirmBox("录像文件出错，你想回到上个节点吗？", function () {
         core.status.replay.failed = false;
         core.ui.closePanel();
@@ -2023,7 +2023,7 @@ control.prototype._doSL_save = function (id) {
         core.playSound('存档');
         core.drawTip('存档成功！');
     }, function (err) {
-        main.log(err);
+        console.error(err);
         alert("存档失败，错误信息：\n" + err);
     });
     core.removeFlag("__events__");
@@ -2056,7 +2056,7 @@ control.prototype._doSL_load = function (id, callback) {
             }
             callback(id, data);
         }, function (err) {
-            main.log(err);
+            console.error(err);
             alert("无效的存档");
         })
     }
@@ -2295,7 +2295,7 @@ control.prototype.getSave = function (index, callback) {
                 }
                 callback(core.saves.autosave.data);
             }, function (err) {
-                main.log(err);
+                console.error(err);
                 callback(null);
             });
         }
@@ -2304,7 +2304,7 @@ control.prototype.getSave = function (index, callback) {
     core.getLocalForage("save" + index, null, function (data) {
         if (callback) callback(data);
     }, function (err) {
-        main.log(err);
+        console.error(err);
         if (callback) callback(null);
     });
 }
@@ -2340,7 +2340,7 @@ control.prototype.getSaveIndexes = function (callback) {
     var indexes = {};
     core.keysLocalForage(function (err, keys) {
         if (err) {
-            main.log(err);
+            console.error(err);
             return callback(indexes);
         }
         keys.forEach(function (key) {
@@ -2678,7 +2678,7 @@ control.prototype.setWeather = function (type, level) {
         core.doFunc(this.weathers[type].initFunc, this, level);
     } catch (e) {
         console.error(e);
-        main.log("ERROR in weather[" + type + "]：已自动注销该项。");
+        console.error("ERROR in weather[" + type + "]：已自动注销该项。");
         core.unregisterWeather(type);
     }
 }
@@ -2853,7 +2853,7 @@ control.prototype.playBgm = function (bgm, startTime) {
     }
     catch (e) {
         console.log("无法播放BGM " + bgm);
-        main.log(e);
+        console.error(e);
         core.musicStatus.playingBgm = null;
     }
 }
@@ -2908,7 +2908,7 @@ control.prototype.pauseBgm = function () {
     }
     catch (e) {
         console.log("无法暂停BGM");
-        main.log(e);
+        console.error(e);
     }
     this.setMusicBtn();
 }
@@ -2927,7 +2927,7 @@ control.prototype.resumeBgm = function (resumeTime) {
     }
     catch (e) {
         console.log("无法恢复BGM");
-        main.log(e);
+        console.error(e);
     }
     this.setMusicBtn();
 }
@@ -2983,7 +2983,7 @@ control.prototype.playSound = function (sound, pitch, callback) {
     }
     catch (e) {
         console.log("无法播放SE " + sound);
-        main.log(e);
+        console.error(e);
     }
 }
 
@@ -3254,7 +3254,7 @@ control.prototype._doResize = function (obj) {
             if (core.doFunc(this.resizes[i].func, this, obj)) return true;
         } catch (e) {
             console.error(e);
-            main.log("ERROR in resizes[" + this.resizes[i].name + "]：已自动注销该项。");
+            console.error("ERROR in resizes[" + this.resizes[i].name + "]：已自动注销该项。");
             this.unregisterResize(this.resizes[i].name);
         }
     }

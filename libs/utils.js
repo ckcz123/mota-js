@@ -1270,7 +1270,7 @@ utils.prototype.same = function (a, b) {
 
 utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
     var _error = function (msg) {
-        main.log(msg);
+        console.error(msg);
         if (error) error(msg);
     }
 

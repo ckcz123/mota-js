@@ -2926,6 +2926,7 @@ type core = {
 
 declare class main {
     readonly core: core
+    readonly dom = core.dom
 
     /** 输出内容（极不好用，建议换成console）*/
     log(e: string | Error, error: boolean): void

@@ -2784,7 +2784,7 @@ declare class icons {
     getTilesetOffset(id?: string): void
 }
 
-class plugins {
+class plugin {
 
 }
 
@@ -2933,9 +2933,9 @@ type core = {
     readonly utils: utils
     readonly icons: icons
     readonly actions: actions
-    readonly plugins: plugins
+    readonly plugin: plugin
 
-} & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugins
+} & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugin
 
 declare class main {
     readonly core: core

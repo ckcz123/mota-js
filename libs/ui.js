@@ -8,7 +8,7 @@
 
 "use strict";
 
-function ui() {
+function ui () {
     this._init();
     // for convenience
     this.SIZE = core.__SIZE__;
@@ -26,6 +26,7 @@ ui.prototype._init = function () {
 ////////////////// 地图设置
 
 ui.prototype.getContextByName = function (name) {
+    if (name instanceof HTMLCanvasElement) return name.getContext('2d');
     var canvas = name;
     if (typeof name == 'string') {
         if (core.canvas[name])
@@ -50,7 +51,7 @@ ui.prototype._createUIEvent = function () {
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
         for (var m in core.canvas) {
-            core.canvas[m].clearRect(-32, -32, core.canvas[m].canvas.width+32, core.canvas[m].canvas.height+32);
+            core.canvas[m].clearRect(-32, -32, core.canvas[m].canvas.width + 32, core.canvas[m].canvas.height + 32);
         }
         core.dom.gif.innerHTML = "";
         core.removeGlobalAnimate();
@@ -103,7 +104,7 @@ ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
         var width = 0;
         for (var i = 0; i < textArray.length; i++) {
             var subtext = textArray[i];
-            if (colorArray[i-1]) ctx.fillStyle = colorArray[i-1].slice(2, -1);
+            if (colorArray[i - 1]) ctx.fillStyle = colorArray[i - 1].slice(2, -1);
             ctx.fillText(subtext, x + width, y);
             width += core.calWidth(ctx, subtext, x, y);
         }
@@ -126,7 +127,7 @@ ui.prototype.setFontForMaxWidth = function (name, text, maxWidth, font) {
     var font = ctx.font, u = /(\d+)px/.exec(font);
     if (u == null) return;
     for (var font_size = parseInt(u[1]); font_size >= 8; font_size--) {
-        ctx.font = font.replace(/(\d+)px/, font_size+"px");
+        ctx.font = font.replace(/(\d+)px/, font_size + "px");
         if (ctx.measureText(text).width <= maxWidth) return;
     }
 }
@@ -176,10 +177,10 @@ ui.prototype.fillRect = function (name, x, y, width, height, style, angle) {
 ui.prototype._uievent_fillRect = function (data) {
     this._createUIEvent();
     if (data.radius) {
-        this.fillRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+        this.fillRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height),
             core.calValue(data.radius), data.style, (core.calValue(data.angle) || 0) * Math.PI / 180);
     } else {
-        this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+        this.fillRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height),
             data.style, (core.calValue(data.angle) || 0) * Math.PI / 180);
     }
 }
@@ -206,10 +207,10 @@ ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth,
 ui.prototype._uievent_strokeRect = function (data) {
     this._createUIEvent();
     if (data.radius) {
-        this.strokeRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+        this.strokeRoundRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height),
             core.calValue(data.radius), data.style, data.lineWidth, (core.calValue(data.angle) || 0) * Math.PI / 180);
     } else {
-        this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), 
+        this.strokeRect('uievent', core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height),
             data.style, data.lineWidth, (core.calValue(data.angle) || 0) * Math.PI / 180);
     }
 }
@@ -272,7 +273,7 @@ ui.prototype.fillPolygon = function (name, nodes, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (!nodes || nodes.length<3) return;
+    if (!nodes || nodes.length < 3) return;
     ctx.beginPath();
     for (var i = 0; i < nodes.length; ++i) {
         var x = core.calValue(nodes[i][0]), y = core.calValue(nodes[i][1]);
@@ -294,7 +295,7 @@ ui.prototype.strokePolygon = function (name, nodes, style, lineWidth) {
     if (lineWidth) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
-    if (!nodes || nodes.length<3) return;
+    if (!nodes || nodes.length < 3) return;
     ctx.beginPath();
     for (var i = 0; i < nodes.length; ++i) {
         var x = core.calValue(nodes[i][0]), y = core.calValue(nodes[i][1]);
@@ -316,7 +317,7 @@ ui.prototype.fillEllipse = function (name, x, y, a, b, angle, style) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     ctx.beginPath();
-    ctx.ellipse(x, y, a, b, angle, 0, 2*Math.PI);
+    ctx.ellipse(x, y, a, b, angle, 0, 2 * Math.PI);
     ctx.fill();
 }
 
@@ -337,7 +338,7 @@ ui.prototype.strokeEllipse = function (name, x, y, a, b, angle, style, lineWidth
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     ctx.beginPath();
-    ctx.ellipse(x, y, a, b, angle, 0, 2*Math.PI);
+    ctx.ellipse(x, y, a, b, angle, 0, 2 * Math.PI);
     ctx.stroke();
 }
 
@@ -403,20 +404,20 @@ ui.prototype._uievent_drawLine = function (data) {
 
 ////// 在某个canvas上绘制一个箭头 //////
 ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
-    if (x1==x2 && y1==y2) return;
+    if (x1 == x2 && y1 == y2) return;
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth != null) core.setLineWidth(name, lineWidth);
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     var head = 10;
-    var dx = x2-x1, dy=y2-y1;
-    var angle = Math.atan2(dy,dx);
+    var dx = x2 - x1, dy = y2 - y1;
+    var angle = Math.atan2(dy, dx);
     ctx.beginPath();
-    ctx.moveTo(x1,y1);
+    ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
-    ctx.lineTo(x2-head*Math.cos(angle-Math.PI/6),y2-head*Math.sin(angle-Math.PI/6));
+    ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
     ctx.moveTo(x2, y2);
-    ctx.lineTo(x2-head*Math.cos(angle+Math.PI/6),y2-head*Math.sin(angle+Math.PI/6));
+    ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
     ctx.stroke();
 }
 
@@ -472,7 +473,7 @@ ui.prototype.setFilter = function (name, filter) {
     else if (typeof filter === 'string') ctx.filter = filter;
     else {
         var x = [];
-        if (filter.blur > 0) x.push('blur(' + filter.blur +'px)');
+        if (filter.blur > 0) x.push('blur(' + filter.blur + 'px)');
         if (filter.hue > 0) x.push('hue-rotate(' + filter.hue + 'deg)');
         if (filter.grayscale > 0) x.push('grayscale(' + filter.grayscale + ')');
         if (filter.invert) x.push('invert(1)');
@@ -525,7 +526,7 @@ ui.prototype._uievent_setAttribute = function (data) {
 
 ui.prototype._uievent_setFilter = function (data) {
     this._createUIEvent();
-    this.setFilter('uievent',data);
+    this.setFilter('uievent', data);
 }
 
 ////// 计算某段文字的宽度 //////
@@ -638,7 +639,7 @@ ui.prototype.drawIcon = function (name, id, x, y, w, h, frame) {
     if (!info) {
         // 检查状态栏图标
         if (core.statusBar.icons[id] instanceof Image)
-            info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
+            info = { image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32 };
         else return;
     }
     core.drawImage(ctx, info.image, 32 * (info.posX + frame), info.height * info.posY, 32, info.height, x, y, w || 32, h || info.height);
@@ -651,7 +652,7 @@ ui.prototype._uievent_drawIcon = function (data) {
         id = core.calValue(data.id);
         if (typeof id !== 'string') id = data.id;
     } catch (e) { id = data.id; }
-    this.drawIcon('uievent', id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.frame||0);
+    this.drawIcon('uievent', id, core.calValue(data.x), core.calValue(data.y), core.calValue(data.width), core.calValue(data.height), data.frame || 0);
 }
 
 ///////////////// UI绘制
@@ -709,7 +710,7 @@ ui.prototype.drawTip = function (text, id, frame) {
         if (info == null || !info.image || info.bigImage) {
             // 检查状态栏图标
             if (core.statusBar.icons[id] instanceof Image) {
-                info = {image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32};
+                info = { image: core.statusBar.icons[id], posX: 0, posY: 0, height: 32 };
             }
             else info = null;
         }
@@ -738,28 +739,28 @@ ui.prototype._drawTip_drawOne = function (tip) {
 ui.prototype.drawText = function (contents, callback) {
     if (contents != null) return this._drawText_setContent(contents, callback);
 
-    if (core.status.event.data.list.length==0) {
+    if (core.status.event.data.list.length == 0) {
         var callback = core.status.event.data.callback;
         core.ui.closePanel(false);
         if (callback) callback();
         return;
     }
 
-    var data=core.status.event.data.list.shift();
+    var data = core.status.event.data.list.shift();
     if (typeof data == 'string') data = { "text": data };
     core.ui.drawTextBox(data.text, data);
 }
 
 ui.prototype._drawText_setContent = function (contents, callback) {
     // 合并进 insertAction
-    if ((core.status.event && core.status.event.id=='action')
+    if ((core.status.event && core.status.event.id == 'action')
         || (!core.hasFlag('__replayText__') && core.isReplaying())) {
-        core.insertAction(contents,null,null,callback);
+        core.insertAction(contents, null, null, callback);
         return;
     }
     if (!(contents instanceof Array)) contents = [contents];
 
-    core.status.event = {'id': 'text', 'data': {'list': contents, 'callback': callback}};
+    core.status.event = { 'id': 'text', 'data': { 'list': contents, 'callback': callback } };
     core.lockControl();
 
     core.waitHeroToStop(core.drawText);
@@ -818,7 +819,7 @@ ui.prototype._getTitleAndIcon = function (content) {
 ////// 正则处理 \b[up,xxx] 问题
 ui.prototype._getPosition = function (content) {
     var pos = null, px = null, py = null, noPeak = false;
-    if (core.status.event.id=='action') {
+    if (core.status.event.id == 'action') {
         px = core.status.event.data.x;
         py = core.status.event.data.y;
     }
@@ -829,7 +830,7 @@ ui.prototype._getPosition = function (content) {
     content = content.replace("\b", "\\b")
         .replace(/\\b\[(up|center|down|hero|this)(,(hero|null|\d+,\d+|\d+))?]/g, function (s0, s1, s2, s3) {
             pos = s1;
-            if (s3 == 'hero' || s1=='hero' && !s3) {
+            if (s3 == 'hero' || s1 == 'hero' && !s3) {
                 px = core.getHeroLoc('x');
                 py = core.getHeroLoc('y');
             }
@@ -840,27 +841,27 @@ ui.prototype._getPosition = function (content) {
                 var str = s3.split(',');
                 px = py = null;
                 if (str.length == 1) {
-                    var follower = core.status.hero.followers[parseInt(str[0])-1];
+                    var follower = core.status.hero.followers[parseInt(str[0]) - 1];
                     if (follower) {
                         px = follower.x;
                         py = follower.y;
                     }
-                } else{
+                } else {
                     px = parseInt(str[0]);
                     py = parseInt(str[1]);
                     noPeak = core.getBlockId(px, py) == null;
                 }
             }
-            if(pos=='hero' || pos=='this'){
-                pos = py==null?'center':(py>core.__HALF_SIZE__? 'up':'down'); 
+            if (pos == 'hero' || pos == 'this') {
+                pos = py == null ? 'center' : (py > core.__HALF_SIZE__ ? 'up' : 'down');
             }
             return "";
         });
-    return {content: content, position: pos, px: px, py: py, noPeak: noPeak};
+    return { content: content, position: pos, px: px, py: py, noPeak: noPeak };
 }
 
 ////// 绘制系统选择光标
-ui.prototype._drawWindowSelector = function(background, x, y, w, h) {
+ui.prototype._drawWindowSelector = function (background, x, y, w, h) {
     w = Math.round(w), h = Math.round(h);
     var ctx = core.ui.createCanvas("_selector", x, y, w, h, 165);
     this._drawSelector(ctx, background, w, h);
@@ -903,53 +904,53 @@ ui.prototype._drawSelector = function (ctx, background, w, h, left, top) {
     left = left || 0;
     top = top || 0;
     // back
-    core.drawImage(ctx, background, 130, 66, 28, 28, left+2, top+2, w-4, h-4);
+    core.drawImage(ctx, background, 130, 66, 28, 28, left + 2, top + 2, w - 4, h - 4);
     // corner
-    core.drawImage(ctx, background, 128, 64,  2,  2, left,  top,  2,  2);
-    core.drawImage(ctx, background, 158, 64,  2,  2, left+w-2, top,  2,  2);
-    core.drawImage(ctx, background, 128, 94,  2,  2, left, top+h-2,  2,  2);
-    core.drawImage(ctx, background, 158, 94,  2,  2, left+w-2, top+h-2,  2,  2);
+    core.drawImage(ctx, background, 128, 64, 2, 2, left, top, 2, 2);
+    core.drawImage(ctx, background, 158, 64, 2, 2, left + w - 2, top, 2, 2);
+    core.drawImage(ctx, background, 128, 94, 2, 2, left, top + h - 2, 2, 2);
+    core.drawImage(ctx, background, 158, 94, 2, 2, left + w - 2, top + h - 2, 2, 2);
     // border
-    core.drawImage(ctx, background, 130, 64, 28,  2, left+2, top, w-4,  2);
-    core.drawImage(ctx, background, 130, 94, 28,  2, left+2, top+h-2, w-4,  2);
-    core.drawImage(ctx, background, 128, 66,  2, 28, left,  top+2,  2,h-4);
-    core.drawImage(ctx, background, 158, 66,  2, 28, left+w-2, top+2,  2,h-4);
+    core.drawImage(ctx, background, 130, 64, 28, 2, left + 2, top, w - 4, 2);
+    core.drawImage(ctx, background, 130, 94, 28, 2, left + 2, top + h - 2, w - 4, 2);
+    core.drawImage(ctx, background, 128, 66, 2, 28, left, top + 2, 2, h - 4);
+    core.drawImage(ctx, background, 158, 66, 2, 28, left + w - 2, top + 2, 2, h - 4);
 }
 
 ////// 绘制 WindowSkin
-ui.prototype.drawWindowSkin = function(background, ctx, x, y, w, h, direction, px, py) {
+ui.prototype.drawWindowSkin = function (background, ctx, x, y, w, h, direction, px, py) {
     background = background || core.status.textAttribute.background;
-	// 仿RM窗口皮肤 ↓
+    // 仿RM窗口皮肤 ↓
     // 绘制背景
-    core.drawImage(ctx, background, 0, 0, 128, 128, x+2, y+2, w-4, h-4);
+    core.drawImage(ctx, background, 0, 0, 128, 128, x + 2, y + 2, w - 4, h - 4);
     // 绘制边框
     // 上方
-    core.drawImage(ctx, background, 128, 0,     16,     16,      x,      y,     16,     16);
+    core.drawImage(ctx, background, 128, 0, 16, 16, x, y, 16, 16);
     for (var dx = 0; dx < w - 64; dx += 32) {
-        core.drawImage(ctx, background, 144, 0,     32,     16,x+dx+16,      y,     32,     16);
-        core.drawImage(ctx, background, 144,48,     32,     16,x+dx+16, y+h-16,     32,     16);
+        core.drawImage(ctx, background, 144, 0, 32, 16, x + dx + 16, y, 32, 16);
+        core.drawImage(ctx, background, 144, 48, 32, 16, x + dx + 16, y + h - 16, 32, 16);
     }
-    core.drawImage(ctx, background, 144, 0,w-dx-32,     16,x+dx+16,      y,w-dx-32,     16);
-    core.drawImage(ctx, background, 144,48,w-dx-32,     16,x+dx+16, y+h-16,w-dx-32,     16);
-    core.drawImage(ctx, background, 176, 0,     16,     16, x+w-16,      y,     16,     16);
+    core.drawImage(ctx, background, 144, 0, w - dx - 32, 16, x + dx + 16, y, w - dx - 32, 16);
+    core.drawImage(ctx, background, 144, 48, w - dx - 32, 16, x + dx + 16, y + h - 16, w - dx - 32, 16);
+    core.drawImage(ctx, background, 176, 0, 16, 16, x + w - 16, y, 16, 16);
     // 左右
     for (var dy = 0; dy < h - 64; dy += 32) {
-        core.drawImage(ctx, background, 128,16,     16,     32,      x,y+dy+16,     16,     32);
-        core.drawImage(ctx, background, 176,16,     16,     32, x+w-16,y+dy+16,     16,     32);
+        core.drawImage(ctx, background, 128, 16, 16, 32, x, y + dy + 16, 16, 32);
+        core.drawImage(ctx, background, 176, 16, 16, 32, x + w - 16, y + dy + 16, 16, 32);
     }
-    core.drawImage(ctx, background, 128,16,     16,h-dy-32,      x,y+dy+16,     16,h-dy-32);
-    core.drawImage(ctx, background, 176,16,     16,h-dy-32, x+w-16,y+dy+16,     16,h-dy-32);
+    core.drawImage(ctx, background, 128, 16, 16, h - dy - 32, x, y + dy + 16, 16, h - dy - 32);
+    core.drawImage(ctx, background, 176, 16, 16, h - dy - 32, x + w - 16, y + dy + 16, 16, h - dy - 32);
     // 下方
-    core.drawImage(ctx, background, 128,48,     16,     16,      x, y+h-16,     16,     16);
-    core.drawImage(ctx, background, 176,48,     16,     16, x+w-16, y+h-16,     16,     16);
+    core.drawImage(ctx, background, 128, 48, 16, 16, x, y + h - 16, 16, 16);
+    core.drawImage(ctx, background, 176, 48, 16, 16, x + w - 16, y + h - 16, 16, 16);
 
     // arrow
-    if(px != null && py != null){
-    	if(direction == 'up'){
-    		core.drawImage(ctx, background,128,96,32,32,px,y+h-3,32,32);
-    	}else if(direction == 'down') {
-    		core.drawImage(ctx, background,160,96,32,32,px,y-29,32,32);
-    	}
+    if (px != null && py != null) {
+        if (direction == 'up') {
+            core.drawImage(ctx, background, 128, 96, 32, 32, px, y + h - 3, 32, 32);
+        } else if (direction == 'down') {
+            core.drawImage(ctx, background, 160, 96, 32, 32, px, y - 29, 32, 32);
+        }
     }
     // 仿RM窗口皮肤 ↑
 }
@@ -990,7 +991,7 @@ ui.prototype._drawBackground_drawWindowSkin = function (background, left, top, r
     ctx = ctx || 'ui';
     if (typeof background == 'string' && core.material.images.images[background]) {
         var image = core.material.images.images[background];
-        if (image.width==192 && image.height==128) {
+        if (image.width == 192 && image.height == 128) {
             core.setAlpha(ctx, this._drawWindowSkin_getOpacity());
             this.drawWindowSkin(image, ctx, left, top, right - left, bottom - top, position, px, py);
             core.setAlpha(ctx, 1);
@@ -1040,8 +1041,8 @@ ui.prototype._calTextBoxWidth = function (ctx, content, min_width, max_width, fo
     // 如果不存在手动换行，尽量调成半行形式
     if (allLines.length == 1) {
         var w = core.calWidth(ctx, allLines[0]) + 10;
-        if (w<min_width*2.3) return core.clamp(w / 1.4, min_width, max_width);
-        if (w<max_width*2.2) return core.clamp(w / 2.4, min_width, max_width);
+        if (w < min_width * 2.3) return core.clamp(w / 1.4, min_width, max_width);
+        if (w < max_width * 2.2) return core.clamp(w / 2.4, min_width, max_width);
         return core.clamp(w / 3.4, min_width, max_width);
     }
     // 存在手动换行：以最长的为准
@@ -1059,7 +1060,7 @@ ui.prototype._getDrawableIconInfo = function (id) {
     }
     id = core.getIdOfThis(id);
     var image = null, icon = null;
-    ["terrains","animates","items","npcs","enemys"].forEach(function (v) {
+    ["terrains", "animates", "items", "npcs", "enemys"].forEach(function (v) {
         if (core.material.icons[v][id] != null) {
             image = core.material.images[v];
             icon = core.material.icons[v][id];
@@ -1069,14 +1070,14 @@ ui.prototype._getDrawableIconInfo = function (id) {
         image = core.statusBar.icons[id];
         icon = 0;
     }
-    return [image,icon];
+    return [image, icon];
 }
 
 ui.prototype._buildFont = function (fontSize, bold, italic, font) {
     var textAttribute = core.status.textAttribute || core.initStatus.textAttribute,
         globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
     if (bold == null) bold = textAttribute.bold;
-    return (bold?"bold ":"") + (italic?"italic ":"") + (fontSize || textAttribute.textfont) + "px " + (font || globalAttribute.font);
+    return (bold ? "bold " : "") + (italic ? "italic " : "") + (fontSize || textAttribute.textfont) + "px " + (font || globalAttribute.font);
 }
 
 ////// 绘制一段文字到某个画布上面
@@ -1121,8 +1122,8 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     if (config.isHD) {
         core.maps._setHDCanvasSize(tempCtx, ctx.canvas.width, ctx.canvas.height);
     } else {
-        tempCtx.canvas.width = ctx==null?1:ctx.canvas.width;
-        tempCtx.canvas.height = ctx==null?1:ctx.canvas.height;
+        tempCtx.canvas.width = ctx == null ? 1 : ctx.canvas.width;
+        tempCtx.canvas.height = ctx == null ? 1 : ctx.canvas.height;
     }
     tempCtx.textBaseline = 'top';
     tempCtx.font = this._buildFont(config.fontSize, config.bold, config.italic, config.font);
@@ -1199,13 +1200,13 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
     var forbidEnd = "（(【《＜﹝<([«‹〔〈{［「｛〖『";
 
     // \n, \\n
-    if (ch == '\n' || (ch=='\\' && content.charAt(config.index)=='n')) {
+    if (ch == '\n' || (ch == '\\' && content.charAt(config.index) == 'n')) {
         this._drawTextContent_newLine(tempCtx, config);
-        if (ch=='\\') config.index++;
+        if (ch == '\\') config.index++;
         return this._drawTextContent_next(tempCtx, content, config);
     }
     // \r, \\r
-    if (ch == '\r' || (ch=='\\' && content.charAt(config.index)=='r')) {
+    if (ch == '\r' || (ch == '\\' && content.charAt(config.index) == 'r')) {
         if (ch == '\\') config.index++;
         return this._drawTextContent_changeColor(tempCtx, content, config);
     }
@@ -1232,20 +1233,20 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
                 config.forceChangeLine = true;
             } else {
                 this._drawTextContent_newLine(tempCtx, config);
-                config.index-=ch.length;
+                config.index -= ch.length;
                 return this._drawTextContent_next(tempCtx, content, config);
             }
         } else if (forbidEnd.indexOf(ch) >= 0 && config.index < content.length) {
             // --- 当前不应该换行；但是提前检查一下是否是行尾标点
             var nextch = content.charAt(config.index);
             // 确认不是手动换行
-            if (nextch != '\n' && !(nextch == '\\' && content.charAt(config.index+1) == 'n')) {
+            if (nextch != '\n' && !(nextch == '\\' && content.charAt(config.index + 1) == 'n')) {
                 // 检查是否会换行
                 var nextchwidth = core.calWidth(tempCtx, nextch) + config.letterSpacing;
                 if (config.offsetX + charwidth + nextchwidth > config.maxWidth) {
                     // 下一项会换行，因此在此处换行
                     this._drawTextContent_newLine(tempCtx, config);
-                    config.index-=ch.length;
+                    config.index -= ch.length;
                     return this._drawTextContent_next(tempCtx, content, config);
                 }
             }
@@ -1255,9 +1256,11 @@ ui.prototype._drawTextContent_drawChar = function (tempCtx, content, config, ch)
     // 输出
     var left = config.offsetX, top = config.offsetY + config.topMargin;
     core.fillText(tempCtx, ch, left, top);
-    config.blocks.push({left: config.offsetX, top: config.offsetY,
+    config.blocks.push({
+        left: config.offsetX, top: config.offsetY,
         width: charwidth, height: config.currfont + config.lineMargin,
-        line: config.line, marginLeft: 0});
+        line: config.line, marginLeft: 0
+    });
     config.offsetX += charwidth;
     return true;
 }
@@ -1291,10 +1294,10 @@ ui.prototype._drawTextContent_newLine = function (tempCtx, config) {
 ui.prototype._drawTextContent_changeColor = function (tempCtx, content, config) {
     // 检查是不是 []
     var index = config.index, index2;
-    if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
+    if (content.charAt(index) == '[' && ((index2 = content.indexOf(']', index)) >= 0)) {
         // 变色
-        var str = content.substring(index+1, index2);
-        if (str=="") tempCtx.fillStyle = config.color;
+        var str = content.substring(index + 1, index2);
+        if (str == "") tempCtx.fillStyle = config.color;
         else tempCtx.fillStyle = str;
         config.index = index2 + 1;
     }
@@ -1306,8 +1309,8 @@ ui.prototype._drawTextContent_changeFontSize = function (tempCtx, content, confi
     config.index++;
     // 检查是不是 []
     var index = config.index, index2;
-    if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
-        var str = content.substring(index+1, index2);
+    if (content.charAt(index) == '[' && ((index2 = content.indexOf(']', index)) >= 0)) {
+        var str = content.substring(index + 1, index2);
         if (!/^\d+$/.test(str)) config.currfont = config.fontSize;
         else config.currfont = parseInt(str);
         config.index = index2 + 1;
@@ -1322,9 +1325,9 @@ ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
     config.index++;
     // 检查是不是 []
     var index = config.index, index2;
-    if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
-        var str = content.substring(index+1, index2);
-        if (str=="") config.font = config.defaultFont;
+    if (content.charAt(index) == '[' && ((index2 = content.indexOf(']', index)) >= 0)) {
+        var str = content.substring(index + 1, index2);
+        if (str == "") config.font = config.defaultFont;
         else config.font = str;
         config.index = index2 + 1;
     } else config.font = config.defaultFont;
@@ -1335,8 +1338,8 @@ ui.prototype._drawTextContent_changeFont = function (tempCtx, content, config) {
 ui.prototype._drawTextContent_emptyChar = function (tempCtx, content, config) {
     config.index++;
     var index = config.index, index2;
-    if (content.charAt(index) == '[' && ((index2=content.indexOf(']', index))>=0)) {
-        var str = content.substring(index+1, index2);
+    if (content.charAt(index) == '[' && ((index2 = content.indexOf(']', index)) >= 0)) {
+        var str = content.substring(index + 1, index2);
         if (/^\d+$/.test(str)) {
             var value = parseInt(str);
             for (var i = 0; i < value; ++i) {
@@ -1352,8 +1355,8 @@ ui.prototype._drawTextContent_emptyChar = function (tempCtx, content, config) {
 ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
     // 绘制一个 \i 效果
     var index = config.index, index2;
-    if (content.charAt(config.index+1) == '[' && ((index2=content.indexOf(']', index+1))>=0)) {
-        var str = content.substring(index+2, index2);
+    if (content.charAt(config.index + 1) == '[' && ((index2 = content.indexOf(']', index + 1)) >= 0)) {
+        var str = content.substring(index + 2, index2);
         // --- 获得图标
         var iconInfo = core.ui._getDrawableIconInfo(str), image = iconInfo[0], icon = iconInfo[1];
         if (image == null) return this._drawTextContent_next(tempCtx, content, config);
@@ -1365,11 +1368,13 @@ ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
             return this._drawTextContent_next(tempCtx, content, config);
         }
         // 绘制到画布上
-        core.drawImage(tempCtx, image, 0, 32*icon, 32, 32, left, top, width, width);
+        core.drawImage(tempCtx, image, 0, 32 * icon, 32, 32, left, top, width, width);
 
-        config.blocks.push({left: left, top: config.offsetY,
+        config.blocks.push({
+            left: left, top: config.offsetY,
             width: width, height: width + config.lineMargin,
-            line: config.line, marginLeft: 0});
+            line: config.line, marginLeft: 0
+        });
 
         config.offsetX += width + 6;
         config.index = index2 + 1;
@@ -1416,7 +1421,7 @@ ui.prototype._animateUI = function (type, ctx, callback) {
 }
 
 ////// 绘制一个对话框 //////
-ui.prototype.drawTextBox = function(content, config) {
+ui.prototype.drawTextBox = function (content, config) {
     config = config || {};
 
     this.clearUI();
@@ -1463,7 +1468,7 @@ ui.prototype.drawTextBox = function(content, config) {
     // Step 5: 绘制正文
     var config = this.drawTextContent(config.ctx || 'ui', content, {
         left: hPos.content_left, top: content_top, maxWidth: hPos.validWidth,
-        lineHeight: vPos.lineHeight, time: (config.showAll || config.async || textAttribute.time<=0 || core.status.event.id!='action')?0:textAttribute.time
+        lineHeight: vPos.lineHeight, time: (config.showAll || config.async || textAttribute.time <= 0 || core.status.event.id != 'action') ? 0 : textAttribute.time
     });
 
     // Step 6: 绘制光标
@@ -1484,14 +1489,14 @@ ui.prototype._drawTextBox_drawImages = function (content, ctx) {
     return content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
         var ss = str.split(",");
         // 绘制
-        if (ss.length==3)
+        if (ss.length == 3)
             core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]));
-        else if (ss.length==5)
+        else if (ss.length == 5)
             core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]));
         else if (ss.length >= 9) {
             if (ss.length >= 10) core.setAlpha(ctx, parseFloat(ss[9]));
             var angle = (parseFloat(ss[10]) || 0) * Math.PI / 180;
-            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]), 
+            core.drawImage(ctx, ss[0], parseFloat(ss[1]), parseFloat(ss[2]), parseFloat(ss[3]), parseFloat(ss[4]),
                 parseFloat(ss[5]), parseFloat(ss[6]), parseFloat(ss[7]), parseFloat(ss[8]), angle);
             core.setAlpha(ctx, 1);
         }
@@ -1542,7 +1547,7 @@ ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, po
     });
     if (titleInfo.title) height += textAttribute.titlefont + 5;
     if (titleInfo.icon != null) {
-        if (titleInfo.title) height = Math.max(height, titleInfo.height+50);
+        if (titleInfo.title) height = Math.max(height, titleInfo.height + 50);
         else height = Math.max(height, titleInfo.height + 30);
     }
     else if (titleInfo.image)
@@ -1553,13 +1558,13 @@ ui.prototype._drawTextBox_getVerticalPosition = function (content, titleInfo, po
     switch (posInfo.position) {
         case 'center': top = parseInt((this.PIXEL - height) / 2); break;
         case 'up':
-            if (posInfo.px==null || posInfo.py==null)
+            if (posInfo.px == null || posInfo.py == null)
                 top = 5 + textAttribute.offset;
             else
                 top = 32 * posInfo.py - height - (titleInfo.height - 32) - yoffset - core.bigmap.offsetY;
             break;
         case 'down':
-            if (posInfo.px==null || posInfo.py==null)
+            if (posInfo.px == null || posInfo.py == null)
                 top = this.PIXEL - height - 5 - textAttribute.offset;
             else {
                 top = 32 * posInfo.py + 32 + yoffset - core.bigmap.offsetY;
@@ -1597,7 +1602,7 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
     }
     if (titleInfo.icon != null) {
         core.setAlpha(ctx, alpha);
-        core.strokeRect(ctx, hPos.left + 15 - 1, image_top-1, 34, titleInfo.height + 2, null, 2);
+        core.strokeRect(ctx, hPos.left + 15 - 1, image_top - 1, 34, titleInfo.height + 2, null, 2);
         core.setAlpha(ctx, 1);
         core.status.boxAnimateObjs = [];
         // --- 勇士
@@ -1615,7 +1620,7 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
                 core.fillRect(ctx, hPos.left + 15, image_top, 32, titleInfo.height, core.material.groundPattern);
                 core.drawImage(ctx, titleInfo.image, 0, 0, core.material.icons.hero.width || 32, core.material.icons.hero.height,
                     hPos.left + 15, image_top, 32, titleInfo.height);
-            }            
+            }
         }
         else {
             if (titleInfo.bigImage) {
@@ -1635,13 +1640,13 @@ ui.prototype._drawTextBox_drawTitleAndIcon = function (titleInfo, hPos, vPos, al
     }
     if (titleInfo.image != null && titleInfo.icon == null) { // 头像图
         core.drawImage(ctx, titleInfo.image, 0, 0, titleInfo.image.width, titleInfo.image.height,
-            hPos.left+10, vPos.top+10, 70, 70);
+            hPos.left + 10, vPos.top + 10, 70, 70);
     }
     return content_top;
 }
 
 ui.prototype._createTextCanvas = function (content, lineHeight) {
-    var width = this.PIXEL, height = 30 + this.getTextContentHeight(content, {lineHeight: lineHeight});
+    var width = this.PIXEL, height = 30 + this.getTextContentHeight(content, { lineHeight: lineHeight });
     var ctx = document.createElement('canvas').getContext('2d');
     ctx.canvas.width = width;
     ctx.canvas.height = height;
@@ -1668,7 +1673,7 @@ ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
 ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
     // 开始绘制到UI上
     time /= Math.max(core.status.replay.speed, 1)
-    var per_pixel = 1, height = ctx.canvas.height, per_time = time * per_pixel / (this.PIXEL+height);
+    var per_pixel = 1, height = ctx.canvas.height, per_time = time * per_pixel / (this.PIXEL + height);
     var currH = this.PIXEL;
     core.drawImage('ui', ctx.canvas, 0, currH);
     var animate = setInterval(function () {
@@ -1698,10 +1703,10 @@ ui.prototype.textImage = function (content, lineHeight) {
 }
 
 ////// 绘制一个选项界面 //////
-ui.prototype.drawChoices = function(content, choices, width, ctx) {
+ui.prototype.drawChoices = function (content, choices, width, ctx) {
     choices = core.clone(choices || []);
 
-    core.status.event.ui = {"text": content, "choices": choices, "width": width};
+    core.status.event.ui = { "text": content, "choices": choices, "width": width };
     this.clearUI();
 
     content = core.replaceText(content || "");
@@ -1711,7 +1716,7 @@ ui.prototype.drawChoices = function(content, choices, width, ctx) {
     var vPos = this._drawChoices_getVerticalPosition(titleInfo, choices, hPos);
     core.status.event.ui.offset = vPos.offset;
 
-    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, {ctx: ctx});
+    var isWindowSkin = this.drawBackground(hPos.left, vPos.top, hPos.right, vPos.bottom, { ctx: ctx });
     this._drawChoices_drawTitle(titleInfo, hPos, vPos, ctx);
     this._drawChoices_drawChoices(choices, isWindowSkin, hPos, vPos, ctx);
 }
@@ -1723,14 +1728,14 @@ ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices, 
     var width = this._calTextBoxWidth(ctx, titleInfo.content || "", width || 246, this.PIXEL - 20);
     for (var i = 0; i < choices.length; i++) {
         if (typeof choices[i] === 'string')
-            choices[i] = {"text": choices[i]};
+            choices[i] = { "text": choices[i] };
         choices[i].text = core.replaceText(choices[i].text);
         choices[i].width = core.calWidth(ctx, core.replaceText(choices[i].text));
         if (choices[i].icon != null) choices[i].width += 28;
-        width = Math.max(width, choices[i].width+30);
+        width = Math.max(width, choices[i].width + 30);
     }
     var left = (this.PIXEL - width) / 2, right = left + width;
-    var content_left = left + (titleInfo.icon == null ? 15: 60), validWidth = right - content_left - 10;
+    var content_left = left + (titleInfo.icon == null ? 15 : 60), validWidth = right - content_left - 10;
 
     return { left: left, right: right, width: width, content_left: content_left, validWidth: validWidth };
 }
@@ -1754,7 +1759,7 @@ ui.prototype._drawChoices_getVerticalPosition = function (titleInfo, choices, hP
             choice_top += 32 * offset;
         }
     }
-    return {top: bottom - height, height: height, bottom: bottom, choice_top: choice_top, offset: offset };
+    return { top: bottom - height, height: height, bottom: bottom, choice_top: choice_top, offset: offset };
 }
 
 ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos, ctx) {
@@ -1765,7 +1770,7 @@ ui.prototype._drawChoices_drawTitle = function (titleInfo, hPos, vPos, ctx) {
         core.setTextAlign(ctx, 'center');
 
         content_top = vPos.top + 41;
-        var title_offset = hPos.left+hPos.width/2;
+        var title_offset = hPos.left + hPos.width / 2;
         // 动画
 
         if (titleInfo.icon != null) {
@@ -1813,14 +1818,14 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
             var iconInfo = this._getDrawableIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
             if (image != null) {
                 core.drawImage(ctx, image, 0, 32 * icon, 32, 32,
-                    this.HPIXEL - choices[i].width/2, vPos.choice_top + 32*i - 17, 22, 22);
+                    this.HPIXEL - choices[i].width / 2, vPos.choice_top + 32 * i - 17, 22, 22);
                 offset += 14;
             }
         }
         core.fillText(ctx, choices[i].text, offset, vPos.choice_top + 32 * i, color);
     }
 
-    if (choices.length>0 && core.status.event.selection != 'none') {
+    if (choices.length > 0 && core.status.event.selection != 'none') {
         core.status.event.selection = core.status.event.selection || 0;
         while (core.status.event.selection < 0) core.status.event.selection += choices.length;
         while (core.status.event.selection >= choices.length) core.status.event.selection -= choices.length;
@@ -1828,15 +1833,15 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         if (isWindowSkin) {
             if (hasCtx) {
                 this._drawSelector(ctx, core.status.textAttribute.background,
-                    len + 10, 28, this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20);
+                    len + 10, 28, this.HPIXEL - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20);
             } else {
                 this._drawWindowSelector(core.status.textAttribute.background,
-                    this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
+                    this.HPIXEL - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
             }
         }
         else
-            core.strokeRoundRect(ctx, this.HPIXEL - len/2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
-                len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
+            core.strokeRoundRect(ctx, this.HPIXEL - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
+                len + 10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
@@ -1853,7 +1858,7 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
         if (core.status.event.id != 'action') {
             core.status.event.id = 'confirmBox';
             core.status.event.ui = text;
-            core.status.event.data = {'yes': yesCallback, 'no': noCallback};
+            core.status.event.data = { 'yes': yesCallback, 'no': noCallback };
         }
     }
 
@@ -1863,30 +1868,30 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
     core.setFont(ctx, this._buildFont(19, true));
     var contents = text.split("\n");
     var rect = this._drawConfirmBox_getRect(contents, ctx);
-    var isWindowSkin = this.drawBackground(rect.left, rect.top, rect.right, rect.bottom, {ctx: ctx});
+    var isWindowSkin = this.drawBackground(rect.left, rect.top, rect.right, rect.bottom, { ctx: ctx });
 
     core.setTextAlign(ctx, 'center');
     core.setFillStyle(ctx, core.arrayToRGBA(core.status.textAttribute.text))
     for (var i in contents) {
-        core.fillText(ctx, contents[i], this.HPIXEL, rect.top + 50 + i*30);
+        core.fillText(ctx, contents[i], this.HPIXEL, rect.top + 50 + i * 30);
     }
 
     core.fillText(ctx, "确定", this.HPIXEL - 38, rect.bottom - 35, null, this._buildFont(17, true));
     core.fillText(ctx, "取消", this.HPIXEL + 38, rect.bottom - 35);
     if (core.status.event.selection != 'none') {
-        var len=core.calWidth(ctx, "确定");
-        var strokeLeft = this.HPIXEL + (76*core.status.event.selection-38) - parseInt(len/2) - 5;
-    
+        var len = core.calWidth(ctx, "确定");
+        var strokeLeft = this.HPIXEL + (76 * core.status.event.selection - 38) - parseInt(len / 2) - 5;
+
         if (isWindowSkin) {
             if (hasCtx) {
                 this._drawSelector(ctx, core.status.textAttribute.background,
-                    len + 10, 28, strokeLeft, rect.bottom-35-20);
+                    len + 10, 28, strokeLeft, rect.bottom - 35 - 20);
             } else {
-                this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom-35-20, len+10, 28);
+                this._drawWindowSelector(core.status.textAttribute.background, strokeLeft, rect.bottom - 35 - 20, len + 10, 28);
             }
         }
         else
-            core.strokeRoundRect(ctx, strokeLeft, rect.bottom-35-20, len+10, 28, 6, core.status.globalAttribute.selectColor, 2);
+            core.strokeRoundRect(ctx, strokeLeft, rect.bottom - 35 - 20, len + 10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
 
@@ -1895,12 +1900,12 @@ ui.prototype._drawConfirmBox_getRect = function (contents, ctx) {
         return Math.max(pre, core.calWidth(ctx, curr));
     }, 0);
     var left = Math.min(this.HPIXEL - 40 - parseInt(max_width / 2), 100), right = this.PIXEL - left;
-    var top = this.HPIXEL - 68 - (contents.length-1)*30, bottom = this.HPIXEL + 68;
+    var top = this.HPIXEL - 68 - (contents.length - 1) * 30, bottom = this.HPIXEL + 68;
     return { top: top, left: left, bottom: bottom, right: right, width: right - left, height: bottom - top };
 }
 
 ////// 绘制等待界面 //////
-ui.prototype.drawWaiting = function(text) {
+ui.prototype.drawWaiting = function (text) {
     core.lockControl();
     core.status.event.id = 'waiting';
     core.clearUI();
@@ -1914,7 +1919,7 @@ ui.prototype.drawWaiting = function(text) {
 }
 
 ////// 绘制系统设置界面 //////
-ui.prototype._drawSwitchs = function() {
+ui.prototype._drawSwitchs = function () {
     core.status.event.id = 'switchs';
     var choices = [
         "音效设置",
@@ -1946,7 +1951,7 @@ ui.prototype._drawSwitchs_display = function () {
         "怪物显伤： " + (core.flags.displayEnemyDamage ? "[ON]" : "[OFF]"),
         "临界显伤： " + (core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
-        "领域模式： " + (core.flags.extraDamageType == 2 ? "[最简]" : core.flags.extraDamageType == 1 ? "[半透明]" : "[完整]" ),
+        "领域模式： " + (core.flags.extraDamageType == 2 ? "[最简]" : core.flags.extraDamageType == 1 ? "[半透明]" : "[完整]"),
         "返回上一级",
     ];
     this.drawChoices(null, choices);
@@ -1958,9 +1963,9 @@ ui.prototype._drawSwitchs_action = function () {
         // 数值越大耗时越长
         " <   步时：" + core.values.moveSpeed + "   > ",
         " <   转场：" + core.values.floorChangeTime + "   > ",
-        "血瓶绕路： "+(core.hasFlag('__potionNoRouting__') ? "[ON]":"[OFF]"),
-        "单击瞬移： "+(!core.hasFlag("__noClickMove__") ? "[ON]":"[OFF]"),
-        "左手模式： "+(core.flags.leftHandPrefer ? "[ON]":"[OFF]"),
+        "血瓶绕路： " + (core.hasFlag('__potionNoRouting__') ? "[ON]" : "[OFF]"),
+        "单击瞬移： " + (!core.hasFlag("__noClickMove__") ? "[ON]" : "[OFF]"),
+        "左手模式： " + (core.flags.leftHandPrefer ? "[ON]" : "[OFF]"),
         "返回上一级",
     ];
     this.drawChoices(null, choices);
@@ -1989,7 +1994,7 @@ ui.prototype._drawQuickShop = function () {
     core.status.event.id = 'selectShop';
     var shopList = core.status.shops, keys = core.listShopIds();
     var choices = keys.map(function (shopId) {
-        return {"text": shopList[shopId].textInList, "color": core.isShopVisited(shopId) ? null : "#999999"};
+        return { "text": shopList[shopId].textInList, "color": core.isShopVisited(shopId) ? null : "#999999" };
     });
     choices.push("返回游戏");
     this.drawChoices(null, choices);
@@ -2039,7 +2044,7 @@ ui.prototype._drawReplay = function () {
 ui.prototype._drawGameInfo = function () {
     core.status.event.id = 'gameInfo';
     this.drawChoices(null, [
-        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于游戏","下载离线版本", "返回主菜单"
+        "数据统计", "查看工程", "游戏主页", "操作帮助", "关于游戏", "下载离线版本", "返回主菜单"
     ]);
 }
 
@@ -2053,13 +2058,13 @@ ui.prototype.drawPagination = function (page, totalPage, y) {
     var length = core.calWidth('ui', page + " / " + page, this._buildFont(15, true));
 
     core.setTextAlign('ui', 'left');
-    core.fillText('ui', page + " / " + totalPage, parseInt((this.PIXEL - length) / 2), y*32+19);
+    core.fillText('ui', page + " / " + totalPage, parseInt((this.PIXEL - length) / 2), y * 32 + 19);
 
     core.setTextAlign('ui', 'center');
     if (page > 1)
-        core.fillText('ui', '上一页', this.HPIXEL - 80, y*32+19);
+        core.fillText('ui', '上一页', this.HPIXEL - 80, y * 32 + 19);
     if (page < totalPage)
-        core.fillText('ui', '下一页', this.HPIXEL + 80, y*32+19);
+        core.fillText('ui', '下一页', this.HPIXEL + 80, y * 32 + 19);
 }
 
 ////// 绘制键盘光标 //////
@@ -2075,14 +2080,14 @@ ui.prototype._drawCursor = function () {
     core.lockControl();
     core.clearUI();
     var width = 4;
-    core.strokeRect('ui', 32*automaticRoute.cursorX+width/2, 32*automaticRoute.cursorY+width/2,
-        32-width, 32-width, core.status.globalAttribute.selectColor, width);
+    core.strokeRect('ui', 32 * automaticRoute.cursorX + width / 2, 32 * automaticRoute.cursorY + width / 2,
+        32 - width, 32 - width, core.status.globalAttribute.selectColor, width);
 
 }
 
 ////// 绘制怪物手册 //////
 ui.prototype.drawBook = function (index) {
-    var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+    var floorId = core.floorIds[(core.status.event.ui || {}).index] || core.status.floorId;
     // 清除浏览地图时的光环缓存
     if (floorId != core.status.floorId && core.status.checkBlock) {
         core.status.checkBlock.cache = {};
@@ -2113,7 +2118,7 @@ ui.prototype.drawBook = function (index) {
     core.drawBoxAnimate();
     this.drawPagination(page, totalPage);
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13, '#DDDDDD', this._buildFont(15, true));
 }
 
 ui.prototype._drawBook_pageinfo = function () {
@@ -2136,7 +2141,7 @@ ui.prototype._drawBook_drawBackground = function () {
 ui.prototype._drawBook_drawEmpty = function () {
     core.setTextAlign('ui', 'center');
     core.fillText('ui', "本层无怪物", this.HPIXEL, this.HPIXEL + 14, '#999999', this._buildFont(50, true));
-    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13,'#DDDDDD', this._buildFont(15, true));
+    core.fillText('ui', '返回游戏', this.PIXEL - 46, this.PIXEL - 13, '#DDDDDD', this._buildFont(15, true));
 }
 
 ui.prototype._drawBook_drawOne = function (floorId, index, enemy, pageinfo, selected) {
@@ -2177,7 +2182,7 @@ ui.prototype._drawBook_drawBox = function (index, enemy, top, pageinfo) {
     // 检查大怪物
     if (blockInfo.bigImage) {
         core.status.boxAnimateObjs.push({
-            bigImage: blockInfo.bigImage, face: blockInfo.face, centerX: border_left + 21, centerY: border_top + 21, 
+            bigImage: blockInfo.bigImage, face: blockInfo.face, centerX: border_left + 21, centerY: border_top + 21,
             max_width: 60
         });
     }
@@ -2225,7 +2230,7 @@ ui.prototype._drawBook_drawName = function (index, enemy, top, left, width) {
         switch (enemy.specialText.length) {
             case 1:
                 core.fillText('ui', enemy.specialText[0], left + width / 2,
-                    top + 50, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'), 
+                    top + 50, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'),
                     this._buildFont(15, true), width);
                 break;
             case 2:
@@ -2238,9 +2243,9 @@ ui.prototype._drawBook_drawName = function (index, enemy, top, left, width) {
                 var rightWidth = core.calWidth('ui', enemy.specialText[1]);
                 // Step 3: 绘制
                 core.fillText('ui', enemy.specialText[0], left + (width + leftWidth - totalWidth) / 2,
-                    top+50, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'));
+                    top + 50, core.arrayToRGBA((enemy.specialColor || [])[0] || '#FF6A6A'));
                 core.fillText('ui', enemy.specialText[1], left + (width + totalWidth - rightWidth) / 2,
-                    top+50, core.arrayToRGBA((enemy.specialColor || [])[1] || '#FF6A6A'));
+                    top + 50, core.arrayToRGBA((enemy.specialColor || [])[1] || '#FF6A6A'));
                 break;
             default:
                 core.fillText('ui', '多属性...', left + width / 2,
@@ -2262,11 +2267,11 @@ ui.prototype._drawBook_drawRow1 = function (index, enemy, top, left, width, posi
     var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
     core.fillText('ui', core.getStatusLabel('hp'), col1, position, '#DDDDDD', f13);
-    core.fillText('ui', core.formatBigNumber(enemy.hp||0), col1 + 30, position, null, b13);
+    core.fillText('ui', core.formatBigNumber(enemy.hp || 0), col1 + 30, position, null, b13);
     core.fillText('ui', core.getStatusLabel('atk'), col2, position, null, f13);
-    core.fillText('ui', core.formatBigNumber(enemy.atk||0), col2 + 30, position, null, b13);
+    core.fillText('ui', core.formatBigNumber(enemy.atk || 0), col2 + 30, position, null, b13);
     core.fillText('ui', core.getStatusLabel('def'), col3, position, null, f13);
-    core.fillText('ui', core.formatBigNumber(enemy.def||0), col3 + 30, position, null, b13);
+    core.fillText('ui', core.formatBigNumber(enemy.def || 0), col3 + 30, position, null, b13);
 }
 
 ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, position) {
@@ -2276,9 +2281,9 @@ ui.prototype._drawBook_drawRow2 = function (index, enemy, top, left, width, posi
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
     // 获得第二行绘制的内容
     var second_line = [];
-    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) second_line.push([core.getStatusLabel('money'), core.formatBigNumber(enemy.money || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableMoney') >= 0) second_line.push([core.getStatusLabel('money'), core.formatBigNumber(enemy.money || 0)]);
     if (core.flags.enableAddPoint) second_line.push([core.getStatusLabel('point'), core.formatBigNumber(enemy.point || 0)]);
-    if (core.flags.statusBarItems.indexOf('enableExp')>=0) second_line.push([core.getStatusLabel('exp'), core.formatBigNumber(enemy.exp || 0)]);
+    if (core.flags.statusBarItems.indexOf('enableExp') >= 0) second_line.push([core.getStatusLabel('exp'), core.formatBigNumber(enemy.exp || 0)]);
 
     var damage_offset = col1 + (this.PIXEL - col1) / 2 - 12;
     // 第一列
@@ -2305,11 +2310,11 @@ ui.prototype._drawBook_drawRow3 = function (index, enemy, top, left, width, posi
     var b13 = this._buildFont(13, true), f13 = this._buildFont(13, false);
     var col1 = left, col2 = left + width * 9 / 25, col3 = left + width * 17 / 25;
     core.fillText('ui', '临界', col1, position, '#DDDDDD', f13);
-    core.fillText('ui', core.formatBigNumber(enemy.critical||0), col1 + 30, position, null, b13);
+    core.fillText('ui', core.formatBigNumber(enemy.critical || 0), col1 + 30, position, null, b13);
     core.fillText('ui', '减伤', col2, position, null, f13);
-    core.fillText('ui', core.formatBigNumber(enemy.criticalDamage||0), col2 + 30, position, null, b13);
+    core.fillText('ui', core.formatBigNumber(enemy.criticalDamage || 0), col2 + 30, position, null, b13);
     core.fillText('ui', '加防', col3, position, null, f13);
-    core.fillText('ui', core.formatBigNumber(enemy.defDamage||0), col3 + 30, position, null, b13);
+    core.fillText('ui', core.formatBigNumber(enemy.defDamage || 0), col3 + 30, position, null, b13);
 }
 
 ui.prototype._drawBook_drawDamage = function (index, enemy, offset, position) {
@@ -2343,7 +2348,7 @@ ui.prototype._drawBookDetail = function (index) {
 
     var left = 10, width = this.PIXEL - 2 * left, right = left + width;
     var content_left = left + 25, validWidth = right - content_left - 13;
-    var height = Math.max(this.getTextContentHeight(content, {fontSize: 16, lineHeight: 24, maxWidth: validWidth}) + 58, 80), 
+    var height = Math.max(this.getTextContentHeight(content, { fontSize: 16, lineHeight: 24, maxWidth: validWidth }) + 58, 80),
         top = (this.PIXEL - height) / 2, bottom = top + height;
 
     core.setAlpha('data', 0.9);
@@ -2352,20 +2357,20 @@ ui.prototype._drawBookDetail = function (index) {
     core.strokeRect('data', left - 1, top - 1, width + 1, height + 1,
         core.arrayToRGBA(core.status.globalAttribute.borderColor), 2);
     core.playSound('确定');
-    this._drawBookDetail_drawContent(enemy, content, {top: top, content_left: content_left, bottom: bottom, validWidth: validWidth});
+    this._drawBookDetail_drawContent(enemy, content, { top: top, content_left: content_left, bottom: bottom, validWidth: validWidth });
 }
 
 ui.prototype._drawBookDetail_getInfo = function (index) {
-    var floorId = core.floorIds[(core.status.event.ui||{}).index] || core.status.floorId;
+    var floorId = core.floorIds[(core.status.event.ui || {}).index] || core.status.floorId;
     // 清除浏览地图时的光环缓存
     if (floorId != core.status.floorId && core.status.checkBlock) {
         core.status.checkBlock.cache = {};
     }
     var enemys = core.enemys.getCurrentEnemys(floorId);
-    if (enemys.length==0) return [];
+    if (enemys.length == 0) return [];
     index = core.clamp(index, 0, enemys.length - 1);
     var enemy = enemys[index], enemyId = enemy.id;
-    var texts=core.enemys.getSpecialHint(enemyId);
+    var texts = core.enemys.getSpecialHint(enemyId);
     if (texts.length == 0) texts.push("该怪物无特殊属性。");
     if (enemy.description) texts.push(enemy.description + "\r");
     texts.push("");
@@ -2409,18 +2414,18 @@ ui.prototype._drawBookDetail_mofang = function (enemy, texts) {
     if (core.enemys.hasSpecial(enemy.special, 10)) {
         var hp = enemy.hp;
         var delta = core.status.hero.atk - core.status.hero.def;
-        if (delta<hp && hp<=10000 && hp>0) {
-            texts.push("\r[#FF6A6A]\\d模仿临界计算器：\\d\r[]（当前攻防差"+core.formatBigNumber(delta)+"）");
+        if (delta < hp && hp <= 10000 && hp > 0) {
+            texts.push("\r[#FF6A6A]\\d模仿临界计算器：\\d\r[]（当前攻防差" + core.formatBigNumber(delta) + "）");
             var u = [];
             this._drawBookDetail_mofang_getArray(hp).forEach(function (t) {
                 if (u.length < 20) u.push(t);
-                else if (Math.abs(t[0]-delta)<Math.abs(u[0][0]-delta)) {
+                else if (Math.abs(t[0] - delta) < Math.abs(u[0][0] - delta)) {
                     u.shift();
                     u.push(t);
                 }
             });
             texts.push(JSON.stringify(u.map(function (v) {
-                return core.formatBigNumber(v[0])+":"+v[1];
+                return core.formatBigNumber(v[0]) + ":" + v[1];
             })));
         }
     }
@@ -2428,20 +2433,20 @@ ui.prototype._drawBookDetail_mofang = function (enemy, texts) {
 
 ui.prototype._drawBookDetail_mofang_getArray = function (hp) {
     var arr = [];
-    var last=0, start=0;
-    for (var i=1;i<hp;i++) {
-        var now=parseInt((hp-1)/i);
-        if (now!=last) {
-            if (last!=0) {
-                arr.push([start, last+"x"]);
+    var last = 0, start = 0;
+    for (var i = 1; i < hp; i++) {
+        var now = parseInt((hp - 1) / i);
+        if (now != last) {
+            if (last != 0) {
+                arr.push([start, last + "x"]);
             }
-            last=now;
-            start=i;
+            last = now;
+            start = i;
         }
     }
-    if (last!=0) {
-        arr.push([start,"1x"]);
-        arr.push([hp,"0"]);
+    if (last != 0) {
+        arr.push([start, "1x"]);
+        arr.push([hp, "0"]);
     }
     return arr;
 }
@@ -2453,15 +2458,15 @@ ui.prototype._drawBookDetail_vampire = function (enemy, floorId, texts) {
             // 二分HP
             var start = 1, end = 100 * damage;
             var nowHp = core.status.hero.hp;
-            while (start<end) {
-                var mid = Math.floor((start+end)/2);
+            while (start < end) {
+                var mid = Math.floor((start + end) / 2);
                 core.status.hero.hp = mid;
                 if (core.canBattle(enemy.id, enemy.x, enemy.y, floorId)) end = mid;
-                else start = mid+1;
+                else start = mid + 1;
             }
             core.status.hero.hp = start;
             if (core.canBattle(enemy.id)) {
-                texts.push("\r[#FF6A6A]\\d打死该怪物最低需要生命值：\\d\r[]"+core.formatBigNumber(start));
+                texts.push("\r[#FF6A6A]\\d打死该怪物最低需要生命值：\\d\r[]" + core.formatBigNumber(start));
             }
             core.status.hero.hp = nowHp;
         }
@@ -2470,19 +2475,19 @@ ui.prototype._drawBookDetail_vampire = function (enemy, floorId, texts) {
 
 ui.prototype._drawBookDetail_hatred = function (enemy, texts) {
     if (core.enemys.hasSpecial(enemy.special, 17)) {
-        texts.push("\r[#FF6A6A]\\d当前仇恨伤害值：\\d\r[]"+core.getFlag('hatred', 0));
+        texts.push("\r[#FF6A6A]\\d当前仇恨伤害值：\\d\r[]" + core.getFlag('hatred', 0));
     }
 }
 
 ui.prototype._drawBookDetail_turnAndCriticals = function (enemy, floorId, texts) {
     var damageInfo = core.getDamageInfo(enemy.id, null, enemy.x, enemy.y, floorId);
-    texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]"+((damageInfo||{}).turn||0));
+    texts.push("\r[#FF6A6A]\\d战斗回合数：\\d\r[]" + ((damageInfo || {}).turn || 0));
     // 临界表
     var criticals = core.enemys.nextCriticals(enemy.id, 8, enemy.x, enemy.y, floorId).map(function (v) {
-        return core.formatBigNumber(v[0])+":"+core.formatBigNumber(v[1]);
+        return core.formatBigNumber(v[0]) + ":" + core.formatBigNumber(v[1]);
     });
-    while (criticals[0]=='0:0') criticals.shift();
-    texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]"+JSON.stringify(criticals));
+    while (criticals[0] == '0:0') criticals.shift();
+    texts.push("\r[#FF6A6A]\\d临界表：\\d\r[]" + JSON.stringify(criticals));
 }
 
 ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
@@ -2491,12 +2496,14 @@ ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
     core.fillText('data', enemy.name, pos.content_left, pos.top + 30, core.status.globalAttribute.selectColor, this._buildFont(22, true));
     var content_top = pos.top + 44;
 
-    this.drawTextContent('data', content, {left: pos.content_left, top: content_top, maxWidth: pos.validWidth,
-        fontSize: 16, lineHeight: 24});
+    this.drawTextContent('data', content, {
+        left: pos.content_left, top: content_top, maxWidth: pos.validWidth,
+        fontSize: 16, lineHeight: 24
+    });
 }
 
 ////// 绘制楼层传送器 //////
-ui.prototype.drawFly = function(page) {
+ui.prototype.drawFly = function (page) {
     core.status.event.data = page;
     var floorId = core.floorIds[page];
     var title = core.status.maps[floorId].title;
@@ -2536,7 +2543,7 @@ ui.prototype.drawFly = function(page) {
     }
     var size = this.PIXEL - 143;
     core.strokeRect('ui', 20, 100, size, size, '#FFFFFF', 2);
-    core.drawThumbnail(floorId, null, {ctx: 'ui', x: 20, y: 100, size: size, damage: true});
+    core.drawThumbnail(floorId, null, { ctx: 'ui', x: 20, y: 100, size: size, damage: true });
 }
 
 ////// 绘制中心对称飞行器
@@ -2548,13 +2555,13 @@ ui.prototype._drawCenterFly = function () {
     var toX = core.bigmap.width - 1 - core.getHeroLoc('x'), toY = core.bigmap.height - 1 - core.getHeroLoc('y');
     this.clearUI();
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
-    core.drawThumbnail(null, null, {heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image, ctx: 'ui', centerX: toX, centerY: toY});
+    core.drawThumbnail(null, null, { heroLoc: core.status.hero.loc, heroIcon: core.status.hero.image, ctx: 'ui', centerX: toX, centerY: toY });
     var offsetX = core.clamp(toX - core.__HALF_SIZE__, 0, core.bigmap.width - core.__SIZE__),
         offsetY = core.clamp(toY - core.__HALF_SIZE__, 0, core.bigmap.height - core.__SIZE__);
     core.fillRect('ui', (toX - offsetX) * 32, (toY - offsetY) * 32, 32, 32, fillstyle);
-    core.status.event.data = {"x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY};
+    core.status.event.data = { "x": toX, "y": toY, "posX": toX - offsetX, "posY": toY - offsetY };
     core.playSound('打开界面');
-    core.drawTip("请确认当前"+core.material.items['centerFly'].name+"的位置", 'centerFly');
+    core.drawTip("请确认当前" + core.material.items['centerFly'].name + "的位置", 'centerFly');
     return;
 }
 
@@ -2568,15 +2575,15 @@ ui.prototype._drawViewMaps = function (index, x, y) {
     core.status.checkBlock.cache = {};
     var data = this._drawViewMaps_buildData(index, x, y);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');
-    core.drawThumbnail(data.floorId, null, {damage: data.damage, ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all});
+    core.drawThumbnail(data.floorId, null, { damage: data.damage, ctx: 'ui', centerX: data.x, centerY: data.y, all: data.all });
     core.clearMap('data');
     core.setTextAlign('data', 'left');
     core.setFont('data', '16px Arial');
     var text = core.status.maps[data.floorId].title;
-    if (!data.all && (data.mw>this.SIZE || data.mh>this.SIZE))
-        text+=" ["+(data.x-this.HSIZE)+","+(data.y-this.HSIZE)+"]";
+    if (!data.all && (data.mw > this.SIZE || data.mh > this.SIZE))
+        text += " [" + (data.x - this.HSIZE) + "," + (data.y - this.HSIZE) + "]";
     if (core.markedFloorIds[data.floorId])
-        text+=" （已标记）";
+        text += " （已标记）";
     var textX = 16, textY = 18, width = textX + core.calWidth('data', text) + 16, height = 42;
     core.fillRect('data', 5, 5, width, height, 'rgba(0,0,0,0.4)');
     core.fillText('data', text, textX + 5, textY + 15, 'rgba(255,255,255,0.6)');
@@ -2587,7 +2594,7 @@ ui.prototype._drawViewMaps_drawHint = function () {
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, 'rgba(0,0,0,0.7)');
     core.setTextAlign('ui', 'center');
     var stroke = function (left, top, width, height, fillStyle, lineWidth) {
-        core.strokeRect('ui', left+2, top+2, width-4, height-4, fillStyle, lineWidth);
+        core.strokeRect('ui', left + 2, top + 2, width - 4, height - 4, fillStyle, lineWidth);
     }
 
     var perpx = this.PIXEL / 5, cornerpx = perpx * 3 / 4;
@@ -2624,12 +2631,12 @@ ui.prototype._drawViewMaps_drawHint = function () {
 }
 
 ui.prototype._drawViewMaps_buildData = function (index, x, y) {
-    var damage = (core.status.event.data||{}).damage;
-    var all = (core.status.event.data||{all: true}).all;
-    if (index.damage != null) damage=index.damage;
-    if (index.all != null) all=index.all;
-    if (index.index != null) { x=index.x; y=index.y; index=index.index; }
-    index = core.clamp(index, 0, core.floorIds.length-1);
+    var damage = (core.status.event.data || {}).damage;
+    var all = (core.status.event.data || { all: true }).all;
+    if (index.damage != null) damage = index.damage;
+    if (index.all != null) all = index.all;
+    if (index.index != null) { x = index.x; y = index.y; index = index.index; }
+    index = core.clamp(index, 0, core.floorIds.length - 1);
     if (damage == null) damage = true; // 浏览地图默认开显伤好了
 
     var floorId = core.floorIds[index], mw = core.floors[floorId].width, mh = core.floors[floorId].height;
@@ -2638,13 +2645,15 @@ ui.prototype._drawViewMaps_buildData = function (index, x, y) {
     x = core.clamp(x, this.HSIZE, mw - this.HSIZE - 1);
     y = core.clamp(y, this.HSIZE, mh - this.HSIZE - 1);
 
-    core.status.event.data = {index: index, x: x, y: y, floorId: floorId, mw: mw, mh: mh,
-                              damage: damage, all: all };
+    core.status.event.data = {
+        index: index, x: x, y: y, floorId: floorId, mw: mw, mh: mh,
+        damage: damage, all: all
+    };
     return core.status.event.data;
 }
 
 ////// 绘制道具栏 //////
-ui.prototype._drawToolbox = function(index) {
+ui.prototype._drawToolbox = function (index) {
     var info = this._drawToolbox_getInfo(index);
     this._drawToolbox_drawBackground();
 
@@ -2677,40 +2686,40 @@ ui.prototype.getToolboxItems = function (cls) {
         return this.uidata.getToolboxItems(cls);
     }
     return Object.keys(core.status.hero.items[cls] || {})
-            .filter(function (id) { return !core.material.items[id].hideInToolbox; })
-            .sort();
+        .filter(function (id) { return !core.material.items[id].hideInToolbox; })
+        .sort();
 }
 
 ui.prototype._drawToolbox_getInfo = function (index) {
     // 设定eventdata
     if (!core.status.event.data || core.status.event.data.toolsPage == null)
-        core.status.event.data = {"toolsPage":1, "constantsPage":1, "selectId":null}
+        core.status.event.data = { "toolsPage": 1, "constantsPage": 1, "selectId": null }
     // 获取物品列表
-    var tools = core.getToolboxItems('tools'), 
+    var tools = core.getToolboxItems('tools'),
         constants = core.getToolboxItems('constants');
     // 处理页数
     var toolsPage = core.status.event.data.toolsPage;
     var constantsPage = core.status.event.data.constantsPage;
-    var toolsTotalPage = Math.ceil(tools.length/this.LAST);
-    var constantsTotalPage = Math.ceil(constants.length/this.LAST);
+    var toolsTotalPage = Math.ceil(tools.length / this.LAST);
+    var constantsTotalPage = Math.ceil(constants.length / this.LAST);
     // 处理index
     if (index == null)
         index = tools.length == 0 && constants.length > 0 ? this.LAST : 0;
-    core.status.event.selection=index;
+    core.status.event.selection = index;
     // 确认选择对象
     var select, selectId;
-    if (index<this.LAST) {
-        select = index + (toolsPage-1)*this.LAST;
-        if (select>=tools.length) select=Math.max(0, tools.length-1);
+    if (index < this.LAST) {
+        select = index + (toolsPage - 1) * this.LAST;
+        if (select >= tools.length) select = Math.max(0, tools.length - 1);
         selectId = tools[select];
     }
     else {
-        select = index%this.LAST + (constantsPage-1)*this.LAST;
-        if (select>=constants.length) select=Math.max(0, constants.length-1);
+        select = index % this.LAST + (constantsPage - 1) * this.LAST;
+        if (select >= constants.length) select = Math.max(0, constants.length - 1);
         selectId = constants[select];
     }
-    if (!core.hasItem(selectId)) selectId=null;
-    core.status.event.data.selectId=selectId;
+    if (!core.hasItem(selectId)) selectId = null;
+    core.status.event.data.selectId = selectId;
     return {
         index: index, tools: tools, constants: constants, toolsPage: toolsPage, constantsPage: constantsPage,
         toolsTotalPage: toolsTotalPage, constantsTotalPage: constantsTotalPage, selectId: selectId
@@ -2731,23 +2740,23 @@ ui.prototype._drawToolbox_drawLine = function (yoffset, text) {
     core.canvas.ui.lineTo(this.PIXEL, yoffset);
     core.canvas.ui.stroke();
     core.canvas.ui.beginPath();
-    core.canvas.ui.moveTo(this.PIXEL, yoffset-1);
-    core.canvas.ui.lineTo(this.PIXEL, yoffset-25);
-    core.canvas.ui.lineTo(this.PIXEL-72, yoffset-25);
-    core.canvas.ui.lineTo(this.PIXEL-102, yoffset-1);
+    core.canvas.ui.moveTo(this.PIXEL, yoffset - 1);
+    core.canvas.ui.lineTo(this.PIXEL, yoffset - 25);
+    core.canvas.ui.lineTo(this.PIXEL - 72, yoffset - 25);
+    core.canvas.ui.lineTo(this.PIXEL - 102, yoffset - 1);
     core.canvas.ui.fill();
-    core.fillText('ui', text, this.PIXEL - 5, yoffset-6, '#333333', this._buildFont(16, true));
+    core.fillText('ui', text, this.PIXEL - 5, yoffset - 6, '#333333', this._buildFont(16, true));
 }
 
 ui.prototype._drawToolbox_drawDescription = function (info, max_height) {
     core.setTextAlign('ui', 'left');
     if (!info.selectId) return;
-    var item=core.material.items[info.selectId];
+    var item = core.material.items[info.selectId];
     var name = item.name || "未知道具";
-    try { name = core.replaceText(name); } catch (e) {}
+    try { name = core.replaceText(name); } catch (e) { }
     core.fillText('ui', name, 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     var text = item.text || "该道具暂无描述。";
-    try { text = core.replaceText(text); } catch (e) {}
+    try { text = core.replaceText(text); } catch (e) { }
 
     var height = null;
     for (var fontSize = 17; fontSize >= 9; fontSize -= 2) {
@@ -2779,7 +2788,7 @@ ui.prototype._drawToolbox_drawContent = function (info, line, items, page, drawC
 }
 
 ////// 绘制装备界面 //////
-ui.prototype._drawEquipbox = function(index) {
+ui.prototype._drawEquipbox = function (index) {
     var info = this._drawEquipbox_getInfo(index);
     this._drawToolbox_drawBackground();
 
@@ -2806,7 +2815,7 @@ ui.prototype._drawEquipbox = function(index) {
 
 ui.prototype._drawEquipbox_getInfo = function (index) {
     if (!core.status.event.data || core.status.event.data.page == null)
-        core.status.event.data = {"page":1, "selectId":null};
+        core.status.event.data = { "page": 1, "selectId": null };
     var allEquips = core.status.globalAttribute.equipName;
     var equipLength = allEquips.length;
     if (!core.status.hero.equipment) core.status.hero.equipment = [];
@@ -2821,28 +2830,30 @@ ui.prototype._drawEquipbox_getInfo = function (index) {
         else index = 0;
     }
     if (index >= this.LAST && ownEquipment.length == 0) index = 0;
-    var selectId=null;
+    var selectId = null;
     if (index < this.LAST) {
-        if (index >= equipLength) index=Math.max(0, equipLength - 1);
+        if (index >= equipLength) index = Math.max(0, equipLength - 1);
         selectId = equipEquipment[index] || null;
     }
     else {
-        if (page == totalPage) index = Math.min(index, (ownEquipment.length+this.LAST-1)%this.LAST+this.LAST);
+        if (page == totalPage) index = Math.min(index, (ownEquipment.length + this.LAST - 1) % this.LAST + this.LAST);
         selectId = ownEquipment[index - this.LAST + (page - 1) * this.LAST];
-        if (!core.hasItem(selectId)) selectId=null;
+        if (!core.hasItem(selectId)) selectId = null;
     }
-    core.status.event.selection=index;
-    core.status.event.data.selectId=selectId;
-    return { index: index, selectId: selectId, page: page, totalPage: totalPage, allEquips: allEquips,
-            equipLength: equipLength, equipEquipment: equipEquipment, ownEquipment: ownEquipment};
+    core.status.event.selection = index;
+    core.status.event.data.selectId = selectId;
+    return {
+        index: index, selectId: selectId, page: page, totalPage: totalPage, allEquips: allEquips,
+        equipLength: equipLength, equipEquipment: equipEquipment, ownEquipment: ownEquipment
+    };
 }
 
 ui.prototype._drawEquipbox_description = function (info, max_height) {
     core.setTextAlign('ui', 'left');
     if (!info.selectId) return;
-    var equip=core.material.items[info.selectId];
+    var equip = core.material.items[info.selectId];
     // --- 标题
-    if (!equip.equip) equip.equip = {"type": 0};
+    if (!equip.equip) equip.equip = { "type": 0 };
     var equipType = equip.equip.type, equipString;
     if (typeof equipType === 'string') {
         equipString = equipType || "未知部位";
@@ -2852,7 +2863,7 @@ ui.prototype._drawEquipbox_description = function (info, max_height) {
     core.fillText('ui', equip.name + "（" + equipString + "）", 10, 32, core.status.globalAttribute.selectColor, this._buildFont(20, true))
     // --- 描述
     var text = equip.text || "该装备暂无描述。";
-    try { text = core.replaceText(text); } catch (e) {}
+    try { text = core.replaceText(text); } catch (e) { }
 
     var height = null;
     for (var fontSize = 17; fontSize >= 9; fontSize -= 2) {
@@ -2897,10 +2908,10 @@ ui.prototype._drawEquipbox_drawStatusChanged = function (info, y, equip, equipTy
         if (nowValue == newValue) continue;
         var text = core.getStatusLabel(name);
         this._drawEquipbox_drawStatusChanged_draw(text + " ", '#CCCCCC', obj);
-        var color = newValue>nowValue?'#00FF00':'#FF0000';
+        var color = newValue > nowValue ? '#00FF00' : '#FF0000';
         nowValue = core.formatBigNumber(nowValue);
         newValue = core.formatBigNumber(newValue);
-        this._drawEquipbox_drawStatusChanged_draw(nowValue+"->", '#CCCCCC', obj);
+        this._drawEquipbox_drawStatusChanged_draw(nowValue + "->", '#CCCCCC', obj);
         this._drawEquipbox_drawStatusChanged_draw(newValue, color, obj);
         obj.drawOffset += 8;
     }
@@ -2920,7 +2931,7 @@ ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
     core.setTextAlign('ui', 'center');
     var per_line = this.HSIZE - 3, width = Math.floor(this.PIXEL / (per_line + 0.25));
     // 当前装备
-    for (var i = 0; i < info.equipLength ; i++) {
+    for (var i = 0; i < info.equipLength; i++) {
         var equipId = info.equipEquipment[i] || null;
         // var offset_text = width * (i % per_line) + 56;
         var offset_image = width * (i % per_line) + width * 2 / 3;
@@ -2931,24 +2942,24 @@ ui.prototype._drawEquipbox_drawEquiped = function (info, line) {
             core.drawImage('ui', core.material.images.items, 0, 32 * icon, 32, 32, offset_image, y, 32, 32);
         }
         core.fillText('ui', info.allEquips[i] || "未知", offset_text, y + 27, '#FFFFFF', this._buildFont(16, true))
-        core.strokeRoundRect('ui', offset_image - 4, y - 4, 40, 40, 6, info.index==i?core.status.globalAttribute.selectColor:"#FFFFFF");
+        core.strokeRoundRect('ui', offset_image - 4, y - 4, 40, 40, 6, info.index == i ? core.status.globalAttribute.selectColor : "#FFFFFF");
     }
 }
 
 ////// 绘制存档/读档界面 //////
-ui.prototype._drawSLPanel = function(index, refresh) {
+ui.prototype._drawSLPanel = function (index, refresh) {
     core.control._loadFavoriteSaves();
     if (index == null) index = 1;
     if (index < 0) index = 0;
 
-    var page = parseInt(index/10), offset=index%10;
+    var page = parseInt(index / 10), offset = index % 10;
     var max_page = main.savePages || 30;
-    if(core.status.event.data && core.status.event.data.mode=='fav')
-        max_page = Math.ceil((core.saves.favorite||[]).length/5);
-    if (page>=max_page) page=max_page - 1;
-    if (offset>5) offset=5;
-    if (core.status.event.data && core.status.event.data.mode=='fav' && page == max_page - 1) {
-        offset = Math.min(offset, (core.saves.favorite||[]).length - 5 * page);
+    if (core.status.event.data && core.status.event.data.mode == 'fav')
+        max_page = Math.ceil((core.saves.favorite || []).length / 5);
+    if (page >= max_page) page = max_page - 1;
+    if (offset > 5) offset = 5;
+    if (core.status.event.data && core.status.event.data.mode == 'fav' && page == max_page - 1) {
+        offset = Math.min(offset, (core.saves.favorite || []).length - 5 * page);
     }
 
     var last_page = -1;
@@ -2957,7 +2968,7 @@ ui.prototype._drawSLPanel = function(index, refresh) {
         last_page = core.status.event.data.page;
         mode = core.status.event.data.mode;
     }
-    core.status.event.data={ 'page':page, 'offset':offset, 'mode':mode };
+    core.status.event.data = { 'page': page, 'offset': offset, 'mode': mode };
     core.status.event.ui = core.status.event.ui || [];
     if (refresh || page != last_page) {
         core.status.event.ui = [];
@@ -2972,19 +2983,19 @@ ui.prototype._drawSLPanel_draw = function (page, max_page) {
     // --- 绘制背景
     this._drawSLPanel_drawBackground();
     // --- 绘制文字
-    core.ui.drawPagination(page+1, max_page);
+    core.ui.drawPagination(page + 1, max_page);
     core.setTextAlign('ui', 'center');
-    var bottom = this.PIXEL-13;
-    core.fillText('ui', '返回游戏', this.PIXEL-48, bottom, '#DDDDDD', this._buildFont(15, true));
+    var bottom = this.PIXEL - 13;
+    core.fillText('ui', '返回游戏', this.PIXEL - 48, bottom, '#DDDDDD', this._buildFont(15, true));
 
     if (core.status.event.selection)
         core.setFillStyle('ui', '#FF6A6A');
-    if (core.status.event.id=='save')
+    if (core.status.event.id == 'save')
         core.fillText('ui', '删除模式', 48, bottom);
-    else{
-        if(core.status.event.data.mode=='all'){
+    else {
+        if (core.status.event.data.mode == 'all') {
             core.fillText('ui', '[E]显示收藏', 52, bottom);
-        }else{
+        } else {
             core.fillText('ui', '[E]显示全部', 52, bottom);
         }
     }
@@ -2992,105 +3003,105 @@ ui.prototype._drawSLPanel_draw = function (page, max_page) {
     this._drawSLPanel_drawRecords();
 }
 
-ui.prototype._drawSLPanel_drawBackground = function() {
+ui.prototype._drawSLPanel_drawBackground = function () {
     core.clearMap('ui');
     core.setAlpha('ui', 0.85);
     core.fillRect('ui', 0, 0, this.PIXEL, this.PIXEL, '#000000');//可改成背景图图
     core.setAlpha('ui', 1);
 }
 
-ui.prototype._drawSLPanel_loadSave = function(page, callback) {
+ui.prototype._drawSLPanel_loadSave = function (page, callback) {
     var ids = [0];
     for (var i = 1; i <= 5; ++i) {
         var id = 5 * page + i;
-        if(core.status.event.data.mode=='fav')
+        if (core.status.event.data.mode == 'fav')
             id = core.saves.favorite[id - 1]; // 因为favorite第一个不是自动存档 所以要偏移1
         ids.push(id);
     }
     core.getSaves(ids, function (data) {
         for (var i = 1; i < ids.length; ++i)
             core.status.event.ui[i] = data[i];
-        core.status.event.ui[0] = data[0] == null ? null : data[0][core.saves.autosave.now-1];
+        core.status.event.ui[0] = data[0] == null ? null : data[0][core.saves.autosave.now - 1];
         callback();
     });
 }
 
 // 在以x为中心轴 y为顶坐标 的位置绘制一条宽为size的记录 cho表示是否被选中 选中会加粗 highlight表示高亮标题 ✐
-ui.prototype._drawSLPanel_drawRecord = function(title, data, x, y, size, cho, highLight){
+ui.prototype._drawSLPanel_drawRecord = function (title, data, x, y, size, cho, highLight) {
     var globalAttribute = core.status.globalAttribute || core.initStatus.globalAttribute;
     var strokeColor = globalAttribute.selectColor;
     if (core.status.event.selection) strokeColor = '#FF6A6A';
     if (!data || !data.floorId) highLight = false;
     if (data && data.__toReplay__) title = '[R]' + title;
 
-    core.fillText('ui', title, x, y, highLight?globalAttribute.selectColor:'#FFFFFF', this._buildFont(17, true));
-    core.strokeRect('ui', x-size/2, y+15, size, size, cho?strokeColor:'#FFFFFF', cho?6:2);
+    core.fillText('ui', title, x, y, highLight ? globalAttribute.selectColor : '#FFFFFF', this._buildFont(17, true));
+    core.strokeRect('ui', x - size / 2, y + 15, size, size, cho ? strokeColor : '#FFFFFF', cho ? 6 : 2);
     if (data && data.floorId) {
         core.setTextAlign('ui', "center");
         var map = core.maps.loadMap(data.maps, data.floorId);
         core.extractBlocksForUI(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
             heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags,
-            ctx: 'ui', x: x-size/2, y: y+15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
+            ctx: 'ui', x: x - size / 2, y: y + 15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
         });
         if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {
-            core.fillRect('ui', x-size/2, y+15, size, size, [0, 0, 0, 0.4]);
-            core.fillText('ui', data.hard, x, parseInt(y+22+size/2), data.hero.flags.__hardColor__ || 'red', this._buildFont(30,true));
+            core.fillRect('ui', x - size / 2, y + 15, size, size, [0, 0, 0, 0.4]);
+            core.fillText('ui', data.hard, x, parseInt(y + 22 + size / 2), data.hero.flags.__hardColor__ || 'red', this._buildFont(30, true));
         }
         // 绘制存档笔记
         if (data.hero.notes && data.hero.notes.length > 0) {
             core.setTextAlign('ui', 'left');
             if (data.hero.notes.length >= 2) {
-                core.fillRect('ui', x-size/2, y + 15, size, 28, [0,0,0,0.3]);
-                core.fillBoldText('ui', data.hero.notes.length - 1 + ". " + data.hero.notes[data.hero.notes.length - 2].substring(0, 10), 
+                core.fillRect('ui', x - size / 2, y + 15, size, 28, [0, 0, 0, 0.3]);
+                core.fillBoldText('ui', data.hero.notes.length - 1 + ". " + data.hero.notes[data.hero.notes.length - 2].substring(0, 10),
                     x - size / 2 + 2, y + 15 + 12, '#FFFFFF', null, this._buildFont(10, false));
-                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10), 
+                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10),
                     x - size / 2 + 2, y + 15 + 24);
             } else {
-                core.fillRect('ui', x-size/2, y + 15, size, 16, [0,0,0,0.3]);
-                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10), 
+                core.fillRect('ui', x - size / 2, y + 15, size, 16, [0, 0, 0, 0.3]);
+                core.fillBoldText('ui', data.hero.notes.length + ". " + data.hero.notes[data.hero.notes.length - 1].substring(0, 10),
                     x - size / 2 + 2, y + 15 + 12, '#FFFFFF', null, this._buildFont(10, false));
             }
         }
         core.setTextAlign('ui', "center");
-        var v = core.formatBigNumber(data.hero.hp,true)+"/"+core.formatBigNumber(data.hero.atk,true)+"/"+core.formatBigNumber(data.hero.def,true);
-        var v2 = "/"+core.formatBigNumber(data.hero.mdef,true);
+        var v = core.formatBigNumber(data.hero.hp, true) + "/" + core.formatBigNumber(data.hero.atk, true) + "/" + core.formatBigNumber(data.hero.def, true);
+        var v2 = "/" + core.formatBigNumber(data.hero.mdef, true);
         if (core.calWidth('ui', v + v2, this._buildFont(10, false)) <= size) v += v2;
-        core.fillText('ui', v, x, y+30+size, globalAttribute.selectColor);
-        core.fillText('ui', core.formatDate(new Date(data.time)), x, y+43+size, data.hero.flags.debug?'#FF6A6A':'#FFFFFF');
+        core.fillText('ui', v, x, y + 30 + size, globalAttribute.selectColor);
+        core.fillText('ui', core.formatDate(new Date(data.time)), x, y + 43 + size, data.hero.flags.debug ? '#FF6A6A' : '#FFFFFF');
     }
     else {
-        core.fillRect('ui', x-size/2, y+15, size, size, '#333333');
-        core.fillText('ui', '空', x, parseInt(y+22+size/2), '#FFFFFF', this._buildFont(30, true));
-    } 
+        core.fillRect('ui', x - size / 2, y + 15, size, size, '#333333');
+        core.fillText('ui', '空', x, parseInt(y + 22 + size / 2), '#FFFFFF', this._buildFont(30, true));
+    }
 }
 
-ui.prototype._drawSLPanel_drawRecords  = function (n) {
+ui.prototype._drawSLPanel_drawRecords = function (n) {
     var page = core.status.event.data.page;
     var offset = core.status.event.data.offset;
-    var u = Math.floor(this.PIXEL/6), size = Math.floor(this.PIXEL/3-20);
-    var name=core.status.event.id=='save'?"存档":core.status.event.id=='load'?"读档":"回放";
+    var u = Math.floor(this.PIXEL / 6), size = Math.floor(this.PIXEL / 3 - 20);
+    var name = core.status.event.id == 'save' ? "存档" : core.status.event.id == 'load' ? "读档" : "回放";
 
-    for (var i = 0; i < (n||6); i++){
+    for (var i = 0; i < (n || 6); i++) {
         var data = core.status.event.ui[i];
         var id = 5 * page + i;
-        var highLight = (i>0&&core.saves.favorite.indexOf(id)>=0) || core.status.event.data.mode=='fav';
-        var title = (highLight?'★ ':'☆ ') + (core.saves.favoriteName[id] || (name + id));
-        if (i != 0 && core.status.event.data.mode=='fav') {
+        var highLight = (i > 0 && core.saves.favorite.indexOf(id) >= 0) || core.status.event.data.mode == 'fav';
+        var title = (highLight ? '★ ' : '☆ ') + (core.saves.favoriteName[id] || (name + id));
+        if (i != 0 && core.status.event.data.mode == 'fav') {
             if (!data) break;
             var real_id = core.saves.favorite[id - 1];
             title = (core.saves.favoriteName[real_id] || (name + real_id)) + ' ✐';
         }
 
         var charSize = 32;// 字体占用像素范围
-        var topSpan = parseInt((this.PIXEL-charSize-2*(charSize*2 + size))/3);// Margin
-        var yTop1 = topSpan+parseInt(charSize/2) + 8;//文字的中心
-        var yTop2 = yTop1+charSize*2+size+topSpan;
-        if (i<3) {
-            this._drawSLPanel_drawRecord(i==0?"自动存档":title, data, (2*i+1)*u, yTop1, size, i==offset, highLight);
+        var topSpan = parseInt((this.PIXEL - charSize - 2 * (charSize * 2 + size)) / 3);// Margin
+        var yTop1 = topSpan + parseInt(charSize / 2) + 8;//文字的中心
+        var yTop2 = yTop1 + charSize * 2 + size + topSpan;
+        if (i < 3) {
+            this._drawSLPanel_drawRecord(i == 0 ? "自动存档" : title, data, (2 * i + 1) * u, yTop1, size, i == offset, highLight);
         }
         else {
-            this._drawSLPanel_drawRecord(title, data, (2*i-5)*u, yTop2, size, i==offset, highLight);
+            this._drawSLPanel_drawRecord(title, data, (2 * i - 5) * u, yTop2, size, i == offset, highLight);
         }
     }
 };
@@ -3117,23 +3128,23 @@ ui.prototype._drawKeyBoard = function () {
     var now = this.HPIXEL - 89 + offset;
 
     var lines = [
-        ["F1","F2","F3","F4","F5","F6","F7","F8","F9","10","11"],
-        ["1","2","3","4","5","6","7","8","9","0"],
-        ["Q","W","E","R","T","Y","U","I","O","P"],
-        ["A","S","D","F","G","H","J","K","L"],
-        ["Z","X","C","V","B","N","M"],
-        ["-","=","[","]","\\",";","'",",",".","/","`"],
-        ["ES","TA","CA","SH","CT","AL","SP","BS","EN","DE"]
+        ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "10", "11"],
+        ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+        ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+        ["A", "S", "D", "F", "G", "H", "J", "K", "L"],
+        ["Z", "X", "C", "V", "B", "N", "M"],
+        ["-", "=", "[", "]", "\\", ";", "'", ",", ".", "/", "`"],
+        ["ES", "TA", "CA", "SH", "CT", "AL", "SP", "BS", "EN", "DE"]
     ];
 
     lines.forEach(function (line) {
-        for (var i=0;i<line.length;i++) {
-            core.fillText('ui', line[i], core.ui.HPIXEL + 32*(i-5) + offset, now);
+        for (var i = 0; i < line.length; i++) {
+            core.fillText('ui', line[i], core.ui.HPIXEL + 32 * (i - 5) + offset, now);
         }
-        now+=32;
+        now += 32;
     });
 
-    core.fillText("ui", "返回游戏", this.HPIXEL + 128 + offset, now-3, '#FFFFFF', this._buildFont(15, true));
+    core.fillText("ui", "返回游戏", this.HPIXEL + 128 + offset, now - 3, '#FFFFFF', this._buildFont(15, true));
 
     if (isWindowSkin)
         this._drawWindowSelector(core.status.textAttribute.background, this.HPIXEL + 92 + offset, now - 22, 72, 27);
@@ -3160,18 +3171,18 @@ ui.prototype._drawStatistics = function (floorIds) {
         this._drawStatistics_generateText(obj, "全塔", obj.total),
         this._drawStatistics_generateText(obj, "当前", obj.current),
         this._drawStatistics_generateText(obj, "标记（浏览地图时B键或左下角）", obj.marked),
-        "当前总步数："+core.status.hero.steps+"，当前游戏时长："+core.formatTime(statistics.currTime)
-        +"，总游戏时长"+core.formatTime(statistics.totalTime)
-        +"。\n瞬间移动次数："+statistics.moveDirectly+"，共计少走"+statistics.ignoreSteps+"步。"
-        +"\n\n总计通过血瓶恢复生命值为"+core.formatBigNumber(statistics.hp)+"点。\n\n"
-        +"总计打死了"+statistics.battle+"个怪物，得到了"+core.formatBigNumber(statistics.money)+"金币，"+core.formatBigNumber(statistics.exp)+"点经验。\n\n"
-        +"受到的总伤害为"+core.formatBigNumber(statistics.battleDamage+statistics.poisonDamage+statistics.extraDamage)
-        +"，其中战斗伤害"+core.formatBigNumber(statistics.battleDamage)+"点"
-        +(core.flags.statusBarItems.indexOf('enableDebuff')>=0?("，中毒伤害"+core.formatBigNumber(statistics.poisonDamage)+"点"):"")
-        +"，领域/夹击/阻击/血网伤害"+core.formatBigNumber(statistics.extraDamage)+"点。",
+        "当前总步数：" + core.status.hero.steps + "，当前游戏时长：" + core.formatTime(statistics.currTime)
+        + "，总游戏时长" + core.formatTime(statistics.totalTime)
+        + "。\n瞬间移动次数：" + statistics.moveDirectly + "，共计少走" + statistics.ignoreSteps + "步。"
+        + "\n\n总计通过血瓶恢复生命值为" + core.formatBigNumber(statistics.hp) + "点。\n\n"
+        + "总计打死了" + statistics.battle + "个怪物，得到了" + core.formatBigNumber(statistics.money) + "金币，" + core.formatBigNumber(statistics.exp) + "点经验。\n\n"
+        + "受到的总伤害为" + core.formatBigNumber(statistics.battleDamage + statistics.poisonDamage + statistics.extraDamage)
+        + "，其中战斗伤害" + core.formatBigNumber(statistics.battleDamage) + "点"
+        + (core.flags.statusBarItems.indexOf('enableDebuff') >= 0 ? ("，中毒伤害" + core.formatBigNumber(statistics.poisonDamage) + "点") : "")
+        + "，领域/夹击/阻击/血网伤害" + core.formatBigNumber(statistics.extraDamage) + "点。",
         "\t[说明]1. 地图数据统计的效果仅模拟当前立刻获得该道具的效果。\n2. 不会计算“不可被浏览地图”的隐藏层的数据。\n" +
-        "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n"+
-        "4. 在自定义道具（例如其他宝石）后，需在脚本编辑的drawStatistics中注册，不然不会进行统计。\n"+
+        "3. 不会计算任何通过事件得到的道具（显示事件、改变图块、或直接增加道具等）。\n" +
+        "4. 在自定义道具（例如其他宝石）后，需在脚本编辑的drawStatistics中注册，不然不会进行统计。\n" +
         "5. 道具不会统计通过插入事件或useItemEvent实现的效果。\n6. 所有统计信息仅供参考，如有错误，概不负责。"
     ])
     core.removeFlag("__replayText__");
@@ -3198,8 +3209,8 @@ ui.prototype._drawStatistics_buildObj = function () {
     var order = ["doors", "items", "tools", "constants", "equips"];
     ids.sort(function (a, b) {
         var c1 = order.indexOf(cls[a]), c2 = order.indexOf(cls[b]);
-        if (c1==c2) return ori.indexOf(a)-ori.indexOf(b);
-        return c1-c2;
+        if (c1 == c2) return ori.indexOf(a) - ori.indexOf(b);
+        return c1 - c2;
     });
     var obj = {
         'monster': {
@@ -3210,7 +3221,7 @@ ui.prototype._drawStatistics_buildObj = function () {
             'hp': 0, 'atk': 0, 'def': 0, 'mdef': 0
         }
     };
-    return {ids: ids, cls: cls, ext: ext, total: core.clone(obj), current: core.clone(obj), marked: core.clone(obj)};
+    return { ids: ids, cls: cls, ext: ext, total: core.clone(obj), current: core.clone(obj), marked: core.clone(obj) };
 }
 
 ui.prototype._drawStatistics_add = function (floorId, obj, x1, x2, value) {
@@ -3225,11 +3236,11 @@ ui.prototype._drawStatistics_floorId = function (floorId, obj) {
     core.extractBlocks(floorId);
     var floor = core.status.maps[floorId], blocks = floor.blocks;
     // 隐藏层不给看
-    if (floor.cannotViewMap && floorId!=core.status.floorId) return;
+    if (floor.cannotViewMap && floorId != core.status.floorId) return;
     blocks.forEach(function (block) {
         if (block.disable) return;
         var event = block.event;
-        if (event.cls.indexOf("enemy")==0) {
+        if (event.cls.indexOf("enemy") == 0) {
             core.ui._drawStatistics_enemy(floorId, event.id, obj);
         }
         else {
@@ -3249,14 +3260,14 @@ ui.prototype._drawStatistics_enemy = function (floorId, id, obj) {
 }
 
 ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
-    var hp=0, atk=0, def=0, mdef=0;
-    if (obj.cls[id]=='items' && id!='superPotion') {
+    var hp = 0, atk = 0, def = 0, mdef = 0;
+    if (obj.cls[id] == 'items' && id != 'superPotion') {
         var temp = core.clone(core.status.hero);
         core.setFlag("__statistics__", true);
         var ratio = core.status.thisMap.ratio;
         core.status.thisMap.ratio = core.clone(core.status.maps[floorId].ratio);
         try { eval(core.material.items[id].itemEffect); }
-        catch (e) {}
+        catch (e) { }
         core.status.thisMap.ratio = ratio;
         hp = core.status.hero.hp - temp.hp;
         atk = core.status.hero.atk - temp.atk;
@@ -3266,13 +3277,13 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
         window.hero = core.status.hero;
         window.flags = core.status.hero.flags;
     }
-    else if (obj.cls[id]=='equips') {
+    else if (obj.cls[id] == 'equips') {
         var values = core.material.items[id].equip || {};
         atk = values.atk || 0;
         def = values.def || 0;
         mdef = values.mdef || 0;
     }
-    if (id.indexOf('sword')==0 || id.indexOf('shield')==0 || obj.cls[id]=='equips') {
+    if (id.indexOf('sword') == 0 || id.indexOf('shield') == 0 || obj.cls[id] == 'equips') {
         var t = "";
         if (atk > 0) t += atk + core.getStatusLabel('atk');
         if (def > 0) t += def + core.getStatusLabel('def');
@@ -3287,35 +3298,35 @@ ui.prototype._drawStatistics_items = function (floorId, floor, id, obj) {
 }
 
 ui.prototype._drawStatistics_generateText = function (obj, type, data) {
-    var text = type+"地图中：\n";
-    text += "共有怪物"+data.monster.count+"个";
-    if (core.flags.statusBarItems.indexOf('enableMoney')>=0) text+="，总金币数"+data.monster.money;
-    if (core.flags.statusBarItems.indexOf('enableExp')>=0) text+="，总经验数"+data.monster.exp;
-    if (core.flags.enableAddPoint) text+="，总加点数"+data.monster.point;
-    text+="。\n";
+    var text = type + "地图中：\n";
+    text += "共有怪物" + data.monster.count + "个";
+    if (core.flags.statusBarItems.indexOf('enableMoney') >= 0) text += "，总金币数" + data.monster.money;
+    if (core.flags.statusBarItems.indexOf('enableExp') >= 0) text += "，总经验数" + data.monster.exp;
+    if (core.flags.enableAddPoint) text += "，总加点数" + data.monster.point;
+    text += "。\n";
 
     var prev = "";
     obj.ids.forEach(function (key) {
         var value = data.count[key];
-        if (value==0) return;
+        if (value == 0) return;
         if (obj.cls[key] != prev) {
             if (prev != "") text += "。";
             text += "\n";
         }
         else text += "，";
         prev = obj.cls[key];
-        var name = ((core.material.items[key] || (core.getBlockById(key) || {}).event)||{}).name || key;
-        text+=name+value+"个";
+        var name = ((core.material.items[key] || (core.getBlockById(key) || {}).event) || {}).name || key;
+        text += name + value + "个";
         if (obj.ext[key])
-            text+="("+obj.ext[key]+")";
+            text += "(" + obj.ext[key] + ")";
     })
-    if (prev!="") text+="。";
+    if (prev != "") text += "。";
 
-    text+="\n";
-    text+="共加生命值"+core.formatBigNumber(data.add.hp)+"点，攻击"
-        +core.formatBigNumber(data.add.atk)+"点，防御"
-        +core.formatBigNumber(data.add.def)+"点，护盾"
-        +core.formatBigNumber(data.add.mdef)+"点。";
+    text += "\n";
+    text += "共加生命值" + core.formatBigNumber(data.add.hp) + "点，攻击"
+        + core.formatBigNumber(data.add.atk) + "点，防御"
+        + core.formatBigNumber(data.add.def) + "点，护盾"
+        + core.formatBigNumber(data.add.mdef) + "点。";
     return text;
 }
 
@@ -3337,10 +3348,10 @@ ui.prototype._drawHelp = function () {
     }
     else {
         core.drawText([
-            "\t[键盘快捷键列表]"+
+            "\t[键盘快捷键列表]" +
             "[CTRL] 跳过对话   [Z] 转向\n" +
-            "[X] "+core.material.items['book'].name + "   [G] "+core.material.items['fly'].name+"\n" +
-            "[A] 读取自动存档   [W] 撤销读取自动存档\n" + 
+            "[X] " + core.material.items['book'].name + "   [G] " + core.material.items['fly'].name + "\n" +
+            "[A] 读取自动存档   [W] 撤销读取自动存档\n" +
             "[S/D] 存读档页面   [SPACE] 轻按\n" +
             "[V] 快捷商店   [ESC] 系统菜单\n" +
             "[T] 道具页面   [Q] 装备页面\n" +
@@ -3348,16 +3359,16 @@ ui.prototype._drawHelp = function () {
             "[R] 回放录像   [E] 显示光标\n" +
             "[N] 返回标题页面   [P] 游戏主页\n" +
             "[O] 查看工程   [F7] 打开debug穿墙模式\n" +
-            "[PgUp/PgDn] 浏览地图\n"+
-            "[1~4] 快捷使用破炸飞和其他道具\n"+
+            "[PgUp/PgDn] 浏览地图\n" +
+            "[1~4] 快捷使用破炸飞和其他道具\n" +
             "[Alt+0~9] 快捷换装",
-            "\t[鼠标操作]"+
-            "点状态栏中图标： 进行对应的操作\n"+
-            "点任意块： 寻路并移动\n"+
-            "点任意块并拖动： 指定寻路路线\n"+
-            "双击空地： 瞬间移动\n"+
-            "单击勇士： 转向\n"+
-            "双击勇士： 轻按（仅在轻按开关打开时有效）\n"+
+            "\t[鼠标操作]" +
+            "点状态栏中图标： 进行对应的操作\n" +
+            "点任意块： 寻路并移动\n" +
+            "点任意块并拖动： 指定寻路路线\n" +
+            "双击空地： 瞬间移动\n" +
+            "单击勇士： 转向\n" +
+            "双击勇士： 轻按（仅在轻按开关打开时有效）\n" +
             "长按任意位置：跳过剧情对话或打开虚拟键盘"
         ]);
     }
@@ -3431,7 +3442,7 @@ ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
     if (angle == 0) {
         canvas.style.transform = '';
     } else {
-        canvas.style.transform = 'rotate(' + angle +'deg)';
+        canvas.style.transform = 'rotate(' + angle + 'deg)';
     }
     canvas.setAttribute('_angle', angle);
 }

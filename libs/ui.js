@@ -1097,7 +1097,7 @@ ui.prototype.drawTextContent = function (ctx, content, config) {
     config.top = config.top || 0;
     config.color = core.arrayToRGBA(config.color || textAttribute.text);
     if (config.bold == null) config.bold = textAttribute.bold;
-    config.italic = false;
+    config.italic = config.italic || false;
     config.align = config.align || textAttribute.align || "left";
     config.fontSize = config.fontSize || textAttribute.textfont;
     config.lineHeight = config.lineHeight || (config.fontSize * 1.3);
@@ -1166,6 +1166,7 @@ ui.prototype._drawTextContent_draw = function (ctx, tempCtx, content, config) {
         while (_drawNext());
     }
     else {
+        clearInterval(core.status.event.interval);
         core.status.event.interval = setInterval(function () {
             if (!_drawNext()) {
                 clearInterval(core.status.event.interval);

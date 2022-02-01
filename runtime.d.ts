@@ -2338,13 +2338,26 @@ declare class ui {
     /** 
      * 绘制一段文字到某个画布上面
      * @param ctx 要绘制到的画布
-     * @param content 要绘制的内容；转义字符不允许保留 \t, \b 和 \f
+     * @param content 要绘制的内容；转义字符只允许保留 \n, \r[...], \i[...], \c[...], \d, \e
      * @param config 绘制配置项，目前暂时包含如下内容（均为可选）
      *                left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
      *                fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
      * @returns 绘制信息 
      */
-    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: any): any
+    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: {
+        left?: number
+        top?: number
+        maxWidth?: number
+        color?: number
+        align?: 'left' | 'center' | 'right'
+        fontSize: number
+        lineHeight?: number
+        time?: number
+        font?: string
+        letterSpacing?: number
+        bold?: boolean
+        italic?: boolean
+    }): any
 
     /** 获得某段文字的预计绘制高度；参见 drawTextContent */
     getTextContentHeight(content: string, config?: any): void
@@ -2927,8 +2940,20 @@ type core = {
 declare class main {
     readonly core: core
     readonly dom = core.dom
+    /** 游戏版本，发布后会被随机，请勿使用该属性 */
+    readonly version: string
+    readonly useCompress: boolean
+    readonly savePages: number
+    readonly mode: 'play' | 'editor'
+    readonly statusBar: {
+        images: { [x: string]: HTMLElement }
+        icons: { [x: string]: number | null | undefined }
+        [x: string]: HTMLElement | object
+    }
+    readonly __VERSION__: string
+    readonly __VERSION_CODE__: number
 
-    /** 输出内容（极不好用，建议换成console）*/
+    /** 输出内容（极不好用，建议换成console，我甚至不知道样板为什么会有这个东西）*/
     log(e: string | Error, error: boolean): void
 }
 

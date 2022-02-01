@@ -2,7 +2,7 @@ function main () {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.8.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.9"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -188,7 +188,7 @@ function main () {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.8.2";
+    this.__VERSION__ = "2.9";
     this.__VERSION_CODE__ = 507;
 }
 

@@ -3393,8 +3393,8 @@ control.prototype._resize_canvas = function (obj) {
         // core.maps._setHDCanvasSize(ctx, parseFloat(canvas.getAttribute('_width')), parseFloat(canvas.getAttribute('_height')));
         canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
         canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
-        var scale = canvas.getAttribute('_scale');
-        core.resizeCanvas(canvas, canvas.width * scale * core.domStyle.scale, canvas.height * scale * core.domStyle.scale);
+        var scale = canvas.getAttribute('_scale') || 1;
+        core.resizeCanvas(canvas, canvas.width * scale / core.domStyle.scale, canvas.height * scale / core.domStyle.scale);
     }
     // resize next
     main.dom.next.style.width = main.dom.next.style.height = 5 * core.domStyle.scale + "px";

@@ -44,7 +44,24 @@ main.floors.sample2=
     "events": {
         "12,12": [
             "234"
-        ]
+        ],
+        "10,11": {
+            "trigger": "action",
+            "enable": true,
+            "noPass": null,
+            "displayDamage": true,
+            "opacity": 1,
+            "filter": {
+                "blur": 0,
+                "hue": 0,
+                "grayscale": 0,
+                "invert": false,
+                "shadow": 0
+            },
+            "data": [
+                "\t[小妖精,bearRight]欢迎使用事件编辑器(双击方块可直接预览)"
+            ]
+        }
     },
     "changeFloor": {
         "6,10": {

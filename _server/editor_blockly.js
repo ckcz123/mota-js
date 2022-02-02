@@ -1,6 +1,6 @@
 editor_blockly = function () {
 
-    var editor_blockly = {entryType:'event'};
+    var editor_blockly = { entryType: 'event' };
 
     editor.uivalues.disableBlocklyReplace = editor.config.get("disableBlocklyReplace", false);
     var replaceCheckbox = document.getElementById('blocklyReplace');
@@ -62,7 +62,7 @@ editor_blockly = function () {
         matchBrackets: true,
         lineWrapping: true,
         continueComments: "Enter",
-        extraKeys: {"Ctrl-Q": "toggleComment"},
+        extraKeys: { "Ctrl-Q": "toggleComment" },
     });
     codeAreaHL.on('changes', function () {
         editor_blockly.highlightParse(!changeFromBlockly);
@@ -96,15 +96,15 @@ editor_blockly = function () {
     }
 
     editor_blockly.setValue = function (value) {
-      changeFromBlockly = true;
-      codeAreaHL.setValue(value);
+        changeFromBlockly = true;
+        codeAreaHL.setValue(value);
     }
 
     editor_blockly.parse = function () {
         MotaActionFunctions.parse(
             eval('obj=' + codeAreaHL.getValue().replace(/[<>&]/g, function (c) {
-                return {'<': '&lt;', '>': '&gt;', '&': '&amp;'}[c];
-            }).replace(/\\(r|f|i|c|d|e|g|z)/g,'\\\\$1')),
+                return { '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c];
+            }).replace(/\\(r|f|i|c|d|e|g|z)/g, '\\\\$1')),
             editor_blockly.isCommonEntry() ? 'common' : editor_blockly.entryType
         );
     }
@@ -132,7 +132,7 @@ editor_blockly = function () {
 
     var blocklyWidgetDiv = document.getElementsByClassName('blocklyWidgetDiv');
     editor_blockly.show = function () {
-        if (typeof(selectBox) !== typeof(undefined)) selectBox.isSelected(false);
+        if (typeof (selectBox) !== typeof (undefined)) selectBox.isSelected(false);
         document.getElementById('left6').style = '';
         for (var ii = 0, node; node = blocklyWidgetDiv[ii]; ii++) {
             node.style.zIndex = 201;
@@ -149,10 +149,10 @@ editor_blockly = function () {
 
     var blocklyParseBtn = document.getElementById('blocklyParse');
     editor_blockly.highlightParse = function (shouldHighLight) {
-      if (shouldNotifyParse == shouldHighLight) return;
-      shouldNotifyParse = shouldHighLight;
-      if (shouldHighLight) blocklyParseBtn.classList.add('highlight');
-      else blocklyParseBtn.classList.remove('highlight');
+        if (shouldNotifyParse == shouldHighLight) return;
+        shouldNotifyParse = shouldHighLight;
+        if (shouldHighLight) blocklyParseBtn.classList.add('highlight');
+        else blocklyParseBtn.classList.remove('highlight');
     }
 
     editor_blockly.cancel = function () {
@@ -169,20 +169,20 @@ editor_blockly = function () {
             return;
         }
         if (shouldNotifyParse) {
-          alert('你尚未解析修改后的内容，请进行解析或放弃操作');
-          return;
+            alert('你尚未解析修改后的内容，请进行解析或放弃操作');
+            return;
         }
-        if(editor_blockly.workspace.topBlocks_.length>=2){
-          editor_blockly.setValue('入口方块只能有一个');
-          return;
+        if (editor_blockly.workspace.topBlocks_.length >= 2) {
+            editor_blockly.setValue('入口方块只能有一个');
+            return;
         }
         var eventType = editor_blockly.entryType;
-        if(editor_blockly.workspace.topBlocks_.length==1){
-          var blockType = editor_blockly.workspace.topBlocks_[0].type;
-          if(blockType!==eventType+'_m' && !(editor_blockly.isCommonEntry() && blockType == 'common_m')){
-            editor_blockly.setValue('入口方块类型错误');
-            return;
-          }
+        if (editor_blockly.workspace.topBlocks_.length == 1) {
+            var blockType = editor_blockly.workspace.topBlocks_[0].type;
+            if (blockType !== eventType + '_m' && !(editor_blockly.isCommonEntry() && blockType == 'common_m')) {
+                editor_blockly.setValue('入口方块类型错误');
+                return;
+            }
         }
         var setvalue = function (value) {
             var thisTr = document.getElementById(editor_blockly.id);
@@ -196,7 +196,7 @@ editor_blockly = function () {
             input.onchange();
         }
         if (codeAreaHL.getValue() === '') {
-            eventType==='shop'?setvalue('[]'):setvalue('null');
+            eventType === 'shop' ? setvalue('[]') : setvalue('null');
             return;
         }
         var code = Blockly.JavaScript.workspaceToCode(editor_blockly.workspace);
@@ -246,7 +246,7 @@ editor_blockly = function () {
                     }
                 }
             }
-            if (one.type == 'previewUI' && this.checkAsync(one.action)) return true; 
+            if (one.type == 'previewUI' && this.checkAsync(one.action)) return true;
             if (one.async && one.type != 'animate' && one.type != 'function' && one.type != 'text') hasAsync = true;
             if (one.type == 'waitAsync' || one.type == 'stopAsync') hasAsync = false;
         }
@@ -255,17 +255,17 @@ editor_blockly = function () {
 
     var _isTextAttributeSet = false;
 
-    editor_blockly.previewBlock = function (b,args) {
+    editor_blockly.previewBlock = function (b, args) {
 
         var previewTextDrawing = function (content) {
             var arr = [];
-            content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {        
+            content.replace(/(\f|\\f)\[(.*?)]/g, function (text, sympol, str) {
                 var list = str.split(",");
                 if (list.length == 3 || list.length == 5 || list.length >= 9) {
                     var name = list[0];
-                    var obj = {"type": "drawImage"};
+                    var obj = { "type": "drawImage" };
                     if (name.endsWith(":o") || name.endsWith(":x") || name.endsWith(":y")) {
-                        obj.reverse = name.substring(name.length-2);
+                        obj.reverse = name.substring(name.length - 2);
                         name = name.substring(0, name.length - 2);
                     }
                     obj.image = name;
@@ -282,7 +282,7 @@ editor_blockly = function () {
                         obj.h1 = parseFloat(list[8]);
                     }
                     if (list.length >= 10) {
-                        arr.push({"type": "setAttribute", "alpha": parseFloat(list[9])});
+                        arr.push({ "type": "setAttribute", "alpha": parseFloat(list[9]) });
                     }
                     if (list.length >= 11) {
                         obj.angle = parseFloat(list[10]);
@@ -303,78 +303,84 @@ editor_blockly = function () {
             }
 
             var code = "[" + Blockly.JavaScript.blockToCode(b).replace(/\\(i|c|d|e|g|z)/g, '\\\\$1') + "]";
-            eval("var obj="+code);
+            eval("var obj=" + code);
             if (obj.length == 0) return true;
             obj = obj[0];
             switch (b.type) {
-            case 'text_0_s':
-            case 'text_1_s':
-            case 'text_2_s':
-            case 'choices_s':
-            case 'confirm_s':
-                if (!_isTextAttributeSet) {
-                    alert('警告！你尚未设置用于预览的剧情文本的属性，将采用默认属性进行预览。\n你可以双击“设置剧情文本的属性”事件来设置用于预览的属性。');
-                    core.status.textAttribute = core.clone(core.initStatus.textAttribute);
-                    _isTextAttributeSet = true;
-                }
-                editor.uievent.previewUI([obj]);
-                break;
-            case 'setText_s': // 设置剧情文本的属性
-                _isTextAttributeSet = true;
-                core.status.textAttribute = core.clone(core.initStatus.textAttribute);
-                core.setTextAttribute(obj);
-                alert('已成功设置此属性为显示文章的预览属性！')
-                break;
-            case 'waitContext_2': // 等待用户操作坐标预览
-                editor.uievent.previewUI([{"type": "fillRect", "x": obj.px[0], "y": obj.py[0],
-                    "width": "(" + obj.px[1] + ")-(" + obj.px[0] + ")", "height": "(" + obj.py[1] + ")-(" + obj.py[0] + ")",
-                    "style": "rgba(255,0,0,0.5)"}]);
-                break;
-            case 'showImage_s': // 显示图片
-            case 'showImage_1_s':
-                if (obj.sloc) {
-                    editor.uievent.previewUI([
-                        {type: "setAttribute", alpha: obj.opacity},
-                        {type: "drawImage", image: obj.image, x: obj.sloc[0], y: obj.sloc[1], w: obj.sloc[2], h: obj.sloc[3],
-                            x1: obj.loc[0], y1: obj.loc[1], w1: obj.loc[2], h1: obj.loc[3], reverse: obj.reverse}
-                    ]);
-                } else {
-                    editor.uievent.previewUI([
-                        {type: "setAttribute", alpha: obj.opacity},
-                        {type: "drawImage", image: obj.image, x: obj.loc[0], y: obj.loc[1], w: obj.loc[2], h: obj.loc[3], reverse: obj.reverse}
-                    ]);
-                }
-                break;
-            case 'showGif_s': // 显示动图
-                if (obj.name && obj.loc) {
-                    editor.uievent.previewUI([{type: "drawImage", image: obj.name, x: obj.loc[0], y: obj.loc[1]}]);
-                }
-                break;
-            case 'setCurtain_0_s': // 更改色调
-                if (obj.color) {
-                    editor.uievent.previewUI([{type: "fillRect", x: 0, y: 0, width: core.__PIXELS__, height: core.__PIXELS__, style: obj.color}]);
-                }
-                break;
-            case 'floorOneImage': // 楼层贴图
-                obj.w = obj.w / (obj.frame || 1);
-                editor.uievent.previewUI([
-                    {type: "drawImage", image: obj.name, x: obj.sx || 0, y: obj.sy || 0, w: obj.w, h: obj.h,
-                        x1: obj.x, y1: obj.y, w1: obj.w, h1: obj.h, reverse: obj.reverse}
-                ]);
-                break;
-            case 'previewUI_s': // 预览
-                editor.uievent.previewUI(obj.action);
-                break;
-            default:
-                if (b.type.startsWith(obj.type)) {
+                case 'text_0_s':
+                case 'text_1_s':
+                case 'text_2_s':
+                case 'choices_s':
+                case 'confirm_s':
+                    if (!_isTextAttributeSet) {
+                        alert('警告！你尚未设置用于预览的剧情文本的属性，将采用默认属性进行预览。\n你可以双击“设置剧情文本的属性”事件来设置用于预览的属性。');
+                        core.status.textAttribute = core.clone(core.initStatus.textAttribute);
+                        _isTextAttributeSet = true;
+                    }
                     editor.uievent.previewUI([obj]);
-                }
+                    break;
+                case 'setText_s': // 设置剧情文本的属性
+                    _isTextAttributeSet = true;
+                    core.status.textAttribute = core.clone(core.initStatus.textAttribute);
+                    core.setTextAttribute(obj);
+                    alert('已成功设置此属性为显示文章的预览属性！')
+                    break;
+                case 'waitContext_2': // 等待用户操作坐标预览
+                    editor.uievent.previewUI([{
+                        "type": "fillRect", "x": obj.px[0], "y": obj.py[0],
+                        "width": "(" + obj.px[1] + ")-(" + obj.px[0] + ")", "height": "(" + obj.py[1] + ")-(" + obj.py[0] + ")",
+                        "style": "rgba(255,0,0,0.5)"
+                    }]);
+                    break;
+                case 'showImage_s': // 显示图片
+                case 'showImage_1_s':
+                    if (obj.sloc) {
+                        editor.uievent.previewUI([
+                            { type: "setAttribute", alpha: obj.opacity },
+                            {
+                                type: "drawImage", image: obj.image, x: obj.sloc[0], y: obj.sloc[1], w: obj.sloc[2], h: obj.sloc[3],
+                                x1: obj.loc[0], y1: obj.loc[1], w1: obj.loc[2], h1: obj.loc[3], reverse: obj.reverse
+                            }
+                        ]);
+                    } else {
+                        editor.uievent.previewUI([
+                            { type: "setAttribute", alpha: obj.opacity },
+                            { type: "drawImage", image: obj.image, x: obj.loc[0], y: obj.loc[1], w: obj.loc[2], h: obj.loc[3], reverse: obj.reverse }
+                        ]);
+                    }
+                    break;
+                case 'showGif_s': // 显示动图
+                    if (obj.name && obj.loc) {
+                        editor.uievent.previewUI([{ type: "drawImage", image: obj.name, x: obj.loc[0], y: obj.loc[1] }]);
+                    }
+                    break;
+                case 'setCurtain_0_s': // 更改色调
+                    if (obj.color) {
+                        editor.uievent.previewUI([{ type: "fillRect", x: 0, y: 0, width: core.__PIXELS__, height: core.__PIXELS__, style: obj.color }]);
+                    }
+                    break;
+                case 'floorOneImage': // 楼层贴图
+                    obj.w = obj.w / (obj.frame || 1);
+                    editor.uievent.previewUI([
+                        {
+                            type: "drawImage", image: obj.name, x: obj.sx || 0, y: obj.sy || 0, w: obj.w, h: obj.h,
+                            x1: obj.x, y1: obj.y, w1: obj.w, h1: obj.h, reverse: obj.reverse
+                        }
+                    ]);
+                    break;
+                case 'previewUI_s': // 预览
+                    editor.uievent.previewUI(obj.action);
+                    break;
+                default:
+                    if (b.type.startsWith(obj.type)) {
+                        editor.uievent.previewUI([obj]);
+                    }
             }
-        } catch (e) {main.log(e);}
+        } catch (ee) { console.error(ee) }
 
     }
 
-    editor_blockly.selectMaterial = function(b,material){
+    editor_blockly.selectMaterial = function (b, material) {
         var value = b.getFieldValue(material[1]);
         value = main.nameMap[value] || value;
         editor.uievent.selectMaterial([value], '请选择素材', material[0], function (one) {
@@ -388,7 +394,7 @@ editor_blockly = function () {
                 // 检测是否别名替换
                 for (var name in main.nameMap) {
                     if (main.nameMap[name] == value) {
-                        if (confirm("检测到该文件存在别名："+name+"\n是否使用别名进行替换？")) {
+                        if (confirm("检测到该文件存在别名：" + name + "\n是否使用别名进行替换？")) {
                             b.setFieldValue(name, material[1]);
                             return;
                         } else {
@@ -401,10 +407,10 @@ editor_blockly = function () {
         });
     }
 
-    editor_blockly.doubleclicktext = function(b,f){
+    editor_blockly.doubleclicktext = function (b, f) {
         var value = b.getFieldValue(f);
         //多行编辑
-        editor_multi.multiLineEdit(value, b, f, {'lint': f === 'RawEvalString_0'}, function (newvalue, b, f) {
+        editor_multi.multiLineEdit(value, b, f, { 'lint': f === 'RawEvalString_0' }, function (newvalue, b, f) {
             if (!f.startsWith('EvalString_Multi')) {
                 newvalue = newvalue.split('\n').join('\\n');
             }
@@ -415,23 +421,23 @@ editor_blockly = function () {
     editor_blockly.doubleClickBlock = function (blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
 
-        if (b && MotaActionBlocks[b.type].previewBlock){
-            editor_blockly.previewBlock(b,MotaActionBlocks[b.type].previewBlock)
+        if (b && MotaActionBlocks[b.type].previewBlock) {
+            editor_blockly.previewBlock(b, MotaActionBlocks[b.type].previewBlock)
             return;
         }
 
         if (b && MotaActionBlocks[b.type].selectPoint) { // selectPoint
-            editor_blockly.selectPoint(b,eval(MotaActionBlocks[b.type].selectPoint));
+            editor_blockly.selectPoint(b, eval(MotaActionBlocks[b.type].selectPoint));
             return;
         }
 
         if (b && MotaActionBlocks[b.type].material) {
-            editor_blockly.selectMaterial(b,JSON.parse(MotaActionBlocks[b.type].material));
+            editor_blockly.selectMaterial(b, JSON.parse(MotaActionBlocks[b.type].material));
             return;
         }
 
         if (b && MotaActionBlocks[b.type].doubleclicktext) { //多行编辑
-            editor_blockly.doubleclicktext(b,MotaActionBlocks[b.type].doubleclicktext);
+            editor_blockly.doubleclicktext(b, MotaActionBlocks[b.type].doubleclicktext);
             return;
         }
     }
@@ -439,7 +445,7 @@ editor_blockly = function () {
     editor_blockly.selectPointFromButton = function () {
         var b = Blockly.selected;
         if (b && MotaActionBlocks[b.type].selectPoint) {
-            editor_blockly.selectPoint(b,eval(MotaActionBlocks[b.type].selectPoint));
+            editor_blockly.selectPoint(b, eval(MotaActionBlocks[b.type].selectPoint));
             return;
         } else {
             editor.uievent.selectPoint();
@@ -448,11 +454,11 @@ editor_blockly = function () {
 
     editor_blockly.showKeyCodes = function () {
         alert('键值查询表：\nA65 B66 C67 D68 E69 F70 G71 H72 I73 J74 K75 L76 M77\n'
-            +'N78 O79 P80 Q81 R82 S83 T84 U85 V86 W87 X88 Y89 Z90\n0:48 1:49 2:50 3:51 4:52 5:53 6:54 7:55 8:56 9:57\n'
-            +'空格:13 回车:32 ESC:27 后退:8 Tab:9 Shift:16 Ctrl:17 Alt:18\nPgUp:33 PgDn:34 左:37 上:38 右:39 下:40\n更多键值请自行百度查表')
+            + 'N78 O79 P80 Q81 R82 S83 T84 U85 V86 W87 X88 Y89 Z90\n0:48 1:49 2:50 3:51 4:52 5:53 6:54 7:55 8:56 9:57\n'
+            + '空格:13 回车:32 ESC:27 后退:8 Tab:9 Shift:16 Ctrl:17 Alt:18\nPgUp:33 PgDn:34 左:37 上:38 右:39 下:40\n更多键值请自行百度查表')
     }
 
-    editor_blockly.lastUsedType=[
+    editor_blockly.lastUsedType = [
         'text_0_s',
         'comment_s',
         'show_s',
@@ -469,33 +475,33 @@ editor_blockly = function () {
         'setBlock_s',
         'insert_1_s'
     ]; // 最常用的15个事件
-    editor_blockly.lastUsedTypeNum=15;
+    editor_blockly.lastUsedTypeNum = 15;
 
-    editor_blockly.addIntoLastUsedType=function(blockId) {
+    editor_blockly.addIntoLastUsedType = function (blockId) {
         var b = editor_blockly.workspace.getBlockById(blockId);
-        if(!b)return;
+        if (!b) return;
         var blockType = b.type;
-        if(!blockType || blockType.indexOf("_s")!==blockType.length-2 || blockType==='pass_s')return;
-        editor_blockly.lastUsedType = editor_blockly.lastUsedType.filter(function (v) {return v!==blockType;});
+        if (!blockType || blockType.indexOf("_s") !== blockType.length - 2 || blockType === 'pass_s') return;
+        editor_blockly.lastUsedType = editor_blockly.lastUsedType.filter(function (v) { return v !== blockType; });
         if (editor_blockly.lastUsedType.length >= editor_blockly.lastUsedTypeNum)
             editor_blockly.lastUsedType.pop();
         editor_blockly.lastUsedType.unshift(blockType);
 
-        document.getElementById("searchBlock").value='';
+        document.getElementById("searchBlock").value = '';
     }
 
     // Index from 1 - 9
-    editor_blockly.openToolbox = function(index) {
+    editor_blockly.openToolbox = function (index) {
         if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
         editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
     }
-    editor_blockly.reopenToolbox = function(index) {
+    editor_blockly.reopenToolbox = function (index) {
         if (index < 0) index += editor_blockly.workspace.toolbox_.tree_.children_.length;
         editor_blockly.workspace.toolbox_.tree_.setSelectedItem(editor_blockly.workspace.toolbox_.tree_.children_[index]);
         editor_blockly.workspace.getFlyout().show(editor_blockly.workspace.toolbox_.tree_.children_[index].blocks);
     }
 
-    editor_blockly.closeToolbox = function() {
+    editor_blockly.closeToolbox = function () {
         editor_blockly.workspace.toolbox_.clearSelection();
     }
 
@@ -514,14 +520,14 @@ editor_blockly = function () {
         if (value == '') return editor_blockly.lastUsedType;
         var results = [];
         for (var name in MotaActionBlocks) {
-            if (typeof name !== 'string' || name.indexOf("_s") !== name.length-2) continue;
+            if (typeof name !== 'string' || name.indexOf("_s") !== name.length - 2) continue;
             var block = MotaActionBlocks[name];
-            if(block && block.json) {
-                if ((block.json.type||"").toLowerCase().indexOf(value)>=0
-                    || (block.json.message0||"").toLowerCase().indexOf(value)>=0
-                    || (block.json.tooltip||"").toLowerCase().indexOf(value)>=0) {
+            if (block && block.json) {
+                if ((block.json.type || "").toLowerCase().indexOf(value) >= 0
+                    || (block.json.message0 || "").toLowerCase().indexOf(value) >= 0
+                    || (block.json.tooltip || "").toLowerCase().indexOf(value) >= 0) {
                     results.push(name);
-                    if (results.length>=editor_blockly.lastUsedTypeNum)
+                    if (results.length >= editor_blockly.lastUsedTypeNum)
                         break;
                 }
             }
@@ -532,7 +538,7 @@ editor_blockly = function () {
 
     // ------ select point ------
 
-    editor_blockly.selectPoint = function (block,arr) {
+    editor_blockly.selectPoint = function (block, arr) {
 
         var floorId = editor.currentFloorId, pos = editor.pos, x = pos.x, y = pos.y;
 
@@ -547,8 +553,8 @@ editor_blockly = function () {
                 if (fv != editor.currentFloorId || editor_blockly.entryType == 'commonEvent') block.setFieldValue(fv, arr[2]);
                 else block.setFieldValue(arr[3] ? fv : "", arr[2]);
             }
-            block.setFieldValue(xv+"", arr[0]);
-            block.setFieldValue(yv+"", arr[1]);
+            block.setFieldValue(xv + "", arr[0]);
+            block.setFieldValue(yv + "", arr[1]);
             if (block.type == 'changeFloor_m' || block.type == 'changeFloor_s') {
                 block.setFieldValue("floorId", "Floor_List_0");
                 block.setFieldValue("loc", "Stair_List_0");
@@ -565,7 +571,7 @@ editor_blockly = function () {
         var index = Math.max(content.lastIndexOf(":"), content.lastIndexOf("："));
         if (index >= 0) {
             var ch = content.charAt(index);
-            var before = content.substring(0, index), token = content.substring(index+1);
+            var before = content.substring(0, index), token = content.substring(index + 1);
             if (/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]*$/.test(token)) {
                 if (before.endsWith("状态") || (ch == ':' && before.endsWith("status"))) {
                     var list = Object.keys(core.status.hero);
@@ -596,20 +602,20 @@ editor_blockly = function () {
                 } else if (before.endsWith("怪物") || (ch == ':' && before.endsWith("enemy"))) {
                     var list = Object.keys(core.material.enemys);
                     if (before.endsWith("怪物") && MotaActionFunctions) {
-                      list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
-                          return v[1];
-                      }).concat(list);
+                        list = MotaActionFunctions.pattern.replaceEnemyList.map(function (v) {
+                            return v[1];
+                        }).concat(list);
                     }
                     return list.filter(function (one) {
                         return one != token && one.startsWith(token);
                     })
                 } else {
-                    var index2 = Math.max(content.lastIndexOf(":", index-1), content.lastIndexOf("：", index-1));
+                    var index2 = Math.max(content.lastIndexOf(":", index - 1), content.lastIndexOf("：", index - 1));
                     var ch2 = content.charAt(index2);
                     if (index2 >= 0) {
                         before = content.substring(0, index2);
                         if (before.endsWith("怪物") || (ch == ':' && ch2 == ':' && before.endsWith("enemy"))) {
-                            var list = MotaActionBlocks['EnemyId_List'].options.map(function(v){return v[1]});
+                            var list = MotaActionBlocks['EnemyId_List'].options.map(function (v) { return v[1] });
                             if (before.endsWith("怪物") && MotaActionFunctions) {
                                 list = MotaActionFunctions.pattern.replaceEnemyValueList.map(function (v) {
                                     return v[1];
@@ -651,7 +657,7 @@ editor_blockly = function () {
         // 提供 flags.xxx 补全
         index = content.lastIndexOf("flags.");
         if (index >= 0) {
-            var token = content.substring(index+6);
+            var token = content.substring(index + 6);
             return Object.keys(editor.used_flags || {}).filter(function (one) {
                 return one != token && one.startsWith(token)
                     && /^[a-zA-Z_]\w*$/.test(one);
@@ -661,7 +667,7 @@ editor_blockly = function () {
         // 提供 hero.xxx 补全
         index = content.lastIndexOf("hero.");
         if (index >= 0) {
-            var token = content.substring(index+6);
+            var token = content.substring(index + 6);
             return Object.keys(core.status.hero).filter(function (one) {
                 return one != token && one.startsWith(token);
             }).sort();
@@ -696,14 +702,14 @@ editor_blockly = function () {
             }).sort();
         }
 
-        var namesObj={};
+        var namesObj = {};
 
         namesObj.allIds = ["this"].concat(core.getAllIconIds());
         namesObj.allIconIds = namesObj.allIds.concat(Object.keys(core.statusBar.icons).filter(function (x) {
-          return core.statusBar.icons[x] instanceof Image;
+            return core.statusBar.icons[x] instanceof Image;
         }));
         namesObj.allImages = Object.keys(core.material.images.images)
-            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.images.images[main.nameMap[one]];}));
+            .concat(Object.keys(main.nameMap).filter(function (one) { return core.material.images.images[main.nameMap[one]]; }));
         namesObj.allEnemys = Object.keys(core.material.enemys);
         if (MotaActionFunctions && !MotaActionFunctions.disableReplace) {
             namesObj.allEnemys = namesObj.allEnemys.concat(MotaActionFunctions.pattern.replaceEnemyList.map(function (x) {
@@ -721,16 +727,16 @@ editor_blockly = function () {
             }).map(function (x) { return x[1]; }));
         }
         namesObj.allAnimates = Object.keys(core.material.animates)
-            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.animates[main.nameMap[one]];}));
+            .concat(Object.keys(main.nameMap).filter(function (one) { return core.material.animates[main.nameMap[one]]; }));
         namesObj.allBgms = Object.keys(core.material.bgms)
-            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.bgms[main.nameMap[one]];}));
+            .concat(Object.keys(main.nameMap).filter(function (one) { return core.material.bgms[main.nameMap[one]]; }));
         namesObj.allSounds = Object.keys(core.material.sounds)
-            .concat(Object.keys(main.nameMap).filter(function (one) {return core.material.sounds[main.nameMap[one]];}));;
+            .concat(Object.keys(main.nameMap).filter(function (one) { return core.material.sounds[main.nameMap[one]]; }));;
         namesObj.allShops = Object.keys(core.status.shops);
         namesObj.allFloorIds = core.floorIds;
         namesObj.allColors = ["aqua（青色）", "black（黑色）", "blue（蓝色）", "fuchsia（品红色）", "gray（灰色）", "green（深绿色）", "lime（绿色）",
-                         "maroon（深红色）", "navy（深蓝色）", "gold（金色）",  "olive（黄褐色）", "orange（橙色）", "purple（品红色）", 
-                         "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
+            "maroon（深红色）", "navy（深蓝色）", "gold（金色）", "olive（黄褐色）", "orange（橙色）", "purple（品红色）",
+            "red（红色）", "silver（淡灰色）", "teal（深青色）", "white（白色）", "yellow（黄色）"];
         namesObj.allFonts = [main.styles.font].concat(main.fonts);
         namesObj.allDoors = ["this"].concat(Object.keys(maps_90f36752_8815_4be8_b32b_d7fad1d0542e)
             .map(function (key) { return maps_90f36752_8815_4be8_b32b_d7fad1d0542e[key]; })
@@ -738,9 +744,9 @@ editor_blockly = function () {
             .map(function (one) { return one.id; }));
         namesObj.allEvents = Object.keys(core.events.commonEvent);
         var filter = function (list, content) {
-          return list.filter(function (one) {
-            return one != content && one.startsWith(content);
-          }).sort();
+            return list.filter(function (one) {
+                return one != content && one.startsWith(content);
+            }).sort();
         }
 
         // 对任意图块提供补全
@@ -752,8 +758,8 @@ editor_blockly = function () {
         // 对音效进行补全
         // 对全局商店进行补全
         // 对楼层名进行补全
-        for(var ii=0,names;names=['allIds','allEnemys','allItems','allEquips','allImages','allAnimates','allBgms','allSounds','allShops','allFloorIds','allDoors','allEvents'][ii];ii++){
-            if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name)!==-1) {
+        for (var ii = 0, names; names = ['allIds', 'allEnemys', 'allItems', 'allEquips', 'allImages', 'allAnimates', 'allBgms', 'allSounds', 'allShops', 'allFloorIds', 'allDoors', 'allEvents'][ii]; ii++) {
+            if (MotaActionBlocks[type][names] && eval(MotaActionBlocks[type][names]).indexOf(name) !== -1) {
                 return filter(namesObj[names], content);
             }
         }
@@ -761,44 +767,44 @@ editor_blockly = function () {
         // 对\f进行自动补全
         index = Math.max(content.lastIndexOf("\f["), content.lastIndexOf("\\f["));
         if (index >= 0) {
-          if (content.charAt(index) == '\\') index++;
-          var after = content.substring(index + 2);
-          if (after.indexOf(",") < 0 && after.indexOf("]") < 0) {
-            return filter(namesObj.allImages, after);
-          }
+            if (content.charAt(index) == '\\') index++;
+            var after = content.substring(index + 2);
+            if (after.indexOf(",") < 0 && after.indexOf("]") < 0) {
+                return filter(namesObj.allImages, after);
+            }
         }
 
         // 对\\i进行补全
         index = content.lastIndexOf("\\i[");
         if (index >= 0) {
-          var after = content.substring(index + 3);
-          if (after.indexOf("]") < 0) {
-            return filter(namesObj.allIconIds, after);
-          }
+            var after = content.substring(index + 3);
+            if (after.indexOf("]") < 0) {
+                return filter(namesObj.allIconIds, after);
+            }
         }
 
         // 对\r进行补全
         index = Math.max(content.lastIndexOf("\r["), content.lastIndexOf("\\r["));
         if (index >= 0) {
-          if (content.charAt(index) == '\\') index++;
-          var after = content.substring(index + 2);
-          if (after.indexOf("]") < 0) {
-            return filter(namesObj.allColors, after);
-          }
+            if (content.charAt(index) == '\\') index++;
+            var after = content.substring(index + 2);
+            if (after.indexOf("]") < 0) {
+                return filter(namesObj.allColors, after);
+            }
         }
 
         // 对\g进行补全
         index = content.lastIndexOf("\\g[");
         if (index >= 0) {
-          var after = content.substring(index + 3);
-          if (after.indexOf("]") < 0) {
-            return filter(namesObj.allFonts, after);
-          }
+            var after = content.substring(index + 3);
+            if (after.indexOf("]") < 0) {
+                return filter(namesObj.allFonts, after);
+            }
         }
 
         // 对\进行补全！
         if (content.charAt(content.length - 1) == '\\') {
-          return ["n（换行）", "f（立绘）", "r（变色）", "i（图标）", "z（暂停打字）", "t（标题图标）", "b（对话框）", "c（字体大小）", "d（粗体）", "e（斜体）", "g（字体）"];
+            return ["n（换行）", "f（立绘）", "r（变色）", "i（图标）", "z（暂停打字）", "t（标题图标）", "b（对话框）", "c（字体大小）", "d（粗体）", "e（斜体）", "g（字体）"];
         }
 
         return [];
@@ -807,25 +813,25 @@ editor_blockly = function () {
     editor_blockly.completeItems = [];
 
     editor_blockly.onTextFieldCreate = function (self, htmlInput) {
-        var pb=self.sourceBlock_
+        var pb = self.sourceBlock_
         var args = MotaActionBlocks[pb.type].args
-        var targetf=args[args.indexOf(self.name)+1]
+        var targetf = args[args.indexOf(self.name) + 1]
 
         // ------ colour
 
-        if(targetf && targetf.slice(0,7)==='Colour_'){
+        if (targetf && targetf.slice(0, 7) === 'Colour_') {
             var inputDom = htmlInput;
             // var getValue=function(){ // 获得自己的字符串
             //     return pb.getFieldValue(self.name);
             // }
-            var setValue = function(newValue){ // 设置右边颜色块的css颜色
+            var setValue = function (newValue) { // 设置右边颜色块的css颜色
                 pb.setFieldValue(newValue, targetf)
             }
             // 给inputDom绑事件
-            inputDom.oninput=function(){
-                var value=inputDom.value
-                if(/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)){
-                    setValue('rgba('+value+')')
+            inputDom.oninput = function () {
+                var value = inputDom.value
+                if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(value)) {
+                    setValue('rgba(' + value + ')')
                 }
             }
         }
@@ -866,14 +872,14 @@ editor_blockly = function () {
                     });
                     editor_blockly.completeItems.unshift(text);
                 },
-                filter: function () {return true;},
+                filter: function () { return true; },
                 item: function (text, input) {
                     var id = text.label, info = core.getBlockInfo(id);
                     var li = document.createElement("li");
                     li.setAttribute("role", "option");
                     li.setAttribute("aria-selected", "false");
                     input = awesomplete.prefix.trim();
-                    if (input != "") text = text.replace(new RegExp("^"+input, "i"), "<mark>$&</mark>");
+                    if (input != "") text = text.replace(new RegExp("^" + input, "i"), "<mark>$&</mark>");
                     li.innerHTML = text;
                     if (info) {
                         var height = (info.height || 32), width = 32;
@@ -907,10 +913,10 @@ editor_blockly = function () {
                 value = value.substring(0, index);
                 // cal prefix
                 awesomplete.prefix = value;
-                for (var i = index - 1; i>=0; i--) {
+                for (var i = index - 1; i >= 0; i--) {
                     var c = value.charAt(i);
                     if (!/^[a-zA-Z0-9_\u4E00-\u9FCC\u3040-\u30FF\u2160-\u216B\u0391-\u03C9]$/.test(c)) {
-                        awesomplete.prefix = value.substring(i+1);
+                        awesomplete.prefix = value.substring(i + 1);
                         break;
                     }
                 }
@@ -933,7 +939,7 @@ editor_blockly = function () {
 
     editor_blockly.isBlockCollapsedSupported = function (block) {
         var supportedDisabledBlocks = [
-            'text_0_s', 'text_1_s', 'text_2_s', 'if_s', 'if_1_s', 'confirm_s', 'switch_s', 'choices_s', 
+            'text_0_s', 'text_1_s', 'text_2_s', 'if_s', 'if_1_s', 'confirm_s', 'switch_s', 'choices_s',
             'for_s', 'forEach_s', 'while_s', 'dowhile_s', 'wait_s', 'previewUI_s',
             'waitContext_1', 'waitContext_2', 'waitContext_3', 'switchCase', 'choicesContext'
         ];
@@ -945,16 +951,16 @@ editor_blockly = function () {
 
 // --- modify Blockly
 
-Blockly.FieldColour.prototype.showEditor_ = function() {
+Blockly.FieldColour.prototype.showEditor_ = function () {
     Blockly.WidgetDiv.hide();
 
     // console.log('here')
-    var self=this;
-    var pb=self.sourceBlock_
+    var self = this;
+    var pb = self.sourceBlock_
     var args = MotaActionBlocks[pb.type].args
-    var targetf=args[args.indexOf(self.name)-1]
+    var targetf = args[args.indexOf(self.name) - 1]
 
-    var getValue=function(){
+    var getValue = function () {
         // return self.getValue() // css颜色
         var f = pb.getFieldValue(targetf);
         if (/^[0-9 ]+,[0-9 ]+,[0-9 ]+(,[0-9. ]+)?$/.test(f)) {
@@ -964,9 +970,9 @@ Blockly.FieldColour.prototype.showEditor_ = function() {
         // 也可以用 pb.getFieldValue(targetf) 获得颜色块左边的域的内容
     }
 
-    var setValue=function(newValue){ // css颜色
+    var setValue = function (newValue) { // css颜色
         self.setValue(newValue)
-        pb.setFieldValue(newValue.replace("rgba(","").replace(")",""), targetf) // 放在颜色块左边的域中
+        pb.setFieldValue(newValue.replace("rgba(", "").replace(")", ""), targetf) // 放在颜色块左边的域中
     }
 
     setTimeout(function () {
@@ -983,7 +989,7 @@ Blockly.FieldColour.prototype.setValue = function (colour) {
     this.doValueUpdate_(colour);
 }
 
-Blockly.FieldColour.prototype.initView = function() {
+Blockly.FieldColour.prototype.initView = function () {
     this.size_ = new Blockly.utils.Size(
         this.getConstants().FIELD_COLOUR_DEFAULT_WIDTH,
         this.getConstants().FIELD_COLOUR_DEFAULT_HEIGHT);
@@ -996,21 +1002,21 @@ Blockly.FieldColour.prototype.initView = function() {
     }
 };
 
-Blockly.FieldTextInput.prototype.showInlineEditor_ = function(quietInput) {
+Blockly.FieldTextInput.prototype.showInlineEditor_ = function (quietInput) {
     Blockly.WidgetDiv.show(
         this, this.sourceBlock_.RTL, this.widgetDispose_.bind(this));
     this.htmlInput_ = this.widgetCreate_();
     this.isBeingEdited_ = true;
 
     editor_blockly.onTextFieldCreate(this, this.htmlInput_);
-  
+
     if (!quietInput) {
-      this.htmlInput_.focus({preventScroll:true});
-      this.htmlInput_.select();
+        this.htmlInput_.focus({ preventScroll: true });
+        this.htmlInput_.select();
     }
 };
 
-Blockly.FieldTextInput.prototype.onHtmlInputKeyDown_ = function(e) {
+Blockly.FieldTextInput.prototype.onHtmlInputKeyDown_ = function (e) {
     if (e.keyCode == Blockly.utils.KeyCodes.ENTER && !(window.awesomplete && window.awesomplete.opened)) {
         Blockly.WidgetDiv.hide();
         Blockly.DropDownDiv.hideWithoutAnimation();
@@ -1026,19 +1032,19 @@ Blockly.FieldTextInput.prototype.onHtmlInputKeyDown_ = function(e) {
     }
 };
 
-Blockly.FieldMultilineInput.prototype.showInlineEditor_ = function(quietInput) {
+Blockly.FieldMultilineInput.prototype.showInlineEditor_ = function (quietInput) {
     Blockly.FieldMultilineInput.superClass_.showInlineEditor_.call(this, quietInput);
     // force to resize the input
     this.htmlInput_.style.height = Blockly.WidgetDiv.DIV.style.height;
 };
 
-Blockly.FieldMultilineInput.prototype.onHtmlInputChange_ = function(e) {
+Blockly.FieldMultilineInput.prototype.onHtmlInputChange_ = function (e) {
     Blockly.FieldMultilineInput.superClass_.onHtmlInputChange_.call(this, e);
     // force to resize the input
     this.htmlInput_.style.height = Blockly.WidgetDiv.DIV.style.height;
 };
 
-Blockly.copy_ = function(toCopy) {
+Blockly.copy_ = function (toCopy) {
     if (toCopy.isComment) {
         var xml = toCopy.toXmlWithXY();
     } else {
@@ -1061,7 +1067,7 @@ Blockly.copy_ = function(toCopy) {
  * Paste the provided block onto the workspace.
  * @param {!Element} xmlBlock XML block element.
  */
-Blockly.WorkspaceSvg.prototype.paste = function(xmlBlock) {
+Blockly.WorkspaceSvg.prototype.paste = function (xmlBlock) {
     if (!this.rendered || xmlBlock.getElementsByTagName('block').length >=
         this.remainingCapacity()) {
         return;
@@ -1081,7 +1087,7 @@ Blockly.WorkspaceSvg.prototype.paste = function(xmlBlock) {
 
 // -- Support showing disabled blocks
 
-Blockly.Generator.prototype.blockToCode = function(block, opt_thisOnly) {
+Blockly.Generator.prototype.blockToCode = function (block, opt_thisOnly) {
     if (this.isInitialized === false) {
         console.warn(
             'Generator init was not called before blockToCode was called.');
@@ -1129,14 +1135,14 @@ Blockly.Generator.prototype.blockToCode = function(block, opt_thisOnly) {
     throw SyntaxError('Invalid code generated: ' + code);
 };
 
-Blockly.BlockSvg.prototype.generateContextMenu = function() {
+Blockly.BlockSvg.prototype.generateContextMenu = function () {
     if (this.workspace.options.readOnly || !this.contextMenu) {
         return null;
     }
     // Save the current block in a variable for use in closures.
     var block = this;
     var menuOptions = [];
-  
+
     if (!this.isInFlyout) {
         // 删除
         if (this.isDeletable() && this.isMovable()) {
@@ -1153,7 +1159,7 @@ Blockly.BlockSvg.prototype.generateContextMenu = function() {
             menuOptions.push({
                 text: this.isEnabled() ? Blockly.Msg['DISABLE_BLOCK'] : Blockly.Msg['ENABLE_BLOCK'],
                 enabled: !this.getInheritedDisabled(),
-                callback: function() {
+                callback: function () {
                     var group = Blockly.Events.getGroup();
                     if (!group) {
                         Blockly.Events.setGroup(true);
@@ -1169,13 +1175,13 @@ Blockly.BlockSvg.prototype.generateContextMenu = function() {
             menuOptions.push(Blockly.ContextMenu.blockDeleteOption(block));
         }
     }
-  
-    menuOptions.push(Blockly.ContextMenu.blockHelpOption(block));  
+
+    menuOptions.push(Blockly.ContextMenu.blockHelpOption(block));
     if (this.customContextMenu) this.customContextMenu(menuOptions);
     return menuOptions;
 };
 
-Blockly.FieldDropdown.prototype.doClassValidation_ = function (opt_newValue) { 
+Blockly.FieldDropdown.prototype.doClassValidation_ = function (opt_newValue) {
     return opt_newValue;
 }
 
@@ -1193,7 +1199,7 @@ Blockly.FieldDropdown.prototype.doValueUpdate_ = function (newValue) {
     }
 };
 
-Blockly.FieldMultilineInput.prototype.getDisplayText_ = function() {
+Blockly.FieldMultilineInput.prototype.getDisplayText_ = function () {
     var value = this.value_;
     if (!value) return Blockly.Field.NBSP;
     var curr = '', text = '';

@@ -2,7 +2,7 @@
 
 "use strict";
 
-function events() {
+function events () {
     this._init();
 }
 
@@ -58,10 +58,9 @@ events.prototype._startGame_start = function (hard, seed, route, callback) {
     if (core.flags.startUsingCanvas) {
         core.hideStatusBar();
         core.dom.musicBtn.style.display = 'block';
-        core.dom.enlargeBtn.style.display = 'block';
         core.push(todo, core.firstData.startCanvas);
     }
-    core.push(todo, {"type": "function", "function": "function() { core.events._startGame_setHard(); }"})
+    core.push(todo, { "type": "function", "function": "function() { core.events._startGame_setHard(); }" })
     core.push(todo, core.firstData.startText);
     this.insertAction(todo, null, null, function () {
         core.events._startGame_afterStart(callback);
@@ -78,7 +77,7 @@ events.prototype._startGame_setHard = function () {
     main.levelChoose.forEach(function (one) {
         if (one.name == core.status.hard) {
             hardValue = one.hard;
-            hardColor = core.arrayToRGBA(one.color || [255,0,0,1]);
+            hardColor = core.arrayToRGBA(one.color || [255, 0, 0, 1]);
             core.insertAction(one.action);
         }
     });
@@ -160,7 +159,10 @@ events.prototype._gameOver_confirmUpload = function (ending, norank) {
             core.events._gameOver_doUpload("", ending, norank);
         }
         else {
-            core.myprompt("请输入你的ID：", core.getCookie('id') || "", function (username)  {
+            var id = core.getCookie('id') || "";
+            var hint = "请输入你的ID：\n（登录状态下输入数字用户编号可成为蓝名成绩并计入用户通关数）";
+            if (id) hint = "请输入你的ID：\n（输入数字用户编号" + id + "可成为蓝名成绩并计入用户通关数）";
+            core.myprompt(hint, id, function (username) {
                 core.events._gameOver_doUpload(username, ending, norank);
             });
         }
@@ -217,7 +219,7 @@ events.prototype._gameOver_confirmDownload = function (ending) {
             'seed': core.getFlag('__seed__'),
             'route': core.encodeRoute(core.status.route)
         }
-        core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route", 
+        core.download(core.firstData.name + "_" + core.formatDate2(new Date()) + ".h5route",
             LZString.compressToBase64(JSON.stringify(obj)));
         core.events._gameOver_askRate(ending);
     }, function () {
@@ -255,13 +257,13 @@ events.prototype._gameOver_askRate = function (ending) {
         return;
     }
 
-    core.ui.drawConfirmBox("恭喜通关！你想进行评分吗？", function () {
+    core.ui.drawConfirmBox("恭喜通关！你想查看榜单、评论，\n以及评分和标色投票吗？", function () {
         if (core.platform.isPC) {
-            window.open("/score.php?name=" + core.firstData.name, "_blank");
+            window.open("/tower/?name=" + core.firstData.name, "_blank");
             core.restart();
         }
         else {
-            window.location.href = "/score.php?name=" + core.firstData.name;
+            window.location.href = "/tower/?name=" + core.firstData.name;
         }
     }, function () {
         core.restart();
@@ -269,7 +271,7 @@ events.prototype._gameOver_askRate = function (ending) {
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
-events.prototype.restart = function() {
+events.prototype.restart = function () {
     core.showStartAnimate();
     core.playBgm(main.startBgm);
 }
@@ -309,12 +311,12 @@ events.prototype.doSystemEvent = function (type, data, callback) {
             return core.doFunc(this.systemEvents[type], this, data, callback);
         }
         catch (e) {
-            main.log(e);
-            main.log("ERROR in systemEvents["+type+"]");
+            console.error(e);
+            console.error("ERROR in systemEvents[" + type + "]");
         }
     }
     if (this["_sys_" + type]) return this["_sys_" + type](data, callback);
-    main.log("未知的系统事件: " + type + "！");
+    console.error("未知的系统事件: " + type + "！");
     if (callback) callback();
 }
 
@@ -330,7 +332,7 @@ events.prototype.trigger = function (x, y, callback) {
     }
     if (core.status.gameOver) return _executeCallback();
     if (core.status.event.id == 'action') {
-        core.insertAction({"type": "function", "function": "function () { core.events._trigger_inAction("+x+","+y+"); }", "async": true},
+        core.insertAction({ "type": "function", "function": "function () { core.events._trigger_inAction(" + x + "," + y + "); }", "async": true },
             null, null, null, true);
         return _executeCallback();
     }
@@ -344,7 +346,7 @@ events.prototype.trigger = function (x, y, callback) {
         core.clearRouteFolding();
         try {
             eval(block.event.script);
-        } catch (e) { main.log(e); }
+        } catch (ee) { console.error(ee) }
     }
 
     // 碰触事件
@@ -370,14 +372,14 @@ events.prototype.trigger = function (x, y, callback) {
 
 events.prototype._trigger_inAction = function (x, y) {
     if (core.status.gameOver || core.status.event.id != 'action') return;
-    
+
     var block = core.getBlock(x, y);
     if (block == null) return core.doAction();
 
     // 执行该点的脚本
     try {
         eval(block.event.script);
-    } catch (e) { main.log(e); }
+    } catch (ee) { console.error(ee) }
 
     // 碰触事件
     if (block.event.event) {
@@ -436,9 +438,9 @@ events.prototype._sys_battle = function (data, callback) {
     // 检查战前事件
     var beforeBattle = [];
     core.push(beforeBattle, core.floors[core.status.floorId].beforeBattle[data.x + "," + data.y]);
-    core.push(beforeBattle, (core.material.enemys[data.event.id]||{}).beforeBattle);
+    core.push(beforeBattle, (core.material.enemys[data.event.id] || {}).beforeBattle);
     if (beforeBattle.length > 0) {
-        core.push(beforeBattle, [{"type": "battle", "x": data.x, "y": data.y}]);
+        core.push(beforeBattle, [{ "type": "battle", "x": data.x, "y": data.y }]);
         core.clearContinueAutomaticRoute();
 
         // 自动存档
@@ -542,7 +544,7 @@ events.prototype._openDoor_check = function (block, x, y, needKey) {
     if (needKey) {
         for (var keyName in keyInfo) {
             var keyValue = keyInfo[keyName];
-            if (keyName.endsWith(':o')) keyName = keyName.substring(0, keyName.length - 2);            
+            if (keyName.endsWith(':o')) keyName = keyName.substring(0, keyName.length - 2);
 
             // --- 如果是一个不存在的道具，则直接认为无法开启
             if (!core.material.items[keyName]) {
@@ -559,7 +561,7 @@ events.prototype._openDoor_check = function (block, x, y, needKey) {
             }
         }
         if (!core.status.event.id) core.autosave(true);
-        for (var keyName in keyInfo) {  
+        for (var keyName in keyInfo) {
             if (!keyName.endsWith(':o')) core.removeItem(keyName, keyInfo[keyName]);
         }
     }
@@ -590,7 +592,7 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
         if (callback) callback();
     }
 
-    var animate = window.setInterval(function() {
+    var animate = window.setInterval(function () {
         blockInfo.posX++;
         if (blockInfo.posX == 4) {
             clearInterval(animate);
@@ -598,9 +600,9 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
             cb();
             return;
         }
-        core.maps._drawBlockInfo(blockInfo, x, y);    
+        core.maps._drawBlockInfo(blockInfo, x, y);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
-    
+
     core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
@@ -632,13 +634,13 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
         var hint = core.material.items[id].text || "该道具暂无描述";
         try {
             hint = core.replaceText(hint);
-        } catch (e) {}
-        if (!core.status.event.id || core.status.event.id=='action') {
-            core.insertAction("\t["+core.material.items[id].name+","+id+"]" + hint + "\n"
+        } catch (e) { }
+        if (!core.status.event.id || core.status.event.id == 'action') {
+            core.insertAction("\t[" + core.material.items[id].name + "," + id + "]" + hint + "\n"
                 + (id.endsWith('Key') ? "（钥匙类道具，遇到对应的门时自动打开）"
                     : itemCls == 'tools' ? "（消耗类道具，请按T在道具栏使用）"
-                    : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
-                    : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""));
+                        : itemCls == 'constants' ? "（永久类道具，请按T在道具栏使用）"
+                            : itemCls == 'equips' ? "（装备类道具，请按Q在装备栏进行装备）" : ""));
         }
         itemHint.push(id);
     }
@@ -683,7 +685,7 @@ events.prototype._getNextItem = function (direction, noRoute) {
 events.prototype._sys_changeFloor = function (data, callback) {
     data = data.event.data;
     var heroLoc = {};
-    if (data.loc) heroLoc = {'x': data.loc[0], 'y': data.loc[1]};
+    if (data.loc) heroLoc = { 'x': data.loc[0], 'y': data.loc[1] };
     if (data.direction) heroLoc.direction = data.direction;
     if (core.status.event.id != 'action') core.status.event.id = null;
     core.changeFloor(data.floorId, data.stair, heroLoc, data.time, function () {
@@ -728,7 +730,7 @@ events.prototype._changeFloor_getInfo = function (floorId, stair, heroLoc, time)
         floorId = core.status.floorId;
     }
     if (!core.status.maps[floorId]) {
-        main.log("不存在的楼层：" + floorId);
+        console.error("不存在的楼层：" + floorId);
         return null;
     }
 
@@ -796,13 +798,13 @@ events.prototype._changeFloor_beforeChange = function (info, callback) {
 }
 
 events.prototype._changeFloor_playSound = function () {
-	// 播放换层音效
-	if (core.hasFlag('__fromLoad__')) // 是否是读档造成的切换
-		core.playSound('读档');
-	else if (core.hasFlag('__isFlying__')) // 是否是楼传造成的切换
-		core.playSound('飞行器');
-	else
-	    core.playSound('上下楼');
+    // 播放换层音效
+    if (core.hasFlag('__fromLoad__')) // 是否是读档造成的切换
+        core.playSound('读档');
+    else if (core.hasFlag('__isFlying__')) // 是否是楼传造成的切换
+        core.playSound('飞行器');
+    else
+        core.playSound('上下楼');
 }
 
 events.prototype._changeFloor_changing = function (info, callback) {
@@ -811,7 +813,7 @@ events.prototype._changeFloor_changing = function (info, callback) {
     var __lockViewport__ = flags.__lockViewport__;
     core.setFlag('__lockViewport__', null);
     core.drawHero();
-    core.setFlag('__lockViewport__', __lockViewport__);    
+    core.setFlag('__lockViewport__', __lockViewport__);
 
     if (info.time == 0)
         this._changeFloor_afterChange(info, callback);
@@ -885,8 +887,8 @@ events.prototype.pushBox = function (data) {
         core.setBlock('flower', data.x, data.y);
     // 勇士前进一格，然后触发推箱子后事件
     core.insertAction([
-        {"type": "moveAction"},
-        {"type": "function", "function": "function() { core.afterPushBox(); }"}
+        { "type": "moveAction" },
+        { "type": "function", "function": "function() { core.afterPushBox(); }" }
     ]);
 }
 
@@ -949,8 +951,8 @@ events.prototype.doEvent = function (data, x, y, prefix) {
             return core.doFunc(this.actions[type], this, data, x, y, prefix);
         }
         catch (e) {
-            main.log(e);
-            main.log("ERROR in actions["+type+"]");
+            console.error(e);
+            console.error("ERROR in actions[" + type + "]");
         }
     }
     if (this["_action_" + type]) return this["_action_" + type](data, x, y, prefix);
@@ -963,8 +965,8 @@ events.prototype.setEvents = function (list, x, y, callback) {
     if (list) {
         var l = core.clone(list);
         if (!(l instanceof Array)) l = [l];
-        l.push({"type": "_label"});
-        data.list = [{todo: l, total: core.clone(l), condition: "false"}];
+        l.push({ "type": "_label" });
+        data.list = [{ todo: l, total: core.clone(l), condition: "false" }];
         // 结束所有正在执行的自动事件
         if (list.length == 0) {
             core.status.autoEvents.forEach(function (autoEvent) {
@@ -1004,9 +1006,9 @@ events.prototype.doAction = function () {
     core.status.event.interval = null;
     delete core.status.event.aniamteUI;
     if (core.status.gameOver || core.status.replay.failed) return;
-    core.clearUI();
     // 判定是否执行完毕
     if (this._doAction_finishEvents()) return;
+    core.clearUI();
     var floorId = core.status.event.data.floorId || core.status.floorId;
     // 当前点坐标和前缀
     var x = core.status.event.data.x, y = core.status.event.data.y;
@@ -1017,7 +1019,7 @@ events.prototype.doAction = function () {
     var data = current.todo.shift();
     core.status.event.data.current = data;
     if (typeof data == "string")
-        data = {"type": "text", "text": data};
+        data = { "type": "text", "text": data };
     // 该事件块已经被禁用
     if (data._disabled) return core.doAction();
     data.floorId = data.floorId || floorId;
@@ -1027,6 +1029,7 @@ events.prototype.doAction = function () {
 }
 
 events.prototype._doAction_finishEvents = function () {
+    if (core.status.event.id != 'action') return true;
     // 事件处理完毕
     if (core.status.event.data.list.length == 0) {
         // 检测并执行延迟自动事件
@@ -1078,7 +1081,7 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
                     list.splice(index, 0, action);
                     break;
                 }
-            } 
+            }
         }
         else core.unshift(core.status.event.data.list[0].todo, action);
         this.setEvents(null, x, y, callback);
@@ -1099,12 +1102,12 @@ events.prototype.insertCommonEvent = function (name, args, x, y, callback, addTo
         for (var i = 0; i < args.length; ++i) {
             try {
                 if (args[i] != null)
-                    core.setFlag('arg'+(i+1), args[i]);
-            } catch (e) { main.log(e); }
+                    core.setFlag('arg' + (i + 1), args[i]);
+            } catch (ee) { console.error(ee) }
         }
     }
 
-    this.insertAction({"type": "dowhile", "condition": "false", "data": commonEvent}, x, y, callback, addToLast);
+    this.insertAction({ "type": "dowhile", "condition": "false", "data": commonEvent }, x, y, callback, addToLast);
 }
 
 ////// 获得一个公共事件 //////
@@ -1132,13 +1135,14 @@ events.prototype.recoverEvents = function (data) {
 events.prototype.checkAutoEvents = function () {
     // 只有在无操作或事件流中才能执行自动事件！
     if (!core.isPlaying() || (core.status.lockControl && core.status.event.id != 'action')) return;
+    if (core.hasFlag('__doNotCheckAutoEvents__')) return;
     var todo = [], delay = [];
     core.status.autoEvents.forEach(function (autoEvent) {
         var symbol = autoEvent.symbol, x = autoEvent.x, y = autoEvent.y, floorId = autoEvent.floorId;
         // 不在当前楼层 or 已经执行过 or 已被分区 or 正在执行中
         if (autoEvent.currentFloor && floorId != core.status.floorId) return;
         if (!autoEvent.multiExecute && core.autoEventExecuted(symbol)) return;
-        if ((flags.__removed__||[]).indexOf(floorId) >= 0) return;
+        if ((flags.__removed__ || []).indexOf(floorId) >= 0) return;
         if (core.autoEventExecuting(symbol)) return;
         var prefix = floorId + "@" + x + "@" + y;
         try {
@@ -1149,23 +1153,29 @@ events.prototype.checkAutoEvents = function () {
 
         core.autoEventExecuting(symbol, true);
         core.autoEventExecuted(symbol, true);
-        
+
         var event;
         if (x == null && y == null) {
             event = [
                 // 用do-while(0)包一层防止break影响事件流
-                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
-                {"type": "function", "function":
-                        "function() { core.autoEventExecuting('" + symbol + "', false); }"}
+                { "type": "dowhile", "condition": "false", "data": autoEvent.data },
+                {
+                    "type": "function", "function":
+                        "function() { core.autoEventExecuting('" + symbol + "', false); }"
+                }
             ];
         } else {
             event = [
-                {"type": "function", "function":
-                        "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"},
+                {
+                    "type": "function", "function":
+                        "function() { core.pushEventLoc(" + x + ", " + y + ", '" + floorId + "' ); }"
+                },
                 // 用do-while(0)包一层防止break影响事件流
-                {"type": "dowhile", "condition": "false", "data": autoEvent.data},
-                {"type": "function", "function":
-                        "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"}
+                { "type": "dowhile", "condition": "false", "data": autoEvent.data },
+                {
+                    "type": "function", "function":
+                        "function() { core.popEventLoc(); core.autoEventExecuting('" + symbol + "', false); }"
+                }
             ];
         }
 
@@ -1392,7 +1402,7 @@ events.prototype._action_text = function (data, x, y, prefix) {
 
 events.prototype._action_moveTextBox = function (data, x, y, prefix) {
     if (this.__action_checkReplaying()) return;
-    this.__action_doAsyncFunc(data.async, core.moveTextBox, 
+    this.__action_doAsyncFunc(data.async, core.moveTextBox,
         data.code, this.__action_getLoc(data.loc, x, y, prefix), data.relative, data.moveMode, data.time);
 }
 
@@ -1434,7 +1444,7 @@ events.prototype._action_tip = function (data, x, y, prefix) {
 
 events.prototype._action_show = function (data, x, y, prefix) {
     data.loc = this.__action_getLoc2D(data.loc, x, y, prefix);
-    if (data.time > 0 &&  data.floorId == core.status.floorId) {
+    if (data.time > 0 && data.floorId == core.status.floorId) {
         this.__action_doAsyncFunc(data.async, core.animateBlock, data.loc, 'show', data.time);
     }
     else {
@@ -1546,7 +1556,7 @@ events.prototype._action_animate = function (data, x, y, prefix) {
 }
 
 events.prototype._action_stopAnimate = function (data, x, y, prefix) {
-    core.stopAnimate(data.doCallback);
+    core.stopAnimate(null, data.doCallback);
     core.doAction();
 }
 
@@ -1578,14 +1588,14 @@ events.prototype._action_moveAction = function (data, x, y, prefix) {
         // 检查noPass决定是撞击还是移动
         if (core.noPass(nx, ny)) {
             core.insertAction([
-                {"type": "trigger", "loc": [nx, ny]}
+                { "type": "trigger", "loc": [nx, ny] }
             ]);
         } else {
             // 先移动一格，然后尝试触发事件
             core.insertAction([
-                {"type": "moveHero", "steps": ["forward"]},
-                {"type": "function", "function": "function() { core.moveOneStep(core.doAction); }", "async": true},
-                {"type": "_label"},
+                { "type": "moveHero", "steps": ["forward"] },
+                { "type": "function", "function": "function() { core.moveOneStep(core.doAction); }", "async": true },
+                { "type": "_label" },
             ]);
         }
     }
@@ -1625,7 +1635,7 @@ events.prototype._action_jumpHero = function (data, x, y, prefix) {
 
 events.prototype._action_changeFloor = function (data, x, y, prefix) {
     var loc = this.__action_getHeroLoc(data.loc, prefix);
-    var heroLoc = {x: loc[0], y: loc[1], direction: data.direction};
+    var heroLoc = { x: loc[0], y: loc[1], direction: data.direction };
     core.changeFloor(data.floorId, data.stair, heroLoc, data.time, core.doAction);
 }
 
@@ -1661,7 +1671,7 @@ events.prototype._action_showTextImage = function (data, x, y, prefix) {
     var loc = this.__action_getLoc(data.loc, 0, 0, prefix);
     if (core.isReplaying()) data.time = 0;
     data.text = core.replaceText(data.text, prefix);
-    var __tmpName = (Math.random()+"_"+Math.random()).replace(/\./g, "") + ".png";
+    var __tmpName = (Math.random() + "_" + Math.random()).replace(/\./g, "") + ".png";
     core.material.images.images[__tmpName] = core.ui.textImage(data.text);
     this.__action_doAsyncFunc(data.async || data.time == 0, core.showImage,
         data.code, __tmpName + (data.reverse || ""), null, loc, data.opacity, data.time);
@@ -1811,18 +1821,18 @@ events.prototype._action_insert = function (data, x, y, prefix) {
     else {
         // 设置参数
         if (data.args instanceof Array) {
-           for (var i = 0; i < data.args.length; ++i) {
-               try {
-                   if (data.args[i] != null)
-                       core.setFlag('arg'+(i+1), data.args[i]);
-               } catch (e) { main.log(e); }
-           }
+            for (var i = 0; i < data.args.length; ++i) {
+                try {
+                    if (data.args[i] != null)
+                        core.setFlag('arg' + (i + 1), data.args[i]);
+                } catch (ee) { console.error(ee) }
+            }
         }
         var loc = this.__action_getLoc(data.loc, x, y, prefix);
         core.setFlag('arg0', loc);
         var floorId = data.floorId;
         var which = data.which || "events";
-        var event = (core.floors[floorId][which]||[])[loc[0] + "," + loc[1]];
+        var event = (core.floors[floorId][which] || [])[loc[0] + "," + loc[1]];
         if (event) this.insertAction(event.data || event);
     }
     core.doAction();
@@ -2094,13 +2104,13 @@ events.prototype._action_choices = function (data, x, y, prefix) {
                 core.status.route.push("choices:none");
                 core.setFlag('timeout', 0);
                 core.doAction();
-            }, data.timeout);   
+            }, data.timeout);
         }
         core.status.event.timeout = new Date().getTime() + (data.timeout || 0);
     }
     for (var i = 0; i < data.choices.length; i++) {
         if (typeof data.choices[i] === 'string')
-            data.choices[i] = {"text": data.choices[i]};
+            data.choices[i] = { "text": data.choices[i] };
         data.choices[i].text = core.replaceText(data.choices[i].text, prefix);
     }
     core.ui.drawChoices(core.replaceText(data.text, prefix), data.choices, data.width);
@@ -2121,13 +2131,13 @@ events.prototype.__action_choices_replaying = function (data, index) {
     } else core.setFlag('timeout', 0);
     core.status.event.selection = selection;
     setTimeout(function () {
-        core.status.route.push("choices:"+index);
+        core.status.route.push("choices:" + index);
         if (selection != 'none') {
             // 检查
             var choice = data.choices[selection];
             if (choice.need != null && choice.need != '' && !core.calValue(choice.need)) {
                 // 无法选择此项
-                core.control._replay_error("无法选择项："+index);
+                core.control._replay_error("无法选择项：" + index);
                 return;
             } else {
                 core.insertAction(choice.action);
@@ -2150,7 +2160,7 @@ events.prototype._precompile_choices = function (data) {
 
 events.prototype._action_confirm = function (data, x, y, prefix) {
     data.text = core.replaceText(data.text, prefix);
-    core.status.event.ui = {"text": data.text, "yes": data.yes, "no": data.no};
+    core.status.event.ui = { "text": data.text, "yes": data.yes, "no": data.no };
     if (core.isReplaying()) {
         var action = core.status.replay.toReplay.shift();
         if (action.indexOf('choices:') == 0 && !(action == 'choices:none' && !data.timeout)) {
@@ -2189,7 +2199,7 @@ events.prototype.__action_confirm_replaying = function (data, index) {
     } else core.setFlag('timeout', 0);
     core.status.event.selection = index;
     setTimeout(function () {
-        core.status.route.push("choices:"+index);
+        core.status.route.push("choices:" + index);
         if (index != 'none') {
             if (index == 0) core.insertAction(data.yes);
             else core.insertAction(data.no);
@@ -2213,7 +2223,7 @@ events.prototype._action_for = function (data, x, y, prefix) {
     var from = core.calValue(data.from);
     var to = core.calValue(data.to);
     var step = core.calValue(data.step);
-    if (typeof from != 'number' || typeof to !='number' || typeof step != 'number') {
+    if (typeof from != 'number' || typeof to != 'number' || typeof step != 'number') {
         core.insertAction('循环遍历事件要求【起始点】【终止点】【每步】仅能是数字！');
         return core.doAction();
     }
@@ -2229,18 +2239,18 @@ events.prototype._action_for = function (data, x, y, prefix) {
     var stepName = '@temp@for-step@' + letter;
     core.setFlag(toName, data.to);
     core.setFlag(stepName, data.step);
-    var condition = "(function () {"+
-        "var to = core.calValue(core.getFlag('" + toName + "'));"+
-        "var step = core.calValue(core.getFlag('" + stepName + "'));"+
-        "if (typeof step != 'number' || typeof to != 'number') return false;"+
-        "if (step == 0) return true;"+
-        "var currentValue = core.getFlag('@temp@" + letter + "');"+
-        "currentValue += step;"+
-        "core.setFlag('@temp@" + letter + "', currentValue);"+
-        "if (step > 0) { return currentValue <= to; }"+
-        "else { return currentValue >= to; }"+
+    var condition = "(function () {" +
+        "var to = core.calValue(core.getFlag('" + toName + "'));" +
+        "var step = core.calValue(core.getFlag('" + stepName + "'));" +
+        "if (typeof step != 'number' || typeof to != 'number') return false;" +
+        "if (step == 0) return true;" +
+        "var currentValue = core.getFlag('@temp@" + letter + "');" +
+        "currentValue += step;" +
+        "core.setFlag('@temp@" + letter + "', currentValue);" +
+        "if (step > 0) { return currentValue <= to; }" +
+        "else { return currentValue >= to; }" +
         "})()";
-    return this._action_dowhile({"condition": condition, "data": data.data}, x, y, prefix);
+    return this._action_dowhile({ "condition": condition, "data": data.data }, x, y, prefix);
 }
 
 events.prototype._precompile_for = function (data) {
@@ -2260,12 +2270,12 @@ events.prototype._action_forEach = function (data, x, y, prefix) {
     var listName = '@temp@forEach@' + data.name.substring(5);
     core.setFlag(listName, core.clone(data.list));
     var condition = "(function () {" +
-        "var list = core.getFlag('"+listName+"', []);"+
-        "if (list.length == 0) return false;"+
-        "core.setFlag('@temp@'+'" + data.name.substring(5) + "', list.shift());"+
-        "return true;"+
+        "var list = core.getFlag('" + listName + "', []);" +
+        "if (list.length == 0) return false;" +
+        "core.setFlag('@temp@'+'" + data.name.substring(5) + "', list.shift());" +
+        "return true;" +
         "})()";
-    return this._action_while({"condition": condition, "data": data.data}, x, y, prefix);
+    return this._action_while({ "condition": condition, "data": data.data }, x, y, prefix);
 }
 
 events.prototype._precompile_forEach = function (data) {
@@ -2277,9 +2287,9 @@ events.prototype._action_while = function (data, x, y, prefix) {
     if (core.calValue(data.condition, prefix)) {
         var list = core.clone(data.data);
         if (!(list instanceof Array)) list = [list];
-        list.push({"type": "_label"});
+        list.push({ "type": "_label" });
         core.unshift(core.status.event.data.list,
-            {"todo": list, "total": core.clone(list), "condition": data.condition}
+            { "todo": list, "total": core.clone(list), "condition": data.condition }
         );
     }
     core.doAction();
@@ -2294,9 +2304,9 @@ events.prototype._precompile_while = function (data) {
 events.prototype._action_dowhile = function (data, x, y, prefix) {
     var list = core.clone(data.data);
     if (!(list instanceof Array)) list = [list];
-    list.push({"type": "_label"});
+    list.push({ "type": "_label" });
     core.unshift(core.status.event.data.list,
-        {"todo": list, "total": core.clone(list), "condition": data.condition}
+        { "todo": list, "total": core.clone(list), "condition": data.condition }
     );
     core.doAction();
 }
@@ -2352,7 +2362,7 @@ events.prototype._action_function = function (data, x, y, prefix) {
             eval('(' + func + ')()');
         }
     } catch (e) {
-        main.log(e);
+        console.error(e);
     }
     if (!data.async)
         core.doAction();
@@ -2426,7 +2436,7 @@ events.prototype._action_wait = function (data, x, y, prefix) {
         core.control._replay_error(code);
         return;
     } else if (data.timeout) {
-        core.status.event.interval = setTimeout(function() {
+        core.status.event.interval = setTimeout(function () {
             core.status.route.push("input:none");
             core.setFlag("type", -1);
             core.setFlag("timeout", 0);
@@ -2493,7 +2503,7 @@ events.prototype.__action_wait_afterGet = function (data) {
         }
         if (one["case"] == "condition") {
             var condition = false;
-            try { condition = core.calValue(one.condition); } catch (e) {}
+            try { condition = core.calValue(one.condition); } catch (e) { }
             if (condition) {
                 found = true;
                 core.push(todo, one.action);
@@ -2527,9 +2537,9 @@ events.prototype._precompile_wait = function (data) {
 
 events.prototype._action_waitAsync = function (data, x, y, prefix) {
     var test = window.setInterval(function () {
-        if (!core.hasAsync() 
-                && (data.excludeAnimates || core.isReplaying() || core.getPlayingAnimates().length == 0)
-                && (!data.includeSounds || core.isReplaying() ||  core.getPlayingSounds().length == 0)) {
+        if (!core.hasAsync()
+            && (data.excludeAnimates || core.isReplaying() || core.getPlayingAnimates().length == 0)
+            && (!data.includeSounds || core.isReplaying() || core.getPlayingSounds().length == 0)) {
             clearInterval(test);
             core.doAction();
         }
@@ -2773,7 +2783,7 @@ events.prototype.useFly = function (fromUserAction) {
         if (!core.hasItem('fly')) {
             core.playSound('操作失败');
             core.drawTip('你没有' + core.material.items['fly'].name, 'fly');
-        } else if (!core.canUseItem('fly')) {
+        } else if (!core.canUseItem('fly') || (core.flags.flyNearStair && !core.nearStair())) {
             core.playSound('操作失败');
             core.drawTip('无法传送到当前层', 'fly');
         } else {
@@ -2875,32 +2885,32 @@ events.prototype.save = function (fromUserAction) {
         return;
     if (!this._checkStatus('save', fromUserAction)) return;
     var saveIndex = core.saves.saveIndex;
-    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+    var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
     core.playSound('打开界面');
-    core.ui._drawSLPanel(10*page+offset);
+    core.ui._drawSLPanel(10 * page + offset);
 }
 
 ////// 点击读取按钮时的打开操作 //////
 events.prototype.load = function (fromUserAction) {
     if (core.isReplaying()) return;
     var saveIndex = core.saves.saveIndex;
-    var page=parseInt((saveIndex-1)/5), offset=saveIndex-5*page;
+    var page = parseInt((saveIndex - 1) / 5), offset = saveIndex - 5 * page;
     // 游戏开始前读档
     if (!core.isPlaying()) {
         core.dom.startPanel.style.display = 'none';
         core.clearStatus();
         core.clearMap('all');
-        core.status.event = {'id': 'load', 'data': null};
+        core.status.event = { 'id': 'load', 'data': null };
         core.status.lockControl = true;
         core.playSound('打开界面');
-        core.ui._drawSLPanel(10*page+offset);
+        core.ui._drawSLPanel(10 * page + offset);
         return;
     }
     if (core.status.event.id == 'load' && core.events.recoverEvents(core.status.event.interval))
         return;
     if (!this._checkStatus('load', fromUserAction)) return;
     core.playSound('打开界面');
-    core.ui._drawSLPanel(10*page+offset);
+    core.ui._drawSLPanel(10 * page + offset);
 }
 
 ////// 点击设置按钮时的操作 //////
@@ -2939,7 +2949,7 @@ events.prototype.hasAsyncAnimate = function () {
 events.prototype.follow = function (name) {
     name = core.getMappedName(name);
     if (core.material.images.images[name]) {
-        core.status.hero.followers.push({"name": name});
+        core.status.hero.followers.push({ "name": name });
         core.gatherFollowers();
         core.clearMap('hero');
         core.drawHero();
@@ -3040,9 +3050,9 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix, norefre
     var enemyInfo = core.getFlag('enemyInfo');
     if (!enemyInfo[id]) enemyInfo[id] = {};
     if (typeof value === 'string' && name == 'name') value = value.replace(/\r/g, '\\r');
-    value = this._updateValueByOperator(core.calValue(value, prefix), (core.material.enemys[id]||{})[name], operator);
+    value = this._updateValueByOperator(core.calValue(value, prefix), (core.material.enemys[id] || {})[name], operator);
     enemyInfo[id][name] = value;
-    (core.material.enemys[id]||{})[name] = core.clone(value);
+    (core.material.enemys[id] || {})[name] = core.clone(value);
     if (!norefresh) core.updateStatusBar();
 }
 
@@ -3055,26 +3065,26 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
     var enemy = core.material.enemys[block.event.id];
     if (enemy == null) return;
     if (typeof value === 'string' && name == 'name') value = value.replaceAll(/\r/g, '\\r');
-    value = this._updateValueByOperator(core.calValue(value, prefix), enemy[name], operator);
+    value = this._updateValueByOperator(core.calValue(value, prefix), core.getEnemyValue(enemy, name, x, y, floorId), operator);
     flags.enemyOnPoint = flags.enemyOnPoint || {};
-    flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {}; 
-    flags.enemyOnPoint[floorId][x+","+y] = flags.enemyOnPoint[floorId][x+","+y] || {};
-    flags.enemyOnPoint[floorId][x+","+y][name] = value;
+    flags.enemyOnPoint[floorId] = flags.enemyOnPoint[floorId] || {};
+    flags.enemyOnPoint[floorId][x + "," + y] = flags.enemyOnPoint[floorId][x + "," + y] || {};
+    flags.enemyOnPoint[floorId][x + "," + y][name] = value;
     if (!norefresh) core.updateStatusBar();
 }
 
 ////// 重置某个点上的怪物属性 //////
 events.prototype.resetEnemyOnPoint = function (x, y, floorId, norefresh) {
-    delete ((flags.enemyOnPoint||{})[floorId||core.status.floorId]||{})[x+","+y];
+    delete ((flags.enemyOnPoint || {})[floorId || core.status.floorId] || {})[x + "," + y];
     if (!norefresh) core.updateStatusBar();
 }
 
 ////// 将某个点上已经设置的怪物属性移动到其他点 //////
 events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId, norefresh) {
     floorId = floorId || core.status.floorId;
-    if (((flags.enemyOnPoint||{})[floorId]||{})[fromX+","+fromY]) {
-        flags.enemyOnPoint[floorId][toX+","+toY] = flags.enemyOnPoint[floorId][fromX+","+fromY];
-        delete flags.enemyOnPoint[floorId][fromX+","+fromY];
+    if (((flags.enemyOnPoint || {})[floorId] || {})[fromX + "," + fromY]) {
+        flags.enemyOnPoint[floorId][toX + "," + toY] = flags.enemyOnPoint[floorId][fromX + "," + fromY];
+        delete flags.enemyOnPoint[floorId][fromX + "," + fromY];
         if (!norefresh) core.updateStatusBar();
     }
 }
@@ -3110,7 +3120,7 @@ events.prototype.setGlobalFlag = function (name, value) {
     var flags = core.getFlag("globalFlags", {});
     if (name.startsWith('s:')) {
         name = name.substring(2);
-        var statusBarItems = core.flags.statusBarItems.filter(function (v) {return v!=name;});
+        var statusBarItems = core.flags.statusBarItems.filter(function (v) { return v != name; });
         if (value) statusBarItems.push(name);
         core.flags.statusBarItems = statusBarItems;
         flags.statusBarItems = core.clone(statusBarItems);
@@ -3196,7 +3206,7 @@ events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
             if (callback) callback();
         }
     }, 10);
-    
+
     core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
@@ -3229,7 +3239,7 @@ events.prototype.clearTextBox = function (code, callback) {
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
     if ((core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null)
-         || core.getBlock(x, y) != null) {
+        || core.getBlock(x, y) != null) {
         if (callback) callback();
         return;
     }
@@ -3262,7 +3272,7 @@ events.prototype.closeDoor = function (x, y, id, callback) {
         }
         core.maps._drawBlockInfo(blockInfo, x, y);
     }, core.status.replay.speed == 24 ? 1 : speed / Math.max(core.status.replay.speed, 1));
-    
+
     core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = cb;
 }
@@ -3373,7 +3383,7 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
-    
+
     core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
@@ -3418,7 +3428,7 @@ events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
-    
+
     core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
@@ -3446,7 +3456,7 @@ events.prototype.scaleImage = function (code, center, scale, moveMode, time, cal
         centerY = currTop + height * currScale / 2;
     }
     var scaleInfo = {
-        x: (currLeft - centerX) / currScale,  y: (currTop - centerY) / currScale, centerX: centerX, centerY: centerY,
+        x: (currLeft - centerX) / currScale, y: (currTop - centerY) / currScale, centerX: centerX, centerY: centerY,
         width: width, height: height, currScale: currScale, scale: scale, moveMode: moveMode, time: time
     }
     this._scaleImage_scale(ctx, scaleInfo, callback);
@@ -3479,7 +3489,7 @@ events.prototype._scaleImage_scale = function (ctx, scaleInfo, callback) {
             if (callback) callback();
         }
     }, per_time);
-    
+
     core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
@@ -3528,7 +3538,7 @@ events.prototype.setVolume = function (value, time, callback) {
             if (callback) callback();
         }
     }, per_time);
-    
+
     core.animateFrame.lastAsyncId = animate;
     core.animateFrame.asyncId[animate] = callback;
 }
@@ -3542,7 +3552,7 @@ events.prototype.vibrate = function (direction, time, speed, power, callback) {
     if (!time) time = 1000;
     speed = speed || 10;
     power = power || 10;
-    var shakeInfo = {duration: parseInt(time / 10), speed: speed, power: power, direction: 1, shake: 0};
+    var shakeInfo = { duration: parseInt(time / 10), speed: speed, power: power, direction: 1, shake: 0 };
     if (direction == 'random') {
         direction = ['horizontal', 'vertical', 'diagonal1', 'diagonal2'][Math.floor(Math.random() * 4)];
     }
@@ -3590,12 +3600,12 @@ events.prototype._vibrate_update = function (shakeInfo) {
 }
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
-events.prototype.eventMoveHero = function(steps, time, callback) {
+events.prototype.eventMoveHero = function (steps, time, callback) {
     time = time || core.values.moveSpeed;
-    var step = 0, moveSteps = (steps||[]).map(function (t) {
-        return [t.split(':')[0], parseInt(t.split(':')[1]||"1")];
+    var step = 0, moveSteps = (steps || []).map(function (t) {
+        return [t.split(':')[0], parseInt(t.split(':')[1] || "1")];
     }).filter(function (t) {
-        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed'].indexOf(t[0])>=0
+        return ['up', 'down', 'left', 'right', 'forward', 'backward', 'leftup', 'leftdown', 'rightup', 'rightdown', 'speed'].indexOf(t[0]) >= 0
             && !(t[0] == 'speed' && t[1] < 16);
     });
     core.status.heroMoving = -1;
@@ -3606,8 +3616,8 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
             if (callback) callback();
         }
 
-        var animate=window.setInterval(function() {
-            if (moveSteps.length==0) {
+        var animate = window.setInterval(function () {
+            if (moveSteps.length == 0) {
                 delete core.animateFrame.asyncId[animate];
                 clearInterval(animate);
                 cb();
@@ -3624,7 +3634,7 @@ events.prototype.eventMoveHero = function(steps, time, callback) {
                     step = 0;
             }
         }, core.status.replay.speed == 24 ? 1 : time / 8 / core.status.replay.speed);
-    
+
         core.animateFrame.lastAsyncId = animate;
         core.animateFrame.asyncId[animate] = cb;
     }
@@ -3669,9 +3679,9 @@ events.prototype.jumpHero = function (ex, ey, time, callback) {
     var sx = core.getHeroLoc('x'), sy = core.getHeroLoc('y');
     if (ex == null) ex = sx;
     if (ey == null) ey = sy;
-    var sx=core.status.hero.loc.x, sy=core.status.hero.loc.y;
-    if (!core.isset(ex)) ex=sx;
-    if (!core.isset(ey)) ey=sy;
+    var sx = core.status.hero.loc.x, sy = core.status.hero.loc.y;
+    if (!core.isset(ex)) ex = sx;
+    if (!core.isset(ey)) ey = sy;
     var jumpInfo = core.maps.__generateJumpInfo(sx, sy, ex, ey, time || 500);
     jumpInfo.icon = core.material.icons.hero[core.getHeroLoc('direction')];
     jumpInfo.width = core.material.icons.hero.width || 32;
@@ -3718,7 +3728,7 @@ events.prototype.setHeroIcon = function (name, noDraw) {
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
     if (!img) {
-        console.error("找不到图片: "+img);
+        console.error("找不到图片: " + img);
         return;
     }
     if (core.material.images.hero == img) return;
@@ -3742,7 +3752,7 @@ events.prototype.checkLvUp = function () {
 }
 
 events.prototype._checkLvUp_check = function () {
-    if (core.flags.statusBarItems.indexOf('enableLevelUp')<0 || !core.firstData.levelUp
+    if (core.flags.statusBarItems.indexOf('enableLevelUp') < 0 || !core.firstData.levelUp
         || core.status.hero.lv >= core.firstData.levelUp.length) return null;
     // 计算下一个所需要的数值
     var next = (core.firstData.levelUp[core.status.hero.lv] || {});

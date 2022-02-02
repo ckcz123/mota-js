@@ -67,7 +67,12 @@ def all_floors():
 	if len(ids) == 0:
 		abort(404)
 		return None
-	return Response('\n'.join([get_file('project/floors/%s.js' % id) for id in ids]), mimetype = 'text/javascript')
+	content = []
+	for id in ids:
+		v = get_file('project/floors/%s.js' % id)
+		if isPy3: v = str(v, encoding = 'utf-8')
+		content.append(v)
+	return Response('\n'.join(content), mimetype = 'text/javascript')
 
 @app.route('/__all_animates__', methods=['GET'])
 def all_animates():
@@ -79,7 +84,9 @@ def all_animates():
 	for id in ids:
 		animate = 'project/animates/%s.animate' % id
 		if os.path.exists(animate):
-			content.append(get_file(animate))
+			v = get_file(animate)
+			if isPy3: v = str(v, encoding = 'utf-8')
+			content.append(v)
 		else: content.append('')
 	return '@@@~~~###~~~@@@'.join(content)
 

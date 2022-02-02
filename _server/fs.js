@@ -3,7 +3,7 @@
 
 
     var _isset = function (val) {
-        if (val == undefined || val == null || (typeof val=='number' && isNaN(val))) {
+        if (val == undefined || val == null || (typeof val == 'number' && isNaN(val))) {
             return false;
         }
         return true
@@ -16,26 +16,26 @@
             xhr.overrideMimeType(mimeType);
         if (_isset(responseType))
             xhr.responseType = responseType;
-        xhr.onload = function(e) {
-            if (xhr.status==200) {
+        xhr.onload = function (e) {
+            if (xhr.status == 200) {
                 if (_isset(success)) {
                     success(xhr.response);
                 }
             }
             else {
                 if (_isset(error))
-                    error("HTTP "+xhr.status);
+                    error("HTTP " + xhr.status);
             }
         };
         xhr.onabort = function () {
             if (_isset(error))
                 error("Abort");
         }
-        xhr.ontimeout = function() {
+        xhr.ontimeout = function () {
             if (_isset(error))
                 error("Timeout");
         }
-        xhr.onerror = function() {
+        xhr.onerror = function () {
             if (_isset(error))
                 error("Error on Connection");
         }
@@ -46,7 +46,7 @@
 
 
     var postsomething = function (data, _ip, callback) {
-        if (typeof(data) == typeof([][0]) || data == null) data = JSON.stringify({1: 2});
+        if (typeof (data) == typeof ([][0]) || data == null) data = JSON.stringify({ 1: 2 });
 
         _http("POST", _ip, data, function (data) {
             if (data.slice(0, 6) == 'error:') {
@@ -56,14 +56,14 @@
                 callback(null, data);
             }
         }, function (e) {
-            if (window.main != null && main.log) main.log(e);
+            if (window.main != null) console.log(e);
             else console.log(e);
-            callback(e+"：请检查启动服务是否处于正常运行状态。");
+            callback(e + "：请检查启动服务是否处于正常运行状态。");
         }, "text/plain; charset=x-user-defined");
     }
 
     fs.readFile = function (filename, encoding, callback) {
-        if (typeof(filename) != typeof(''))
+        if (typeof (filename) != typeof (''))
             throw 'Type Error in fs.readFile';
         if (encoding == 'utf-8') {
             //读文本文件
@@ -91,7 +91,7 @@
     }
 
     fs.writeFile = function (filename, datastr, encoding, callback) {
-        if (typeof(filename) != typeof('') || typeof(datastr) != typeof(''))
+        if (typeof (filename) != typeof ('') || typeof (datastr) != typeof (''))
             throw 'Type Error in fs.writeFile';
         if (encoding == 'utf-8') {
             //写文本文件
@@ -121,14 +121,14 @@
     }
 
     fs.writeMultiFiles = function (filenames, datastrs, callback) {
-        postsomething('name='+filenames.join(';')+'&value='+datastrs.join(';'), '/writeMultiFiles', callback);
+        postsomething('name=' + filenames.join(';') + '&value=' + datastrs.join(';'), '/writeMultiFiles', callback);
     }
 
     fs.readdir = function (path, callback) {
         //callback:function(err, data)
         //path:支持"/"做分隔符,不以"/"结尾
         //data:[filename1,filename2,..] filename是字符串,只包含文件不包含目录
-        if (typeof(path) != typeof(''))
+        if (typeof (path) != typeof (''))
             throw 'Type Error in fs.readdir';
         var data = '';
         data += 'name=' + path;
@@ -150,7 +150,7 @@
      */
     fs.mkdir = function (path, callback) {
         //callback:function(err, data)
-        if (typeof(path) != typeof(''))
+        if (typeof (path) != typeof (''))
             throw 'Type Error in fs.readdir';
         var data = '';
         data += 'name=' + path;
@@ -163,7 +163,7 @@
      * @param {() => {err: string, data}} callback
      */
     fs.moveFile = function (src, dest, callback) {
-        if (typeof(src) != typeof('') || typeof(dest) != typeof(''))
+        if (typeof (src) != typeof ('') || typeof (dest) != typeof (''))
             throw 'Type Error in fs.readdir';
         var data = '';
         data += 'src=' + src + "&dest=" + dest;
@@ -176,7 +176,7 @@
      * @param {() => {err: string, data}} callback
      */
     fs.deleteFile = function (path, callback) {
-        if (typeof(path) != typeof(''))
+        if (typeof (path) != typeof (''))
             throw 'Type Error in fs.readdir';
         var data = '';
         data += 'name=' + path;

@@ -6,7 +6,7 @@
 
 "use strict";
 
-function core() {
+function core () {
     this.__SIZE__ = 13;
     this.__PIXELS__ = this.__SIZE__ * 32;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
@@ -104,7 +104,7 @@ function core() {
         offsetX: 0, // in pixel
         offsetY: 0,
         posX: 0, // 
-        posY: 0, 
+        posY: 0,
         width: this.__SIZE__, // map width and height
         height: this.__SIZE__,
         v2: false,
@@ -135,7 +135,7 @@ function core() {
 
         // 勇士属性
         'hero': {},
-        'heroCenter': {'px': null, 'py': null},
+        'heroCenter': { 'px': null, 'py': null },
 
         // 当前地图
         'floorId': null,
@@ -231,10 +231,10 @@ function core() {
             "statusLeftBackground": main.styles.statusLeftBackground || "url(project/materials/ground.png) repeat",
             "statusTopBackground": main.styles.statusTopBackground || "url(project/materials/ground.png) repeat",
             "toolsBackground": main.styles.toolsBackground || "url(project/materials/ground.png) repeat",
-            "borderColor": main.styles.borderColor || [204,204,204,1],
-            "statusBarColor": main.styles.statusBarColor || [255,255,255,1],
+            "borderColor": main.styles.borderColor || [204, 204, 204, 1],
+            "statusBarColor": main.styles.statusBarColor || [255, 255, 255, 1],
             "floorChangingStyle": main.styles.floorChangingStyle || "background-color: black; color: white",
-            "selectColor": main.styles.selectColor || [255,215,0,1],
+            "selectColor": main.styles.selectColor || [255, 215, 0, 1],
             "font": main.styles.font || "Verdana"
         },
         'curtainColor': null,
@@ -284,9 +284,8 @@ core.prototype.init = function (coreData, callback) {
         core.extensions._load(function () {
             core._afterLoadResources(callback);
         });
-    });    
+    });
     core.dom.musicBtn.style.display = 'block';
-    core.dom.enlargeBtn.style.display = 'block';
     core.setMusicBtn();
 }
 
@@ -295,7 +294,7 @@ core.prototype._init_flags = function () {
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
     this._init_sys_flags();
-    
+
     // 让你总是拼错！
     window.on = true;
     window.off = false;
@@ -306,7 +305,7 @@ core.prototype._init_flags = function () {
     core.dom.logoLabel.innerText = core.firstData.title;
     document.title = core.firstData.title + " - HTML5魔塔";
     document.getElementById("startLogo").innerText = core.firstData.title;
-    (core.firstData.shops||[]).forEach(function (t) { core.initStatus.shops[t.id] = t; });
+    (core.firstData.shops || []).forEach(function (t) { core.initStatus.shops[t.id] = t; });
 
     core.maps._initFloors();
     // 初始化怪物、道具等
@@ -344,15 +343,15 @@ core.prototype._init_flags = function () {
             symbol: "_equipEvent_" + equipId,
             currentFloor: false,
             multiExecute: true,
-            condition: "core.hasEquip('" + equipId + "') && !core.hasFlag('"+equipFlag+"')",
-            data: core.precompile([{"type": "setValue", "name": "flag:" + equipFlag, "value": "true"}].concat(equip.equip.equipEvent||[])),
+            condition: "core.hasEquip('" + equipId + "') && !core.hasFlag('" + equipFlag + "')",
+            data: core.precompile([{ "type": "setValue", "name": "flag:" + equipFlag, "value": "true" }].concat(equip.equip.equipEvent || [])),
         };
         var autoEvent2 = {
             symbol: "_unequipEvent_" + equipId,
             currentFloor: false,
             multiExecute: true,
-            condition: "!core.hasEquip('" + equipId + "') && core.hasFlag('"+equipFlag+"')",
-            data: core.precompile([{"type": "setValue", "name": "flag:" + equipFlag, "value": "null"}].concat(equip.equip.unequipEvent||[])),
+            condition: "!core.hasEquip('" + equipId + "') && core.hasFlag('" + equipFlag + "')",
+            data: core.precompile([{ "type": "setValue", "name": "flag:" + equipFlag, "value": "null" }].concat(equip.equip.unequipEvent || [])),
         };
         core.initStatus.autoEvents.push(autoEvent1);
         core.initStatus.autoEvents.push(autoEvent2);
@@ -444,7 +443,7 @@ core.prototype._init_others = function () {
     core.loadImage("materials", 'fog', function (name, img) { core.animateFrame.weather.fog = img; });
     core.loadImage("materials", "cloud", function (name, img) { core.animateFrame.weather.cloud = img; })
     core.loadImage("materials", "sun", function (name, img) { core.animateFrame.weather.sun = img; })
-    core.loadImage("materials", 'keyboard', function (name, img) {core.material.images.keyboard = img; });
+    core.loadImage("materials", 'keyboard', function (name, img) { core.material.images.keyboard = img; });
     // 记录存档编号
     core.saves.saveIndex = core.getLocalStorage('saveIndex', 1);
     core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });
@@ -467,7 +466,7 @@ core.prototype._afterLoadResources = function (callback) {
         }
         var arr = core.splitImage(core.material.images.images[name], one.width, one.height);
         for (var i = 0; i < arr.length; ++i) {
-            core.material.images.images[(one.prefix||"") + i + '.png'] = arr[i];
+            core.material.images.images[(one.prefix || "") + i + '.png'] = arr[i];
         }
     });
 
@@ -478,7 +477,7 @@ core.prototype._afterLoadResources = function (callback) {
 }
 
 core.prototype._init_plugins = function () {
-    core.plugin = new function () {};
+    core.plugin = new function () { };
 
     for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
         if (plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name] instanceof Function) {
@@ -486,8 +485,8 @@ core.prototype._init_plugins = function () {
                 plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1[name].apply(core.plugin);
             }
             catch (e) {
-                main.log(e);
-                main.log("无法初始化插件"+name);
+                console.error(e);
+                console.error("无法初始化插件" + name);
             }
         }
     }
@@ -514,16 +513,13 @@ core.prototype._forwardFunc = function (name, funcname) {
     }
 
     if (core[funcname]) {
-        console.error("ERROR: 无法转发 "+name+" 中的函数 "+funcname+" 到 core 中！同名函数已存在。");
+        console.error("ERROR: 无法转发 " + name + " 中的函数 " + funcname + " 到 core 中！同名函数已存在。");
         return;
     }
     var parameterInfo = /^\s*function\s*[\w_$]*\(([\w_,$\s]*)\)\s*\{/.exec(core[name][funcname].toString());
     var parameters = (parameterInfo == null ? "" : parameterInfo[1]).replace(/\s*/g, '').replace(/,/g, ', ');
     // core[funcname] = new Function(parameters, "return core."+name+"."+funcname+"("+parameters+");");
-    eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + "(" + parameters + ");\n}");
-    if (name == 'plugin') {
-        main.log("插件函数转发：core."+funcname+" = core.plugin."+funcname);
-    }
+    eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + ".apply(core." + name + ", arguments);\n}");
 }
 
 core.prototype.doFunc = function (func, _this) {

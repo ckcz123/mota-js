@@ -238,16 +238,19 @@ main.prototype.init = function (mode, callback) {
                 main.core.init(coreData, callback);
                 main.core.resize();
                 // 自动放缩最大化
-                try {
-                    if (main.core) {
-                        var index = main.core.domStyle.availableScale.indexOf(core.domStyle.scale);
-                        main.core.control.setDisplayScale(main.core.domStyle.availableScale.length - 1 - index);
-                        if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
-                            main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
-                            main.core.resize();
+                if (core.getLocalStorage('autoScale') === void 0) core.setLocalStorage('autoScale', true);
+                if (core.getLocalStorage('autoScale') && !core.domStyle.isVertical) {
+                    try {
+                        if (main.core) {
+                            var index = main.core.domStyle.availableScale.indexOf(core.domStyle.scale);
+                            main.core.control.setDisplayScale(main.core.domStyle.availableScale.length - 1 - index);
+                            if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
+                                main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
+                                main.core.resize();
+                            }
                         }
-                    }
-                } catch (e) { console.error(e) };
+                    } catch (e) { console.error(e) };
+                }
             });
         });
     });

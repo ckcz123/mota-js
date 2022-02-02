@@ -1953,6 +1953,7 @@ ui.prototype._drawSwitchs_display = function () {
         "临界显伤： " + (core.flags.displayCritical ? "[ON]" : "[OFF]"),
         "领域显伤： " + (core.flags.displayExtraDamage ? "[ON]" : "[OFF]"),
         "领域模式： " + (core.flags.extraDamageType == 2 ? "[最简]" : core.flags.extraDamageType == 1 ? "[半透明]" : "[完整]"),
+        "自动放缩： " + (core.getLocalStorage('autoScale') ? "[ON]" : "[OFF]"),
         "返回上一级",
     ];
     this.drawChoices(null, choices);

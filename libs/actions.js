@@ -2301,6 +2301,11 @@ actions.prototype._clickSwitchs_display = function (x, y) {
                 core.playSound('确定');
                 return this._clickSwitchs_display_extraDamageType();
             case 7:
+                core.playSound('确定');
+                core.setLocalStorage('autoScale', core.getLocalStorage('autoScale') ? false : true);
+                core.ui._drawSwitchs_display();
+                break;
+            case 8:
                 core.status.event.selection = 1;
                 core.playSound('取消');
                 core.ui._drawSwitchs();

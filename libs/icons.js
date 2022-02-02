@@ -2,7 +2,7 @@
 
 "use strict";
 
-function icons() {
+function icons () {
     this._init();
 }
 
@@ -70,7 +70,7 @@ icons.prototype.getTilesetOffset = function (id) {
         var width = Math.floor(parseInt(img.getAttribute('_width')) / 32), height = Math.floor(parseInt(img.getAttribute('_height')) / 32);
         if (id >= startOffset && id < startOffset + width * height) {
             var x = (id - startOffset) % width, y = parseInt((id - startOffset) / width);
-            return {"image": imgName, "x": x, "y": y};
+            return { "image": imgName, "x": x, "y": y };
         }
         startOffset += this.tilesetStartOffset;
     }

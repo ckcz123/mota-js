@@ -2,7 +2,7 @@
 
 "use strict";
 
-function maps() {
+function maps () {
     this._init();
 }
 
@@ -53,7 +53,7 @@ maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
     if (!map) map = core.cloneArray(floor.map);
     if (map instanceof Array) {
-        map = {"map": map};
+        map = { "map": map };
     }
     if (!map.map) map.map = core.cloneArray(floor.map);
     var content = {};
@@ -76,7 +76,7 @@ maps.prototype.loadFloor = function (floorId, map) {
 maps.prototype._loadFloor_doNotCopy = function () {
     return [
         "firstArrive", "eachArrive", "blocks", "parallelDo", "map", "bgmap", "fgmap",
-        "events", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor", 
+        "events", "changeFloor", "beforeBattle", "afterBattle", "afterGetItem", "afterOpenDoor",
         "cannotMove", "cannotMoveIn"
     ];
 }
@@ -84,7 +84,7 @@ maps.prototype._loadFloor_doNotCopy = function () {
 /// 根据需求解析出blocks
 maps.prototype.extractBlocks = function (map) {
     map = map || core.status.floorId;
-    if (typeof map == 'string') map = (core.status.maps||{})[map];
+    if (typeof map == 'string') map = (core.status.maps || {})[map];
     if (!map) return;
     if (map.blocks) return;
     if (map.deleted) {
@@ -104,7 +104,7 @@ maps.prototype._mapIntoBlocks = function (map, floor, floorId) {
             var number = (map[i] || [])[j] || 0, block;
             if (main.mode == 'editor') {
                 if (!number) continue;
-                block = {x: j, y: i, id: number, event: this.getBlockByNumber(number).event};
+                block = { x: j, y: i, id: number, event: this.getBlockByNumber(number).event };
             } else {
                 block = this.initBlock(j, i, number, true, floor);
             }
@@ -147,7 +147,7 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
                 var event = (floor.events || {})[j + "," + i];
                 if (event != null && event.filter != null) filter = core.clone(event.filter);
             }
-            map.blocks.push(Object.assign({}, this.getBlockByNumber(number), {x: j, y: i, opacity: opacity, filter: filter}));
+            map.blocks.push(Object.assign({}, this.getBlockByNumber(number), { x: j, y: i, opacity: opacity, filter: filter }));
         }
     }
 }
@@ -202,15 +202,15 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
         opacity = this._getBlockOpacityFromFlag(eventFloor.floorId, x, y);
         filter = this._getBlockFilterFromFlag(eventFloor.floorId, x, y);
     }
-    var block = {'x': x, 'y': y, 'id': id};
+    var block = { 'x': x, 'y': y, 'id': id };
     if (disable != null) block.disable = disable;
     if (opacity != null) block.opacity = opacity;
     if (filter != null) block.filter = filter;
 
-    if (id == 17) block.event = {"cls": "terrains", "id": "airwall", "cannotIn":["up", "down", "left", "right"]};
+    if (id == 17) block.event = { "cls": "terrains", "id": "airwall", "cannotIn": ["up", "down", "left", "right"] };
     else if (id in this.blocksInfo) block.event = JSON.parse(JSON.stringify(this.blocksInfo[id]));
-    else if (core.icons.getTilesetOffset(id)) block.event = {"cls": "tileset", "id": "X" + id};
-    else block.event = {'cls': 'terrains', 'id': 'none', 'noPass': false};
+    else if (core.icons.getTilesetOffset(id)) block.event = { "cls": "tileset", "id": "X" + id };
+    else block.event = { 'cls': 'terrains', 'id': 'none', 'noPass': false };
 
     if (block.event.noPass == null) {
         if (block.event.canPass == null) {
@@ -222,7 +222,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     delete block.event.canPass;
 
     // 增加怪物的faceIds
-    if (block.event.cls.indexOf("enemy") ==0 ) {
+    if (block.event.cls.indexOf("enemy") == 0) {
         var enemy = core.material.enemys[block.event.id];
         if (enemy && enemy.faceIds) {
             block.event.faceIds = enemy.faceIds;
@@ -233,7 +233,7 @@ maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     if (eventFloor) {
         this._addEvent(block, x, y, (eventFloor.events || {})[x + "," + y]);
         var changeFloor = (eventFloor.changeFloor || {})[x + "," + y];
-        if (changeFloor) this._addEvent(block, x, y, {"trigger": "changeFloor", "data": changeFloor});
+        if (changeFloor) this._addEvent(block, x, y, { "trigger": "changeFloor", "data": changeFloor });
     }
     if (main.mode == 'editor') delete block.disable;
     return block;
@@ -260,10 +260,10 @@ maps.prototype._addEvent = function (block, x, y, event) {
     if (!event) return;
     // event是字符串或数组？
     if (typeof event == "string") {
-        event = {"data": [event]};
+        event = { "data": [event] };
     }
     else if (event instanceof Array) {
-        event = {"data": event};
+        event = { "data": event };
     }
     event.data = event.data || [];
 
@@ -337,7 +337,7 @@ maps.prototype._processInvalidMap = function (mapArr, width, height) {
     }
     for (var j = 0; j < height; ++j) {
         for (var i = 0; i < width; ++i) {
-            if (j < mapArr.length && i < mapArr[j].length) 
+            if (j < mapArr.length && i < mapArr[j].length)
                 map[j][i] = mapArr[j][i];
         }
     }
@@ -352,7 +352,7 @@ maps.prototype._getBlockOpacityFromFlag = function (floorId, x, y, flags) {
     if (!floorId) return null;
     if ((flags.__removed__ || []).indexOf(floorId) >= 0) return null;
     var index = x + y * core.floors[floorId].width;
-    return (__opacity__[floorId]||{})[index];
+    return (__opacity__[floorId] || {})[index];
 }
 
 maps.prototype._getBlockFilterFromFlag = function (floorId, x, y, flags) {
@@ -363,7 +363,7 @@ maps.prototype._getBlockFilterFromFlag = function (floorId, x, y, flags) {
     if (!floorId) return null;
     if ((flags.__removed__ || []).indexOf(floorId) >= 0) return null;
     var index = x + y * core.floors[floorId].width;
-    return core.clone((__filter__[floorId]||{})[index]);
+    return core.clone((__filter__[floorId] || {})[index]);
 }
 
 ////// 设置某个点的不透明度 //////
@@ -447,10 +447,10 @@ maps.prototype.setMapBlockDisabled = function (floorId, x, y, disabled) {
     if (!window.flags.__disabled__) window.flags.__disabled__ = {};
     if ((window.flags.__removed__ || []).indexOf(floorId) >= 0) return;
     var __disabled__ = window.flags.__disabled__ || {};
-    if (!__disabled__[floorId]) __disabled__[floorId] = [[],[]];
+    if (!__disabled__[floorId]) __disabled__[floorId] = [[], []];
     var index = x + y * core.floors[floorId].width;
-    __disabled__[floorId][0] = __disabled__[floorId][0].filter(function (x) {return x != index});
-    __disabled__[floorId][1] = __disabled__[floorId][1].filter(function (x) {return x != index});
+    __disabled__[floorId][0] = __disabled__[floorId][0].filter(function (x) { return x != index });
+    __disabled__[floorId][1] = __disabled__[floorId][1].filter(function (x) { return x != index });
     if (disabled == null) return;
     if (disabled) __disabled__[floorId][0].push(index);
     else __disabled__[floorId][1].push(index);
@@ -525,7 +525,7 @@ maps.prototype.loadMap = function (data, floorId, flags) {
     if (!floorId) {
         var map = {};
         core.floorIds.forEach(function (id) {
-            if (core.inArray((flags||{}).__removed__, id)) {
+            if (core.inArray((flags || {}).__removed__, id)) {
                 data[id] = { deleted: true, canFlyTo: false, canFlyFrom: false, cannotViewMap: true };
             }
             map[id] = core.maps.loadFloor(id, data[id]);
@@ -601,7 +601,7 @@ maps.prototype._getMapArrayFromBlocks = function (blockArray, width, height, sho
 ////// 以x,y的形式返回每个点的事件 //////
 maps.prototype.getMapBlocksObj = function (floorId, noCache) {
     floorId = floorId || core.status.floorId;
-    if (core.status.mapBlockObjs[floorId] && !noCache) 
+    if (core.status.mapBlockObjs[floorId] && !noCache)
         return core.status.mapBlockObjs[floorId];
 
     var obj = {};
@@ -630,10 +630,10 @@ maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
     for (var y = 0; y < height; ++y) {
         if (arr[y] == null) arr[y] = Array(width).fill(0);
     }
-    (core.getFlag('__'+name+'v__', {})[floorId] || []).forEach(function (one) {
+    (core.getFlag('__' + name + 'v__', {})[floorId] || []).forEach(function (one) {
         arr[one[1]][one[0]] = one[2] || 0;
     });
-    (core.getFlag('__'+name+'d__', {})[floorId] || []).forEach(function (one) {
+    (core.getFlag('__' + name + 'd__', {})[floorId] || []).forEach(function (one) {
         arr[one[1]][one[0]] = 0;
     });
     if (main.mode == 'editor') {
@@ -701,7 +701,7 @@ maps.prototype.generateMovableArray = function (floorId) {
 
 maps.prototype._generateMovableArray_arrays = function (floorId) {
     return {
-        bgArray: this.getBgMapArray(floorId), 
+        bgArray: this.getBgMapArray(floorId),
         fgArray: this.getFgMapArray(floorId),
         eventArray: this.getMapArray(floorId)
     };
@@ -740,7 +740,7 @@ maps.prototype._canMoveHero_checkPoint = function (x, y, direction, floorId, arr
 
     // 4. 检查是否能进将死的领域
     if (floorId == core.status.floorId && !core.flags.canGoDeadZone && !core.status.lockControl &&
-        Math.max(core.status.hero.hp, 1) <= ((core.status.checkBlock.damage||{})[nx + "," + ny]||0) && arrays.eventArray[ny][nx] == 0)
+        Math.max(core.status.hero.hp, 1) <= ((core.status.checkBlock.damage || {})[nx + "," + ny] || 0) && arrays.eventArray[ny][nx] == 0)
         return false;
 
     return true;
@@ -760,7 +760,7 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
 
 ////// 能否瞬间移动 //////
 maps.prototype.canMoveDirectly = function (destX, destY) {
-    return this.canMoveDirectlyArray([[destX,destY]])[0];
+    return this.canMoveDirectlyArray([[destX, destY]])[0];
 }
 
 maps.prototype.canMoveDirectlyArray = function (locs, canMoveArray) {
@@ -888,12 +888,12 @@ maps.prototype.automaticRoute = function (destX, destY) {
     if (destX == startX && destY == startY) return [];
     // BFS找寻最短路径
     var route = this._automaticRoute_bfs(startX, startY, destX, destY);
-    if (route[destX+","+destY] == null) return [];
+    if (route[destX + "," + destY] == null) return [];
     // 路径数组转换
     var ans = [], nowX = destX, nowY = destY;
     while (nowX != startX || nowY != startY) {
         var dir = route[nowX + "," + nowY];
-        ans.push({'direction': dir, 'x': nowX, 'y': nowY});
+        ans.push({ 'direction': dir, 'x': nowX, 'y': nowY });
         nowX -= core.utils.scan[dir].x;
         nowY -= core.utils.scan[dir].y;
     }
@@ -904,28 +904,28 @@ maps.prototype.automaticRoute = function (destX, destY) {
 maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
     var route = {}, canMoveArray = this.generateMovableArray();
     // 使用优先队列
-    var queue = new PriorityQueue({comparator: function (a,b) { return a.depth - b.depth; }});
+    var queue = new PriorityQueue({ comparator: function (a, b) { return a.depth - b.depth; } });
     route[startX + "," + startY] = '';
-    queue.queue({depth: 0, x: startX, y: startY});
+    queue.queue({ depth: 0, x: startX, y: startY });
     var blocks = core.getMapBlocksObj();
-    while (queue.length!=0) {
+    while (queue.length != 0) {
         var curr = queue.dequeue(), deep = curr.depth, nowX = curr.x, nowY = curr.y;
         for (var direction in core.utils.scan) {
             if (!core.inArray(canMoveArray[nowX][nowY], direction)) continue;
             var nx = nowX + core.utils.scan[direction].x;
             var ny = nowY + core.utils.scan[direction].y;
-            if (nx<0 || nx>=core.bigmap.width || ny<0 || ny>=core.bigmap.height || route[nx+","+ny] != null) continue;
+            if (nx < 0 || nx >= core.bigmap.width || ny < 0 || ny >= core.bigmap.height || route[nx + "," + ny] != null) continue;
             // 重点
             if (nx == destX && ny == destY) {
-                route[nx+","+ny] = direction;
+                route[nx + "," + ny] = direction;
                 break;
             }
             // 不可通行
             if (core.noPass(nx, ny)) continue;
-            route[nx+","+ny] = direction;
-            queue.queue({depth: deep + this._automaticRoute_deepAdd(nx, ny, blocks), x: nx, y: ny});
+            route[nx + "," + ny] = direction;
+            queue.queue({ depth: deep + this._automaticRoute_deepAdd(nx, ny, blocks), x: nx, y: ny });
         }
-        if (route[destX+","+destY] != null) break;
+        if (route[destX + "," + destY] != null) break;
     }
     return route;
 }
@@ -933,7 +933,7 @@ maps.prototype._automaticRoute_bfs = function (startX, startY, destX, destY) {
 maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
     // 判定每个可通行点的损耗值，越高越应该绕路
     var deepAdd = 1;
-    var block = blocks[x+","+y];
+    var block = blocks[x + "," + y];
     if (block && !block.disable) {
         var id = block.event.id;
         // 绕过亮灯
@@ -946,9 +946,9 @@ maps.prototype._automaticRoute_deepAdd = function (x, y, blocks) {
         // if (block.event.trigger == 'changeFloor') deepAdd+=10;
     }
     // 绕过存在伤害的地方
-    deepAdd += (core.status.checkBlock.damage[x+","+y]||0) * 100;
+    deepAdd += (core.status.checkBlock.damage[x + "," + y] || 0) * 100;
     // 绕过捕捉
-    if (core.status.checkBlock.ambush[x+","+y]) deepAdd += 1000;
+    if (core.status.checkBlock.ambush[x + "," + y]) deepAdd += 1000;
     return deepAdd;
 }
 
@@ -973,7 +973,7 @@ maps.prototype._getBigImageInfo = function (bigImage, face, animate) {
         // case "right": dx = 32 - per_width; dy = 32 - per_height; break;
     }
 
-    return {sx: sx, sy: sy, per_width: per_width, per_height: per_height, face: face, dx: dx, dy: dy};
+    return { sx: sx, sy: sy, per_width: per_width, per_height: per_height, face: face, dx: dx, dy: dy };
 }
 
 ////// 绘制一个图块 //////
@@ -1025,7 +1025,7 @@ maps.prototype._drawBlockInfo_bigImage = function (blockInfo, x, y, ctx) {
 
     var px = 32 * x - core.bigmap.offsetX;
     var py = 32 * y - core.bigmap.offsetY;
-    
+
     // 上半部分 - 会遮挡勇士；z值高于event2，为51
     var header = "_bigImage_header_" + x + "_" + y;
     // 下半部分 - 会被勇士遮挡；z值高于event，为31
@@ -1172,7 +1172,7 @@ maps.prototype.redrawMap = function () {
     core.bigmap.canvas.forEach(function (one) {
         core.clearMap(one);
     });
-    this._drawMap_drawAll(null, {redraw: true});
+    this._drawMap_drawAll(null, { redraw: true });
     core.drawDamage();
 }
 
@@ -1211,7 +1211,7 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, co
                 var bigImageInfo = core.maps._getBigImageInfo(blockInfo.bigImage, blockInfo.face, 0);
                 var per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
                 core.maps._drawBlockInfo_drawWithFilter(block, ctx, function () {
-                    core.drawImage(ctx, blockInfo.bigImage, bigImageInfo.sx, bigImageInfo.sy, per_width, per_height, 
+                    core.drawImage(ctx, blockInfo.bigImage, bigImageInfo.sx, bigImageInfo.sy, per_width, per_height,
                         32 * block.x + bigImageInfo.dx, 32 * block.y + bigImageInfo.dy, per_width, per_height);
                 });
             });
@@ -1232,7 +1232,7 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, co
 maps.prototype.drawBg = function (floorId, config) {
     floorId = floorId || core.status.floorId;
     if (config == null) config = {};
-    if (typeof config == 'string' || config.canvas) config = {ctx: config};
+    if (typeof config == 'string' || config.canvas) config = { ctx: config };
     config = Object.assign({}, config);
     if (config.ctx == null) {
         config.onMap = true;
@@ -1286,7 +1286,7 @@ maps.prototype._drawBg_drawBackground = function (floorId, config) {
 maps.prototype.drawEvents = function (floorId, blocks, config) {
     floorId = floorId || core.status.floorId;
     if (config == null) config = {};
-    if (typeof config == 'string' || config.canvas) config = {ctx: config};
+    if (typeof config == 'string' || config.canvas) config = { ctx: config };
     config = Object.assign({}, config);
     if (config.ctx == null) {
         config.onMap = true;
@@ -1342,7 +1342,7 @@ maps.prototype.drawEvents = function (floorId, blocks, config) {
 maps.prototype.drawFg = function (floorId, config) {
     floorId = floorId || core.status.floorId;
     if (config == null) config = {};
-    if (typeof config == 'string' || config.canvas) config = {ctx: config};
+    if (typeof config == 'string' || config.canvas) config = { ctx: config };
     config = Object.assign({}, config);
     if (config.ctx == null) {
         config.onMap = true;
@@ -1444,14 +1444,14 @@ maps.prototype._drawFloorImages_gif = function (image, dx, dy) {
 
 maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus, onMap) {
     var height = image.height;
-    var imageName = one.name + (one.reverse||'');
+    var imageName = one.name + (one.reverse || '');
     var width = parseInt((one.w == null ? image.width : one.w) / (one.frame || 1));
     var height = one.h == null ? image.height : one.h;
     var sx = (one.sx || 0) + (currStatus || 0) % (one.frame || 1) * width;
     var sy = one.sy || 0;
     var x = one.x || 0, y = one.y || 0;
     if (onMap && core.bigmap.v2) {
-        if (x > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || x + width < 32 * core.bigmap.posX - 32 
+        if (x > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || x + width < 32 * core.bigmap.posX - 32
             || y > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || y + height < 32 * core.bigmap.posY - 32) {
             return;
         }
@@ -1483,111 +1483,112 @@ maps.prototype._drawAutotile = function (ctx, mapArr, block, size, left, top, st
     status = status || 0;
     status %= parseInt(autotile.width / 96);
     var done = {};
-    var isGrass = function(x,y){
-        if(core.maps._drawAutotile_getAutotileAroundId(mapArr[yy][xx],x,y,mapArr)){
+    var isGrass = function (x, y) {
+        if (core.maps._drawAutotile_getAutotileAroundId(mapArr[yy][xx], x, y, mapArr)) {
             return 1;
-        }else{
+        } else {
             return 0;
         }
     }
     var iG = [];
-    [-1,0,1].forEach(function(_x){
-    iG[_x] = [];
-        [-1,0,1].forEach(function(_y){
+    [-1, 0, 1].forEach(function (_x) {
+        iG[_x] = [];
+        [-1, 0, 1].forEach(function (_y) {
             iG[_x][_y] = isGrass(xx + _x, yy + _y);
-        })});
-    if(iG[-1][-1] + iG[0][-1] + iG[0][0] + iG[-1][0] == 3 && !iG[-1][-1]){
+        })
+    });
+    if (iG[-1][-1] + iG[0][-1] + iG[0][0] + iG[-1][0] == 3 && !iG[-1][-1]) {
         this._drawAutotile_render(ctx, xx * size + left, yy * size + top, size, autotile, status, 16, null, onMap);
         done[0] = true;
     }
-    if(iG[0][-1] + iG[1][-1] + iG[1][0] + iG[0][0] == 3 && !iG[1][-1]){
-        this._drawAutotile_render(ctx, xx * size + left + size/2, yy * size + top, size, autotile, status,  17, null, onMap);
+    if (iG[0][-1] + iG[1][-1] + iG[1][0] + iG[0][0] == 3 && !iG[1][-1]) {
+        this._drawAutotile_render(ctx, xx * size + left + size / 2, yy * size + top, size, autotile, status, 17, null, onMap);
         done[1] = true;
     }
-    if(iG[0][0] + iG[1][0] + iG[1][1] + iG[0][1] == 3 && !iG[1][1]){
-        this._drawAutotile_render(ctx, xx * size + left+size/2, yy * size + top + size/2, size, autotile, status, 18, null, onMap);
+    if (iG[0][0] + iG[1][0] + iG[1][1] + iG[0][1] == 3 && !iG[1][1]) {
+        this._drawAutotile_render(ctx, xx * size + left + size / 2, yy * size + top + size / 2, size, autotile, status, 18, null, onMap);
         done[3] = true;
     }
-    if(iG[0-1][0] + iG[0][0] + iG[0][1] + iG[-1][1] == 3 && !iG[-1][1]){
-        this._drawAutotile_render(ctx, xx * size + left, yy * size + top + size/2, size, autotile, status, 19, null, onMap);
+    if (iG[0 - 1][0] + iG[0][0] + iG[0][1] + iG[-1][1] == 3 && !iG[-1][1]) {
+        this._drawAutotile_render(ctx, xx * size + left, yy * size + top + size / 2, size, autotile, status, 19, null, onMap);
         done[2] = true;
     }
     var _id = iG[0][-1] + 2 * iG[-1][0] + 4 * iG[0][1] + 8 * iG[1][0];
 
-    this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status,  _id, done, onMap);
+    this._drawAutotile_render(ctx, xx * size, yy * size, size, autotile, status, _id, done, onMap);
 }
 
 
-maps.prototype._drawAutotile_render = function(canvas, x, y, size, autotile, status, index, done, onMap) {
+maps.prototype._drawAutotile_render = function (canvas, x, y, size, autotile, status, index, done, onMap) {
     if (onMap) {
         x -= 32 * core.bigmap.posX;
         y -= 32 * core.bigmap.posY;
     }
     var indexData = [[[96 * status, 0, 32, 32, x, y, size, size],],
-        [[96 * status, 3 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size],],
-        [[96 * status +  2 * 32, 32, 32, 16, x, y, size, size / 2],[96 * status +  2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
-        [[96 * status +  2 * 32, 3 * 32, 32, 32, x, y, size, size],],
-        [[96 * status, 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 32, 16, 32, x + size / 2, y, size / 2, size],],
-        [[96 * status, 2 * 32, 16, 32, x, y, size / 2, size],[96 * status +  2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size],],
-        [[96 * status +  2 * 32, 32, 32, 32, x, y, size, size],],
-        [[96 * status +  2 * 32, 2 * 32, 32, 32, x, y, size, size],],
-        [[96 * status, 32, 32, 16, x, y, size, size / 2],[96 * status, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
-        [[96 * status, 3 * 32, 32, 32, x, y, size, size],],
-        [[96 * status +  32, 32, 32, 16, x, y, size, size / 2],[96 * status +  32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
-        [[96 * status +  32, 3 * 32, 32, 32, x, y, size, size],],
-        [[96 * status, 32, 32, 32, x, y, size, size],],
-        [[96 * status, 2 * 32, 32, 32, x, y, size, size],],
-        [[96 * status +  32, 32, 32, 32, x, y, size, size],],
-        [[96 * status +  32, 2 * 32, 32, 32, x, y, size, size],],
-        [[96 * status +  2 * 32, 0, 16, 16, x, y, size / 2, size / 2],],
-        [[96 * status +  2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2],],
-        [[96 * status +  2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2],],
-        [[96 * status +  2 * 32, 16, 16, 16, x, y, size / 2, size / 2],],
+    [[96 * status, 3 * 32, 16, 32, x, y, size / 2, size], [96 * status + 2 * 32 + 16, 3 * 32, 16, 32, x + size / 2, y, size / 2, size],],
+    [[96 * status + 2 * 32, 32, 32, 16, x, y, size, size / 2], [96 * status + 2 * 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+    [[96 * status + 2 * 32, 3 * 32, 32, 32, x, y, size, size],],
+    [[96 * status, 32, 16, 32, x, y, size / 2, size], [96 * status + 2 * 32 + 16, 32, 16, 32, x + size / 2, y, size / 2, size],],
+    [[96 * status, 2 * 32, 16, 32, x, y, size / 2, size], [96 * status + 2 * 32 + 16, 2 * 32, 16, 32, x + size / 2, y, size / 2, size],],
+    [[96 * status + 2 * 32, 32, 32, 32, x, y, size, size],],
+    [[96 * status + 2 * 32, 2 * 32, 32, 32, x, y, size, size],],
+    [[96 * status, 32, 32, 16, x, y, size, size / 2], [96 * status, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+    [[96 * status, 3 * 32, 32, 32, x, y, size, size],],
+    [[96 * status + 32, 32, 32, 16, x, y, size, size / 2], [96 * status + 32, 3 * 32 + 16, 32, 16, x, y + size / 2, size, size / 2],],
+    [[96 * status + 32, 3 * 32, 32, 32, x, y, size, size],],
+    [[96 * status, 32, 32, 32, x, y, size, size],],
+    [[96 * status, 2 * 32, 32, 32, x, y, size, size],],
+    [[96 * status + 32, 32, 32, 32, x, y, size, size],],
+    [[96 * status + 32, 2 * 32, 32, 32, x, y, size, size],],
+    [[96 * status + 2 * 32, 0, 16, 16, x, y, size / 2, size / 2],],
+    [[96 * status + 2 * 32 + 16, 0, 16, 16, x, y, size / 2, size / 2],],
+    [[96 * status + 2 * 32 + 16, 16, 16, 16, x, y, size / 2, size / 2],],
+    [[96 * status + 2 * 32, 16, 16, 16, x, y, size / 2, size / 2],],
     ];
     var data = indexData[index];
-    if(index>=16){ // 拐角直接绘制
-        core.drawImage(canvas, autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size/2, size/2);
-    }else{ // 非拐角要根据是否已经绘制进行切分后绘制
+    if (index >= 16) { // 拐角直接绘制
+        core.drawImage(canvas, autotile, data[0][0], data[0][1], data[0][2], data[0][3], data[0][4], data[0][5], size / 2, size / 2);
+    } else { // 非拐角要根据是否已经绘制进行切分后绘制
         this._drawAutotile_renderCut(canvas, autotile, x, y, size, data, done);
     }
 }
 
-maps.prototype._drawAutotile_renderCut = function(canvas, autotile, x, y, size, data, done){
+maps.prototype._drawAutotile_renderCut = function (canvas, autotile, x, y, size, data, done) {
     var drawData = [];
     done = done || {};
-    if(data.length == 2){
+    if (data.length == 2) {
         var idx = 0;
         var cut = 0;
-        for(var i in data){
-            if(data[i][2] % 32){ // 是否纵切
+        for (var i in data) {
+            if (data[i][2] % 32) { // 是否纵切
                 cut = 0;
             }
-            else if(data[i][3] % 32){ // 是否横切
+            else if (data[i][3] % 32) { // 是否横切
                 cut = 1;
             }
-            if(data[i][0] % 32 || data[i][1] % 32){ // right down
+            if (data[i][0] % 32 || data[i][1] % 32) { // right down
                 idx = 1;
-            }else{  // left top
+            } else {  // left top
                 idx = 0;
             }
-            if(cut){
+            if (cut) {
                 idx *= 2;
-                if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
-                if(!done[idx + 1])drawData[idx + 1] = [parseInt(data[i][0]) + 16, data[i][1]];
-            }else{
-                if(!done[idx])drawData[idx] = [data[i][0], data[i][1]];
-                if(!done[idx + 2])drawData[idx + 2] = [data[i][0], parseInt(data[i][1]) + 16];
+                if (!done[idx]) drawData[idx] = [data[i][0], data[i][1]];
+                if (!done[idx + 1]) drawData[idx + 1] = [parseInt(data[i][0]) + 16, data[i][1]];
+            } else {
+                if (!done[idx]) drawData[idx] = [data[i][0], data[i][1]];
+                if (!done[idx + 2]) drawData[idx + 2] = [data[i][0], parseInt(data[i][1]) + 16];
             }
         }
-    }else{
-        if(!done[0])drawData[0] = [data[0][0], data[0][1]];
-        if(!done[1])drawData[1] = [data[0][0] + 16, data[0][1]];
-        if(!done[2])drawData[2] = [data[0][0], data[0][1] + 16];
-        if(!done[3])drawData[3] = [data[0][0] + 16, data[0][1] + 16];
+    } else {
+        if (!done[0]) drawData[0] = [data[0][0], data[0][1]];
+        if (!done[1]) drawData[1] = [data[0][0] + 16, data[0][1]];
+        if (!done[2]) drawData[2] = [data[0][0], data[0][1] + 16];
+        if (!done[3]) drawData[3] = [data[0][0] + 16, data[0][1] + 16];
     }
-    for(var i = 0; i<4; i++){
-        var dt = drawData[i];if(!dt)continue;
-        core.drawImage(canvas, autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size/2, size/2);
+    for (var i = 0; i < 4; i++) {
+        var dt = drawData[i]; if (!dt) continue;
+        core.drawImage(canvas, autotile, dt[0], dt[1], 16, 16, x + (i % 2) * size / 2, y + parseInt(i / 2) * size / 2, size / 2, size / 2);
     };
 }
 
@@ -1642,12 +1643,12 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
         }
     } else {
         if (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
-                || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16) {
+            || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16) {
             return;
         }
     }
 
-    var cv = block.name?core.canvas[block.name]:core.canvas.event;
+    var cv = block.name ? core.canvas[block.name] : core.canvas.event;
     cv.clearRect(32 * x - 32 * core.bigmap.posX, 32 * y - 32 * core.bigmap.posY, 32, 32);
     var alpha = null;
     if (block.opacity != null) alpha = core.setAlpha(cv, block.opacity);
@@ -1706,11 +1707,12 @@ maps.prototype._makeAutotileEdges = function () {
 //    heroLoc: 勇士位置；heroIcon：勇士图标（默认当前勇士）；damage：是否绘制显伤；flags：当前的flags（存读档时使用）
 //    ctx：要绘制到的画布（名）；x,y：起点横纵坐标（默认0）；size：大小（默认416/480）；
 //    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心）
+//    noHD：不使用高清绘制，避免存读档界面出问题
 maps.prototype.drawThumbnail = function (floorId, blocks, options) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
     options = options || {};
-    if (typeof options == 'string' || options.canvas) options = {ctx: options};
+    if (typeof options == 'string' || options.canvas) options = { ctx: options };
     var ctx = options.ctx;
     // Step1：绘制到tempCanvas上
     this._drawThumbnail_drawTempCanvas(floorId, blocks, options);
@@ -1729,13 +1731,17 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     if (options.all) {
         // 计算比例
         var scale = Math.max(core.__SIZE__ / width, core.__SIZE__ / height);
-        tempCanvas.canvas.width = width * 32 * scale;
-        tempCanvas.canvas.height = height * 32 * scale;
+        if (options.noHD) {
+            tempCanvas.canvas.width = width * 32 * scale;
+            tempCanvas.canvas.height = height * 32 * scale;
+        } else core.resizeCanvas(tempCanvas, width * 32 * scale, height * 32 * scale);
         tempCanvas.scale(scale, scale);
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
-        tempCanvas.canvas.width = core.__PIXELS__;
-        tempCanvas.canvas.height = core.__PIXELS__;
+        if (options.noHD) {
+            tempCanvas.canvas.width = core.__PIXELS__;
+            tempCanvas.canvas.height = core.__PIXELS__;
+        } else core.resizeCanvas(tempCanvas, core.__PIXELS__, core.__PIXELS__);
         var centerX = options.centerX, centerY = options.centerY;
         if (centerX == null) centerX = Math.floor(width / 2);
         if (centerY == null) centerY = Math.floor(height / 2);
@@ -1744,11 +1750,13 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         tempCanvas.translate(-32 * offsetX, -32 * offsetY);
     } else {
         options.v2 = false;
-        tempCanvas.canvas.width = width * 32;
-        tempCanvas.canvas.height = height * 32;
+        if (options.noHD) {
+            tempCanvas.canvas.width = width * 32;
+            tempCanvas.canvas.height = height * 32;
+        } else core.resizeCanvas(tempCanvas, width * 32, height * 32);
     }
     options.ctx = tempCanvas;
-    
+
     // 地图过大的缩略图不绘制显伤
     if (width * height > core.bigmap.threshold)
         options.damage = false;
@@ -1780,7 +1788,7 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
         options.heroIcon = core.getMappedName(options.heroIcon);
         var icon = core.material.icons.hero[options.heroLoc.direction];
         var height = core.material.images.images[options.heroIcon].height / 4;
-        var width = core.material.images.images[options.heroIcon].width || 32;
+        var width = (core.material.images.images[options.heroIcon].width || 128) / 4;
         core.drawImage(options.ctx, core.material.images.images[options.heroIcon], icon.stop * width, icon.loc * height, width, height,
             32 * options.heroLoc.x + 32 - width, 32 * options.heroLoc.y + 32 - height, width, height);
     }
@@ -1801,7 +1809,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     var centerX = options.centerX, centerY = options.centerY;
     if (centerX == null) centerX = Math.floor(width / 2);
     if (centerY == null) centerY = Math.floor(height / 2);
-    var tempCanvas = core.bigmap.tempCanvas; 
+    var tempCanvas = core.bigmap.tempCanvas;
 
     if (options.all) {
         var tempWidth = tempCanvas.canvas.width, tempHeight = tempCanvas.canvas.height;
@@ -1828,7 +1836,9 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
         } else {
             var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
                 offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+            var scale = core.domStyle.scale;
+            if (options.noHD) scale = 1;
+            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * scale, offsetY * 32 * scale, core.__PIXELS__ * scale, core.__PIXELS__ * scale, x, y, size, size);
         }
 
     }
@@ -1861,9 +1871,9 @@ maps.prototype.terrainExists = function (x, y, id, floorId) {
 maps.prototype.stairExists = function (x, y, floorId) {
     var blockId = this.getBlockId(x, y, floorId);
     if (blockId == null) return false;
-    var ids = ['upFloor','downFloor'];
-    ids = ids.concat(['leftPortal','rightPortal','upPortal','downPortal','portal','starPortal']);
-    return ids.indexOf(blockId)>=0;
+    var ids = ['upFloor', 'downFloor'];
+    ids = ids.concat(['leftPortal', 'rightPortal', 'upPortal', 'downPortal', 'portal', 'starPortal']);
+    return ids.indexOf(blockId) >= 0;
 }
 
 ////// 当前位置是否在楼梯边 //////
@@ -1920,7 +1930,7 @@ maps.prototype.getBlockOpacity = function (x, y, floorId, showDisable) {
 maps.prototype.getBlockFilter = function (x, y, floorId, showDisable) {
     var block = core.getBlock(x, y, floorId, showDisable);
     if (block == null) return null;
-    if (block.filter == null) return {blur: 0, hue: 0, grayscale: 0, invert: false, shadow: 0};
+    if (block.filter == null) return { blur: 0, hue: 0, grayscale: 0, invert: false, shadow: 0 };
     return core.clone(block.filter);
 }
 
@@ -1975,8 +1985,10 @@ maps.prototype.getBlockInfo = function (block) {
         if (!doorInfo && bigImage != null) animate = 4;
     }
 
-    return {number: number, id: id, cls: cls, name: name, image: image, posX: posX, doorInfo: doorInfo,
-        posY: posY, height: height, faceIds: faceIds, animate: animate, face: face, bigImage: bigImage};
+    return {
+        number: number, id: id, cls: cls, name: name, image: image, posX: posX, doorInfo: doorInfo,
+        posY: posY, height: height, faceIds: faceIds, animate: animate, face: face, bigImage: bigImage
+    };
 }
 
 ////// 搜索某个图块出现的所有位置 //////
@@ -1994,7 +2006,7 @@ maps.prototype.searchBlock = function (id, floorId, showDisable) {
     for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
         var block = core.status.maps[floorId].blocks[i];
         if ((showDisable || !block.disable) && (core.matchWildcard(id, block.event.id) || core.matchRegex(id, block.event.id))) {
-            result.push({floorId: floorId, x: block.x, y: block.y, block: block});
+            result.push({ floorId: floorId, x: block.x, y: block.y, block: block });
         }
     }
     return result;
@@ -2014,7 +2026,7 @@ maps.prototype.searchBlockWithFilter = function (blockFilter, floorId, showDisab
     for (var i = 0; i < core.status.maps[floorId].blocks.length; ++i) {
         var block = core.status.maps[floorId].blocks[i];
         if ((showDisable || !block.disable) && blockFilter(block)) {
-            result.push({floorId: floorId, x: block.x, y: block.y, block: block});
+            result.push({ floorId: floorId, x: block.x, y: block.y, block: block });
         }
     }
     return result;
@@ -2141,7 +2153,7 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
     var blocks = core.status.maps[floorId].blocks, block = blocks[index];
     blocks.splice(index, 1);
     if (core.status.mapBlockObjs[floorId])
-        delete core.status.mapBlockObjs[floorId][block.x+","+block.y];
+        delete core.status.mapBlockObjs[floorId][block.x + "," + block.y];
     core.setMapBlockDisabled(floorId, block.x, block.y, true);
     this._updateMapArray(floorId, block.x, block.y);
 }
@@ -2175,17 +2187,17 @@ maps.prototype._triggerBgFgMap = function (type, name, loc, floorId, callback) {
     if (!floorId) return;
 
     if (loc.length == 0) return;
-    var disabled = core.getFlag('__'+name+'d__', {});
+    var disabled = core.getFlag('__' + name + 'd__', {});
     disabled[floorId] = disabled[floorId] || [];
     loc.forEach(function (t) {
         if (type == 'hide') {
             disabled[floorId].push([t[0], t[1]]);
         } else {
-            disabled[floorId] = disabled[floorId].filter(function (one) { return one[0] != t[0] || one[1] != t[1]});
+            disabled[floorId] = disabled[floorId].filter(function (one) { return one[0] != t[0] || one[1] != t[1] });
         }
     })
-    core.setFlag('__'+name+'d__', disabled);
-    
+    core.setFlag('__' + name + 'd__', disabled);
+
     core.status[name + "maps"][floorId] = null;
 
     if (floorId == core.status.floorId) {
@@ -2247,7 +2259,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     if (originBlock == null) {
         core.status.maps[floorId].blocks.push(block);
         if (core.status.mapBlockObjs[floorId])
-            core.status.mapBlockObjs[floorId][block.x+","+block.y] = block;
+            core.status.mapBlockObjs[floorId][block.x + "," + block.y] = block;
         core.setMapBlockDisabled(floorId, block.x, block.y, false);
         delete block.disable;
     }
@@ -2263,7 +2275,7 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
             core.redrawMap();
         } else {
             if (originEvent != null) {
-                this._removeBlockFromMap(floorId, {x: x, y: y, event: originEvent});
+                this._removeBlockFromMap(floorId, { x: x, y: y, event: originEvent });
             }
             if (!block.disable) {
                 core.drawBlock(block);
@@ -2357,7 +2369,7 @@ maps.prototype.animateSetBlocks = function (number, locs, floorId, time, callbac
         return;
     }
     if (typeof locs[0] == 'number' && typeof locs[1] == 'number')
-    locs = [locs];
+        locs = [locs];
 
     var count = locs.length;
     var _afterSet = function () {
@@ -2426,14 +2438,16 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
         else number = core.getNumberById(number);
     }
 
-    var values = core.getFlag('__'+name+'v__', {});
+    var values = core.getFlag('__' + name + 'v__', {});
     values[floorId] = (values[floorId] || []).filter(function (one) { return one[0] != x || one[1] != y });
-    values[floorId].push([x,y,number]);
-    core.setFlag('__'+name+'v__', values);
+    values[floorId].push([x, y, number]);
+    core.setFlag('__' + name + 'v__', values);
 
     core.status[name + "maps"][floorId] = null;
 
-    if (floorId == core.status.floorId){
+    this._getBgFgMapArray(name, floorId, true);
+
+    if (floorId == core.status.floorId) {
         core.clearMap(name);
         if (name.startsWith('bg')) core.drawBg(floorId);
         else core.drawFg(floorId);
@@ -2574,10 +2588,10 @@ maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
         return;
     }
     var block = blockArr[0], blockInfo = blockArr[1];
-    var moveSteps = (steps||[]).map(function (t) {
-        return [t.split(':')[0], parseInt(t.split(':')[1]||"1")];
+    var moveSteps = (steps || []).map(function (t) {
+        return [t.split(':')[0], parseInt(t.split(':')[1] || "1")];
     }).filter(function (t) {
-        return ['up','down','left','right','forward','backward','leftup','leftdown','rightup','rightdown','speed'].indexOf(t[0])>=0
+        return ['up', 'down', 'left', 'right', 'forward', 'backward', 'leftup', 'leftdown', 'rightup', 'rightdown', 'speed'].indexOf(t[0]) >= 0
             && !(t[0] == 'speed' && t[1] < 16)
     });
     var canvases = this._initDetachedBlock(blockInfo, x, y, block.event.animate !== false);
@@ -2625,7 +2639,7 @@ maps.prototype._moveBlock_doMove = function (blockInfo, canvases, moveInfo, call
             else
                 core.maps._moveJumpBlock_finished(blockInfo, canvases, moveInfo, animate, cb);
         }, moveInfo.per_time);
-        
+
         core.animateFrame.lastAsyncId = animate;
         core.animateFrame.asyncId[animate] = cb;
     }
@@ -2706,7 +2720,7 @@ maps.prototype._moveBlock_moving = function (blockInfo, canvases, moveInfo) {
     if (moveInfo.step == 16) {
         moveInfo.step = 0;
         moveInfo.moveSteps[0][1]--;
-        if (moveInfo.moveSteps[0][1]<=0) {
+        if (moveInfo.moveSteps[0][1] <= 0) {
             moveInfo.moveSteps.shift();
         }
     }
@@ -2947,7 +2961,11 @@ maps.prototype.drawBoxAnimate = function () {
             var bigImageInfo = core.maps._getBigImageInfo(obj.bigImage, obj.face, core.status.globalAnimateStatus % 4);
             var sx = bigImageInfo.sx, sy = bigImageInfo.sy, per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
             var actual_width = Math.min(per_width, obj.max_width || per_width), actual_height = per_height * actual_width / per_width;
-            core.drawImage(ctx, obj.bigImage, sx, sy, per_width, per_height, 
+            var x = obj.centerX - actual_width / 2, y = obj.centerY - actual_height / 2;
+            core.clearMap(ctx, x, y, actual_width, actual_height);
+            core.fillRect(ctx, x, y, actual_width, actual_height, core.material.groundPattern);
+            core.strokeRect(ctx, x, y, actual_width, actual_height, 'gold', 2);
+            core.drawImage(ctx, obj.bigImage, sx, sy, per_width, per_height,
                 obj.centerX - actual_width / 2, obj.centerY - actual_height / 2, actual_width, actual_height);
         } else {
             var ctx = obj.ctx || 'ui';
@@ -2977,7 +2995,7 @@ maps.prototype.drawAnimate = function (name, x, y, alignWindow, callback) {
         centerY += core.bigmap.offsetY;
     }
     animate.se = animate.se || {};
-    if (typeof animate.se == 'string') animate.se = {1: animate.se};
+    if (typeof animate.se == 'string') animate.se = { 1: animate.se };
 
     var id = setTimeout(null);
     core.status.animateObjs.push({
@@ -3006,7 +3024,7 @@ maps.prototype.drawHeroAnimate = function (name, callback) {
     // 开始绘制
     var animate = core.material.animates[name];
     animate.se = animate.se || {};
-    if (typeof animate.se == 'string') animate.se = {1: animate.se};
+    if (typeof animate.se == 'string') animate.se = { 1: animate.se };
 
     var id = setTimeout(null);
     core.status.animateObjs.push({
@@ -3033,7 +3051,7 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
     var ctx = core.getContextByName(name);
     if (!ctx) return;
     var frame = animate.frames[index % animate.frame];
-    core.playSound((animate.se||{})[index % animate.frame + 1], (animate.pitch||{})[index % animate.frame + 1]);
+    core.playSound((animate.se || {})[index % animate.frame + 1], (animate.pitch || {})[index % animate.frame + 1]);
     var ratio = animate.ratio;
     frame.forEach(function (t) {
         var image = animate.images[t.index];
@@ -3051,7 +3069,7 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
         var mirror = t.mirror ? 'x' : null;
         var angle = t.angle ? -t.angle * Math.PI / 180 : null;
         core.drawImage(ctx, image, ix, iy, realWidth, realHeight, null, null, null, null, angle, mirror);
-        
+
         core.setAlpha(ctx, 1);
     })
 }

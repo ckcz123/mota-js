@@ -286,7 +286,6 @@ core.prototype.init = function (coreData, callback) {
         });
     });
     core.dom.musicBtn.style.display = 'block';
-    core.dom.enlargeBtn.style.display = 'block';
     core.setMusicBtn();
 }
 

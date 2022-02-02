@@ -25,7 +25,7 @@ function main () {
         'gameGroup': document.getElementById('gameGroup'),
         'mainTips': document.getElementById('mainTips'),
         'musicBtn': document.getElementById('musicBtn'),
-        'enlargeBtn': document.getElementById('enlargeBtn'),
+        'enlargeBtn': document.createElement('img'),
         'startPanel': document.getElementById('startPanel'),
         'startTop': document.getElementById('startTop'),
         'startTopProgressBar': document.getElementById('startTopProgressBar'),

@@ -1,3 +1,4 @@
+/// <reference path="./runtime.d.ts" />
 function main () {
 
     //------------------------ 用户修改内容 ------------------------//
@@ -236,6 +237,17 @@ main.prototype.init = function (mode, callback) {
                     })
                 main.core.init(coreData, callback);
                 main.core.resize();
+                // 自动放缩最大化
+                try {
+                    if (main.core) {
+                        var index = main.core.domStyle.availableScale.indexOf(core.domStyle.scale);
+                        main.core.control.setDisplayScale(main.core.domStyle.availableScale.length - 1 - index);
+                        if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
+                            main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
+                            main.core.resize();
+                        }
+                    }
+                } catch (e) { console.error(e) };
             });
         });
     });
@@ -783,18 +795,6 @@ main.prototype.listen = function () {
             if (main.core)
                 main.core.triggerBgm();
         } catch (ee) { console.error(ee) }
-    }
-
-    main.dom.enlargeBtn.onclick = function () {
-        try {
-            if (main.core) {
-                main.core.setDisplayScale(1);
-                if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
-                    main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
-                    main.core.resize();
-                }
-            }
-        } catch (e) { console.error(e) };
     }
 
     window.onblur = function () {

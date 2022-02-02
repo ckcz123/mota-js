@@ -108,6 +108,7 @@
 }
 
 #startLogo {
+    user-select: none;
     position: absolute;
     z-index: 290;
     left: 0;
@@ -121,6 +122,7 @@
 }
 
 #startTitle {
+    user-select: none;
     position: absolute;
     z-index: 280;
 }
@@ -215,6 +217,7 @@
     padding: 3px;
 }
 #statusBar .status{
+    user-select: none;
     position: relative;
     display: block;
     float: left;
@@ -227,10 +230,12 @@
     max-height: 1.6em;
 }
 #statusBar span{
+    user-select: none;
     font: bold italic 1.1em Verdana;
     display: inline;
 }
 #statusBar p {
+    user-select: none;
     display: inline-block;
     vertical-align: middle;
     width: 60%;
@@ -256,6 +261,7 @@
 }
 
 p#hard {
+    user-select: none;
     width: 6em;
     vertical-align: middle;
     display: inline-block;
@@ -267,6 +273,7 @@ p#hard {
 }
 
 span#poison, span#weak, span#curse, span#pickaxe, span#bomb, span#fly {
+    user-select: none;
     font-style: normal;
     font-size: 1em;
 }

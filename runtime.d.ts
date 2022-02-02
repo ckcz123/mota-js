@@ -1638,12 +1638,17 @@ declare class maps {
     automaticRoute(destX: number, destY: number): Array<{ direction: direction, x: number, y: number }>
 
     /**
-     * 地图重绘
-     * @example core.drawMap(); // 重绘当前地图，常用于更改贴图后或自动元件的刷新
+     * 地图绘制
+     * @example core.drawMap(); // 绘制当前地图
      * @param floorId 地图id，省略表示当前楼层
      * @param callback 重绘完毕后的回调函数，可选
      */
     drawMap(floorId?: string, callback?: () => void): void
+
+    /**
+     * 重绘地图
+     */
+    redrawMap(): void
 
     /**
      * 绘制背景层（含贴图，其与背景层矩阵的绘制顺序可通过复写此函数来改变）
@@ -2937,9 +2942,9 @@ type core = {
 
 } & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugin
 
-declare class main {
+type main = {
     readonly core: core
-    readonly dom = core.dom
+    readonly dom: { [key: string]: HTMLElement }
     /** 游戏版本，发布后会被随机，请勿使用该属性 */
     readonly version: string
     readonly useCompress: boolean
@@ -2957,6 +2962,7 @@ declare class main {
     log(e: string | Error, error: boolean): void
 }
 
+declare let main: main
 declare let core: core
 declare let flags: { [x: string]: any }
 declare let hero = core.status.hero

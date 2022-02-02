@@ -3276,7 +3276,7 @@ control.prototype.resize = function () {
         core.domStyle.isVertical = false;
 
         core.domStyle.availableScale = [];
-        [1, 1.25, 1.5, 1.75, 2].forEach(function (v) {
+        [1, 1.25, 1.5, 1.75, 2, 2.25, 2.5].forEach(function (v) {
             if (clientWidth - 3 * BORDER >= v * (CANVAS_WIDTH + BAR_WIDTH) && horizontalMaxRatio >= v) {
                 core.domStyle.availableScale.push(v);
             }
@@ -3371,8 +3371,16 @@ control.prototype._resize_gameGroup = function (obj) {
 
 control.prototype._resize_canvas = function (obj) {
     var innerSize = (obj.CANVAS_WIDTH * core.domStyle.scale) + "px";
-    for (var i = 0; i < core.dom.gameCanvas.length; ++i)
-        core.dom.gameCanvas[i].style.width = core.dom.gameCanvas[i].style.height = innerSize;
+    for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
+        var ctx = core.dom.gameCanvas[i].getContext('2d');
+        // core.maps._setHDCanvasSize(ctx);
+        core.resizeCanvas(ctx, core.__PIXELS__, core.__PIXELS__);
+        if (core.status && core.status.maps) {
+            core.redrawMap();
+            core.drawHero();
+            core.setWeather(core.animateFrame.weather.type, core.animateFrame.weather.level);
+        }
+    }
     core.dom.gif.style.width = core.dom.gif.style.height = innerSize;
     core.dom.gif2.style.width = core.dom.gif2.style.height = innerSize;
     core.dom.gameDraw.style.width = core.dom.gameDraw.style.height = innerSize;
@@ -3388,6 +3396,7 @@ control.prototype._resize_canvas = function (obj) {
     // resize dynamic canvas
     for (var name in core.dymCanvas) {
         var ctx = core.dymCanvas[name], canvas = ctx.canvas;
+        core.maps._setHDCanvasSize(ctx, parseFloat(canvas.getAttribute('_width')), parseFloat(canvas.getAttribute('_height')));
         canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
         canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
         var scale = canvas.getAttribute('_scale');

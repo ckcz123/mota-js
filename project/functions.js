@@ -579,19 +579,19 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 							// 检查【光环】技能，数字25
 							if (enemy && core.hasSpecial(enemy.special, 25)) {
 								// 检查是否是范围光环
-								var inRange = enemy.range == null;
-								if (enemy.range != null && x != null && y != null) {
+								var inRange = enemy.haloRange == null;
+								if (enemy.haloRange != null && x != null && y != null) {
 									var dx = Math.abs(block.x - x),
 										dy = Math.abs(block.y - y);
 									// 检查十字和九宫格光环
-									if (dx + dy <= enemy.range) inRange = true;
-									if (enemy.zoneSquare && dx <= enemy.range && dy <= enemy.range) inRange = true;
+									if (dx + dy <= enemy.haloRange) inRange = true;
+									if (enemy.haloSquare && dx <= enemy.haloRange && dy <= enemy.haloRange) inRange = true;
 								}
 								// 检查是否可叠加
-								if (inRange && (enemy.add || !usedEnemyIds[enemy.id])) {
-									hp_buff += enemy.value || 0;
-									atk_buff += enemy.atkValue || 0;
-									def_buff += enemy.defValue || 0;
+								if (inRange && (enemy.haloAdd || !usedEnemyIds[enemy.id])) {
+									hp_buff += enemy.hpBuff || 0;
+									atk_buff += enemy.atkBuff || 0;
+									def_buff += enemy.defBuff || 0;
 									usedEnemyIds[enemy.id] = true;
 								}
 							}
@@ -689,7 +689,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 			// 吸血
 			if (core.hasSpecial(mon_special, 11)) {
-				var vampire_damage = hero_hp * enemy.value;
+				var vampire_damage = hero_hp * enemy.vampire;
 
 				// 如果有神圣盾免疫吸血等可以在这里写
 				// 也可以用hasItem和hasEquip来判定装备
@@ -718,18 +718,18 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			// 每回合的反击伤害；反击是按照勇士的攻击次数来计算回合
 			var counterDamage = 0;
 			if (core.hasSpecial(mon_special, 8))
-				counterDamage += Math.floor((enemy.atkValue || core.values.counterAttack) * hero_atk);
+				counterDamage += Math.floor((enemy.counterAttack || core.values.counterAttack) * hero_atk);
 
 			// 先攻
 			if (core.hasSpecial(mon_special, 1)) init_damage += per_damage;
 
 			// 破甲
 			if (core.hasSpecial(mon_special, 7))
-				init_damage += Math.floor((enemy.defValue || core.values.breakArmor) * hero_def);
+				init_damage += Math.floor((enemy.breakArmor || core.values.breakArmor) * hero_def);
 
 			// 净化
 			if (core.hasSpecial(mon_special, 9))
-				init_damage += Math.floor((enemy.n || core.values.purify) * hero_mdef);
+				init_damage += Math.floor((enemy.purify || core.values.purify) * hero_mdef);
 
 			// 勇士每回合对怪物造成的伤害
 			var hero_per_damage = Math.max(hero_atk - mon_def, 0);
@@ -1300,7 +1300,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 							if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
 							// 如果是十字领域，则还需要满足 |dx|+|dy|<=range
 							if (!zoneSquare && Math.abs(dx) + Math.abs(dy) > range) continue;
-							damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+							damage[currloc] = (damage[currloc] || 0) + (enemy.zone || 0);
 							type[currloc] = type[currloc] || {};
 							type[currloc]["领域伤害"] = true;
 						}
@@ -1316,7 +1316,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 							ny = y + scan[dir].y,
 							currloc = nx + "," + ny;
 						if (nx < 0 || nx >= width || ny < 0 || ny >= height) continue;
-						damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+						damage[currloc] = (damage[currloc] || 0) + (enemy.repluse || 0);
 						type[currloc] = type[currloc] || {};
 						type[currloc]["阻击伤害"] = true;
 
@@ -1340,7 +1340,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					for (var nx = 0; nx < width; nx++) {
 						var currloc = nx + "," + y;
 						if (nx != x) {
-							damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+							damage[currloc] = (damage[currloc] || 0) + (enemy.laser || 0);
 							type[currloc] = type[currloc] || {};
 							type[currloc]["激光伤害"] = true;
 						}
@@ -1348,7 +1348,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					for (var ny = 0; ny < height; ny++) {
 						var currloc = x + "," + ny;
 						if (ny != y) {
-							damage[currloc] = (damage[currloc] || 0) + (enemy.value || 0);
+							damage[currloc] = (damage[currloc] || 0) + (enemy.laser || 0);
 							type[currloc] = type[currloc] || {};
 							type[currloc]["激光伤害"] = true;
 						}

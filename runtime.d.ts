@@ -94,6 +94,7 @@ type ResolvedMap = {
     ratio: number
     title: string
     weather: [string, number]
+    blocks: Array<Block>
 }
 
 type Enemy = {

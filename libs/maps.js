@@ -2961,6 +2961,10 @@ maps.prototype.drawBoxAnimate = function () {
             var bigImageInfo = core.maps._getBigImageInfo(obj.bigImage, obj.face, core.status.globalAnimateStatus % 4);
             var sx = bigImageInfo.sx, sy = bigImageInfo.sy, per_width = bigImageInfo.per_width, per_height = bigImageInfo.per_height;
             var actual_width = Math.min(per_width, obj.max_width || per_width), actual_height = per_height * actual_width / per_width;
+            var x = obj.centerX - actual_width / 2, y = obj.centerY - actual_height / 2;
+            core.clearMap(ctx, x, y, actual_width, actual_height);
+            core.fillRect(ctx, x, y, actual_width, actual_height, core.material.groundPattern);
+            core.strokeRect(ctx, x, y, actual_width, actual_height, 'gold', 2);
             core.drawImage(ctx, obj.bigImage, sx, sy, per_width, per_height,
                 obj.centerX - actual_width / 2, obj.centerY - actual_height / 2, actual_width, actual_height);
         } else {

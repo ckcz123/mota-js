@@ -99,9 +99,6 @@ main.floors.sample0=
                 "type": "hide",
                 "time": 500
             }
-        ],
-        "7,9": [
-            "\\i[angel]"
         ]
     },
     "changeFloor": {

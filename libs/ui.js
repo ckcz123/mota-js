@@ -1060,7 +1060,7 @@ ui.prototype._getDrawableIconInfo = function (id) {
     }
     id = core.getIdOfThis(id);
     var image = null, icon = null;
-    ["terrains", "animates", "items", "npcs", "enemys"].forEach(function (v) {
+    ["terrains", "animates", "items", "npcs", "enemys", 'enemy48', 'npc48'].forEach(function (v) {
         if (core.material.icons[v][id] != null) {
             image = core.material.images[v];
             icon = core.material.icons[v][id];
@@ -1357,6 +1357,7 @@ ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
     // 绘制一个 \i 效果
     var index = config.index, index2;
     if (content.charAt(config.index + 1) == '[' && ((index2 = content.indexOf(']', index + 1)) >= 0)) {
+        console.log(1);
         var str = core.replaceText(content.substring(index + 2, index2));
         // --- 获得图标
         var cls = core.getClsFromId(str);
@@ -1372,7 +1373,7 @@ ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
         // 绘制到画布上
         var height = 32;
         if (cls.endsWith('48')) height = 48;
-        core.drawImage(tempCtx, image, 0, height * icon, 32, height, left, top, width, width);
+        core.drawImage(tempCtx, image, 0, height * icon, 32, height, left, top, width, height === 48 ? width * 1.5 : width);
 
         config.blocks.push({
             left: left, top: config.offsetY,

@@ -3369,7 +3369,7 @@ control.prototype._resize_canvas = function (obj) {
         var ctx = core.dom.gameCanvas[i].getContext('2d');
         // core.maps._setHDCanvasSize(ctx);
         core.resizeCanvas(ctx, core.__PIXELS__, core.__PIXELS__);
-        if (core.status && core.status.maps) {
+        if (core.status && core.status.maps && core.status.floorId && core.status.maps[core.status.floorId]) {
             core.redrawMap();
             core.drawHero();
             core.setWeather(core.animateFrame.weather.type, core.animateFrame.weather.level);

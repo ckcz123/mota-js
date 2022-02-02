@@ -809,8 +809,10 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			// 可以在这里任意增加或编辑每个按键的行为
 
 			// 如果处于正在行走状态，则不处理
-			if (core.isMoving())
-				return;
+			if (core.isMoving()) return;
+
+			// 商店长按时忽略
+			if (core.status.onShopLongDown) return core.status.onShopLongDown = false;
 
 			// Alt+0~9，快捷换上套装
 			if (altKey && keyCode >= 48 && keyCode <= 57) {

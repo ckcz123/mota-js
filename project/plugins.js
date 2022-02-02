@@ -249,6 +249,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		core.registerAction('keyDown', 'shops', function (keycode) {
 			if (!core.status.lockControl || !core.hasFlag("@temp@shop") || core.status.event.id != 'action') return false;
 			if (core.status.event.data.type != 'choices') return false;
+			core.status.onShopLongDown = true;
 			var data = core.status.event.data.current;
 			var choices = data.choices;
 			var topIndex = core.actions._getChoicesTopIndex(choices.length);

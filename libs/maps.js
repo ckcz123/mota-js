@@ -1707,6 +1707,7 @@ maps.prototype._makeAutotileEdges = function () {
 //    heroLoc: 勇士位置；heroIcon：勇士图标（默认当前勇士）；damage：是否绘制显伤；flags：当前的flags（存读档时使用）
 //    ctx：要绘制到的画布（名）；x,y：起点横纵坐标（默认0）；size：大小（默认416/480）；
 //    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心）
+//    noHD：不使用高清绘制，避免存读档界面出问题
 maps.prototype.drawThumbnail = function (floorId, blocks, options) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -1730,13 +1731,17 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     if (options.all) {
         // 计算比例
         var scale = Math.max(core.__SIZE__ / width, core.__SIZE__ / height);
-        tempCanvas.canvas.width = width * 32 * scale;
-        tempCanvas.canvas.height = height * 32 * scale;
+        if (options.noHD) {
+            tempCanvas.canvas.width = width * 32 * scale;
+            tempCanvas.canvas.height = height * 32 * scale;
+        } else core.resizeCanvas(tempCanvas, width * 32 * scale, height * 32 * scale);
         tempCanvas.scale(scale, scale);
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
-        tempCanvas.canvas.width = core.__PIXELS__;
-        tempCanvas.canvas.height = core.__PIXELS__;
+        if (options.noHD) {
+            tempCanvas.canvas.width = core.__PIXELS__;
+            tempCanvas.canvas.height = core.__PIXELS__;
+        } else core.resizeCanvas(tempCanvas, core.__PIXELS__, core.__PIXELS__);
         var centerX = options.centerX, centerY = options.centerY;
         if (centerX == null) centerX = Math.floor(width / 2);
         if (centerY == null) centerY = Math.floor(height / 2);
@@ -1745,8 +1750,10 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         tempCanvas.translate(-32 * offsetX, -32 * offsetY);
     } else {
         options.v2 = false;
-        tempCanvas.canvas.width = width * 32;
-        tempCanvas.canvas.height = height * 32;
+        if (options.noHD) {
+            tempCanvas.canvas.width = width * 32;
+            tempCanvas.canvas.height = height * 32;
+        } else core.resizeCanvas(tempCanvas, width * 32, height * 32);
     }
     options.ctx = tempCanvas;
 
@@ -1829,7 +1836,9 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
         } else {
             var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
                 offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+            var scale = core.domStyle.scale;
+            if (options.noHD) scale = 1;
+            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * scale, offsetY * 32 * scale, core.__PIXELS__ * scale, core.__PIXELS__ * scale, x, y, size, size);
         }
 
     }

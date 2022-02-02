@@ -1357,8 +1357,9 @@ ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
     // 绘制一个 \i 效果
     var index = config.index, index2;
     if (content.charAt(config.index + 1) == '[' && ((index2 = content.indexOf(']', index + 1)) >= 0)) {
-        var str = content.substring(index + 2, index2);
+        var str = core.replaceText(content.substring(index + 2, index2));
         // --- 获得图标
+        var cls = core.getClsFromId(str);
         var iconInfo = core.ui._getDrawableIconInfo(str), image = iconInfo[0], icon = iconInfo[1];
         if (image == null) return this._drawTextContent_next(tempCtx, content, config);
         // 检查自动换行
@@ -1369,7 +1370,9 @@ ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
             return this._drawTextContent_next(tempCtx, content, config);
         }
         // 绘制到画布上
-        core.drawImage(tempCtx, image, 0, 32 * icon, 32, 32, left, top, width, width);
+        var height = 32;
+        if (cls.endsWith('48')) height = 48;
+        core.drawImage(tempCtx, image, 0, height * icon, 32, height, left, top, width, width);
 
         config.blocks.push({
             left: left, top: config.offsetY,
@@ -3044,7 +3047,7 @@ ui.prototype._drawSLPanel_drawRecord = function (title, data, x, y, size, cho, h
         core.extractBlocksForUI(map, data.hero.flags);
         core.drawThumbnail(data.floorId, map.blocks, {
             heroLoc: data.hero.loc, heroIcon: data.hero.image, flags: data.hero.flags,
-            ctx: 'ui', x: x - size / 2, y: y + 15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y
+            ctx: 'ui', x: x - size / 2, y: y + 15, size: size, centerX: data.hero.loc.x, centerY: data.hero.loc.y, noHD: true
         });
         if (core.isPlaying() && core.getFlag("hard") != data.hero.flags.hard) {
             core.fillRect('ui', x - size / 2, y + 15, size, size, [0, 0, 0, 0.4]);

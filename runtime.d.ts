@@ -1701,6 +1701,8 @@ declare class maps {
         centerX?: number
         /** 绘制的视野中心 */
         centerY?: number
+        /** 存读档时使用，可以无视 */
+        noHD: boolean
     }): void
 
     /**
@@ -2781,7 +2783,7 @@ declare class icons {
     getIcons(): void
 
     /** 根据ID获得其类型 */
-    getClsFromId(id?: string): void
+    getClsFromId(id?: string): string
 
     /** 获得所有图标的ID */
     getAllIconIds(): void

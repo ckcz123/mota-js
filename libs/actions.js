@@ -1911,8 +1911,10 @@ actions.prototype._keyUpEquipbox = function (keycode, altKey) {
         core.playSound('取消');
         core.ui.closePanel();
         var last = core.status.route[core.status.route.length - 1];
-        if (last.startsWith('equip:') || last.startsWith('unEquip:')) {
-            core.status.route.push('no');
+        if (typeof last === 'string') {
+            if (last.startsWith('equip:') || last.startsWith('unEquip:')) {
+                core.status.route.push('no');
+            }
         }
         core.checkAutoEvents();
         return;

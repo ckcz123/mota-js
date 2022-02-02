@@ -3053,12 +3053,10 @@ control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
 control.prototype.updateStatusBar_update = function () {
     if (!core.control.needUpdate) return;
     if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
-    setTimeout(function () {
-        core.control.controldata.updateStatusBar();
-        if (!core.control.noAutoEvents) core.checkAutoEvents();
-        core.control._updateStatusBar_setToolboxIcon();
-        core.clearRouteFolding();
-    })
+    core.control.controldata.updateStatusBar();
+    if (!core.control.noAutoEvents) core.checkAutoEvents();
+    core.control._updateStatusBar_setToolboxIcon();
+    core.clearRouteFolding();
     core.control.needUpdate = false;
     core.control.noAutoEvents = true;
 }

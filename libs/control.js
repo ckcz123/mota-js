@@ -3048,6 +3048,7 @@ control.prototype.clearStatusBar = function () {
 control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
     this.needUpdate = true;
     if (!doNotCheckAutoEvents) this.noAutoEvents = false;
+    if (core.isReplaying()) return this.updateStatusBar_update();
 }
 
 control.prototype.updateStatusBar_update = function () {

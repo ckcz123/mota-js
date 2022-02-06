@@ -40,9 +40,11 @@ maps.prototype._resetFloorImages = function () {
 
 maps.prototype._setHDCanvasSize = function (ctx, width, height) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    if (width != null) ctx.canvas.width = width * core.domStyle.ratio;
-    if (height != null) ctx.canvas.height = height * core.domStyle.ratio;
-    ctx.scale(core.domStyle.ratio, core.domStyle.ratio);
+    var ratio = core.domStyle.ratio;
+    if (ctx === core.bigmap.tempCanvas) ratio = core.domStyle.scale;
+    if (width != null) ctx.canvas.width = width * ratio;
+    if (height != null) ctx.canvas.height = height * ratio;
+    ctx.scale(ratio, ratio);
     ctx.canvas.setAttribute('isHD', 1);
 }
 

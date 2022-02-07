@@ -3368,12 +3368,14 @@ control.prototype._resize_canvas = function (obj) {
         var ctx = core.dom.gameCanvas[i].getContext('2d');
         // core.maps._setHDCanvasSize(ctx);
         core.resizeCanvas(ctx, core.__PIXELS__, core.__PIXELS__);
+    }
+    requestAnimationFrame(function () {
         if (core.status && core.status.maps && core.status.floorId && core.status.maps[core.status.floorId]) {
             core.redrawMap();
             core.drawHero();
             core.setWeather(core.animateFrame.weather.type, core.animateFrame.weather.level);
         }
-    }
+    });
     core.dom.gif.style.width = core.dom.gif.style.height = innerSize;
     core.dom.gif2.style.width = core.dom.gif2.style.height = innerSize;
     core.dom.gameDraw.style.width = core.dom.gameDraw.style.height = innerSize;

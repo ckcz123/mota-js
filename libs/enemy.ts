@@ -75,8 +75,5 @@ export class Enemy {
     /** 销毁这个怪物 */
     destroy(): void {
         this.destroyed = true;
-        for (const status in this) {
-            this[status] = void 0;
-        }
     }
 }

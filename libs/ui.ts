@@ -71,7 +71,7 @@ export function relocateSprite(name: string | PIXI.Sprite, x: number, y: number)
  */
 export function resizeSprite(name: string | PIXI.Sprite, w?: number, h?: number): PIXI.Sprite {
     let sprite = getSprite(name);
-    if (!sprite) return;
+    if (!sprite) throw new ReferenceError('不存在这个sprite！')
     if (w) {
         if (w <= 1) sprite.scale.x = w;
         else sprite.width = w;
@@ -135,7 +135,7 @@ export function drawImageOnContainer(container: string | PIXI.Container, image: 
     x: number = 0, y: number = 0, w?: number, h?: number, z?: number): void {
     let c = getContainer(container);
     if (!c) return;
-    let id: string;
+    let id: string = '';
     if (!self) {
         if (typeof container === 'string') {
             while (true) {
@@ -190,11 +190,11 @@ export function createText(text: string, x?: number, y?: number, z?: number, sty
 export function createText(text: string[], x?: number, y?: number, z?: number, style?: Partial<PIXI.ITextStyle>): PIXI.Text[]
 export function createText(text: string | string[], x: number = 0, y: number = 0, z?: number, style?: Partial<PIXI.ITextStyle>): PIXI.Text | PIXI.Text[] {
     if (!(text instanceof Array)) text = [text];
-    let texts = [];
+    let texts: PIXI.Text[] = [];
     text.forEach(text => {
         let t = new PIXI.Text(text, style);
         t.position.set(x, y);
-        if (style.align === 'center' && !style.wordWrap) t.anchor.set(0.5, 0.5);
+        if (style?.align === 'center' && !style.wordWrap) t.anchor.set(0.5, 0.5);
         texts.push(t);
         t.zIndex = z || 0;
     })

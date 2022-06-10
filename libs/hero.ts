@@ -256,6 +256,7 @@ export class Hero {
         if (dir === 'left') return 2;
         if (dir === 'right') return 3;
         if (dir === 'up') return 4;
+        return 0;
     }
 
     /** 解析素材 */
@@ -364,7 +365,7 @@ export class Hero {
             if (core.status.maps[this.floor].canArrive(dx + this.x, dy + this.y))
                 this.setLoc(dx + this.x, dy + this.y);
             this.moving = false;
-            return;
+            return this;
         }
         const texture = PIXI.utils.TextureCache[this.graph];
         const container = this.createOwnContainer();
@@ -401,8 +402,8 @@ export class Hero {
                 texture.frame = rectangle;
                 // ----- listen animating ----- //
                 const ev: AnimationEvent = {
-                    row: this.data.now % this.data.width, line: Math.ceil(this.data.now / this.data.height),
-                    index: this.data.now, x: this.x, y: this.y, dir: this.dir, rect: rectangle, texture
+                    row: (this.data.now as number) % this.data.width, line: Math.ceil((this.data.now as number) / this.data.height),
+                    index: this.data.now as number, x: this.x, y: this.y, dir: this.dir, rect: rectangle, texture
                 }
                 this.listen('animating', ev);
                 // ----- listen end ----- //
@@ -504,5 +505,5 @@ export function deleteHero(id: string): void {
 export function changeHero(id: string): Hero {
     if (core.status.hero[id]) {
         return core.status.nowHero = core.status.hero[id];
-    }
+    } else return core.status.nowHero;
 }

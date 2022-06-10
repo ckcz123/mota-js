@@ -24,8 +24,8 @@ export interface defaultUnit {
     pass: boolean
     graph?: string
     block?: Block
-    trigger?: () => any
-    destroy?: () => any
+    trigger: () => any
+    destroy: () => any
     [key: string]: any
 }
 
@@ -66,8 +66,7 @@ export class Block {
      */
     trigger<K extends keyof Returns>(type?: K): Returns[K] {
         if (type && type !== this.cls) {
-            console.error('传入的类型与实际不同！传入的类型为：' + type + '；而实际的类型为：' + this.cls);
-            return;
+            throw new TypeError('触发器传入的类型与实际不同！传入的类型为：' + type + '；而实际的类型为：' + this.cls);
         }
         return this.data.trigger();
     }

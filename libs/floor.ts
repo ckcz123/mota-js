@@ -81,7 +81,7 @@ export class Floor {
         let enemy = new Enemy(core.units.enemy[id], x, y, layer, this.floorId)
         let e = new block.Block(enemy, x, y);
         this.block[layer][x + ',' + y] = e;
-        this.damages[x + ',' + y] = { damage: null };
+        this.damages[x + ',' + y] = { damage: 0 };
         return this;
     }
 
@@ -138,10 +138,12 @@ export class Floor {
                 // 开始绘制
                 if (cls !== 'autotile') {
                     let animate = core.dict[nn].animate;
-                    let texture = core.dict[nn].animate.texture;
-                    texture.frame = animate.data[0];
-                    animate.data.now = 0;
-                    this.drawOne(texture, x, y, container, nn.toString());
+                    let texture = animate?.texture;
+                    if (texture && animate) {
+                        texture.frame = animate.data[0];
+                        animate.data.now = 0;
+                        this.drawOne(texture, x, y, container, nn.toString());
+                    }
                 } else {
                     this.drawAutotile(nn, x, y, layer, container);
                 }
@@ -159,7 +161,7 @@ export class Floor {
         let sy = this.unit_height / sprite.height;
         if (sx > 1 && sy > 1) sprite.scale.set(Math.min(sx, sy));
         container.addChild(sprite);
-        this.sprites[container.name.match(/[0-9]+/)[0]][x + ',' + y] = sprite;
+        this.sprites[(container.name.match(/[0-9]+/) ?? [])[0]][x + ',' + y] = sprite;
         sprite.name = number + '@' + x + ',' + y;
         return this;
     }
@@ -201,14 +203,20 @@ export class Floor {
 
     /** 获取block */
     getBlock(x: number, y: number, layer: number = this.event): block.Block {
-        if (x < 0 || y < 0) return null;
+        if (x < 0 || y < 0) throw new RangeError('获取的方块坐标不在地图范围内');
         let b = this.block[layer][x + ',' + y];
         if (b) return b;
         else {
             let dict = core.dict[this.map[layer][y][x]];
             const unit: block.defaultUnit = {
                 id: dict.id, number: this.map[layer][y][x], x, y, type: dict.cls,
-                floorId: this.floorId, layer, pass: dict.pass
+                floorId: this.floorId, layer, pass: dict.pass,
+                trigger() {
+                    return;
+                },
+                destroy() {
+                    return;
+                },
             }
             return block.generateBlock(unit);
         }

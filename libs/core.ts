@@ -23,7 +23,7 @@ export class Core {
     containers: { [key: string]: PIXI.Container };
     sprite: { [key: string]: PIXI.Sprite };
     dataContent: { [key: string]: any };
-    dict: { [key: number]: { id: string, cls: string, img: string, animate?: animate.Animate, pass?: boolean } } = dict;
+    dict = dict;
     floorIds: string[];
     scale: number;
     __WIDTH__: number;
@@ -88,10 +88,13 @@ export class Core {
         core.status = {
             hero: {},
             maps: {},
+            // @ts-ignore
             thisMap: void 0,
+            // @ts-ignore
             nowHero: void 0,
             areas: {},
             views: {},
+            // @ts-ignore
             nowView: void 0,
         }
         core.settings = {

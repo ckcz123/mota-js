@@ -11,8 +11,8 @@ class Main {
         this.version = '3.0';
         core.dom = {
             'body': document.body,
-            'gameGroup': document.getElementById('gameGroup'),
-            'gameDraw': document.getElementById('gameDraw')
+            'gameGroup': document.getElementById('gameGroup') as HTMLDivElement,
+            'gameDraw': document.getElementById('gameDraw') as HTMLDivElement
         }
         core.pixi = {};
     }

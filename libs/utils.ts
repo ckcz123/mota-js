@@ -32,7 +32,7 @@ export function getStatusLabel(name: string): string {
 /** 获得可显示的属性 */
 export function getShowStatus(hero: string | Hero): Array<string> {
     if (!(hero instanceof Hero)) hero = core.status.hero[hero];
-    if (!hero) return;
+    if (!hero) throw new ReferenceError('不存在这个英雄！');
     const list = ['atk', 'def', 'mdef', 'hp', 'hpmax', 'mana', 'manamax'];
     return Object.keys(hero).filter(v => list.includes(v));
 }

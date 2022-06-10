@@ -28,12 +28,12 @@ export class Autotile {
         /** 总帧数 */
         total?: number
         /** 单位长宽 */
-        unit?: {
+        unit: {
             width?: number
             height?: number
         }
         /** 连接的方向 */
-        dir?: {
+        dir: {
             up?: boolean
             left?: boolean
             down?: boolean
@@ -44,14 +44,14 @@ export class Autotile {
             rightdown?: boolean
         }
         /** 四个角的texture */
-        textures?: {
+        textures: {
             leftup?: PIXI.Texture
             rightup?: PIXI.Texture
             rightdown?: PIXI.Texture
             leftdown?: PIXI.Texture
         }
         /** 四个角或整个的rectangle */
-        graphs?: {
+        graphs: {
             leftup?: PIXI.Rectangle
             rightup?: PIXI.Rectangle
             rightdown?: PIXI.Rectangle
@@ -60,7 +60,8 @@ export class Autotile {
         }
     }
 
-    constructor(number: number, x?: number, y?: number, layer?: number, floor?: string) {
+    constructor(number: number, x: number = 0, y: number = 0, layer: number = core.status.thisMap.event,
+        floor: string = core.status.thisMap.floorId) {
         let tile = core.dict[number];
         if (tile.cls !== 'autotile') return;
         this.node = tile.img;
@@ -139,7 +140,7 @@ export class Autotile {
                                     如果上边有，则向下移动1格，如果下边有，则向上移动2格
             以此类推，在左上角，则左边/上边移动两格......即在哪个角落，在哪个方向就移动2格
         */
-        let img = core.material.autotile[this.data.img];
+        let img = core.material.autotile[this.data.img as string];
         if (dir !== 0) {
             let scanList = ['leftup', 'leftdown', 'rightup', 'rightdown'];
             for (let dirs of scanList) {
@@ -177,7 +178,7 @@ export class Autotile {
                 let [px, py] = this.getPixel(x, y, dirs);
                 let texture: PIXI.Texture = PIXI.utils.TextureCache[this.data.img + '@' + px + '@' + py];
                 if (!texture) {
-                    let rect = new PIXI.Rectangle(px, py, this.data.unit.width / 2, this.data.unit.height / 2);
+                    let rect = new PIXI.Rectangle(px, py, (this.data.unit?.width as number) / 2, (this.data.unit?.height as number) / 2);
                     this.data.graphs[dirs] = rect;
                     // 获取texture
                     texture = this.generateTexture(rect);
@@ -187,7 +188,7 @@ export class Autotile {
         } else {
             // 为单个图块，直接取左上角
             let t = PIXI.utils.TextureCache[this.node + '@n'];
-            let rect = new PIXI.Rectangle(0, 0, this.data.unit.width, this.data.unit.height);
+            let rect = new PIXI.Rectangle(0, 0, (this.data.unit.width as number), (this.data.unit.height as number));
             if (t) {
                 this.data.graphs.all = rect;
                 return this;
@@ -203,9 +204,9 @@ export class Autotile {
     /** 由坐标内容获取像素信息 */
     getPixel(x: number, y: number, dir: string): [number, number] {
         let [dx, dy] = [0, 0];
-        if (dir.includes('right')) dx += this.data.unit.width / 2;
-        if (dir.includes('down')) dy += this.data.unit.height / 2;
-        return [(x + 1) * this.data.unit.width + dx, (y + 2) * this.data.unit.height + dy];
+        if (dir.includes('right')) dx += ((this.data.unit.width as number) as number) / 2;
+        if (dir.includes('down')) dy += ((this.data.unit.height as number) as number) / 2;
+        return [(x + 1) * ((this.data.unit.width as number) as number) + dx, (y + 2) * ((this.data.unit.height as number) as number) + dy];
     }
 
     /** 生成texture */
@@ -213,7 +214,7 @@ export class Autotile {
         let id = this.data.img + '@' + rect.x + '@' + rect.y;
         let texture = PIXI.utils.TextureCache[id]
         if (!texture) {
-            let texture = new PIXI.Texture(new PIXI.BaseTexture(core.material.autotile[this.data.img]));
+            let texture = new PIXI.Texture(new PIXI.BaseTexture(core.material.autotile[this.data.img as string]));
             texture.frame = rect;
             PIXI.Texture.addToCache(texture, id);
             return texture;
@@ -228,8 +229,8 @@ export class Autotile {
         let aspect = img[1].split('@');
         this.data.total = parseInt(aspect[0].split('x')[1]);
         let im = core.material.autotile[this.data.img];
-        this.data.unit.width = im.width / parseInt(aspect[1].split('x')[0]);
-        this.data.unit.height = im.height / parseInt(aspect[1].split('x')[1]);
+        (this.data.unit.width as number) = im.width / parseInt(aspect[1].split('x')[0]);
+        (this.data.unit.height as number) = im.height / parseInt(aspect[1].split('x')[1]);
         return this;
     }
 
@@ -253,14 +254,14 @@ export class Autotile {
             let leftup = new PIXI.Sprite(this.data.textures.leftup);
             leftup.position.set(0, 0);
             let rightup = new PIXI.Sprite(this.data.textures.rightup);
-            rightup.position.set(this.data.unit.width / 2, 0);
+            rightup.position.set((this.data.unit.width as number) / 2, 0);
             let leftdown = new PIXI.Sprite(this.data.textures.leftdown);
-            leftdown.position.set(0, this.data.unit.height / 2);
+            leftdown.position.set(0, (this.data.unit.height as number) / 2);
             let rightdown = new PIXI.Sprite(this.data.textures.rightdown);
-            rightdown.position.set(this.data.unit.width / 2, this.data.unit.height / 2);
+            rightdown.position.set((this.data.unit.width as number) / 2, (this.data.unit.height as number) / 2);
             container.addChild(leftup, rightup, leftdown, rightdown);
         }
-        container.scale.set(floor.unit_width / this.data.unit.width, floor.unit_height / this.data.unit.height);
+        container.scale.set(floor.unit_width / (this.data.unit.width as number), floor.unit_height / (this.data.unit.height as number));
         return this;
     }
 

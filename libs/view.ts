@@ -24,7 +24,7 @@ export class View {
     id: string;
     width: number;
     height: number;
-    followHero: Hero;
+    followHero?: Hero;
     listener: { [key: string]: Function[] };
 
     constructor(id: string, x: number, y: number, scale: number) {
@@ -55,7 +55,7 @@ export class View {
             if (this.id === 'main') this.center();
             let ax = this.width * this.anchor.x;
             let ay = this.height * this.anchor.y;
-            if (!core.containers.map) return;
+            if (!core.containers.map) return this;
             core.containers.map.scale.set(scale);
             core.containers.map.position.set(-this.x - ax, -this.y - ay);
         }
@@ -172,7 +172,7 @@ export class View {
     /** 跟随某个勇士 */
     follow(hero: string | Hero): View {
         if (!(hero instanceof Hero)) hero = core.status.hero[hero];
-        if (!hero) return;
+        if (!hero) return this;
         this.followHero = hero;
         hero.followers.push(this);
         return this;
@@ -181,7 +181,7 @@ export class View {
     /** 取消跟随某个勇士 */
     unfollow(hero: string | Hero): View {
         if (!(hero instanceof Hero)) hero = core.status.hero[hero];
-        if (!hero) return;
+        if (!hero) return this;
         this.followHero = void 0;
         hero.followers = hero.followers.filter(v => v.id !== this.id);
         return this;

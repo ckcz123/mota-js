@@ -30,9 +30,9 @@ export class Animate {
         let s = this.node.split('.');
         let img = s[0] + '.' + s[s.length - 1];
         // 获取xy位置及图片的宽高数
-        let x = /@x[0-9]+@/.exec(this.node)[0].match(/[0-9]+/)[0];
-        let y = /@y[0-9]+./.exec(this.node)[0].match(/[0-9]+/)[0];
-        let aspect = /.[0-9]+x[0-9]+@/.exec(this.node)[0].match(/[0-9]+/g);
+        let x = ((/@x[0-9]+@/.exec(this.node) ?? [])[0].match(/[0-9]+/) ?? [])[0] as string;
+        let y = ((/@y[0-9]+./.exec(this.node) ?? [])[0].match(/[0-9]+/) ?? [])[0] as string;
+        let aspect = (/.[0-9]+x[0-9]+@/.exec(this.node) ?? [])[0].match(/[0-9]+/g) as RegExpMatchArray;
         // 计算每一格的长宽
         let im = core.material[this.cls][img];
         let w = ~~(im.width / parseInt(aspect[0]));
@@ -99,7 +99,7 @@ export function initAnimate(): void {
  * @param func 动画每帧执行的函数，包含dt参数，dt表示帧之间的延迟分量
  * @param onStart 是否在开始游戏后再执行
  */
-export function registerTicker(name: string, func: (dt?: number) => void, onStart?: boolean): void {
+export function registerTicker(name: string, func: (dt?: number) => void, onStart: boolean = false): void {
     animations[name] = { onStart, func };
 }
 

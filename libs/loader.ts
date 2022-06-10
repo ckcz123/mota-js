@@ -19,7 +19,7 @@ export async function load(): Promise<void> {
 /** 加载图片 */
 async function loadImages(): Promise<void> {
     let load = core.dataContent.images.map((one: string) => {
-        let src = 'project/images/' + one;
+        let src = 'images/' + one;
         let image = new Image();
         image.src = src;
         core.material.images[one] = image;
@@ -41,7 +41,7 @@ async function loadBgm(): Promise<void> {
 
 /** 加载某个背景音乐 */
 async function loadBgm_loadOne(name: string): Promise<void> {
-    let src = 'project/bgms/' + name;
+    let src = 'bgms/' + name;
     let bgm = new Audio(src);
     bgm.preload = 'none';
     bgm.loop = true;
@@ -60,7 +60,7 @@ async function loadSound(): Promise<void> {
 
 /** 加载某个音效 */
 async function loadSound_loadOne(name: string): Promise<void> {
-    let src = 'project/sounds/' + name;
+    let src = 'sounds/' + name;
     let bgm = new Audio(src);
     bgm.preload = 'none';
     core.material.sounds[name] = bgm;
@@ -73,7 +73,7 @@ async function loadMaterial(): Promise<void> {
         return new Promise((res, rej) => {
             img.onload = res;
             img.onerror = rej;
-            img.src = 'project/' + dir + '/' + name;
+            img.src = dir + '/' + name;
             core.material[dir][name] = img;
         });
     }

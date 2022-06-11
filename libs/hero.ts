@@ -102,6 +102,11 @@ export class Hero {
     floor: string;
     aspect: string;
     autoScale: boolean;
+    enable: {
+        hpmax: boolean;
+        mana: boolean;
+        manamax: boolean;
+    }
     /** 正在移动 */
     moving: boolean;
     followers: View[];
@@ -164,6 +169,11 @@ export class Hero {
             shifting: []
         }
         this.moveStatus = 'none';
+        this.enable = {
+            hpmax: false,
+            mana: false,
+            manamax: false
+        }
     }
 
     /** 设置属性 */
@@ -486,24 +496,106 @@ export class Hero {
     }
 }
 
+interface AttributeHandler {
+    set: (target: Hero, key: string, value: any) => any
+    get: (target: Hero, key: string) => any
+}
+
+/** 某些属性需要特殊处理 */
+const setFuncs: { [x: string]: AttributeHandler['set'] } = {};
+const getFuncs: { [x: string]: AttributeHandler['get'] } = {};
+
+const handler: ProxyHandler<Hero> = {
+    set(target, key, value) {
+        if (typeof key === 'symbol') throw new TypeError('不允许使用symbol类型的变量作为键！');
+        if (target[key] instanceof Function) throw new TypeError('不允许设置函数！');
+        if (setFuncs[key]) {
+            const res = setFuncs[key](target, key, value);
+            target[key] = res
+            return true;
+        } else {
+            target[key] = value;
+            return true;
+        }
+    },
+    get(target, key) {
+        if (typeof key === 'symbol') throw new TypeError('不允许使用symbol类型的变量作为键！');
+        if (getFuncs[key]) {
+            return getFuncs[key](target, key);
+        } else return target[key];
+    }
+}
+
 /** 创建一个新的勇士 */
 export function createHero(id: string, status: Status): Hero {
     deleteHero(id);
     status.id = id;
-    let hero = new Hero(status);
-    core.status.hero[id] = hero;
+    const hero = new Hero(status);
+    const proxy = new Proxy(hero, handler);
+    core.status.hero[id] = proxy;
     return hero;
 }
 
 /** 删除一个勇士 */
-export function deleteHero(id: string): void {
-    if (!core.status.hero[id]) return;
+export function deleteHero(id: string): boolean {
+    if (!core.status.hero[id]) return false;
     delete core.status.hero[id];
+    return true;
 }
 
 /** 切换勇士 */
 export function changeHero(id: string): Hero {
     if (core.status.hero[id]) {
         return core.status.nowHero = core.status.hero[id];
-    } else return core.status.nowHero;
+    } else throw new ReferenceError('没有指定id的勇士！');
 }
+
+/** 增添属性监听器 */
+export function addAttributeListener<T extends keyof AttributeHandler>(type: T, key: string, func: AttributeHandler[T]): boolean {
+    if (type === 'set') {
+        if (setFuncs[key]) console.warn('设置了一个已存在的属性监听器');
+        setFuncs[key] = func;
+        return true;
+    }
+    if (type === 'get') {
+        if (getFuncs[key]) console.warn('设置了一个已存在的属性监听器');
+        getFuncs[key] = func as AttributeHandler['get'];
+        return true;
+    }
+    return false;
+}
+
+/** 移除属性监听器 */
+export function removeAttributeListener(type: keyof AttributeHandler, key: string): boolean {
+    if (type === 'set') {
+        delete setFuncs[key];
+        return true;
+    }
+    if (type === 'get') {
+        delete getFuncs[key];
+        return true;
+    }
+    return false;
+}
+
+// 系统的属性监听器
+/** 限制生命小于等于生命上限 */
+addAttributeListener('set', 'hp', (target, key, value) => {
+    if (value <= 0) return;
+    if (!target.enable.hpmax) {
+        if (value > 0) return value;
+    }
+    const max = target.hpmax;
+    return Math.min(value, max);
+});
+
+/** 限制魔法小于等于魔法上限 */
+addAttributeListener('set', 'mana', (target, key, value) => {
+    if (!target.enable.mana) return 0;
+    if (!target.enable.manamax) {
+        if (value > 0) return value;
+    }
+    if (value <= 0) return 0;
+    const max = target.hpmax;
+    return Math.min(value, max);
+});

@@ -6,12 +6,13 @@
 import Status from './status.vue';
 import { core } from '../../../libs/core';
 import { getStatusLabel, getShowStatus } from '../../../libs/utils';
+import { defineComponent } from 'vue';
 
 let hero = core.status.nowHero;
 let list = getShowStatus(hero);
 list = list.map(v => { return { id: v, name: getStatusLabel(v) }});
 
-export default {
+export default defineComponent( {
     name: 'StatusBar',
     data: () => {
         return { list, hero: core.status.nowHero };
@@ -19,7 +20,7 @@ export default {
     components: {
         Status
     }
-}
+});
 </script>
 
 <style>

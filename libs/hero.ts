@@ -5,7 +5,7 @@ import { animate, core } from './core';
 import * as PIXI from 'pixi.js-legacy';
 import { View } from './view';
 import * as utils from './utils';
-import * as _ from 'lodash';
+import _ from 'lodash';
 
 /** 方向 */
 type Direction = 'left' | 'right' | 'up' | 'down';
@@ -504,25 +504,37 @@ interface AttributeHandler {
 /** 某些属性需要特殊处理 */
 const setFuncs: { [x: string]: AttributeHandler['set'] } = {};
 const getFuncs: { [x: string]: AttributeHandler['get'] } = {};
+/** 对所有的属性都生效，会按照顺序执行，在普通监听器之后执行 */
+const setForAll: AttributeHandler['set'][] = [];
+const getForAll: AttributeHandler['get'][] = [];
 
 const handler: ProxyHandler<Hero> = {
     set(target, key, value) {
-        if (typeof key === 'symbol') throw new TypeError('不允许使用symbol类型的变量作为键！');
+        if (typeof key === 'symbol') return false;
         if (target[key] instanceof Function) throw new TypeError('不允许设置函数！');
+        let res = value;
         if (setFuncs[key]) {
-            const res = setFuncs[key](target, key, value);
-            target[key] = res
-            return true;
-        } else {
-            target[key] = value;
-            return true;
+            res = setFuncs[key](target, key, value);
         }
+        for (let func of setForAll) {
+            res = func(target, key, res);
+        }
+        if (typeof res === 'number' && typeof target[key] === 'number') {
+            target.addStatus(key, res - target[key]);
+        }
+        target.setStatus(key, res);
+        return true;
     },
     get(target, key) {
-        if (typeof key === 'symbol') throw new TypeError('不允许使用symbol类型的变量作为键！');
+        if (typeof key === 'symbol') return target[key];
+        let res = target[key];
         if (getFuncs[key]) {
-            return getFuncs[key](target, key);
-        } else return target[key];
+            res = getFuncs[key](target, key);
+        }
+        for (let func of getForAll) {
+            res = func(target, key);
+        }
+        return res;
     }
 }
 
@@ -576,6 +588,42 @@ export function removeAttributeListener(type: keyof AttributeHandler, key: strin
         return true;
     }
     return false;
+}
+
+/** 对所有属性添加属性监听器 */
+export function addAttributeListenerForAll<T extends keyof AttributeHandler>(type: T, func: AttributeHandler[T]): number {
+    if (type === 'set') {
+        const i = setForAll.indexOf(func);
+        if (i > -1) {
+            console.warn('已存在相同函数，已自动将该函数移至数组末尾');
+            setForAll.splice(i, 1);
+            return setForAll.push(func) - 1;
+        } else return setForAll.push(func) - 1;
+    }
+    if (type === 'get') {
+        const i = getForAll.indexOf(func as AttributeHandler['get']);
+        if (i > -1) {
+            console.warn('已存在相同函数，已自动将该函数移至数组末尾');
+            getForAll.splice(i, 1);
+            return getForAll.push(func as AttributeHandler['get']) - 1;
+        } else return getForAll.push(func as AttributeHandler['get']) - 1;
+    }
+    return -1;
+}
+
+/** 移除添加的所有属性监听器 */
+export function removeAttributeListenerForAll(type: keyof AttributeHandler, index: number): boolean {
+    if (type === 'set') {
+        if (!setForAll[index]) return false;
+        delete setForAll[index];
+        return true;
+    }
+    if (type === 'get') {
+        if (!getForAll[index]) return false;
+        delete getForAll[index];
+        return true;
+    }
+    return false
 }
 
 // 系统的属性监听器

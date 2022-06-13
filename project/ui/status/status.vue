@@ -5,13 +5,15 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
     name: 'Status',
     props: ['value', 'name'],
     data: () => {
         return {};
     }
-}
+});
 </script>
 
 <style lang='less' scoped>

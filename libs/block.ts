@@ -1,6 +1,3 @@
-/*
-block.ts负责图块相关内容
-*/
 import { core } from './core';
 import * as enemy from './enemy';
 import * as utils from './utils';
@@ -11,6 +8,8 @@ import * as PIXI from 'pixi.js-legacy';
 interface Returns {
     enemy: enemy.Enemy
 }
+
+export type cls = 'enemy' | 'autotile' | 'terrains' | 'tileset'
 
 export interface defaultUnit {
     readonly id: string
@@ -33,7 +32,7 @@ export class Block {
     readonly data: enemy.Enemy | autotile.Autotile | defaultUnit;
     readonly x: number;
     readonly y: number;
-    readonly cls: string;
+    readonly cls: cls
     readonly floorId: string;
     pass: boolean;
     graph: string;
@@ -68,6 +67,10 @@ export class Block {
         if (type && type !== this.cls) {
             throw new TypeError('触发器传入的类型与实际不同！传入的类型为：' + type + '；而实际的类型为：' + this.cls);
         }
+        const trigger = triggers[type ?? this.cls];
+        for (let name in trigger) {
+            if (trigger[name] instanceof Function) trigger[name](this);
+        }
         return this.data.trigger();
     }
 
@@ -86,4 +89,29 @@ export class Block {
 export function generateBlock(unit: defaultUnit, x: number = unit.x, y: number = unit.y): Block {
     const block = new Block(unit, x, y);
     return block;
+}
+
+/** 自定义的trigger */
+const triggers = {
+    enemy: {},
+    terrains: {},
+    autotile: {},
+    tileset: {}
+}
+
+/** 添加自定义trigger
+ * @param type 触发器种类
+ * @param name 要添加的函数的唯一标识符，不同触发器种类间可以相同，同种触发器间不可相同
+ * @param func 要执行的函数
+ */
+export function addTrigger(type: cls, name: string, func: (block: Block) => void): void {
+    if (!(type in triggers)) throw new TypeError(`不存在触发器类型：${type}`);
+    if (triggers[type][name] instanceof Function) console.warn('触发器已存在，已进行覆盖');
+    triggers[type][name] = func;
+}
+
+/** 删除自定义trigger */
+export function removeTrigger(type: cls, name: string): void {
+    if (triggers[type][name] instanceof Function) delete triggers[type][name];
+    else console.warn('不存在要删除的触发器');
 }

@@ -1,6 +1,3 @@
-/*
-view.ts负责视角相关内容
-*/
 import { core } from './core';
 import { Hero } from './hero';
 

@@ -1,10 +1,11 @@
+import { cls } from "../libs/block";
 import { animate } from "../libs/core";
 
 let dict: {
     [key: number]:
     {
         id: string,
-        cls: string,
+        cls: cls,
         img: string,
         pass: boolean
         animate?: animate.Animate,

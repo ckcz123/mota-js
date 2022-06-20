@@ -1,6 +1,3 @@
-/*
-resize.ts 负责窗口界面相关内容
-*/
 import { core, ui } from './core';
 
 /** 窗口大小变化时执行的函数 */

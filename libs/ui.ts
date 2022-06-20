@@ -1,6 +1,3 @@
-/*
-ui.ts负责部分ui的绘制
-*/
 import * as PIXI from 'pixi.js-legacy';
 import { core } from './core';
 

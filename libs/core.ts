@@ -1,6 +1,3 @@
-/*
-core.ts 负责游戏的初始化以及核心内容
-*/
 import { dict } from '../project/dict';
 import * as resize from './resize';
 import * as ui from './ui';

@@ -1,6 +1,3 @@
-/*
-hero.ts负责勇士相关内容
-*/
 import { animate, core } from './core';
 import * as PIXI from 'pixi.js-legacy';
 import { View } from './view';
@@ -623,7 +620,7 @@ export function removeAttributeListenerForAll(type: keyof AttributeHandler, inde
         delete getForAll[index];
         return true;
     }
-    return false
+    return false;
 }
 
 // 系统的属性监听器

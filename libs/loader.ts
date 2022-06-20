@@ -1,6 +1,3 @@
-/*
-loader.ts负责对文件的加载
-*/
 import * as control from './control';
 import { core } from './core';
 import * as animate from './animate';

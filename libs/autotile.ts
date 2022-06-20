@@ -1,7 +1,3 @@
-/*
-autotile.ts负责autotile相关内容
-*/
-
 import { core } from './core';
 import * as utils from './utils';
 import * as PIXI from 'pixi.js-legacy';

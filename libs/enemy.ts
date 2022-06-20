@@ -1,7 +1,3 @@
-/*
-enemy.ts负责怪物相关内容
-*/
-
 import * as enemy from '../project/functions/enemy';
 import { Hero } from "./hero";
 import { core } from './core';

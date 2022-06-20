@@ -1,7 +1,3 @@
-/*
-events.ts负责游戏内的事件
-*/
-
 import * as ui from './ui';
 import * as maps from './maps';
 import * as listen from '../project/functions/listen';

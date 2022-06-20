@@ -1,6 +1,3 @@
-/*
-floor.ts负责楼层相关内容
-*/
 import { core } from './core';
 import * as block from './block';
 import * as view from './view';

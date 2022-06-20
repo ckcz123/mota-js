@@ -1,6 +1,3 @@
-/*
-animate.ts负责动画相关内容
-*/
 import { Block } from './block';
 import { core } from './core';
 import * as PIXI from 'pixi.js-legacy';

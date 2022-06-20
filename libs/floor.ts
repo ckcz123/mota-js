@@ -21,7 +21,7 @@ export class Floor {
         [key: number]: { [key: string]: block.Block };
     }
     damages: {
-        [key: string]: { damage: number, critical?: number }
+        [key: string]: { damage?: number, critical?: number }
     }
     sprites: {
         [key: number]: { [key: string]: PIXI.DisplayObject }
@@ -187,7 +187,7 @@ export class Floor {
         for (let loc in this.damages) {
             let [x, y] = loc.split(',');
             // 创建text
-            let damage = enemy.getDamageStyle(this.damages[loc].damage);
+            let damage = enemy.getDamageStyle(this.damages[loc].damage ?? '???');
             let text = ui.createText(damage.damage, 2 + this.unit_width * parseInt(x), this.unit_height * (parseInt(y) + 1) - 2, 0, {
                 fontSize: this.unit_width / 3, fontFamily: 'Arial', fill: damage.color, stroke: '#000000', strokeThickness: 2
             });

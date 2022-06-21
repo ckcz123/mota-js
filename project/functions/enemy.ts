@@ -29,11 +29,6 @@ export interface CEnemy {
 
 let worker: Worker;
 let loaded = false;
-window.onload = () => {
-    worker = core.core.worker.damage;
-    worker.postMessage({ loop, normal });
-    loaded = true;
-}
 
 /** 计算楼层全部怪物的伤害 */
 export function calculateAll(floor: Floor | string, hero: Hero | string, option: Option = {}): void {

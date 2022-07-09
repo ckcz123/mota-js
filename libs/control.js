@@ -3284,7 +3284,7 @@ control.prototype.resize = function () {
     else {
         // 竖屏
         core.domStyle.isVertical = true;
-        core.domStyle.scale = Math.min(1, (clientWidth - 2 * BORDER) / CANVAS_WIDTH);
+        core.domStyle.scale = Math.min((clientWidth - 2 * BORDER) / CANVAS_WIDTH);
         core.domStyle.availableScale = [];
         extendToolbar = false;
     }

@@ -17,7 +17,8 @@ ckcz123）特意制作了这样一部HTML5魔塔样板。
 
 继续查看文档的详细介绍，让你学会如何使用这一个样板来制作属于自己的HTML5魔塔，或者……任何非即时的网格地图游戏。
 
-本说明文档配有较为过时的B站视频教程，可供参考：[https://www.bilibili.com/video/av32781473/](https://www.bilibili.com/video/av32781473/)。
+* [新版视频教程](https://www.bilibili.com/video/BV1SB4y1p7bg?share_source=copy_web)
+* [脚本教程](https://www.bilibili.com/video/BV1uL411J7yZ?share_source=copy_web)
 
 ==========================================================================================
 

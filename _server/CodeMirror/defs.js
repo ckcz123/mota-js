@@ -3393,7 +3393,7 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
         "!doc": "负责一切UI界面的绘制。主要包括三个部分：<br/>- 设置某个画布的属性与在某个画布上绘制的相关API<br/>- 具体的某个UI界面的绘制<br/>- 动态创建画布相关的API",
         "resizeCanvas": {
           "!doc": "重新设置一个自定义画布的大小",
-          "!type": "fn(name: string, x: number, y: number)"
+          "!type": "fn(name: string, x?: number, y?: number, styleOnly?: bool, isTempCanvas?: bool)"
         },
         "deleteCanvas": {
           "!doc": "删除一个自定义画布<br/>name: 画布名，也可以传入一个函数对所有画布进行筛选",

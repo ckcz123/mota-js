@@ -3454,15 +3454,15 @@ ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
 }
 
 ////// canvas重置 //////
-ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
+ui.prototype.resizeCanvas = function (name, width, height, styleOnly, isTempCanvas) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
     if (width != null) {
-        if (!styleOnly) core.maps._setHDCanvasSize(ctx, width, null);
+        if (!styleOnly) core.maps._setHDCanvasSize(ctx, width, null, isTempCanvas);
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
     }
     if (height != null) {
-        if (!styleOnly) core.maps._setHDCanvasSize(ctx, null, height);
+        if (!styleOnly) core.maps._setHDCanvasSize(ctx, null, height, isTempCanvas);
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
     }
     return ctx;

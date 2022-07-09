@@ -38,10 +38,11 @@ maps.prototype._resetFloorImages = function () {
     }
 }
 
-maps.prototype._setHDCanvasSize = function (ctx, width, height) {
+maps.prototype._setHDCanvasSize = function (ctx, width, height, isTempCanvas) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     var ratio = core.domStyle.ratio;
     if (ctx === core.bigmap.tempCanvas) ratio = core.domStyle.scale;
+    if (isTempCanvas) ratio = core.domStyle.ratio;
     if (width != null) ctx.canvas.width = width * ratio;
     if (height != null) ctx.canvas.height = height * ratio;
     ctx.scale(ratio, ratio);
@@ -1736,7 +1737,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         if (options.noHD) {
             tempCanvas.canvas.width = width * 32 * scale;
             tempCanvas.canvas.height = height * 32 * scale;
-        } else core.resizeCanvas(tempCanvas, width * 32 * scale, height * 32 * scale);
+        } else core.resizeCanvas(tempCanvas, width * 32 * scale, height * 32 * scale, false, true);
         tempCanvas.scale(scale, scale);
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
@@ -1749,13 +1750,13 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         if (centerY == null) centerY = Math.floor(height / 2);
         var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
             offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-        tempCanvas.translate(-32 * offsetX, -32 * offsetY);
+        tempCanvas.translate(-32 * offsetX, -32 * offsetY, false, true);
     } else {
         options.v2 = false;
         if (options.noHD) {
             tempCanvas.canvas.width = width * 32;
             tempCanvas.canvas.height = height * 32;
-        } else core.resizeCanvas(tempCanvas, width * 32, height * 32);
+        } else core.resizeCanvas(tempCanvas, width * 32, height * 32, false, true);
     }
     options.ctx = tempCanvas;
 

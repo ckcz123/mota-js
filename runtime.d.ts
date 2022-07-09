@@ -331,10 +331,12 @@ declare class control {
     debug(): void
 
     /**
-     * 立刻刷新状态栏和地图显伤
+     * 刷新状态栏和地图显伤
+     * 2.9.1优化：非必须立刻执行的刷新（一般是伤害相关的除外）的延迟到下一动画帧执行
      * @param doNotCheckAutoEvents 是否不检查自动事件
+     * @param immediate 是否立刻刷新，而非延迟到下一动画帧刷新
      */
-    updateStatusBar(doNotCheckAutoEvents?: boolean): void
+    updateStatusBar(doNotCheckAutoEvents?: boolean, immediate?: boolean): void
 
     /** 删除某个flag/变量 */
     removeFlag(name: string): void

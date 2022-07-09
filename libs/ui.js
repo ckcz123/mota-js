@@ -669,7 +669,7 @@ ui.prototype.closePanel = function () {
     }
     this.clearUI();
     core.maps.generateGroundPattern();
-    core.updateStatusBar(true);
+    core.updateStatusBar(true, true);
     core.unlockControl();
     core.status.event.data = null;
     core.status.event.id = null;

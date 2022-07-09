@@ -18,7 +18,6 @@ control.prototype._init = function () {
     this.replayActions = [];
     this.weathers = {};
     this.resizes = [];
-    this.needUpdate = false;
     this.noAutoEvents = true;
     // --- 注册系统的animationFrame
     this.registerAnimationFrame("totalTime", false, this._animationFrame_totalTime);
@@ -29,7 +28,6 @@ control.prototype._init = function () {
     this.registerAnimationFrame("weather", true, this._animationFrame_weather);
     this.registerAnimationFrame("tip", true, this._animateFrame_tip);
     this.registerAnimationFrame("parallelDo", false, this._animationFrame_parallelDo);
-    this.registerAnimationFrame("updateStatusBar", true, this.updateStatusBar_update);
     // --- 注册系统的天气
     this.registerWeather("rain", this._weather_rain, this._animationFrame_weather_rain);
     this.registerWeather("snow", this._weather_snow, this._animationFrame_weather_snow);
@@ -1134,11 +1132,11 @@ control.prototype.checkBlock = function () {
         core.status.hero.statistics.extraDamage += damage;
         if (core.status.hero.hp <= 0) {
             core.status.hero.hp = 0;
-            core.updateStatusBar();
+            core.updateStatusBar(false, true);
             core.events.lose();
             return;
         } else {
-            core.updateStatusBar();
+            core.updateStatusBar(false, true);
         }
     }
     this._checkBlock_ambush(core.status.checkBlock.ambush[loc]);
@@ -1350,7 +1348,7 @@ control.prototype.startReplay = function (list) {
     core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
     core.setOpacity('replay', 0.6);
     this._replay_drawProgress();
-    core.updateStatusBar();
+    core.updateStatusBar(false, true);
     core.drawTip("开始播放");
     this.replay();
 }
@@ -1365,7 +1363,7 @@ control.prototype.triggerReplay = function () {
 control.prototype.pauseReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     core.status.replay.pausing = true;
-    core.updateStatusBar();
+    core.updateStatusBar(false, true);
     core.drawTip("暂停播放");
 }
 
@@ -1377,7 +1375,7 @@ control.prototype.resumeReplay = function () {
         return core.drawTip("请等待当前事件的处理结束");
     }
     core.status.replay.pausing = false;
-    core.updateStatusBar();
+    core.updateStatusBar(false, true);
     core.drawTip("恢复播放");
     core.replay();
 }
@@ -1442,7 +1440,7 @@ control.prototype.stopReplay = function (force) {
     core.status.replay.steps = 0;
     core.status.replay.save = [];
     core.deleteCanvas('replay');
-    core.updateStatusBar();
+    core.updateStatusBar(false, true);
     core.drawTip("停止播放并恢复游戏");
 }
 
@@ -1477,7 +1475,7 @@ control.prototype.rewindReplay = function () {
         core.createCanvas('replay', 0, core.__PIXELS__ - 40, core.__PIXELS__, 40, 199);
         core.setOpacity('replay', 0.6);
         core.control._replay_drawProgress();
-        core.updateStatusBar();
+        core.updateStatusBar(false, true);
         core.drawTip("成功回退到上一个节点");
     });
 }
@@ -3045,20 +3043,21 @@ control.prototype.clearStatusBar = function () {
 }
 
 ////// 更新状态栏 //////
-control.prototype.updateStatusBar = function (doNotCheckAutoEvents) {
-    this.needUpdate = true;
+control.prototype.updateStatusBar = function (doNotCheckAutoEvents, immediate) {
+    if (immediate) {
+        return this.updateStatusBar_update();
+    }
     if (!doNotCheckAutoEvents) this.noAutoEvents = false;
-    if (core.isReplaying()) return this.updateStatusBar_update();
+    if (core.isReplaying()) this.updateStatusBar_update();
+    requestAnimationFrame(this.updateStatusBar_update)
 }
 
 control.prototype.updateStatusBar_update = function () {
-    if (!core.control.needUpdate) return;
     if (!core.isPlaying() || core.hasFlag('__statistics__')) return;
     core.control.controldata.updateStatusBar();
     if (!core.control.noAutoEvents) core.checkAutoEvents();
     core.control._updateStatusBar_setToolboxIcon();
     core.clearRouteFolding();
-    core.control.needUpdate = false;
     core.control.noAutoEvents = true;
 }
 
@@ -3364,18 +3363,18 @@ control.prototype._resize_gameGroup = function (obj) {
 
 control.prototype._resize_canvas = function (obj) {
     var innerSize = (obj.CANVAS_WIDTH * core.domStyle.scale) + "px";
-    for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
-        var ctx = core.dom.gameCanvas[i].getContext('2d');
-        // core.maps._setHDCanvasSize(ctx);
-        core.resizeCanvas(ctx, core.__PIXELS__, core.__PIXELS__);
-    }
-    requestAnimationFrame(function () {
-        if (core.status && core.status.maps && core.status.floorId && core.status.maps[core.status.floorId]) {
-            core.redrawMap();
-            core.drawHero();
-            core.setWeather(core.animateFrame.weather.type, core.animateFrame.weather.level);
+    if (!core.isPlaying()) {
+        for (var i = 0; i < core.dom.gameCanvas.length; ++i) {
+            var ctx = core.dom.gameCanvas[i].getContext('2d');
+            core.resizeCanvas(ctx, core.__PIXELS__, core.__PIXELS__);
+            core.dom.gameCanvas[i].style.width = core.dom.gameCanvas[i].style.height = innerSize;
         }
-    });
+    } else {
+        requestAnimationFrame(function () {
+            for (var i = 0; i < core.dom.gameCanvas.length; ++i)
+                core.dom.gameCanvas[i].style.width = core.dom.gameCanvas[i].style.height = innerSize;
+        });
+    }
     core.dom.gif.style.width = core.dom.gif.style.height = innerSize;
     core.dom.gif2.style.width = core.dom.gif2.style.height = innerSize;
     core.dom.gameDraw.style.width = core.dom.gameDraw.style.height = innerSize;
@@ -3389,13 +3388,24 @@ control.prototype._resize_canvas = function (obj) {
         core.canvas[cn].canvas.style.height = core.canvas[cn].canvas.height / ratio * core.domStyle.scale + "px";
     });
     // resize dynamic canvas
-    for (var name in core.dymCanvas) {
-        var ctx = core.dymCanvas[name], canvas = ctx.canvas;
-        // core.maps._setHDCanvasSize(ctx, parseFloat(canvas.getAttribute('_width')), parseFloat(canvas.getAttribute('_height')));
-        canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
-        canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
-        var scale = canvas.getAttribute('_scale') || 1;
-        core.resizeCanvas(canvas, canvas.width * scale / core.domStyle.scale, canvas.height * scale / core.domStyle.scale);
+    if (!core.isPlaying()) {
+        for (var name in core.dymCanvas) {
+            var ctx = core.dymCanvas[name], canvas = ctx.canvas;
+            // core.maps._setHDCanvasSize(ctx, parseFloat(canvas.getAttribute('_width')), parseFloat(canvas.getAttribute('_height')));
+            canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
+            canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
+            var scale = canvas.getAttribute('_scale') || 1;
+            core.resizeCanvas(canvas, canvas.width * scale / core.domStyle.scale, canvas.height * scale / core.domStyle.scale);
+        }
+    } else {
+        for (var name in core.dymCanvas) {
+            var ctx = core.dymCanvas[name], canvas = ctx.canvas;
+            var ratio = canvas.hasAttribute('isHD') ? core.domStyle.ratio : 1;
+            canvas.style.width = canvas.width / ratio * core.domStyle.scale + "px";
+            canvas.style.height = canvas.height / ratio * core.domStyle.scale + "px";
+            canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
+            canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
+        }
     }
     // resize next
     main.dom.next.style.width = main.dom.next.style.height = 5 * core.domStyle.scale + "px";

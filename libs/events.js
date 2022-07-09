@@ -2369,7 +2369,7 @@ events.prototype._action_function = function (data, x, y, prefix) {
 }
 
 events.prototype._action_update = function (data, x, y, prefix) {
-    core.updateStatusBar(data.doNotCheckAutoEvents);
+    core.updateStatusBar(data.doNotCheckAutoEvents, true);
     core.doAction();
 }
 

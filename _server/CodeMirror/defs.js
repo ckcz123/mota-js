@@ -2408,8 +2408,8 @@ var terndefs_f6783a0a_522d_417e_8407_94c67b692e50 = [
           "!type": "fn(type?: string, level?: number)"
         },
         "updateStatusBar": {
-          "!doc": "立刻刷新状态栏和地图显伤<br/>doNotCheckAutoEvents: 是否不检查自动事件",
-          "!type": "fn(doNotCheckAutoEvents?: bool)"
+          "!doc": "刷新状态栏和地图显伤<br/>doNotCheckAutoEvents: 是否不检查自动事件",
+          "!type": "fn(doNotCheckAutoEvents?: bool, immediate?: bool)"
         },
         "autosave": {
           "!doc": "自动存档",

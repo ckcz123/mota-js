@@ -2068,7 +2068,7 @@ maps.prototype.showBlock = function (x, y, floorId) {
             } else {
                 core.drawBlock(block);
                 core.addGlobalAnimate(block);
-                core.updateStatusBar();
+                core.updateStatusBar(false, true);
             }
         }
     }

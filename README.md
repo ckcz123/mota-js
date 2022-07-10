@@ -9,6 +9,8 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 * [Demo / 样板效果](https://ckcz123.com/games/template/)
 * [Docs / 使用文档说明](https://ckcz123.github.io/mota-js/)
 * [Video / 视频教程](https://www.bilibili.com/video/av32781473/)
+* [Video / 新版视频教程](https://www.bilibili.com/video/BV1SB4y1p7bg?share_source=copy_web)
+* [Video / 脚本教程](https://www.bilibili.com/video/BV1uL411J7yZ?share_source=copy_web)
 
 ![样板](./docs/sample0.png)
 
@@ -64,6 +66,37 @@ HTML5 canvas制作的魔塔样板，支持全平台游戏！
 ```
 
 ## 更新说明
+
+### 2022.7.10 HTML5魔塔样板V2.9.1
+
+* [x] 修复更新状态栏延迟到下一动画帧引发的一系列bug，修改为增加一个是否立即更新的参数
+* [x] 修复resize导致canvas被清空的bug
+* [x] 修复怪物属性栏光环叠加的说明bug
+* [x] 修复自2.7.3增加薄墙以来导致的terrains模糊
+* [x] 修复手机端绘制缩略图的模糊问题
+* [x] 更新部分文档
+* [x] 增加F8为debug按键，不删除F7，避免部分浏览器的按键冲突
+* [x] 删除脚本编辑中多行注释中的带缩进空行，避免出现编辑器的神秘bug
+* [x] 修复自定义js脚本中使用insertAction导致转换时出现中文导致脚本不可用的bug
+
+### 2022.2.2 HTML5魔塔样板V2.9
+
+* [x] 修复浏览地图使用楼传可无视楼梯边的bug
+* [x] 修复utils.js里面的语法bug
+* [x] 修复设置前景层背景层的图块后立刻刷新地图导致图块重新出现的bug
+* [x] 修复商店长按与keyUp冲突的bug
+* [x] 修复图片缩放以后缩放浏览器导致图片大小还原的bug
+* [x] 修复缩略图不高清的bug
+* [x] 修复大怪物的boxAnimate的bug
+* [x] 优化updateStatusBar的性能
+* [x] \i支持enemy48和npc48
+* [x] 启动服务加入魔塔小课堂
+* [x] 分离怪物属性，将value分离成zone laser repulse等
+* [x] 复写可以新增参数
+* [x] 杀掉main.log
+* [x] 完善runtime.d.ts，建议使用vscode进行编辑脚本
+* [x] 自动缩放最大化
+* [x] 缩放最高支持2.5倍缩放
 
 ### 2021.9.1 HTML5魔塔样板V2.8.2
 

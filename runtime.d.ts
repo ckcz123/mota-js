@@ -331,10 +331,12 @@ declare class control {
     debug(): void
 
     /**
-     * 立刻刷新状态栏和地图显伤
+     * 刷新状态栏和地图显伤
+     * 2.9.1优化：非必须立刻执行的刷新（一般是伤害相关的除外）的延迟到下一动画帧执行
      * @param doNotCheckAutoEvents 是否不检查自动事件
+     * @param immediate 是否立刻刷新，而非延迟到下一动画帧刷新
      */
-    updateStatusBar(doNotCheckAutoEvents?: boolean): void
+    updateStatusBar(doNotCheckAutoEvents?: boolean, immediate?: boolean): void
 
     /** 删除某个flag/变量 */
     removeFlag(name: string): void
@@ -2236,8 +2238,12 @@ declare class ui {
     /** 重新定位一个自定义画布 */
     relocateCanvas(name: string, x: number, y: number, useDelta: boolean): void
 
-    /** 重新设置一个自定义画布的大小 */
-    resizeCanvas(name: string, x: number, y: number): void
+    /** 
+     * 重新设置一个自定义画布的大小
+     * @param styleOnly 是否只修改style，而不修改元素上的长宽，如果是true，会出现模糊现象
+     * @param isTempCanvas 是否是临时画布，如果填true，会将临时画布修改为高清画布
+     */
+    resizeCanvas(name: string, x?: number, y?: number, styleOnly?: boolean, isTempCanvas?: boolean): void
 
     /** 设置一个自定义画布的旋转角度 */
     rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void

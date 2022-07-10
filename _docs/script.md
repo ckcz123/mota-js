@@ -4,7 +4,7 @@
 
 在V2.6版本中，基本对整个项目代码进行了重写，更加方便造塔者的使用。
 
-可配合基础js教学视频 https://www.bilibili.com/video/BV1uL411J7yZ/ 使用。
+* [脚本教程视频](https://www.bilibili.com/video/BV1uL411J7yZ?share_source=copy_web)
 
 ## 控制台的使用
 

@@ -1421,11 +1421,14 @@ MotaActionFunctions.workspace = function(){return workspace}
 
 MotaActionFunctions.parse = function(obj,type) {
   try {
-    obj = JSON.parse(MotaActionFunctions.replaceToName(JSON.stringify(obj)));
-  } catch (e) {}
+    obj = obj.map(function (e) {
+      if (e.type == "function") return e;
+      else return JSON.parse(MotaActionFunctions.replaceToName(JSON.stringify(e)));
+    });
+  } catch (e) { }
   MotaActionFunctions.workspace().clear();
-  xml_text = MotaActionFunctions.actionParser.parse(obj,type||'event');
-  xml = Blockly.Xml.textToDom('<xml>'+xml_text+'</xml>');
+  xml_text = MotaActionFunctions.actionParser.parse(obj, type || 'event');
+  xml = Blockly.Xml.textToDom('<xml>' + xml_text + '</xml>');
   Blockly.Xml.domToWorkspace(xml, MotaActionFunctions.workspace());
 }
 

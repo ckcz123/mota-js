@@ -552,6 +552,12 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 					},
 					"_data": "状态栏显示项"
 				},
+				"autoScale": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "自动缩放最大化",
+					"_data": "是否自动缩放最大化，关闭后不再最大化"
+				},
 				"extendToolbar": {
 					"_leaf": true,
 					"_type": "checkbox",

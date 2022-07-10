@@ -290,7 +290,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			// 判定是否致死
 			if (damage == null || damage >= core.status.hero.hp) {
 				core.status.hero.hp = 0;
-				core.updateStatusBar();
+				core.updateStatusBar(false, true);
 				core.events.lose('战斗失败');
 				return;
 			}
@@ -926,6 +926,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					core.getNextItem();
 					break;
 				case 118: // F7：开启debug模式
+				case 119: // F8：由于F7与部分浏览器有冲突，故新增F8
 					core.debug();
 					break;
 				case 70: // F：开启技能“二倍斩”
@@ -1000,7 +1001,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					if (px >= 200 && px <= 250 && py >= 50 && py <= 100) {
 						// 记录点击坐标。这里的1代表此时是竖屏！
 						core.status.route.push("click:1:" + px + ":" + py);
-		
 						// 可以插入公共事件 / 普通事件 / 执行一段脚本（如打开自绘UI或增减flag）
 						core.insertCommonEvent("道具商店");
 						// core.insertAction(["一段事件"]);
@@ -1011,7 +1011,6 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					if (px >= 50 && px <= 100 && py >= 200 && py <= 250) {
 						// 记录点击坐标。这里的0代表此时是横屏！
 						core.status.route.push("click:0:" + px + ":" + py);
-		
 						// 可以插入公共事件 / 普通事件 / 执行一段脚本（如打开自绘UI或增减flag）
 						core.insertCommonEvent("道具商店");
 						// core.insertAction(["一段事件"]);
@@ -1478,17 +1477,17 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				core.status.hero.hp -= core.values.poisonDamage;
 				if (core.status.hero.hp <= 0) {
 					core.status.hero.hp = 0;
-					core.updateStatusBar();
+					core.updateStatusBar(false, true);
 					core.events.lose();
 					return;
 				} else {
-					core.updateStatusBar();
+					core.updateStatusBar(false, true);
 				}
 			}
 
 			// 从v2.7开始，每一步行走不会再刷新状态栏。
 			// 如果有特殊要求（如每走一步都加buff之类），可手动取消注释下面这一句：
-			// core.updateStatusBar(true);
+			// core.updateStatusBar(true, true);
 
 			// 检查自动事件
 			core.checkAutoEvents();
@@ -1553,7 +1552,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				core.status.hero.statistics.moveDirectly++;
 				core.status.hero.statistics.ignoreSteps += ignoreSteps;
 				if (core.hasFlag('poison')) {
-					core.updateStatusBar();
+					core.updateStatusBar(false, true);
 				}
 				core.checkRouteFolding();
 				return true;

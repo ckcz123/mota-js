@@ -322,7 +322,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"haloAdd": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "吸血加到自身",
+					"_docs": "光环是否叠加",
 					"_data": "光环是否叠加"
 				},
 				"atkValue": {
@@ -661,7 +661,7 @@ var comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 						"ratio": {
 							"_leaf": true,
 							"_type": "textarea",
-							"_range": "thiseval==~~thiseval && thiseval>=0",
+							"_range": "thiseval <= Number.MAX_SAFE_INTEGER && thiseval>=0",
 							"_docs": "宝石血瓶效果",
 							"_data": "每一层的宝石/血瓶效果，即获得宝石和血瓶时框内\"ratio\"的值。"
 						}

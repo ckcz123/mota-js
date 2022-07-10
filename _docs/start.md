@@ -2,6 +2,9 @@
 
 ?> 在这一节中，将详细介绍做一部塔的流程。现在，让我们来做一部单层塔！
 
+* [新版视频教程](https://www.bilibili.com/video/BV1SB4y1p7bg?share_source=copy_web)
+* [脚本教程](https://www.bilibili.com/video/BV1uL411J7yZ?share_source=copy_web)
+
 ## 前置需求
 你需要满足如下条件才能进行制作：[样板下载地址](https://github.com/ckcz123/mota-js/releases)。
 1.  操作系统：

@@ -238,7 +238,8 @@ main.prototype.init = function (mode, callback) {
                 main.core.init(coreData, callback);
                 main.core.resize();
                 // 自动放缩最大化
-                if (core.getLocalStorage('autoScale') === void 0) core.setLocalStorage('autoScale', true);
+                if (!data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.flags.autoScale) core.setLocalStorage('autoScale', false)
+                else core.setLocalStorage('autoScale', true);
                 if (core.getLocalStorage('autoScale') && !core.domStyle.isVertical) {
                     try {
                         if (main.core) {

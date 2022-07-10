@@ -53,7 +53,7 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
                 console.error(e);
             }
         }
-        core.updateStatusBar();
+        core.updateStatusBar(false, true);
     }
     else {
         core.addItem(itemId, itemNum);
@@ -121,7 +121,7 @@ items.prototype._afterUseItem = function (itemId) {
         core.status.hero.items[itemCls][itemId]--;
     if (core.status.hero.items[itemCls][itemId] <= 0)
         delete core.status.hero.items[itemCls][itemId];
-    core.updateStatusBar();
+    core.updateStatusBar(false, true);
 }
 
 ////// 当前能否使用道具 //////

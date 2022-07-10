@@ -3048,7 +3048,7 @@ control.prototype.updateStatusBar = function (doNotCheckAutoEvents, immediate) {
         return this.updateStatusBar_update();
     }
     if (!doNotCheckAutoEvents) this.noAutoEvents = false;
-    if (core.isReplaying()) this.updateStatusBar_update();
+    if (core.isReplaying()) return this.updateStatusBar_update();
     requestAnimationFrame(this.updateStatusBar_update)
 }
 

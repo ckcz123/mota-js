@@ -1834,19 +1834,18 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     }
     else {
         // 只绘制可见窗口
+        var ratio = core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale;
         if (options.v2) {
-            core.drawImage(ctx, tempCanvas.canvas, 0, 0, core.__PIXELS__ * core.domStyle.ratio, core.__PIXELS__ * core.domStyle.ratio, x, y, size, size);
+            core.drawImage(ctx, tempCanvas.canvas, 0, 0, core.__PIXELS__ * ratio, core.__PIXELS__ * ratio, x, y, size, size);
         } else {
             var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
                 offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-            var scale = core.domStyle.scale;
             if (options.noHD) {
-                scale = 1;
                 core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+                return;
             }
-            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * core.domStyle.ratio, offsetY * 32 * core.domStyle.ratio, core.__PIXELS__ * core.domStyle.ratio, core.__PIXELS__ * core.domStyle.ratio, x, y, size, size);
+            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * ratio, offsetY * 32 * ratio, core.__PIXELS__ * ratio, core.__PIXELS__ * ratio, x, y, size, size);
         }
-
     }
 }
 

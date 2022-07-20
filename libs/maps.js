@@ -1750,7 +1750,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         if (centerY == null) centerY = Math.floor(height / 2);
         var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
             offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-        tempCanvas.translate(-32 * offsetX, -32 * offsetY, false, true);
+        tempCanvas.translate(-32 * offsetX, -32 * offsetY);
     } else {
         options.v2 = false;
         if (options.noHD) {

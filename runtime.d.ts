@@ -88,7 +88,7 @@ type ResolvedMap = {
         sy?: number
         w?: number
         h?: number
-        frame?: numer
+        frame?: number
     }>
     name: string
     ratio: number
@@ -840,7 +840,7 @@ declare class control {
     resumeBgm(resumeTime?: number): void
 
     /** 设置背景音乐的播放速度和音调 */
-    setBgmSpeed(speed: number, usePitch?: bool): void
+    setBgmSpeed(speed: number, usePitch?: boolean): void
 
     /** 设置音乐图标的显隐状态 */
     setMusicBtn(): void
@@ -1066,10 +1066,10 @@ declare class events {
      * @param time 移动用时，单位为毫秒。不填视为1秒
      * @param callback 图片移动完毕后的回调函数，可选
      */
-    rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
+    rotateImage(code: number, center?: [number?, number?], angle?: number, moveMode?: string, time?: number, callback?: () => void): void
 
     /** 放缩一张图片 */
-    scaleImage(code: number, center?: [Number?, number?], scale: number, moveMode?: string, time?: number, callback?: () => void): void
+    scaleImage(code: number, center?: [Number?, number?], scale?: number, moveMode?: string, time?: number, callback?: () => void): void
 
     /**
      * 绘制一张动图或擦除所有动图
@@ -1326,7 +1326,7 @@ declare class events {
     clearTextBox(code: number): void
 
     /** 移动对话框 */
-    moveTextBox(code: number, loc: [number], relative: bool, moveMode?: string, time?: number, callback?: () => any): void
+    moveTextBox(code: number, loc: [number], relative: boolean, moveMode?: string, time?: number, callback?: () => any): void
 
     /** 设置文件别名 */
     setNameMap(name: string, value?: string): void
@@ -1506,8 +1506,8 @@ declare class enemys {
     getEnemys(): any
 
     /** 获得所有特殊属性定义 */
-    getSpecials(): Array<number, string | ((enemy: Enemy) => string), string | ((enemy: Enemy) => string),
-        string | [number, number, number, number?], number?>[]
+    getSpecials(): [number, string | ((enemy: Enemy) => string), string | ((enemy: Enemy) => string),
+        string | [number, number, number, number?], number?][]
 
     /** 获得所有特殊属性的颜色 */
     getSpecialColor(enemy: string | Enemy): Array<string | [number, number, number, number?]>
@@ -2249,7 +2249,7 @@ declare class ui {
     rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
-    deleteCanvas(name: string | ((name: string) => bool)): void
+    deleteCanvas(name: string | ((name: string) => boolean)): void
 
     /** 清空所有的自定义画布 */
     deleteAllCanvas(): void
@@ -2798,7 +2798,7 @@ declare class icons {
     getTilesetOffset(id?: string): void
 }
 
-class plugin {
+declare class plugin {
 
 }
 
@@ -2971,7 +2971,54 @@ type main = {
     log(e: string | Error, error: boolean): void
 }
 
+declare class Sprite {
+
+    x: number
+    y: number
+    width: number
+    height: number
+    zIndex: number
+    reference: 'game' | 'window'
+    canvas: HTMLCanvasElement
+    context: CanvasRenderingContext2D
+    name: string
+    readonly count: number
+
+    /** 创建一个sprite画布
+     * @param reference 参考系，游戏画面或者窗口
+     * @param name 可选，sprite的名称，方便通过core.dymCanvas获取
+     */
+    constructor(x: number, y: number, w: number, h: number, z: number, reference?: 'game' | 'window', name?: string)
+
+    /** 初始化 */
+    init(): void
+
+    /** 设置css特效 */
+    setCss(css: string): Sprite
+
+    /** 
+     * 移动sprite
+     * @param isDelta 是否是相对位置，如果是，那么sprite会相对于原先的位置进行移动
+     */
+    move(x: number, y: number, isDelta?: boolean): Sprite
+
+    /**
+     * 重新设置sprite的大小
+     * @param {boolean} styleOnly 是否只修改css效果，如果是，那么将会不高清，如果不是，那么会清空画布
+     */
+    resize(w: number, h: number, styleOnly?: boolean): Sprite
+
+    /** 删除 */
+    destroy(): void
+
+    /** 添加事件监听器 */
+    addEventListener: HTMLCanvasElement['addEventListener']
+
+    /** 删除事件监听器 */
+    removeEventListenr: HTMLCanvasElement['addEventListener']
+}
+
 declare let main: main
 declare let core: core
 declare let flags: { [x: string]: any }
-declare let hero = core.status.hero
+declare let hero: HeroStatus

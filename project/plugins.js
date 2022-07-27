@@ -1364,5 +1364,131 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.plugin._resetTitleCanvas();
 			_loadData.call(core.control, data, callback);
 		}
+	},
+	"Sprite": function () {
+		var count = 0;
+
+		/** 创建一个sprite画布
+		 * @param {number} x
+		 * @param {number} y
+		 * @param {number} w
+		 * @param {number} h
+		 * @param {number} z
+		 * @param {'game' | 'window'} reference 参考系，游戏画面或者窗口
+		 * @param {string} name 可选，sprite的名称，方便通过core.dymCanvas获取
+		 */
+		function Sprite (x, y, w, h, z, reference, name) {
+			this.x = x;
+			this.y = y;
+			this.width = w;
+			this.height = h;
+			this.zIndex = z;
+			this.reference = reference;
+			this.canvas = null;
+			this.context = null;
+			this.count = 0;
+			this.name = name;
+			/** 初始化 */
+			this.init = function () {
+				if (reference === 'window') {
+					var canvas = document.createElement('canvas');
+					this.canvas = canvas;
+					this.context = canvas.getContext('2d');
+					canvas.width = w;
+					canvas.height = h;
+					canvas.style.width = w + 'px';
+					canvas.style.height = h + 'px';
+					canvas.style.position = 'absolute';
+					canvas.style.top = y + 'px';
+					canvas.style.left = x + 'px';
+					canvas.style.zIndex = z.toString();
+					document.body.appendChild(canvas);
+				} else {
+					this.context = core.createCanvas(this.name || '_sprite_' + count, x, y, w, h, z);
+					this.canvas = this.context.canvas;
+					this.count = count;
+					this.canvas.style.pointerEvents = 'auto';
+					count++;
+				}
+			}
+			this.init();
+
+			/** 设置css特效
+			 * @param {string} css
+			 */
+			this.setCss = function (css) {
+				css = css.replace('\n', ';').replace(';;', ';');
+				var effects = css.split(';');
+				var self = this;
+				effects.forEach(function (v) {
+					var content = v.split(':');
+					var name = content[0];
+					var value = content[1];
+					name = name.trim().split('-').reduce(function (pre, curr, i, a) {
+						if (i === 0 && curr !== '') return curr;
+						if (a[0] === '' && i === 1) return curr;
+						return pre + curr.toUpperCase()[0] + curr.slice(1);
+					}, '');
+					var canvas = self.canvas;
+					if (name in canvas.style) canvas.style[name] = value;
+				});
+				return this;
+			}
+
+			/** 
+			 * 移动sprite
+			 * @param {boolean} isDelta 是否是相对位置，如果是，那么sprite会相对于原先的位置进行移动
+			 */
+			this.move = function (x, y, isDelta) {
+				if (x !== undefined && x !== null) this.x = x;
+				if (y !== undefined && y !== null) this.y = y;
+				if (this.reference === 'window') {
+					var ele = this.canvas;
+					ele.style.left = x + (isDelta ? parseFloat(ele.style.left) : 0) + 'px';
+					ele.style.top = y + (isDelta ? parseFloat(ele.style.top) : 0) + 'px';
+				} else core.relocateCanvas(this.context, x, y, isDelta);
+				return this;
+			}
+
+			/** 
+			 * 重新设置sprite的大小
+			 * @param {boolean} styleOnly 是否只修改css效果，如果是，那么将会不高清，如果不是，那么会清空画布
+			 */
+			this.resize = function (w, h, styleOnly) {
+				if (w !== undefined && w !== null) this.w = w;
+				if (h !== undefined && h !== null) this.h = h;
+				if (reference === 'window') {
+					var ele = this.canvas;
+					ele.style.width = w + 'px';
+					ele.style.height = h + 'px';
+					if (!styleOnly) {
+						ele.width = w;
+						ele.height = h;
+					}
+				} else core.resizeCanvas(this.context, x, y, styleOnly);
+				return this;
+			}
+
+			/** 删除 */
+			this.destroy = function () {
+				if (this.reference === 'window') {
+					if (this.canvas) document.body.removeChild(this.canvas);
+				} else {
+					core.deleteCanvas(this.name || '_sprite_' + this.count);
+				}
+			}
+
+			/** 添加事件监听器 */
+			this.addEventListener = function () {
+				this.canvas.addEventListener.apply(this.canvas, arguments);
+			}
+
+			/** 移除事件监听器 */
+			this.removeEventListener = function () {
+				this.canvas.removeEventListener.apply(this.canvas, arguments);
+			}
+		}
+
+		window.Sprite = Sprite;
 	}
 }

@@ -300,7 +300,7 @@ const actionAttributes = {
         time: ['毫秒数', 'number']
     },
     transition: {
-        style: ['效果', 'string'],
+        style: ['作用效果', 'string'],
         time: ['过渡时间', 'string'],
         mode: ['过渡方式', 'string'],
         delay: ['延迟', 'string']
@@ -341,7 +341,7 @@ const actionAttributes = {
         data: ['css效果', 'string_multi']
     },
     composite: {
-        mode: ['混合方式', 'string']
+        mode: ['混合方式', 'composite']
     },
     filter: {
         data: ['滤镜', 'string_multi']
@@ -504,43 +504,44 @@ class BaseAction<K extends keyof SpriteDrawInfoMap> {
     type: K
     data: SpriteDrawInfoMap[K]
     ele: HTMLDivElement
+    /** 是否展开了详细信息 */
     detailed = false
     attrs: HTMLDivElement = document.createElement('div');
     static cnt = 0
+    cnt = BaseAction.cnt++
 
     constructor(type: K, data: SpriteDrawInfoMap[K]) {
         this.type = type;
         this.data = data;
         this.ele = this.generateElement();
-        BaseAction.cnt++;
     }
 
     /** 生成element */
     generateElement() {
         const div = document.createElement('div'); // 根div
-        div.id = `ui-info-${BaseAction.cnt}`;
+        div.id = `ui-info-${this.cnt}`;
         div.className = 'ui-info';
 
         const data = document.createElement('div'); // 展示信息的div
-        data.id = `ui-data-${BaseAction.cnt}`;
+        data.id = `ui-data-${this.cnt}`;
         data.className = 'ui-data';
 
         const detail = document.createElement('span'); // 展开与收回详细信息
-        detail.id = `ui-trigger-detail-${BaseAction.cnt}`;
+        detail.id = `ui-trigger-detail-${this.cnt}`;
         detail.className = 'ui-trigger-detail';
         detail.innerHTML = '▲';
         data.appendChild(detail);
         div.appendChild(data);
 
         const del = document.createElement('span'); // 删除
-        del.id = `ui-delete-${BaseAction.cnt}`;
+        del.id = `ui-delete-${this.cnt}`;
         del.className = 'ui-delete';
         del.innerHTML = '✖';
         data.appendChild(del);
 
         const attributes = actionAttributes[this.type];
         const attrs = this.attrs; // 属性列表div
-        attrs.id = `ui-attrs-${BaseAction.cnt}`;
+        attrs.id = `ui-attrs-${this.cnt}`;
         attrs.className = 'ui-attrs';
 
         // 展开/收回详细信息
@@ -568,39 +569,52 @@ class BaseAction<K extends keyof SpriteDrawInfoMap> {
     /** 生成某个属性的div */
     generateDiv(key: keyof SpriteDrawInfoMap, name: string, type: string) {
         const one = document.createElement('div');
-        one.id = `ui-attrs-one-${BaseAction.cnt}`;
+        one.id = `ui-attrs-one-${this.cnt}`;
         one.className = 'ui-attrs-one';
         if (!/Array<[\w,]*>/.test(type)) { // 非数组形式
             // 包括属性名、输入框
             const n = document.createElement('span');
             n.innerHTML = name;
-            n.id = `ui-name-${BaseAction.cnt}-${name}`;
+            n.id = `ui-name-${this.cnt}-${name}`;
             n.className = 'ui-name';
             one.appendChild(n);
             // 输入框，分情况，如果是a|b|c的形式，使用select
-            if (!type.includes('|')) {
+            if (!type.includes('|') && type !== 'composite') {
                 // 继续细分，包括多行文本及选择图片等
                 if (type === 'string_multi') {
                     // 多行文本，单独弹出一个对话框进行编辑
                     const open = document.createElement('button');
-                    open.id = `ui-multi-${BaseAction.cnt}-${key}`;
+                    open.id = `ui-multi-${this.cnt}-${key}`;
+                    open.className = 'ui-multi';
+                    one.appendChild(open);
+
+                } else if (type === 'string_img' || type === 'string_icon') {
+                    // 需要选择框
+                    const right = document.createElement('div');
+                    right.id = `ui-img-${this.cnt}-${key}`;
+                    right.className = 'ui-img';
+                    one.appendChild(right);
+                    const btn = document.createElement('button');
+                    btn.id = `ui-imgbtn-${this.cnt}-${key}`;
+                    btn.className = 'ui-imgbtn';
                 } else {
-                    // 单行文本、数字、带单位的数字
+                    // 单行文本、数字、带单位的数字、布尔值
                     const input = document.createElement('input');
-                    input.id = `ui-input-${BaseAction.cnt}-${key}`;
+                    input.id = `ui-input-${this.cnt}-${key}`;
                     input.className = 'ui-input';
-                    input.type = 'text';
+                    input.type = type === 'boolean' ? 'checkbox' : 'text';
                     input.addEventListener('input', () => {
-                        this.listenInput(input.value, type as ('number' | 'string' | 'number_u'), input);
+                        this.listenInput(input.value,
+                            type as ('number' | 'string' | 'number_u' | 'boolean'), input);
                     });
                     one.appendChild(input);
                 }
             } else {
                 // 使用select
                 const select = document.createElement('select');
-                select.id = `ui-select-${BaseAction.cnt}-${key}`;
+                select.id = `ui-select-${this.cnt}-${key}`;
                 select.className = 'ui-select';
-                const os = type.split('|');
+                const os = type === 'composite' ? composition : type.split('|');
                 for (const value of os) {
                     const option = document.createElement('option');
                     option.className = 'ui-option';
@@ -611,7 +625,7 @@ class BaseAction<K extends keyof SpriteDrawInfoMap> {
         } else { // 数组形式
             // 数组形式需要一个新建按钮
             const info = document.createElement('div');
-            info.id = `ui-array-${BaseAction.cnt}`;
+            info.id = `ui-array-${this.cnt}`;
             info.className = 'ui-array';
             one.appendChild(info);
             // 新建时数组为空，所以直接忽略渲染内容的步骤
@@ -623,7 +637,7 @@ class BaseAction<K extends keyof SpriteDrawInfoMap> {
     }
 
     /** 监听input */
-    listenInput(value: string, type: 'number' | 'string' | 'number_u', ele: HTMLInputElement) {
+    listenInput(value: string, type: 'number' | 'string' | 'number_u' | 'boolean', ele: HTMLInputElement) {
         const info = ele.id.split('-');
         const key = info[3] as keyof SpriteDrawInfoMap[K];
         if (type === 'string') {
@@ -638,7 +652,7 @@ class BaseAction<K extends keyof SpriteDrawInfoMap> {
             }
             // @ts-ignore
             this.data[key] = value;
-        } else {
+        } else if (type === 'number') {
             const n = parseFloat(value);
             if (isNaN(n)) {
                 ele.setAttribute('_invalid', 'true');
@@ -647,6 +661,9 @@ class BaseAction<K extends keyof SpriteDrawInfoMap> {
             ele.setAttribute('_invalid', 'false');
             // @ts-ignore
             this.data[key] = n;
+        } else { // 布尔值，直接赋值即可
+            // @ts-ignore
+            this.data[key] = value;
         }
     }
 

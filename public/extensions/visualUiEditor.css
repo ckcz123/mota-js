@@ -163,3 +163,8 @@ html, body {
     border-top: #333 solid 1px;
     border-bottom: #333 solid 1px;
 }
+
+.ui-img {
+    display: flex;
+    flex-direction: row;
+}

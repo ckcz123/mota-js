@@ -492,4 +492,6 @@ p#name {
 #ui-editor {
     z-index: 9999999;
     position: absolute;
+    overflow: visible;
+    height: 100%;
 }

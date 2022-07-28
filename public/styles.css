@@ -488,3 +488,8 @@ p#name {
     0% { opacity: 1 }
     100% { opacity: 0 }
 }
+
+#ui-editor {
+    z-index: 9999999;
+    position: absolute;
+}

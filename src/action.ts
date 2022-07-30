@@ -1,0 +1,52 @@
+///<reference path='./info.d.ts'/>
+
+import { actionAttributes, composition, units, sprites } from "./info";
+
+/** 每个action的根类 */
+export class BaseAction<K extends keyof SpriteDrawInfoMap> {
+    type: K
+    data!: SpriteDrawInfoMap[K];
+    /** 是否展开了详细信息 */
+    detailed = false
+    attrs: HTMLDivElement = document.createElement('div');
+    static cnt = 0
+    cnt = BaseAction.cnt++
+
+    /** 有没有成功创建这个实例 */
+    success = false
+
+    constructor(type: K) {
+        this.type = type;
+        const data = this.generateBaseData();
+        if (!data) return;
+        this.data = data;
+        this.success = true;
+    }
+
+    generateBaseData() {
+        // @ts-ignore
+        const data: SpriteDrawInfoMap[K] = {};
+        const all = Object.values(sprites);
+        if (!all[0]) return core.drawTip('请先创建画布');
+        const info = actionAttributes[this.type];
+        for (const key in info) {
+            // @ts-ignore
+            const [name, type] = info[key] as string[];
+            let value: any = '';
+            if (!type.includes('|')) {
+                if (type === 'composite') value = 'source-over';
+                else if (type === 'number') value = 0;
+                else if (type === 'boolean') value = false;
+                else if (type === 'number_u') value = '0px';
+                else if (/Array<[a-zA-Z,_]+>/.test(type)) value = [];
+                else throw new ReferenceError(`Nonexistent type exists.`);
+            } else {
+                const all = type.split('|');
+                value = all[0];
+            }
+            // @ts-ignore
+            data[key] = value;
+        }
+        return data;
+    }
+}

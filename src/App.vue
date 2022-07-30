@@ -7,7 +7,7 @@
                 :status="one[0] === mode" @click="triggerMode(one[0])"
             >{{one[1]}}</button>
         </div>
-        <Editor></Editor>
+        <Editor v-if="mode === 'edit'"></Editor>
     </div>
 </template>
 
@@ -76,6 +76,7 @@ export default defineComponent({
     text-shadow: 2px 2px 2px black;
     cursor: pointer;
     border: 2px solid rgb(20, 167, 235);
+    z-index: -1;
 }
 
 #open:hover {
@@ -96,11 +97,10 @@ export default defineComponent({
     box-shadow: 0px 0px 5px black, 5px 5px 5px black;
     background-color: rgba(200, 200, 200);
     padding: 2px;
-    z-index: 200;
+    z-index: -1;
     user-select: none;
     transition: all 0.3s ease-out;
     -webkit-transition: all 0.3s ease-out;
-    z-index: 999999;
 }
 
 .mode {

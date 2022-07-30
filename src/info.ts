@@ -244,3 +244,5 @@ export const units = [
     'em', 'ex', 'ch', 'rem', 'lh', 'vw', 'vh', 'vmin', 'vmax',
     '%'
 ];
+
+export const sprites: { [x: string]: Sprite } = {};

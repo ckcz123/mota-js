@@ -21,13 +21,14 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
         if (!data) return;
         this.data = data;
         this.success = true;
+        this.addSprite();
     }
 
     generateBaseData() {
         // @ts-ignore
         const data: SpriteDrawInfoMap[K] = {};
         const all = Object.values(sprites);
-        if (!all[0]) return core.drawTip('请先创建画布');
+        if (!all[0] && this.type !== 'create') return core.drawTip('请先创建画布');
         const info = actionAttributes[this.type];
         for (const key in info) {
             // @ts-ignore
@@ -39,6 +40,8 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
                 else if (type === 'boolean') value = false;
                 else if (type === 'number_u') value = '0px';
                 else if (/Array<[a-zA-Z,_]+>/.test(type)) value = [];
+                else if (/string_(icon|img)/.test(type)) value = '';
+                else if (/string(_multi)?/.test(type)) value = '';
                 else throw new ReferenceError(`Nonexistent type exists.`);
             } else {
                 const all = type.split('|');
@@ -48,5 +51,13 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
             data[key] = value;
         }
         return data;
+    }
+
+    addSprite() {
+        if (this.type !== 'create') return;
+        const sprite = new Sprite(0, 0, 0, 0, 0, 'game');
+        (this as BaseAction<'create'>).data.name = sprite.name;
+        sprite.setCss('display: none;');
+        sprites[sprite.name] = sprite;
     }
 }

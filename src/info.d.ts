@@ -245,8 +245,10 @@ interface SpriteTextContent {
     italic: boolean
 }
 
-type SpriteDrawInfo<K extends keyof SpriteDrawInfoMap> = SpriteDrawInfoMap[K]
+type SpriteDrawInfo<K extends Key> = SpriteDrawInfoMap[K]
 
 type FsCallback = (err?: string, data?: string) => void
 
 type UiMode = 'edit' | 'uiList'
+
+type Key = keyof SpriteDrawInfoMap

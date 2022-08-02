@@ -40,7 +40,7 @@ export default defineComponent({
         triggerMode(mode: string) {
             this.mode = mode;
         }
-    }
+    },
 });
 </script>
 
@@ -57,6 +57,7 @@ export default defineComponent({
     height: 100%;
     background-color: rgba(187, 187, 187, 0.9);
     position: absolute;
+    overflow: visible;
     transition: all 0.3s ease-out;
     -webkit-transition: all 0.3s ease-out;
 }

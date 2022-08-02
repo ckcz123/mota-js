@@ -245,4 +245,4 @@ export const units = [
     '%'
 ];
 
-export const sprites: { [x: string]: Sprite } = {};
+export const sprites: Record<string, Sprite> = {};

@@ -1387,7 +1387,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			this.canvas = null;
 			this.context = null;
 			this.count = 0;
-			this.name = name;
+			this.name = name || '_sprite_' + count;
 			/** 初始化 */
 			this.init = function () {
 				if (reference === 'window') {
@@ -1406,10 +1406,10 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				} else {
 					this.context = core.createCanvas(this.name || '_sprite_' + count, x, y, w, h, z);
 					this.canvas = this.context.canvas;
-					this.count = count;
 					this.canvas.style.pointerEvents = 'auto';
-					count++;
 				}
+				this.count = count;
+				count++;
 			}
 			this.init();
 

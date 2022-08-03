@@ -1,12 +1,12 @@
 <template>
     <div id="action">
         <div id="info">
-            <span id="detail" @click="triggerDetail()">▲</span>
+            <span id="detail" @click="triggerDetail($event)">▲</span>
             <span id="name">{{actions[type as Key]}}</span>
             <span id="del">✖</span>
         </div>
         <div id="attrs" v-if="detailed">
-            
+            <Attr v-for="(value, key) of attrs" :value="ref(value)" :id="type" :name="key"></Attr>
         </div>
     </div>
 </template>
@@ -15,12 +15,12 @@
     const actions = drawActions;
     const props = defineProps<{
         data: SpriteDrawInfo<any>
-        type: string
+        type: Key
     }>();
 
-    let detailed = false;
+    let detailed = ref(false);
         
-    const attrs = Object.entries(props.data);
+    const attrs = props.data as Object;
 
     defineExpose({
         detailed
@@ -28,15 +28,16 @@
 </script>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, provide, ref } from "vue";
 import { BaseAction } from "../action";
 import { actionAttributes, drawActions } from "../info";
+import Attr from "./attr.vue";
 
 export default defineComponent({
     name: 'action',
     methods: {
-        triggerDetail() {
-            const span = document.getElementById('detail') as HTMLSpanElement;
+        triggerDetail(e: MouseEvent) {
+            const span = e.currentTarget as HTMLSpanElement;
             span.style.transform = `rotate(${this.detailed ? 90 : 180}deg)`;
             this.detailed = !this.detailed;
         }
@@ -60,8 +61,10 @@ span {
 }
 
 #info {
+    .border();
     display: flex;
     justify-content: space-between;
+    background-color: #ddd;
 }
 
 #detail {
@@ -100,7 +103,16 @@ span {
 }
 
 #action {
-    .border();
+    width: 100%;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    box-shadow: 0px 0px 2px #000;
+}
+
+#attrs {
+    width: 90%;
+    left: 10%;
+    position: relative;
     background-color: #ddd;
 }
 </style>

@@ -4,9 +4,9 @@
             <Action v-for="one of list" :data="one.data" :type="one.type"></Action>
         </div>
         <button id="add" class="button" @click="triggerAdd">+ 添加新操作</button>
-        <div id="actions">
+        <div id="actions" v-if="showActions">
             <button 
-                v-if="showActions" v-for="[id, name] of actions" :id="id"
+                v-for="[id, name] of actions" :id="id"
                 class="button" @click="doAdd(id as keyof SpriteDrawInfoMap)"
             >{{name}}</button>
         </div>
@@ -26,7 +26,7 @@
 </script>
 
 <script lang="ts">
-import { defineComponent, Ref, ref } from "vue";
+import { defineComponent, provide, Ref, ref } from "vue";
 import { BaseAction } from '../action';
 import { drawActions } from "../info";
 import Action from "./action.vue";
@@ -41,6 +41,8 @@ export default defineComponent({
         doAdd(action: keyof SpriteDrawInfoMap) {
             const data = new BaseAction(action);
             if (!data.success) return;
+            console.log(data);
+            
             this.list = this.list.concat([data]);
         }
     }
@@ -80,6 +82,7 @@ export default defineComponent({
 
 #editor {
     overflow: auto;
+    overflow-x: hidden;
     height: 100%;
 }
 </style>

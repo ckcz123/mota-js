@@ -9,9 +9,13 @@
         <button id="add" class="button" @click="triggerAdd">+ 添加新操作</button>
         <div id="actions" v-if="showActions">
             <button 
-                v-for="[id, name] of actions" :id="id"
+                v-for="[id, name] of actions" :id="id" v-if="list[0]?.type === 'create'"
                 class="button" @click="doAdd(id as keyof SpriteDrawInfoMap)"
             >{{name}}</button>
+            <!-- 如果是还没有创建画布 -->
+            <button 
+                v-else id="create" class="button" @click="doAdd('create')"
+            >创建画布</button>
         </div>
     </div>
 </template>
@@ -29,14 +33,13 @@
 </script>
 
 <script lang="ts">
-import { defineComponent, provide, Ref, ref } from "vue";
+import { defineComponent, Ref, ref } from "vue";
 import { BaseAction } from '../action';
 import { drawActions } from "../info";
 import Action from "./action.vue";
 
 export default defineComponent({
     name: 'Editor',
-    components: { Action },
     methods: {
         triggerAdd() {
             this.showActions = !this.showActions;
@@ -48,8 +51,9 @@ export default defineComponent({
             this.list = this.list.concat([data]);
         },
         doDelete(i: number) {
+            // 第一个操作不能删，除非只有第一个操作
+            if (i === 0 && this.list.length !== 1) return;
             this.list.splice(i, 1);
-            this.list = this.list;
         }
     }
 })

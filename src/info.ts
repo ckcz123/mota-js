@@ -182,7 +182,6 @@ export const actionAttributes = {
         sy: ['起点纵坐标', 'number'],
         x: ['终点横坐标', 'number'],
         y: ['终点纵坐标', 'number'],
-        stroke: ['是否为边框', 'boolean'],
         lineWidth: ['线条宽度', 'number'],
         style: ['颜色', 'string']
     },

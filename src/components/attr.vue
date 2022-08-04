@@ -1,7 +1,7 @@
 <template>
     <!-- 直接if吧 -->
     <div id="attr">
-        <span id="description">{{ 
+        <span id="description" v-if="!isArray">{{ 
             // @ts-ignore
             actionAttributes[id][name][0]
         }}</span>
@@ -16,11 +16,12 @@
         id: Key
     }>();
 
-    const text = ['string', 'number_u', 'number'];
-    const select = ['string_img', 'string_icon'];
-
     // @ts-ignore
     const type = actionAttributes[props.id][props.name][1] as string;
+
+    const text = ['string', 'number_u', 'number'];
+    const select = ['string_img', 'string_icon'];
+    const isArray = /^Array<[a-zA-Z,]+>$/.test(type);
 
     let value = props.value;
 

@@ -1,7 +1,10 @@
 <template>
     <div id="editor">
         <div id="added-action">
-            <Action v-for="one of list" :data="one.data" :type="one.type"></Action>
+            <Action 
+                v-for="(one, i) of list" :data="one.data" 
+                :type="one.type" :index="i" @delete="doDelete($event)"
+            ></Action>
         </div>
         <button id="add" class="button" @click="triggerAdd">+ 添加新操作</button>
         <div id="actions" v-if="showActions">
@@ -41,9 +44,12 @@ export default defineComponent({
         doAdd(action: keyof SpriteDrawInfoMap) {
             const data = new BaseAction(action);
             if (!data.success) return;
-            console.log(data);
             
             this.list = this.list.concat([data]);
+        },
+        doDelete(i: number) {
+            this.list.splice(i, 1);
+            this.list = this.list;
         }
     }
 })

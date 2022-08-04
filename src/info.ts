@@ -60,7 +60,7 @@ export const actionAttributes = {
         z: ['纵深', 'number']
     },
     delete: {
-        name: ['画布名称', 'string']
+        // name: ['画布名称', 'string']
     },
     move: {
         x: ['横坐标', 'number'],
@@ -211,6 +211,7 @@ export const actionAttributes = {
         h: ['高度', 'number'],
     },
     text: {
+        str: ['文字', 'string'],
         stroke: ['添加描边', 'boolean'],
         italic: ['斜体', 'boolean'],
         font: ['字体', 'string'],
@@ -218,8 +219,7 @@ export const actionAttributes = {
         fontWeight: ['字体粗细', 'string'],
         style: ['字体颜色', 'string'],
         strokeStyle: ['描边颜色', 'string'],
-        maxWidth: ['最大宽度', 'number'],
-        str: ['文字', 'string']
+        maxWidth: ['最大宽度', 'number']
     },
     textContent: {
         content: ['文本', 'string_multi'],

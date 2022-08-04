@@ -3,10 +3,14 @@
         <div id="info">
             <span id="detail" @click="triggerDetail($event)">▲</span>
             <span id="name">{{actions[type as Key]}}</span>
-            <span id="del">✖</span>
+            <span id="del" @click="del()">✖</span>
         </div>
         <div id="attrs" v-if="detailed">
-            <Attr v-for="(value, key) of attrs" :value="ref(value)" :id="type" :name="key"></Attr>
+            <div id="sprite" v-if="needSprite"></div>
+            <Attr 
+                v-for="(value, key) of attrs" :value="ref(value)" 
+                :id="type" :name="key"
+            ></Attr>
         </div>
     </div>
 </template>
@@ -16,11 +20,17 @@
     const props = defineProps<{
         data: SpriteDrawInfo<any>
         type: Key
+        index: number
     }>();
 
     let detailed = ref(false);
         
     const attrs = props.data as Object;
+    const needSprite = !['wait', 'create', 'save', 'restore'].includes(props.type);
+
+    defineEmits<{
+        (e: 'delete', i: number): void
+    }>()
 
     defineExpose({
         detailed
@@ -40,6 +50,9 @@ export default defineComponent({
             const span = e.currentTarget as HTMLSpanElement;
             span.style.transform = `rotate(${this.detailed ? 90 : 180}deg)`;
             this.detailed = !this.detailed;
+        },
+        del() {
+            this.$emit('delete', this.index)
         }
     }
 })

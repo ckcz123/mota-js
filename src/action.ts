@@ -12,12 +12,16 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
     static cnt = 0
     cnt = BaseAction.cnt++
 
+    /** 作用于的sprite */
+    sprite: string
+
     /** 有没有成功创建这个实例 */
     success = false
 
     constructor(type: K) {
         this.type = type;
         const data = this.generateBaseData();
+        this.sprite = Object.keys(sprites)[0] || '';
         if (!data) return;
         this.data = data;
         this.success = true;
@@ -39,9 +43,9 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
                 else if (type === 'number') value = 0;
                 else if (type === 'boolean') value = false;
                 else if (type === 'number_u') value = '0px';
-                else if (/Array<[a-zA-Z,_]+>/.test(type)) value = [];
-                else if (/string_(icon|img)/.test(type)) value = '';
-                else if (/string(_multi)?/.test(type)) value = '';
+                else if (/^Array<[a-zA-Z,_]+>$/.test(type)) value = [];
+                else if (/^string_(icon|img)$/.test(type)) value = '';
+                else if (/^string(_multi)?$/.test(type)) value = '';
                 else throw new ReferenceError(`Nonexistent type exists.`);
             } else {
                 const all = type.split('|');

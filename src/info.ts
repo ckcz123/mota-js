@@ -211,6 +211,8 @@ export const actionAttributes = {
     },
     text: {
         str: ['文字', 'string'],
+        x: ['横坐标', 'number'],
+        y: ['纵坐标', 'number'],
         stroke: ['添加描边', 'boolean'],
         italic: ['斜体', 'boolean'],
         font: ['字体', 'string'],
@@ -222,8 +224,8 @@ export const actionAttributes = {
     },
     textContent: {
         content: ['文本', 'string_multi'],
-        x: ['横坐标', 'number'],
-        y: ['纵坐标', 'number'],
+        left: ['横坐标', 'number'],
+        top: ['纵坐标', 'number'],
         width: ['宽度', 'number'],
         color: ['颜色', 'string'],
         align: ['对齐', 'left|center|right'],

@@ -6,7 +6,11 @@
             <span id="del" @click="del()">✖</span>
         </div>
         <div id="attrs" v-if="detailed">
-            <div id="sprite" v-if="needSprite"></div>
+            <div id="sprite" v-if="needSprite">
+                <span id="description">作用画布</span>
+                <!-- 之后会换成select，暂时先这么写 -->
+                <input id="input" type="text" :v-model.trim="sprite"/>
+            </div>
             <Attr 
                 v-for="(value, key) of attrs" :value="ref(value)" 
                 :id="type" :name="key"
@@ -18,16 +22,18 @@
 <script setup lang="ts">
     const actions = drawActions;
     const props = defineProps<{
-        data: SpriteDrawInfo<any>
+        data: BaseAction<any>
         type: Key
         index: number
     }>();
 
     let detailed = ref(false);
         
-    const attrs = props.data as Object;
+    const attrs = props.data.data as Object;
     const needSprite = !['wait', 'create', 'save', 'restore'].includes(props.type);
 
+    let sprite = props.data.sprite;
+    
     defineEmits<{
         (e: 'delete', i: number): void
     }>()
@@ -38,7 +44,7 @@
 </script>
 
 <script lang="ts">
-import { defineComponent, provide, ref } from "vue";
+import { defineComponent, provide, ref, watch } from "vue";
 import { BaseAction } from "../action";
 import { actionAttributes, drawActions } from "../info";
 import Attr from "./attr.vue";
@@ -127,5 +133,40 @@ span {
     left: 10%;
     position: relative;
     background-color: #ddd;
+}
+
+#sprite {
+    .border();
+    display: flex;
+    justify-content: space-between;
+    justify-items: center;
+    margin-top: 2px;
+    margin-bottom: 2px;
+    text-align: center;
+    font-weight: 200;
+
+    #description {
+        margin-left: 10px;
+        height: 100%;
+        font-size: 17px;
+    }
+}
+
+#input {
+    width: 40%;
+    border: 0.5px solid #222;
+    border-radius: 3px;
+    margin-right: 10px;
+    transition: all 0.2s linear;
+    font-size: 18px;
+    font-weight: 200;
+}
+
+#input:hover {
+    border-color: #88f;
+}
+
+#input:focus {
+    border-color: #88f;
 }
 </style>

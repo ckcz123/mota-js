@@ -1,19 +1,19 @@
 ///<reference path='./info.d.ts'/>
 
+import { Ref, ref } from "vue";
 import { actionAttributes, composition, units, sprites } from "./info";
 
 /** 每个action的根类 */
 export class BaseAction<K extends keyof SpriteDrawInfoMap> {
+    static cnt = 0
     type: K
     data!: SpriteDrawInfoMap[K];
     /** 是否展开了详细信息 */
     detailed = false
-    attrs: HTMLDivElement = document.createElement('div');
-    static cnt = 0
     cnt = BaseAction.cnt++
 
     /** 作用于的sprite */
-    sprite: string
+    sprite: Ref<string>
 
     /** 有没有成功创建这个实例 */
     success = false
@@ -21,7 +21,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
     constructor(type: K) {
         this.type = type;
         const data = this.generateBaseData();
-        this.sprite = Object.keys(sprites)[0] || '';
+        this.sprite = ref(Object.keys(sprites)[0] || '');
         if (!data) return;
         this.data = data;
         this.success = true;

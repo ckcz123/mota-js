@@ -133,7 +133,7 @@ ui.prototype.setFontForMaxWidth = function (name, text, maxWidth, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
-ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font, maxWidth) {
+ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font, maxWidth, lineWidth) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
     if (font) ctx.font = font;
@@ -145,7 +145,7 @@ ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font
         this.setFontForMaxWidth(ctx, text, maxWidth);
     }
     ctx.strokeStyle = strokeStyle;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = lineWidth || 2;
     ctx.strokeText(text, x, y);
     ctx.fillStyle = style;
     ctx.fillText(text, x, y);

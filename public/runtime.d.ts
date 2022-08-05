@@ -3,6 +3,21 @@
  * @author 秋橙 & tocque
  */
 
+interface TextContentConfig {
+    left ?: number
+    top ?: number
+    maxWidth ?: number
+    color ?: rgbarray
+    align ?: 'left' | 'center' | 'right'
+    fontSize: number
+    lineHeight ?: number
+    time ?: number
+    font ?: string
+    letterSpacing ?: number
+    bold ?: boolean
+    italic ?: boolean
+}
+
 type direction = 'up' | 'down' | 'left' | 'right'
 type move = 'forward' | direction
 type loc = { direction: direction, x: number, y: number }
@@ -2195,7 +2210,7 @@ declare class ui {
      * name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。（下同）
      * 如果name也可以是'all'，若为all则为清空所有系统画布。
      */
-    clearMap(name: CtxRefer): void
+    clearMap(name: CtxRefer, x?: number, y?: number, w?: number, h?: number): void
 
     /**
      * 在某个画布上绘制一段文字
@@ -2225,7 +2240,7 @@ declare class ui {
      * 绘制一个矩形的边框
      * @param style 绘制的样式
      */
-    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, angle?: number): void
+    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, lineWidth?: number, angle?: number): void
 
     /**
      * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
@@ -2246,7 +2261,7 @@ declare class ui {
     resizeCanvas(name: string, x?: number, y?: number, styleOnly?: boolean, isTempCanvas?: boolean): void
 
     /** 设置一个自定义画布的旋转角度 */
-    rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
+    rotateCanvas(name: CtxRefer, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
     deleteCanvas(name: string | ((name: string) => boolean)): void
@@ -2358,20 +2373,7 @@ declare class ui {
      *                fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
      * @returns 绘制信息 
      */
-    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: {
-        left?: number
-        top?: number
-        maxWidth?: number
-        color?: number
-        align?: 'left' | 'center' | 'right'
-        fontSize: number
-        lineHeight?: number
-        time?: number
-        font?: string
-        letterSpacing?: number
-        bold?: boolean
-        italic?: boolean
-    }): any
+    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: TextContentConfig): any
 
     /** 获得某段文字的预计绘制高度；参见 drawTextContent */
     getTextContentHeight(content: string, config?: any): void

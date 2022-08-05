@@ -2,7 +2,7 @@
     <div id="editor">
         <div id="added-action">
             <Action 
-                v-for="(one, i) of list" :data="one.data" 
+                v-for="(one, i) of list" :data="one" 
                 :type="one.type" :index="i" @delete="doDelete($event)"
             ></Action>
         </div>
@@ -48,7 +48,7 @@ export default defineComponent({
             const data = new BaseAction(action);
             if (!data.success) return;
             
-            this.list = this.list.concat([data]);
+            this.list.push(data)
         },
         doDelete(i: number) {
             // 第一个操作不能删，除非只有第一个操作

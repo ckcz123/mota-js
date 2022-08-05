@@ -5,7 +5,7 @@
             // @ts-ignore
             actionAttributes[id][name][0]
         }}</span>
-        <input id="input" v-if="text.includes(type)" :value="value"/>
+        <input id="input" v-if="text.includes(type)" @blur="blur" v-model.trim="value"/>
     </div>
 </template>
 
@@ -31,18 +31,6 @@
         value,
         type
     })
-
-    watch(value, (newValue, oldValue) => {
-        if (type === 'number_u') {
-            if (!/[0-9]+/.test(newValue)) value.value = '0px';
-            if (!units.some(v => newValue.endsWith(v))) 
-                value.value = `${parseFloat(newValue)}px`;
-        } else if (type === 'number') {
-            value.value = parseFloat(newValue);
-        } else if (type === 'string') {
-            value.value = newValue;
-        }
-    })
 </script>
 
 <script lang="ts">
@@ -51,6 +39,17 @@ import { actionAttributes, units } from '../info.js';
 
 export default defineComponent({
     name: 'Attrs',
+    methods: {
+        blur() {
+            if (this.type === 'number_u') {
+                if (!/[0-9]+/.test(this.value)) this.value = '0px';
+                if (!units.some(v => this.value.endsWith(v))) 
+                    this.value = `${parseFloat(this.value)}px`;
+            } else if (this.type === 'number') {
+                this.value = parseFloat(this.value);
+            }
+        }
+    }
 })
 </script>
 

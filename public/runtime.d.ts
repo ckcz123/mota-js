@@ -4,18 +4,18 @@
  */
 
 interface TextContentConfig {
-    left ?: number
-    top ?: number
-    maxWidth ?: number
-    color ?: rgbarray
-    align ?: 'left' | 'center' | 'right'
+    left?: number
+    top?: number
+    maxWidth?: number
+    color?: rgbarray
+    align?: 'left' | 'center' | 'right'
     fontSize: number
-    lineHeight ?: number
-    time ?: number
-    font ?: string
-    letterSpacing ?: number
-    bold ?: boolean
-    italic ?: boolean
+    lineHeight?: number
+    time?: number
+    font?: string
+    letterSpacing?: number
+    bold?: boolean
+    italic?: boolean
 }
 
 type direction = 'up' | 'down' | 'left' | 'right'
@@ -2227,7 +2227,7 @@ declare class ui {
      * @param strokeStyle 绘制的描边颜色
      * @param font 绘制的字体
      */
-    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number): void
+    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number, lineWidth?: number): void
 
     /**
      * 绘制一个矩形。style可选为绘制样式

@@ -157,7 +157,7 @@ export function image(name: string, img: string, sx: number, sy: number, sw: num
 
 export function icon(name: string, icon: string, x: number, y: number, frame: number) {
     const sprite = getSprite(name);
-    core.drawIcon(sprite.context, icon, x, y, undefined, undefined, frame);
+    core.drawIcon(sprite.context, icon, x, y, void 0, void 0, frame);
 }
 
 export function winskin(name: string, img: string, x: number, y: number, w: number, h: number) {
@@ -169,7 +169,7 @@ export function text(name: string, str: string, x: number, y: number, stroke: bo
     const sprite = getSprite(name);
     const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? 300} ${fontSize}px ${font}`;
     sprite.context.lineWidth = lineWidth;
-    if (stroke) core.fillBoldText(sprite.context, str, x, y, style, strokeStyle, fontStyle);
+    if (stroke) core.fillBoldText(sprite.context, str, x, y, style, strokeStyle, fontStyle, void 0, lineWidth);
     else core.fillText(sprite.context, str, x, y, style, fontStyle);
 }
 

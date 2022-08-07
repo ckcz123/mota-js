@@ -16,14 +16,14 @@ class Main {
         }
         core.pixi = {};
     }
-    // ---- 加载游戏核心代码及楼层 ---- //
+
     /** 开始加载游戏 */
     async load(): Promise<void> {
         // 加载project内的初始化文件
         core.floorIds = data.floorIds;
         for (let name of data.floorIds) {
-            await import(/* @vite-ignore */'./project/floors/' + name).then(floor => {
-                core.floors[name] = floor.floor;
+            await import(`./project/floors/${name}.json`).then(floor => {
+                core.floors[name] = floor;
             });
         }
         core.dataContent = data;
@@ -34,7 +34,7 @@ class Main {
 
     /** 执行全局初始化 */
     globalInit(): void {
-        // 创建游戏相关pixi精灵
+        // 创建游戏相关pixi
         let game = new PIXI.Application({
             width: 0,
             height: 0,

@@ -3,15 +3,7 @@ import * as maps from './maps';
 import * as listen from '../project/functions/listen';
 import { core } from './core';
 import { Floor } from './floor';
-
-interface EventAction<T extends keyof EventType> {
-    type: T
-    data: EventType[T]
-}
-
-interface EventType {
-    x: any
-}
+import { EventAction, EventType } from '../project/global';
 
 export class Event {
     data: EventAction<any>[];
@@ -21,13 +13,13 @@ export class Event {
     }
 
     /** 添加事件内容 */
-    add<K extends keyof EventType>(data: EventAction<K>): Event {
+    add<K extends keyof EventType>(...data: EventAction<K>[]): Event {
         return this;
     }
 
     /** 移除特定索引的事件内容 */
-    remove(index: number): Event {
-        this.data.splice(index, 1);
+    remove(index: number, length: number = 1): Event {
+        this.data.splice(index, length || 1);
         return this;
     }
 
@@ -58,5 +50,5 @@ export function startGame() {
     maps.changeFloor('sample0', 0, 0);
     listen.addHeroListener();
     core.status.views.main.follow('hero');
-    import('../project/ui/status/main');
+    import('../project/ui/status/main.js');
 }

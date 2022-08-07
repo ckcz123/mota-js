@@ -252,3 +252,6 @@ type FsCallback = (err?: string, data?: string) => void
 type UiMode = 'edit' | 'uiList'
 
 type Key = keyof SpriteDrawInfoMap
+
+declare const js: monaco.editor.IStandaloneCodeEditor
+declare const txt: monaco.editor.IStandaloneCodeEditor

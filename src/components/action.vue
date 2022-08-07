@@ -9,7 +9,11 @@
             <div id="sprite" v-if="needSprite">
                 <span id="description">作用画布</span>
                 <!-- 之后会换成select，暂时先这么写 -->
-                <input id="input" type="text" :v-model.trim="sprite"/>
+                <select id="select">
+                    <option 
+                        v-for="sprite of sprites" :value="sprite.name"
+                    >{{sprite.name}}</option>
+                </select>
             </div>
             <Attr 
                 v-for="(value, key) of attrs" :value="ref(value)" 
@@ -48,6 +52,7 @@ import { defineComponent, provide, ref, watch } from "vue";
 import { BaseAction } from "../action";
 import { actionAttributes, drawActions } from "../info";
 import Attr from "./attr.vue";
+import { sprites } from "../info";
 
 export default defineComponent({
     name: 'action',

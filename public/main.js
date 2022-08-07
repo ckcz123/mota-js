@@ -318,7 +318,7 @@ main.prototype.loadFloors = function (callback) {
         callback();
     }
     script.onerror = script.onabort = script.ontimeout = function (e) {
-        console.clear();
+        // console.clear();
         for (var i = 0; i < main.floorIds.length; i++) {
             main.loadFloor(main.floorIds[i], function (modName) {
                 main.setMainTipsText("楼层 " + modName + '.js 加载完毕');
@@ -427,6 +427,7 @@ main.prototype.listen = function () {
 
     ////// 在界面上按下某按键时 //////
     main.dom.body.onkeydown = function (e) {
+        if (main.editorOpened) return;
         try {
             if (main.dom.inputDiv.style.display == 'block') return;
             if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
@@ -436,6 +437,7 @@ main.prototype.listen = function () {
 
     ////// 在界面上放开某按键时 //////
     main.dom.body.onkeyup = function (e) {
+        if (main.editorOpened) return;
         try {
             if (main.dom.startPanel.style.display == 'block' &&
                 (main.dom.startButtons.style.display == 'block' || main.dom.levelChooseButtons.style.display == 'block')) {

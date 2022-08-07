@@ -6,10 +6,15 @@
             actionAttributes[id][name][0]
         }}</span>
         <input id="input" v-if="text.includes(type)" @blur="blur" v-model.trim="value"/>
+        <button 
+            id="multi" v-else-if="type === 'string_multi'" @click="openEditor(value)"
+        >编辑</button>
+
     </div>
 </template>
 
 <script setup lang="ts">
+
     const props = defineProps<{
         value: Ref<any>
         name: string
@@ -36,6 +41,7 @@
 <script lang="ts">
 import { defineComponent, Ref, ref, watch } from 'vue';
 import { actionAttributes, units } from '../info.js';
+import { openEditor } from '../monaco.js';
 
 export default defineComponent({
     name: 'Attrs',
@@ -48,6 +54,9 @@ export default defineComponent({
             } else if (this.type === 'number') {
                 this.value = parseFloat(this.value);
             }
+        },
+        openEditor(value: string) {
+            openEditor('txt', value);
         }
     }
 })
@@ -93,7 +102,7 @@ export default defineComponent({
     border-color: #88f;
 }
 
-#input:active {
+#input:focus {
     border-color: #88f;
 }
 </style>

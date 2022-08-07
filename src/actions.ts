@@ -7,8 +7,10 @@ function getSprite(name: string) {
     return sprites[name];
 }
 
-export function wait(action: BaseAction<any>, time: number) {
-    // #
+export async function wait(time: number) {
+    await new Promise(res => {
+        setTimeout(res, time);
+    });
 }
 
 export function transition(name: string, style: string, time: string, mode: string, delay: string) {

@@ -2954,6 +2954,7 @@ type core = {
 } & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugin
 
 type main = {
+    editorOpened: boolean
     readonly core: core
     readonly dom: { [key: string]: HTMLElement }
     /** 游戏版本，发布后会被随机，请勿使用该属性 */

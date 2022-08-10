@@ -4,6 +4,7 @@
             <Action 
                 v-for="(one, i) of list" :data="one" 
                 :type="one.type" :index="i" @delete="doDelete($event)"
+                @open-editor="openEditor($event.value, $event.lang)"
             ></Action>
         </div>
         <button id="add" class="button" @click="triggerAdd">+ 添加新操作</button>
@@ -18,17 +19,30 @@
             >创建画布</button>
         </div>
     </div>
+    <Monaco 
+        v-if="editorOpened" @close="closeEditor()" :value="editorValue" :lang="editorLang"
+    ></Monaco>
 </template>
 
 <script setup lang="ts">
     const list: Ref<BaseAction<any>[]> = ref([]);
+    // @ts-ignore
+    window.list = list
     const actions = ref(Object.entries(drawActions));
     const showActions = ref(false);
+
+    const editorOpened = ref(false);
+
+    const editorValue = ref('');
+    const editorLang = ref<'js' | 'txt'>('js');
 
     defineExpose({
         list,
         actions,
-        showActions
+        showActions,
+        editorLang,
+        editorValue,
+        editorOpened
     })
 </script>
 
@@ -37,6 +51,7 @@ import { defineComponent, Ref, ref } from "vue";
 import { BaseAction } from '../action';
 import { drawActions } from "../info";
 import Action from "./action.vue";
+import Monaco from './monaco.vue';
 
 export default defineComponent({
     name: 'Editor',
@@ -48,12 +63,20 @@ export default defineComponent({
             const data = new BaseAction(action);
             if (!data.success) return;
             
-            this.list.push(data)
+            this.list.push(data);
         },
         doDelete(i: number) {
             // 第一个操作不能删，除非只有第一个操作
             if (i === 0 && this.list.length !== 1) return;
             this.list.splice(i, 1);
+        },
+        openEditor(value: string = '', lang: 'js' | 'txt' = 'js') {
+            this.editorValue = value;
+            this.editorLang = lang;
+            this.editorOpened = true;
+        },
+        closeEditor() {
+            this.editorOpened = false;
         }
     }
 })

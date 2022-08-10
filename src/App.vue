@@ -126,30 +126,3 @@ export default defineComponent({
     background-color: rgba(160, 160, 160, 0.8);
 }
 </style>
-
-<style lang="less">
-
-#code-editor {
-    width: 100%;
-    height: 100%;
-    display: none;
-    justify-content: center;
-    justify-items: center;
-    align-items: center;
-    z-index: 10000;
-    position: absolute;
-    left: 0px;
-    top: 0px;
-
-    #code-container {
-        width: 80%;
-        height: 80%;
-        z-index: 10000;
-        overflow: hidden;
-
-        * {
-            height: 100%;
-        }
-    }
-}
-</style>

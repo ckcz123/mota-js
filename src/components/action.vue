@@ -6,18 +6,18 @@
             <span id="del" @click="del()">✖</span>
         </div>
         <div id="attrs" v-if="detailed">
+            <!-- 大部分都需要一个作用画布的参数 -->
             <div id="sprite" v-if="needSprite">
                 <span id="description">作用画布</span>
-                <!-- 之后会换成select，暂时先这么写 -->
-                <select id="select">
+                <select id="select" :value="sprite">
                     <option 
                         v-for="sprite of sprites" :value="sprite.name"
                     >{{sprite.name}}</option>
                 </select>
             </div>
             <Attr 
-                v-for="(value, key) of attrs" :value="ref(value)" 
-                :id="type" :name="key"
+                v-for="(value, key) of attrs" :value="ref(value)" :id="type" 
+                :name="key" @open-editor="openEditor($event)" @change="change(key, $event)"
             ></Attr>
         </div>
     </div>
@@ -40,6 +40,7 @@
     
     defineEmits<{
         (e: 'delete', i: number): void
+        (e: 'openEditor', data: { value?: string, lang?: 'js' | 'txt' }): void
     }>()
 
     defineExpose({
@@ -48,9 +49,9 @@
 </script>
 
 <script lang="ts">
-import { defineComponent, provide, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import { BaseAction } from "../action";
-import { actionAttributes, drawActions } from "../info";
+import { drawActions } from "../info";
 import Attr from "./attr.vue";
 import { sprites } from "../info";
 
@@ -64,6 +65,12 @@ export default defineComponent({
         },
         del() {
             this.$emit('delete', this.index)
+        },
+        openEditor(data: { value?: string, lang?: 'js' | 'txt' }) {
+            this.$emit('openEditor', data);
+        },
+        change(id: string, value: any) {
+            this.data.data[id] = value;
         }
     }
 })
@@ -173,5 +180,23 @@ span {
 
 #input:focus {
     border-color: #88f;
+}
+
+#select {
+    width: 40%;
+    border: 1px solid #222;
+    border-radius: 3px;
+    margin-right: 10px;
+    transition: all 0.2s linear;
+    font-size: 17px;
+    font-weight: 200;
+}
+
+#select:hover {
+    border-color: #88f;
+}
+
+option {
+    border-radius: 0px;
 }
 </style>

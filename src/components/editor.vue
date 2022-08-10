@@ -2,7 +2,7 @@
     <div id="editor">
         <div id="added-action">
             <Action 
-                v-for="(one, i) of list" :data="one" 
+                v-for="(one, i) of list" :data="one" :key="one.cnt"
                 :type="one.type" :index="i" @delete="doDelete($event)"
                 @open-editor="openEditor($event.value, $event.lang)"
             ></Action>
@@ -19,7 +19,7 @@
             >创建画布</button>
         </div>
     </div>
-    <Monaco 
+    <Monaco
         v-if="editorOpened" @close="closeEditor()" :value="editorValue" :lang="editorLang"
     ></Monaco>
 </template>
@@ -27,7 +27,7 @@
 <script setup lang="ts">
     const list: Ref<BaseAction<any>[]> = ref([]);
     // @ts-ignore
-    window.list = list
+    window.list = list;
     const actions = ref(Object.entries(drawActions));
     const showActions = ref(false);
 

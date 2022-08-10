@@ -9,7 +9,13 @@
         <button 
             id="multi" v-else-if="type === 'string_multi'" @click="openEditor(value)"
         >编辑</button>
-
+        <input id="check" v-else-if="type === 'boolean'" type="checkbox" v-model="value"/>
+        <select id="select" v-else-if="type.includes('|')" v-model="value">
+            <option v-for="one of (options as string[])">{{ one }}</option>
+        </select>
+        <div id="img" v-else-if="select.includes(type)">
+            
+        </div>
     </div>
 </template>
 
@@ -27,6 +33,7 @@
     const text = ['string', 'number_u', 'number'];
     const select = ['string_img', 'string_icon'];
     const isArray = /^Array<[a-zA-Z,]+>$/.test(type);
+    const options = type.includes('|') && type.split('|') as string[];    
 
     let value = props.value;
 
@@ -49,6 +56,7 @@
 
     watch(props.value, newValue => {
         emits('change', newValue);
+        console.log(newValue);
     })
 </script>
 
@@ -130,4 +138,17 @@ button:active {
     background-color: aquamarine;
 }
 
+#select {
+    width: 40%;
+    border: 1px solid #222;
+    border-radius: 3px;
+    margin-right: 10px;
+    transition: all 0.2s linear;
+    font-size: 17px;
+    font-weight: 200;
+}
+
+#select:hover {
+    border-color: #88f;
+}
 </style>

@@ -34,7 +34,7 @@
     let detailed = ref(false);
         
     const attrs = props.data.data as Object;
-    const needSprite = !['wait', 'create', 'save', 'restore'].includes(props.type);
+    const needSprite = !['wait', 'create'].includes(props.type);
 
     let sprite = props.data.sprite;
     
@@ -194,9 +194,5 @@ span {
 
 #select:hover {
     border-color: #88f;
-}
-
-option {
-    border-radius: 0px;
 }
 </style>

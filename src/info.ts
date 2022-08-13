@@ -87,7 +87,7 @@ export const actionAttributes = {
         data: ['css效果', 'string_multi']
     },
     composite: {
-        mode: ['混合方式', 'composite']
+        mode: ['混合方式', composition.join('|')]
     },
     filter: {
         data: ['滤镜', 'string_multi']

@@ -2814,7 +2814,19 @@ type core = {
     /** 游戏素材 */
     readonly material: {
         readonly animates: { [key: string]: Animate },
-        readonly images: {},
+        readonly images: {
+            airwall: HTMLImageElement
+            animates: HTMLImageElement
+            enemys: HTMLImageElement
+            enemy48: HTMLImageElement
+            items: HTMLImageElement
+            npcs: HTMLImageElement
+            npc48: HTMLImageElement
+            terrains: HTMLImageElement
+            autotile: { [x: string]: HTMLImageElement }
+            images: { [x: string]: HTMLImageElement }
+            tilesets: { [x: string]: HTMLImageElement }
+        },
         readonly bgms: { [key: string]: HTMLAudioElement },
         readonly sounds: { [key: string]: HTMLAudioElement },
         readonly ground: CanvasRenderingContext2D
@@ -2825,7 +2837,7 @@ type core = {
         readonly enemys: { [key: string]: Enemy },
         /** 道具信息 */
         readonly items: { [key: string]: Item }
-        readonly icons: {},
+        readonly icons: { [key: string]: { [key: string]: number } },
     }
     readonly timeout: {
         turnHeroTimeout: any,
@@ -2939,6 +2951,12 @@ type core = {
     readonly floors: { [key: string]: ResolvedMap }
     readonly floorIds: string[]
 
+    readonly statusBar: {
+        readonly icons: { [x: string]: HTMLImageElement }
+    }
+
+    readonly materials: string[]
+
     readonly control: control
     readonly loader: loader
     readonly events: events
@@ -2969,6 +2987,7 @@ type main = {
     }
     readonly __VERSION__: string
     readonly __VERSION_CODE__: number
+    readonly images: string[]
 
     /** 输出内容（极不好用，建议换成console，我甚至不知道样板为什么会有这个东西）*/
     log(e: string | Error, error: boolean): void
@@ -3010,6 +3029,12 @@ declare class Sprite {
      * @param {boolean} styleOnly 是否只修改css效果，如果是，那么将会不高清，如果不是，那么会清空画布
      */
     resize(w: number, h: number, styleOnly?: boolean): Sprite
+
+    /** 旋转画布 */
+    rotate(angle: number, cx?: number, cy?: number): Sprite
+
+    /** 擦除画布 */
+    clear(x: number, y: number, w?: number, h?: number): Sprite
 
     /** 删除 */
     destroy(): void

@@ -14,15 +14,20 @@
             <option v-for="one of (options as string[])">{{ one }}</option>
         </select>
         <div id="img" v-else-if="select.includes(type)">
-            
+            <button id="select-img" @click="openImageSelector">选择</button>
+            <span id="img-display">{{ value || '无' }}</span>
         </div>
     </div>
+    <ImgSelector 
+        :type="type" :selected="value" v-if="selectImg" 
+        @select="selectImage($event)" @close="closeImageSelector"
+    ></ImgSelector>
 </template>
 
 <script setup lang="ts">
 
     const props = defineProps<{
-        value: Ref<any>
+        value: any
         name: string
         id: Key
     }>();
@@ -33,16 +38,18 @@
     const text = ['string', 'number_u', 'number'];
     const select = ['string_img', 'string_icon'];
     const isArray = /^Array<[a-zA-Z,]+>$/.test(type);
-    const options = type.includes('|') && type.split('|') as string[];    
+    const options = type.includes('|') && type.split('|') as string[];
+    const selectImg = ref(false);
 
-    let value = props.value;
+    let value = ref(props.value);
 
     defineExpose({
         text,
         select,
         value,
         type,
-        multiCallback
+        multiCallback,
+        selectImg
     })
 
     const emits = defineEmits<{
@@ -50,21 +57,21 @@
         (e: 'change', value: any): void
     }>()
 
-    function multiCallback(value: string) {
-        props.value.value = value;
+    function multiCallback(v: string) {
+        value.value = v;
     }
 
-    watch(props.value, newValue => {
+    watch(value, newValue => {
         emits('change', newValue);
         console.log(newValue);
     })
 </script>
 
 <script lang="ts">
-import { defineComponent, Ref, ref, watch } from 'vue';
+import { defineComponent, ref, watch } from 'vue';
 import { actionAttributes, units } from '../info.js';
 import { settings } from '../loadMonaco';
-// import { openEditor } from '../monaco.js';
+import ImgSelector from './imgSelector.vue';
 
 export default defineComponent({
     name: 'Attrs',
@@ -81,6 +88,17 @@ export default defineComponent({
         openEditor(value: string) {
             if (this.type === 'string_multi') settings.callback = this.multiCallback;
             this.$emit('openEditor', { value, lang: 'txt' });
+        },
+        openImageSelector() {
+            this.selectImg = true;
+            main.editorOpened = true;
+        },
+        selectImage(name: string) {
+            this.value = name;
+        },
+        closeImageSelector() {
+            this.selectImg = false;
+            main.editorOpened = false;
         }
     }
 })
@@ -100,6 +118,7 @@ export default defineComponent({
     display: flex;
     justify-content: space-between;
     justify-items: center;
+    align-items: center;
     margin-top: 2px;
     margin-bottom: 2px;
     text-align: center;
@@ -114,7 +133,7 @@ export default defineComponent({
 
 input, button {
     width: 40%;
-    border: 1px solid #222;
+    border: 1.5px solid #222;
     border-radius: 3px;
     margin-right: 10px;
     transition: all 0.2s linear;
@@ -150,5 +169,25 @@ button:active {
 
 #select:hover {
     border-color: #88f;
+}
+
+#select-img {
+    width: 30%;
+    margin: 0;
+}
+
+#img-display {
+    width: 70%;
+    font-size: 12px;
+    font-weight: 200;
+    color: #000;
+    user-select: none;
+}
+
+#img {
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 </style>

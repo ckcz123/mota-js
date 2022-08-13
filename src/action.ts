@@ -39,8 +39,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
             const [name, type] = info[key] as string[];
             let value: any = '';
             if (!type.includes('|')) {
-                if (type === 'composite') value = 'source-over';
-                else if (type === 'number') value = 0;
+                if (type === 'number') value = 0;
                 else if (type === 'boolean') value = false;
                 else if (type === 'number_u') value = '0px';
                 else if (/^Array<[a-zA-Z,_]+>$/.test(type)) value = [];
@@ -50,6 +49,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
             } else {
                 const all = type.split('|');
                 value = all[0];
+                if (all.includes('source-over')) value = 'source-over';
             }
             // @ts-ignore
             data[key] = value;

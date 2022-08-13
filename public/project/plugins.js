@@ -1469,6 +1469,37 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 				return this;
 			}
 
+			/**
+			 * 旋转画布
+			 */
+			this.rotate = function (angle, cx, cy) {
+				if (this.reference === 'window') {
+					var left = this.x;
+					var top = this.y;
+					this.canvas.style.transformOrigin = (cx - left) + 'px ' + (cy - top) + 'px';
+					if (angle === 0) {
+						canvas.style.transform = '';
+					} else {
+						canvas.style.transform = 'rotate(' + angle + 'deg)';
+					}
+				} else {
+					core.rotateCanvas(this.context, angle, cx, cy);
+				}
+				return this;
+			}
+
+			/**
+			 * 清除sprite
+			 */
+			this.clear = function (x, y, w, h) {
+				if (this.reference === 'window') {
+					this.context.clearRect(x, y, w, h);
+				} else {
+					core.clearMap(this.context, x, y, w, h);
+				}
+				return this;
+			}
+
 			/** 删除 */
 			this.destroy = function () {
 				if (this.reference === 'window') {

@@ -16,7 +16,7 @@
                 </select>
             </div>
             <Attr 
-                v-for="(value, key) of attrs" :value="ref(value)" :id="type" 
+                v-for="(value, key) of attrs" :value="value" :id="type" 
                 :name="key" @open-editor="openEditor($event)" @change="change(key, $event)"
             ></Attr>
         </div>

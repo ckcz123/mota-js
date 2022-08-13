@@ -44,12 +44,12 @@ export function resize(name: string, w: number, h: number, styleOnly: boolean) {
 
 export function rotate(name: string, cx: number, cy: number, angle: number) {
     const sprite = getSprite(name);
-    core.rotateCanvas(sprite.context, angle, cx, cy);
+    sprite.rotate(angle, cx, cy);
 }
 
 export function clear(name: string, x: number, y: number, w: number, h: number) {
     const sprite = getSprite(name);
-    core.clearMap(sprite.context, x, y, w, h);
+    sprite.clear(x, y, w, h);
 }
 
 export function css(name: string, data: string) {

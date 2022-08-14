@@ -42,6 +42,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
                 if (type === 'number') value = 0;
                 else if (type === 'boolean') value = false;
                 else if (type === 'number_u') value = '0px';
+                else if (type === 'number_time') value = '0ms';
                 else if (/^Array<[a-zA-Z,_]+>$/.test(type)) value = [];
                 else if (/^string_(icon|img)$/.test(type)) value = '';
                 else if (/^string(_multi)?$/.test(type)) value = '';

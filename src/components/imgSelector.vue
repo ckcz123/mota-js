@@ -4,15 +4,32 @@
             <button id="img-confirm" @click="close">确定</button>
             <button id="img-cancel" @click="cancel">取消</button>
             <input 
-                id="search-input" v-model.trim="search" 
-                placeholder="可使用 /RegExp/i 的形式使用正则表达式搜索"
+                id="search-input" v-model.trim="search" @change="change"
+                placeholder="可使用 /RegExp/ 的形式使用正则表达式搜索"
             />
+            <div id="type" v-if="type === 'string_icon'">
+                <div id="type-description" @click="selectType($event)">
+                    <span id="arrow">▲</span>
+                    <span id="s-type">选择类型</span>
+                </div>
+                <div id="type-all" v-if="typeOpened">
+                    <div class="type-one" v-for="t of allTypes">
+                        <input 
+                            :value="t" type="checkbox" @change="changeType($event)"
+                            checked="true"
+                        />
+                        <span class="">{{ t }}</span>
+                    </div>
+                </div>
+            </div>
         </div>
         <hr/>
-        <ImgOption 
-            v-for="id of imgs" :name="id" :key="id" :type="type"
-            :selected="selected" @select="select($event)"
-        ></ImgOption>
+        <div id="options">
+            <ImgOption 
+                v-for="id of imgs" :name="id" :key="id" :type="type"
+                :selected="selected" @select="select($event)"
+            ></ImgOption>
+        </div>
     </div>
 </template>
 
@@ -34,6 +51,9 @@ const before = props.selected;
 
 const search = ref('');
 const selectedType = ref<string[]>(core.materials.slice(0, -1).concat(['status']));
+
+const typeOpened = ref(false);
+const allTypes = core.materials.slice(0, -1).concat(['status']);
 
 /** 获得所有的需要显示的图标 */
 let imgs = ref(getImgs());
@@ -66,8 +86,8 @@ Type: ${info}.`
 
 /** 搜索功能 */
 function filterSearch(value: string) {
-    // 正则搜索
-    if (/^\/[^]+\/[igms]*$/.test(search.value)) {
+    if (/^\/[^]+\/[a-zA-Z]*$/.test(search.value)) {
+        // 正则搜索
         const info = search.value.split('/');
         try {
             return new RegExp(info[1], info[2]).test(value);
@@ -78,9 +98,13 @@ function filterSearch(value: string) {
 }
 
 watch(search, (v) => {
-    search.value = v;    
-    imgs.value = getImgs();    
+    search.value = v;
+    imgs.value = getImgs();
 })
+
+function change(this: HTMLDivElement) {
+    this.scrollTo(0, 0);
+}
 
 function select(id: string) {
     emits('select', id);
@@ -93,6 +117,23 @@ function cancel() {
 
 function close() {
     emits('close');
+}
+
+function selectType(e: MouseEvent) {    
+    const parent = e.currentTarget as HTMLDivElement;
+    const arrow = parent.children[0] as HTMLSpanElement
+    parent.style.borderBottomLeftRadius = `${typeOpened.value ? 5 : 0}px`;
+    parent.style.borderBottomRightRadius = `${typeOpened.value ? 5 : 0}px`;
+    arrow.style.transform = `rotate(${typeOpened.value ? 90 : 180}deg)`;
+    typeOpened.value = !typeOpened.value;
+}
+
+function changeType(e: Event) {
+    const ele = e.currentTarget as HTMLInputElement
+    const type = ele.value;
+    if (!ele.checked) selectedType.value = selectedType.value.filter(v => v !== type);
+    else selectedType.value.push(type);
+    imgs.value = getImgs();
 }
 </script>
 
@@ -110,7 +151,14 @@ function close() {
     border-radius: 5px;
     box-shadow: 0px 0px 12px #000;
     padding: 8px;
-    overflow: auto;
+    overflow: hidden;
+}
+
+#img-tools {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    overflow: visible;
 }
 
 input, button {
@@ -122,6 +170,7 @@ input, button {
     font-size: 17px;
     font-weight: 200;
     padding: 3px;
+    height: 30px;
 }
 
 input {
@@ -142,7 +191,77 @@ input:hover, button:hover {
 }
 
 #type {
+    width: 15%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 40px;
     position: relative;
-    width: 10%;
+}
+
+#type-description:hover {
+    border-color: #88f;
+}
+
+#type-description:active {
+    background-color: aquamarine;
+}
+
+#options {
+    width: 100%;
+    height: calc(100% - 55px);
+    overflow: auto;
+}
+
+#type-description {
+    cursor: pointer;
+    width: 100%;
+    font-size: 18px;
+    background-color: aqua;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    border: #000 1.5px solid;
+    border-radius: 5px;
+    transition: all 0.3s linear;
+    -webkit-transition: all 0.3s linear;
+    justify-self: center;
+    display: flex;
+    justify-content: center;
+
+    #arrow {
+        transform: rotate(90deg);
+        transition: all 0.3s ease-out;
+        -webkit-transition: all 0.3s ease-out;
+    }
+
+    #s-type {
+        width: 60%;
+        margin-left: 10px;
+    }
+}
+
+.type-one {
+    width: 100%;
+    margin-left: 5px;
+    margin-right: 5px;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin-top: 2px;
+
+    input {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+#type-all {
+    width: 100%;
+    background-color: #eee;
+    border-left: solid #bbb 1.5px;
+    border-bottom: solid #bbb 1.5px;
+    border-right: solid #bbb 1.5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
 }
 </style>

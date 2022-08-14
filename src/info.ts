@@ -47,7 +47,7 @@ export const actionAttributes = {
     },
     transition: {
         style: ['作用效果', 'string'],
-        time: ['过渡时间', 'string'],
+        time: ['过渡时间', 'number_time'],
         mode: ['过渡方式', 'string'],
         delay: ['延迟', 'string']
     },

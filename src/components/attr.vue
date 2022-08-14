@@ -17,6 +17,9 @@
             <button id="select-img" @click="openImageSelector">选择</button>
             <span id="img-display">{{ value || '无' }}</span>
         </div>
+        <div id="array" v-else-if="isArray">
+
+        </div>
     </div>
     <ImgSelector 
         :type="type" :selected="value" v-if="selectImg" 
@@ -83,6 +86,11 @@ export default defineComponent({
                     this.value = `${parseFloat(this.value)}px`;
             } else if (this.type === 'number') {
                 this.value = parseFloat(this.value);
+            } else if (this.type === 'number_time') {
+                if (!/[0-9]+/.test(this.value)) this.value = '0ms';
+                if (!['s', 'ms'].some(v => this.value.endsWith(v))) {
+                    this.value = `${parseFloat(this.value)}ms`;
+                }
             }
         },
         openEditor(value: string) {

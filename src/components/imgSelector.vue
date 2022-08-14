@@ -4,7 +4,7 @@
             <button id="img-confirm" @click="close">确定</button>
             <button id="img-cancel" @click="cancel">取消</button>
             <input 
-                id="search-input" v-model.trim="search" @change="change"
+                id="search-input" v-model.trim="search"
                 placeholder="可使用 /RegExp/ 的形式使用正则表达式搜索"
             />
             <div id="type" v-if="type === 'string_icon'">
@@ -16,7 +16,7 @@
                     <div class="type-one" v-for="t of allTypes">
                         <input 
                             :value="t" type="checkbox" @change="changeType($event)"
-                            checked="true"
+                            :checked="selectedType.includes(t)"
                         />
                         <span class="">{{ t }}</span>
                     </div>
@@ -50,10 +50,16 @@ const emits = defineEmits<{
 const before = props.selected;
 
 const search = ref('');
-const selectedType = ref<string[]>(core.materials.slice(0, -1).concat(['status']));
+const selectedType = ref<string[]>(
+    core.materials.slice(0, -1).concat(['status'])
+);
 
 const typeOpened = ref(false);
-const allTypes = core.materials.slice(0, -1).concat(['status']);
+const allTypes = core.materials.slice(0, -1)
+    .concat([
+        'status', ...Object.keys(core.material.images.tilesets)
+        .map(v => v.slice(0, -4))
+    ]);
 
 /** 获得所有的需要显示的图标 */
 let imgs = ref(getImgs());
@@ -80,8 +86,23 @@ Type: ${info}.`
                 .filter(filterSearch)
             );
         }
+        // tilesets
+        const all = Object.keys(core.material.images.tilesets);
+        for (let n = 0; n < all.length; n++) {
+            const id = all[n]
+            if (!selectedType.value.includes(id.slice(0, -4))) continue;
+            res.push(...getTilesetId(id, n));
+        }
         return res;
     }
+}
+
+/** 获取所有tilesets的id */
+function getTilesetId(id: string, n: number) {
+    const img = core.material.images.tilesets[id];
+    const xcnt = ~~(img.width / 32),
+        ycnt = ~~(img.height / 32);
+    return new Array(xcnt * ycnt).fill(0).map((v, i) => `X${(n + 1) * 10000 + i + 1}`);
 }
 
 /** 搜索功能 */
@@ -100,10 +121,12 @@ function filterSearch(value: string) {
 watch(search, (v) => {
     search.value = v;
     imgs.value = getImgs();
+    change()
 })
 
-function change(this: HTMLDivElement) {
-    this.scrollTo(0, 0);
+function change() {
+    const div = document.getElementById('options') as HTMLDivElement;
+    div.scrollTo(0, 0);
 }
 
 function select(id: string) {
@@ -134,6 +157,7 @@ function changeType(e: Event) {
     if (!ele.checked) selectedType.value = selectedType.value.filter(v => v !== type);
     else selectedType.value.push(type);
     imgs.value = getImgs();
+    change();
 }
 </script>
 
@@ -191,12 +215,14 @@ input:hover, button:hover {
 }
 
 #type {
-    width: 15%;
-    display: flex;
+    width: 16%;
+    // display: flex;
     flex-direction: column;
     align-items: center;
     height: 40px;
     position: relative;
+    overflow: visible;
+    margin-bottom: 0px;
 }
 
 #type-description:hover {
@@ -235,13 +261,11 @@ input:hover, button:hover {
     }
 
     #s-type {
-        width: 60%;
         margin-left: 10px;
     }
 }
 
 .type-one {
-    width: 100%;
     margin-left: 5px;
     margin-right: 5px;
     display: flex;
@@ -256,6 +280,7 @@ input:hover, button:hover {
 }
 
 #type-all {
+    position: relative;
     width: 100%;
     background-color: #eee;
     border-left: solid #bbb 1.5px;
@@ -263,5 +288,7 @@ input:hover, button:hover {
     border-right: solid #bbb 1.5px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
+    max-height: 50vh;
+    overflow: auto;
 }
 </style>

@@ -18,7 +18,24 @@
             <span id="img-display">{{ value || '无' }}</span>
         </div>
         <div id="array" v-else-if="isArray">
-
+            <div id="array-info">
+                <span id="array-arrow" @click="triggerArrayDetail($event)">▲</span>
+                <span id="description">{{
+                    // @ts-ignore
+                    actionAttributes[id][name][0]
+                }}</span>
+            </div>
+            <div id="array-detail" v-if="arrayDetail">
+                <div class="array-one" v-for="(v, i) of value" :key="i">
+                    <div class="array-one-attr" v-for="(one, ii) of v">
+                        <span>{{arrayInfo[ii]}}</span>
+                        <input 
+                            @blur="blurForArray(i, ii, $event)" v-model.trim="value[i][ii]"
+                        />
+                    </div>
+                </div>
+                <div @click="addArray" id="array-new">+ 添加新项</div>
+            </div>
         </div>
     </div>
     <ImgSelector 
@@ -35,14 +52,18 @@
         id: Key
     }>();
 
+    const arrayDetail = ref(false);
+
     // @ts-ignore
     const type = actionAttributes[props.id][props.name][1] as string;
 
     const text = ['string', 'number_u', 'number'];
     const select = ['string_img', 'string_icon'];
-    const isArray = /^Array<[a-zA-Z,]+>$/.test(type);
+    const isArray = /^Array<[\u4e00-\u9fa5a-zA-Z,]+>$/.test(type);
     const options = type.includes('|') && type.split('|') as string[];
     const selectImg = ref(false);
+
+    const arrayInfo = (isArray && type.slice(6, -1).split(',')) || [];
 
     let value = ref(props.value);
 
@@ -52,7 +73,9 @@
         value,
         type,
         multiCallback,
-        selectImg
+        selectImg,
+        arrayDetail,
+        arrayInfo
     })
 
     const emits = defineEmits<{
@@ -107,6 +130,19 @@ export default defineComponent({
         closeImageSelector() {
             this.selectImg = false;
             main.editorOpened = false;
+        },
+        blurForArray(i: number, ii: number, e: Event) {
+            const input = e.currentTarget as HTMLInputElement;
+            const value = input.value;
+            this.value[i][ii] = parseFloat(value);
+        },
+        triggerArrayDetail(e: MouseEvent) {
+            const span = e.currentTarget as HTMLSpanElement;
+            span.style.transform = `rotate(${this.arrayDetail ? 90 : 180}deg)`;
+            this.arrayDetail = !this.arrayDetail;
+        },
+        addArray() {
+            this.value.push(new Array(this.arrayInfo.length).fill(0));
         }
     }
 })
@@ -132,11 +168,12 @@ export default defineComponent({
     text-align: center;
     font-weight: 200;
 
-    #description {
-        margin-left: 10px;
-        height: 100%;
-        font-size: 17px;
-    }
+}
+
+#description {
+    margin-left: 10px;
+    height: 100%;
+    font-size: 17px;
 }
 
 input, button {
@@ -197,5 +234,63 @@ button:active {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.border{
+    border-left: 2px solid #000;
+    border-top: 1px solid #999;
+    border-bottom: 1px solid #999;
+    border-right: none;
+}
+
+#array {
+    width: 100%;
+}
+
+#array-arrow {
+    transform: rotate(90deg);
+    margin-left: 10px;
+    color: #777;
+    transition: transform 0.4s ease-out, filter 0.2s linear;
+    -webkit-transition: transform 0.4s ease-out, filter 0.2s linear;
+    cursor: pointer;
+}
+
+#array-info {
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #999;
+}
+
+#array-detail {
+    font-size: 18px;
+    .border();
+    position: relative;
+    width: 90%;
+    left: 10%;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+#array-new {
+    cursor: pointer;
+    border-top: 2px solid #999;
+}
+
+.array-one-attr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #999;
+
+    span {
+        position: relative;
+        left: 10px;
+    }
+}
+
+.array-one {
+    border-top: 2px solid #999;
 }
 </style>

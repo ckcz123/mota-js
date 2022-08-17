@@ -5,7 +5,7 @@
             <button id="img-cancel" @click="cancel">取消</button>
             <input 
                 id="search-input" v-model.trim="search"
-                placeholder="可使用 /RegExp/ 的形式使用正则表达式搜索"
+                placeholder="输入字符或使用 /RegExp/ 的形式使用正则表达式搜索"
             />
             <div id="type" v-if="type === 'string_icon'">
                 <div id="type-description" @click="selectType($event)">
@@ -54,6 +54,8 @@ const selectedType = ref<string[]>(
     core.materials.slice(0, -1).concat(['status'])
 );
 
+let lastId: number;
+
 const typeOpened = ref(false);
 const allTypes = core.materials.slice(0, -1)
     .concat([
@@ -91,7 +93,7 @@ Type: ${info}.`
         for (let n = 0; n < all.length; n++) {
             const id = all[n]
             if (!selectedType.value.includes(id.slice(0, -4))) continue;
-            res.push(...getTilesetId(id, n));
+            res.push(...getTilesetId(id, n).filter(filterSearch));
         }
         return res;
     }
@@ -119,9 +121,12 @@ function filterSearch(value: string) {
 }
 
 watch(search, (v) => {
-    search.value = v;
-    imgs.value = getImgs();
-    change()
+    clearTimeout(lastId);
+    lastId = setTimeout(() => {
+        search.value = v;
+        imgs.value = getImgs();
+        change();
+    }, 300);
 })
 
 function change() {
@@ -216,9 +221,6 @@ input:hover, button:hover {
 
 #type {
     width: 16%;
-    // display: flex;
-    flex-direction: column;
-    align-items: center;
     height: 40px;
     position: relative;
     overflow: visible;

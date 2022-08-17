@@ -3,6 +3,10 @@
 import { Ref, ref } from "vue";
 import { actionAttributes, composition, units, sprites } from "./info";
 
+export const list: Ref<BaseAction<any>[]> = ref([]);
+// @ts-ignore
+window.list = list;
+
 /** 每个action的根类 */
 export class BaseAction<K extends keyof SpriteDrawInfoMap> {
     static cnt = 0

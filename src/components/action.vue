@@ -64,7 +64,8 @@ export default defineComponent({
             this.detailed = !this.detailed;
         },
         del() {
-            this.$emit('delete', this.index)
+            this.$emit('delete', this.index);
+            if (this.type === 'create') delete sprites[this.data.data.name];
         },
         openEditor(data: { value?: string, lang?: 'js' | 'txt' }) {
             this.$emit('openEditor', data);

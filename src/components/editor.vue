@@ -25,9 +25,7 @@
 </template>
 
 <script setup lang="ts">
-    const list: Ref<BaseAction<any>[]> = ref([]);
-    // @ts-ignore
-    window.list = list;
+
     const actions = ref(Object.entries(drawActions));
     const showActions = ref(false);
 
@@ -48,7 +46,7 @@
 
 <script lang="ts">
 import { defineComponent, Ref, ref } from "vue";
-import { BaseAction } from '../action';
+import { BaseAction, list } from '../action';
 import { drawActions } from "../info";
 import Action from "./action.vue";
 import Monaco from './monaco.vue';

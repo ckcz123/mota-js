@@ -1,6 +1,6 @@
 <template>
     <div id="action">
-        <div id="info">
+        <div id="info" @mouseup="rightClick($event)">
             <span id="detail" @click="triggerDetail($event)">▲</span>
             <span id="name">{{actions[type as Key]}}</span>
             <span id="del" @click="del()">✖</span>
@@ -9,7 +9,7 @@
             <!-- 大部分都需要一个作用画布的参数 -->
             <div id="sprite" v-if="needSprite">
                 <span id="description">作用画布</span>
-                <select id="select" :value="sprite">
+                <select id="select" v-model="sprite">
                     <option 
                         v-for="sprite of sprites" :value="sprite.name"
                     >{{sprite.name}}</option>
@@ -31,29 +31,35 @@
         index: number
     }>();
 
-    let detailed = ref(false);
+    const detailed = ref(false);
         
     const attrs = props.data.data as Object;
     const needSprite = !['wait', 'create'].includes(props.type);
 
-    let sprite = props.data.sprite;
+    const sprite = ref(Object.keys(sprites)[0]);
     
     defineEmits<{
         (e: 'delete', i: number): void
         (e: 'openEditor', data: { value?: string, lang?: 'js' | 'txt' }): void
+        (e: 'right', data: { status: boolean, x: number, y: number }): void
     }>()
 
     defineExpose({
-        detailed
+        detailed,
+    })
+
+    watch(sprite, newValue => {
+        sprite.value = props.data.sprite = newValue;
     })
 </script>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, onMounted, ref, watch } from "vue";
 import { BaseAction } from "../action";
 import { drawActions } from "../info";
 import Attr from "./attr.vue";
 import { sprites } from "../info";
+import { Emitter } from "monaco-editor";
 
 export default defineComponent({
     name: 'action',
@@ -72,6 +78,12 @@ export default defineComponent({
         },
         change(id: string, value: any) {
             this.data.data[id] = value;
+        },
+        rightClick(e: MouseEvent) {
+            if (e.button === 2) {
+                e.preventDefault();
+                this.$emit('right', { status: true, x: e.clientX, y: e.clientY });
+            } else this.$emit('right', { status: false, x: e.clientX, y: e.clientY });
         }
     }
 })

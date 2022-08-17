@@ -9,4 +9,6 @@ window.onload = () => {
     }
 }
 
+document.oncontextmenu = e => false;
+
 export { }

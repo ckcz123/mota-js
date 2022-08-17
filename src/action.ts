@@ -17,7 +17,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
     cnt = BaseAction.cnt++
 
     /** 作用于的sprite */
-    sprite: Ref<string>
+    sprite: string
 
     /** 有没有成功创建这个实例 */
     success = false
@@ -25,7 +25,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
     constructor(type: K) {
         this.type = type;
         const data = this.generateBaseData();
-        this.sprite = ref(Object.keys(sprites)[0] || '');
+        this.sprite = Object.keys(sprites)[0];
         if (!data) return;
         this.data = data;
         this.success = true;

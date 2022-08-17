@@ -27,6 +27,10 @@
             </div>
             <div id="array-detail" v-if="arrayDetail">
                 <div class="array-one" v-for="(v, i) of value" :key="i">
+                    <div id="array-one-info">
+                        <span id="array-one-index">第{{i + 1}}项</span>
+                        <span id="array-one-del" @click="arrayDel(i)">✖</span>
+                    </div>
                     <div class="array-one-attr" v-for="(one, ii) of v">
                         <span>{{arrayInfo[ii]}}</span>
                         <input 
@@ -143,6 +147,9 @@ export default defineComponent({
         },
         addArray() {
             this.value.push(new Array(this.arrayInfo.length).fill(0));
+        },
+        arrayDel(i: number) {
+            this.value.splice(i, 1);
         }
     }
 })
@@ -265,10 +272,7 @@ button:active {
 
 #array-detail {
     font-size: 18px;
-    .border();
     position: relative;
-    width: 90%;
-    left: 10%;
     margin-top: 2px;
     margin-bottom: 2px;
 }
@@ -292,5 +296,29 @@ button:active {
 
 .array-one {
     border-top: 2px solid #999;
+}
+
+#array-one-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 35%;
+    padding-right: 10px;
+    border-bottom: 1px solid #999;
+}
+
+#array-one-del {
+    color: #777;
+    cursor: pointer;
+    transition: filter 0.2s linear;
+    -webkit-transition: filter 0.2s linear;
+}
+
+#array-one-del:hover {
+    filter: drop-shadow(0 0 1px #222);
+}
+
+#array-one-del:active {
+    filter: drop-shadow(0 0 1px #222)brightness(1.2);
 }
 </style>

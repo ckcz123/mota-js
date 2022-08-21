@@ -7,7 +7,7 @@ interface TextContentConfig {
     left?: number
     top?: number
     maxWidth?: number
-    color?: rgbarray
+    color?: rgbarray | string
     align?: 'left' | 'center' | 'right'
     fontSize: number
     lineHeight?: number

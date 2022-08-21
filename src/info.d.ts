@@ -21,7 +21,7 @@ interface SpriteDrawInfoMap {
     wait: Wait
     transition: Transition
     create: SpriteCreate
-    delete: SpriteDelete
+    del: SpriteDelete
     move: SpriteMove
     resize: SpriteResize
     rotate: SpriteRotate

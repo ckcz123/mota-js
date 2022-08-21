@@ -17,7 +17,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
     cnt = BaseAction.cnt++
 
     /** 作用于的sprite */
-    sprite: string
+    sprite?: string
 
     /** 有没有成功创建这个实例 */
     success = false

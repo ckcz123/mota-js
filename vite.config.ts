@@ -14,5 +14,10 @@ export default defineConfig({
       `monaco-editor/esm/vs/language/typescript/ts.worker`,
       `monaco-editor/esm/vs/editor/editor.worker`
     ],
-  }
+  },
+  // server: {
+  //   proxy: {
+  //     "/listFile": "http://127.0.0.1:5173"
+  //   }
+  // }
 })

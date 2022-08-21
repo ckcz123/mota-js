@@ -7,13 +7,15 @@ function getSprite(name: string) {
     return sprites[name];
 }
 
-export async function wait(time: number) {
+export async function wait(name: string, data: { time: number }) {
+    const { time } = data;
     await new Promise(res => {
         setTimeout(res, time);
     });
 }
 
-export function transition(name: string, style: string, time: string, mode: string, delay: string) {
+export function transition(name: string, data: { style: string, time: string, mode: string, delay: string }) {
+    const { style, time, mode, delay } = data;
     // 直接设置css即可
     const sprite = getSprite(name);
     const s = sprite.canvas.style;
@@ -22,7 +24,7 @@ export function transition(name: string, style: string, time: string, mode: stri
     else s.transition += `, ${tran}`;
 }
 
-export function create(name: string, x: number, y: number, w: number, h: number, z: number) {
+export function create(name: string) {
     const sprite = getSprite(name);
     sprite.setCss('display: block');
 }
@@ -32,43 +34,51 @@ export function del(name: string) {
     sprite.setCss('display: none');
 }
 
-export function move(name: string, x: number, y: number, isDelta: boolean) {
+export function move(name: string, data: { x: number, y: number, isDelta: boolean }) {
+    const { x, y, isDelta } = data;
     const sprite = getSprite(name);
     sprite.move(x, y, isDelta);
 }
 
-export function resize(name: string, w: number, h: number, styleOnly: boolean) {
+export function resize(name: string, data: { w: number, h: number, styleOnly: boolean }) {
+    const { w, h, styleOnly } = data;
     const sprite = getSprite(name);
     sprite.resize(w, h, styleOnly);
 }
 
-export function rotate(name: string, cx: number, cy: number, angle: number) {
+export function rotate(name: string, data: { cx: number, cy: number, angle: number }) {
+    const { cx, cy, angle } = data;
     const sprite = getSprite(name);
     sprite.rotate(angle, cx, cy);
 }
 
-export function clear(name: string, x: number, y: number, w: number, h: number) {
+export function clear(name: string, data: { x: number, y: number, w: number, h: number }) {
+    const { x, y, w, h } = data;
     const sprite = getSprite(name);
     sprite.clear(x, y, w, h);
 }
 
-export function css(name: string, data: string) {
+export function css(name: string, css: { data: string }) {
+    const { data } = css;
     const sprite = getSprite(name);
     sprite.setCss(data);
 }
 
-export function composite(name: string, mode: GlobalCompositeOperation) {
+export function composite(name: string, data: { mode: GlobalCompositeOperation }) {
+    const { mode } = data;
     const sprite = getSprite(name);
     const ctx = sprite.context;
     ctx.globalCompositeOperation = mode;
 }
 
-export function filter(name: string, data: string) {
+export function filter(name: string, d: { data: string }) {
+    const { data } = d;
     const sprite = getSprite(name);
     sprite.context.filter = data;
 }
 
-export function shadow(name: string, shadowBlur: number, shadowColor: string, shadowOffsetX: number, shadowOffsetY: number) {
+export function shadow(name: string, data: { shadowBlur: number, shadowColor: string, shadowOffsetX: number, shadowOffsetY: number }) {
+    const { shadowBlur, shadowColor, shadowOffsetX, shadowOffsetY } = data;
     const sprite = getSprite(name);
     const ctx = sprite.context;
     ctx.shadowBlur = shadowBlur;
@@ -77,7 +87,8 @@ export function shadow(name: string, shadowBlur: number, shadowColor: string, sh
     ctx.shadowOffsetY = shadowOffsetY;
 }
 
-export function textInfo(name: string, direction: CanvasDirection, textAlign: CanvasTextAlign, textBaseline: CanvasTextBaseline) {
+export function textInfo(name: string, data: { direction: CanvasDirection, textAlign: CanvasTextAlign, textBaseline: CanvasTextBaseline }) {
+    const { direction, textAlign, textBaseline } = data;
     const sprite = getSprite(name);
     const ctx = sprite.context;
     ctx.direction = direction;
@@ -95,53 +106,62 @@ export function restore(name: string) {
     sprite.context.restore();
 }
 
-export function line(name: string, x1: number, y1: number, x2: number, y2: number, lineWidth: number, style: string) {
+export function line(name: string, data: { x1: number, y1: number, x2: number, y2: number, lineWidth: number, style: string }) {
+    const { x1, y1, x2, y2, lineWidth, style } = data;
     const sprite = getSprite(name);
     core.drawLine(sprite.context, x1, y1, x2, y2, style, lineWidth);
 }
 
-export function arc(name: string, x: number, y: number, r: number, start: number, end: number, stroke: boolean, lineWidth: number, style: string) {
+export function arc(name: string, data: { x: number, y: number, r: number, start: number, end: number, stroke: boolean, lineWidth: number, style: string }) {
+    const { x, y, r, start, end, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
     if (stroke) core.strokeArc(sprite.context, x, y, r, start, end, style, lineWidth);
     else core.fillArc(sprite.context, x, y, r, start, end, style);
 }
 
-export function circle(name: string, x: number, y: number, r: number, stroke: boolean, lineWidth: number, style: string) {
+export function circle(name: string, data: { x: number, y: number, r: number, stroke: boolean, lineWidth: number, style: string }) {
+    const { x, y, r, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
     if (stroke) core.strokeCircle(sprite.context, x, y, r, style, lineWidth);
     else core.fillCircle(sprite.context, x, y, r, style)
 }
 
-export function rect(name: string, x: number, y: number, w: number, h: number, stroke: boolean, lineWidth: number, style: string) {
+export function rect(name: string, data: { x: number, y: number, w: number, h: number, stroke: boolean, lineWidth: number, style: string }) {
+    const { x, y, w, h, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
     if (stroke) core.strokeRect(sprite.context, x, y, w, h, style, lineWidth);
     else core.fillRect(sprite.context, x, y, w, h, style);
 }
 
-export function roundRect(name: string, x: number, y: number, w: number, h: number, r: number, stroke: boolean, lineWidth: number, style: string) {
+export function roundRect(name: string, data: { x: number, y: number, w: number, h: number, r: number, stroke: boolean, lineWidth: number, style: string }) {
+    const { x, y, w, h, r, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
     if (stroke) core.strokeRoundRect(sprite.context, x, y, w, h, r, style, lineWidth);
     else core.fillRoundRect(sprite.context, x, y, w, h, r, style);
 }
 
-export function polygon(name: string, path: Array<[number, number]>, stroke: boolean, lineWidth: number, style: string) {
+export function polygon(name: string, data: { path: Array<[number, number]>, stroke: boolean, lineWidth: number, style: string }) {
+    const { path, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
     if (stroke) core.strokePolygon(sprite.context, path, style, lineWidth);
     else core.fillPolygon(sprite.context, path, style);
 }
 
-export function ellipse(name: string, x: number, y: number, a: number, b: number, stroke: boolean, lineWidth: number, style: string) {
+export function ellipse(name: string, data: { x: number, y: number, a: number, b: number, stroke: boolean, lineWidth: number, style: string }) {
+    const { x, y, a, b, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
     if (stroke) core.strokeEllipse(sprite.context, x, y, a, b, void 0, style, lineWidth);
     else core.fillEllipse(sprite.context, x, y, a, b, void 0, style);
 }
 
-export function arrow(name: string, x1: number, y1: number, x2: number, y2: number, lineWidth: number, style: string) {
+export function arrow(name: string, data: { x1: number, y1: number, x2: number, y2: number, lineWidth: number, style: string }) {
+    const { x1, y1, x2, y2, lineWidth, style } = data;
     const sprite = getSprite(name);
     core.drawArrow(sprite.context, x1, y1, x2, y2, style, lineWidth);
 }
 
-export function bezierCurve(name: string, cp1x: number, cp1y: number, cp2x: number, cp2y: number, sx: number, sy: number, x: number, y: number, lineWidth: number, style: string) {
+export function bezierCurve(name: string, data: { cp1x: number, cp1y: number, cp2x: number, cp2y: number, sx: number, sy: number, x: number, y: number, lineWidth: number, style: string }) {
+    const { cp1x, cp1y, cp2x, cp2y, x, y, sx, sy, lineWidth, style } = data;
     const sprite = getSprite(name);
     let ctx = sprite.context;
     ctx.beginPath();
@@ -152,22 +172,26 @@ export function bezierCurve(name: string, cp1x: number, cp1y: number, cp2x: numb
     ctx.stroke();
 }
 
-export function image(name: string, img: string, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number) {
+export function image(name: string, data: { img: string, sx: number, sy: number, sw: number, sh: number, dx: number, dy: number, dw: number, dh: number }) {
+    const { img, sx, sy, sw, sh, dx, dy, dw, dh } = data;
     const sprite = getSprite(name);
     core.drawImage(sprite.context, img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-export function icon(name: string, icon: string, x: number, y: number, frame: number) {
+export function icon(name: string, data: { icon: string, x: number, y: number, frame: number }) {
+    const { icon, x, y, frame } = data;
     const sprite = getSprite(name);
     core.drawIcon(sprite.context, icon, x, y, void 0, void 0, frame);
 }
 
-export function winskin(name: string, img: string, x: number, y: number, w: number, h: number) {
+export function winskin(name: string, data: { img: string, x: number, y: number, w: number, h: number }) {
+    const { img, x, y, w, h } = data;
     const sprite = getSprite(name);
     core.drawWindowSkin(img, sprite.context, x, y, w.toString(), h.toString());
 }
 
-export function text(name: string, str: string, x: number, y: number, stroke: boolean, italic: boolean, font: string, fontSize: number, fontWeight: string, style: string, strokeStyle: string, lineWidth: number) {
+export function text(name: string, data: { str: string, x: number, y: number, stroke: boolean, italic: boolean, font: string, fontSize: number, fontWeight: string, style: string, strokeStyle: string, lineWidth: number }) {
+    const { str, x, y, italic, fontWeight, fontSize, font, lineWidth, stroke, strokeStyle, style } = data;
     const sprite = getSprite(name);
     const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? 300} ${fontSize}px ${font}`;
     sprite.context.lineWidth = lineWidth;
@@ -175,7 +199,11 @@ export function text(name: string, str: string, x: number, y: number, stroke: bo
     else core.fillText(sprite.context, str, x, y, style, fontStyle);
 }
 
-export function textContent(name: string, content: string, config: TextContentConfig) {
+export function textContent(name: string, data: { content: string, left: number, top: number, width: number, color: string, align: 'left' | 'center' | 'right', fontSize: number, lineHeight: number, time: number, font: string, letterSpacing: number, bold: boolean, italic: boolean }) {
+    const { content, left, top, width, color, align, fontSize, lineHeight, time, font, letterSpacing, bold, italic } = data;
     const sprite = getSprite(name);
-    core.drawTextContent(sprite.context, content, config);
+    core.drawTextContent(sprite.context, content, {
+        left, top, maxWidth: width, color, align, fontSize,
+        lineHeight, time, font, letterSpacing, bold, italic
+    });
 }

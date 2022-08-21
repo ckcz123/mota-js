@@ -12,7 +12,7 @@ export const drawActions = {
     wait: '等待',
     transition: '设置过渡',
     create: '创建画布',
-    delete: '删除画布',
+    del: '删除画布',
     move: '移动画布',
     resize: '缩放画布',
     rotate: '旋转画布',
@@ -59,7 +59,7 @@ export const actionAttributes = {
         h: ['高度', 'number'],
         z: ['纵深', 'number']
     },
-    delete: {
+    del: {
         // name: ['画布名称', 'string']
     },
     move: {

@@ -192,6 +192,7 @@ export default defineComponent({
     text-align: center;
     max-height: 40vh;
     overflow: auto;
+    cursor: pointer;
 
     hr {
         margin: 2px;

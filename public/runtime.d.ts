@@ -2277,7 +2277,7 @@ declare class ui {
      * @param image 要绘制的图片，可以是一个全塔属性中定义的图片名（会从images中去获取），图片本身，或者一个画布。
      */
     drawImage(name: CtxRefer,
-        image: CanvasImageSource | string, dx: number): void
+        image: CanvasImageSource | string, dx: number, dy: number): void
     drawImage(name: CtxRefer,
         image: CanvasImageSource | string, dx: number, dy: number, dw: number, dh: number): void
     drawImage(name: CtxRefer,

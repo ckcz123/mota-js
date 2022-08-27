@@ -66,7 +66,7 @@ interface SpriteCreate {
     w: number
     h: number
     z: number
-    name?: string
+    name: string
 }
 
 interface SpriteDelete {
@@ -218,6 +218,8 @@ interface SpriteWinskin {
 }
 
 interface SpriteText {
+    x: number
+    y: number
     stroke: boolean
     font: string
     fontSize: string
@@ -231,9 +233,9 @@ interface SpriteText {
 
 interface SpriteTextContent {
     content: string
-    x: number
-    y: number
-    width: number
+    left: number
+    top: number
+    maxWidth: number
     color: number
     align: 'left' | 'center' | 'right'
     fontSize: number

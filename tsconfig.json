@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "noEmit": true,
+    },
+    "include": [
+        "main.js", "project/**/*.js", "libs/**/*.js", "runtime.d.ts"
+    ]
+}

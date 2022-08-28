@@ -1,22 +1,32 @@
-/// <reference path="./runtime.d.ts" />
-function main () {
+var main = (function () {
+
+function Main () {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.9"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    /** 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。 */
+    this.version = "2.9";
 
-    this.useCompress = false; // 是否使用压缩文件
-    // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
-    // 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
-    // 如果要进行剧本的修改请务必将其改成false。
+    /**
+     * 是否使用压缩文件
+     * 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
+     * 请注意，只有useCompress是false时才会读取floors目录下的文件，为true时会直接读取libs目录下的floors.min.js文件。
+     * 如果要进行剧本的修改请务必将其改成false。
+     */
+    this.useCompress = false;
 
-    this.bgmRemote = false; // 是否采用远程BGM
-    this.bgmRemoteRoot = "https://h5mota.com/music/"; // 远程BGM的根目录
+    /** 是否采用远程BGM */
+    this.bgmRemote = false;
+    /** 远程BGM的根目录 */
+    this.bgmRemoteRoot = "https://h5mota.com/music/";
 
-    this.isCompetition = false; // 是否是比赛模式
+    /** 是否是比赛模式 */
+    this.isCompetition = false;
 
-    this.savePages = 1000; // 存档页数，每页可存5个；默认为1000页5000个存档
-    this.criticalUseLoop = 1; // 循环临界的分界
+    /** 存档页数，每页可存5个；默认为1000页5000个存档 */
+    this.savePages = 1000;
+    /** 循环临界的分界 */
+    this.criticalUseLoop = 1;
 
     //------------------------ 用户修改内容 END ------------------------//
 
@@ -193,13 +203,20 @@ function main () {
     this.__VERSION_CODE__ = 508;
 }
 
-main.prototype.init = function (mode, callback) {
+Main.prototype.init = function (mode, callback) {
     for (var i = 0; i < main.dom.gameCanvas.length; i++) {
         main.canvas[main.dom.gameCanvas[i].id] = main.dom.gameCanvas[i].getContext('2d');
     }
     main.mode = mode;
 
-    main.loadJs('project', main.pureData, function () {
+    main.setMainTipsText('正在加载核心js文件...');
+
+    if (main.useCompress) {
+        main.preloadMod("libs/libs.min.js");
+        main.preloadMod("project/floors.min.js");
+    }
+
+    main.loadJs('project', main.pureData).then(function () {
         var mainData = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.main;
         for (var ii in mainData) main[ii] = mainData[ii];
 
@@ -220,134 +237,139 @@ main.prototype.init = function (mode, callback) {
         main.createOnChoiceAnimation();
         main.importFonts(main.fonts);
 
-        main.loadJs('libs', main.loadList, function () {
-            main.core = core;
+        return Promise.all([
+            main.loadJs('libs', main.loadList),
+            main.loadFloors(),
+        ]);
+    }).then(function () {
+        main.dom.mainTips.style.display = 'none';
+        main.core = core;
+    
+        for (var i = 0; i < main.loadList.length; i++) {
+            var name = main.loadList[i];
+            if (name === 'core') continue;
+            main.core[name] = new window[name]();
+        }
 
-            for (i = 0; i < main.loadList.length; i++) {
-                var name = main.loadList[i];
-                if (name === 'core') continue;
-                main.core[name] = new window[name]();
-            }
-
-            main.loadFloors(function () {
-                var coreData = {};
-                ["dom", "statusBar", "canvas", "images", "tilesets", "materials",
-                    "animates", "bgms", "sounds", "floorIds", "floors", "floorPartitions"].forEach(function (t) {
-                        coreData[t] = main[t];
-                    })
-                main.core.init(coreData, callback);
-                main.core.resize();
-                // 自动放缩最大化
-                if (!data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.flags.autoScale) core.setLocalStorage('autoScale', false)
-                else core.setLocalStorage('autoScale', true);
-                if (core.getLocalStorage('autoScale') && !core.domStyle.isVertical) {
-                    try {
-                        if (main.core) {
-                            var index = main.core.domStyle.availableScale.indexOf(core.domStyle.scale);
-                            main.core.control.setDisplayScale(main.core.domStyle.availableScale.length - 1 - index);
-                            if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
-                                main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
-                                main.core.resize();
-                            }
-                        }
-                    } catch (e) { console.error(e) };
+        var coreData = {};
+        ["dom", "statusBar", "canvas", "images", "tilesets", "materials",
+            "animates", "bgms", "sounds", "floorIds", "floors", "floorPartitions"].forEach(function (t) {
+                coreData[t] = main[t];
+            })
+        main.core.init(coreData, callback);
+        main.core.resize();
+        // 自动放缩最大化
+        if (!data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.flags.autoScale) core.setLocalStorage('autoScale', false)
+        else core.setLocalStorage('autoScale', true);
+        if (core.getLocalStorage('autoScale') && !core.domStyle.isVertical) {
+            try {
+                if (main.core) {
+                    var index = main.core.domStyle.availableScale.indexOf(core.domStyle.scale);
+                    main.core.control.setDisplayScale(main.core.domStyle.availableScale.length - 1 - index);
+                    if (!main.core.isPlaying() && main.core.flags.enableHDCanvas) {
+                        main.core.domStyle.ratio = Math.max(window.devicePixelRatio || 1, main.core.domStyle.scale);
+                        main.core.resize();
+                    }
                 }
-            });
-        });
+            } catch (e) { console.error(e) };
+        }
     });
 }
 
-////// 动态加载所有核心JS文件 //////
-main.prototype.loadJs = function (dir, loadList, callback) {
+Main.prototype.preloadMod = function (path) {
+    var link = document.createElement("link");
+    link.rel = "preload";
+    link.href = path + "?v=" + main.version;
+    link.as = "script";
+    document.head.appendChild(link);
+}
 
-    // 加载js
-    main.setMainTipsText('正在加载核心js文件...')
-
-    if (this.useCompress) {
-        main.loadMod(dir, dir, function () {
-            callback();
-        })
-    }
-    else {
-        var instanceNum = 0;
-        for (var i = 0; i < loadList.length; i++) {
-            main.loadMod(dir, loadList[i], function (modName) {
-                main.setMainTipsText(modName + '.js 加载完毕');
-                instanceNum++;
-                if (instanceNum === loadList.length) {
-                    callback();
-                }
+/**
+ * 动态加载所有核心JS文件
+ * @param {string} dir 
+ * @param {string[]} loadList 
+ */
+Main.prototype.loadJs = function (dir, loadList) {
+    if (main.useCompress) {
+        return main.loadMod(dir, dir, true).then(function () {
+            main.setMainTipsText(dir + ' 加载完毕');
+        });
+    } else {
+        return Promise.all(loadList.map(function (name) {
+            return main.loadMod(dir, name).then(function () {
+                main.setMainTipsText(dir + '/' + name + ' 加载完毕');
             });
-        }
+        }));
     }
 }
 
-////// 加载某一个JS文件 //////
-main.prototype.loadMod = function (dir, modName, callback, onerror) {
+/**
+ * 加载某一个JS文件
+ * @param {string} path
+ * @param {Record<string, string>} [params]
+ * @return {Promise<void>}
+ */
+Main.prototype.loadScript = function (path, params) {
     var script = document.createElement('script');
-    var name = modName;
-    script.src = dir + '/' + modName + (this.useCompress ? ".min" : "") + '.js?v=' + this.version;
-    script.onload = function () {
-        callback(name);
-    }
-    main.dom.body.appendChild(script);
+    return new Promise(function (res, rej) {
+        var query = params ? '?' + new URLSearchParams(params).toString() : '';
+        script.src = path + query;
+        script.onload = function () {
+            res();
+        }
+        script.onerror = function () {
+            rej();
+        }
+        main.dom.body.appendChild(script);
+    });
 }
 
-////// 动态加载所有楼层（剧本） //////
-main.prototype.loadFloors = function (callback) {
+/**
+ * @param {string} dir 
+ * @param {string} name 
+ * @param {boolean} [useCompress]
+ * @returns {Promise<void>}
+ */
+Main.prototype.loadMod = function (dir, name, useCompress) {
+    var path = dir + '/' + name + (useCompress ? '.min' : '') + '.js';
+    return main.loadScript(path, { v: main.version });
+}
 
-    // 加载js
-    main.setMainTipsText('正在加载楼层文件...')
+/**
+ * 动态加载所有楼层（剧本）
+ * @returns 
+ */
+Main.prototype.loadFloors = function () {
+
     if (this.useCompress) { // 读取压缩文件
-        var script = document.createElement('script');
-        script.src = 'project/floors.min.js?v=' + this.version;
-        main.dom.body.appendChild(script);
-        script.onload = function () {
-            main.dom.mainTips.style.display = 'none';
-            callback();
-        }
-        return;
+        return main.loadMod('project', 'floors', true).then(function () {
+            main.setMainTipsText("地图数据加载完毕");
+        });
     }
 
     // 高层塔优化
-    var script = document.createElement('script');
-    script.src = '__all_floors__.js?v=' + this.version + '&id=' + main.floorIds.join(',');
-    script.onload = function () {
-        main.dom.mainTips.style.display = 'none';
-        main.supportBunch = true;
-        callback();
-    }
-    script.onerror = script.onabort = script.ontimeout = function (e) {
-        console.clear();
-        for (var i = 0; i < main.floorIds.length; i++) {
-            main.loadFloor(main.floorIds[i], function (modName) {
-                main.setMainTipsText("楼层 " + modName + '.js 加载完毕');
-                if (Object.keys(main.floors).length === main.floorIds.length) {
-                    main.dom.mainTips.style.display = 'none';
-                    callback();
-                }
-            });
-        }
-    }
-    main.dom.body.appendChild(script);
+    return main.loadScript('__all_floors__.js', { v: main.version, id: main.floorIds.join(',')})
+        .then(function () {
+            main.supportBunch = true;
+        })
+        .catch(function () {
+            return Promise.all(main.floorIds.map(function (floorId) {
+                return main.loadMod('project/floors', floorId, function () {
+                    main.setMainTipsText("地图 " + floorId + ' 加载完毕');
+                });
+            }));
+        })
 }
 
-////// 加载某一个楼层 //////
-main.prototype.loadFloor = function (floorId, callback) {
-    var script = document.createElement('script');
-    script.src = 'project/floors/' + floorId + '.js?v=' + this.version;
-    main.dom.body.appendChild(script);
-    script.onload = function () {
-        callback(floorId);
-    }
-}
-
-////// 加载过程提示 //////
-main.prototype.setMainTipsText = function (text) {
+/**
+ * 加载过程提示
+ * @param {string} text 
+ */
+Main.prototype.setMainTipsText = function (text) {
     main.dom.mainTips.innerHTML = text;
 }
 
-main.prototype.log = function (e, error) {
+Main.prototype.log = function (e, error) {
     if (e) {
         if (error) return console.error(e);
         if (main.core && main.core.platform && !main.core.platform.isPC) {
@@ -359,7 +381,7 @@ main.prototype.log = function (e, error) {
     }
 }
 
-main.prototype.createOnChoiceAnimation = function () {
+Main.prototype.createOnChoiceAnimation = function () {
     var borderColor = main.dom.startButtonGroup.style.caretColor || "rgb(255, 215, 0)";
     // get rgb value
     var rgb = /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(,\s*\d+\s*)?\)$/.exec(borderColor);
@@ -378,7 +400,7 @@ main.prototype.createOnChoiceAnimation = function () {
 }
 
 ////// 选项 //////
-main.prototype.selectButton = function (index) {
+Main.prototype.selectButton = function (index) {
     var select = function (children) {
         index = (index + children.length) % children.length;
         for (var i = 0; i < children.length; ++i) {
@@ -404,8 +426,8 @@ main.prototype.selectButton = function (index) {
 }
 
 ////// 创建字体 //////
-main.prototype.importFonts = function (fonts) {
-    if (!(fonts instanceof Array) || fonts.length == 0) return;
+Main.prototype.importFonts = function (fonts) {
+    if (!(Array.isArray(fonts)) || fonts.length == 0) return;
     var style = document.createElement('style');
     style.type = 'text/css';
     var html = '';
@@ -416,7 +438,7 @@ main.prototype.importFonts = function (fonts) {
     document.body.appendChild(style);
 }
 
-main.prototype.listen = function () {
+Main.prototype.listen = function () {
 
     ////// 窗口大小变化时 //////
     window.onresize = function () {
@@ -825,4 +847,6 @@ main.prototype.listen = function () {
 
 }//listen end
 
-var main = new main();
+return new Main();
+
+})();

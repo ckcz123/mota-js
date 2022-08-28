@@ -88,7 +88,7 @@ type ResolvedMap = {
         sy?: number
         w?: number
         h?: number
-        frame?: numer
+        frame?: number
     }>
     name: string
     ratio: number
@@ -322,7 +322,7 @@ type gameStatus = {
 }
 
 /** @file control.js 主要用来进行游戏控制，比如行走控制、自动寻路、存读档等等游戏核心内容。 */
-declare class control {
+interface control {
 
     /**
      * 开启调试模式, 此模式下可以按Ctrl键进行穿墙, 并忽略一切事件。
@@ -840,7 +840,7 @@ declare class control {
     resumeBgm(resumeTime?: number): void
 
     /** 设置背景音乐的播放速度和音调 */
-    setBgmSpeed(speed: number, usePitch?: bool): void
+    setBgmSpeed(speed: number, usePitch?: boolean): void
 
     /** 设置音乐图标的显隐状态 */
     setMusicBtn(): void
@@ -893,7 +893,7 @@ declare class control {
 }
 
 /**@file events.js将处理所有和事件相关的操作。 */
-declare class events {
+interface events {
 
     /**
      * 开始新游戏
@@ -1326,7 +1326,7 @@ declare class events {
     clearTextBox(code: number): void
 
     /** 移动对话框 */
-    moveTextBox(code: number, loc: [number], relative: bool, moveMode?: string, time?: number, callback?: () => any): void
+    moveTextBox(code: number, loc: [number], relative: boolean, moveMode?: string, time?: number, callback?: () => any): void
 
     /** 设置文件别名 */
     setNameMap(name: string, value?: string): void
@@ -1336,7 +1336,7 @@ declare class events {
 }
 
 /** @file actions.js 定义了玩家的操作控制 */
-declare class actions {
+interface actions {
     /**
      * 此函数将注册一个用户交互行为。
      * @param action 要注册的交互类型，如 ondown, onclick, keyDown 等等。
@@ -1394,7 +1394,7 @@ declare class actions {
 }
 
 /** @file enemys.js 定义了一系列和敌人相关的API函数。 */
-declare class enemys {
+interface enemys {
 
     /**
      * 判定某种特殊属性的有无
@@ -1506,8 +1506,8 @@ declare class enemys {
     getEnemys(): any
 
     /** 获得所有特殊属性定义 */
-    getSpecials(): Array<number, string | ((enemy: Enemy) => string), string | ((enemy: Enemy) => string),
-        string | [number, number, number, number?], number?>[]
+    getSpecials(): [number, string | ((enemy: Enemy) => string), string | ((enemy: Enemy) => string),
+        string | [number, number, number, number?], number?][]
 
     /** 获得所有特殊属性的颜色 */
     getSpecialColor(enemy: string | Enemy): Array<string | [number, number, number, number?]>
@@ -1543,7 +1543,7 @@ declare class enemys {
 }
 
 /** @file maps.js负责一切和地图相关的处理内容 */
-declare class maps {
+interface maps {
 
     /**
      * 根据图块id得到数字（地图矩阵中的值）
@@ -1996,7 +1996,7 @@ declare class maps {
 }
 
 /** @file loader.js 主要负责资源的加载 */
-declare class loader {
+interface loader {
     /** 加载一系列图片 */
     loadImages(dir: any, names: any, toSave: any, callback?: () => any): any
 
@@ -2020,7 +2020,7 @@ declare class loader {
 }
 
 /** @file items.js 主要负责一切和道具相关的内容。 */
-declare class items {
+interface items {
 
     /**
      * 即捡即用类的道具获得时的效果
@@ -2182,7 +2182,7 @@ declare class items {
 }
 
 /** @file ui.js 主要用来进行UI窗口的绘制，如对话框、怪物手册、楼传器、存读档界面等等。*/
-declare class ui {
+interface ui {
 
     /**
      * 根据画布名找到一个画布的context；支持系统画布和自定义画布。如果不存在画布返回null。
@@ -2249,7 +2249,7 @@ declare class ui {
     rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
-    deleteCanvas(name: string | ((name: string) => bool)): void
+    deleteCanvas(name: string | ((name: string) => boolean)): void
 
     /** 清空所有的自定义画布 */
     deleteAllCanvas(): void
@@ -2444,7 +2444,7 @@ declare class ui {
 }
 
 /** 工具类 主要用来进行一些辅助函数的计算 */
-declare class utils {
+interface utils {
 
     /**
      * 将一段文字中的${}（表达式）进行替换。
@@ -2783,7 +2783,7 @@ declare class utils {
 }
 
 /** 和图标相关的函数 */
-declare class icons {
+interface icons {
 
     /** 获得所有图标类型 */
     getIcons(): void
@@ -2798,11 +2798,7 @@ declare class icons {
     getTilesetOffset(id?: string): void
 }
 
-class plugin {
-
-}
-
-type core = {
+type CoreMixin = {
     /** 地图可视部分大小 */
     readonly __SIZE__: number;
     /** 地图像素 */
@@ -2885,7 +2881,7 @@ type core = {
         /** 是否支持复制到剪切板 */supportCopy: boolean
 
         fileInput: null
-        /** 是否支持FileReader */fileReader: null
+        /** 是否支持FileReader */fileReader: FileReader
         /** 读取成功 */successCallback: null
         /** 读取失败 */errorCallback: null
     }
@@ -2947,12 +2943,12 @@ type core = {
     readonly utils: utils
     readonly icons: icons
     readonly actions: actions
-    readonly plugin: plugin
+    readonly plugin: Record<string, Function>
 
-} & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugin
+} & control & events & loader & enemys & items & maps & ui & utils & icons & actions
 
-type main = {
-    readonly core: core
+interface Main {
+    readonly core: CoreMixin
     readonly dom: { [key: string]: HTMLElement }
     /** 游戏版本，发布后会被随机，请勿使用该属性 */
     readonly version: string
@@ -2971,7 +2967,5 @@ type main = {
     log(e: string | Error, error: boolean): void
 }
 
-declare let main: main
-declare let core: core
 declare let flags: { [x: string]: any }
-declare let hero = core.status.hero
+declare let hero: Core['status']['hero']

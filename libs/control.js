@@ -1,4 +1,3 @@
-/// <reference path="../runtime.d.ts" />
 
 /*
 control.js：游戏主要逻辑控制

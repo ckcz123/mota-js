@@ -1,4 +1,3 @@
-/// <reference path="../runtime.d.ts" />
 
 /*
 actions.js：用户交互的事件的处理

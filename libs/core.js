@@ -1,10 +1,14 @@
-/// <reference path="../runtime.d.ts" />
 
 /**
  * 初始化 start
  */
 
 "use strict";
+
+// /**
+//  * @type {CoreMixin}
+//  */
+// const core = (() => {
 
 function core () {
     this.__SIZE__ = 13;
@@ -530,8 +534,7 @@ core.prototype.doFunc = function (func, _this) {
     return func.apply(_this, Array.prototype.slice.call(arguments, 2));
 }
 
-/**
- * 系统机制 end
- */
+// return new Core();
 
+// })();
 var core = new core();

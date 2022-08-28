@@ -52,13 +52,19 @@
     const editorOpened = ref(false);
 
     const editorValue = ref('');
-    const editorLang = ref<'js' | 'txt'>('js');
+    const editorLang = ref<'javascript' | 'txt'>('javascript');
     
     const right = ref(false);
     const insertIndex = ref(0);
     const insert = ref(false);
     const insertPos = ref('top');
     const pointerY = 0;
+
+    function openEditor(value: string = '', lang: 'javascript' | 'txt' = 'javascript') {
+        editorValue.value = value;
+        editorLang.value = lang;
+        editorOpened.value = true;
+    }
 
     defineExpose({
         list,
@@ -71,7 +77,8 @@
         insertIndex,
         insert,
         insertPos,
-        pointerY
+        pointerY,
+        openEditor
     })
 </script>
 
@@ -98,11 +105,6 @@ export default defineComponent({
             // 第一个操作不能删，除非只有第一个操作
             if (i === 0 && this.list.length !== 1) return;
             this.list.splice(i, 1);
-        },
-        openEditor(value: string = '', lang: 'js' | 'txt' = 'js') {
-            this.editorValue = value;
-            this.editorLang = lang;
-            this.editorOpened = true;
         },
         closeEditor() {
             this.editorOpened = false;

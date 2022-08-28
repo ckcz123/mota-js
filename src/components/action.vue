@@ -40,7 +40,7 @@
     
     defineEmits<{
         (e: 'delete', i: number): void
-        (e: 'openEditor', data: { value?: string, lang?: 'js' | 'txt' }): void
+        (e: 'openEditor', data: { value?: string, lang?: 'javascript' | 'txt' }): void
         (e: 'right', data: { status: boolean, x: number, y: number }): void
     }>()
 
@@ -73,7 +73,7 @@ export default defineComponent({
             this.$emit('delete', this.index);
             if (this.type === 'create') delete sprites[this.data.data.name];
         },
-        openEditor(data: { value?: string, lang?: 'js' | 'txt' }) {
+        openEditor(data: { value?: string, lang?: 'javascript' | 'txt' }) {
             this.$emit('openEditor', data);
         },
         change(id: string, value: any) {

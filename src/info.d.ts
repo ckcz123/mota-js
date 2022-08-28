@@ -54,10 +54,10 @@ interface Wait {
 }
 
 interface Transition {
-    attribute: string[]
-    time: string[]
-    delay: string[]
-    mode: ('linear' | 'ease-in' | 'ease-out' | 'ease-in-out')[]
+    style: string
+    time: string
+    delay: string
+    mode: ('linear' | 'ease-in' | 'ease-out' | 'ease-in-out')
 }
 
 interface SpriteCreate {
@@ -99,12 +99,11 @@ interface SpriteClear {
 }
 
 interface SpriteCss {
-    key: keyof CSSStyleDeclaration
     data: string
 }
 
 interface SpriteComposite {
-    data: GlobalCompositeOperation
+    mode: GlobalCompositeOperation
 }
 
 interface SpriteFilter {

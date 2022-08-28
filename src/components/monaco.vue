@@ -25,6 +25,7 @@ onMounted(() => {
         fontSize: 22,
         value: props.value
     })
+    editor.getAction('editor.action.formatDocument').run();
     main.editorOpened = true;
 })
 
@@ -34,7 +35,7 @@ const emits = defineEmits<{
 
 const props = defineProps<{
     value: string
-    lang: 'js' | 'txt'
+    lang: 'javascript' | 'txt'
 }>()
 
 function close() {

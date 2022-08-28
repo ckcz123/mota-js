@@ -24,9 +24,12 @@ export function transition(name: string, data: { style: string, time: string, mo
     else s.transition += `, ${tran}`;
 }
 
-export function create(name: string) {
+export function create(name: string, data: { x: number, y: number, w: number, h: number, z: number }) {
     const sprite = getSprite(name);
     sprite.setCss('display: block');
+    sprite.move(data.x, data.y);
+    sprite.resize(data.w, data.h);
+    sprite.canvas.style.zIndex = data.z.toString();
 }
 
 export function del(name: string) {

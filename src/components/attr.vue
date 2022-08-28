@@ -83,7 +83,7 @@
     })
 
     const emits = defineEmits<{
-        (e: 'openEditor', data: { value?: string, lang?: 'js' | 'txt' }): void
+        (e: 'openEditor', data: { value?: string, lang?: 'javascript' | 'txt' }): void
         (e: 'change', value: any): void
     }>()
 

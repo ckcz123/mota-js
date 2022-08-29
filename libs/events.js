@@ -16,11 +16,26 @@ events.prototype._init = function () {
 // ------ 初始化，开始和结束 ------ //
 
 /// 初始化游戏
+/**
+ * 初始化游戏
+ * @param {HeroStatus} hero
+ * @param {any} hard
+ * @param {string} floorId
+ * @param {any} maps
+ * @param {any} values
+ */
 events.prototype.resetGame = function (hero, hard, floorId, maps, values) {
     this.eventdata.resetGame(hero, hard, floorId, maps, values);
 }
 
 ////// 游戏开始事件 //////
+/**
+ * 开始新游戏
+ * @param {string} hard 难度名，会显示在左下角（横屏）或右下角（竖屏）
+ * @param {number} seed 随机种子，相同的种子保证了录像的可重复性
+ * @param {string} route 经由base64压缩后的录像，用于从头开始的录像回放
+ * @param {() => void} callback 回调函数，可选
+ */
 events.prototype.startGame = function (hard, seed, route, callback) {
     main.dom.levelChooseButtons.style.display = 'none';
     main.dom.startButtonGroup.style.display = 'none';
@@ -109,12 +124,22 @@ events.prototype._startGame_upload = function () {
 }
 
 ////// 游戏获胜事件 //////
+/**
+ * 游戏获胜事件
+ * @param {string} reason
+ * @param {boolean} norank
+ * @param {boolean} noexit
+ */
 events.prototype.win = function (reason, norank, noexit) {
     if (!noexit) core.status.gameOver = true;
     return this.eventdata.win(reason, norank, noexit);
 }
 
 ////// 游戏失败事件 //////
+/**
+ * 游戏失败事件
+ * @param {string} reason
+ */
 events.prototype.lose = function (reason) {
     if (core.isReplaying()) return core.control._replay_error(reason, function () { core.lose(reason); });
     core.status.gameOver = true;
@@ -122,6 +147,12 @@ events.prototype.lose = function (reason) {
 }
 
 ////// 游戏结束 //////
+/**
+ * 游戏结束
+ * @param {string} ending 结局名，省略表示失败
+ * @param {boolean} fromReplay true表示在播放录像，可选
+ * @param {boolean} norank true表示不计入榜单，可选
+ */
 events.prototype.gameOver = function (ending, fromReplay, norank) {
     if (!core.status.extraEvent) {
         core.clearMap('all');
@@ -270,12 +301,14 @@ events.prototype._gameOver_askRate = function (ending) {
 }
 
 ////// 重新开始游戏；此函数将回到标题页面 //////
+/** 重新开始游戏；此函数将回到标题页面 */
 events.prototype.restart = function () {
     core.showStartAnimate();
     core.playBgm(main.startBgm);
 }
 
 ////// 询问是否需要重新开始 //////
+/** 询问是否需要重新开始 */
 events.prototype.confirmRestart = function () {
     core.playSound('打开界面');
     core.status.event.selection = 1;
@@ -293,16 +326,31 @@ events.prototype.confirmRestart = function () {
 
 ////// 注册一个系统事件 //////
 // type为事件名，func为事件的处理函数，可接受(data, callback)参数
+/**
+ * 注册一个系统事件
+ * @param {string} type 事件名
+ * @param {(data?: any, callback?: () => void) => void} func 为事件的处理函数，可接受(data,callback)参数
+ */
 events.prototype.registerSystemEvent = function (type, func) {
     this.systemEvents[type] = func;
 }
 
 ////// 注销一个系统事件 //////
+/**
+ * 注销一个系统事件
+ * @param {string} type
+ */
 events.prototype.unregisterSystemEvent = function (type) {
     delete this.systemEvents[type];
 }
 
 ////// 执行一个系统事件 //////
+/**
+ * 执行一个系统事件
+ * @param {string} type
+ * @param {any} data
+ * @param {() => any} callback
+ */
 events.prototype.doSystemEvent = function (type, data, callback) {
     core.clearRouteFolding();
     if (this.systemEvents[type]) {
@@ -320,6 +368,12 @@ events.prototype.doSystemEvent = function (type, data, callback) {
 }
 
 ////// 触发(x,y)点的事件 //////
+/**
+ * 触发(x,y)点的系统事件；会执行该点图块的script属性，同时支持战斗（会触发战后）、道具（会触发道具后）、楼层切换等等
+ * @param {number} x
+ * @param {number} y
+ * @param {() => any} callback
+ */
 events.prototype.trigger = function (x, y, callback) {
     var _executeCallback = function () {
         // 因为trigger之后还有可能触发其他同步脚本（比如阻激夹域检测）
@@ -457,6 +511,14 @@ events.prototype._sys_battle = function (data, callback) {
 }
 
 ////// 战斗 //////
+/**
+ * 战斗，如果填写了坐标就会删除该点的敌人并触发战后事件
+ * @param {string} id 敌人id，必填
+ * @param {number} x 敌人的横坐标，可选
+ * @param {number} y 敌人的纵坐标，可选
+ * @param {boolean} force true表示强制战斗，可选
+ * @param {() => void} callback 回调函数，可选
+ */
 events.prototype.battle = function (id, x, y, force, callback) {
     core.saveAndStopAutomaticRoute();
     id = id || core.getBlockId(x, y);
@@ -479,11 +541,23 @@ events.prototype.battle = function (id, x, y, force, callback) {
 }
 
 ////// 战斗前触发的事件 //////
+/**
+ * 战斗前触发的事件
+ * @param {string} enemyId
+ * @param {number} x
+ * @param {number} y
+ */
 events.prototype.beforeBattle = function (enemyId, x, y) {
     return this.eventdata.beforeBattle(enemyId, x, y)
 }
 
 ////// 战斗结束后触发的事件 //////
+/**
+ * 战斗结束后触发的事件
+ * @param {string} enemyId
+ * @param {number} x
+ * @param {number} y
+ */
 events.prototype.afterBattle = function (enemyId, x, y) {
     return this.eventdata.afterBattle(enemyId, x, y);
 }
@@ -496,6 +570,13 @@ events.prototype._sys_openDoor = function (data, callback) {
 }
 
 ////// 开门 //////
+/**
+ * 开门（包括三种基础墙）
+ * @param {number} x 门的横坐标
+ * @param {number} y 门的纵坐标
+ * @param {boolean} needKey true表示需要钥匙，会导致机关门打不开
+ * @param {() => void} callback 门完全打开后或打不开时的回调函数，可选
+ */
 events.prototype.openDoor = function (x, y, needKey, callback) {
     var block = core.getBlock(x, y);
     core.saveAndStopAutomaticRoute();
@@ -607,6 +688,12 @@ events.prototype._openDoor_animate = function (block, x, y, callback) {
 }
 
 ////// 开一个门后触发的事件 //////
+/**
+ * 开一个门后触发的事件
+ * @param {string} doorId
+ * @param {number} x
+ * @param {number} y
+ */
 events.prototype.afterOpenDoor = function (doorId, x, y) {
     return this.eventdata.afterOpenDoor(doorId, x, y);
 }
@@ -616,6 +703,14 @@ events.prototype._sys_getItem = function (data, callback) {
 }
 
 ////// 获得某个物品 //////
+/**
+ * 获得道具并提示，如果填写了坐标就会删除该点的该道具
+ * @param {string} id 道具id，必填
+ * @param {number} num 获得的数量，不填视为1，填了就别填坐标了
+ * @param {number} x 道具的横坐标，可选
+ * @param {number} y 道具的纵坐标，可选
+ * @param {() => void} callback 回调函数，可选
+ */
 events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
     if (num == null) num = 1;
     var itemCls = core.material.items[id].cls;
@@ -648,11 +743,22 @@ events.prototype.getItem = function (id, num, x, y, isGentleClick, callback) {
     if (callback) callback();
 }
 
+/**
+ * 获得一个道具后的shij
+ * @param {string} id
+ * @param {number} x
+ * @param {number} y
+ * @param {boolean} isGentleClick
+ */
 events.prototype.afterGetItem = function (id, x, y, isGentleClick) {
     this.eventdata.afterGetItem(id, x, y, isGentleClick);
 }
 
 ////// 获得面前的物品（轻按） //////
+/**
+ * 轻按获得面前的物品或周围唯一物品
+ * @param {boolean} noRoute 若为true则不计入录像
+ */
 events.prototype.getNextItem = function (noRoute) {
     if (core.isMoving() || !core.flags.enableGentleClick) return false;
     if (this._canGetNextItem()) return this._getNextItem(null, noRoute);
@@ -694,6 +800,14 @@ events.prototype._sys_changeFloor = function (data, callback) {
 }
 
 ////// 楼层切换 //////
+/**
+ * 场景切换
+ * @param {string} floorId 传送的目标地图id，可以填':before'和':after'分别表示楼下或楼上
+ * @param {string} stair 传送的位置，可以填':now'（保持不变，可省略）,':symmetry'（中心对称）,':symmetry_x'（左右对称）,':symmetry_y'（上下对称）或图块id（该图块最好在目标层唯一，一般为'downFloor'或'upFloor'）
+ * @param {{ x?: number, y?: number, direction?: direction }} heroLoc 传送的坐标（如果填写了，就会覆盖上述的粗略目标位置）和传送后主角的朝向（不填表示保持不变）
+ * @param {number} time 传送的黑屏时间，单位为毫秒。不填为用户设置值
+ * @param {() => void} callback 黑屏结束后的回调函数，可选
+ */
 events.prototype.changeFloor = function (floorId, stair, heroLoc, time, callback) {
     var info = this._changeFloor_getInfo(floorId, stair, heroLoc, time);
     if (info == null) {
@@ -830,23 +944,40 @@ events.prototype._changeFloor_afterChange = function (info, callback) {
     if (callback) callback();
 }
 
+/**
+ * 楼层转换中
+ * @param {string} floorId
+ * @param {any} heroLoc
+ */
 events.prototype.changingFloor = function (floorId, heroLoc) {
     this.eventdata.changingFloor(floorId, heroLoc);
 }
 
 ////// 转换楼层结束的事件 //////
+/**
+ * 转换楼层结束的事件
+ * @param {string} floorId
+ */
 events.prototype.afterChangeFloor = function (floorId) {
     if (main.mode != 'play') return;
     return this.eventdata.afterChangeFloor(floorId);
 }
 
 ////// 是否到达过某个楼层 //////
+/**
+ * 是否到达过某个楼层
+ * @param {string} floorId
+ */
 events.prototype.hasVisitedFloor = function (floorId) {
     if (!core.hasFlag("__visited__")) core.setFlag("__visited__", {});
     return core.getFlag("__visited__")[floorId] || false;
 }
 
 ////// 到达某楼层 //////
+/**
+ * 到达某楼层
+ * @param {string} floorId
+ */
 events.prototype.visitFloor = function (floorId) {
     if (!core.hasFlag("__visited__")) core.setFlag("__visited__", {});
     core.getFlag("__visited__")[floorId] = true;
@@ -858,6 +989,10 @@ events.prototype._sys_pushBox = function (data, callback) {
 }
 
 ////// 推箱子 //////
+/**
+ * 推箱子
+ * @param {any} data
+ */
 events.prototype.pushBox = function (data) {
     if (data.event.id != 'box' && data.event.id != 'boxed') return;
 
@@ -892,6 +1027,7 @@ events.prototype.pushBox = function (data) {
 }
 
 ////// 推箱子后的事件 //////
+/** 推箱子后的事件 */
 events.prototype.afterPushBox = function () {
     return this.eventdata.afterPushBox();
 }
@@ -902,6 +1038,10 @@ events.prototype._sys_ski = function (data, callback) {
 }
 
 /// 当前是否在冰上
+/**
+ * 当前是否在冰上
+ * @param {number} number
+ */
 events.prototype.onSki = function (number) {
     if (number == null) number = core.getBgNumber();
     var block = core.getBlockByNumber(number);
@@ -933,16 +1073,33 @@ events.prototype._sys_custom = function (data, callback) {
 ////// 注册一个自定义事件 //////
 // type为事件名，func为事件的处理函数，可接受(data, x, y, prefix)参数
 // data为事件内容，x和y为当前点坐标（可为null），prefix为当前点前缀
+/**
+ * 注册一个自定义事件
+ * @param {string} type 事件类型
+ * @param {(data: any, x?: number, y?: number, prefix?: string) => void} func 事件的处理函数，可接受(data, x, y, prefix)参数
+ * data为事件内容，x和y为当前点坐标（可为null），prefix为当前点前缀
+ */
 events.prototype.registerEvent = function (type, func) {
     this.actions[type] = func;
 }
 
 ////// 注销一个自定义事件
+/**
+ * 注销一个自定义事件
+ * @param {string} type
+ */
 events.prototype.unregisterEvent = function (type) {
     delete this.actions[type];
 }
 
 ////// 执行一个自定义事件
+/**
+ * 执行一个自定义事件
+ * @param {any} data
+ * @param {number} x
+ * @param {number} y
+ * @param {any} prefix
+ */
 events.prototype.doEvent = function (data, x, y, prefix) {
     var type = data.type;
     if (this.actions[type]) {
@@ -959,6 +1116,13 @@ events.prototype.doEvent = function (data, x, y, prefix) {
     core.doAction();
 }
 
+/**
+ * 直接设置事件列表
+ * @param {any} list
+ * @param {number} x
+ * @param {number} y
+ * @param {() => any} callback
+ */
 events.prototype.setEvents = function (list, x, y, callback) {
     var data = core.status.event.data || {};
     if (list) {
@@ -983,6 +1147,13 @@ events.prototype.setEvents = function (list, x, y, callback) {
 }
 
 ////// 开始执行一系列自定义事件 //////
+/**
+ * 开始执行一系列自定义事件
+ * @param {any} list
+ * @param {number} x
+ * @param {number} y
+ * @param {() => any} callback
+ */
 events.prototype.startEvents = function (list, x, y, callback) {
     if (!list) return;
     if (!(list instanceof Array)) {
@@ -997,6 +1168,10 @@ events.prototype.startEvents = function (list, x, y, callback) {
 }
 
 ////// 执行当前自定义事件列表中的下一个事件 //////
+/**
+ * 执行下一个事件指令，常作为回调
+ * @param {true} keepUI true表示不清除UI画布和选择光标
+ */
 events.prototype.doAction = function () {
     // 清空boxAnimate和UI层
     clearInterval(core.status.event.interval);
@@ -1060,6 +1235,14 @@ events.prototype._popEvents = function (current, prefix) {
 }
 
 ////// 往当前事件列表之前或之后添加一个或多个事件 //////
+/**
+ * 插入一段事件；此项不可插入公共事件，请用 core.insertCommonEvent
+ * @param {Events} action 单个事件指令，或事件指令数组
+ * @param {number} x 新的当前点横坐标，可选
+ * @param {number} y 新的当前点纵坐标，可选
+ * @param {() => void} callback 新的回调函数，可选
+ * @param {boolean} addToLast 插入的位置，true表示插入到末尾，否则插入到开头
+ */
 events.prototype.insertAction = function (action, x, y, callback, addToLast) {
     if (core.hasFlag("__statistics__")) return;
     if (core.status.gameOver) return;
@@ -1088,6 +1271,15 @@ events.prototype.insertAction = function (action, x, y, callback, addToLast) {
 }
 
 ////// 往当前事件列表之前或之后添加一个公共事件 //////
+/**
+ * 插入一个公共事件
+ * @param {string} name 公共事件名；如果公共事件不存在则直接忽略
+ * @param {any} args 参数列表，为一个数组，将依次赋值给 flag:arg1, flag:arg2, ...
+ * @param {number} x 新的当前点横坐标，可选
+ * @param {number} y 新的当前点纵坐标，可选
+ * @param {() => any} callback 新的回调函数，可选
+ * @param {boolean} addToLast 插入的位置，true表示插入到末尾，否则插入到开头
+ */
 events.prototype.insertCommonEvent = function (name, args, x, y, callback, addToLast) {
     var commonEvent = this.getCommonEvent(name);
     if (!commonEvent) {
@@ -1110,12 +1302,20 @@ events.prototype.insertCommonEvent = function (name, args, x, y, callback, addTo
 }
 
 ////// 获得一个公共事件 //////
+/**
+ * 获得一个公共事件
+ * @param {string} name
+ */
 events.prototype.getCommonEvent = function (name) {
     if (!name || typeof name !== 'string') return null;
     return this.commonEvent[name] || null;
 }
 
 ////// 恢复一个事件 //////
+/**
+ * 恢复一个事件
+ * @param {any} data
+ */
 events.prototype.recoverEvents = function (data) {
     if (data) {
         core.ui.closePanel();
@@ -1131,6 +1331,7 @@ events.prototype.recoverEvents = function (data) {
 }
 
 ////// 检测自动事件 //////
+/** 检测自动事件 */
 events.prototype.checkAutoEvents = function () {
     // 只有在无操作或事件流中才能执行自动事件！
     if (!core.isPlaying() || (core.status.lockControl && core.status.event.id != 'action')) return;
@@ -1198,6 +1399,11 @@ events.prototype.checkAutoEvents = function () {
 
 }
 
+/**
+ * 当前是否在执行某个自动事件
+ * @param {string} symbol
+ * @param {any} value
+ */
 events.prototype.autoEventExecuting = function (symbol, value) {
     var aei = core.getFlag('__aei__', []);
     if (value == null) return aei.indexOf(symbol) >= 0;
@@ -1208,6 +1414,11 @@ events.prototype.autoEventExecuting = function (symbol, value) {
     }
 }
 
+/**
+ * 当前是否执行过某个自动事件
+ * @param {string} symbol
+ * @param {any} value
+ */
 events.prototype.autoEventExecuted = function (symbol, value) {
     var aed = core.getFlag('__aed__', []);
     if (value == null) return aed.indexOf(symbol) >= 0;
@@ -1218,6 +1429,12 @@ events.prototype.autoEventExecuted = function (symbol, value) {
     }
 }
 
+/**
+ * 将当前点坐标入栈
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 events.prototype.pushEventLoc = function (x, y, floorId) {
     if (core.status.event.id != 'action') return;
     core.status.event.data.locStack.push({
@@ -1230,6 +1447,7 @@ events.prototype.pushEventLoc = function (x, y, floorId) {
     core.status.event.data.floorId = floorId;
 }
 
+/** 将当前点坐标入栈 */
 events.prototype.popEventLoc = function () {
     if (core.status.event.id != 'action') return;
     var loc = core.status.event.data.locStack.shift();
@@ -1240,6 +1458,10 @@ events.prototype.popEventLoc = function () {
     }
 }
 
+/**
+ * 预编辑事件
+ * @param {any} data
+ */
 events.prototype.precompile = function (data) {
     var array = this.__precompile_getArray();
     if (typeof data == 'string') {
@@ -2753,6 +2975,10 @@ events.prototype._checkStatus = function (name, fromUserAction, checkItem) {
 }
 
 ////// 点击怪物手册时的打开操作 //////
+/**
+ * 点击怪物手册时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.openBook = function (fromUserAction) {
     if (core.isReplaying()) return;
     // 如果能恢复事件（从callBook事件触发）
@@ -2775,6 +3001,10 @@ events.prototype.openBook = function (fromUserAction) {
 }
 
 ////// 点击楼层传送器时的打开操作 //////
+/**
+ * 点击楼层传送器时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.useFly = function (fromUserAction) {
     if (core.isReplaying()) return;
     // 从“浏览地图”页面：尝试直接传送到该层
@@ -2813,11 +3043,20 @@ events.prototype.useFly = function (fromUserAction) {
     return;
 }
 
+/**
+ * 飞往某一层
+ * @param {string} toId
+ * @param {() => boolean} callback
+ */
 events.prototype.flyTo = function (toId, callback) {
     return this.eventdata.flyTo(toId, callback);
 }
 
 ////// 点击装备栏时的打开操作 //////
+/**
+ * 点击装备栏时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.openEquipbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('equipbox', fromUserAction)) return;
@@ -2826,6 +3065,10 @@ events.prototype.openEquipbox = function (fromUserAction) {
 }
 
 ////// 点击工具栏时的打开操作 //////
+/**
+ * 点击工具栏时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.openToolbox = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('toolbox', fromUserAction)) return;
@@ -2834,6 +3077,10 @@ events.prototype.openToolbox = function (fromUserAction) {
 }
 
 ////// 点击快捷商店按钮时的打开操作 //////
+/**
+ * 点击快捷商店按钮时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.openQuickShop = function (fromUserAction) {
     if (core.isReplaying()) return;
 
@@ -2866,6 +3113,10 @@ events.prototype.openQuickShop = function (fromUserAction) {
     core.ui._drawQuickShop();
 }
 
+/**
+ * 点击虚拟键盘时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.openKeyBoard = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('keyBoard', fromUserAction)) return;
@@ -2873,6 +3124,10 @@ events.prototype.openKeyBoard = function (fromUserAction) {
 }
 
 ////// 点击保存按钮时的打开操作 //////
+/**
+ * 点击存档按钮时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.save = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (core.hasFlag('__forbidSave__')) {
@@ -2890,6 +3145,10 @@ events.prototype.save = function (fromUserAction) {
 }
 
 ////// 点击读取按钮时的打开操作 //////
+/**
+ * 点击读档按钮时的打开操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.load = function (fromUserAction) {
     if (core.isReplaying()) return;
     var saveIndex = core.saves.saveIndex;
@@ -2913,6 +3172,10 @@ events.prototype.load = function (fromUserAction) {
 }
 
 ////// 点击设置按钮时的操作 //////
+/**
+ * 点击设置按钮时的操作
+ * @param {boolean} fromUserAction
+ */
 events.prototype.openSettings = function (fromUserAction) {
     if (core.isReplaying()) return;
     if (!this._checkStatus('settings', fromUserAction))
@@ -2923,11 +3186,13 @@ events.prototype.openSettings = function (fromUserAction) {
 
 // ------ 一些事件的具体执行过程 ------ //
 
+/** 当前是否有未处理完毕的异步事件（不包含动画和音效） */
 events.prototype.hasAsync = function () {
     return Object.keys(core.animateFrame.asyncId).length > 0;
 }
 
 ////// 立刻停止所有异步事件 //////
+/** 立刻停止所有异步事件 */
 events.prototype.stopAsync = function () {
     var callbacks = [];
     for (var id in core.animateFrame.asyncId) {
@@ -2945,6 +3210,10 @@ events.prototype.hasAsyncAnimate = function () {
 }
 
 ////// 跟随 //////
+/**
+ * 跟随
+ * @param {string} name 要跟随的一个合法的4x4的行走图名称，需要在全塔属性注册
+ */
 events.prototype.follow = function (name) {
     name = core.getMappedName(name);
     if (core.material.images.images[name]) {
@@ -2957,6 +3226,10 @@ events.prototype.follow = function (name) {
 }
 
 ////// 取消跟随 //////
+/**
+ * 取消跟随
+ * @param {string} name 取消跟随的行走图，不填则取消全部跟随者
+ */
 events.prototype.unfollow = function (name) {
     if (!name) {
         core.status.hero.followers = [];
@@ -2993,6 +3266,13 @@ events.prototype._updateValueByOperator = function (value, originValue, operator
 }
 
 ////// 数值操作 //////
+/**
+ * 数值操作
+ * @param {string} name
+ * @param {string} operator
+ * @param {any} value
+ * @param {string} prefix
+ */
 events.prototype.setValue = function (name, operator, value, prefix) {
     value = this._updateValueByOperator(core.calValue(value, prefix), core.calValue(name, prefix), operator);
     this._setValue_setStatus(name, value);
@@ -3042,6 +3322,14 @@ events.prototype._setValue_setGlobal = function (name, value) {
 }
 
 ////// 设置一个怪物属性 //////
+/**
+ * 设置一项敌人属性并计入存档
+ * @param {string} id 敌人id
+ * @param {K} name 属性的英文缩写
+ * @param {Enemy[K]} value 属性的新值，可选
+ * @param {string} operator 操作符，可选
+ * @param {string} prefix 独立开关前缀，一般不需要，下同
+ */
 events.prototype.setEnemy = function (id, name, value, operator, prefix, norefresh) {
     if (!core.hasFlag('enemyInfo')) {
         core.setFlag('enemyInfo', {});
@@ -3056,6 +3344,16 @@ events.prototype.setEnemy = function (id, name, value, operator, prefix, norefre
 }
 
 ////// 设置某个点上的怪物属性 //////
+/**
+ * 设置某个点的敌人属性
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {K} name
+ * @param {Enemy[K]} value
+ * @param {string} operator
+ * @param {string} prefix
+ */
 events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operator, prefix, norefresh) {
     floorId = floorId || core.status.floorId;
     var block = core.getBlock(x, y, floorId);
@@ -3073,12 +3371,26 @@ events.prototype.setEnemyOnPoint = function (x, y, floorId, name, value, operato
 }
 
 ////// 重置某个点上的怪物属性 //////
+/**
+ * 重置某个点的敌人属性
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 events.prototype.resetEnemyOnPoint = function (x, y, floorId, norefresh) {
     delete ((flags.enemyOnPoint || {})[floorId || core.status.floorId] || {})[x + "," + y];
     if (!norefresh) core.updateStatusBar();
 }
 
 ////// 将某个点上已经设置的怪物属性移动到其他点 //////
+/**
+ * 将某个点已经设置的敌人属性移动到其他点
+ * @param {number} fromX
+ * @param {number} fromY
+ * @param {number} toX
+ * @param {number} toY
+ * @param {string} floorId
+ */
 events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId, norefresh) {
     floorId = floorId || core.status.floorId;
     if (((flags.enemyOnPoint || {})[floorId] || {})[fromX + "," + fromY]) {
@@ -3089,6 +3401,13 @@ events.prototype.moveEnemyOnPoint = function (fromX, fromY, toX, toY, floorId, n
 }
 
 ////// 设置楼层属性 //////
+/**
+ * 设置一项楼层属性并刷新状态栏
+ * @param {K} name 要求改的属性名
+ * @param {Floor[K] | boolean | number | string | [number, number] | [string, number?] | Array<string | [number, number, string, number?, number?]>} values 属性的新值
+ * @param {string} floorId 楼层id，不填视为当前层
+ * @param {string} prefix 独立开关前缀，一般不需要，下同
+ */
 events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
     floorId = floorId || core.status.floorId;
     core.status.maps[floorId][name] = value;
@@ -3096,6 +3415,11 @@ events.prototype.setFloorInfo = function (name, value, floorId, prefix) {
 }
 
 ////// 设置全塔属性 //////
+/**
+ * 设置全塔属性
+ * @param {string} name
+ * @param {any} value
+ */
 events.prototype.setGlobalAttribute = function (name, value) {
     if (typeof value == 'string') {
         if ((value.charAt(0) == '"' && value.charAt(value.length - 1) == '"')
@@ -3115,6 +3439,11 @@ events.prototype.setGlobalAttribute = function (name, value) {
 }
 
 ////// 设置全局开关 //////
+/**
+ * 设置一个系统开关
+ * @param {keyof SystemFlags} name 系统开关的英文名
+ * @param {boolean} value 开关的新值，您可以用!core.flags[name]简单地表示将此开关反转
+ */
 events.prototype.setGlobalFlag = function (name, value) {
     var flags = core.getFlag("globalFlags", {});
     if (name.startsWith('s:')) {
@@ -3133,12 +3462,21 @@ events.prototype.setGlobalFlag = function (name, value) {
 }
 
 ////// 设置文件别名 //////
+/**
+ * 设置文件别名
+ * @param {string} name
+ * @param {string} value
+ */
 events.prototype.setNameMap = function (name, value) {
     if (!core.hasFlag('__nameMap__')) core.setFlag('__nameMap__', {});
     flags.__nameMap__[name] = value;
 }
 
 ////// 设置剧情文本的属性 //////
+/**
+ * 设置剧情文本的属性
+ * @param {any} data
+ */
 events.prototype.setTextAttribute = function (data) {
     if (!core.isPlaying()) return;
     ["position", "offset", "align", "bold", "titlefont", "textfont", "lineHeight", "time", "letterSpacing", "animateTime"].forEach(function (t) {
@@ -3160,6 +3498,15 @@ events.prototype.setTextAttribute = function (data) {
     if (main.mode == 'play') core.setFlag('textAttribute', core.status.textAttribute);
 }
 
+/**
+ * 移动对话框
+ * @param {number} code
+ * @param {[number]} loc
+ * @param {boolean} relative
+ * @param {string} moveMode
+ * @param {number} time
+ * @param {() => any} callback
+ */
 events.prototype.moveTextBox = function (code, loc, relative, moveMode, time, callback) {
     var ctx = core.getContextByName('__text__' + code);
     if (!ctx) {
@@ -3211,6 +3558,10 @@ events.prototype._moveTextBox_moving = function (ctx, moveInfo, callback) {
 }
 
 ////// 清除对话框 //////
+/**
+ * 清除对话框
+ * @param {number} code
+ */
 events.prototype.clearTextBox = function (code, callback) {
     if (code == null) {
         code = Object.keys(core.dymCanvas).filter(function (one) { return one.startsWith('__text__') })
@@ -3235,6 +3586,13 @@ events.prototype.clearTextBox = function (code, callback) {
 }
 
 ////// 关门 //////
+/**
+ * 关门，目标点必须为空地
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} id 门的id，也可以用三种基础墙
+ * @param {() => void} callback 门完全关上后的回调函数，可选
+ */
 events.prototype.closeDoor = function (x, y, id, callback) {
     id = id || "";
     if ((core.material.icons.animates[id] == null && core.material.icons.npc48[id] == null)
@@ -3277,6 +3635,16 @@ events.prototype.closeDoor = function (x, y, id, callback) {
 }
 
 ////// 显示图片 //////
+/**
+ * 显示一张图片
+ * @param {number} code 图片编号，为不大于50的正整数，加上100后就是对应画布层的z值，较大的会遮罩较小的，注意色调层的z值为125，UI层为140
+ * @param {string | HTMLImageElement} image 图片文件名（可以是全塔属性中映射前的中文名）或图片对象（见上面的例子）
+ * @param {Array<number>} sloc 一行且至多四列的数组，表示从原图裁剪的左上角坐标和宽高，可选
+ * @param {Array<number>} loc 一行且至多四列的数组，表示图片在视野中的左上角坐标和宽高，可选
+ * @param {number} opacityVal 不透明度，为小于1的正数。不填视为1
+ * @param {number} time 淡入时间，单位为毫秒。不填视为0
+ * @param {() => void} callback 图片完全显示出来后的回调函数，可选
+ */
 events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time, callback) {
     var imageName = null;
     if (typeof image == 'string') {
@@ -3316,6 +3684,12 @@ events.prototype.showImage = function (code, image, sloc, loc, opacityVal, time,
 }
 
 ////// 隐藏图片 //////
+/**
+ * 隐藏一张图片
+ * @param {number} code 图片编号
+ * @param {number} time 淡出时间，单位为毫秒
+ * @param {() => void} callback 图片完全消失后的回调函数，可选
+ */
 events.prototype.hideImage = function (code, time, callback) {
     time = time || 0;
     var name = "image" + (code + 100);
@@ -3331,6 +3705,15 @@ events.prototype.hideImage = function (code, time, callback) {
 }
 
 ////// 移动图片 //////
+/**
+ * 移动一张图片并/或改变其透明度
+ * @param {number} code 图片编号
+ * @param {[number?, number?]} to 新的左上角坐标，省略表示原地改变透明度
+ * @param {number} opacityVal 新的透明度，省略表示不变
+ * @param {string} moveMode 移动模式
+ * @param {number} time 移动用时，单位为毫秒。不填视为1秒
+ * @param {() => void} callback 图片移动完毕后的回调函数，可选
+ */
 events.prototype.moveImage = function (code, to, opacityVal, moveMode, time, callback) {
     to = to || [];
     var name = "image" + (code + 100);
@@ -3388,6 +3771,15 @@ events.prototype._moveImage_moving = function (name, moveInfo, callback) {
 }
 
 ////// 旋转图片 //////
+/**
+ * 旋转一张图片
+ * @param {number} code 图片编号
+ * @param {[number?, number?]} center 旋转中心像素（以屏幕为基准）；不填视为图片本身中心
+ * @param {number} angle 旋转角度；正数为顺时针，负数为逆时针
+ * @param {string} moveMode 旋转模式
+ * @param {number} time 移动用时，单位为毫秒。不填视为1秒
+ * @param {() => void} callback 图片移动完毕后的回调函数，可选
+ */
 events.prototype.rotateImage = function (code, center, angle, moveMode, time, callback) {
     center = center || [];
     var name = "image" + (code + 100);
@@ -3433,6 +3825,15 @@ events.prototype._rotateImage_rotating = function (name, rotateInfo, callback) {
 }
 
 ////// 放缩一张图片 //////
+/**
+ * 放缩一张图片
+ * @param {number} code
+ * @param {[Number?, number?]} center
+ * @param {number} scale
+ * @param {string} moveMode
+ * @param {number} time
+ * @param {() => void} callback
+ */
 events.prototype.scaleImage = function (code, center, scale, moveMode, time, callback) {
     center = center || [];
     var name = "image" + (code + 100);
@@ -3494,6 +3895,12 @@ events.prototype._scaleImage_scale = function (ctx, scaleInfo, callback) {
 }
 
 ////// 绘制或取消一张gif图片 //////
+/**
+ * 绘制一张动图或擦除所有动图
+ * @param {string} name 动图文件名，可以是全塔属性中映射前的中文名
+ * @param {number} x 动图在视野中的左上角横坐标
+ * @param {number} y 动图在视野中的左上角纵坐标
+ */
 events.prototype.showGif = function (name, x, y) {
     name = core.getMappedName(name);
     var image = core.material.images.images[name];
@@ -3513,6 +3920,12 @@ events.prototype.showGif = function (name, x, y) {
 }
 
 ////// 淡入淡出音乐 //////
+/**
+ * 调节bgm的音量
+ * @param {number} value 新的音量，为0或不大于1的正数。注意系统设置中是这个值的平方根的十倍
+ * @param {number} time 渐变用时，单位为毫秒。不填或小于100毫秒都视为0
+ * @param {() => void} callback 渐变完成后的回调函数，可选
+ */
 events.prototype.setVolume = function (value, time, callback) {
     var set = function (value) {
         core.musicStatus.designVolume = value;
@@ -3543,6 +3956,14 @@ events.prototype.setVolume = function (value, time, callback) {
 }
 
 ////// 画面震动 //////
+/**
+ * 视野抖动
+ * @param {string} direction 抖动方向
+ * @param {number} time 抖动时长，单位为毫秒
+ * @param {number} speed 抖动速度
+ * @param {number} power 抖动幅度
+ * @param {() => void} callback 抖动平息后的回调函数，可选
+ */
 events.prototype.vibrate = function (direction, time, speed, power, callback) {
     if (core.isReplaying()) {
         if (callback) callback();
@@ -3599,6 +4020,12 @@ events.prototype._vibrate_update = function (shakeInfo) {
 }
 
 /////// 使用事件让勇士移动。这个函数将不会触发任何事件 //////
+/**
+ * 强制移动主角（包括后退），这个函数的作者已经看不懂这个函数了
+ * @param {step[]} steps 步伐数组，注意后退时跟随者的行为会很难看
+ * @param {number} time 每步的用时，单位为毫秒。0或不填则取主角的移速，如果后者也不存在就取0.1秒
+ * @param {() => void} callback 移动完毕后的回调函数，可选
+ */
 events.prototype.eventMoveHero = function (steps, time, callback) {
     time = time || core.values.moveSpeed;
     var step = 0, moveSteps = (steps || []).map(function (t) {
@@ -3674,6 +4101,13 @@ events.prototype._eventMoveHero_moving = function (step, moveSteps) {
 }
 
 ////// 勇士跳跃事件 //////
+/**
+ * 主角跳跃，跳跃勇士。ex和ey为目标点的坐标，可以为null表示原地跳跃。time为总跳跃时间。
+ * @param {number} ex 跳跃后的横坐标
+ * @param {number} ey 跳跃后的纵坐标
+ * @param {number} time 跳跃时长，单位为毫秒。不填视为半秒
+ * @param {() => void} callback 跳跃完毕后的回调函数，可选
+ */
 events.prototype.jumpHero = function (ex, ey, time, callback) {
     var sx = core.getHeroLoc('x'), sy = core.getHeroLoc('y');
     if (ex == null) ex = sx;
@@ -3723,6 +4157,11 @@ events.prototype._jumpHero_jumping = function (jumpInfo) {
 }
 
 ////// 设置角色行走图 //////
+/**
+ * 更改主角行走图
+ * @param {string} name 新的行走图文件名，可以是全塔属性中映射前的中文名。映射后会被存入core.status.hero.image
+ * @param {boolean} noDraw true表示不立即刷新（刷新会导致大地图下视野重置到以主角为中心）
+ */
 events.prototype.setHeroIcon = function (name, noDraw) {
     name = core.getMappedName(name);
     var img = core.material.images.images[name];
@@ -3740,6 +4179,7 @@ events.prototype.setHeroIcon = function (name, noDraw) {
 }
 
 ////// 检查升级事件 //////
+/** 检查升级事件 */
 events.prototype.checkLvUp = function () {
     var actions = [];
     while (true) {
@@ -3767,6 +4207,10 @@ events.prototype._checkLvUp_check = function () {
 }
 
 ////// 尝试使用道具 //////
+/**
+ * 尝试使用一个道具
+ * @param {string} itemId 道具id，其中敌人手册、传送器和飞行器会被特殊处理
+ */
 events.prototype.tryUseItem = function (itemId) {
     if (itemId == 'book') {
         core.ui.closePanel();

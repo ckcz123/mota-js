@@ -24,6 +24,11 @@ ui.prototype._init = function () {
 
 ////////////////// 地图设置
 
+/**
+ * 根据画布名找到一个画布的context；支持系统画布和自定义画布。如果不存在画布返回null。
+ * 也可以传画布的context自身，则返回自己。
+ * @param {CtxRefer} canvas
+ */
 ui.prototype.getContextByName = function (name) {
     if (name instanceof HTMLCanvasElement) return name.getContext('2d');
     var canvas = name;
@@ -47,6 +52,12 @@ ui.prototype._createUIEvent = function () {
 }
 
 ////// 清除地图 //////
+/**
+ * 清空某个画布图层
+ * name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。（下同）
+ * 如果name也可以是'all'，若为all则为清空所有系统画布。
+ * @param {CtxRefer} name
+ */
 ui.prototype.clearMap = function (name, x, y, width, height) {
     if (name == 'all') {
         for (var m in core.canvas) {
@@ -79,6 +90,16 @@ ui.prototype._uievent_clearMap = function (data) {
 }
 
 ////// 在某个canvas上绘制一段文字 //////
+/**
+ * 在某个画布上绘制一段文字
+ * @param {CtxRefer} name
+ * @param {string} text 要绘制的文本
+ * @param {number} x
+ * @param {number} y
+ * @param {string} style 绘制的样式
+ * @param {string} font 绘制的字体
+ * @param {number} maxWidth
+ */
 ui.prototype.fillText = function (name, text, x, y, style, font, maxWidth) {
     if (style) core.setFillStyle(name, style);
     if (font) core.setFont(name, font);
@@ -120,6 +141,13 @@ ui.prototype._uievent_fillText = function (data) {
 }
 
 ////// 自适配字体大小
+/**
+ * 根据最大宽度自动缩小字体
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} text
+ * @param {number} maxWidth
+ * @param {any} font
+ */
 ui.prototype.setFontForMaxWidth = function (name, text, maxWidth, font) {
     var ctx = this.getContextByName(name);
     if (font) core.setFont(name, font);
@@ -132,6 +160,17 @@ ui.prototype.setFontForMaxWidth = function (name, text, maxWidth, font) {
 }
 
 ////// 在某个canvas上绘制粗体 //////
+/**
+ * 在某个画布上绘制一个描黑边的文字
+ * @param {CtxRefer} name
+ * @param {string} text 要绘制的文本
+ * @param {number} x
+ * @param {number} y
+ * @param {string} style 绘制的样式
+ * @param {string} strokeStyle 绘制的描边颜色
+ * @param {string} font 绘制的字体
+ * @param {number} maxWidth
+ */
 ui.prototype.fillBoldText = function (name, text, x, y, style, strokeStyle, font, maxWidth) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
@@ -156,6 +195,16 @@ ui.prototype._uievent_fillBoldText = function (data) {
 }
 
 ////// 在某个canvas上绘制一个矩形 //////
+/**
+ * 绘制一个矩形。style可选为绘制样式
+ * @param {CtxRefer} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {string} style 绘制的样式
+ * @param {number} angle 旋转角度，弧度制
+ */
 ui.prototype.fillRect = function (name, x, y, width, height, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
@@ -185,6 +234,16 @@ ui.prototype._uievent_fillRect = function (data) {
 }
 
 ////// 在某个canvas上绘制一个矩形的边框 //////
+/**
+ * 绘制一个矩形的边框
+ * @param {CtxRefer} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {string} style 绘制的样式
+ * @param {number} angle
+ */
 ui.prototype.strokeRect = function (name, x, y, width, height, style, lineWidth, angle) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
@@ -215,6 +274,17 @@ ui.prototype._uievent_strokeRect = function (data) {
 }
 
 ////// 在某个canvas上绘制一个圆角矩形 //////
+/**
+ * 在某个canvas上绘制一个圆角矩形
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} radius
+ * @param {string} style
+ * @param {number} angle
+ */
 ui.prototype.fillRoundRect = function (name, x, y, width, height, radius, style, angle) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
@@ -234,6 +304,18 @@ ui.prototype.fillRoundRect = function (name, x, y, width, height, radius, style,
 }
 
 ////// 在某个canvas上绘制一个圆角矩形的边框 //////
+/**
+ * 在某个canvas上绘制一个圆角矩形的边框
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} radius
+ * @param {string} style
+ * @param {number} lineWidth
+ * @param {number} angle
+ */
 ui.prototype.strokeRoundRect = function (name, x, y, width, height, radius, style, lineWidth, angle) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
@@ -268,6 +350,12 @@ ui.prototype._roundRect_buildPath = function (ctx, x, y, width, height, radius) 
 }
 
 ////// 在某个canvas上绘制一个多边形 //////
+/**
+ * 在某个canvas上绘制一个多边形
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {any} nodes
+ * @param {string} style
+ */
 ui.prototype.fillPolygon = function (name, nodes, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
@@ -289,6 +377,13 @@ ui.prototype._uievent_fillPolygon = function (data) {
 }
 
 ////// 在某个canvas上绘制一个多边形的边框 //////
+/**
+ * 在某个canvas上绘制一个多边形的边框
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {any} nodes
+ * @param {string} style
+ * @param {number} lineWidth
+ */
 ui.prototype.strokePolygon = function (name, nodes, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
@@ -311,6 +406,16 @@ ui.prototype._uievent_strokePolygon = function (data) {
 }
 
 ////// 在某个canvas上绘制一个椭圆 //////
+/**
+ * 在某个canvas上绘制一个椭圆
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} a
+ * @param {number} b
+ * @param {number} angle
+ * @param {any} style
+ */
 ui.prototype.fillEllipse = function (name, x, y, a, b, angle, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
@@ -320,6 +425,14 @@ ui.prototype.fillEllipse = function (name, x, y, a, b, angle, style) {
     ctx.fill();
 }
 
+/**
+ * 在某个canvas上绘制一个圆
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} r
+ * @param {string} style
+ */
 ui.prototype.fillCircle = function (name, x, y, r, style) {
     return this.fillEllipse(name, x, y, r, r, 0, style);
 }
@@ -331,6 +444,17 @@ ui.prototype._uievent_fillEllipse = function (data) {
 }
 
 ////// 在某个canvas上绘制一个圆的边框 //////
+/**
+ * 在某个canvas上绘制一个椭圆的边框
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} a
+ * @param {number} b
+ * @param {number} angle
+ * @param {string} style
+ * @param {number} lineWidth
+ */
 ui.prototype.strokeEllipse = function (name, x, y, a, b, angle, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
@@ -341,6 +465,15 @@ ui.prototype.strokeEllipse = function (name, x, y, a, b, angle, style, lineWidth
     ctx.stroke();
 }
 
+/**
+ * 在某个canvas上绘制一个圆的边框
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {any} r
+ * @param {string} style
+ * @param {number} lineWidth
+ */
 ui.prototype.strokeCircle = function (name, x, y, r, style, lineWidth) {
     return this.strokeEllipse(name, x, y, r, r, 0, style, lineWidth);
 }
@@ -351,6 +484,16 @@ ui.prototype._uievent_strokeEllipse = function (data) {
         core.calValue(data.b), (core.calValue(data.angle) || 0) * Math.PI / 180, data.style, data.lineWidth);
 }
 
+/**
+ * 在某个canvas上绘制一个扇形
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} r
+ * @param {number} start
+ * @param {number} end
+ * @param {string} style
+ */
 ui.prototype.fillArc = function (name, x, y, r, start, end, style) {
     if (style) core.setFillStyle(name, style);
     var ctx = this.getContextByName(name);
@@ -368,6 +511,17 @@ ui.prototype._uievent_fillArc = function (data) {
         (core.calValue(data.start) || 0) * Math.PI / 180, (core.calValue(data.end) || 0) * Math.PI / 180, data.style);
 }
 
+/**
+ * 在某个canvas上绘制一段弧
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} r
+ * @param {number} start
+ * @param {number} end
+ * @param {string} style
+ * @param {number} lineWidth
+ */
 ui.prototype.strokeArc = function (name, x, y, r, start, end, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth) core.setLineWidth(name, lineWidth);
@@ -385,6 +539,16 @@ ui.prototype._uievent_strokeArc = function (data) {
 }
 
 ////// 在某个canvas上绘制一条线 //////
+/**
+ * 在某个canvas上绘制一条线
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ * @param {string} style
+ * @param {number} lineWidth
+ */
 ui.prototype.drawLine = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (style) core.setStrokeStyle(name, style);
     if (lineWidth != null) core.setLineWidth(name, lineWidth);
@@ -402,6 +566,16 @@ ui.prototype._uievent_drawLine = function (data) {
 }
 
 ////// 在某个canvas上绘制一个箭头 //////
+/**
+ * 在某个canvas上绘制一个箭头
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} x1
+ * @param {number} y1
+ * @param {number} x2
+ * @param {number} y2
+ * @param {string} style
+ * @param {number} lineWidth
+ */
 ui.prototype.drawArrow = function (name, x1, y1, x2, y2, style, lineWidth) {
     if (x1 == x2 && y1 == y2) return;
     if (style) core.setStrokeStyle(name, style);
@@ -426,30 +600,53 @@ ui.prototype._uievent_drawArrow = function (data) {
 }
 
 ////// 设置某个canvas的文字字体 //////
+/**
+ * 设置某个canvas的文字字体
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} font
+ */
 ui.prototype.setFont = function (name, font) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.font = font;
 }
 
 ////// 设置某个canvas的线宽度 //////
+/**
+ * 设置某个canvas的线宽度
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} lineWidth
+ */
 ui.prototype.setLineWidth = function (name, lineWidth) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.lineWidth = lineWidth;
 }
 
 ////// 保存某个canvas状态 //////
+/**
+ * 保存某个canvas状态
+ * @param {string | CanvasRenderingContext2D} name
+ */
 ui.prototype.saveCanvas = function (name) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.save();
 }
 
 ////// 加载某个canvas状态 //////
+/**
+ * 加载某个canvas状态
+ * @param {string | CanvasRenderingContext2D} name
+ */
 ui.prototype.loadCanvas = function (name) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.restore();
 }
 
 ////// 设置某个canvas的alpha值，并返回设置之前的alpha值 //////
+/**
+ * 设置某个canvas的alpha值；返回设置之前画布的不透明度。
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} alpha
+ */
 ui.prototype.setAlpha = function (name, alpha) {
     var ctx = this.getContextByName(name);
     if (!ctx) return null;
@@ -459,12 +656,22 @@ ui.prototype.setAlpha = function (name, alpha) {
 }
 
 ////// 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现 //////
+/**
+ * 设置某个canvas的透明度；尽量不要使用本函数，而是全部换成setAlpha实现
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {number} opacity
+ */
 ui.prototype.setOpacity = function (name, opacity) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.canvas.style.opacity = opacity;
 }
 
 ////// 设置某个canvas的filter //////
+/**
+ * 设置某个canvas的filter属性
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {any} filter
+ */
 ui.prototype.setFilter = function (name, filter) {
     var ctx = this.getContextByName(name);
     if (!ctx) return;
@@ -483,24 +690,44 @@ ui.prototype.setFilter = function (name, filter) {
 }
 
 ////// 设置某个canvas的绘制属性（如颜色等） //////
+/**
+ * 设置某个canvas的绘制属性（如颜色等）
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} style
+ */
 ui.prototype.setFillStyle = function (name, style) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.fillStyle = core.arrayToRGBA(style);
 }
 
 ////// 设置某个canvas边框属性 //////
+/**
+ * 设置某个canvas边框属性
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} style
+ */
 ui.prototype.setStrokeStyle = function (name, style) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.strokeStyle = core.arrayToRGBA(style);
 }
 
 ////// 设置某个canvas的对齐 //////
+/**
+ * 设置某个canvas的对齐
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} align
+ */
 ui.prototype.setTextAlign = function (name, align) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.textAlign = align;
 }
 
 ////// 设置某个canvas的baseline //////
+/**
+ * 设置某个canvas的baseline
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {any} baseline
+ */
 ui.prototype.setTextBaseline = function (name, baseline) {
     var ctx = this.getContextByName(name);
     if (ctx) ctx.textBaseline = baseline;
@@ -529,6 +756,12 @@ ui.prototype._uievent_setFilter = function (data) {
 }
 
 ////// 计算某段文字的宽度 //////
+/**
+ * 计算某段文字的宽度
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} text
+ * @param {string} font
+ */
 ui.prototype.calWidth = function (name, text, font) {
     var ctx = this.getContextByName(name);
     if (ctx) {
@@ -539,6 +772,13 @@ ui.prototype.calWidth = function (name, text, font) {
 }
 
 ////// 字符串自动换行的分割 //////
+/**
+ * 字符串自动换行的分割
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} text
+ * @param {number} maxWidth
+ * @param {string} font
+ */
 ui.prototype.splitLines = function (name, text, maxWidth, font) {
     var ctx = this.getContextByName(name);
     if (!ctx) return [text];
@@ -569,6 +809,34 @@ ui.prototype.splitLines = function (name, text, maxWidth, font) {
 }
 
 ////// 绘制一张图片 //////
+/**
+ * 在一个画布上绘制图片
+ * 后面的8个坐标参数与canvas的drawImage的八个参数完全相同。
+ * 请查看 http://www.w3school.com.cn/html5/canvas_drawimage.asp 了解更多。
+ * @param {CtxRefer} name 可以是系统画布之一，也可以是任意自定义动态创建的画布名 画布名称或者画布的context
+ * @param {CanvasImageSource | string} image 要绘制的图片，可以是一个全塔属性中定义的图片名（会从images中去获取），图片本身，或者一个画布。
+ * @param {number} dx
+ */
+/**
+ * @param {CtxRefer} name
+ * @param {CanvasImageSource | string} image
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dw
+ * @param {number} dh
+ */
+/**
+ * @param {CtxRefer} name
+ * @param {CanvasImageSource | string} image
+ * @param {number} sx
+ * @param {number} sy
+ * @param {number} sw
+ * @param {number} sh
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dw
+ * @param {number} dh
+ */
 ui.prototype.drawImage = function (name, image, x, y, w, h, x1, y1, w1, h1, angle, reverse) {
     // 检测文件名以 :x, :y, :o 结尾，表示左右翻转，上下翻转和中心翻转
     var ctx = this.getContextByName(name);
@@ -630,6 +898,16 @@ ui.prototype._uievent_drawImage = function (data) {
         core.calValue(data.x1), core.calValue(data.y1), core.calValue(data.w1), core.calValue(data.h1), (core.calValue(data.angle) || 0) * Math.PI / 180);
 }
 
+/**
+ * 在某个canvas上绘制一个图标
+ * @param {string | CanvasRenderingContext2D} name
+ * @param {string} id
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {number} frame
+ */
 ui.prototype.drawIcon = function (name, id, x, y, w, h, frame) {
     frame = frame || 0;
     var ctx = this.getContextByName(name);
@@ -657,6 +935,7 @@ ui.prototype._uievent_drawIcon = function (data) {
 ///////////////// UI绘制
 
 ////// 结束一切事件和绘制，关闭UI窗口，返回游戏进程 //////
+/** 结束一切事件和绘制，关闭UI窗口，返回游戏进程 */
 ui.prototype.closePanel = function () {
     if (core.status.hero && core.status.hero.flags) {
         // 清除全部临时变量
@@ -680,6 +959,7 @@ ui.prototype.closePanel = function () {
     core.interval.onDownInterval = 'tmp';
 }
 
+/** 清空UI层内容 */
 ui.prototype.clearUI = function () {
     core.status.boxAnimateObjs = [];
     core.deleteCanvas("_selector");
@@ -692,6 +972,12 @@ ui.prototype.clearUI = function () {
 }
 
 ////// 左上角绘制一段提示 //////
+/**
+ * 左上角绘制一段提示
+ * @param {string} text 要提示的文字内容，支持 ${} 语法
+ * @param {string} id 要绘制的图标ID
+ * @param {number} frame 要绘制图标的第几帧
+ */
 ui.prototype.drawTip = function (text, id, frame) {
     text = core.replaceText(text) || "";
     var realText = this._getRealContent(text);
@@ -735,6 +1021,11 @@ ui.prototype._drawTip_drawOne = function (tip) {
 }
 
 ////// 地图中间绘制一段文字 //////
+/**
+ * 地图中间绘制一段文字
+ * @param {string} contents
+ * @param {() => any} callback
+ */
 ui.prototype.drawText = function (contents, callback) {
     if (contents != null) return this._drawText_setContent(contents, callback);
 
@@ -867,6 +1158,16 @@ ui.prototype._drawWindowSelector = function (background, x, y, w, h) {
 }
 
 ////// 自绘一个选择光标
+/**
+ * 自绘选择光标
+ * @param {number} code
+ * @param {string} background
+ * @param {number} x
+ * @param {number} y
+ * @param {number} w
+ * @param {number} h
+ * @param {number} z
+ */
 ui.prototype.drawUIEventSelector = function (code, background, x, y, w, h, z) {
     var canvasName = '_uievent_selector_' + (code || 0);
     var background = background || core.status.textAttribute.background;
@@ -887,6 +1188,10 @@ ui.prototype._uievent_drawSelector = function (data) {
 }
 
 ////// 清除自绘的选择光标
+/**
+ * 清除一个或多个选择光标
+ * @param {number | number[]} code
+ */
 ui.prototype.clearUIEventSelector = function (codes) {
     if (codes == null) {
         core.deleteCanvas(function (one) { return one.startsWith('_uievent_selector_'); })
@@ -917,6 +1222,18 @@ ui.prototype._drawSelector = function (ctx, background, w, h, left, top) {
 }
 
 ////// 绘制 WindowSkin
+/**
+ * 绘制WindowSkin
+ * @param {any} background
+ * @param {string | CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} y
+ * @param {string} w
+ * @param {string} h
+ * @param {any} direction
+ * @param {any} px
+ * @param {any} py
+ */
 ui.prototype.drawWindowSkin = function (background, ctx, x, y, w, h, direction, px, py) {
     background = background || core.status.textAttribute.background;
     // 仿RM窗口皮肤 ↓
@@ -955,6 +1272,14 @@ ui.prototype.drawWindowSkin = function (background, ctx, x, y, w, h, direction, 
 }
 
 ////// 绘制一个背景图，可绘制 winskin 或纯色背景；支持小箭头绘制
+/**
+ * 绘制一个背景图，可绘制winskin或纯色背景；支持小箭头绘制
+ * @param {string} left
+ * @param {string} top
+ * @param {string} right
+ * @param {string} bottom
+ * @param {any} posInfo
+ */
 ui.prototype.drawBackground = function (left, top, right, bottom, posInfo) {
     posInfo = posInfo || {};
     var px = posInfo.px == null || posInfo.noPeak ? null : posInfo.px * 32 - core.bigmap.offsetX;
@@ -1085,6 +1410,27 @@ ui.prototype._buildFont = function (fontSize, bold, italic, font) {
 // config：绘制配置项，目前暂时包含如下内容（均为可选）
 //         left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
 //         fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：字体类型；letterSpacing：字符间距
+/**
+ * 绘制一段文字到某个画布上面
+ * @param {string | CanvasRenderingContext2D} ctx 要绘制到的画布
+ * @param {string} content 要绘制的内容；转义字符只允许保留 \n, \r[...], \i[...], \c[...], \d, \e
+ * @param {{
+ *         left?: number
+ *         top?: number
+ *         maxWidth?: number
+ *         color?: number
+ *         align?: 'left' | 'center' | 'right'
+ *         fontSize: number
+ *         lineHeight?: number
+ *         time?: number
+ *         font?: string
+ *         letterSpacing?: number
+ *         bold?: boolean
+ *         italic?: boolean
+ *     }} config 绘制配置项，目前暂时包含如下内容（均为可选）
+ *  left, top：起始点位置；maxWidth：单行最大宽度；color：默认颜色；align：左中右
+ *  fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
+ */
 ui.prototype.drawTextContent = function (ctx, content, config) {
     ctx = core.getContextByName(ctx);
     // 设置默认配置项
@@ -1387,6 +1733,11 @@ ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
     return this._drawTextContent_next(tempCtx, content, config);
 }
 
+/**
+ * 获得某段文字的预计绘制高度；参见 drawTextContent
+ * @param {string} content
+ * @param {any} config
+ */
 ui.prototype.getTextContentHeight = function (content, config) {
     return this.drawTextContent(null, content, config).offsetY;
 }
@@ -1425,6 +1776,11 @@ ui.prototype._animateUI = function (type, ctx, callback) {
 }
 
 ////// 绘制一个对话框 //////
+/**
+ * 绘制一个对话框
+ * @param {string} content
+ * @param {any} config
+ */
 ui.prototype.drawTextBox = function (content, config) {
     config = config || {};
 
@@ -1659,6 +2015,13 @@ ui.prototype._createTextCanvas = function (content, lineHeight) {
 }
 
 ////// 绘制滚动字幕 //////
+/**
+ * 绘制滚动字幕
+ * @param {string} content
+ * @param {number} time
+ * @param {number} lineHeight
+ * @param {() => any} callback
+ */
 ui.prototype.drawScrollText = function (content, time, lineHeight, callback) {
     content = core.replaceText(content || "");
     lineHeight = lineHeight || 1.4;
@@ -1697,6 +2060,11 @@ ui.prototype._drawScrollText_animate = function (ctx, time, callback) {
 }
 
 ////// 文本图片化 //////
+/**
+ * 文本图片化
+ * @param {string} content
+ * @param {number} lineHeight
+ */
 ui.prototype.textImage = function (content, lineHeight) {
     content = core.replaceText(content || "");
     lineHeight = lineHeight || 1.4;
@@ -1707,6 +2075,11 @@ ui.prototype.textImage = function (content, lineHeight) {
 }
 
 ////// 绘制一个选项界面 //////
+/**
+ * 绘制一个选项界面
+ * @param {string} content
+ * @param {any} choices
+ */
 ui.prototype.drawChoices = function (content, choices, width, ctx) {
     choices = core.clone(choices || []);
 
@@ -1850,6 +2223,12 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
 }
 
 ////// 绘制一个确认/取消的警告页面 //////
+/**
+ * 绘制一个确认框
+ * @param {string} text
+ * @param {() => void} yesCallback
+ * @param {() => void} noCallback
+ */
 ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
     var hasCtx = ctx != null;
     ctx = ctx || 'ui';
@@ -1909,6 +2288,10 @@ ui.prototype._drawConfirmBox_getRect = function (contents, ctx) {
 }
 
 ////// 绘制等待界面 //////
+/**
+ * 绘制等待界面
+ * @param {string} text
+ */
 ui.prototype.drawWaiting = function (text) {
     core.lockControl();
     core.status.event.id = 'waiting';
@@ -2054,6 +2437,12 @@ ui.prototype._drawGameInfo = function () {
 }
 
 ////// 绘制分页 //////
+/**
+ * 绘制分页
+ * @param {any} page
+ * @param {any} totalPage
+ * @param {number} y
+ */
 ui.prototype.drawPagination = function (page, totalPage, y) {
     // if (totalPage<page) totalPage=page;
     if (totalPage <= 1) return;
@@ -2091,6 +2480,10 @@ ui.prototype._drawCursor = function () {
 }
 
 ////// 绘制怪物手册 //////
+/**
+ * 绘制怪物手册
+ * @param {any} index
+ */
 ui.prototype.drawBook = function (index) {
     var floorId = core.floorIds[(core.status.event.ui || {}).index] || core.status.floorId;
     // 清除浏览地图时的光环缓存
@@ -2508,6 +2901,10 @@ ui.prototype._drawBookDetail_drawContent = function (enemy, content, pos) {
 }
 
 ////// 绘制楼层传送器 //////
+/**
+ * 绘制楼层传送器
+ * @param {any} page
+ */
 ui.prototype.drawFly = function (page) {
     core.status.event.data = page;
     var floorId = core.floorIds[page];
@@ -2686,6 +3083,10 @@ ui.prototype._drawToolbox = function (index) {
 }
 
 ////// 获得所有应该在道具栏显示的某个类型道具 //////
+/**
+ * 获得所有应该在道具栏显示的某个类型道具
+ * @param {string} cls
+ */
 ui.prototype.getToolboxItems = function (cls) {
     if (this.uidata.getToolboxItems) {
         return this.uidata.getToolboxItems(cls);
@@ -3158,6 +3559,7 @@ ui.prototype._drawKeyBoard = function () {
 }
 
 ////// 绘制状态栏 /////
+/** 绘制状态栏 */
 ui.prototype.drawStatusBar = function () {
     this.uidata.drawStatusBar();
 }
@@ -3382,6 +3784,18 @@ ui.prototype._drawHelp = function () {
 ////// 动态canvas //////
 
 ////// canvas创建 //////
+/**
+ * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
+ * x,y为创建的画布相对窗口左上角的像素坐标，width,height为创建的长宽。
+ * zIndex为创建的纵向高度（关系到画布之间的覆盖），z值高的将覆盖z值低的；系统画布的z值可在个性化中查看。
+ * 返回创建的画布的context，也可以通过core.dymCanvas[name]调用
+ * @param {string} name
+ * @param {number} x
+ * @param {number} y
+ * @param {number} width
+ * @param {number} height
+ * @param {number} zIndex
+ */
 ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     // 如果画布已存在则直接调用
     if (core.dymCanvas[name]) {
@@ -3409,6 +3823,13 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
 }
 
 ////// canvas重定位 //////
+/**
+ * 重新定位一个自定义画布
+ * @param {string} name
+ * @param {number} x
+ * @param {number} y
+ * @param {boolean} useDelta
+ */
 ui.prototype.relocateCanvas = function (name, x, y, useDelta) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
@@ -3432,6 +3853,13 @@ ui.prototype.relocateCanvas = function (name, x, y, useDelta) {
 }
 
 ////// canvas旋转 //////
+/**
+ * 设置一个自定义画布的旋转角度
+ * @param {string} name
+ * @param {number} angle
+ * @param {number} centerX
+ * @param {number} centerY
+ */
 ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
@@ -3453,6 +3881,14 @@ ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
 }
 
 ////// canvas重置 //////
+/**
+ * 重新设置一个自定义画布的大小
+ * @param {string} name
+ * @param {number} x
+ * @param {number} y
+ * @param {boolean} styleOnly 是否只修改style，而不修改元素上的长宽，如果是true，会出现模糊现象
+ * @param {boolean} isTempCanvas 是否是临时画布，如果填true，会将临时画布修改为高清画布
+ */
 ui.prototype.resizeCanvas = function (name, width, height, styleOnly, isTempCanvas) {
     var ctx = core.getContextByName(name);
     if (!ctx) return null;
@@ -3467,6 +3903,10 @@ ui.prototype.resizeCanvas = function (name, width, height, styleOnly, isTempCanv
     return ctx;
 }
 ////// canvas删除 //////
+/**
+ * 删除一个自定义画布
+ * @param {string | ((name: string) => boolean)} name
+ */
 ui.prototype.deleteCanvas = function (name) {
     if (name instanceof Function) {
         Object.keys(core.dymCanvas).forEach(function (one) {
@@ -3481,6 +3921,7 @@ ui.prototype.deleteCanvas = function (name) {
 }
 
 ////// 删除所有动态canvas //////
+/** 清空所有的自定义画布 */
 ui.prototype.deleteAllCanvas = function () {
     return this.deleteCanvas(function () { return true; })
 }

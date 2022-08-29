@@ -14,6 +14,7 @@ items.prototype._init = function () {
 }
 
 ////// 获得所有道具 //////
+/** 获得所有道具 */
 items.prototype.getItems = function () {
     var items = core.clone(this.items);
     var equipInfo = core.getFlag('equipInfo');
@@ -26,6 +27,11 @@ items.prototype.getItems = function () {
 }
 
 ////// “即捡即用类”道具的使用效果 //////
+/**
+ * 即捡即用类的道具获得时的效果
+ * @param {string} itemId 道具id
+ * @param {number} itemNum 道具数量，可选，默认为1
+ */
 items.prototype.getItemEffect = function (itemId, itemNum) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
@@ -60,6 +66,10 @@ items.prototype.getItemEffect = function (itemId, itemNum) {
 }
 
 ////// “即捡即用类”道具的文字提示 //////
+/**
+ * 即捡即用类的道具获得时的额外提示
+ * @param {string} itemId 道具id
+ */
 items.prototype.getItemEffectTip = function (itemId) {
     var itemCls = core.material.items[itemId].cls;
     // 消耗品
@@ -78,6 +88,12 @@ items.prototype.getItemEffectTip = function (itemId) {
 }
 
 ////// 使用道具 //////
+/**
+ * 使用一个道具
+ * @param {string} itemId 道具id
+ * @param {boolean} noRoute 是否不计入录像，快捷键使用的请填true，否则可省略
+ * @param {() => void} callback 道具使用完毕或使用失败后的回调函数
+ */
 items.prototype.useItem = function (itemId, noRoute, callback) {
     if (!this.canUseItem(itemId)) {
         if (callback) callback();
@@ -124,6 +140,10 @@ items.prototype._afterUseItem = function (itemId) {
 }
 
 ////// 当前能否使用道具 //////
+/**
+ * 检查能否使用某种道具
+ * @param {string} itemId 道具id
+ */
 items.prototype.canUseItem = function (itemId) {
     // 没有道具
     if (!core.hasItem(itemId)) return false;
@@ -141,6 +161,10 @@ items.prototype.canUseItem = function (itemId) {
 }
 
 ////// 获得某个物品的个数 //////
+/**
+ * 统计某种道具的持有量
+ * @param {string} itemId 道具id
+ */
 items.prototype.itemCount = function (itemId) {
     if (!core.material.items[itemId] || !core.isPlaying()) return 0;
     var itemCls = core.material.items[itemId].cls;
@@ -149,11 +173,19 @@ items.prototype.itemCount = function (itemId) {
 }
 
 ////// 是否存在某个物品 //////
+/**
+ * 检查主角是否持有某种道具(不包括已穿戴的装备)
+ * @param {string} itemId 道具id
+ */
 items.prototype.hasItem = function (itemId) {
     return this.itemCount(itemId) > 0;
 }
 
 ////// 是否装备某件装备 //////
+/**
+ * 检查主角是否穿戴着某件装备
+ * @param {string} itemId 装备id
+ */
 items.prototype.hasEquip = function (itemId) {
     if (!(core.material.items[itemId] || {}).equip || !core.isPlaying()) return null;
 
@@ -164,11 +196,20 @@ items.prototype.hasEquip = function (itemId) {
 }
 
 ////// 获得某个装备类型的当前装备 //////
+/**
+ * 检查主角某种类型的装备目前是什么
+ * @param {number} equipType 装备类型，自然数
+ */
 items.prototype.getEquip = function (equipType) {
     return core.status.hero.equipment[equipType] || null;
 }
 
 ////// 设置某个物品的个数 //////
+/**
+ * 设置某种道具的持有量
+ * @param {string} itemId 道具id
+ * @param {number} itemNum 新的持有量，可选，自然数，默认为0
+ */
 items.prototype.setItem = function (itemId, itemNum) {
     itemNum = itemNum || 0;
     var itemCls = core.material.items[itemId].cls;
@@ -182,6 +223,11 @@ items.prototype.setItem = function (itemId, itemNum) {
 }
 
 ////// 增加某个物品的个数 //////
+/**
+ * 静默增减某种道具的持有量 不会更新游戏画面或是显示提示
+ * @param {string} itemId 道具id
+ * @param {number} itemNum 增加量，负数表示没收
+ */
 items.prototype.addItem = function (itemId, itemNum) {
     if (itemNum == null) itemNum = 1;
     var itemData = core.material.items[itemId];
@@ -201,6 +247,11 @@ items.prototype.addItem = function (itemId, itemNum) {
 }
 
 ////// 删除某个物品 //////
+/**
+ * 删除某个物品
+ * @param {string} itemId
+ * @param {number} itemNum
+ */
 items.prototype.removeItem = function (itemId, itemNum) {
     if (itemNum == null) itemNum = 1;
     if (!core.hasItem(itemId)) return false;
@@ -215,6 +266,10 @@ items.prototype.removeItem = function (itemId, itemNum) {
 
 // ---------- 装备相关 ------------ //
 
+/**
+ * 根据类型获得一个可用的装备孔
+ * @param {string} name
+ */
 items.prototype.getEquipTypeByName = function (name) {
     var names = core.status.globalAttribute.equipName;
     var types = [];
@@ -227,6 +282,10 @@ items.prototype.getEquipTypeByName = function (name) {
     return types.length == 1 ? types[0] : -1;
 }
 
+/**
+ * 判定某件装备的类型
+ * @param {string} equipId 装备id
+ */
 items.prototype.getEquipTypeById = function (equipId) {
     var type = core.material.items[equipId].equip.type;
     if (typeof type == 'string')
@@ -235,6 +294,11 @@ items.prototype.getEquipTypeById = function (equipId) {
 }
 
 // 当前能否撞上某装备
+/**
+ * 检查能否穿上某件装备
+ * @param {string} equipId 装备id
+ * @param {boolean} hint 无法穿上时是否提示（比如是因为未持有还是别的什么原因）
+ */
 items.prototype.canEquip = function (equipId, hint) {
     // 装备是否合法
     var equip = core.material.items[equipId] || {};
@@ -276,6 +340,11 @@ items.prototype.canEquip = function (equipId, hint) {
 }
 
 ////// 换上 //////
+/**
+ * 尝试穿上某件背包里的装备并提示
+ * @param {string} equipId 装备id
+ * @param {() => void} callback 穿戴成功或失败后的回调函数
+ */
 items.prototype.loadEquip = function (equipId, callback) {
     if (!this.canEquip(equipId, true)) {
         if (callback) callback();
@@ -295,6 +364,11 @@ items.prototype.loadEquip = function (equipId, callback) {
 }
 
 ////// 卸下 //////
+/**
+ * 脱下某个类型的装备
+ * @param {number} equipType 装备类型编号，自然数
+ * @param {() => void} callback 卸下装备后的回调函数
+ */
 items.prototype.unloadEquip = function (equipType, callback) {
     var unloadEquipId = core.status.hero.equipment[equipType];
     if (!unloadEquipId) {
@@ -305,6 +379,11 @@ items.prototype.unloadEquip = function (equipType, callback) {
     this._realLoadEquip(equipType, null, unloadEquipId, callback);
 }
 
+/**
+ * 比较两件（类型可不同）装备的优劣
+ * @param {string} compareEquipId 装备甲的id
+ * @param {string} beComparedEquipId 装备乙的id
+ */
 items.prototype.compareEquipment = function (compareEquipId, beComparedEquipId) {
     var result = { "value": {}, "percentage": {} };
     var first = core.material.items[compareEquipId], second = core.material.items[beComparedEquipId];
@@ -361,6 +440,10 @@ items.prototype._realLoadEquip_playSound = function () {
 }
 
 ////// 保存装备 //////
+/**
+ * 保存当前套装
+ * @param {number} index 套装编号，自然数
+ */
 items.prototype.quickSaveEquip = function (index) {
     var saveEquips = core.getFlag("saveEquips", []);
     saveEquips[index] = core.clone(core.status.hero.equipment);
@@ -370,6 +453,10 @@ items.prototype.quickSaveEquip = function (index) {
 }
 
 ////// 读取装备 //////
+/**
+ * 快速换装
+ * @param {number} index 套装编号，自然数
+ */
 items.prototype.quickLoadEquip = function (index) {
     var current = core.getFlag("saveEquips", [])[index];
     if (!current) {
@@ -412,6 +499,15 @@ items.prototype.quickLoadEquip = function (index) {
 }
 
 ////// 设置装备属性 //////
+/**
+ * 设置某个装备的属性并计入存档
+ * @param {string} equipId 装备id
+ * @param {string} valueType 增幅类型，只能是value（数值）或percentage（百分比）
+ * @param {string} name 要修改的属性名称，如atk
+ * @param {any} value 要修改到的属性数值
+ * @param {string} operator 操作符，可选，如+=表示在原始值上增加
+ * @param {string} prefix 独立开关前缀，一般不需要
+ */
 items.prototype.setEquip = function (equipId, valueType, name, value, operator, prefix) {
     var equip = core.material.items[equipId];
     if (!equip || equip.cls != 'equips') return;

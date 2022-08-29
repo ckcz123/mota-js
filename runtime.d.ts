@@ -321,6 +321,28 @@ type gameStatus = {
     animateObjs: []
 }
 
+interface DrawThumbnailOption {
+    heroLoc?: [number, number]
+    heroIcon?: string
+    /** 是否绘制显伤 */
+    damage?: boolean
+    /** 存读档时使用，可以无视 */
+    flags?: { [x: string]: any }
+    ctx?: CtxRefer
+    x?: number
+    y?: number
+    /** 绘制大小 */
+    size?: number
+    /** 绘制全图 */
+    all?: boolean
+    /** 绘制的视野中心 */
+    centerX?: number
+    /** 绘制的视野中心 */
+    centerY?: number
+    /** 存读档时使用，可以无视 */
+    noHD: boolean
+}
+
 /** @file control.js 主要用来进行游戏控制，比如行走控制、自动寻路、存读档等等游戏核心内容。 */
 interface control {
 

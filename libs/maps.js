@@ -51,6 +51,11 @@ maps.prototype._setHDCanvasSize = function (ctx, width, height, isTempCanvas) {
 // ------ 加载地图与地图的存档读档（压缩与解压缩） ------ //
 
 ////// 加载某个楼层（从剧本或存档中） //////
+/**
+ * 加载某个楼层（从剧本或存档中）
+ * @param {string} floorId
+ * @param {any} map
+ */
 maps.prototype.loadFloor = function (floorId, map) {
     var floor = core.floors[floorId];
     if (!map) map = core.cloneArray(floor.map);
@@ -84,6 +89,15 @@ maps.prototype._loadFloor_doNotCopy = function () {
 }
 
 /// 根据需求解析出blocks
+/**
+ * 根据需求解析出blocks
+ * @param {any} map
+ */
+/**
+ * 根据需求为UI解析出blocks
+ * @param {any} map
+ * @param {any} flags
+ */
 maps.prototype.extractBlocks = function (map) {
     map = map || core.status.floorId;
     if (typeof map == 'string') map = (core.status.maps || {})[map];
@@ -155,6 +169,10 @@ maps.prototype.extractBlocksForUI = function (map, flags) {
 }
 
 ////// 从ID获得数字 //////
+/**
+ * 根据图块id得到数字（地图矩阵中的值）
+ * @param {string} id 图块id
+ */
 maps.prototype.getNumberById = function (id) {
     id = this.getIdOfThis(id);
     core.status.id2number = core.status.id2number || {};
@@ -177,16 +195,28 @@ maps.prototype._getNumberById = function (id) {
     return 0;
 }
 
+/**
+ * 根据数字获得图块
+ * @param {number} number
+ */
 maps.prototype.getBlockByNumber = function (number) {
     core.status.number2Block = core.status.number2Block || {};
     if (core.status.number2Block[number] != null) return core.status.number2Block[number];
     return core.status.number2Block[number] = this.initBlock(null, null, number, true);
 }
 
+/**
+ * 根据ID获得图块
+ * @param {string} id
+ */
 maps.prototype.getBlockById = function (id) {
     return this.getBlockByNumber(this.getNumberById(id));
 }
 
+/**
+ * 获得当前事件点的ID
+ * @param {string} id
+ */
 maps.prototype.getIdOfThis = function (id) {
     if (id != 'this') return id;
     if (core.status.event.id != 'action') return id;
@@ -195,6 +225,14 @@ maps.prototype.getIdOfThis = function (id) {
 }
 
 ////// 数字和ID的对应关系 //////
+/**
+ * 初始化一个图块
+ * @param {number} x
+ * @param {number} y
+ * @param {string | number} id
+ * @param {boolean} addInfo
+ * @param {any} eventFloor
+ */
 maps.prototype.initBlock = function (x, y, id, addInfo, eventFloor) {
     var disable = null;
     var opacity = null;
@@ -308,6 +346,11 @@ maps.prototype._initMaps = function () {
 }
 
 ////// 压缩地图
+/**
+ * 压缩地图
+ * @param {any} mapArr
+ * @param {string} floorId
+ */
 maps.prototype.compressMap = function (mapArr, floorId) {
     var floorMap = core.floors[floorId].map;
     if (core.utils.same(mapArr, floorMap)) return null;
@@ -459,6 +502,11 @@ maps.prototype.setMapBlockDisabled = function (floorId, x, y, disabled) {
 }
 
 ////// 解压缩地图
+/**
+ * 解压缩地图
+ * @param {any} mapArr
+ * @param {string} floorId
+ */
 maps.prototype.decompressMap = function (mapArr, floorId) {
     var mw = core.floors[floorId].width;
     var mh = core.floors[floorId].height;
@@ -486,6 +534,10 @@ maps.prototype.decompressMap = function (mapArr, floorId) {
 }
 
 ////// 将当前地图重新变成数字，以便于存档 //////
+/**
+ * 将当前地图重新变成数字，以便于存档
+ * @param {string} floorId
+ */
 maps.prototype.saveMap = function (floorId) {
     var maps = core.status.maps;
     if (!floorId) {
@@ -523,6 +575,12 @@ maps.prototype._compressFloorData = function (map, floor) {
 }
 
 ////// 将存档中的地图信息重新读取出来 //////
+/**
+ * 将存档中的地图信息重新读取出来
+ * @param {any} data
+ * @param {string} floorId
+ * @param {any} flags
+ */
 maps.prototype.loadMap = function (data, floorId, flags) {
     if (!floorId) {
         var map = {};
@@ -538,6 +596,10 @@ maps.prototype.loadMap = function (data, floorId, flags) {
 }
 
 ////// 更改地图画布的尺寸
+/**
+ * 更改地图画布的尺寸
+ * @param {string} floorId
+ */
 maps.prototype.resizeMap = function (floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -567,6 +629,11 @@ maps.prototype.resizeMap = function (floorId) {
 }
 
 ////// 将当前地图重新变成二维数组形式 //////
+/**
+ * 生成事件层矩阵
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {boolean} noCache
+ */
 maps.prototype.getMapArray = function (floorId, noCache) {
     floorId = floorId || core.status.floorId;
     var map = core.status.maps[floorId];
@@ -575,6 +642,11 @@ maps.prototype.getMapArray = function (floorId, noCache) {
 }
 
 ////// 获得地图上某点的数字
+/**
+ * 判定图块的事件层数字；不存在为0
+ * @param {string} floorId
+ * @param {boolean} noCache
+ */
 maps.prototype.getMapNumber = function (x, y, floorId, noCache) {
     return this.getMapArray(floorId, noCache)[y][x];
 }
@@ -601,6 +673,11 @@ maps.prototype._getMapArrayFromBlocks = function (blockArray, width, height, sho
 }
 
 ////// 以x,y的形式返回每个点的事件 //////
+/**
+ * 以x,y的形式返回每个点的事件
+ * @param {string} floorId
+ * @param {boolean} noCache
+ */
 maps.prototype.getMapBlocksObj = function (floorId, noCache) {
     floorId = floorId || core.status.floorId;
     if (core.status.mapBlockObjs[floorId] && !noCache)
@@ -650,10 +727,20 @@ maps.prototype._getBgFgMapArray = function (name, floorId, noCache) {
     return arr;
 }
 
+/**
+ * 生成背景层矩阵
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {boolean} noCache 可选，true表示不使用缓存
+ */
 maps.prototype.getBgMapArray = function (floorId) {
     return this._getBgFgMapArray('bg', floorId);
 }
 
+/**
+ * 生成前景层矩阵
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {boolean} noCache 可选，true表示不使用缓存
+ */
 maps.prototype.getFgMapArray = function (floorId) {
     return this._getBgFgMapArray('fg', floorId);
 }
@@ -664,10 +751,24 @@ maps.prototype._getBgFgNumber = function (name, x, y, floorId) {
     return this._getBgFgMapArray(name, floorId)[y][x];
 }
 
+/**
+ * 判定背景层的一个位置是什么
+ * @param {number} x 横坐标，不填为当前勇士坐标
+ * @param {number} y 纵坐标，不填为当前勇士坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {boolean} noCache
+ */
 maps.prototype.getBgNumber = function (x, y, floorId) {
     return this._getBgFgNumber('bg', x, y, floorId);
 }
 
+/**
+ * 判定前景层的一个位置是什么
+ * @param {number} x 横坐标，不填为当前勇士坐标
+ * @param {number} y 纵坐标，不填为当前勇士坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {boolean} noCache
+ */
 maps.prototype.getFgNumber = function (x, y, floorId) {
     return this._getBgFgNumber('fg', x, y, floorId);
 }
@@ -675,6 +776,10 @@ maps.prototype.getFgNumber = function (x, y, floorId) {
 // ------ 当前能否朝某方向移动，能否瞬间移动 ------ //
 
 ////// 生成全图的当前可移动信息 //////
+/**
+ * 可通行性判定
+ * @param {string} floorId 地图id，不填视为当前地图
+ */
 maps.prototype.generateMovableArray = function (floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return null;
@@ -710,6 +815,13 @@ maps.prototype._generateMovableArray_arrays = function (floorId) {
 }
 
 ////// 勇士能否前往某方向 //////
+/**
+ * 单点单朝向的可通行性判定
+ * @param {number} x 起点横坐标，不填视为主角当前的
+ * @param {number} y 起点纵坐标，不填视为主角当前的
+ * @param {direction} direction 移动的方向，不填视为主角面对的方向
+ * @param {string} floorId 地图id，不填视为当前地图
+ */
 maps.prototype.canMoveHero = function (x, y, direction, floorId) {
     if (x == null) x = core.getHeroLoc('x');
     if (y == null) y = core.getHeroLoc('y');
@@ -761,10 +873,19 @@ maps.prototype._canMoveHero_checkCannotInOut = function (number, name, direction
 }
 
 ////// 能否瞬间移动 //////
+/**
+ * 能否瞬移到某点，并求出节约的步数。
+ * @param {number} destX 目标点的横坐标
+ * @param {number} destY 目标点的纵坐标
+ */
 maps.prototype.canMoveDirectly = function (destX, destY) {
     return this.canMoveDirectlyArray([[destX, destY]])[0];
 }
 
+/**
+ * 获得某些点可否通行的信息
+ * @param {any} locs
+ */
 maps.prototype.canMoveDirectlyArray = function (locs, canMoveArray) {
     var ans = [], number = locs.length;
 
@@ -885,6 +1006,11 @@ maps.prototype._canMoveDirectly_checkNextPoint = function (blocksObj, x, y) {
 }
 
 ////// 自动寻路找寻最优路径 //////
+/**
+ * 自动寻路
+ * @param {number} destX 目标点的横坐标
+ * @param {number} destY 目标点的纵坐标
+ */
 maps.prototype.automaticRoute = function (destX, destY) {
     var startX = core.getHeroLoc('x'), startY = core.getHeroLoc('y');
     if (destX == startX && destY == startY) return [];
@@ -979,6 +1105,11 @@ maps.prototype._getBigImageInfo = function (bigImage, face, animate) {
 }
 
 ////// 绘制一个图块 //////
+/**
+ * 绘制一个图块
+ * @param {any} block
+ * @param {any} animate
+ */
 maps.prototype.drawBlock = function (block, animate, ctx) {
     if (block.event.id == 'none') return;
     var redraw = animate != null;
@@ -1138,6 +1269,10 @@ maps.prototype._drawBlockInfo_shouldBlurFg = function (x, y) {
 }
 
 ////// 生成groundPattern //////
+/**
+ * 生成groundPattern
+ * @param {string} floorId
+ */
 maps.prototype.generateGroundPattern = function (floorId) {
     // 生成floorId层的groundPattern（盒子内的怪物动画）
     var groundId = ((core.status.maps || core.floors)[floorId || core.status.floorId] || {}).defaultGround || "ground";
@@ -1151,6 +1286,11 @@ maps.prototype.generateGroundPattern = function (floorId) {
 }
 
 ////// 绘制某张地图 //////
+/**
+ * 地图绘制
+ * @param {string} floorId 地图id，省略表示当前楼层
+ * @param {() => void} callback 重绘完毕后的回调函数，可选
+ */
 maps.prototype.drawMap = function (floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -1170,6 +1310,7 @@ maps.prototype.drawMap = function (floorId) {
 }
 
 ////// 重绘某张地图 //////
+/** 重绘地图 */
 maps.prototype.redrawMap = function () {
     core.bigmap.canvas.forEach(function (one) {
         core.clearMap(one);
@@ -1231,6 +1372,11 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, co
 ////// 绘制背景层 //////
 // config：绘制的参数，可包含如下项：
 // redraw - 是否是重绘；ctx - 要绘制到的画布（仅限缩略图使用）；
+/**
+ * 绘制背景层（含贴图，其与背景层矩阵的绘制顺序可通过复写此函数来改变）
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {CanvasRenderingContext2D} ctx 某画布的ctx，用于绘制缩略图，一般不需要
+ */
 maps.prototype.drawBg = function (floorId, config) {
     floorId = floorId || core.status.floorId;
     if (config == null) config = {};
@@ -1285,6 +1431,12 @@ maps.prototype._drawBg_drawBackground = function (floorId, config) {
 }
 
 ////// 绘制事件层 //////
+/**
+ * 绘制事件层
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {Block[]} blocks 一般不需要
+ * @param {CanvasRenderingContext2D} ctx 某画布的ctx，用于绘制缩略图，一般不需要
+ */
 maps.prototype.drawEvents = function (floorId, blocks, config) {
     floorId = floorId || core.status.floorId;
     if (config == null) config = {};
@@ -1341,6 +1493,11 @@ maps.prototype.drawEvents = function (floorId, blocks, config) {
 ////// 绘制前景层 //////
 // config：绘制的参数，可包含如下项：
 // redraw - 是否是重绘；ctx - 要绘制到的画布（仅限缩略图使用）；
+/**
+ * 绘制前景层（含贴图，其与前景层矩阵的绘制顺序可通过复写此函数来改变）
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {CanvasRenderingContext2D} ctx 某画布的ctx，用于绘制缩略图，一般不需要
+ */
 maps.prototype.drawFg = function (floorId, config) {
     floorId = floorId || core.status.floorId;
     if (config == null) config = {};
@@ -1710,6 +1867,12 @@ maps.prototype._makeAutotileEdges = function () {
 //    ctx：要绘制到的画布（名）；x,y：起点横纵坐标（默认0）；size：大小（默认416/480）；
 //    all：是否绘制全图（默认false）；centerX,centerY：截取中心（默认为地图正中心）
 //    noHD：不使用高清绘制，避免存读档界面出问题
+/**
+ * 绘制缩略图
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {Block[]} blocks 一般不需要
+ * @param {DrawThumbnailOption} options 额外的绘制项，可选。可以增绘主角位置和朝向、采用不同于游戏中的主角行走图、增绘显伤、提供flags用于存读档
+ */
 maps.prototype.drawThumbnail = function (floorId, blocks, options) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -1849,6 +2012,12 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
 // -------- 获得某个点的图块信息 -------- //
 
 ////// 某个点是否不可通行 //////
+/**
+ * 判定某个点是否不可被踏入（不基于主角生命值和图块cannotIn属性）
+ * @param {number} x 目标点的横坐标
+ * @param {number} y 目标点的纵坐标
+ * @param {string} floorId 目标点所在的地图id，不填视为当前地图
+ */
 maps.prototype.noPass = function (x, y, floorId) {
     var block = core.getBlock(x, y, floorId);
     if (block == null) return false;
@@ -1856,6 +2025,12 @@ maps.prototype.noPass = function (x, y, floorId) {
 }
 
 ////// 某个点是否存在NPC //////
+/**
+ * 某个点是否存在NPC
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 maps.prototype.npcExists = function (x, y, floorId) {
     var block = this.getBlock(x, y, floorId);
     if (block == null) return false;
@@ -1863,6 +2038,13 @@ maps.prototype.npcExists = function (x, y, floorId) {
 }
 
 ////// 某个点是否存在（指定的）地形 //////
+/**
+ * 某个点是否存在（指定的）地形
+ * @param {number} x
+ * @param {number} y
+ * @param {string} id
+ * @param {string} floorId
+ */
 maps.prototype.terrainExists = function (x, y, id, floorId) {
     var block = this.getBlock(x, y, floorId);
     if (block == null) return false;
@@ -1870,6 +2052,12 @@ maps.prototype.terrainExists = function (x, y, id, floorId) {
 }
 
 ////// 某个点是否存在楼梯 //////
+/**
+ * 某个点是否存在楼梯
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 maps.prototype.stairExists = function (x, y, floorId) {
     var blockId = this.getBlockId(x, y, floorId);
     if (blockId == null) return false;
@@ -1879,12 +2067,20 @@ maps.prototype.stairExists = function (x, y, floorId) {
 }
 
 ////// 当前位置是否在楼梯边 //////
+/** 当前位置是否在楼梯边；在楼传平面塔模式下对箭头也有效 */
 maps.prototype.nearStair = function () {
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y');
     return this.stairExists(x, y) || this.stairExists(x - 1, y) || this.stairExists(x, y - 1) || this.stairExists(x + 1, y) || this.stairExists(x, y + 1);
 }
 
 ////// 某个点是否存在（指定的）怪物 //////
+/**
+ * 某个点是否存在（指定的）怪物
+ * @param {number} x
+ * @param {number} y
+ * @param {string} id
+ * @param {string} floorId
+ */
 maps.prototype.enemyExists = function (x, y, id, floorId) {
     var block = this.getBlock(x, y, floorId);
     if (block == null) return false;
@@ -1892,6 +2088,13 @@ maps.prototype.enemyExists = function (x, y, id, floorId) {
 }
 
 ////// 获得某个点的block //////
+/**
+ * 获得某个点的block
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {boolean} showDisable
+ */
 maps.prototype.getBlock = function (x, y, floorId, showDisable) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return null;
@@ -1903,18 +2106,39 @@ maps.prototype.getBlock = function (x, y, floorId, showDisable) {
 }
 
 ////// 获得某个点的blockId //////
+/**
+ * 判定某个点的图块id
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {boolean} showDisable 隐藏点是否不返回null，true表示不返回null
+ */
 maps.prototype.getBlockId = function (x, y, floorId, showDisable) {
     var block = core.getBlock(x, y, floorId, showDisable);
     return block == null ? null : block.event.id;
 }
 
 ////// 获得某个点的数字 //////
+/**
+ * 判定某个点的图块数字；空图块为0
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {boolean} showDisable
+ */
 maps.prototype.getBlockNumber = function (x, y, floorId, showDisable) {
     var block = core.getBlock(x, y, floorId, showDisable);
     return block == null ? null : block.id;
 }
 
 ////// 获得某个点的blockCls //////
+/**
+ * 判定某个点的图块类型
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ * @param {boolean} showDisable 隐藏点是否不返回null，true表示不返回null
+ */
 maps.prototype.getBlockCls = function (x, y, floorId, showDisable) {
     var block = core.getBlock(x, y, floorId, showDisable);
     return block == null ? null : block.event.cls;
@@ -1937,6 +2161,10 @@ maps.prototype.getBlockFilter = function (x, y, floorId, showDisable) {
 }
 
 ////// 获得某个图块或素材的信息，包括 ID，cls，图片，坐标，faceIds 等等 //////
+/**
+ * 获得某个图块或素材的信息，包括ID，cls，图片，坐标，faceIds等等
+ * @param {any} block
+ */
 maps.prototype.getBlockInfo = function (block) {
     if (!block) return null;
     if (typeof block == 'string') { // 参数是ID
@@ -1994,6 +2222,12 @@ maps.prototype.getBlockInfo = function (block) {
 }
 
 ////// 搜索某个图块出现的所有位置 //////
+/**
+ * 搜索图块, 支持通配符
+ * @param {string} id 图块id，支持星号表示任意多个（0个起）字符
+ * @param {string | Array<string>} floorId 地图id，不填视为当前地图
+ * @param {boolean} showDisable 隐藏点是否计入，true表示计入
+ */
 maps.prototype.searchBlock = function (id, floorId, showDisable) {
     if (typeof id == 'number') id = this.getBlockByNumber(id).event.id;
     floorId = floorId || core.status.floorId;
@@ -2015,6 +2249,12 @@ maps.prototype.searchBlock = function (id, floorId, showDisable) {
 }
 
 ////// 给定筛选函数，搜索某个图块出现的所有位置 //////
+/**
+ * 根据给定的筛选函数搜索全部满足条件的图块
+ * @param {(block: Block) => boolean} blockFilter 筛选函数，可接受block输入，应当返回一个boolean值
+ * @param {string | Array<string>} floorId 地图id，不填视为当前地图
+ * @param {boolean} showDisable 隐藏点是否计入，true表示计入
+ */
 maps.prototype.searchBlockWithFilter = function (blockFilter, floorId, showDisable) {
     floorId = floorId || core.status.floorId;
     var result = [];
@@ -2035,6 +2275,10 @@ maps.prototype.searchBlockWithFilter = function (blockFilter, floorId, showDisab
 }
 
 ////// 获得某个图块，其行走图朝向朝下的图块ID //////
+/**
+ * 获得某个图块对应行走图朝向向下的那一项的id；如果不存在行走图绑定则返回自身id
+ * @param {any} block
+ */
 maps.prototype.getFaceDownId = function (block) {
     if (block == null) return null;
     if (typeof block == 'string') { // 参数是ID
@@ -2051,6 +2295,12 @@ maps.prototype.getFaceDownId = function (block) {
 // -------- 启用/禁用图块，楼层贴图 -------- //
 
 ////// 将某个块从禁用变成启用状态 //////
+/**
+ * 显示（隐藏或显示的）图块，此函数将被“显示事件”指令和勾选了“不消失”的“移动/跳跃事件”指令（如阻击怪）的终点调用
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ */
 maps.prototype.showBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -2075,6 +2325,12 @@ maps.prototype.showBlock = function (x, y, floorId) {
 }
 
 ////// 只隐藏但不删除某块 //////
+/**
+ * 隐藏一个图块，对应于「隐藏事件」且不删除
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ */
 maps.prototype.hideBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -2091,6 +2347,11 @@ maps.prototype.hideBlock = function (x, y, floorId) {
 }
 
 ////// 根据图块的索引来隐藏图块 //////
+/**
+ * 根据图块的索引来隐藏图块
+ * @param {any} index
+ * @param {string} floorId
+ */
 maps.prototype.hideBlockByIndex = function (index, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -2102,6 +2363,11 @@ maps.prototype.hideBlockByIndex = function (index, floorId) {
 }
 
 ////// 一次性隐藏多个block //////
+/**
+ * 一次性隐藏多个block
+ * @param {any} indexes
+ * @param {string} floorId
+ */
 maps.prototype.hideBlockByIndexes = function (indexes, floorId) {
     indexes.sort(function (a, b) {
         return b - a;
@@ -2131,6 +2397,12 @@ maps.prototype._removeBlockFromMap = function (floorId, block) {
 }
 
 ////// 删除某个图块 //////
+/**
+ * 删除一个图块，对应于「隐藏事件」并同时删除
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ */
 maps.prototype.removeBlock = function (x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return false;
@@ -2148,6 +2420,11 @@ maps.prototype.removeBlock = function (x, y, floorId) {
 }
 
 ////// 根据block的索引（尽可能）删除该块 //////
+/**
+ * 根据block的索引（尽可能）删除该块
+ * @param {any} index
+ * @param {string} floorId
+ */
 maps.prototype.removeBlockByIndex = function (index, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -2161,6 +2438,11 @@ maps.prototype.removeBlockByIndex = function (index, floorId) {
 }
 
 ////// 一次性删除多个block //////
+/**
+ * 一次性删除多个block
+ * @param {any} indexes
+ * @param {string} floorId
+ */
 maps.prototype.removeBlockByIndexes = function (indexes, floorId) {
     indexes.sort(function (a, b) {
         return b - a;
@@ -2170,11 +2452,25 @@ maps.prototype.removeBlockByIndexes = function (indexes, floorId) {
 }
 
 ////// 显示前景/背景地图 //////
+/**
+ * 显示前景/背景地图
+ * @param {string} name
+ * @param {any} loc
+ * @param {string} floorId
+ * @param {() => any} callback
+ */
 maps.prototype.showBgFgMap = function (name, loc, floorId, callback) {
     this._triggerBgFgMap('show', name, loc, floorId, callback);
 }
 
 ////// 隐藏前景/背景地图 //////
+/**
+ * 隐藏前景/背景地图
+ * @param {string} name
+ * @param {any} loc
+ * @param {string} floorId
+ * @param {() => any} callback
+ */
 maps.prototype.hideBgFgMap = function (name, loc, floorId, callback) {
     this._triggerBgFgMap('hide', name, loc, floorId, callback);
 }
@@ -2209,11 +2505,23 @@ maps.prototype._triggerBgFgMap = function (type, name, loc, floorId, callback) {
 }
 
 ////// 显示一个楼层贴图 //////
+/**
+ * 显示一个楼层贴图
+ * @param {any} loc
+ * @param {string} floorId
+ * @param {() => any} callback
+ */
 maps.prototype.showFloorImage = function (loc, floorId, callback) {
     this._triggerFloorImage('show', loc, floorId, callback);
 }
 
 ////// 隐藏一个楼层贴图 //////
+/**
+ * 隐藏一个楼层贴图
+ * @param {any} loc
+ * @param {string} floorId
+ * @param {() => any} callback
+ */
 maps.prototype.hideFloorImage = function (loc, floorId, callback) {
     this._triggerFloorImage('hide', loc, floorId, callback);
 }
@@ -2241,6 +2549,13 @@ maps.prototype._triggerFloorImage = function (type, loc, floorId, callback) {
 }
 
 ////// 改变图块 //////
+/**
+ * 转变图块
+ * @param {number | string} number 新图块的数字（也支持纯数字字符串如'1'）或id
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ */
 maps.prototype.setBlock = function (number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId || number == null || x == null || y == null) return;
@@ -2288,6 +2603,15 @@ maps.prototype.setBlock = function (number, x, y, floorId) {
     }
 }
 
+/**
+ * 动画形式转变某点图块
+ * @param {number | string} number
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {number} time
+ * @param {() => any} callback
+ */
 maps.prototype.animateSetBlock = function (number, x, y, floorId, time, callback) {
     floorId = floorId || core.status.floorId;
     time = time || 0;
@@ -2365,6 +2689,14 @@ maps.prototype._animateSetBlock_originDisabled = function (number, x, y, floorId
     if (callback) callback();
 }
 
+/**
+ * 动画形式同时转变若干点图块
+ * @param {number | string} number
+ * @param {any} locs
+ * @param {string} floorId
+ * @param {number} time
+ * @param {() => any} callback
+ */
 maps.prototype.animateSetBlocks = function (number, locs, floorId, time, callback) {
     if (!(locs instanceof Array)) {
         if (callback) callback();
@@ -2386,6 +2718,13 @@ maps.prototype.animateSetBlocks = function (number, locs, floorId, time, callbac
 }
 
 ////// 事件转向 //////
+/**
+ * 事件转向
+ * @param {string} direction
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 maps.prototype.turnBlock = function (direction, x, y, floorId) {
     var id = core.getBlockId(x, y, floorId, true);
     var blockInfo = core.getBlockInfo(id);
@@ -2406,6 +2745,12 @@ maps.prototype.turnBlock = function (direction, x, y, floorId) {
 }
 
 ////// 将地图中所有某个图块替换成另一个图块 //////
+/**
+ * 批量替换图块
+ * @param {number} fromNumber 旧图块的数字
+ * @param {number} toNumber 新图块的数字
+ * @param {string | Array<string>} floorId 地图id或其数组，不填视为当前地图
+ */
 maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
     floorId = floorId || core.status.floorId;
     if (floorId instanceof Array) {
@@ -2429,6 +2774,14 @@ maps.prototype.replaceBlock = function (fromNumber, toNumber, floorId) {
 }
 
 ////// 改变前景背景的图块 //////
+/**
+ * 转变图层块
+ * @param {'bg' | 'fg'} name 背景还是前景
+ * @param {number | string} number 新图层块的数字（也支持纯数字字符串如'1'）或id
+ * @param {number} x 横坐标
+ * @param {number} y 纵坐标
+ * @param {string} floorId 地图id，不填视为当前地图
+ */
 maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId || number == null || x == null || y == null) return;
@@ -2457,6 +2810,10 @@ maps.prototype.setBgFgBlock = function (name, number, x, y, floorId) {
 }
 
 ////// 重置地图 //////
+/**
+ * 重置地图
+ * @param {string | string[]} floorId
+ */
 maps.prototype.resetMap = function (floorId) {
     floorId = floorId || core.status.floorId;
     if (!floorId) return;
@@ -2581,6 +2938,15 @@ maps.prototype._getAndRemoveBlock = function (x, y) {
 }
 
 ////// 显示移动某块的动画，达到{“type”:”move”}的效果 //////
+/**
+ * 移动图块
+ * @param {number} x 起点的横坐标
+ * @param {number} y 起点的纵坐标
+ * @param {step[]} steps 步伐数组
+ * @param {number} time 单步和淡出用时，单位为毫秒。不填视为半秒
+ * @param {boolean} keep 是否不淡出，true表示不淡出
+ * @param {() => void} callback 移动或淡出后的回调函数，可选
+ */
 maps.prototype.moveBlock = function (x, y, steps, time, keep, callback) {
     if (core.status.replay.speed == 24) time = 1;
     time = time || 500;
@@ -2729,6 +3095,16 @@ maps.prototype._moveBlock_moving = function (blockInfo, canvases, moveInfo) {
 }
 
 ////// 显示跳跃某块的动画，达到{"type":"jump"}的效果 //////
+/**
+ * 跳跃图块；从V2.7开始不再有音效
+ * @param {number} sx 起点的横坐标
+ * @param {number} sy 起点的纵坐标
+ * @param {number} ex 终点的横坐标
+ * @param {number} ey 终点的纵坐标
+ * @param {number} time 单步和淡出用时，单位为毫秒。不填视为半秒
+ * @param {boolean} keep 是否不淡出，true表示不淡出
+ * @param {() => void} callback 落地或淡出后的回调函数，可选
+ */
 maps.prototype.jumpBlock = function (sx, sy, ex, ey, time, keep, callback) {
     time = time || 500;
     var blockArr = this._getAndRemoveBlock(sx, sy);
@@ -2807,6 +3183,13 @@ maps.prototype._moveJumpBlock_finished = function (blockInfo, canvases, info, an
 }
 
 ////// 显示/隐藏某个块时的动画效果 //////
+/**
+ * 显示/隐藏某个块时的动画效果
+ * @param {any} loc
+ * @param {any} type
+ * @param {any} time
+ * @param {() => any} callback
+ */
 maps.prototype.animateBlock = function (loc, type, time, callback) {
     if (core.status.replay.speed == 24) time = 1;
     if (typeof loc[0] == 'number' && typeof loc[1] == 'number')
@@ -2913,6 +3296,10 @@ maps.prototype._animateBlock_drawList = function (list, progress) {
 // ------ 全局动画控制，动画绘制 ------ //
 
 ////// 添加一个全局动画 //////
+/**
+ * 添加一个全局动画
+ * @param {any} block
+ */
 maps.prototype.addGlobalAnimate = function (block) {
     if (!block || !block.event) return;
     this.removeGlobalAnimate(block.x, block.y, block.name);
@@ -2928,6 +3315,12 @@ maps.prototype.addGlobalAnimate = function (block) {
 }
 
 ////// 删除一个或所有全局动画 //////
+/**
+ * 删除一个或所有全局动画
+ * @param {number} x
+ * @param {number} y
+ * @param {string} name
+ */
 maps.prototype.removeGlobalAnimate = function (x, y, name) {
     // 没有定义xy，则全部删除
     if (x == null || y == null) {
@@ -2949,6 +3342,7 @@ maps.prototype.removeGlobalAnimate = function (x, y, name) {
 }
 
 ////// 绘制UI层的box动画 //////
+/** 绘制UI层的box动画 */
 maps.prototype.drawBoxAnimate = function () {
     if (core.status.boxAnimateObjs.length == 0) return;
     // check ui2
@@ -2981,6 +3375,14 @@ maps.prototype.drawBoxAnimate = function () {
 }
 
 ////// 绘制动画 //////
+/**
+ * 播放动画，注意即使指定了主角的坐标也不会跟随主角移动，如有需要请使用core.drawHeroAnimate(name, callback)函数
+ * @param {string} name 动画文件名，不含后缀
+ * @param {number} x 绝对横坐标
+ * @param {number} y 绝对纵坐标
+ * @param {boolean} alignWindow 是否是相对窗口的坐标
+ * @param {() => void} callback 动画停止后的回调函数，可选
+ */
 maps.prototype.drawAnimate = function (name, x, y, alignWindow, callback) {
     name = core.getMappedName(name);
 
@@ -3014,6 +3416,11 @@ maps.prototype.drawAnimate = function (name, x, y, alignWindow, callback) {
 }
 
 ////// 绘制一个跟随勇士的动画 //////
+/**
+ * 播放跟随勇士的动画
+ * @param {string} name 动画名
+ * @param {() => void} callback 动画停止后的回调函数，可选
+ */
 maps.prototype.drawHeroAnimate = function (name, callback) {
     name = core.getMappedName(name);
 
@@ -3042,6 +3449,10 @@ maps.prototype.drawHeroAnimate = function (name, callback) {
 }
 
 ////// 获得当前正在播放的所有（指定）动画的id列表 //////
+/**
+ * 获得当前正在播放的所有（指定）动画的id列表
+ * @param {string} name
+ */
 maps.prototype.getPlayingAnimates = function (name) {
     return (core.status.animateObjs || []).filter(function (one) {
         return name == null || one.name == name;
@@ -3077,6 +3488,11 @@ maps.prototype._drawAnimateFrame = function (name, animate, centerX, centerY, in
 }
 
 ////// 停止动画 //////
+/**
+ * 立刻停止一个动画播放
+ * @param {number} id 播放动画的编号，即drawAnimate或drawHeroAnimate返回值
+ * @param {boolean} doCallback 是否执行该动画的回调函数
+ */
 maps.prototype.stopAnimate = function (id, doCallback) {
     for (var i = 0; i < core.status.animateObjs.length; i++) {
         var obj = core.status.animateObjs[i];

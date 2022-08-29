@@ -219,6 +219,13 @@ loader.prototype._loadTilesets_afterLoad = function () {
 
 // ------ 实际加载一系列图片 ------ //
 
+/**
+ * 加载一系列图片
+ * @param {any} dir
+ * @param {any} names
+ * @param {any} toSave
+ * @param {() => any} callback
+ */
 loader.prototype.loadImages = function (dir, names, toSave, callback) {
     if (!names || names.length == 0) {
         if (callback) callback();
@@ -243,6 +250,12 @@ loader.prototype.loadImages = function (dir, names, toSave, callback) {
     }
 }
 
+/**
+ * 加载某一张图片
+ * @param {any} dir
+ * @param {any} imgName
+ * @param {() => any} callback
+ */
 loader.prototype.loadImage = function (dir, imgName, callback) {
     try {
         var name = imgName;
@@ -268,6 +281,14 @@ loader.prototype.loadImage = function (dir, imgName, callback) {
 
 // ------ 从zip中加载一系列图片 ------ //
 
+/**
+ * 从zip中加载一系列图片
+ * @param {any} url
+ * @param {any} names
+ * @param {any} toSave
+ * @param {any} onprogress
+ * @param {any} onfinished
+ */
 loader.prototype.loadImagesFromZip = function (url, names, toSave, onprogress, onfinished) {
     if (!names || names.length == 0) {
         if (onfinished) onfinished();
@@ -425,6 +446,10 @@ loader.prototype._loadMusic_async = function (onprogress, onfinished) {
     core.playBgm(main.startBgm);
 }
 
+/**
+ * 加载一个音乐
+ * @param {string} name
+ */
 loader.prototype.loadOneMusic = function (name) {
     var music = new Audio();
     music.preload = 'none';
@@ -434,6 +459,10 @@ loader.prototype.loadOneMusic = function (name) {
     core.material.bgms[name] = music;
 }
 
+/**
+ * 加载一个音效
+ * @param {string} name
+ */
 loader.prototype.loadOneSound = function (name) {
     core.http('GET', 'project/sounds/' + name + "?v=" + main.version, null, function (data) {
         core.loader._loadOneSound_decodeData(name, data);
@@ -467,6 +496,10 @@ loader.prototype._loadOneSound_decodeData = function (name, data) {
     }
 }
 
+/**
+ * 加载一个bgm
+ * @param {string} name
+ */
 loader.prototype.loadBgm = function (name) {
     name = core.getMappedName(name);
     if (!core.material.bgms[name]) return;
@@ -495,6 +528,10 @@ loader.prototype._preloadBgm = function (bgm) {
     bgm.play();
 }
 
+/**
+ * 释放一个bgm的缓存
+ * @param {string} name
+ */
 loader.prototype.freeBgm = function (name) {
     name = core.getMappedName(name);
     if (!core.material.bgms[name]) return;

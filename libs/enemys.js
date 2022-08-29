@@ -19,6 +19,7 @@ enemys.prototype._init = function () {
     }
 }
 
+/** 获得所有怪物原始数据的一个副本 */
 enemys.prototype.getEnemys = function () {
     var enemys = core.clone(this.enemys);
     var enemyInfo = core.getFlag('enemyInfo');
@@ -53,6 +54,11 @@ enemys.prototype.getEnemys = function () {
 }
 
 ////// 判断是否含有某特殊属性 //////
+/**
+ * 判定某种特殊属性的有无
+ * @param {number | number[] | string | Enemy} special 敌人id或敌人对象或正整数数组或自然数
+ * @param {number} test 待检查的属性编号
+ */
 enemys.prototype.hasSpecial = function (special, test) {
     if (special == null) return false;
 
@@ -75,11 +81,16 @@ enemys.prototype.hasSpecial = function (special, test) {
     return false;
 }
 
+/** 获得所有特殊属性定义 */
 enemys.prototype.getSpecials = function () {
     return this.enemydata.getSpecials();
 }
 
 ////// 获得所有特殊属性的名称 //////
+/**
+ * 获得某种敌人的全部特殊属性名称
+ * @param {string | Enemy} enemy 敌人id或敌人对象，如core.material.enemys.greenSlime
+ */
 enemys.prototype.getSpecialText = function (enemy) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (!enemy) return [];
@@ -97,6 +108,10 @@ enemys.prototype.getSpecialText = function (enemy) {
 }
 
 ////// 获得所有特殊属性的颜色 //////
+/**
+ * 获得所有特殊属性的颜色
+ * @param {string | Enemy} enemy
+ */
 enemys.prototype.getSpecialColor = function (enemy) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (!enemy) return [];
@@ -115,6 +130,10 @@ enemys.prototype.getSpecialColor = function (enemy) {
 }
 
 ////// 获得所有特殊属性的额外标记 //////
+/**
+ * 获得所有特殊属性的额外标记
+ * @param {string | Enemy} enemy
+ */
 enemys.prototype.getSpecialFlag = function (enemy) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     if (!enemy) return [];
@@ -132,6 +151,11 @@ enemys.prototype.getSpecialFlag = function (enemy) {
 }
 
 ////// 获得每个特殊属性的说明 //////
+/**
+ * 获得某种敌人的某种特殊属性的介绍
+ * @param {string | Enemy} enemy 敌人id或敌人对象，用于确定属性的具体数值，否则可选
+ * @param {number} special 属性编号，可以是该敌人没有的属性
+ */
 enemys.prototype.getSpecialHint = function (enemy, special) {
     var specials = this.getSpecials();
 
@@ -164,6 +188,14 @@ enemys.prototype._calSpecialContent = function (enemy, content) {
 }
 
 ////// 获得某个点上某个怪物的某项属性 //////
+/**
+ * 获得某个敌人的某项属性值
+ * @param {string | Enemy} enemy
+ * @param {string} name
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
     floorId = floorId || core.status.floorId;
     if ((((flags.enemyOnPoint || {})[floorId] || {})[x + "," + y] || {})[name] != null) {
@@ -180,12 +212,26 @@ enemys.prototype.getEnemyValue = function (enemy, name, x, y, floorId) {
 }
 
 ////// 能否获胜 //////
+/**
+ * 判定主角当前能否打败某只敌人
+ * @param {string | Enemy} enemy 敌人id或敌人对象
+ * @param {number} x 敌人的横坐标，可选
+ * @param {number} y 敌人的纵坐标，可选
+ * @param {string} floorId 敌人所在的地图，可选
+ */
 enemys.prototype.canBattle = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId);
     return damage != null && damage < core.status.hero.hp;
 }
 
+/**
+ * 获得某只敌人的地图显伤，包括颜色
+ * @param {string | Enemy} enemy 敌人id或敌人对象
+ * @param {number} x 敌人的横坐标，可选
+ * @param {number} y 敌人的纵坐标，可选
+ * @param {string} floorId 敌人所在的地图，可选
+ */
 enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     var damage = this.getDamage(enemy, x, y, floorId);
@@ -219,6 +265,14 @@ enemys.prototype.getDamageString = function (enemy, x, y, floorId) {
 }
 
 ////// 接下来N个临界值和临界减伤计算 //////
+/**
+ * 获得某只敌人接下来的若干个临界及其减伤，算法基于useLoop开关选择回合法或二分法
+ * @param {string | Enemy} enemy 敌人id或敌人对象
+ * @param {number} number 要计算的临界数量，可选，默认为1
+ * @param {number} x 敌人的横坐标，可选
+ * @param {number} y 敌人的纵坐标，可选
+ * @param {string} floorId 敌人所在的地图，可选
+ */
 enemys.prototype.nextCriticals = function (enemy, number, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     number = number || 1;
@@ -371,6 +425,14 @@ enemys.prototype._nextCriticals_useTurn = function (enemy, info, number, x, y, f
 }
 
 ////// N防减伤计算 //////
+/**
+ * 计算再加若干点防御能使某只敌人对主角的总伤害降低多少
+ * @param {string | Enemy} enemy 敌人id或敌人对象
+ * @param {number} k 假设主角增加的防御力，可选，默认为1
+ * @param {number} x 敌人的横坐标，可选
+ * @param {number} y 敌人的纵坐标，可选
+ * @param {string} floorId 敌人所在的地图，可选
+ */
 enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
     k = k || 1;
@@ -380,6 +442,14 @@ enemys.prototype.getDefDamage = function (enemy, k, x, y, floorId) {
     return nowDamage - nextDamage;
 }
 
+/**
+ * 获得怪物真实属性
+ * @param {string | Enemy} enemy
+ * @param {any} hero
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
     if (enemy == null) return null;
     if (typeof enemy == 'string') enemy = core.material.enemys[enemy];
@@ -387,6 +457,14 @@ enemys.prototype.getEnemyInfo = function (enemy, hero, x, y, floorId) {
 }
 
 ////// 获得战斗伤害信息（实际伤害计算函数） //////
+/**
+ * 获得战斗伤害信息（实际伤害计算函数）
+ * @param {string | Enemy} enemy
+ * @param {any} hero
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ */
 enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
     if (enemy == null) return null;
     // 移动到了脚本编辑 - getDamageInfo中
@@ -395,6 +473,13 @@ enemys.prototype.getDamageInfo = function (enemy, hero, x, y, floorId) {
 }
 
 ////// 获得在某个勇士属性下怪物伤害 //////
+/**
+ * 获得某只敌人对主角的总伤害
+ * @param {string | Enemy} enemy 敌人id或敌人对象
+ * @param {number} x 敌人的横坐标，可选
+ * @param {number} y 敌人的纵坐标，可选
+ * @param {string} floorId 敌人所在的地图，可选
+ */
 enemys.prototype.getDamage = function (enemy, x, y, floorId) {
     return this._getDamage(enemy, null, x, y, floorId);
 }
@@ -411,6 +496,10 @@ enemys.prototype._getDamage = function (enemy, hero, x, y, floorId) {
 }
 
 ////// 获得当前楼层的怪物列表 //////
+/**
+ * 获得某张地图的敌人集合，用于手册绘制
+ * @param {string} floorId 地图id，可选
+ */
 enemys.prototype.getCurrentEnemys = function (floorId) {
     floorId = floorId || core.status.floorId;
     var enemys = [], used = {};
@@ -503,6 +592,11 @@ enemys.prototype._getCurrentEnemys_sort = function (enemys) {
     });
 }
 
+/**
+ * 检查某些楼层是否还有漏打的（某种）敌人
+ * @param {string} enemyId 敌人id，可选，默认为任意敌人
+ * @param {string | string[]} floorId 地图id或其数组，可选，默认为当前地图
+ */
 enemys.prototype.hasEnemyLeft = function (enemyId, floorId) {
     if (floorId == null) floorId = core.status.floorId;
     if (!(floorId instanceof Array)) floorId = [floorId];

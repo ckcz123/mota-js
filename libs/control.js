@@ -63,12 +63,22 @@ control.prototype._init = function () {
 ////// 注册一个 animationFrame //////
 // name：名称，可用来作为注销使用；needPlaying：是否只在游戏运行时才执行（在标题界面不执行）
 // func：要执行的函数，或插件中的函数名；可接受timestamp（从页面加载完毕到当前所经过的时间）作为参数
+/**
+ * 注册一个 animationFrame
+ * @param {string} name 名称，可用来作为注销使用
+ * @param {boolean} needPlaying 是否只在游戏运行时才执行（在标题界面不执行）
+ * @param {(timestamp: number) => void} func 要执行的函数，或插件中的函数名；可接受timestamp（从页面加载完毕到当前所经过的时间）作为参数
+ */
 control.prototype.registerAnimationFrame = function (name, needPlaying, func) {
     this.unregisterAnimationFrame(name);
     this.renderFrameFuncs.push({ name: name, needPlaying: needPlaying, func: func });
 }
 
 ////// 注销一个 animationFrame //////
+/**
+ * 注销一个animationFrame
+ * @param {string} name
+ */
 control.prototype.unregisterAnimationFrame = function (name) {
     this.renderFrameFuncs = this.renderFrameFuncs.filter(function (x) { return x.name != name; });
 }
@@ -364,6 +374,11 @@ control.prototype._animationFrame_parallelDo = function (timestamp) {
 // ------ 标题界面的处理 ------ //
 
 ////// 显示游戏开始界面 //////
+/**
+ * 进入标题画面
+ * @param {boolean} noAnimate 可选，true表示不由黑屏淡入而是立即亮屏
+ * @param {() => void} callback 可选，完全亮屏后的回调函数
+ */
 control.prototype.showStartAnimate = function (noAnimate, callback) {
     this._showStartAnimate_resetDom();
     if (core.flags.startUsingCanvas || noAnimate)
@@ -401,16 +416,22 @@ control.prototype._showStartAnimate_finished = function (start, callback) {
 }
 
 ////// 隐藏游戏开始界面 //////
+/**
+ * 淡出标题画面
+ * @param {() => void} callback 标题画面完全淡出后的回调函数
+ */
 control.prototype.hideStartAnimate = function (callback) {
     core.hideWithAnimate(core.dom.startPanel, 20, callback);
 }
 
 ////// 游戏是否已经开始 //////
+/** 游戏是否已经开始 */
 control.prototype.isPlaying = function () {
     return core.status.played;
 }
 
 ////// 清除游戏状态和数据 //////
+/** 清除游戏状态和数据 */
 control.prototype.clearStatus = function () {
     // 停止各个Timeout和Interval
     for (var i in core.timeout) {
@@ -447,11 +468,17 @@ control.prototype._initStatistics = function (totalTime) {
 // ------ 自动寻路，人物行走 ------ //
 
 ////// 清除自动寻路路线 //////
+/**
+ * 清除自动寻路路线
+ * @param {any} x
+ * @param {any} y
+ */
 control.prototype.clearAutomaticRouteNode = function (x, y) {
     core.clearMap('route', x * 32 + 5 - core.status.automaticRoute.offsetX, y * 32 + 5 - core.status.automaticRoute.offsetY, 27, 27);
 }
 
 ////// 停止自动寻路操作 //////
+/** 停止自动寻路操作 */
 control.prototype.stopAutomaticRoute = function () {
     if (!core.status.played) return;
     core.status.automaticRoute.autoHeroMove = false;
@@ -468,6 +495,7 @@ control.prototype.stopAutomaticRoute = function () {
 }
 
 ////// 保存剩下的寻路，并停止 //////
+/** 保存剩下的寻路，并停止 */
 control.prototype.saveAndStopAutomaticRoute = function () {
     var automaticRoute = core.status.automaticRoute;
     if (automaticRoute.moveStepBeforeStop.length == 0) {
@@ -479,6 +507,7 @@ control.prototype.saveAndStopAutomaticRoute = function () {
 }
 
 ////// 继续剩下的自动寻路操作 //////
+/** 继续剩下的自动寻路操作 */
 control.prototype.continueAutomaticRoute = function () {
     // 此函数只应由events.afterOpenDoor和events.afterBattle调用
     var moveStep = core.status.automaticRoute.moveStepBeforeStop;
@@ -492,6 +521,10 @@ control.prototype.continueAutomaticRoute = function () {
 }
 
 ////// 清空剩下的自动寻路列表 //////
+/**
+ * 清空剩下的自动寻路列表
+ * @param {() => any} callback
+ */
 control.prototype.clearContinueAutomaticRoute = function (callback) {
     core.deleteCanvas('route');
     core.status.automaticRoute.moveStepBeforeStop = [];
@@ -499,6 +532,12 @@ control.prototype.clearContinueAutomaticRoute = function (callback) {
 }
 
 ////// 设置自动寻路路线 //////
+/**
+ * 半自动寻路，用于鼠标或手指拖动
+ * @param {number} destX 鼠标或手指的起拖点横坐标
+ * @param {number} destY 鼠标或手指的起拖点纵坐标
+ * @param {Array<{ direction: direction, x: number, y: number }>} stepPostfix 拖动轨迹的数组表示，每项为一步的方向和目标点。
+ */
 control.prototype.setAutomaticRoute = function (destX, destY, stepPostfix) {
     if (!core.status.played || core.status.lockControl) return;
     if (this._setAutomaticRoute_isMoving(destX, destY)) return;
@@ -612,6 +651,10 @@ control.prototype._setAutomaticRoute_setAutoSteps = function (moveStep) {
 }
 
 ////// 设置勇士的自动行走路线 //////
+/**
+ * 连续行走
+ * @param {Array<{ direction: direction, step: number }>} steps 压缩的步伐数组，每项表示朝某方向走多少步
+ */
 control.prototype.setAutoHeroMove = function (steps) {
     steps = steps || core.status.automaticRoute.autoStepRoutes;
     if (steps.length == 0) return;
@@ -623,6 +666,10 @@ control.prototype.setAutoHeroMove = function (steps) {
 }
 
 ////// 设置行走的效果动画 //////
+/**
+ * 设置行走的效果动画
+ * @param {() => any} callback
+ */
 control.prototype.setHeroMoveInterval = function (callback) {
     if (core.status.heroMoving > 0) return;
     if (core.status.replay.speed == 24) {
@@ -648,11 +695,19 @@ control.prototype.setHeroMoveInterval = function (callback) {
 }
 
 ////// 每移动一格后执行的事件 //////
+/**
+ * 每移动一格后执行的事件
+ * @param {() => any} callback
+ */
 control.prototype.moveOneStep = function (callback) {
     return this.controldata.moveOneStep(callback);
 }
 
 ////// 实际每一步的行走过程 //////
+/**
+ * 尝试前进一步，如果面前不可被踏入就会直接触发该点事件
+ * @param {() => void} callback 走一步后的回调函数，可选
+ */
 control.prototype.moveAction = function (callback) {
     if (core.status.heroMoving > 0) return;
     var noPass = core.noPass(core.nextX(), core.nextY()), canMove = core.canMoveHero();
@@ -712,6 +767,11 @@ control.prototype._moveAction_popAutomaticRoute = function () {
 }
 
 ////// 让勇士开始移动 //////
+/**
+ * 连续前进，不撞南墙不回头
+ * @param {direction} direction 可选，如果设置了就会先转身到该方向
+ * @param {() => void} callback 可选，如果设置了就只走一步
+ */
 control.prototype.moveHero = function (direction, callback) {
     // 如果正在移动，直接return
     if (core.status.heroMoving != 0) return;
@@ -745,11 +805,16 @@ control.prototype._moveHero_moving = function () {
 }
 
 ////// 当前是否正在移动 //////
+/** 当前是否正在移动 */
 control.prototype.isMoving = function () {
     return !core.status.heroStop || core.status.heroMoving > 0;
 }
 
 ////// 停止勇士的一切行动，等待勇士行动结束后，再执行callback //////
+/**
+ * 等待主角停下
+ * @param {() => void} callback 主角停止后的回调函数
+ */
 control.prototype.waitHeroToStop = function (callback) {
     var lastDirection = core.status.automaticRoute.lastDirection;
     core.stopAutomaticRoute();
@@ -769,6 +834,10 @@ control.prototype.waitHeroToStop = function (callback) {
 }
 
 ////// 转向 //////
+/**
+ * 主角转向并计入录像，不会导致跟随者聚集，会导致视野重置到以主角为中心
+ * @param {direction} direction 主角的新朝向，可为 up, down, left, right, :left, :right, :back 七种之一
+ */
 control.prototype.turnHero = function (direction) {
     if (direction) {
         core.setHeroLoc('direction', direction);
@@ -783,11 +852,22 @@ control.prototype.turnHero = function (direction) {
 }
 
 ////// 瞬间移动 //////
+/**
+ * 瞬间移动
+ * @param {any} destX
+ * @param {any} destY
+ * @param {any} ignoreSteps
+ */
 control.prototype.moveDirectly = function (destX, destY, ignoreSteps) {
     return this.controldata.moveDirectly(destX, destY, ignoreSteps);
 }
 
 ////// 尝试瞬间移动 //////
+/**
+ * 尝试瞬移，如果该点有图块/事件/阻激夹域捕则会瞬移到它旁边再走一步（不可踏入的话当然还是触发该点事件），这一步的方向优先和瞬移前主角的朝向一致
+ * @param {number} destX 目标点的横坐标
+ * @param {number} destY 目标点的纵坐标
+ */
 control.prototype.tryMoveDirectly = function (destX, destY) {
     if (this.nearHero(destX, destY)) return false;
     var canMoveArray = core.maps.generateMovableArray();
@@ -808,6 +888,12 @@ control.prototype.tryMoveDirectly = function (destX, destY) {
 }
 
 ////// 绘制勇士 //////
+/**
+ * 绘制主角和跟随者并重置视野到以主角为中心
+ * @param {'stop' | 'leftFoot' | 'rightFoot'} status 绘制状态，一般用stop
+ * @param {number} offset 相对主角逻辑位置的偏移量，不填视为无偏移
+ * @param {number} frame 绘制第几帧
+ */
 control.prototype.drawHero = function (status, offset, frame) {
     if (!core.isPlaying() || !core.status.floorId || core.status.gameOver) return;
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), direction = core.getHeroLoc('direction');
@@ -885,6 +971,13 @@ control.prototype._drawHero_getDrawObjs = function (direction, x, y, status, off
     });
 }
 
+/**
+ * 改变勇士的不透明度
+ * @param {number} opacity
+ * @param {string} moveMode
+ * @param {any} time
+ * @param {() => any} callback
+ */
 control.prototype.setHeroOpacity = function (opacity, moveMode, time, callback) {
     time = time || 0;
     if (time == 0) {
@@ -918,6 +1011,12 @@ control.prototype.setHeroOpacity = function (opacity, moveMode, time, callback) 
 // ------ 画布、位置、阻激夹域，显伤 ------ //
 
 ////// 设置画布偏移
+/**
+ * 设置大地图的偏移量
+ * @param {string} canvasId
+ * @param {number} x
+ * @param {number} y
+ */
 control.prototype.setGameCanvasTranslate = function (canvas, x, y) {
     var c = core.dom.gameCanvas[canvas];
     x = x * core.domStyle.scale;
@@ -935,6 +1034,11 @@ control.prototype.setGameCanvasTranslate = function (canvas, x, y) {
 };
 
 ////// 加减画布偏移
+/**
+ * 加减画布偏移
+ * @param {number} x
+ * @param {number} y
+ */
 control.prototype.addGameCanvasTranslate = function (x, y) {
     for (var ii = 0, canvas; canvas = core.dom.gameCanvas[ii]; ii++) {
         var id = canvas.getAttribute('id');
@@ -954,6 +1058,7 @@ control.prototype.addGameCanvasTranslate = function (x, y) {
 }
 
 ////// 更新视野范围 //////
+/** 更新大地图的可见区域 */
 control.prototype.updateViewport = function () {
     // 当前是否应该重绘？
     if (core.bigmap.v2) {
@@ -990,6 +1095,12 @@ control.prototype.updateViewport = function () {
 }
 
 ////// 设置视野范围 //////
+/**
+ * 设置视野范围 
+ * px,py: 左上角相对大地图的像素坐标，不需要为32倍数
+ * @param {number} px
+ * @param {number} py
+ */
 control.prototype.setViewport = function (px, py) {
     var originOffsetX = core.bigmap.offsetX, originOffsetY = core.bigmap.offsetY;
     core.bigmap.offsetX = core.clamp(px, 0, 32 * core.bigmap.width - core.__PIXELS__);
@@ -1006,6 +1117,14 @@ control.prototype.setViewport = function (px, py) {
 }
 
 ////// 移动视野范围 //////
+/**
+ * 移动视野范围
+ * @param {number} x
+ * @param {number} y
+ * @param {string} moveMode
+ * @param {number} time
+ * @param {() => any} callback
+ */
 control.prototype.moveViewport = function (x, y, moveMode, time, callback) {
     time = time || 0;
     time /= Math.max(core.status.replay.speed, 1)
@@ -1037,24 +1156,39 @@ control.prototype.moveViewport = function (x, y, moveMode, time, callback) {
 }
 
 ////// 获得勇士面对位置的x坐标 //////
+/**
+ * 获取主角面前第n格的横坐标
+ * @param {number} n 目标格与主角的距离，面前为正数，背后为负数，脚下为0，不填视为1
+ */
 control.prototype.nextX = function (n) {
     if (n == null) n = 1;
     return core.getHeroLoc('x') + core.utils.scan[core.getHeroLoc('direction')].x * n;
 }
 
 ////// 获得勇士面对位置的y坐标 //////
+/**
+ * 获取主角面前第n格的纵坐标
+ * @param {number} n 目标格与主角的距离，面前为正数，背后为负数，脚下为0，不填视为1
+ */
 control.prototype.nextY = function (n) {
     if (n == null) n = 1;
     return core.getHeroLoc('y') + core.utils.scan[core.getHeroLoc('direction')].y * n;
 }
 
 ////// 某个点是否在勇士旁边 //////
+/**
+ * 判定主角是否身处某个点的锯齿领域(取曼哈顿距离)
+ * @param {number} x 领域的中心横坐标
+ * @param {number} y 领域的中心纵坐标
+ * @param {number} n 领域的半径，不填视为1
+ */
 control.prototype.nearHero = function (x, y, n) {
     if (n == null) n = 1;
     return Math.abs(x - core.getHeroLoc('x')) + Math.abs(y - core.getHeroLoc('y')) <= n;
 }
 
 ////// 聚集跟随者 //////
+/** 立刻聚集所有的跟随者 */
 control.prototype.gatherFollowers = function () {
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), dir = core.getHeroLoc('direction');
     core.status.hero.followers.forEach(function (t) {
@@ -1066,6 +1200,7 @@ control.prototype.gatherFollowers = function () {
 }
 
 ////// 更新跟随者坐标 //////
+/** 更新跟随者坐标 */
 control.prototype.updateFollowers = function () {
     core.status.hero.followers.forEach(function (t) {
         if (!t.stop) {
@@ -1114,11 +1249,16 @@ control.prototype._moveDirectyFollowers = function (x, y) {
 }
 
 ////// 更新领域、夹击、阻击的伤害地图 //////
+/**
+ * 更新领域、夹击、阻击的伤害地图
+ * @param {string} floorId
+ */
 control.prototype.updateCheckBlock = function (floorId) {
     return this.controldata.updateCheckBlock(floorId);
 }
 
 ////// 检查并执行领域、夹击、阻击事件 //////
+/** 检查并执行领域、夹击、阻击事件 */
 control.prototype.checkBlock = function () {
     var x = core.getHeroLoc('x'), y = core.getHeroLoc('y'), loc = x + "," + y;
     var damage = core.status.checkBlock.damage[loc];
@@ -1183,6 +1323,11 @@ control.prototype._checkBlock_ambush = function (ambush) {
 }
 
 ////// 更新全地图显伤 //////
+/**
+ * 请不要直接使用该函数，请使用core.updateStatusBar()代替！重算并绘制地图显伤
+ * @param {string} floorId 地图id，不填视为当前地图。预览地图时填写
+ * @param {CanvasRenderingContext2D} ctx 绘制到的画布，如果填写了就会画在该画布而不是显伤层
+ */
 control.prototype.updateDamage = function (floorId, ctx) {
     floorId = floorId || core.status.floorId;
     if (!floorId || core.status.gameOver || main.mode != 'play') return;
@@ -1265,6 +1410,10 @@ control.prototype._updateDamage_extraDamage = function (floorId, onMap) {
 }
 
 ////// 重绘地图显伤 //////
+/**
+ * 仅重绘地图显伤
+ * @param {CanvasRenderingContext2D} ctx
+ */
 control.prototype.drawDamage = function (ctx) {
     if (core.status.gameOver || !core.status.damage || main.mode != 'play') return;
     var onMap = false;
@@ -1318,6 +1467,7 @@ control.prototype._drawDamage_draw = function (ctx, onMap) {
 // ------ 录像相关 ------ //
 
 ////// 选择录像文件 //////
+/** 选择录像文件 */
 control.prototype.chooseReplayFile = function () {
     core.readFile(function (obj) {
         if (obj.name != core.firstData.name) return alert("存档和游戏不一致！");
@@ -1334,6 +1484,10 @@ control.prototype.chooseReplayFile = function () {
 }
 
 ////// 开始播放 //////
+/**
+ * 开始播放
+ * @param {any} list
+ */
 control.prototype.startReplay = function (list) {
     if (!core.isPlaying()) return;
     core.status.replay.replaying = true;
@@ -1353,12 +1507,14 @@ control.prototype.startReplay = function (list) {
 }
 
 ////// 更改播放状态 //////
+/** 更改播放状态 */
 control.prototype.triggerReplay = function () {
     if (core.status.replay.pausing) this.resumeReplay();
     else this.pauseReplay();
 }
 
 ////// 暂停播放 //////
+/** 暂停播放 */
 control.prototype.pauseReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     core.status.replay.pausing = true;
@@ -1367,6 +1523,7 @@ control.prototype.pauseReplay = function () {
 }
 
 ////// 恢复播放 //////
+/** 恢复播放 */
 control.prototype.resumeReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (core.isMoving() || core.status.replay.animate || core.status.event.id) {
@@ -1380,6 +1537,7 @@ control.prototype.resumeReplay = function () {
 }
 
 ////// 单步播放 //////
+/** 单步播放 */
 control.prototype.stepReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) {
@@ -1394,6 +1552,7 @@ control.prototype.stepReplay = function () {
 }
 
 ////// 加速播放 //////
+/** 加速播放 */
 control.prototype.speedUpReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     var speeds = [0.2, 0.5, 1, 2, 3, 6, 12, 24];
@@ -1407,6 +1566,7 @@ control.prototype.speedUpReplay = function () {
 }
 
 ////// 减速播放 //////
+/** 减速播放 */
 control.prototype.speedDownReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     var speeds = [0.2, 0.5, 1, 2, 3, 6, 12, 24];
@@ -1420,6 +1580,10 @@ control.prototype.speedDownReplay = function () {
 }
 
 ////// 设置播放速度 //////
+/**
+ * 设置播放速度
+ * @param {number} speed
+ */
 control.prototype.setReplaySpeed = function (speed) {
     if (!core.isPlaying() || !core.isReplaying()) return;
     core.status.replay.speed = speed;
@@ -1427,6 +1591,10 @@ control.prototype.setReplaySpeed = function (speed) {
 }
 
 ////// 停止播放 //////
+/**
+ * 停止播放
+ * @param {boolean} force
+ */
 control.prototype.stopReplay = function (force) {
     if (!core.isPlaying()) return;
     if (!core.isReplaying() && !force) return;
@@ -1444,6 +1612,7 @@ control.prototype.stopReplay = function (force) {
 }
 
 ////// 回退 //////
+/** 回退 */
 control.prototype.rewindReplay = function () {
     if (!core.isPlaying() || !core.isReplaying()) return;
     if (!core.status.replay.pausing) {
@@ -1583,11 +1752,13 @@ control.prototype._replay_equipbox = function () {
 }
 
 ////// 是否正在播放录像 //////
+/** 是否正在播放录像 */
 control.prototype.isReplaying = function () {
     return (core.status.replay || {}).replaying;
 }
 
 ////// 回放 //////
+/** 回放下一个操作 */
 control.prototype.replay = function (force) {
     if (!core.isPlaying() || !core.isReplaying()
         || core.status.replay.animate || core.status.event.id || core.status.replay.failed) return;
@@ -1606,12 +1777,23 @@ control.prototype.replay = function (force) {
 // func：具体执行录像的函数，可为一个函数或插件中的函数名；
 //       需要接受一个action参数，代表录像回放时的下一个操作
 // func返回true代表成功处理了此录像行为，false代表没有处理此录像行为。
+/**
+ * 注册一个录像行为
+ * @param {string} name 自定义名称，可用于注销使用
+ * @param {(action?: string) => boolean} func 具体执行录像的函数，可为一个函数或插件中的函数名；
+ *  需要接受一个action参数，代表录像回放时的下一个操作
+ *  func返回true代表成功处理了此录像行为，false代表没有处理此录像行为。
+ */
 control.prototype.registerReplayAction = function (name, func) {
     this.unregisterReplayAction(name);
     this.replayActions.push({ name: name, func: func });
 }
 
 ////// 注销一个录像行为 //////
+/**
+ * 注销一个录像行为
+ * @param {string} name
+ */
 control.prototype.unregisterReplayAction = function (name) {
     this.replayActions = this.replayActions.filter(function (b) { return b.name != name; });
 }
@@ -1943,6 +2125,10 @@ control.prototype._replayAction_no = function (action) {
 // ------ 存读档相关 ------ //
 
 ////// 自动存档 //////
+/**
+ * 自动存档
+ * @param {any} removeLast
+ */
 control.prototype.autosave = function (removeLast) {
     if (core.hasFlag('__forbidSave__')) return;
     var x = null;
@@ -1975,6 +2161,7 @@ control.prototype.autosave = function (removeLast) {
 }
 
 /////// 实际进行自动存档 //////
+/** 实际进行自动存档 */
 control.prototype.checkAutosave = function () {
     if (!core.animateFrame || !core.saves || !core.saves.autosave) return;
     core.setLocalStorage('totalTime', core.animateFrame.totalTime);
@@ -1987,6 +2174,11 @@ control.prototype.checkAutosave = function () {
 }
 
 ////// 实际进行存读档事件 //////
+/**
+ * 实际进行存读档事件
+ * @param {string} id
+ * @param {any} type
+ */
 control.prototype.doSL = function (id, type) {
     switch (type) {
         case 'save': this._doSL_save(id); break;
@@ -2158,6 +2350,10 @@ control.prototype._doSL_replaySince_afterGet = function (id, data) {
 }
 
 ////// 同步存档到服务器 //////
+/**
+ * 同步存档到服务器
+ * @param {any} type
+ */
 control.prototype.syncSave = function (type) {
     core.ui.drawWaiting("正在同步，请稍候...");
     var callback = function (saves) {
@@ -2191,6 +2387,7 @@ control.prototype._syncSave_http = function (type, saves) {
 }
 
 ////// 从服务器加载存档 //////
+/** 从服务器加载存档 */
 control.prototype.syncLoad = function () {
     core.myprompt("请输入存档编号+密码", null, function (idpassword) {
         if (!idpassword) return core.ui._drawSyncSave();
@@ -2266,15 +2463,26 @@ control.prototype._syncLoad_write = function (data) {
 }
 
 ////// 存档到本地 //////
+/** 存档到本地 */
 control.prototype.saveData = function () {
     return this.controldata.saveData();
 }
 
 ////// 从本地读档 //////
+/**
+ * 从本地读档
+ * @param {any} data
+ * @param {() => any} callback
+ */
 control.prototype.loadData = function (data, callback) {
     return this.controldata.loadData(data, callback);
 }
 
+/**
+ * 获得某个存档内容
+ * @param {any} index
+ * @param {() => any} callback
+ */
 control.prototype.getSave = function (index, callback) {
     if (index == 0) {
         // --- 自动存档先从缓存中获取
@@ -2305,6 +2513,11 @@ control.prototype.getSave = function (index, callback) {
     });
 }
 
+/**
+ * 获得某些存档内容
+ * @param {any} ids
+ * @param {() => any} callback
+ */
 control.prototype.getSaves = function (ids, callback) {
     if (!(ids instanceof Array)) return this.getSave(ids, callback);
     var count = ids.length, data = {};
@@ -2319,6 +2532,10 @@ control.prototype.getSaves = function (ids, callback) {
     }
 }
 
+/**
+ * 获得所有存档内容
+ * @param {() => any} callback
+ */
 control.prototype.getAllSaves = function (callback) {
     var ids = Object.keys(core.saves.ids).filter(function (x) { return x != 0; })
         .sort(function (a, b) { return a - b; }), saves = [];
@@ -2332,6 +2549,10 @@ control.prototype.getAllSaves = function (callback) {
 }
 
 ////// 获得所有存在存档的存档位 //////
+/**
+ * 获得所有存在存档的存档位
+ * @param {() => any} callback
+ */
 control.prototype.getSaveIndexes = function (callback) {
     var indexes = {};
     core.keysLocalForage(function (err, keys) {
@@ -2355,11 +2576,20 @@ control.prototype._getSaveIndexes_getIndex = function (indexes, name) {
 }
 
 ////// 判断某个存档位是否存在存档 //////
+/**
+ * 判断某个存档位是否存在存档
+ * @param {number} index
+ */
 control.prototype.hasSave = function (index) {
     return core.saves.ids[index] || false;
 }
 
 ////// 删除某个存档
+/**
+ * 删除某个存档
+ * @param {number} index
+ * @param {() => any} callback
+ */
 control.prototype.removeSave = function (index, callback) {
     if (index == 0 || index == "autoSave") {
         index = "autoSave";
@@ -2398,6 +2628,11 @@ control.prototype._updateFavoriteSaves = function () {
 // ------ 属性，状态，位置，buff，变量，锁定控制等 ------ //
 
 ////// 设置勇士属性 //////
+/**
+ * 设置主角的某个属性
+ * @param {K} name 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.setHeroLoc(name, value)，其他的('exp'被视为'exp')会直接对 core.status.hero[name] 赋值
+ * @param {HeroStatus[K]} value 属性的新值
+ */
 control.prototype.setStatus = function (name, value) {
     if (!core.status.hero) return;
     if (name == 'x' || name == 'y' || name == 'direction')
@@ -2407,11 +2642,20 @@ control.prototype.setStatus = function (name, value) {
 }
 
 ////// 增减勇士属性 //////
+/**
+ * 增减主角的某个属性，等价于core.setStatus(name, core.getStatus(name) + value)
+ * @param {K} name 属性的英文名
+ * @param {HeroStatus[K]} value 属性的增量，请注意旧量和增量中只要有一个是字符串就会把两者连起来成为一个更长的字符串
+ */
 control.prototype.addStatus = function (name, value) {
     this.setStatus(name, this.getStatus(name) + value);
 }
 
 ////// 获得勇士属性 //////
+/**
+ * 读取主角的某个属性，不包括百分比修正
+ * @param {K} name 属性的英文名，其中'x'、'y'和'direction'会被特殊处理为 core.getHeroLoc(name)，其他的('exp'被视为'exp')会直接读取 core.status.hero[name]
+ */
 control.prototype.getStatus = function (name) {
     if (!core.status.hero) return null;
     if (name == 'x' || name == 'y' || name == 'direction')
@@ -2423,6 +2667,11 @@ control.prototype.getStatus = function (name) {
 }
 
 ////// 从status中获得属性，如果不存在则从勇士属性中获取 //////
+/**
+ * 从status中获得属性，如果不存在则从勇士属性中获取
+ * @param {any} status
+ * @param {string} name
+ */
 control.prototype.getStatusOrDefault = function (status, name) {
     if (status && name in status)
         return Math.floor(status[name]);
@@ -2430,16 +2679,29 @@ control.prototype.getStatusOrDefault = function (status, name) {
 }
 
 ////// 获得勇士实际属性（增幅后的） //////
+/**
+ * 计算主角的某个属性，包括百分比修正
+ * @param {K} name 属性的英文名，请注意只能用于数值类属性哦，否则乘法会得到NaN
+ */
 control.prototype.getRealStatus = function (name) {
     return this.getRealStatusOrDefault(null, name);
 }
 
 ////// 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取 //////
+/**
+ * 从status中获得实际属性（增幅后的），如果不存在则从勇士属性中获取
+ * @param {any} status
+ * @param {string} name
+ */
 control.prototype.getRealStatusOrDefault = function (status, name) {
     return Math.floor(this.getStatusOrDefault(status, name) * this.getBuff(name));
 }
 
 ////// 获得勇士原始属性（无装备和衰弱影响） //////
+/**
+ * 获得勇士原始属性（无装备和衰弱影响）
+ * @param {string} name
+ */
 control.prototype.getNakedStatus = function (name) {
     var value = this.getStatus(name);
     if (value == null) return value;
@@ -2456,6 +2718,10 @@ control.prototype.getNakedStatus = function (name) {
 }
 
 ////// 获得某个属性的名字 //////
+/**
+ * 获得某个状态的名字
+ * @param {K} name
+ */
 control.prototype.getStatusLabel = function (name) {
     if (this.controldata.getStatusLabel) {
         return this.controldata.getStatusLabel(name) || name;
@@ -2467,6 +2733,12 @@ control.prototype.getStatusLabel = function (name) {
 }
 
 ////// 设置某个属性的增幅值 //////
+/**
+ * 设置主角某个属性的百分比修正倍率，初始值为1，
+ * 倍率存放在flag: '__'+name+'_buff__' 中
+ * @param {K} name 属性的英文名，请注意只能用于数值类属性哦，否则随后的乘法会得到NaN
+ * @param {HeroStatus[K]} value 新的百分比修正倍率，不填（效果上）视为1
+ */
 control.prototype.setBuff = function (name, value) {
     // 仅保留三位有效buff值
     value = parseFloat(value.toFixed(3));
@@ -2474,6 +2746,11 @@ control.prototype.setBuff = function (name, value) {
 }
 
 ////// 加减某个属性的增幅值 //////
+/**
+ * 增减主角某个属性的百分比修正倍率，加减法叠加和抵消。等价于 core.setBuff(name, core.getBuff(name) + value)
+ * @param {K} name 属性的英文名，请注意只能用于数值类属性哦，否则随后的乘法会得到NaN
+ * @param {HeroStatus[K]} value 倍率的增量
+ */
 control.prototype.addBuff = function (name, value) {
     var buff = this.getBuff(name) + value;
     // 仅保留三位有效buff值
@@ -2482,16 +2759,38 @@ control.prototype.addBuff = function (name, value) {
 }
 
 ////// 获得某个属性的增幅值 //////
+/**
+ * 读取主角某个属性的百分比修正倍率，初始值为1
+ * @param {HeroStatus[K]} name 属性的英文名
+ */
 control.prototype.getBuff = function (name) {
     return core.getFlag('__' + name + '_buff__', 1);
 }
 
 ////// 获得或移除毒衰咒效果 //////
+/**
+ * 获得或移除毒衰咒效果
+ * @param {string} action 获得还是移除，'get'为获得，'remove'为移除
+ * @param {string | string[]} type 要获得或移除的毒衰咒效果
+ */
 control.prototype.triggerDebuff = function (action, type) {
     return this.controldata.triggerDebuff(action, type);
 }
 
 ////// 设置勇士的位置 //////
+/**
+ * 设置勇士位置
+ * 值得注意的是，这句话虽然会使勇士改变位置，但并不会使界面重新绘制；
+ * 如需立刻重新绘制地图还需调用：core.clearMap('hero'); core.drawHero(); 来对界面进行更新。
+ * @param {'x' | 'y'} name 要设置的坐标属性
+ * @param {number} value 新值
+ * @param {boolean} noGather 是否聚集跟随者
+ */
+/**
+ * @param {'direction'} name
+ * @param {direction} value
+ * @param {boolean} noGather
+ */
 control.prototype.setHeroLoc = function (name, value, noGather) {
     if (!core.status.hero) return;
     core.status.hero.loc[name] = value;
@@ -2501,6 +2800,9 @@ control.prototype.setHeroLoc = function (name, value, noGather) {
 }
 
 ////// 获得勇士的位置 //////
+/** 读取主角的位置和/或朝向 */
+/** @param {'x' | 'y'} name */
+/** @param {'direction'} name */
 control.prototype.getHeroLoc = function (name) {
     if (!core.status.hero) return;
     if (main.mode == 'editor') {
@@ -2512,6 +2814,10 @@ control.prototype.getHeroLoc = function (name) {
 }
 
 ////// 获得某个等级的名称 //////
+/**
+ * 根据级别的数字获取对应的名称，后者定义在全塔属性
+ * @param {number} lv 级别的数字，不填则视为主角当前的级别
+ */
 control.prototype.getLvName = function (lv) {
     if (!core.status.hero) return null;
     if (lv == null) lv = core.status.hero.lv;
@@ -2519,6 +2825,11 @@ control.prototype.getLvName = function (lv) {
 }
 
 ////// 获得下个等级所需经验；如果不存在下个等级，返回null。 //////
+/**
+ * 获得下次升级需要的经验值。
+ * 升级扣除模式下会返回经验差值；非扣除模式下会返回总共需要的经验值。
+ * 如果无法进行下次升级，返回null。
+ */
 control.prototype.getNextLvUpNeed = function () {
     if (!core.status.hero) return null;
     if (core.status.hero.lv >= core.firstData.levelUp.length) return null;
@@ -2529,6 +2840,11 @@ control.prototype.getNextLvUpNeed = function () {
 }
 
 ////// 设置某个自定义变量或flag //////
+/**
+ * 设置一个flag变量
+ * @param {string} name 变量名，支持中文
+ * @param {any} value 变量的新值，不填或填null视为删除
+ */
 control.prototype.setFlag = function (name, value) {
     if (value == null) return this.removeFlag(name);
     if (!core.status.hero) return;
@@ -2536,12 +2852,22 @@ control.prototype.setFlag = function (name, value) {
 }
 
 ////// 增加某个flag数值 //////
+/**
+ * 增减一个flag变量，等价于 core.setFlag(name, core.getFlag(name, 0) + value)
+ * @param {string} name 变量名，支持中文
+ * @param {number | string} value 变量的增量
+ */
 control.prototype.addFlag = function (name, value) {
     if (!core.status.hero) return;
     core.setFlag(name, core.getFlag(name, 0) + value);
 }
 
 ////// 获得某个自定义变量或flag //////
+/**
+ * 读取一个flag变量
+ * @param {string} name 变量名，支持中文
+ * @param {any} defaultValue 当变量不存在时的返回值，可选（事件流中默认填0）。
+ */
 control.prototype.getFlag = function (name, defaultValue) {
     if (!core.status.hero) return defaultValue;
     var value = core.status.hero.flags[name];
@@ -2549,57 +2875,109 @@ control.prototype.getFlag = function (name, defaultValue) {
 }
 
 ////// 是否存在某个自定义变量或flag，且值为true //////
+/**
+ * 判定一个flag变量是否存在且不为false、0、''、null、undefined和NaN
+ * @param {string} name 变量名，支持中文
+ */
 control.prototype.hasFlag = function (name) {
     return !!core.getFlag(name);
 }
 
 ////// 删除某个自定义变量或flag //////
+/**
+ * 删除某个flag/变量
+ * @param {string} name
+ */
 control.prototype.removeFlag = function (name) {
     if (!core.status.hero) return;
     delete core.status.hero.flags[name];
 }
 
 ////// 获得某个点的独立开关 //////
+/**
+ * 获得某个独立开关
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {string} name
+ * @param {any} defaultValue
+ */
 control.prototype.getSwitch = function (x, y, floorId, name, defaultValue) {
     var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     return this.getFlag(prefix + "@" + name, defaultValue);
 }
 
 ////// 设置某个点的独立开关 //////
+/**
+ * 设置某个独立开关
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {string} name
+ * @param {any} value
+ */
 control.prototype.setSwitch = function (x, y, floorId, name, value) {
     var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     return this.setFlag(prefix + "@" + name, value);
 }
 
 ////// 增加某个点的独立开关 //////
+/**
+ * 增加某个独立开关
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {string} name
+ * @param {any} value
+ */
 control.prototype.addSwitch = function (x, y, floorId, name, value) {
     var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     return this.addFlag(prefix + "@" + name, value);
 }
 
 ////// 判定某个点的独立开关 //////
+/**
+ * 判定某个独立开关
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {string} name
+ */
 control.prototype.hasSwitch = function (x, y, floorId, name) {
     var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     return this.hasFlag(prefix + "@" + name);
 }
 
 ////// 删除某个点的独立开关 //////
+/**
+ * 删除独立开关
+ * @param {number} x
+ * @param {number} y
+ * @param {string} floorId
+ * @param {string} name
+ */
 control.prototype.removeSwitch = function (x, y, floorId, name) {
     var prefix = [floorId || core.status.floorId || ":f", x != null ? x : "x", y != null ? y : "y"].join("@");
     return this.removeFlag(prefix + "@" + name);
 }
 
 ////// 锁定状态栏，常常用于事件处理 //////
+/** 锁定用户控制，常常用于事件处理 */
 control.prototype.lockControl = function () {
     core.status.lockControl = true;
 }
 
 ////// 解锁状态栏 //////
+/** 解锁用户控制 */
 control.prototype.unlockControl = function () {
     core.status.lockControl = false;
 }
 
 ////// 开启debug模式 //////
+/**
+ * 开启调试模式, 此模式下可以按Ctrl键进行穿墙, 并忽略一切事件。
+ * 此模式下不可回放录像和上传成绩。
+ */
 control.prototype.debug = function () {
     core.setFlag('debug', true);
     core.drawText("\t[调试模式开启]此模式下按住Ctrl键（或Ctrl+Shift键）可以穿墙并忽略一切事件。\n此模式下将无法上传成绩。");
@@ -2616,11 +2994,13 @@ control.prototype._bindRoutePush = function () {
 }
 
 ////// 清除录像折叠信息 //////
+/** 清空录像折叠信息 */
 control.prototype.clearRouteFolding = function () {
     core.status.routeFolding = {};
 }
 
 ////// 检查录像折叠 //////
+/** 检查录像折叠信息 */
 control.prototype.checkRouteFolding = function () {
     // 未开启、未开始游戏、录像播放中、正在事件中：不执行
     if (!core.flags.enableRouteFolding || !core.isPlaying() || core.isReplaying() || core.status.event.id) {
@@ -2646,11 +3026,20 @@ control.prototype.checkRouteFolding = function () {
 
 // ------ 天气，色调，BGM ------ //
 
+/**
+ * 获得映射文件名
+ * @param {string} name
+ */
 control.prototype.getMappedName = function (name) {
     return core.getFlag('__nameMap__', {})[name] || (main.nameMap || {})[name] || name;
 }
 
 ////// 更改天气效果 //////
+/**
+ * 设置天气，不计入存档。如需长期生效请使用core.events._action_setWeather()函数
+ * @param {'rain' | 'snow' | 'sun' | 'fog' | 'cloud' | string} type 新天气的类型，不填视为无天气
+ * @param {1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10} level 新天气（晴天除外）的级别，必须为不大于10的正整数，不填视为5
+ */
 control.prototype.setWeather = function (type, level) {
     // 非雨雪
     if (type == null || !this.weathers[type]) {
@@ -2683,12 +3072,22 @@ control.prototype.setWeather = function (type, level) {
 // name为天气类型，如 sun, rain, snow 等
 // initFunc 为设置为此天气时的初始化，接受level参数
 // frameFunc 为该天气下每帧的效果，接受和timestamp参数（从页面加载完毕到当前经过的时间）
+/**
+ * 注册一个天气
+ * @param {string} name
+ * @param {(level: number) => void} initFunc
+ * @param {(timestamp: number, level: number) => void} frameFunc
+ */
 control.prototype.registerWeather = function (name, initFunc, frameFunc) {
     this.unregisterWeather(name);
     this.weathers[name] = { initFunc: initFunc, frameFunc: frameFunc };
 }
 
 ////// 取消注册一个天气 //////
+/**
+ * 注销一个天气
+ * @param {string} name
+ */
 control.prototype.unregisterWeather = function (name) {
     delete this.weathers[name];
     if (core.animateFrame.weather.type == name) {
@@ -2757,6 +3156,13 @@ control.prototype._weather_sun = function (level) {
 }
 
 ////// 更改画面色调 //////
+/**
+ * 更改画面色调，不计入存档。如需长期生效请使用core.events._action_setCurtain()函数
+ * @param {[number, number, number, number?]} color 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若为负数则会被视为0）的颜色数组，不填视为[0, 0, 0, 0]
+ * @param {number} time 渐变时间，单位为毫秒。不填视为750ms，负数视为0（无渐变，立即更改）
+ * @param {string} moveMode
+ * @param {() => void} callback 更改完毕后的回调函数，可选。事件流中常取core.doAction
+ */
 control.prototype.setCurtain = function (color, time, moveMode, callback) {
     if (time == null) time = 750;
     if (time <= 0) time = 0;
@@ -2811,6 +3217,14 @@ control.prototype._setCurtain_animate = function (nowColor, color, time, moveMod
 }
 
 ////// 画面闪烁 //////
+/**
+ * 画面闪烁
+ * @param {[number, number, number, number?]} color 一行三列（第四列视为1）或一行四列（第四列若大于1则会被视为1，第四列若填负数则会被视为0）的颜色数组，必填
+ * @param {number} time 单次闪烁时长，实际闪烁效果为先花其三分之一的时间渐变到目标色调，再花剩余三分之二的时间渐变回去
+ * @param {number} times 闪烁的总次数，不填或填0都视为1
+ * @param {string} moveMode
+ * @param {() => void} callback 闪烁全部完毕后的回调函数，可选
+ */
 control.prototype.screenFlash = function (color, time, times, moveMode, callback) {
     times = times || 1;
     time = time / 3;
@@ -2827,6 +3241,11 @@ control.prototype.screenFlash = function (color, time, times, moveMode, callback
 }
 
 ////// 播放背景音乐 //////
+/**
+ * 播放背景音乐，中途开播但不计入存档且只会持续到下次场景切换。如需长期生效请将背景音乐的文件名赋值给flags.__bgm__
+ * @param {string} bgm 背景音乐的文件名，支持全塔属性中映射前的中文名
+ * @param {number} startTime 跳过前多少秒，不填则不跳过
+ */
 control.prototype.playBgm = function (bgm, startTime) {
     bgm = core.getMappedName(bgm);
     if (main.mode != 'play' || !core.material.bgms[bgm]) return;
@@ -2875,6 +3294,11 @@ control.prototype._playBgm_play = function (bgm, startTime) {
 }
 
 ///// 设置当前背景音乐的播放速度 //////
+/**
+ * 设置背景音乐的播放速度和音调
+ * @param {number} speed
+ * @param {boolean} usePitch
+ */
 control.prototype.setBgmSpeed = function (speed, usePitch) {
     var bgm = core.musicStatus.playingBgm;
     if (main.mode != 'play' || !core.material.bgms[bgm]) return;
@@ -2893,6 +3317,7 @@ control.prototype.setBgmSpeed = function (speed, usePitch) {
 }
 
 ////// 暂停背景音乐的播放 //////
+/** 暂停背景音乐的播放 */
 control.prototype.pauseBgm = function () {
     if (main.mode != 'play') return;
     try {
@@ -2910,6 +3335,10 @@ control.prototype.pauseBgm = function () {
 }
 
 ////// 恢复背景音乐的播放 //////
+/**
+ * 恢复背景音乐的播放
+ * @param {number} resumeTime
+ */
 control.prototype.resumeBgm = function (resumeTime) {
     if (main.mode != 'play') return;
     try {
@@ -2928,6 +3357,7 @@ control.prototype.resumeBgm = function (resumeTime) {
     this.setMusicBtn();
 }
 
+/** 设置音乐图标的显隐状态 */
 control.prototype.setMusicBtn = function () {
     if (core.musicStatus.bgmStatus)
         core.dom.musicBtn.src = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAZCAMAAADzN3VRAAABWVBMVEX///9iYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmJiYmL///8AAAC5ubn+/v6xsbEtLS0MDAxmZmZoaGhvb2/c3Nzd3d38/Pz9/f0oKCgpKSl0dHR1dXW6urrb29v7+/v09PTv7+/39/cgICACAgImJibh4eGFhYWGhoaHh4eOjo5paWm7u7vDw8PMzMwyMjI7OztAQEDe3t5FRUVMTEzj4+Pl5eXm5ubp6enr6+tcXFzi4uL19fVeXl74+PgjIyNkZGQGBgaSkpKYmJiampqenp4DAwMwMDBnZ2cICAivr68eHh63t7cLCwsSEhLw8PBhYWEUFBQVFRXNzc3Pz8/Z2dna2toaGhqkpKSlpaWpqamrq6tFOUNAAAAAc3RSTlMAAwQFBhUWGxwkJSYyO0dISVBRUmpvj5CSk5SVoaOlpqiysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKyA0IuUgAAAVdJREFUeF5NkVVbw0AQRTcQrLR4IIEGcidJoaUuQHF3d3d3+P/CkuxCzss8nG++mbnDBJXhNt2CpbeFK1kQpSEKidlc8S9qdATRa6UIdQMoxEpDA0Ov3wUAPfW+qLWACydNv9zMrzkJwPK6FB3oHyOfXfuNxvoBQ+GmBYinhHB77TmiVBxoYUw1AYcEq332AS8OYKosAuTT0nza9uU2USYPRJgGxEiSOFywJ3mNARozgBJJzkfLvfu8JgGDWcC9FEsjWzR+y80gYDEAA8QZ3N6kmP1Fs3fEASB7pob7Hh+Wz5L0ci17Or05J7bH6B6dZv05XWK3rG+myV05Ert592Qo55sPuoIr7hEZHHtieIPWy0RU9DLwc3Mnck/vi8/E8XNrDWQtEVnL/ySKMrv0jPwPp870fprcyYifmiEmqGpHkI5q9ofSFIUk2qiwIGpEMyxYhhZRRcMPz89RJ2s9W8wAAAAASUVORK5CYII=";
@@ -2936,6 +3366,7 @@ control.prototype.setMusicBtn = function () {
 }
 
 ////// 更改背景音乐的播放 //////
+/** 开启或关闭背景音乐的播放 */
 control.prototype.triggerBgm = function () {
     if (main.mode != 'play') return;
 
@@ -2948,6 +3379,12 @@ control.prototype.triggerBgm = function () {
 }
 
 ////// 播放音频 //////
+/**
+ * 播放一个音效
+ * @param {string} sound
+ * @param {number} pitch
+ * @param {() => any} callback
+ */
 control.prototype.playSound = function (sound, pitch, callback) {
     sound = core.getMappedName(sound);
     if (main.mode != 'play' || !core.musicStatus.soundStatus || !core.material.sounds[sound]) return;
@@ -2983,6 +3420,10 @@ control.prototype.playSound = function (sound, pitch, callback) {
 }
 
 ////// 停止所有音频 //////
+/**
+ * 停止（所有）音频
+ * @param {number} id
+ */
 control.prototype.stopSound = function (id) {
     if (id == null) {
         Object.keys(core.musicStatus.playingSounds).forEach(function (id) {
@@ -3003,6 +3444,10 @@ control.prototype.stopSound = function (id) {
 }
 
 ////// 获得当前正在播放的所有（指定）音效的id列表 //////
+/**
+ * 获得正在播放的所有（指定）音效的id列表
+ * @param {string} name
+ */
 control.prototype.getPlayingSounds = function (name) {
     name = core.getMappedName(name);
     return Object.keys(core.musicStatus.playingSounds).filter(function (one) {
@@ -3011,11 +3456,16 @@ control.prototype.getPlayingSounds = function (name) {
 }
 
 ////// 检查bgm状态 //////
+/** 检查bgm状态 */
 control.prototype.checkBgm = function () {
     core.playBgm(core.musicStatus.playingBgm || main.startBgm);
 }
 
 ///// 设置屏幕放缩 //////
+/**
+ * 设置屏幕放缩
+ * @param {number} delta
+ */
 control.prototype.setDisplayScale = function (delta) {
     var index = core.domStyle.availableScale.indexOf(core.domStyle.scale);
     if (index < 0) return;
@@ -3028,6 +3478,7 @@ control.prototype.setDisplayScale = function (delta) {
 // ------ 状态栏，工具栏等相关 ------ //
 
 ////// 清空状态栏 //////
+/** 清空状态栏 */
 control.prototype.clearStatusBar = function () {
     Object.keys(core.statusBar).forEach(function (e) {
         if (core.statusBar[e].innerHTML != null) {
@@ -3042,6 +3493,12 @@ control.prototype.clearStatusBar = function () {
 }
 
 ////// 更新状态栏 //////
+/**
+ * 刷新状态栏和地图显伤
+ * 2.9.1优化：非必须立刻执行的刷新（一般是伤害相关的除外）的延迟到下一动画帧执行
+ * @param {boolean} doNotCheckAutoEvents 是否不检查自动事件
+ * @param {boolean} immediate 是否立刻刷新，而非延迟到下一动画帧刷新
+ */
 control.prototype.updateStatusBar = function (doNotCheckAutoEvents, immediate) {
     if (immediate) {
         return this.updateStatusBar_update();
@@ -3095,6 +3552,7 @@ control.prototype._updateStatusBar_setToolboxIcon = function () {
     }
 }
 
+/** 显示状态栏 */
 control.prototype.showStatusBar = function () {
     if (main.mode == 'editor') return;
     if (core.domStyle.showStatusBar) return;
@@ -3109,6 +3567,10 @@ control.prototype.showStatusBar = function () {
     core.dom.toolBar.style.display = 'block';
 }
 
+/**
+ * 隐藏状态栏
+ * @param {boolean} showToolbox
+ */
 control.prototype.hideStatusBar = function (showToolbox) {
     if (main.mode == 'editor') return;
 
@@ -3134,6 +3596,10 @@ control.prototype.hideStatusBar = function (showToolbox) {
 }
 
 ////// 更新状态栏的勇士图标 //////
+/**
+ * 更新状态栏的勇士图标
+ * @param {string} name
+ */
 control.prototype.updateHeroIcon = function (name) {
     name = name || "hero.png";
     if (core.statusBar.icons.name == name) return;
@@ -3155,6 +3621,10 @@ control.prototype.updateHeroIcon = function (name) {
 }
 
 ////// 改变工具栏为按钮1-8 //////
+/**
+ * 改变工具栏为按钮1-8
+ * @param {boolean} useButton
+ */
 control.prototype.setToolbarButton = function (useButton) {
     if (!core.domStyle.showStatusBar) {
         // 隐藏状态栏时检查竖屏
@@ -3233,12 +3703,21 @@ control.prototype._shouldDisplayStatus = function (id) {
 ////// 注册一个resize函数 //////
 // name为名称，可供注销使用
 // func可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
+/**
+ * 注册一个resize函数
+ * @param {string} name 名称，可供注销使用
+ * @param {(obj: any) => void} func 可以是一个函数，或者是插件中的函数名；可以接受obj参数，详见resize函数。
+ */
 control.prototype.registerResize = function (name, func) {
     this.unregisterResize(name);
     this.resizes.push({ name: name, func: func });
 }
 
 ////// 注销一个resize函数 //////
+/**
+ * 注销一个resize函数
+ * @param {string} name
+ */
 control.prototype.unregisterResize = function (name) {
     this.resizes = this.resizes.filter(function (b) { return b.name != name; });
 }
@@ -3257,6 +3736,7 @@ control.prototype._doResize = function (obj) {
 }
 
 ////// 屏幕分辨率改变后重新自适应 //////
+/** 屏幕分辨率改变后重新自适应 */
 control.prototype.resize = function () {
     if (main.mode == 'editor') return;
     var clientWidth = main.dom.body.clientWidth, clientHeight = main.dom.body.clientHeight;

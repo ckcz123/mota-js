@@ -31,6 +31,11 @@ utils.prototype._init = function () {
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////
+/**
+ * 将一段文字中的${}（表达式）进行替换。
+ * @param {string} text 模板字符串，可以使用${}计算js表达式，支持“状态、物品、变量、独立开关、全局存储、图块id、图块类型、敌人数据、装备id”等量参与运算
+ * @param {string} prefix
+ */
 utils.prototype.replaceText = function (text, prefix) {
     if (typeof text != 'string') return text;
     var index = text.indexOf("${");
@@ -47,6 +52,10 @@ utils.prototype.replaceText = function (text, prefix) {
     return text.substring(0, index) + value + core.replaceText(text.substring(curr + 1), prefix);
 }
 
+/**
+ * 对一个表达式中的特殊规则进行替换，如status:xxx等。
+ * @param {string} value 模板字符串，注意独立开关不会被替换
+ */
 utils.prototype.replaceValue = function (value) {
     if (typeof value == "string" && (value.indexOf(":") >= 0 || value.indexOf("flag：") >= 0 || value.indexOf('global：') >= 0)) {
         if (value.indexOf('status:') >= 0)
@@ -78,6 +87,11 @@ utils.prototype.replaceValue = function (value) {
 }
 
 ////// 计算表达式的值 //////
+/**
+ * 计算一个表达式的值，支持status:xxx等的计算。
+ * @param {string} value 待求值的表达式
+ * @param {string} prefix 独立开关前缀，一般可省略
+ */
 utils.prototype.calValue = function (value, prefix) {
     if (!core.isset(value)) return null;
     if (typeof value === 'string') {
@@ -95,6 +109,11 @@ utils.prototype.calValue = function (value, prefix) {
 }
 
 ////// 向某个数组前插入另一个数组或元素 //////
+/**
+ * 将b（可以是另一个数组）插入数组a的开头，此函数用于弥补a.unshift(b)中b只能是单项的不足。
+ * @param {any[]} a 原数组
+ * @param {any} b 待插入的新首项或前缀数组
+ */
 utils.prototype.unshift = function (a, b) {
     if (!(a instanceof Array) || b == null) return;
     if (b instanceof Array) {
@@ -107,6 +126,11 @@ utils.prototype.unshift = function (a, b) {
 }
 
 ////// 向某个数组后插入另一个数组或元素 //////
+/**
+ * 将b（可以是另一个数组）插入数组a的末尾，此函数用于弥补a.push(b)中b只能是单项的不足。
+ * @param {any[]} a 原数组
+ * @param {any} b 待插入的新末项或后缀数组
+ */
 utils.prototype.push = function (a, b) {
     if (!(a instanceof Array) || b == null) return;
     if (b instanceof Array) {
@@ -118,6 +142,10 @@ utils.prototype.push = function (a, b) {
     return a;
 }
 
+/**
+ * 解压缩一个数据
+ * @param {any} value
+ */
 utils.prototype.decompress = function (value) {
     try {
         var output = lzw_decode(value);
@@ -141,6 +169,11 @@ utils.prototype.decompress = function (value) {
 }
 
 ////// 设置本地存储 //////
+/**
+ * 设置本地存储
+ * @param {string} key
+ * @param {any} value
+ */
 utils.prototype.setLocalStorage = function (key, value) {
     try {
         if (value == null) {
@@ -165,6 +198,11 @@ utils.prototype.setLocalStorage = function (key, value) {
 }
 
 ////// 获得本地存储 //////
+/**
+ * 获得本地存储
+ * @param {string} key
+ * @param {any} defaultValue
+ */
 utils.prototype.getLocalStorage = function (key, defaultValue) {
     try {
         var value = JSON.parse(localStorage.getItem(core.firstData.name + "_" + key));
@@ -176,12 +214,23 @@ utils.prototype.getLocalStorage = function (key, defaultValue) {
 }
 
 ////// 移除本地存储 //////
+/**
+ * 移除本地存储
+ * @param {string} key
+ */
 utils.prototype.removeLocalStorage = function (key) {
     localStorage.removeItem(core.firstData.name + "_" + key);
     if (key == 'autoSave') delete core.saves.ids[0];
     else if (/^save\d+$/.test(key)) delete core.saves.ids[parseInt(key.substring(4))];
 }
 
+/**
+ * 往数据库写入一段数据
+ * @param {string} key
+ * @param {any} value
+ * @param {() => void} successCallback
+ * @param {() => void} errorCallback
+ */
 utils.prototype.setLocalForage = function (key, value, successCallback, errorCallback) {
     if (value == null) {
         this.removeLocalForage(key);
@@ -218,6 +267,13 @@ utils.prototype._setLocalForage_set = function (name, str, callback) {
     }
 }
 
+/**
+ * 从数据库读出一段数据
+ * @param {string} key
+ * @param {any} defaultValue
+ * @param {(data: any) => void} successCallback
+ * @param {() => void} errorCallback
+ */
 utils.prototype.getLocalForage = function (key, defaultValue, successCallback, errorCallback) {
     var name = core.firstData.name + "_" + key;
     var callback = function (err, value) {
@@ -251,6 +307,12 @@ utils.prototype._getLocalForage_get = function (name, callback) {
     }
 }
 
+/**
+ * 移除数据库的数据
+ * @param {string} key
+ * @param {() => void} successCallback
+ * @param {() => void} errorCallback
+ */
 utils.prototype.removeLocalForage = function (key, successCallback, errorCallback) {
     var name = core.firstData.name + "_" + key;
     var callback = function (err) {
@@ -319,11 +381,21 @@ utils.prototype.lengthLocalForage = function (callback) {
     }
 }
 
+/**
+ * 设置一个全局存储，适用于global:xxx，录像播放时将忽略此函数。
+ * @param {string} key 全局变量名称，支持中文
+ * @param {any} value 全局变量的新值，不填或null表示清除此全局存储
+ */
 utils.prototype.setGlobal = function (key, value) {
     if (core.isReplaying()) return;
     core.setLocalStorage(key, value);
 }
 
+/**
+ * 读取一个全局存储，适用于global:xxx，支持录像。
+ * @param {string} key 全局变量名称，支持中文
+ * @param {any} defaultValue 可选，当此全局变量不存在或值为null、undefined时，用此值代替
+ */
 utils.prototype.getGlobal = function (key, defaultValue) {
     var value;
     if (core.isReplaying()) {
@@ -350,6 +422,12 @@ utils.prototype.getGlobal = function (key, defaultValue) {
 }
 
 ////// 深拷贝一个对象 //////
+/**
+ * 深拷贝一个对象(函数将原样返回)
+ * @param {T} data 待拷贝对象
+ * @param {(name: string, value: any) => boolean} filter 过滤器，可选，表示data为数组或对象时拷贝哪些项或属性，true表示拷贝
+ * @param {boolean} recursion 过滤器是否递归，可选。true表示过滤器也被递归
+ */
 utils.prototype.clone = function (data, filter, recursion) {
     if (!core.isset(data)) return null;
     // date
@@ -384,6 +462,10 @@ utils.prototype.clone = function (data, filter, recursion) {
 }
 
 ////// 深拷贝1D/2D数组优化 //////
+/**
+ * 深拷贝一个1D或2D的数组
+ * @param {Array<number> | Array<Array<number>>} data
+ */
 utils.prototype.cloneArray = function (data) {
     if (!(data instanceof Array)) return this.clone(data);
     if (data[0] instanceof Array) {
@@ -394,6 +476,12 @@ utils.prototype.cloneArray = function (data) {
 }
 
 ////// 裁剪图片 //////
+/**
+ * 等比例切分一张图片
+ * @param {string | HTMLImageElement} image 图片名（支持映射前的中文名）或图片对象（参见上面的例子），获取不到时返回[]
+ * @param {number} width 子图的宽度，单位为像素。原图总宽度必须是其倍数，不填视为32
+ * @param {number} height 子图的高度，单位为像素。原图总高度必须是其倍数，不填视为正方形
+ */
 utils.prototype.splitImage = function (image, width, height) {
     if (typeof image == "string") {
         image = core.getMappedName(image);
@@ -419,6 +507,10 @@ utils.prototype.splitImage = function (image, width, height) {
 }
 
 ////// 格式化时间为字符串 //////
+/**
+ * 格式化日期为字符串
+ * @param {Date} date
+ */
 utils.prototype.formatDate = function (date) {
     if (!date) date = new Date();
     return "" + date.getFullYear() + "-" + core.setTwoDigits(date.getMonth() + 1) + "-" + core.setTwoDigits(date.getDate()) + " "
@@ -426,12 +518,20 @@ utils.prototype.formatDate = function (date) {
 }
 
 ////// 格式化时间为最简字符串 //////
+/**
+ * 格式化日期为最简字符串
+ * @param {Date} date
+ */
 utils.prototype.formatDate2 = function (date) {
     if (!date) date = new Date();
     return "" + date.getFullYear() + core.setTwoDigits(date.getMonth() + 1) + core.setTwoDigits(date.getDate())
         + core.setTwoDigits(date.getHours()) + core.setTwoDigits(date.getMinutes()) + core.setTwoDigits(date.getSeconds());
 }
 
+/**
+ * 格式化时间
+ * @param {number} time
+ */
 utils.prototype.formatTime = function (time) {
     return core.setTwoDigits(parseInt(time / 3600000))
         + ":" + core.setTwoDigits(parseInt(time / 60000) % 60)
@@ -439,16 +539,29 @@ utils.prototype.formatTime = function (time) {
 }
 
 ////// 两位数显示 //////
+/**
+ * 两位数显示
+ * @param {number} x
+ */
 utils.prototype.setTwoDigits = function (x) {
     return (parseInt(x) < 10 && parseInt(x) >= 0) ? "0" + x : x;
 }
 
+/**
+ * 格式化文件大小
+ * @param {number} size
+ */
 utils.prototype.formatSize = function (size) {
     if (size < 1024) return size + 'B';
     else if (size < 1024 * 1024) return (size / 1024).toFixed(2) + "KB";
     else return (size / 1024 / 1024).toFixed(2) + "MB";
 }
 
+/**
+ * 大数字格式化，单位为10000的倍数（w,e,z,j,g），末尾四舍五入
+ * @param {number} x 原数字
+ * @param {boolean} onMap 可选，true表示用于地图显伤，结果总字符数最多为5，否则最多为6
+ */
 utils.prototype.formatBigNumber = function (x, digits) {
     if (digits === true) digits = 5; // 兼容旧版onMap参数
     if (!digits || digits < 5) digits = 6; // 连同负号、小数点和后缀字母在内的总位数，至少需为5，默认为6
@@ -480,6 +593,10 @@ utils.prototype.formatBigNumber = function (x, digits) {
 }
 
 ////// 变速移动 //////
+/**
+ * 变速移动
+ * @param {string} mode
+ */
 utils.prototype.applyEasing = function (name) {
     var list = {
         "easeIn": function (t) {
@@ -505,6 +622,10 @@ utils.prototype.applyEasing = function (name) {
 }
 
 ////// 数组转RGB //////
+/**
+ * 颜色数组转十六进制
+ * @param {[number, number, number]} color 一行三列的数组，各元素必须为不大于255的自然数
+ */
 utils.prototype.arrayToRGB = function (color) {
     if (!(color instanceof Array)) return color;
     var nowR = this.clamp(parseInt(color[0]), 0, 255), nowG = this.clamp(parseInt(color[1]), 0, 255),
@@ -512,6 +633,10 @@ utils.prototype.arrayToRGB = function (color) {
     return "#" + ((1 << 24) + (nowR << 16) + (nowG << 8) + nowB).toString(16).slice(1);
 }
 
+/**
+ * 颜色数组转字符串
+ * @param {[number, number, number, number]} color 一行三列或一行四列的数组，前三个元素必须为不大于255的自然数。第四个元素（如果有）必须为0或不大于1的数字，第四个元素不填视为1
+ */
 utils.prototype.arrayToRGBA = function (color) {
     if (!(color instanceof Array)) return color;
     if (color[3] == null) color[3] = 1;
@@ -521,6 +646,10 @@ utils.prototype.arrayToRGBA = function (color) {
 }
 
 ////// 加密路线 //////
+/**
+ * 录像一压，其结果会被再次base64压缩
+ * @param {string[]} route 原始录像，自定义内容（不予压缩，原样写入）必须由0-9A-Za-z和下划线、冒号组成，所以中文和数组需要用JSON.stringify预处理再base64压缩才能交由一压
+ */
 utils.prototype.encodeRoute = function (route) {
     var ans = "", lastMove = "", cnt = 0;
 
@@ -600,6 +729,10 @@ utils.prototype._encodeRoute_encodeOne = function (t) {
 }
 
 ////// 解密路线 //////
+/**
+ * 录像解压的最后一步，即一压的逆过程
+ * @param {string} route 录像解压倒数第二步的结果，即一压的结果
+ */
 utils.prototype.decodeRoute = function (route) {
     if (!route) return route;
 
@@ -743,11 +876,20 @@ utils.prototype._decodeRoute_decodeOne = function (decodeObj, c) {
 }
 
 ////// 判断某对象是否不为null也不为NaN //////
+/**
+ * 判断一个值是否不为null，undefined和NaN
+ * @param {any} v 待测值，可选
+ */
 utils.prototype.isset = function (val) {
     return val != null && !(typeof val == 'number' && isNaN(val));
 }
 
 ////// 获得子数组 //////
+/**
+ * 判定一个数组是否为另一个数组的前缀，用于录像接续播放。请注意函数名没有大写字母
+ * @param {any[]} a 可能的母数组，不填或比b短将返回null
+ * @param {any[]} b 可能的前缀，不填或比a长将返回null
+ */
 utils.prototype.subarray = function (a, b) {
     if (!(a instanceof Array) || !(b instanceof Array) || a.length < b.length)
         return null;
@@ -757,21 +899,42 @@ utils.prototype.subarray = function (a, b) {
     return a.slice(b.length);
 }
 
+/**
+ * 判定array是不是一个数组，以及element是否在该数组中。
+ * @param {any} array 可能的数组，不为数组或不填将导致返回值为false
+ * @param {any} element 待查找的元素
+ */
 utils.prototype.inArray = function (array, element) {
     return (array instanceof Array) && array.indexOf(element) >= 0;
 }
 
+/**
+ * 将x限定在[a,b]区间内，注意a和b可交换
+ * @param {number} x 原始值，!x为true时x一律视为0
+ * @param {number} a 下限值，大于b将导致与b交换
+ * @param {number} b 上限值，小于a将导致与a交换
+ */
 utils.prototype.clamp = function (x, a, b) {
     var min = Math.min(a, b), max = Math.max(a, b);
     return Math.min(Math.max(x || 0, min), max);
 }
 
+/**
+ * 访问浏览器cookie
+ * @param {string} name
+ */
 utils.prototype.getCookie = function (name) {
     var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
     return match ? match[2] : null;
 }
 
 ////// 设置statusBar的innerHTML，会自动斜体和放缩，也可以增加自定义css //////
+/**
+ * 填写非自绘状态栏
+ * @param {string} name 状态栏项的名称，如'hp', 'atk', 'def'等。必须是core.statusBar中的一个合法项
+ * @param {any} value 要填写的内容，大数字会被格式化为至多6个字符，无中文的内容会被自动设为斜体
+ * @param {string} css 额外的css样式，可选。如更改颜色等
+ */
 utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     if (!core.statusBar[name]) return;
     if (typeof value == 'number') value = this.formatBigNumber(value);
@@ -795,6 +958,10 @@ utils.prototype.setStatusBarInnerHTML = function (name, value, css) {
     core.statusBar[name].setAttribute('_value', value);;
 }
 
+/**
+ * 求字符串的国标码字节数，也可用于等宽字体下文本的宽度测算。请注意样板的默认字体Verdana不是等宽字体
+ * @param {string} str 待测字符串
+ */
 utils.prototype.strlen = function (str) {
     var count = 0;
     for (var i = 0, len = str.length; i < len; i++) {
@@ -803,6 +970,11 @@ utils.prototype.strlen = function (str) {
     return count;
 };
 
+/**
+ * 计算应当转向某个方向
+ * @param {'up' | 'down' | 'left' | 'right' | ':left' | ':right' | ':back'} turn 转向的方向
+ * @param {string} direction 当前方向
+ */
 utils.prototype.turnDirection = function (turn, direction) {
     direction = direction || core.getHeroLoc('direction');
     var directionList = ["left", "leftup", "up", "rightup", "right", "rightdown", "down", "leftdown"];
@@ -823,6 +995,11 @@ utils.prototype.turnDirection = function (turn, direction) {
     return directionList[(index + (turn || 0)) % directionList.length];
 }
 
+/**
+ * 通配符匹配，用于搜索图块等批量处理。
+ * @param {string} pattern 模式串，每个星号表示任意多个（0个起）字符
+ * @param {string} string 待测串
+ */
 utils.prototype.matchWildcard = function (pattern, string) {
     try {
         return new RegExp('^' + pattern.split(/\*+/).map(function (s) {
@@ -833,6 +1010,11 @@ utils.prototype.matchWildcard = function (pattern, string) {
     }
 }
 
+/**
+ * 是否满足正则表达式
+ * @param {string} pattern
+ * @param {string} string
+ */
 utils.prototype.matchRegex = function (pattern, string) {
     try {
         if (pattern.startsWith("^")) pattern = pattern.substring(1);
@@ -844,6 +1026,10 @@ utils.prototype.matchRegex = function (pattern, string) {
 }
 
 ////// Base64加密 //////
+/**
+ * base64加密
+ * @param {string} str 明文
+ */
 utils.prototype.encodeBase64 = function (str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function (match, p1) {
         return String.fromCharCode(parseInt(p1, 16))
@@ -851,12 +1037,20 @@ utils.prototype.encodeBase64 = function (str) {
 }
 
 ////// Base64解密 //////
+/**
+ * base64解密
+ * @param {string} str 密文
+ */
 utils.prototype.decodeBase64 = function (str) {
     return decodeURIComponent(atob(str).split('').map(function (c) {
         return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
 }
 
+/**
+ * 不支持SL的随机数
+ * @param {number} num 填正数表示生成小于num的随机自然数，否则生成小于1的随机正数
+ */
 utils.prototype.rand = function (num) {
     var rand = core.getFlag('__rand__');
     rand = this.__next_rand(rand);
@@ -868,6 +1062,10 @@ utils.prototype.rand = function (num) {
 }
 
 ////// 生成随机数（录像方法） //////
+/**
+ * 支持SL的随机数，并计入录像
+ * @param {number} num 正整数，0或不填会被视为2147483648
+ */
 utils.prototype.rand2 = function (num) {
     num = num || 2147483648;
     num = Math.abs(num);
@@ -910,6 +1108,12 @@ utils.prototype.__next_rand = function (_rand) {
 }
 
 ////// 读取一个本地文件内容 //////
+/**
+ * 尝试请求读取一个本地文件内容 [异步]
+ * @param success 成功后的回调
+ * @param error 失败后的回调
+ * @param readType 不设置则以文本读取，否则以DataUrl形式读取
+ */
 utils.prototype.readFile = function (success, error, accept, readType) {
 
     core.platform.successCallback = success;
@@ -957,6 +1161,10 @@ utils.prototype.readFile = function (success, error, accept, readType) {
 }
 
 ////// 读取文件完毕 //////
+/**
+ * 文件读取完毕后的内容处理 [异步]
+ * @param content
+ */
 utils.prototype.readFileContent = function (content) {
     var obj = null;
     if (content.slice(0, 4) === 'data') {
@@ -987,6 +1195,11 @@ utils.prototype.readFileContent = function (content) {
 }
 
 ////// 下载文件到本地 //////
+/**
+ * 弹窗请求下载一个文本文件
+ * @param {string} filename 文件名
+ * @param {string | String[]} content 文件内容
+ */
 utils.prototype.download = function (filename, content) {
 
     if (window.jsinterface) {
@@ -1052,6 +1265,10 @@ utils.prototype.download = function (filename, content) {
 }
 
 ////// 复制一段内容到剪切板 //////
+/**
+ * 尝试复制一段文本到剪切板。
+ * @param {string} data
+ */
 utils.prototype.copy = function (data) {
 
     if (window.jsinterface) {
@@ -1088,6 +1305,12 @@ utils.prototype.copy = function (data) {
 }
 
 ////// 显示一段confirm //////
+/**
+ * 显示确认框，类似core.drawConfirmBox()
+ * @param {string} hint 弹窗的内容
+ * @param {() => void} yesCallback 确定后的回调函数
+ * @param {() => void} noCallback 取消后的回调函数，可选
+ */
 utils.prototype.myconfirm = function (hint, yesCallback, noCallback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
@@ -1101,6 +1324,12 @@ utils.prototype.myconfirm = function (hint, yesCallback, noCallback) {
 }
 
 ////// 让用户输入一段文字 //////
+/**
+ * 让用户输入一段文字
+ * @param {string} hint
+ * @param {string} value
+ * @param {(data?: string) => any} callback
+ */
 utils.prototype.myprompt = function (hint, value, callback) {
     main.dom.inputDiv.style.display = 'block';
     main.dom.inputMessage.innerHTML = hint.replace(/\n/g, '<br/>');
@@ -1117,6 +1346,12 @@ utils.prototype.myprompt = function (hint, value, callback) {
 }
 
 ////// 动画显示某对象 //////
+/**
+ * 动画显示某对象
+ * @param {any} obj
+ * @param {number} speed
+ * @param {() => any} callback
+ */
 utils.prototype.showWithAnimate = function (obj, speed, callback) {
     obj.style.display = 'block';
     if (!speed || main.mode != 'play') {
@@ -1137,6 +1372,12 @@ utils.prototype.showWithAnimate = function (obj, speed, callback) {
 }
 
 ////// 动画使某对象消失 //////
+/**
+ * 动画使某对象消失
+ * @param {any} obj
+ * @param {number} speed
+ * @param {() => any} callback
+ */
 utils.prototype.hideWithAnimate = function (obj, speed, callback) {
     if (!speed || main.mode != 'play') {
         obj.style.display = 'none';
@@ -1157,6 +1398,7 @@ utils.prototype.hideWithAnimate = function (obj, speed, callback) {
 }
 
 ////// 生成浏览器唯一的 guid //////
+/** 获得浏览器唯一的guid */
 utils.prototype.getGuid = function () {
     var guid = localStorage.getItem('guid');
     if (guid != null) return guid;
@@ -1182,6 +1424,11 @@ utils.prototype.hashCode = function (obj) {
     return this.hashCode(JSON.stringify(obj).split("").sort().join(""));
 }
 
+/**
+ * 判定深层相等, 会逐层比较每个元素
+ * @param {any} a
+ * @param {any} b
+ */
 utils.prototype.same = function (a, b) {
     if (a == null && b == null) return true;
     if (a == null || b == null) return false;
@@ -1205,6 +1452,14 @@ utils.prototype.same = function (a, b) {
     return false;
 }
 
+/**
+ * 解压一段内容
+ * @param {any} blobOrUrl
+ * @param {(data: any) => void} success
+ * @param {(error: string) => void} error
+ * @param {boolean} convertToText
+ * @param {(loaded: number, total: number) => void} onprogress
+ */
 utils.prototype.unzip = function (blobOrUrl, success, error, convertToText, onprogress) {
     var _error = function (msg) {
         console.error(msg);
@@ -1253,6 +1508,14 @@ utils.prototype._unzip_readEntries = function (entries, success, convertToText) 
     });
 }
 
+/**
+ * 发送一个HTTP请求 [异步]
+ * @param {'GET' | 'POST'} type 请求类型
+ * @param {string} url 目标地址
+ * @param {FormData} formData 如果是POST请求则为表单数据
+ * @param {() => void} success 成功后的回调
+ * @param {() => void} error 失败后的回调
+ */
 utils.prototype.http = function (type, url, formData, success, error, mimeType, responseType, onprogress) {
     var xhr = new XMLHttpRequest();
     xhr.open(type, url, true);

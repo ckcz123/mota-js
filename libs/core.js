@@ -5,12 +5,12 @@
 
 "use strict";
 
-// /**
-//  * @type {CoreMixin}
-//  */
-// const core = (() => {
+/**
+ * @type {CoreMixin}
+ */
+const core = (() => {
 
-function core () {
+function Core () {
     this.__SIZE__ = 13;
     this.__PIXELS__ = this.__SIZE__ * 32;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
@@ -265,7 +265,7 @@ function core () {
 /////////// 系统事件相关 ///////////
 
 ////// 初始化 //////
-core.prototype.init = function (coreData, callback) {
+Core.prototype.init = function (coreData, callback) {
     this._forwardFuncs();
     for (var key in coreData)
         core[key] = coreData[key];
@@ -293,7 +293,7 @@ core.prototype.init = function (coreData, callback) {
     core.setMusicBtn();
 }
 
-core.prototype._init_flags = function () {
+Core.prototype._init_flags = function () {
     core.flags = core.clone(core.data.flags);
     core.values = core.clone(core.data.values);
     core.firstData = core.clone(core.data.firstData);
@@ -373,7 +373,7 @@ core.prototype._init_flags = function () {
 
 }
 
-core.prototype._init_sys_flags = function () {
+Core.prototype._init_sys_flags = function () {
     if (core.flags.equipboxButton) core.flags.equipment = true;
     core.flags.displayEnemyDamage = core.getLocalStorage('enemyDamage', true);
     core.flags.displayCritical = core.getLocalStorage('critical', true);
@@ -388,7 +388,7 @@ core.prototype._init_sys_flags = function () {
     core.flags.enableHDCanvas = core.getLocalStorage('enableHDCanvas', !core.platform.isIOS);
 }
 
-core.prototype._init_platform = function () {
+Core.prototype._init_platform = function () {
     core.platform.isOnline = location.protocol.indexOf("http") == 0;
     if (!core.platform.isOnline) alert("请勿直接打开html文件！使用启动服务或者APP进行离线游戏。");
     window.AudioContext = window.AudioContext || window.webkitAudioContext || window.mozAudioContext || window.msAudioContext;
@@ -437,7 +437,7 @@ core.prototype._init_platform = function () {
     }
 }
 
-core.prototype._init_others = function () {
+Core.prototype._init_others = function () {
     // 一些额外的东西
     core.material.groundCanvas = document.createElement('canvas').getContext('2d');
     core.material.groundCanvas.canvas.width = core.material.groundCanvas.canvas.height = 32;
@@ -453,7 +453,7 @@ core.prototype._init_others = function () {
     core.control.getSaveIndexes(function (indexes) { core.saves.ids = indexes; });
 }
 
-core.prototype._afterLoadResources = function (callback) {
+Core.prototype._afterLoadResources = function (callback) {
     // 初始化地图
     core.initStatus.maps = core.maps._initMaps();
     core.control._setRequestAnimationFrame();
@@ -480,7 +480,7 @@ core.prototype._afterLoadResources = function (callback) {
     if (callback) callback();
 }
 
-core.prototype._init_plugins = function () {
+Core.prototype._init_plugins = function () {
     core.plugin = new function () { };
 
     for (var name in plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1) {
@@ -498,7 +498,7 @@ core.prototype._init_plugins = function () {
     core._forwardFunc("plugin");
 }
 
-core.prototype._forwardFuncs = function () {
+Core.prototype._forwardFuncs = function () {
     for (var i = 0; i < main.loadList.length; ++i) {
         var name = main.loadList[i];
         if (name == 'core') continue;
@@ -506,7 +506,7 @@ core.prototype._forwardFuncs = function () {
     }
 }
 
-core.prototype._forwardFunc = function (name, funcname) {
+Core.prototype._forwardFunc = function (name, funcname) {
     if (funcname == null) {
         for (funcname in core[name]) {
             if (funcname.charAt(0) != "_" && core[name][funcname] instanceof Function) {
@@ -526,7 +526,7 @@ core.prototype._forwardFunc = function (name, funcname) {
     eval("core." + funcname + " = function (" + parameters + ") {\n\treturn core." + name + "." + funcname + ".apply(core." + name + ", arguments);\n}");
 }
 
-core.prototype.doFunc = function (func, _this) {
+Core.prototype.doFunc = function (func, _this) {
     if (typeof func == 'string') {
         func = core.plugin[func];
         _this = core.plugin;
@@ -534,7 +534,6 @@ core.prototype.doFunc = function (func, _this) {
     return func.apply(_this, Array.prototype.slice.call(arguments, 2));
 }
 
-// return new Core();
+return new Core();
 
-// })();
-var core = new core();
+})();

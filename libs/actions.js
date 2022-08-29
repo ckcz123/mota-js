@@ -67,6 +67,14 @@ actions.prototype._init = function () {
  * priority：优先级；优先级高的将会被执行。此项可不填，默认为0。
  * 返回：如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
  */
+/**
+ * 此函数将注册一个用户交互行为。
+ * @param {string} action 要注册的交互类型，如 ondown, onclick, keyDown 等等。
+ * @param {string} name 你的自定义名称，可被注销使用；同名重复注册将后者覆盖前者。
+ * @param {string | ((...params: any) => void)} func 执行函数。
+ * 如果func返回true，则不会再继续执行其他的交互函数；否则会继续执行其他的交互函数。
+ * @param {number} priority 优先级；优先级高的将会被执行。此项可不填，默认为0
+ */
 actions.prototype.registerAction = function (action, name, func, priority) {
     if (!name || !func)
         return;
@@ -86,6 +94,11 @@ actions.prototype.registerAction = function (action, name, func, priority) {
 }
 
 ////// 注销一个用户交互行为 //////
+/**
+ * 注销一个用户交互行为
+ * @param {string} action
+ * @param {string} name
+ */
 actions.prototype.unregisterAction = function (action, name) {
     // 将onclick视为ondown处理
     if (action == 'onclick') action = 'ondown';
@@ -96,6 +109,11 @@ actions.prototype.unregisterAction = function (action, name) {
 }
 
 ////// 执行一个用户交互行为 //////
+/**
+ * 执行一个用户交互行为
+ * @param {string} action
+ * @param {any} params
+ */
 actions.prototype.doRegisteredAction = function (action) {
     var actions = this.actions[action];
     if (!actions) return false;
@@ -153,6 +171,10 @@ actions.prototype.__checkLeftHandPrefer = function (e) {
 }
 
 ////// 按下某个键时 //////
+/**
+ * 按下某个键时
+ * @param {KeyboardEvent} e
+ */
 actions.prototype.onkeyDown = function (e) {
     this.doRegisteredAction('onkeyDown', this.__checkLeftHandPrefer(e));
 }
@@ -176,6 +198,10 @@ actions.prototype._sys_onkeyDown = function (e) {
 }
 
 ////// 放开某个键时 //////
+/**
+ * 放开某个键时
+ * @param {KeyboardEvent} e
+ */
 actions.prototype.onkeyUp = function (e) {
     this.doRegisteredAction('onkeyUp', this.__checkLeftHandPrefer(e));
 }
@@ -237,6 +263,10 @@ actions.prototype._sys_onkeyUp = function (e) {
 }
 
 ////// 按住某个键时 //////
+/**
+ * 按住某个键时
+ * @param {number} keyCode
+ */
 actions.prototype.pressKey = function (keyCode) {
     this.doRegisteredAction('pressKey', keyCode);
 }
@@ -251,6 +281,10 @@ actions.prototype._sys_pressKey = function (keyCode) {
 }
 
 ////// 根据按下键的code来执行一系列操作 //////
+/**
+ * 根据按下键的code来执行一系列操作
+ * @param {number} keyCode
+ */
 actions.prototype.keyDown = function (keyCode) {
     this.doRegisteredAction('keyDown', keyCode);
 }
@@ -331,6 +365,12 @@ actions.prototype._sys_keyDown = function (keyCode) {
 }
 
 ////// 根据放开键的code来执行一系列操作 //////
+/**
+ * 根据放开键的code来执行一系列操作
+ * @param {number} keyCode
+ * @param {boolean} altKey
+ * @param {boolean} fromReplay
+ */
 actions.prototype.keyUp = function (keyCode, altKey, fromReplay) {
     this.doRegisteredAction('keyUp', keyCode, altKey, fromReplay);
 }
@@ -452,6 +492,10 @@ actions.prototype._sys_keyUp = function (keyCode, altKey) {
 }
 
 ////// 点击（触摸）事件按下时 //////
+/**
+ * 点击（触摸）事件按下时
+ * @param {number[]} loc
+ */
 actions.prototype.ondown = function (loc) {
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
     var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
@@ -594,6 +638,10 @@ actions.prototype._sys_ondown = function (x, y, px, py) {
 }
 
 ////// 当在触摸屏上滑动时 //////
+/**
+ * 当在触摸屏上滑动时
+ * @param {number[]} loc
+ */
 actions.prototype.onmove = function (loc) {
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
     var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
@@ -679,6 +727,10 @@ actions.prototype._sys_onmove = function (x, y, px, py) {
 }
 
 ////// 当点击（触摸）事件放开时 //////
+/**
+ * 当点击（触摸）事件放开时
+ * @param {number[]} loc
+ */
 actions.prototype.onup = function (loc) {
     var x = parseInt(loc.x / loc.size), y = parseInt(loc.y / loc.size);
     var px = parseInt(loc.x / core.domStyle.scale), py = parseInt(loc.y / core.domStyle.scale);
@@ -755,6 +807,10 @@ actions.prototype._getClickLoc = function (x, y) {
 
 
 ////// 滑动鼠标滚轮时的操作 //////
+/**
+ * 滑动鼠标滚轮时的操作
+ * @param {1 | -1} direct
+ */
 actions.prototype.onmousewheel = function (direct) {
     this.doRegisteredAction('onmousewheel', direct);
 }
@@ -819,6 +875,7 @@ actions.prototype._sys_onmousewheel = function (direct) {
 }
 
 ////// 长按Ctrl键时 //////
+/** 长按Ctrl键时 */
 actions.prototype.keyDownCtrl = function () {
     this.doRegisteredAction('keyDownCtrl');
 }
@@ -844,6 +901,14 @@ actions.prototype._sys_keyDownCtrl = function () {
 }
 
 ////// 长按 //////
+/**
+ * 长按
+ * @param {number} x
+ * @param {number} y
+ * @param {number} px
+ * @param {number} py
+ * @param {boolean} fromEvent
+ */
 actions.prototype.longClick = function (x, y, px, py) {
     if (!core.isPlaying()) return false;
     return this.doRegisteredAction('longClick', x, y, px, py);
@@ -886,6 +951,10 @@ actions.prototype._sys_longClick_lockControl = function (x, y, px, py) {
     return false;
 }
 
+/**
+ * 点击自绘状态栏时
+ * @param {MouseEvent} e
+ */
 actions.prototype.onStatusBarClick = function (e) {
     if (!core.isPlaying()) return false;
     var left = core.dom.gameGroup.offsetLeft + 3;

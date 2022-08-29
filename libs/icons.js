@@ -13,6 +13,7 @@ icons.prototype._init = function () {
     this.tilesetStartOffset = 10000;
 }
 
+/** 获得所有图标类型 */
 icons.prototype.getIcons = function () {
     var icons = core.clone(this.icons);
     icons.hero.leftup = icons.hero.leftdown = icons.hero.left;
@@ -21,6 +22,10 @@ icons.prototype.getIcons = function () {
 }
 
 ////// 根据道具ID获得其cls //////
+/**
+ * 根据ID获得其类型
+ * @param {string} id
+ */
 icons.prototype.getClsFromId = function (id) {
     for (var cls in core.material.icons) {
         if (cls != 'hero' && id in core.material.icons[cls])
@@ -29,6 +34,7 @@ icons.prototype.getClsFromId = function (id) {
     return null;
 }
 
+/** 获得所有图标的ID */
 icons.prototype.getAllIconIds = function () {
     if (this.allIconIds) return this.allIconIds;
     this.allIconIds = [];
@@ -49,6 +55,10 @@ icons.prototype._getAnimateFrames = function (cls) {
 }
 
 ////// 根据图块数字或ID获得所在的tileset和坐标信息 //////
+/**
+ * 根据图块数字或ID获得所在的tileset和坐标信息
+ * @param {string} id
+ */
 icons.prototype.getTilesetOffset = function (id) {
 
     if (typeof id == 'string') {

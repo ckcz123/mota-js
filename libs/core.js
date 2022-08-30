@@ -117,7 +117,7 @@ function core () {
         posX: 0, // 
         posY: 0,
         width: main.mode == 'editor' ? this.__SIZE__ : this._WIDTH_, // map width and height
-        height: main.mode == 'efitor' ? this.__SIZE__ : this._HEIGHT_,
+        height: main.mode == 'editor' ? this.__SIZE__ : this._HEIGHT_,
         v2: false,
         threshold: 1024,
         extend: 10,

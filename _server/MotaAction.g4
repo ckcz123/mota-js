@@ -3119,7 +3119,7 @@ return code;
 
 
 autoSave_s
-    :   '自动存档' '不提示' Bool Newline
+    :   '自动存档' '读档到触发前' Bool Newline
 
 
 /* autoSave_s
@@ -3127,7 +3127,7 @@ tooltip : autoSave: 自动存档
 helpUrl : /_docs/#/instruction
 colour : this.soundColor
 default : [false]
-Bool_0 = Bool_0 ? (', "nohint": true') : '';
+Bool_0 = Bool_0 ? (', "removeLast": true') : '';
 var code = '{"type": "autoSave"'+Bool_0+'},\n';
 return code;
 */;

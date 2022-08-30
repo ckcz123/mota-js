@@ -212,8 +212,8 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 						"type": "fillRect",
 						"x": 0,
 						"y": 0,
-						"width": "core.__PIXELS__",
-						"height": "core.__PIXELS__",
+						"width": "core._PX_ || core.__PIXELS__",
+						"height": "core._PY_ || core.__PIXELS__",
 						"style": [
 							82,
 							82,
@@ -227,7 +227,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 					},
 					{
 						"type": "fillBoldText",
-						"x": "core.__PIXELS__ / 2",
+						"x": "(core._PX_ || core.__PIXELS__) / 2",
 						"y": 80,
 						"style": [
 							255,
@@ -735,20 +735,25 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 		"animateSpeed": 300,
 		"moveSpeed": 100,
 		"statusCanvasRowsOnMobile": 3,
-		"floorChangeTime": 500
+		"floorChangeTime": 100
 	},
 	"flags": {
 		"statusBarItems": [
 			"enableFloor",
+			"enableLv",
 			"enableHP",
+			"enableMana",
 			"enableAtk",
 			"enableDef",
 			"enableMDef",
 			"enableMoney",
-			"enableKeys"
+			"enableExp",
+			"enableKeys",
+			"enablePZF",
+			"enableSkill"
 		],
 		"autoScale": true,
-		"extendToolbar": false,
+		"extendToolbar": true,
 		"flyNearStair": true,
 		"flyRecordPosition": false,
 		"itemFirstText": false,

@@ -1,24 +1,11 @@
-var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
+var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 = 
 {
-	"init": function () {
-
-		console.log("插件编写测试");
-
-		// 可以写一些直接执行的代码
-		// 在这里写的代码将会在【资源加载前】被执行，此时图片等资源尚未被加载。
-		// 请勿在这里对包括bgm，图片等资源进行操作。
-
-
+    "init": function () {
 		this._afterLoadResources = function () {
 			// 本函数将在所有资源加载完毕后，游戏开启前被执行
-			// 可以在这个函数里面对资源进行一些操作。
-			// 若需要进行切分图片，可以使用 core.splitImage() 函数，或直接在全塔属性-图片切分中操作
 		}
-
-		// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为 core.plugin.xxx();
-		// 从V2.6开始，插件中用this.XXX方式定义的函数也会被转发到core中，详见文档-脚本-函数的转发。
 	},
-	"drawLight": function () {
+    "drawLight": function () {
 
 		// 绘制灯光/漆黑层效果。调用方式 core.plugin.drawLight(...)
 		// 【参数说明】
@@ -40,7 +27,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			var ctx = core.getContextByName(name);
 			if (ctx == null) {
 				if (typeof name == 'string')
-					ctx = core.createCanvas(name, 0, 0, core.__PIXELS__, core.__PIXELS__, 98);
+					ctx = core.createCanvas(name, 0, 0, core._PX_ || core.__PIXELS__, core._PY_ || core.__PIXELS__, 98);
 				else return;
 			}
 
@@ -79,7 +66,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			// 可以在任何地方（如afterXXX或自定义脚本事件）调用函数，方法为  core.plugin.xxx();
 		}
 	},
-	"shop": function () {
+    "shop": function () {
 		// 【全局商店】相关的功能
 		// 
 		// 打开一个全局商店
@@ -238,7 +225,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			var choices = data.choices;
 			var topIndex = core.actions._getChoicesTopIndex(choices.length);
 			if (keycode == 88 || keycode == 27) { // X, ESC
-				core.actions._clickAction(core.actions.HSIZE, topIndex + choices.length - 1);
+				core.actions._clickAction(core._HALF_WIDTH_ || core.__HALF_SIZE__, topIndex + choices.length - 1);
 				return true;
 			}
 			return false;
@@ -253,7 +240,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			var choices = data.choices;
 			var topIndex = core.actions._getChoicesTopIndex(choices.length);
 			if (keycode == 13 || keycode == 32) { // Space, Enter
-				core.actions._clickAction(core.actions.HSIZE, topIndex + core.status.event.selection);
+				core.actions._clickAction(core._HALF_WIDTH_ || core.__HALF_SIZE__, topIndex + core.status.event.selection);
 				_shouldProcessKeyUp = false;
 				return true;
 			}
@@ -267,14 +254,14 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			var data = core.status.event.data.current;
 			var choices = data.choices;
 			var topIndex = core.actions._getChoicesTopIndex(choices.length);
-			if (x >= core.actions.CHOICES_LEFT && x <= core.actions.CHOICES_RIGHT && y >= topIndex && y < topIndex + choices.length) {
+			if (Math.abs(x - (core._HALF_WIDTH_ || core.__HALF_SIZE__)) <= 2 && y >= topIndex && y < topIndex + choices.length) {
 				core.actions._clickAction(x, y);
 				return true;
 			}
 			return false;
 		}, 60);
 	},
-	"removeMap": function () {
+    "removeMap": function () {
 		// 高层塔砍层插件，删除后不会存入存档，不可浏览地图也不可飞到。
 		// 推荐用法：
 		// 对于超高层或分区域塔，当在1区时将2区以后的地图删除；1区结束时恢复2区，进二区时删除1区地图，以此类推
@@ -361,7 +348,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			});
 		}
 	},
-	"fiveLayers": function () {
+    "fiveLayers": function () {
 		// 是否启用五图层（增加背景2层和前景2层） 将__enable置为true即会启用；启用后请保存后刷新编辑器
 		// 背景层2将会覆盖背景层 被事件层覆盖 前景层2将会覆盖前景层
 		// 另外 请注意加入两个新图层 会让大地图的性能降低一些
@@ -381,8 +368,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			document.getElementById('gameDraw').appendChild(canvas);
 			var ctx = canvas.getContext('2d');
 			core.canvas[name] = ctx;
-			canvas.width = core.__PIXELS__;
-			canvas.height = core.__PIXELS__;
+			canvas.width = core._PX_ || core.__PIXELS__;
+			canvas.height = core._PY_ || core.__PIXELS__;
 			return canvas;
 		}
 
@@ -515,7 +502,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			};
 		}
 	},
-	"itemShop": function () {
+    "itemShop": function () {
 		// 道具商店相关的插件
 		// 可在全塔属性-全局商店中使用「道具商店」事件块进行编辑（如果找不到可以在入口方块中找）
 
@@ -821,7 +808,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 
 	},
-	"enemyLevel": function () {
+    "enemyLevel": function () {
 		// 此插件将提供怪物手册中的怪物境界显示
 		// 使用此插件需要先给每个怪物定义境界，方法如下：
 		// 点击怪物的【配置表格】，找到“【怪物】相关的表格配置”，然后在【名称】仿照增加境界定义：
@@ -906,42 +893,8 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.fillText('ui', '防御', col3, position, null, f13);
 			core.fillText('ui', core.formatBigNumber(enemy.def || 0), col3 + 30, position, /* [255, 0, 0, 1] */ null, b13);
 		}
-
-
 	},
-	"dynamicHp": function () {
-		// 此插件允许人物血量动态进行变化
-		// 原作：Fux2（老黄鸡）
-
-		// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
-		var __enable = false;
-		if (!__enable) return;
-
-		var speed = 0.05; // 动态血量变化速度，越大越快。
-
-		var _currentHp = null;
-		var _lastStatus = null;
-		var _check = function () {
-			if (_lastStatus != core.status.hero) {
-				_lastStatus = core.status.hero;
-				_currentHp = core.status.hero.hp;
-			}
-		}
-
-		core.registerAnimationFrame('dynamicHp', true, function () {
-			_check();
-			if (core.status.hero.hp != _currentHp) {
-				var dis = (_currentHp - core.status.hero.hp) * speed;
-				if (Math.abs(dis) < 2) {
-					_currentHp = core.status.hero.hp;
-				} else {
-					_currentHp -= dis;
-				}
-				core.setStatusBarInnerHTML('hp', _currentHp);
-			}
-		});
-	},
-	"multiHeros": function () {
+    "multiHeros": function () {
 		// 多角色插件
 		// Step 1: 启用本插件
 		// Step 2: 定义每个新的角色各项初始数据（参见下方注释）
@@ -1087,149 +1040,11 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			core.setFlag("heroId", toHeroId); // 保存切换到的角色ID
 		}
 	},
-	"itemCategory": function () {
-		// 物品分类插件。此插件允许你对消耗道具和永久道具进行分类，比如标记「宝物类」「剧情道具」「药品」等等。
-		// 使用方法：
-		// 1. 启用本插件
-		// 2. 在下方数组中定义全部的物品分类类型
-		// 3. 点击道具的【配置表格】，找到“【道具】相关的表格配置”，然后在【道具描述】之后仿照增加道具的分类：
-		/*
-		 "category": {
-			  "_leaf": true,
-			  "_type": "textarea",
-			  "_string": true,
-			  "_data": "道具分类"
-		 },
-		 */
-		// （你也可以选择使用下拉框的方式定义每个道具的分类，写法参见上面的cls）
-		// 然后刷新编辑器，就可以对每个物品进行分类了
-
-		// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
-		var __enable = false;
-		if (!__enable) return;
-
-		// 在这里定义所有的道具分类类型，一行一个
-		var categories = [
-			"宝物类",
-			"辅助类",
-			"技能类",
-			"剧情道具",
-			"增益道具",
-		];
-		// 当前选中的道具类别
-		var currentCategory = null;
-
-		// 重写 core.ui._drawToolbox 以绘制分类类别
-		var _drawToolbox = core.ui._drawToolbox;
-		core.ui._drawToolbox = function (index) {
-			_drawToolbox.call(this, index);
-			core.setTextAlign('ui', 'left');
-			core.fillText('ui', '类别[E]：' + (currentCategory || "全部"), 15, this.PIXEL - 13);
-		}
-
-		// 获得所有应该在道具栏显示的某个类型道具
-		core.ui.getToolboxItems = function (cls) {
-			// 检查类别
-			return Object.keys(core.status.hero.items[cls])
-				.filter(function (id) {
-					return !core.material.items[id].hideInToolbox &&
-						(currentCategory == null || core.material.items[id].category == currentCategory);
-				}).sort();
-		}
-
-		// 注入道具栏的点击事件（点击类别）
-		var _clickToolbox = core.actions._clickToolbox;
-		core.actions._clickToolbox = function (x, y) {
-			if (x >= 0 && x <= this.HSIZE - 4 && y == this.LAST) {
-				drawToolboxCategory();
-				return;
-			}
-			return _clickToolbox.call(core.actions, x, y);
-		}
-
-		// 注入道具栏的按键事件（E键）
-		var _keyUpToolbox = core.actions._keyUpToolbox;
-		core.actions._keyUpToolbox = function (keyCode) {
-			if (keyCode == 69) {
-				// 按E键则打开分类类别选择
-				drawToolboxCategory();
-				return;
-			}
-			return _keyUpToolbox.call(core.actions, keyCode);
-		}
-
-		// ------ 以下为选择道具分类的相关代码 ------ //
-
-		// 关闭窗口时清除分类选择项
-		var _closePanel = core.ui.closePanel;
-		core.ui.closePanel = function () {
-			currentCategory = null;
-			_closePanel.call(core.ui);
-		}
-
-		// 弹出菜单以选择具体哪个分类
-		// 直接使用 core.drawChoices 进行绘制
-		var drawToolboxCategory = function () {
-			if (core.status.event.id != 'toolbox') return;
-			var selection = categories.indexOf(currentCategory) + 1;
-			core.ui.closePanel();
-			core.status.event.id = 'toolbox-category';
-			core.status.event.selection = selection;
-			core.lockControl();
-			// 给第一项插入「全部」
-			core.drawChoices('请选择道具类别', ["全部"].concat(categories));
-		}
-
-		// 选择某一项
-		var _selectCategory = function (index) {
-			core.ui.closePanel();
-			if (index <= 0 || index > categories.length) currentCategory = null;
-			else currentCategory = categories[index - 1];
-			core.openToolbox();
-		}
-
-		var _clickToolBoxCategory = function (x, y) {
-			if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
-
-			if (x < core.actions.CHOICES_LEFT || x > core.actions.CHOICES_RIGHT) return false;
-			var choices = core.status.event.ui.choices;
-			var topIndex = core.actions._getChoicesTopIndex(choices.length);
-			if (y >= topIndex && y < topIndex + choices.length) {
-				_selectCategory(y - topIndex);
-			}
-			return true;
-		}
-
-		// 注入点击事件
-		core.registerAction('onclick', 'toolbox-category', _clickToolBoxCategory, 100);
-
-		// 注入光标跟随事件
-		core.registerAction('onmove', 'toolbox-category', function (x, y) {
-			if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
-			core.actions._onMoveChoices(x, y);
-			return true;
-		}, 100);
-
-		// 注入键盘光标事件
-		core.registerAction('keyDown', 'toolbox-category', function (keyCode) {
-			if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
-			core.actions._keyDownChoices(keyCode);
-			return true;
-		}, 100);
-
-		// 注入键盘按键事件
-		core.registerAction('keyUp', 'toolbox-category', function (keyCode) {
-			if (!core.status.lockControl || core.status.event.id != 'toolbox-category') return false;
-			core.actions._selectChoices(core.status.event.ui.choices.length, keyCode, _clickToolBoxCategory);
-			return true;
-		}, 100);
-
-	},
-	"heroFourFrames": function () {
+    "heroFourFrames": function () {
 		// 样板的勇士/跟随者移动时只使用2、4两帧，观感较差。本插件可以将四帧全用上。
 
 		// 是否启用本插件
-		var __enable = false;
+		var __enable = true;
 		if (!__enable) return;
 
 		["up", "down", "left", "right"].forEach(function (one) {
@@ -1278,90 +1093,270 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			return false;
 		}
 	},
-	"startCanvas": function () {
-		// 使用本插件可以将自绘的标题界面居中。仅在【标题开启事件化】后才有效。
-		// 由于一些技术性的原因，标题界面事件化无法应用到覆盖状态栏的整个界面。
-		// 这是一个较为妥协的插件，会在自绘标题界面时隐藏状态栏、工具栏和边框，并将画布进行居中。
-		// 本插件仅在全塔属性的 "startCanvas" 生效；进入 "startText" 时将会离开居中状态，回归正常界面。
-
-		// 是否开启本插件，默认禁用；将此改成 true 将启用本插件。
-		var __enable = false;
-		if (!__enable) return;
-
-		// 检查【标题开启事件化】是否开启
-		if (!core.flags.startUsingCanvas || main.mode != 'play') return;
-
-		var _isTitleCanvasEnabled = false;
-		var _getClickLoc = core.actions._getClickLoc;
-		this._setTitleCanvas = function () {
-			if (_isTitleCanvasEnabled) return;
-			_isTitleCanvasEnabled = true;
-
-			// 禁用窗口resize
-			window.onresize = function () { };
-			core.resize = function () { }
-
-			// 隐藏状态栏
-			core.dom.statusBar.style.display = 'none';
-			core.dom.statusCanvas.style.display = 'none';
-			core.dom.toolBar.style.display = 'none';
-			// 居中画布
-			if (core.domStyle.isVertical) {
-				core.dom.gameDraw.style.top =
-					(parseInt(core.dom.gameGroup.style.height) - parseInt(core.dom.gameDraw.style.height)) / 2 + "px";
-			} else {
-				core.dom.gameDraw.style.right =
-					(parseInt(core.dom.gameGroup.style.width) - parseInt(core.dom.gameDraw.style.width)) / 2 + "px";
+    "routeFixing": function () {
+	// 是否开启本插件，true 表示启用，false 表示禁用。
+	var __enable = true;
+	if (!__enable) return;
+	/*
+	 使用说明：启用本插件后，录像回放时您可以用数字键1或6分别切换到原速或24倍速，
+	 暂停播放时按数字键7（电脑按N）可以单步播放。（手机端可以点击难度单词切换出数字键）
+	 数字键2-5可以进行录像自助精修，具体描述见下（实际弹窗请求您输入时不要带有任何空格）：
+	 
+	 up down left right 勇士向某个方向「行走一步或撞击」
+	 item:ID 使用某件道具，如 item:bomb 表示使用炸弹
+	 unEquip:n 卸掉身上第(n+1)件装备（n从0开始），如 unEquip:1 默认表示卸掉盾牌
+	 equip:ID 穿上某件装备，如 equip:sword1 表示装上铁剑
+	 saveEquip:n 将身上的当前套装保存到第n套快捷套装（n从0开始）
+	 loadEquip:n 快捷换上之前保存好的第n套套装
+	 fly:ID 使用楼传飞到某一层，如 fly:MT10 表示飞到主塔10层
+	 choices:none 确认框/选择项「超时」（作者未设置超时时间则此项视为缺失）
+	 choices:n 确认框/选择项选择第(n+1)项（选择项n从0开始，确认框n为0表示「确定」，1表示「取消」）
+	 选择项n为负数时表示选择倒数第 -n 项，如 -1 表示最后一项（V2.8.2起标准全局商店的「离开」项）
+	 此项缺失的话，确认框将选择作者指定的默认项（初始光标位置），选择项将弹窗请求补选（后台录像验证中选最后一项，可以复写函数来修改）
+	 shop:ID 打开某个全局商店，如 shop:itemShop 表示打开道具商店。因此连载塔千万不要中途修改商店ID！
+	 turn 单击勇士（Z键）转身，core.turnHero() 会产生此项，因此通过事件等方式强制让勇士转向应该用 core.setHeroLoc()
+	 turn:dir 勇士转向某个方向，dir 可以为 up down left right（此项一般是读取自动存档产生的，属于样板的不良特性，请勿滥用）
+	 getNext 轻按获得身边道具，优先获得面前的（面前没有则按上下左右顺序依次获得），身边如果没有道具则此项会被跳过
+	 input:none “等待用户操作事件”中超时（作者未设置超时时间则此项会导致报错）
+	 input:xxx 可能表示“等待用户操作事件”的一个操作（如按键操作将直接记录 input:keycode ），
+	 也可能表示一个“接受用户输入数字”的输入，后者的情况下 xxx 为输入的整数。此项缺失的话前者将直接报错，后者将用0代替（后者现在支持负数了）
+	 input2:xxx 可能表示“读取全局存储（core.getGlobal）”读取到的值，也可能表示一个“接受用户输入文本”的输入，
+	 两种情况下 xxx 都为 base64 编码。此项缺失的话前者将重新现场读取，后者将用空字符串代替
+	 no 走到可穿透的楼梯上不触发楼层切换事件，通过本插件可以让勇士停在旁边没有障碍物的楼梯上哦～
+	 move:x:y 尝试瞬移到 [x,y] 点（不改变朝向），该点甚至可以和勇士相邻或者位于视野外
+	 key:n 松开键值为n的键，如 key:49 表示松开大键盘数字键1，默认会触发使用破墙镐
+	 click:n:px:py 点击自绘状态栏，n为0表示横屏1表示竖屏，[px,py] 为点击的像素坐标
+	 random:n 生成了随机数n，即 core.rand2(num) 的返回结果，n必须在 [0,num-1] 范围，num必须为正整数。此项缺失将导致现场重新随机生成数值，可能导致回放结果不一致！
+	 作者自定义的新项（一般为js对象，可以先JSON.stringify()再core.encodeBase64()得到纯英文数字的内容）需要用(半角圆括弧)括起来。
+	 
+	 当您使用数字键5将一些项追加到即将播放内容的开头时，请注意要逆序逐项追加，或者每追加一项就按下数字键7或字母键N单步播放一步。
+	 但是【input input2 random choices】是被动读取的，单步播放如果触发了相应的事件就会连续读取，这时候只能提前逐项追加好。
+	 电脑端熟练以后推荐直接在控制台操作 core.status.route 和 core.status.replay.toReplay（后者录像回放时才有），配合 core.push() 和 core.unshift() 更加灵活自由哦！
+	 */
+	core.actions.registerAction('onkeyUp', '_sys_onkeyUp_replay', function (e) {
+		if (this._checkReplaying()) {
+			if (e.keyCode == 27) // ESCAPE
+				core.stopReplay();
+			else if (e.keyCode == 90) // Z
+				core.speedDownReplay();
+			else if (e.keyCode == 67) // C
+				core.speedUpReplay();
+			else if (e.keyCode == 32) // SPACE
+				core.triggerReplay();
+			else if (e.keyCode == 65) // A
+				core.rewindReplay();
+			else if (e.keyCode == 83) // S
+				core.control._replay_SL();
+			else if (e.keyCode == 88) // X
+				core.control._replay_book();
+			else if (e.keyCode == 33 || e.keyCode == 34) // PgUp/PgDn
+				core.control._replay_viewMap();
+			else if (e.keyCode == 78) // N
+				core.stepReplay();
+			else if (e.keyCode == 84) // T
+				core.control._replay_toolbox();
+			else if (e.keyCode == 81) // Q
+				core.control._replay_equipbox();
+			else if (e.keyCode == 66) // B
+				core.ui._drawStatistics();
+			else if (e.keyCode == 49 || e.keyCode == 54) // 1/6，原速/24倍速播放
+				core.setReplaySpeed(e.keyCode == 49 ? 1 : 24);
+			else if (e.keyCode > 49 && e.keyCode < 54) { // 2-5，录像精修
+				switch (e.keyCode - 48) {
+				case 2: // pop
+					alert("您已移除已录制内容的最后一项：" + core.status.route.pop());
+					break;
+				case 3: // push
+					core.utils.myprompt("请输入您要追加到已录制内容末尾的项：", "", function (value) {
+						if (value != null) core.status.route.push(value);
+					});
+					break;
+				case 4: // shift
+					alert("您已移除即将播放内容的第一项：" + core.status.replay.toReplay.shift());
+					break;
+				case 5: // unshift
+					core.utils.myprompt("请输入您要追加到即将播放内容开头的项：", "", function (value) {
+						if (value != null) core.status.replay.toReplay.unshift(value);
+					});
+				}
 			}
-			core.dom.gameDraw.style.border = '3px transparent solid';
-			core.actions._getClickLoc = function (x, y) {
-				var left = core.dom.gameGroup.offsetLeft + core.dom.gameDraw.offsetLeft + 3;
-				var top = core.dom.gameGroup.offsetTop + core.dom.gameDraw.offsetTop + 3;
-				var loc = { 'x': Math.max(x - left, 0), 'y': Math.max(y - top, 0), 'size': 32 * core.domStyle.scale };
-				return loc;
-			}
+			return true;
 		}
+	}, 100);
+},
+    "numpad": function () {
+	// 样板自带的整数输入事件为白屏弹窗且可以误输入任意非法内容但不支持负整数，观感较差。本插件可以将其美化成仿RM样式，使其支持负整数同时带有音效
+	// 另一方面，4399等第三方平台不允许使用包括 core.myprompt() 和 core.myconfirm() 在内的弹窗，因此也需要此插件来替代，不然类似生命魔杖的道具就不好实现了
+	// 关于负整数输入，V2.8.2原生支持其录像的压缩和解压，只是默认的 core.events._action_input() 函数将负数取了绝对值，可以只复写下面的 core.isReplaying() 部分来取消
 
-		this._resetTitleCanvas = function () {
-			if (!_isTitleCanvasEnabled) return;
-			_isTitleCanvasEnabled = false;
-			window.onresize = function () { try { main.core.resize(); } catch (ee) { console.error(ee) } }
-			core.resize = function () { return core.control.resize(); }
-			core.resize();
-			core.actions._getClickLoc = _getClickLoc;
-		}
+	// 是否启用本插件，false表示禁用，true表示启用
+	var __enable = true;
+	if (!__enable) return;
 
-		// 复写“开始游戏”
-		core.events._startGame_start = function (hard, seed, route, callback) {
-			console.log('开始游戏');
-			core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
-			core.setHeroLoc('x', -1);
-			core.setHeroLoc('y', -1);
-
-			if (seed != null) {
-				core.setFlag('__seed__', seed);
-				core.setFlag('__rand__', seed);
-			} else core.utils.__init_seed();
-
-			core.clearStatusBar();
-			core.plugin._setTitleCanvas();
-
-			var todo = [];
-			core.hideStatusBar();
-			core.push(todo, core.firstData.startCanvas);
-			core.push(todo, { "type": "function", "function": "function() { core.plugin._resetTitleCanvas(); core.events._startGame_setHard(); }" })
-			core.push(todo, core.firstData.startText);
-			this.insertAction(todo, null, null, function () {
-				core.events._startGame_afterStart(callback);
+	core.events._action_input = function (data, x, y, prefix) { // 复写整数输入事件
+		if (core.isReplaying()) { // 录像回放时，处理方式不变，但增加负整数支持
+			core.events.__action_getInput(core.replaceText(data.text, prefix), false, function (value) {
+				value = parseInt(value) || 0; // 去掉了取绝对值的步骤
+				core.status.route.push("input:" + value);
+				core.setFlag("input", value);
+				core.doAction();
 			});
-
-			if (route != null) core.startReplay(route);
-		}
-
-		var _loadData = core.control.loadData;
-		core.control.loadData = function (data, callback) {
-			core.plugin._resetTitleCanvas();
-			_loadData.call(core.control, data, callback);
+		} else {
+			// 正常游戏中，采用暂停录制的方式然后用事件流循环“绘制-等待-变量操作”三板斧实现（按照13*13适配的）。
+			// 您可以自行修改循环内的内容来适配15*15或其他需求，或干脆作为公共事件编辑。
+			core.insertAction([
+				// 记录当前录像长度，下面的循环结束后裁剪。达到“暂停录制”的效果
+				{ "type": "function", "function": "function(){flags['@temp@length']=core.status.route.length}" },
+				{ "type": "setValue", "name": "flag:input", "value": "0" },
+				{
+					"type": "while",
+					"condition": "true",
+					"data": [
+						{ "type": "drawBackground", "background": "winskin.png", "x": 16, "y": 16, "width": 384, "height": 384 },
+						{ "type": "drawIcon", "id": "X10181", "x": 32, "y": 288 },
+						{ "type": "drawIcon", "id": "X10185", "x": 64, "y": 288 },
+						{ "type": "drawIcon", "id": "X10186", "x": 96, "y": 288 },
+						{ "type": "drawIcon", "id": "X10187", "x": 128, "y": 288 },
+						{ "type": "drawIcon", "id": "X10188", "x": 160, "y": 288 },
+						{ "type": "drawIcon", "id": "X10189", "x": 192, "y": 288 },
+						{ "type": "drawIcon", "id": "X10193", "x": 224, "y": 288 },
+						{ "type": "drawIcon", "id": "X10194", "x": 256, "y": 288 },
+						{ "type": "drawIcon", "id": "X10195", "x": 288, "y": 288 },
+						{ "type": "drawIcon", "id": "X10196", "x": 320, "y": 288 },
+						{ "type": "drawIcon", "id": "X10197", "x": 352, "y": 288 },
+						{ "type": "drawIcon", "id": "X10286", "x": 32, "y": 352 },
+						{ "type": "drawIcon", "id": "X10169", "x": 96, "y": 352 },
+						{ "type": "drawIcon", "id": "X10232", "x": 128, "y": 352 },
+						{ "type": "drawIcon", "id": "X10185", "x": 320, "y": 352 },
+						{ "type": "drawIcon", "id": "X10242", "x": 352, "y": 352 },
+						{ "type": "fillBoldText", "x": 48, "y": 256, "style": [255, 255, 255, 1], "font": "bold 32px Consolas", "text": "${flag:input}" },
+						{ "type": "fillBoldText", "x": 32, "y": 48, "style": [255, 255, 255, 1], "font": "16px Consolas", "text": core.replaceText(data.text, prefix) },
+						{
+							"type": "wait",
+							"forceChild": true,
+							"data": [{
+									"case": "keyboard",
+									"keycode": "48,49,50,51,52,53,54,55,56,57",
+									"action": [
+										// 按下数字键，追加到已输入内容的末尾，但禁止越界。变量：keycode-48就是末位数字
+										{ "type": "playSound", "name": "光标移动" },
+										{
+											"type": "if",
+											"condition": "(flag:input<0)",
+											"true": [
+												{ "type": "setValue", "name": "flag:input", "value": "10*flag:input-(flag:keycode-48)" },
+											],
+											"false": [
+												{ "type": "setValue", "name": "flag:input", "value": "10*flag:input+(flag:keycode-48)" },
+											]
+										},
+										{ "type": "setValue", "name": "flag:input", "value": "core.clamp(flag:input,-9e15,9e15)" },
+									]
+								},
+								{
+									"case": "keyboard",
+									"keycode": "189",
+									"action": [
+										// 按下减号键，变更已输入内容的符号
+										{ "type": "playSound", "name": "跳跃" },
+										{ "type": "setValue", "name": "flag:input", "value": "-flag:input" },
+									]
+								},
+								{
+									"case": "keyboard",
+									"keycode": "8",
+									"action": [
+										// 按下退格键，从已输入内容的末尾删除一位
+										{ "type": "playSound", "name": "取消" },
+										{ "type": "setValue", "name": "flag:input", "operator": "//=", "value": "10" },
+									]
+								},
+								{
+									"case": "keyboard",
+									"keycode": "27",
+									"action": [
+										// 按下ESC键，清空已输入内容
+										{ "type": "playSound", "name": "读档" },
+										{ "type": "setValue", "name": "flag:input", "value": "0" },
+									]
+								},
+								{
+									"case": "keyboard",
+									"keycode": "13",
+									"action": [
+										// 按下回车键，确定
+										{ "type": "break", "n": 1 },
+									]
+								},
+								{
+									"case": "mouse",
+									"px": [32, 63],
+									"py": [288, 320],
+									"action": [
+										// 点击减号，变号。右边界写63防止和下面重叠
+										{ "type": "playSound", "name": "跳跃" },
+										{ "type": "setValue", "name": "flag:input", "value": "-flag:input" },
+									]
+								},
+								{
+									"case": "mouse",
+									"px": [64, 384],
+									"py": [288, 320],
+									"action": [
+										// 点击数字，追加到已输入内容的末尾，但禁止越界。变量：x-2就是末位数字
+										{ "type": "playSound", "name": "光标移动" },
+										{
+											"type": "if",
+											"condition": "(flag:input<0)",
+											"true": [
+												{ "type": "setValue", "name": "flag:input", "value": "10*flag:input-(flag:x-2)" },
+											],
+											"false": [
+												{ "type": "setValue", "name": "flag:input", "value": "10*flag:input+(flag:x-2)" },
+											]
+										},
+										{ "type": "setValue", "name": "flag:input", "value": "core.clamp(flag:input,-9e15,9e15)" },
+									]
+								},
+								{
+									"case": "mouse",
+									"px": [32, 64],
+									"py": [352, 384],
+									"action": [
+										// 点击左箭头，退格
+										{ "type": "playSound", "name": "取消" },
+										{ "type": "setValue", "name": "flag:input", "operator": "//=", "value": "10" },
+									]
+								},
+								{
+									"case": "mouse",
+									"px": [96, 160],
+									"py": [352, 384],
+									"action": [
+										// 点击CE，清空
+										{ "type": "playSound", "name": "读档" },
+										{ "type": "setValue", "name": "flag:input", "value": "0" },
+									]
+								},
+								{
+									"case": "mouse",
+									"px": [320, 384],
+									"py": [352, 384],
+									"action": [
+										// 点击OK，确定
+										{ "type": "break", "n": 1 },
+									]
+								}
+							]
+						}
+					]
+				},
+				{ "type": "clearMap" },
+				// 裁剪录像，只保留'input:n'，然后继续录制
+				{ "type": "function", "function": "function(){core.status.route.splice(flags['@temp@length']);core.status.route.push('input:'+core.getFlag('input',0))}" }
+			], x, y);
+			core.events.doAction();
 		}
 	}
+}
 }

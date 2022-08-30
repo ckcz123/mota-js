@@ -149,7 +149,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				color = core.status.maps[floorId].color;
 			core.clearMap('curtain');
 			core.status.curtainColor = color;
-			if (color) core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
+			if (color) core.fillRect('curtain', 0, 0, core._PX_ || core.__PIXELS__, core._PY_ || core.__PIXELS__, core.arrayToRGBA(color));
 			// 更改天气
 			var weather = core.getFlag('__weather__', null);
 			if (!weather && core.status.maps[floorId].weather)
@@ -1233,7 +1233,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			if (core.statusBar.hard.innerText != core.status.hard) {
 				core.statusBar.hard.innerText = core.status.hard;
 			}
-			var hardColor = core.getFlag('__hardColor__', 'red');
+			var hardColor = core.getFlag('__hardColor__');
+			if (hardColor == null) core.statusBar.hard.innerText = '';
 			if (core.statusBar.hard.getAttribute('_style') != hardColor) {
 				core.statusBar.hard.style.color = hardColor;
 				core.statusBar.hard.setAttribute('_style', hardColor);
@@ -1714,8 +1715,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 			var left = 48,
 				top = 36,
-				right = core.__PIXELS__ - 2 * left,
-				bottom = core.__PIXELS__ - 2 * top;
+				right  = (core._PX_ || core.__PIXELS__) - 2 * left,
+				bottom = (core._PY_ || core.__PIXELS__) - 2 * top;
 
 			core.setAlpha('ui', 0.85);
 			core.fillRect('ui', left, top, right, bottom, '#000000');

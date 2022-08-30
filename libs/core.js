@@ -11,7 +11,14 @@
 // const core = (() => {
 
 function core () {
-    this.__SIZE__ = 13;
+    this._WIDTH_ = 17;
+    this._HEIGHT_ = 13;
+    this._PX_ = this._WIDTH_ * 32;
+    this._PY_ = this._HEIGHT_ * 32;
+    this._HALF_WIDTH_ = Math.floor(this._WIDTH_ / 2);
+    this._HALF_HEIGHT_ = Math.floor(this._HEIGHT_ / 2);
+
+    this.__SIZE__ = main.mode == 'editor' ? 15 : this._HEIGHT_;
     this.__PIXELS__ = this.__SIZE__ * 32;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
     this.material = {
@@ -109,8 +116,8 @@ function core () {
         offsetY: 0,
         posX: 0, // 
         posY: 0,
-        width: this.__SIZE__, // map width and height
-        height: this.__SIZE__,
+        width: main.mode == 'editor' ? this.__SIZE__ : this._WIDTH_, // map width and height
+        height: main.mode == 'efitor' ? this.__SIZE__ : this._HEIGHT_,
         v2: false,
         threshold: 1024,
         extend: 10,
@@ -175,8 +182,8 @@ function core () {
             'autoStepRoutes': [],
             'moveStepBeforeStop': [],
             'lastDirection': null,
-            'cursorX': null,
-            'cursorY': null,
+            'cursorX': 0,
+            'cursorY': 0,
             "moveDirectly": false,
         },
 
@@ -273,14 +280,14 @@ core.prototype.init = function (coreData, callback) {
     this._init_platform();
     this._init_others();
     this._init_plugins();
-
+    var b = main.mode == 'editor';
     // 初始化画布
     for (var name in core.canvas) {
         if (core.domStyle.hdCanvas.indexOf(name) >= 0)
-            core.maps._setHDCanvasSize(core.canvas[name], core.__PIXELS__, core.__PIXELS__);
+            core.maps._setHDCanvasSize(core.canvas[name], b ? core.__PIXELS__ : core._PX_, b ? core.__PIXELS__ : core._PY_);
         else {
-            core.canvas[name].canvas.width = core.__PIXELS__;
-            core.canvas[name].canvas.height = core.__PIXELS__;
+            core.canvas[name].canvas.width = (b ? core.__PIXELS__ : core._PX_);
+            core.canvas[name].canvas.height = (b ? core.__PIXELS__ : core._PY_);
         }
     }
 
@@ -380,7 +387,7 @@ core.prototype._init_sys_flags = function () {
     core.flags.displayExtraDamage = core.getLocalStorage('extraDamage', true);
     core.flags.enableEnemyPoint = core.getLocalStorage('enableEnemyPoint', core.flags.enableEnemyPoint);
     core.flags.leftHandPrefer = core.getLocalStorage('leftHandPrefer', false);
-    core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 0);
+    core.flags.extraDamageType = core.getLocalStorage('extraDamageType', 2);
     // 行走速度
     core.values.moveSpeed = core.getLocalStorage('moveSpeed', core.values.moveSpeed || 100);
     core.values.floorChangeTime = core.getLocalStorage('floorChangeTime', core.values.floorChangeTime);

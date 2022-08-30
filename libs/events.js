@@ -41,7 +41,6 @@ events.prototype.startGame = function (hard, seed, route, callback) {
 }
 
 events.prototype._startGame_start = function (hard, seed, route, callback) {
-    console.log('开始游戏');
     core.resetGame(core.firstData.hero, hard, null, core.cloneArray(core.initStatus.maps));
     core.setHeroLoc('x', -1);
     core.setHeroLoc('y', -1);
@@ -1563,7 +1562,7 @@ events.prototype._action_setViewport = function (data, x, y, prefix) {
     if (data.dxy != null) {
         data.loc = [core.bigmap.offsetX / 32 + (core.calValue(data.dxy[0], prefix) || 0), core.bigmap.offsetY / 32 + (core.calValue(data.dxy[1], prefix) || 0)];
     } else if (data.loc == null) {
-        data.loc = [core.getHeroLoc('x') - core.__HALF_SIZE__, core.getHeroLoc('y') - core.__HALF_SIZE__];
+        data.loc = [core.getHeroLoc('x') - core._HALF_WIDTH_, core.getHeroLoc('y') - core._HALF_HEIGHT_];
     } else {
         data.loc = this.__action_getLoc(data.loc, x, y, prefix);
     }
@@ -1984,7 +1983,7 @@ events.prototype._action_setHeroIcon = function (data, x, y, prefix) {
 
 events.prototype._action_input = function (data, x, y, prefix) {
     this.__action_getInput(core.replaceText(data.text, prefix), false, function (value) {
-        value = Math.abs(parseInt(value) || 0);
+        value = parseInt(value) || 0; // 允许负整数
         core.status.route.push("input:" + value);
         core.setFlag("input", value);
         core.doAction();
@@ -2082,9 +2081,9 @@ events.prototype._action_choices = function (data, x, y, prefix) {
         } else {
             // 容错录像
             if (main.replayChecking) {
-                // 录像验证系统中选择第一项
+                // 录像验证系统中选最后一项
                 if (action != 'choices:none') core.status.replay.toReplay.unshift(action); // 首先归还刚才读出的下一步操作
-                core.events.__action_choices_replaying(data, 0)
+                core.events.__action_choices_replaying(data, -1);
             } else {
                 // 正常游戏中弹窗选择
                 core.myprompt('录像回放出错！当前需要执行选择项但录像中未记录。\n如需修复请输入您要选的项（从0起），点击取消将不会修复。', 0, function (value) {
@@ -2581,9 +2580,8 @@ events.prototype._action_callSave = function (data, x, y, prefix) {
 events.prototype._action_autoSave = function (data, x, y, prefix) {
     var forbidSave = core.hasFlag('__forbidSave__');
     core.removeFlag('__forbidSave__');
-    core.autosave();
+    core.autosave(data.removeLast);
     if (forbidSave) core.setFlag('__forbidSave__', true);
-    if (!data.nohint) core.drawTip("已自动存档");
     core.doAction();
 }
 

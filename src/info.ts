@@ -52,7 +52,7 @@ export const actionAttributes = {
         delay: ['延迟', 'string']
     },
     create: {
-        name: ['名称', 'string'],
+        name: ['名称', 'readonly'],
         x: ['横坐标', 'number'],
         y: ['纵坐标', 'number'],
         w: ['宽度', 'number'],

@@ -9,7 +9,17 @@ let dataCache: number[][] = [];
 export async function compile() {
     // init
     sprites = {};
-    let head = '';
+    let head = `// 请复制以下内容至插件中以使用
+// 使用案例：
+/* 
+插件中：
+this.showMyUi = function () {
+    函数内容
+}
+调用时：
+core.showMyUi();
+*/
+`;
     let body = '';
     let final = '';
     let funcs = ''; // 把函数放到末尾
@@ -45,7 +55,7 @@ function split() {
 function createSprite(d: SpriteDrawInfo<'create'>) {
     const name = getSpriteName(d.name);
     const head =
-        `var ${name} = new Sprite(${d.x}, ${d.y}, ${d.w}, ${d.h}, ${d.z}, 'game', ${name});
+        `var ${name} = new Sprite(${d.x}, ${d.y}, ${d.w}, ${d.h}, ${d.z}, 'game', '${name}');
 ${name}.setCss('display: none;');\n`;
     const body = `${name}.setCss('display: block;');
 ${name}.move(${d.x}, ${d.y});
@@ -62,7 +72,7 @@ function getSpriteName(id?: string) {
 
 function generateFn(data: number[], index: number) {
     const start = `function action_${data[0]}_${data.at(-1)} () {\n`;
-    const end = `}`;
+    const end = `}\n`;
     let body = '';
     let head = '';
     for (let i = 0; i < data.length; i++) {
@@ -193,7 +203,7 @@ ctx.stoke();\n`;
     } else if (type === 'text') {
         const info = data as SpriteText;
         const before = `${sprite}.context, '${info.str}', ${info.x}, ${info.y}, '${info.style}'`;
-        const font = `${info.italic ? 'italic' : ''} ${info.fontWeight ?? ''} ${info.fontSize ?? ''} ${info.font}`
+        const font = `${info.italic ? 'italic' : ''} ${info.fontWeight ?? ''} ${info.fontSize ? info.fontSize + 'px' : ''} ${info.font ?? ''}`;
         const after = `'${font.trim()}', ${info.maxWidth}`
         if (info.stroke) body = `core.fillBoldText(${before}, '${info.strokeStyle}', ${after});\n`;
         else body = `core.fillText(${before}, ${after});\n`;

@@ -43,6 +43,7 @@ export default defineComponent({
             root.style.left = folded ? '0px' : '-300px';
             mode.style.left = folded ? '300px' : '230px';
             folded = !folded;
+            main.editorOpened = !folded;
         },
         /** 改变模式 */
         triggerMode(mode: string) {

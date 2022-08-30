@@ -1,6 +1,7 @@
 ///<reference path='../public/runtime.d.ts'/>
 
 declare let fs: Fs
+declare let LZString: LZString
 
 interface Fs {
     deleteFile: (path: string, callback: FsCallback) => void
@@ -9,6 +10,11 @@ interface Fs {
     writeMultiFiles: (fileNames: string[], datastrs: string[], callback: FsCallback) => void
     writeFile: (fileName: string, datastr: string, encoding: 'utf-8' | 'base64', callback: FsCallback) => void
     readFile: (fileName: string, encoding: 'utf-8' | 'base64', callback: FsCallback) => void
+}
+
+interface LZString {
+    compressToBase64: (data: string) => string
+    decompressFromBase64: (data: string) => string
 }
 
 interface DrawDataOf<K extends keyof SpriteDrawInfoMap> {

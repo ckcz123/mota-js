@@ -6,6 +6,7 @@
             actionAttributes[id][name][0]
         }}</span>
         <input id="input" v-if="text.includes(type)" @blur="blur" v-model.trim="value"/>
+        <span id="readonly" v-else-if="type === 'readonly'">{{value}}</span>
         <button 
             id="multi" v-else-if="type === 'string_multi'" @click="openEditor(value)"
         >编辑</button>
@@ -199,6 +200,10 @@ input:hover, button:hover {
 
 input:focus, button:hover {
     border-color: #88f;
+}
+
+#readonly {
+    margin-right: 20px;
 }
 
 button {

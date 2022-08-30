@@ -26,7 +26,7 @@ export function transition(name: string, data: { style: string, time: string, mo
 
 export function create(name: string, data: { x: number, y: number, w: number, h: number, z: number }) {
     const sprite = getSprite(name);
-    sprite.setCss('display: block');
+    sprite.setCss('display: block;');
     sprite.move(data.x, data.y);
     sprite.resize(data.w, data.h);
     sprite.canvas.style.zIndex = data.z.toString();
@@ -34,7 +34,7 @@ export function create(name: string, data: { x: number, y: number, w: number, h:
 
 export function del(name: string) {
     const sprite = getSprite(name);
-    sprite.setCss('display: none');
+    sprite.setCss('display: none;');
 }
 
 export function move(name: string, data: { x: number, y: number, isDelta: boolean }) {
@@ -196,7 +196,7 @@ export function winskin(name: string, data: { img: string, x: number, y: number,
 export function text(name: string, data: { str: string, x: number, y: number, stroke: boolean, italic: boolean, font: string, fontSize: number, fontWeight: string, style: string, strokeStyle: string, lineWidth: number }) {
     const { str, x, y, italic, fontWeight, fontSize, font, lineWidth, stroke, strokeStyle, style } = data;
     const sprite = getSprite(name);
-    const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? 300} ${fontSize}px ${font}`;
+    const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? ''} ${fontSize ? fontSize + 'px' : ''} ${font ?? ''}`;
     sprite.context.lineWidth = lineWidth;
     if (stroke) core.fillBoldText(sprite.context, str, x, y, style, strokeStyle, fontStyle, void 0, lineWidth);
     else core.fillText(sprite.context, str, x, y, style, fontStyle);

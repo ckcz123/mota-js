@@ -21,12 +21,14 @@ onMounted(() => {
     const div = document.getElementById('code') as HTMLDivElement;
     editor = monaco.editor.create(div, {
         language: props.lang,
-        // fontFamily: 'Fira Code',
         fontSize: 22,
-        value: props.value
+        value: props.value,
+        theme: 'light-plus'
     })
-    editor.getAction('editor.action.formatDocument').run();
-    main.editorOpened = true;
+    monaco.editor.setTheme('light-plus');
+    setTimeout(() => {
+        editor.getAction('editor.action.formatDocument').run();
+    }, 100);
 })
 
 const emits = defineEmits<{ 
@@ -40,7 +42,6 @@ const props = defineProps<{
 
 function close() {
     emits('close');
-    main.editorOpened = false;
 }
 
 function save() {

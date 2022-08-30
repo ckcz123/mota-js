@@ -79,3 +79,5 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+compress.js

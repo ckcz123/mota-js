@@ -354,7 +354,7 @@ Main.prototype.loadFloors = function () {
         })
         .catch(function () {
             return Promise.all(main.floorIds.map(function (floorId) {
-                return main.loadMod('project/floors', floorId, function () {
+                return main.loadMod('project/floors', floorId).then(function () {
                     main.setMainTipsText("地图 " + floorId + ' 加载完毕');
                 });
             }));

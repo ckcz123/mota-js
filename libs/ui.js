@@ -1350,10 +1350,9 @@ ui.prototype._drawTextContent_drawIcon = function (tempCtx, content, config) {
     // 绘制一个 \i 效果
     var index = config.index, index2;
     if (content.charAt(config.index + 1) == '[' && ((index2 = content.indexOf(']', index + 1)) >= 0)) {
-        console.log(1);
         var str = core.replaceText(content.substring(index + 2, index2));
         // --- 获得图标
-        var cls = core.getClsFromId(str);
+        var cls = core.getClsFromId(str) || '';
         var iconInfo = core.ui._getDrawableIconInfo(str), image = iconInfo[0], icon = iconInfo[1];
         if (image == null) return this._drawTextContent_next(tempCtx, content, config);
         // 检查自动换行

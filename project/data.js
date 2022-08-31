@@ -131,11 +131,11 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"startButtonsStyle": "background-color: #32369F; opacity: 0.85; color: #FFFFFF; border: #FFFFFF 2px solid; caret-color: #FFD700;",
 			"statusLeftBackground": "url(project/materials/ground.png) repeat",
 			"statusTopBackground": "url(project/materials/ground.png) repeat",
-			"toolsBackground": "url(project/materials/ground.png) repeat",
+			"toolsBackground": "black",
 			"borderColor": [
-				204,
-				204,
-				204,
+				0,
+				0,
+				0,
 				1
 			],
 			"statusBarColor": [
@@ -753,7 +753,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 			"enableSkill"
 		],
 		"autoScale": true,
-		"extendToolbar": true,
+		"extendToolbar": false,
 		"flyNearStair": true,
 		"flyRecordPosition": false,
 		"itemFirstText": false,

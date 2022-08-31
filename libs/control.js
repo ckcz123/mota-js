@@ -838,8 +838,8 @@ control.prototype.drawHero = function (status, offset, frame) {
 }
 
 control.prototype._drawHero_updateViewport = function (x, y, offset) {
-    core.bigmap.offsetX = core.clamp((x - core._HALF_WIDTH_) * 32 + offset.x, 0, 32 * core.bigmap.width - core._PX_);
-    core.bigmap.offsetY = core.clamp((y - core._HALF_HEIGHT_) * 32 + offset.y, 0, 32 * core.bigmap.height - core._PY_);
+    core.bigmap.offsetX = core.clamp((x - core._HALF_WIDTH_) * 32 + offset.x, 0, Math.max(32 * core.bigmap.width - core._PX_, 0));
+    core.bigmap.offsetY = core.clamp((y - core._HALF_HEIGHT_) * 32 + offset.y, 0, Math.max(32 * core.bigmap.height - core._PY_, 0));
     core.control.updateViewport();
 }
 
@@ -2498,6 +2498,7 @@ control.prototype.setHeroLoc = function (name, value, noGather) {
     if ((name == 'x' || name == 'y') && !noGather) {
         this.gatherFollowers();
     }
+    core.ui.drawStatusBar();
 }
 
 ////// 获得勇士的位置 //////
@@ -3262,9 +3263,9 @@ control.prototype._doResize = function (obj) {
 control.prototype.resize = function () {
     if (main.mode == 'editor') return;
     var clientWidth = main.dom.body.clientWidth, clientHeight = main.dom.body.clientHeight;
-    var BAR_WIDTH = Math.round(core._PY_ * 0.3);
     var BORDER = 3;
     var extendToolbar = core.flags.extendToolbar;
+    var BAR_WIDTH = extendToolbar ? 0 : Math.round(core._PY_ * 0.3);
 
     var horizontalMaxRatio = (clientHeight - 2 * BORDER - (extendToolbar ? BORDER : 0)) / (core._PY_ + (extendToolbar ? 38 : 0));
 
@@ -3288,6 +3289,7 @@ control.prototype.resize = function () {
         core.domStyle.scale = Math.min((clientWidth - 2 * BORDER) / core._PX_);
         core.domStyle.availableScale = [];
         extendToolbar = false;
+        BAR_WIDTH = Math.round(core._PX_ * 0.3);
     }
 
     var statusDisplayArr = this._shouldDisplayStatus(), count = statusDisplayArr.length;
@@ -3337,7 +3339,7 @@ control.prototype._resize_gameGroup = function (obj) {
         totalHeight = obj.outerHeight + obj.statusBarHeightInVertical + obj.toolbarHeightInVertical
     }
     else {
-        totalWidth = obj.outerWidth + obj.BAR_WIDTH * core.domStyle.scale + obj.BORDER;
+        totalWidth = obj.outerWidth + obj.BAR_WIDTH * core.domStyle.scale + (obj.extendToolbar ? 0 : obj.BORDER);
         totalHeight = obj.outerHeight + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0);
     }
     gameGroup.style.width = totalWidth + "px";
@@ -3439,7 +3441,7 @@ control.prototype._resize_statusBar = function (obj) {
             statusBar.style.fontSize = 16 * Math.min(1, (core._HEIGHT_ - 4) / obj.count) * core.domStyle.scale + "px";
         }
     }
-    statusBar.style.display = 'block';
+    statusBar.style.display = obj.extendToolbar ? 'none' : 'block';
     statusBar.style.borderTop = statusBar.style.borderLeft = obj.border;
     statusBar.style.borderRight = core.domStyle.isVertical ? obj.border : '';
     statusBar.style.borderBottom = core.domStyle.isVertical ? '' : obj.border;
@@ -3454,7 +3456,7 @@ control.prototype._resize_statusBar = function (obj) {
         core.dom.statusCanvas.style.height = obj.outerHeight - 2 * obj.BORDER + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
         core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, core._PY_ + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0));
     }
-    core.dom.statusCanvas.style.display = core.flags.statusCanvas ? "block" : "none";
+    core.dom.statusCanvas.style.display = core.flags.statusCanvas && !obj.extendToolbar ? "block" : "none";
 }
 
 control.prototype._resize_status = function (obj) {

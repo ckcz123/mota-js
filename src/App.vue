@@ -10,15 +10,26 @@
         <button id="preview" @click="preview()">预览</button>
         <button id="compile" @click="compileAll()">编译</button>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
+        <List v-else @edit="edit($event)"></List>
     </div>
 </template>
 
 <script setup lang="ts">
-import { Component, defineComponent } from "vue";
+import { defineComponent, ref } from "vue";
 import Editor from "./components/editor.vue";
 import { preview } from "./preview";
 import { compile } from "./compile";
 import { settings } from "./loadMonaco";
+import List from "./components/list.vue";
+import { list as uiList } from './action';
+import { load } from "./save";
+
+const mode = ref('list');
+const list = [['list', '列表'], ['edit', '编辑']];
+
+defineExpose({
+    mode, list
+})
 </script>
 
 <script lang="ts">
@@ -27,13 +38,6 @@ let folded = true;
 
 export default defineComponent({
     name: 'App',
-    components: { Editor },
-    data() {
-        return {
-            mode: 'list',
-            list: [['list', '列表'], ['edit', '编辑']]
-        }
-    },
     methods: {
         /** 触发折叠 */
         triggerFold() {
@@ -54,6 +58,11 @@ export default defineComponent({
             const editor = this.$refs.editor as any;
             editor.openEditor(res, 'javascript');
             settings.callback = (v) => {};
+        },
+        async edit(id: string) {
+            const data = await load(id);
+            uiList.value = data;
+            this.mode = 'edit';
         }
     },
 });

@@ -8,7 +8,7 @@ interface Fs {
     mkdir: (path: string, callback: FsCallback) => void
     readdir: (path: string, callback: (err?: string, data?: string[]) => void) => void
     writeMultiFiles: (fileNames: string[], datastrs: string[], callback: FsCallback) => void
-    writeFile: (fileName: string, datastr: string, encoding: 'utf-8' | 'base64', callback: FsCallback) => void
+    writeFile: (fileName: string, datastr: string, encoding: 'utf-8' | 'base64', callback?: FsCallback) => void
     readFile: (fileName: string, encoding: 'utf-8' | 'base64', callback: FsCallback) => void
 }
 

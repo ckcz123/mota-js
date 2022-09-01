@@ -25,7 +25,6 @@ onMounted(() => {
         value: props.value,
         theme: 'light-plus'
     })
-    monaco.editor.setTheme('light-plus');
     setTimeout(() => {
         editor.getAction('editor.action.formatDocument').run();
     }, 100);

@@ -1,7 +1,8 @@
 import * as monaco from 'monaco-editor'
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker'
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker'
-import lightPlus from './light_plus.json';
+import lightPlus from './assets/light_plus.json';
+import darkPlus from './assets/dark_plus.json';
 
 interface MonacoSettings {
     callback?: (value: string) => void
@@ -30,5 +31,6 @@ Error info: ${err}`
 })
 
 monaco.editor.defineTheme('light-plus', lightPlus as monaco.editor.IStandaloneThemeData);
+monaco.editor.defineTheme('dark-plus', darkPlus as monaco.editor.IStandaloneThemeData);
 
 export const settings: MonacoSettings = {}

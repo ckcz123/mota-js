@@ -13,7 +13,7 @@ export async function save(id: string, list: BaseAction<any>[]) {
         res.push(Object.assign({}, { type, sprite: one.sprite }, one.data));
     }
     const str = JSON.stringify(res);
-    await new Promise((res, rej) => fs.writeFile(`_ui/${id}.h5ui`, str, 'utf-8', err => {
+    await new Promise((res, rej) => fs.writeFile(`_ui/${id}.h5ui`, str, 'base64', err => {
         if (err) {
             console.error(err);
             rej('error');
@@ -28,17 +28,17 @@ export async function save(id: string, list: BaseAction<any>[]) {
     });
 }
 
-export async function load(id: string, callback: (res: BaseAction<any>[]) => void) {
+export async function load(id: string) {
+    let res: BaseAction<any>[] = [];
     await new Promise((resolve, rej) => {
-        fs.readFile(`ui/${id}.h5ui`, 'utf-8', (err, data) => {
+        fs.readFile(`_ui/${id}.h5ui`, 'utf-8', (err, data) => {
             if (err || data === void 0 || data === null) {
                 console.error(err);
                 alert('读取失败，错误信息请在控制台查看');
                 rej('error');
                 return;
             }
-            const obj = JSON.parse(data) as { [x: number]: SaveData<any> };
-            const res: BaseAction<any>[] = [];
+            const obj = JSON.parse(LZString.decompressFromBase64(data)) as { [x: number]: SaveData<any> };
             for (const i in obj) {
                 const info = obj[i];
                 const one = new BaseAction(info.type);
@@ -52,8 +52,55 @@ export async function load(id: string, callback: (res: BaseAction<any>[]) => voi
                 }
                 res.push(one);
             }
-            callback(res);
             resolve('success');
+        })
+    })
+    return res;
+}
+
+export async function list() {
+    let res: string[] = [];
+    await new Promise((resolve, rej) => {
+        fs.readdir('_ui', (err, data) => {
+            if (err || !data) {
+                console.error(err);
+                alert('加载已有ui列表失败，错误信息请在控制台查看');
+                rej('error');
+                return;
+            }
+            res = data.map(v => v.slice(0, -5));
+            resolve('success');
+        })
+    })
+    return res;
+}
+
+export async function create(id: string) {
+    if (id === '') return alert('ui名称不能为空!');
+    await new Promise((res, rej) => {
+        fs.writeFile(`_ui/${id}.h5ui`, LZString.compressToBase64('{}'), 'base64', (err, data) => {
+            console.log(data);
+
+            if (err) {
+                console.error(err);
+                alert('创建ui出错，请在控制台查看报错信息');
+                rej('error');
+                return;
+            }
+            res('success');
+        });
+    })
+}
+
+export async function del(id: string) {
+    await new Promise((res, rej) => {
+        fs.deleteFile(`_ui/${id}.h5ui`, (err) => {
+            if (err) {
+                console.error(err);
+                alert('删除ui出错，错误信息请在控制台查看');
+                rej('error');
+            }
+            res('success');
         })
     })
 }

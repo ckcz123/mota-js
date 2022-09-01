@@ -163,8 +163,11 @@ ${sprite}.canvas.style.transition = res;\n`;
         else body = `core.fillRoundRect(${sprite}.context, ${info.x}, ${info.y}, ${info.w}, ${info.h}, ${info.r}, '${info.style}');\n`;
     } else if (type === 'polygon') {
         const info = data as SpritePolygon;
-        if (info.stroke) body = `core.strokePolygon(${sprite}.context, [${info.path.join(', ')}], '${info.style}', ${info.lineWidth});\n`;
-        else body = `core.fillPolygon(${sprite}.context, [${info.path.join(', ')}], '${info.style}');\n`;
+        const res = '[' + info.path.reduce((pre, cur, i) => {
+            return `${pre}${i === 0 ? '' : ', '}[${cur[0]}, ${cur[1]}]`;
+        }, '') + ']';
+        if (info.stroke) body = `core.strokePolygon(${sprite}.context, ${res}, '${info.style}', ${info.lineWidth});\n`;
+        else body = `core.fillPolygon(${sprite}.context, ${res}, '${info.style}');\n`;
     } else if (type === 'ellipse') {
         const info = data as SpriteEllipse;
         if (info.stroke) body = `core.strokeEllipse(${sprite}.context, ${info.x}, ${info.y}, ${info.a}, ${info.b}, 0, '${info.style}', ${info.lineWidth});\n`;

@@ -9,6 +9,7 @@
         </div>
         <button id="preview" @click="preview()">预览</button>
         <button id="compile" @click="compileAll()">编译</button>
+        <button id="save" @click="saveUi()">{{saveText}}</button>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>
     </div>
@@ -22,13 +23,15 @@ import { compile } from "./compile";
 import { settings } from "./loadMonaco";
 import List from "./components/list.vue";
 import { list as uiList } from './action';
-import { load } from "./save";
+import { load, save } from "./save";
 
 const mode = ref('list');
 const list = [['list', '列表'], ['edit', '编辑']];
+const editing = ref('');
+const saveText = ref('保存');
 
 defineExpose({
-    mode, list
+    mode, list, editing, saveText
 })
 </script>
 
@@ -63,6 +66,14 @@ export default defineComponent({
             const data = await load(id);
             uiList.value = data;
             this.mode = 'edit';
+            this.editing = id;
+        },
+        async saveUi() {
+            await save(this.editing, uiList.value);
+            this.saveText = '成功';
+            setTimeout(() => {
+                this.saveText = '保存';
+            }, 1000);
         }
     },
 });
@@ -150,7 +161,7 @@ export default defineComponent({
     background-color: rgba(160, 160, 160, 0.8);
 }
 
-#compile, #preview {
+#compile, #preview, #save {
     .border();
     position: absolute;
     left: 300px;
@@ -176,11 +187,15 @@ export default defineComponent({
     top: 350px;
 }
 
-#compile:hover, #preview:hover {
+#save {
+    top: 400px;
+}
+
+#compile:hover, #preview:hover, #save:hover {
     border: 2px solid rgb(2, 39, 247);
 }
 
-#compile:active, #preview:active {
+#compile:active, #preview:active, #save:active {
     border: 2px solid rgb(2, 39, 247);
     background-color: cadetblue;
 }

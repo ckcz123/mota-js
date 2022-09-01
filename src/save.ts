@@ -12,8 +12,8 @@ export async function save(id: string, list: BaseAction<any>[]) {
         const type = one.type as keyof SpriteDrawInfoMap;
         res.push(Object.assign({}, { type, sprite: one.sprite }, one.data));
     }
-    const str = JSON.stringify(res);
-    await new Promise((res, rej) => fs.writeFile(`_ui/${id}.h5ui`, str, 'base64', err => {
+    const str = LZString.compressToBase64(JSON.stringify(res));
+    await new Promise((res, rej) => fs.writeFile(`_ui/${id}.h5ui`, str, 'utf-8', err => {
         if (err) {
             console.error(err);
             rej('error');
@@ -78,9 +78,7 @@ export async function list() {
 export async function create(id: string) {
     if (id === '') return alert('ui名称不能为空!');
     await new Promise((res, rej) => {
-        fs.writeFile(`_ui/${id}.h5ui`, LZString.compressToBase64('{}'), 'base64', (err, data) => {
-            console.log(data);
-
+        fs.writeFile(`_ui/${id}.h5ui`, LZString.compressToBase64('{}'), 'utf-8', (err,) => {
             if (err) {
                 console.error(err);
                 alert('创建ui出错，请在控制台查看报错信息');

@@ -7,9 +7,10 @@
                 :status="one[0] === mode" @click="triggerMode(one[0])"
             >{{one[1]}}</button>
         </div>
-        <button id="preview" @click="preview()">预览</button>
-        <button id="compile" @click="compileAll()">编译</button>
-        <button id="save" @click="saveUi()">{{saveText}}</button>
+        <button class="tools" id="preview" @click="preview()">预览</button>
+        <button class="tools" id="compile" @click="compileAll()">编译</button>
+        <button class="tools" id="save" @click="saveUi()">{{saveText}}</button>
+        <span id="now">当前ui<br>{{editing}}</span>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>
     </div>
@@ -161,11 +162,11 @@ export default defineComponent({
     background-color: rgba(160, 160, 160, 0.8);
 }
 
-#compile, #preview, #save {
+.tools {
     .border();
     position: absolute;
     left: 300px;
-    width: 60px;
+    width: 70px;
     height: 30px;
     font-size: 16px;
     color: white;
@@ -191,12 +192,30 @@ export default defineComponent({
     top: 400px;
 }
 
-#compile:hover, #preview:hover, #save:hover {
+.tools:hover {
     border: 2px solid rgb(2, 39, 247);
 }
 
-#compile:active, #preview:active, #save:active {
+.tools:active {
     border: 2px solid rgb(2, 39, 247);
     background-color: cadetblue;
+}
+
+#now {
+    .border();
+    position: absolute;
+    left: 300px;
+    width: 70px;
+    font-size: 16px;
+    color: white;
+    background-color: rgb(79, 199, 255);
+    transition: border 0.1s ease-in-out, left 0.3s ease-out;
+    -webkit-transition: border 0.1s ease-in-out, left 0.3s ease-out;
+    box-shadow: 0px 0px 5px black;
+    text-shadow: 2px 2px 2px black;
+    border: 2px solid rgb(20, 167, 235);
+    z-index: -1;
+    top: 450px;
+    text-align: center;
 }
 </style>

@@ -140,8 +140,7 @@ export default defineComponent({
 })
 </script>
 
-<style lang="less">
-
+<style lang="less" scoped>
 .border{
     border-left: 2px solid #000;
     border-top: 1px solid #999;
@@ -159,9 +158,6 @@ export default defineComponent({
     font-size: 20px;
     font-weight: 200;
 }
-</style>
-
-<style lang="less" scoped>
 
 #actions {
     position: relative;

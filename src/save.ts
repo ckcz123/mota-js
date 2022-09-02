@@ -13,6 +13,8 @@ export async function save(id: string, list: BaseAction<any>[]) {
         res.push(Object.assign({}, { type, sprite: one.sprite }, one.data));
     }
     const str = LZString.compressToBase64(JSON.stringify(res));
+    console.log(res);
+
     await new Promise((res, rej) => fs.writeFile(`_ui/${id}.h5ui`, str, 'utf-8', err => {
         if (err) {
             console.error(err);
@@ -39,16 +41,18 @@ export async function load(id: string) {
                 return;
             }
             const obj = JSON.parse(LZString.decompressFromBase64(data)) as { [x: number]: SaveData<any> };
+
             for (const i in obj) {
                 const info = obj[i];
                 const one = new BaseAction(info.type);
                 if (!one.success)
                     throw new ReferenceError(`Unexpected fail on construct BaseAction. index: ${i}`);
                 one.sprite = info.sprite;
+                one.data = {};
                 for (const id in info) {
-                    if (id === 'sprite') continue;
+                    if (id === 'sprite' || id === 'type') continue;
                     // @ts-ignore
-                    one[id] = info[id]
+                    one.data[id] = info[id]
                 }
                 res.push(one);
             }

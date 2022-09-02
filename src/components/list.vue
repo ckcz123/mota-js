@@ -2,7 +2,7 @@
     <span id="loading" v-if="!loaded">加载中...</span>
     <div v-else>
         <div class="list" v-for="id of uiList">
-            <button class="tools" @click="edit(id)">编辑</button>
+            <button class="ui-tools" @click="edit(id)">编辑</button>
             <span>{{id}}</span>
             <span id="del" @click="deleteUi(id)">✖</span>
         </div>
@@ -10,7 +10,7 @@
         <div v-if="createInfo" class="list">
             <span>ui名称</span>
             <input v-model.trim="nowId"/>
-            <button class="tools" @click="createUi(nowId)">创建</button>
+            <button class="ui-tools" @click="createUi(nowId)">创建</button>
         </div>
     </div>
 </template>
@@ -49,6 +49,7 @@ async function deleteUi(id: string) {
 }
 
 async function edit(id: string) {
+    if (!core.isPlaying()) return alert('请先开始游戏');
     emits('edit', id);
     nowId.value = id;
 }
@@ -114,7 +115,7 @@ span {
     font-size: 18px;
 }
 
-.tools, input {
+.ui-tools, input {
     border: 1.5px solid #222;
     border-radius: 3px;
     margin-right: 10px;
@@ -123,15 +124,15 @@ span {
     font-weight: 200;
 }
 
-.tools:hover, input:hover, input:focus {
+.ui-tools:hover, input:hover, input:focus {
     border-color: #88f;
 }
 
-.tools:active {
+.ui-tools:active {
     background-color: aquamarine;
 }
 
-.tools {
+.ui-tools {
     background-color: aqua;
 }
 

@@ -7,9 +7,9 @@
                 :status="one[0] === mode" @click="triggerMode(one[0])"
             >{{one[1]}}</button>
         </div>
-        <button class="tools" id="preview" @click="preview()">预览</button>
-        <button class="tools" id="compile" @click="compileAll()">编译</button>
-        <button class="tools" id="save" @click="saveUi()">{{saveText}}</button>
+        <button class="ui-tools" id="preview" @click="preview()">预览</button>
+        <button class="ui-tools" id="compile" @click="compileAll()">编译</button>
+        <button class="ui-tools" id="save" @click="saveUi()">{{saveText}}</button>
         <span id="now">当前ui<br>{{editing}}</span>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>
@@ -162,7 +162,7 @@ export default defineComponent({
     background-color: rgba(160, 160, 160, 0.8);
 }
 
-.tools {
+.ui-tools {
     .border();
     position: absolute;
     left: 300px;
@@ -192,11 +192,11 @@ export default defineComponent({
     top: 400px;
 }
 
-.tools:hover {
+.ui-tools:hover {
     border: 2px solid rgb(2, 39, 247);
 }
 
-.tools:active {
+.ui-tools:active {
     border: 2px solid rgb(2, 39, 247);
     background-color: cadetblue;
 }

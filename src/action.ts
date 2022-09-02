@@ -1,11 +1,17 @@
 ///<reference path='./info.d.ts'/>
 
-import { Ref, ref } from "vue";
+import { Ref, ref, watch } from "vue";
 import { actionAttributes, composition, units, sprites } from "./info";
+import { previewSync } from "./preview";
 
 export const list: Ref<BaseAction<any>[]> = ref([]);
 // @ts-ignore
 window.list = list;
+
+watch(list, newValue => {
+    list.value = newValue;
+    previewSync();
+})
 
 /** 每个action的根类 */
 export class BaseAction<K extends keyof SpriteDrawInfoMap> {

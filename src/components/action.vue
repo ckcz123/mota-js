@@ -50,6 +50,7 @@
 
     watch(sprite, newValue => {
         sprite.value = props.data.sprite = newValue;
+        previewSync();
     })
 </script>
 
@@ -60,6 +61,7 @@ import { drawActions } from "../info";
 import Attr from "./attr.vue";
 import { sprites } from "../info";
 import { Emitter } from "monaco-editor";
+import { previewSync } from "../preview";
 
 export default defineComponent({
     name: 'action',
@@ -78,6 +80,7 @@ export default defineComponent({
         },
         change(id: string, value: any) {
             this.data.data[id] = value;
+            previewSync();
         },
         rightClick(e: MouseEvent) {
             if (e.button === 2) {

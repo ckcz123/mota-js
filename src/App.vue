@@ -9,7 +9,7 @@
         </div>
         <button class="ui-tools" id="preview" @click="preview()">预览</button>
         <button class="ui-tools" id="compile" @click="compileAll()">编译</button>
-        <button class="ui-tools" id="save" @click="saveUi()" ref="save">{{saveText}}</button>
+        <button class="ui-tools" id="save" @click="saveUi()" ref="save" :saved="saved">{{saveText}}</button>
         <span id="now">当前ui<br>{{editing}}</span>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>
@@ -17,13 +17,13 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, watch } from "vue";
 import Editor from "./components/editor.vue";
 import { preview } from "./preview";
 import { compile } from "./compile";
 import { settings } from "./loadMonaco";
 import List from "./components/list.vue";
-import { list as uiList } from './action';
+import { list as uiList, saved } from './action';
 import { load, save } from "./save";
 import { sprites } from "./info";
 
@@ -58,6 +58,10 @@ export default defineComponent({
         },
         /** 改变模式 */
         triggerMode(mode: string) {
+            if (mode === 'edit' && !this.editing) return alert('请先选择ui');
+            if (mode === 'list' && !saved.value) {
+                if (!confirm('您尚未保存ui，确定要继续吗？')) return;
+            }
             this.mode = mode;
         },
         async compileAll() {
@@ -72,6 +76,7 @@ export default defineComponent({
             uiList.value = data;
             this.mode = 'edit';
             this.editing = id;
+            saved.value = true;
         },
         async saveUi() {
             if (!this.editing) return alert('请先选择ui');
@@ -199,6 +204,10 @@ export default defineComponent({
 
 #save {
     top: 400px;
+}
+
+#save[saved=false] {
+    background-color: rgb(255, 212, 40);
 }
 
 .ui-tools:hover {

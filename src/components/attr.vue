@@ -94,11 +94,13 @@
 
     watch(value, newValue => {
         emits('change', newValue);
+        saved.value = false;
     })
 </script>
 
 <script lang="ts">
 import { defineComponent, ref, watch } from 'vue';
+import { saved } from '../action';
 import { actionAttributes, units } from '../info.js';
 import { settings } from '../loadMonaco';
 import ImgSelector from './imgSelector.vue';

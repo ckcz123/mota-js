@@ -84,8 +84,9 @@
 
 <script lang="ts">
 import { defineComponent, Ref, ref } from "vue";
-import { BaseAction, list } from '../action';
+import { BaseAction, list, saved } from '../action';
 import { drawActions } from "../info";
+import { previewSync } from "../preview";
 import Action from "./action.vue";
 import Monaco from './monaco.vue';
 
@@ -98,13 +99,15 @@ export default defineComponent({
         doAdd(action: keyof SpriteDrawInfoMap) {
             const data = new BaseAction(action);
             if (!data.success) return;
-            
+            saved.value = false;
             this.list.push(data);
         },
         doDelete(i: number) {
             // 第一个操作不能删，除非只有第一个操作
             if (i === 0 && this.list.length !== 1) return;
             this.list.splice(i, 1);
+            previewSync();
+            saved.value = false;
         },
         closeEditor() {
             this.editorOpened = false;
@@ -123,6 +126,8 @@ export default defineComponent({
             const data = new BaseAction(action);
             if (!data.success) return;
             this.list.push(...[data].concat(behind));
+            previewSync();
+            saved.value = false;
         },
         triggerInsert(pos: 'top' | 'bottom') {
             this.insert = !this.insert;

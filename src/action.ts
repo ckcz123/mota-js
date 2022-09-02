@@ -8,6 +8,8 @@ export const list: Ref<BaseAction<any>[]> = ref([]);
 // @ts-ignore
 window.list = list;
 
+export const saved = ref(false);
+
 watch(list, newValue => {
     list.value = newValue;
     previewSync();

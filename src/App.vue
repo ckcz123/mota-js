@@ -9,7 +9,7 @@
         </div>
         <button class="ui-tools" id="preview" @click="preview()">预览</button>
         <button class="ui-tools" id="compile" @click="compileAll()">编译</button>
-        <button class="ui-tools" id="save" @click="saveUi()" ref="save" :saved="saved">{{saveText}}</button>
+        <button class="ui-tools" id="save" @click="saveUi()" ref="save">{{saveText}}</button>
         <span id="now">当前ui<br>{{editing}}</span>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>
@@ -67,7 +67,7 @@ export default defineComponent({
         triggerMode(mode: string) {
             if (mode === 'edit' && !this.editing) return alert('请先选择ui');
             if (mode === 'list' && !saved.value) {
-                if (!confirm('您尚未保存ui，确定要继续吗？')) return;
+                if (!confirm('您尚未保存ui，确定要切换到ui列表吗？')) return;
             }
             this.mode = mode;
         },
@@ -97,6 +97,7 @@ export default defineComponent({
                 this.saveText = '保存';
                 saveSpan.style.backgroundColor = 'rgb(79, 199, 255)';
             }, 1000);
+            saved.value = true;
         }
     },
 });
@@ -211,10 +212,6 @@ export default defineComponent({
 
 #save {
     top: 400px;
-}
-
-#save[saved=false] {
-    background-color: rgb(255, 212, 40);
 }
 
 .ui-tools:hover {

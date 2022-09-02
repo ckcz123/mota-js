@@ -171,6 +171,7 @@ export const actionAttributes: Attr = {
         y: ['中心纵坐标', 'number'],
         a: ['半长轴', 'number'],
         b: ['半短轴', 'number'],
+        angle: ['旋转弧度', 'number'],
         stroke: ['是否为边框', 'boolean'],
         lineWidth: ['线条宽度', 'number'],
         style: ['颜色', 'string']

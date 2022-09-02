@@ -217,11 +217,11 @@ export function polygon(name: string, data: { path: Array<[number, number]>, str
     else core.fillPolygon(sprite.context, path, style);
 }
 
-export function ellipse(name: string, data: { x: number, y: number, a: number, b: number, stroke: boolean, lineWidth: number, style: string }) {
-    const { x, y, a, b, stroke, style, lineWidth } = data;
+export function ellipse(name: string, data: SpriteEllipse) {
+    const { x, y, a, b, angle, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
-    if (stroke) core.strokeEllipse(sprite.context, x, y, a, b, void 0, style, lineWidth);
-    else core.fillEllipse(sprite.context, x, y, a, b, void 0, style);
+    if (stroke) core.strokeEllipse(sprite.context, x, y, a, b, angle, style, lineWidth);
+    else core.fillEllipse(sprite.context, x, y, a, b, angle, style);
 }
 
 export function arrow(name: string, data: { x1: number, y1: number, x2: number, y2: number, lineWidth: number, style: string }) {

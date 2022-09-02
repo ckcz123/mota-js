@@ -1,5 +1,5 @@
 (function () {
-    fs = {};
+    window.fs = {};
 
 
     var _isset = function (val) {

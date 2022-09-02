@@ -112,7 +112,7 @@ export default defineComponent({
                 if (!units.some(v => this.value.endsWith(v))) 
                     this.value = `${parseFloat(this.value)}px`;
             } else if (this.type === 'number') {
-                this.value = parseFloat(this.value);
+                this.value = parseFloat(this.value) || 0;
             } else if (this.type === 'number_time') {
                 if (!/[0-9]+/.test(this.value)) this.value = '0ms';
                 if (!['s', 'ms'].some(v => this.value.endsWith(v))) {

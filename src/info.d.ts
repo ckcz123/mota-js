@@ -132,7 +132,7 @@ interface SpriteOpacity {
 
 interface BaseShape {
     lineWidth: number
-    style: string | CanvasGradient | CanvasPattern
+    style: string
 }
 
 interface Stroke {
@@ -179,6 +179,7 @@ interface SpritePolygon extends BaseShape, Stroke {
 interface SpriteEllipse extends BaseLocatedShape, Stroke {
     a: number
     b: number
+    angle: number
 }
 
 interface SpriteArrow extends BaseShape {

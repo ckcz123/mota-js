@@ -3,6 +3,21 @@
  * @author 秋橙 & tocque
  */
 
+interface TextContentConfig {
+    left?: number
+    top?: number
+    maxWidth?: number
+    color?: rgbarray | string
+    align?: 'left' | 'center' | 'right'
+    fontSize: number
+    lineHeight?: number
+    time?: number
+    font?: string
+    letterSpacing?: number
+    bold?: boolean
+    italic?: boolean
+}
+
 type direction = 'up' | 'down' | 'left' | 'right'
 type move = 'forward' | direction
 type loc = { direction: direction, x: number, y: number }
@@ -322,7 +337,7 @@ type gameStatus = {
 }
 
 /** @file control.js 主要用来进行游戏控制，比如行走控制、自动寻路、存读档等等游戏核心内容。 */
-interface control {
+declare class control {
 
     /**
      * 开启调试模式, 此模式下可以按Ctrl键进行穿墙, 并忽略一切事件。
@@ -893,7 +908,7 @@ interface control {
 }
 
 /**@file events.js将处理所有和事件相关的操作。 */
-interface events {
+declare class events {
 
     /**
      * 开始新游戏
@@ -1066,10 +1081,10 @@ interface events {
      * @param time 移动用时，单位为毫秒。不填视为1秒
      * @param callback 图片移动完毕后的回调函数，可选
      */
-    rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
+    rotateImage(code: number, center?: [number?, number?], angle?: number, moveMode?: string, time?: number, callback?: () => void): void
 
     /** 放缩一张图片 */
-    scaleImage(code: number, center?: [Number?, number?], scale: number, moveMode?: string, time?: number, callback?: () => void): void
+    scaleImage(code: number, center?: [Number?, number?], scale?: number, moveMode?: string, time?: number, callback?: () => void): void
 
     /**
      * 绘制一张动图或擦除所有动图
@@ -1336,7 +1351,7 @@ interface events {
 }
 
 /** @file actions.js 定义了玩家的操作控制 */
-interface actions {
+declare class actions {
     /**
      * 此函数将注册一个用户交互行为。
      * @param action 要注册的交互类型，如 ondown, onclick, keyDown 等等。
@@ -1394,7 +1409,7 @@ interface actions {
 }
 
 /** @file enemys.js 定义了一系列和敌人相关的API函数。 */
-interface enemys {
+declare class enemys {
 
     /**
      * 判定某种特殊属性的有无
@@ -1543,7 +1558,7 @@ interface enemys {
 }
 
 /** @file maps.js负责一切和地图相关的处理内容 */
-interface maps {
+declare class maps {
 
     /**
      * 根据图块id得到数字（地图矩阵中的值）
@@ -1996,7 +2011,7 @@ interface maps {
 }
 
 /** @file loader.js 主要负责资源的加载 */
-interface loader {
+declare class loader {
     /** 加载一系列图片 */
     loadImages(dir: any, names: any, toSave: any, callback?: () => any): any
 
@@ -2020,7 +2035,7 @@ interface loader {
 }
 
 /** @file items.js 主要负责一切和道具相关的内容。 */
-interface items {
+declare class items {
 
     /**
      * 即捡即用类的道具获得时的效果
@@ -2182,7 +2197,7 @@ interface items {
 }
 
 /** @file ui.js 主要用来进行UI窗口的绘制，如对话框、怪物手册、楼传器、存读档界面等等。*/
-interface ui {
+declare class ui {
 
     /**
      * 根据画布名找到一个画布的context；支持系统画布和自定义画布。如果不存在画布返回null。
@@ -2195,7 +2210,7 @@ interface ui {
      * name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。（下同）
      * 如果name也可以是'all'，若为all则为清空所有系统画布。
      */
-    clearMap(name: CtxRefer): void
+    clearMap(name: CtxRefer, x?: number, y?: number, w?: number, h?: number): void
 
     /**
      * 在某个画布上绘制一段文字
@@ -2212,7 +2227,7 @@ interface ui {
      * @param strokeStyle 绘制的描边颜色
      * @param font 绘制的字体
      */
-    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number): void
+    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number, lineWidth?: number): void
 
     /**
      * 绘制一个矩形。style可选为绘制样式
@@ -2225,7 +2240,7 @@ interface ui {
      * 绘制一个矩形的边框
      * @param style 绘制的样式
      */
-    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, angle?: number): void
+    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, lineWidth?: number, angle?: number): void
 
     /**
      * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
@@ -2246,7 +2261,7 @@ interface ui {
     resizeCanvas(name: string, x?: number, y?: number, styleOnly?: boolean, isTempCanvas?: boolean): void
 
     /** 设置一个自定义画布的旋转角度 */
-    rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
+    rotateCanvas(name: CtxRefer, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
     deleteCanvas(name: string | ((name: string) => boolean)): void
@@ -2262,7 +2277,7 @@ interface ui {
      * @param image 要绘制的图片，可以是一个全塔属性中定义的图片名（会从images中去获取），图片本身，或者一个画布。
      */
     drawImage(name: CtxRefer,
-        image: CanvasImageSource | string, dx: number): void
+        image: CanvasImageSource | string, dx: number, dy: number): void
     drawImage(name: CtxRefer,
         image: CanvasImageSource | string, dx: number, dy: number, dw: number, dh: number): void
     drawImage(name: CtxRefer,
@@ -2358,20 +2373,7 @@ interface ui {
      *                fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
      * @returns 绘制信息 
      */
-    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: {
-        left?: number
-        top?: number
-        maxWidth?: number
-        color?: number
-        align?: 'left' | 'center' | 'right'
-        fontSize: number
-        lineHeight?: number
-        time?: number
-        font?: string
-        letterSpacing?: number
-        bold?: boolean
-        italic?: boolean
-    }): any
+    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: TextContentConfig): any
 
     /** 获得某段文字的预计绘制高度；参见 drawTextContent */
     getTextContentHeight(content: string, config?: any): void
@@ -2444,7 +2446,7 @@ interface ui {
 }
 
 /** 工具类 主要用来进行一些辅助函数的计算 */
-interface utils {
+declare class utils {
 
     /**
      * 将一段文字中的${}（表达式）进行替换。
@@ -2783,7 +2785,7 @@ interface utils {
 }
 
 /** 和图标相关的函数 */
-interface icons {
+declare class icons {
 
     /** 获得所有图标类型 */
     getIcons(): void
@@ -2798,7 +2800,11 @@ interface icons {
     getTilesetOffset(id?: string): void
 }
 
-type CoreMixin = {
+declare class plugin {
+
+}
+
+type core = {
     /** 地图可视部分大小 */
     readonly __SIZE__: number;
     /** 地图像素 */
@@ -2808,7 +2814,19 @@ type CoreMixin = {
     /** 游戏素材 */
     readonly material: {
         readonly animates: { [key: string]: Animate },
-        readonly images: {},
+        readonly images: {
+            airwall: HTMLImageElement
+            animates: HTMLImageElement
+            enemys: HTMLImageElement
+            enemy48: HTMLImageElement
+            items: HTMLImageElement
+            npcs: HTMLImageElement
+            npc48: HTMLImageElement
+            terrains: HTMLImageElement
+            autotile: { [x: string]: HTMLImageElement }
+            images: { [x: string]: HTMLImageElement }
+            tilesets: { [x: string]: HTMLImageElement }
+        },
         readonly bgms: { [key: string]: HTMLAudioElement },
         readonly sounds: { [key: string]: HTMLAudioElement },
         readonly ground: CanvasRenderingContext2D
@@ -2819,7 +2837,7 @@ type CoreMixin = {
         readonly enemys: { [key: string]: Enemy },
         /** 道具信息 */
         readonly items: { [key: string]: Item }
-        readonly icons: {},
+        readonly icons: { [key: string]: { [key: string]: number } },
     }
     readonly timeout: {
         turnHeroTimeout: any,
@@ -2881,7 +2899,7 @@ type CoreMixin = {
         /** 是否支持复制到剪切板 */supportCopy: boolean
 
         fileInput: null
-        /** 是否支持FileReader */fileReader: FileReader
+        /** 是否支持FileReader */fileReader: null
         /** 读取成功 */successCallback: null
         /** 读取失败 */errorCallback: null
     }
@@ -2933,6 +2951,12 @@ type CoreMixin = {
     readonly floors: { [key: string]: ResolvedMap }
     readonly floorIds: string[]
 
+    readonly statusBar: {
+        readonly icons: { [x: string]: HTMLImageElement }
+    }
+
+    readonly materials: string[]
+
     readonly control: control
     readonly loader: loader
     readonly events: events
@@ -2943,12 +2967,13 @@ type CoreMixin = {
     readonly utils: utils
     readonly icons: icons
     readonly actions: actions
-    readonly plugin: Record<string, Function>
+    readonly plugin: plugin
 
-} & control & events & loader & enemys & items & maps & ui & utils & icons & actions
+} & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugin
 
-interface Main {
-    readonly core: CoreMixin
+type main = {
+    editorOpened: boolean
+    readonly core: core
     readonly dom: { [key: string]: HTMLElement }
     /** 游戏版本，发布后会被随机，请勿使用该属性 */
     readonly version: string
@@ -2962,10 +2987,66 @@ interface Main {
     }
     readonly __VERSION__: string
     readonly __VERSION_CODE__: number
+    readonly images: string[]
 
     /** 输出内容（极不好用，建议换成console，我甚至不知道样板为什么会有这个东西）*/
     log(e: string | Error, error: boolean): void
 }
 
+declare class Sprite {
+
+    x: number
+    y: number
+    width: number
+    height: number
+    zIndex: number
+    reference: 'game' | 'window'
+    canvas: HTMLCanvasElement
+    context: CanvasRenderingContext2D
+    name: string
+    readonly count: number
+
+    /** 创建一个sprite画布
+     * @param reference 参考系，游戏画面或者窗口
+     * @param name 可选，sprite的名称，方便通过core.dymCanvas获取
+     */
+    constructor(x: number, y: number, w: number, h: number, z: number, reference?: 'game' | 'window', name?: string)
+
+    /** 初始化 */
+    init(): void
+
+    /** 设置css特效 */
+    setCss(css: string): Sprite
+
+    /** 
+     * 移动sprite
+     * @param isDelta 是否是相对位置，如果是，那么sprite会相对于原先的位置进行移动
+     */
+    move(x: number, y: number, isDelta?: boolean): Sprite
+
+    /**
+     * 重新设置sprite的大小
+     * @param {boolean} styleOnly 是否只修改css效果，如果是，那么将会不高清，如果不是，那么会清空画布
+     */
+    resize(w: number, h: number, styleOnly?: boolean): Sprite
+
+    /** 旋转画布 */
+    rotate(angle: number, cx?: number, cy?: number): Sprite
+
+    /** 擦除画布 */
+    clear(x: number, y: number, w?: number, h?: number): Sprite
+
+    /** 删除 */
+    destroy(): void
+
+    /** 添加事件监听器 */
+    addEventListener: HTMLCanvasElement['addEventListener']
+
+    /** 删除事件监听器 */
+    removeEventListenr: HTMLCanvasElement['addEventListener']
+}
+
+declare let main: main
+declare let core: core
 declare let flags: { [x: string]: any }
-declare let hero: Core['status']['hero']
+declare let hero: HeroStatus

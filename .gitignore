@@ -55,6 +55,9 @@ fabric.properties
 
 
 node_modules
-package-lock.json
 
 _saves
+dist
+_ui
+
+compress.js

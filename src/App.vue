@@ -25,6 +25,7 @@ import { settings } from "./loadMonaco";
 import List from "./components/list.vue";
 import { list as uiList } from './action';
 import { load, save } from "./save";
+import { sprites } from "./info";
 
 const mode = ref('list');
 const list = [['list', '列表'], ['edit', '编辑']];
@@ -52,6 +53,8 @@ export default defineComponent({
             mode.style.left = folded ? '300px' : '230px';
             folded = !folded;
             main.editorOpened = !folded;
+            const status = folded ? 'none' : 'block';
+            Object.values(sprites).forEach(v => v.setCss(`display: ${status};`));
         },
         /** 改变模式 */
         triggerMode(mode: string) {

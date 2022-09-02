@@ -66,7 +66,7 @@
 | 常见作用效果       | 说明 |
 | ---           | ---      |
 | left       | x轴方向的位置       |
-| right      | y轴方向的位置       |
+| top      | y轴方向的位置       |
 | opacity    | 不透明度       |
 | background-color  | 背景色       |
 | transform  | 2D和3D变换       |

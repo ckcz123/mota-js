@@ -94,7 +94,6 @@
 
     watch(value, newValue => {
         emits('change', newValue);
-        console.log(newValue);
     })
 </script>
 

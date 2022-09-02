@@ -224,7 +224,7 @@ ctx.stoke();\n`;
             }
         });
         config += `\n}`;
-        body = `core.drawTextContent(${sprite}, '${info.content}', ${config});\n`;
+        body = `core.drawTextContent(${sprite}, \`${info.content}\`, ${config});\n`;
     }
     return { head, body };
 }

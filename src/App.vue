@@ -9,7 +9,7 @@
         </div>
         <button class="ui-tools" id="preview" @click="preview()">预览</button>
         <button class="ui-tools" id="compile" @click="compileAll()">编译</button>
-        <button class="ui-tools" id="save" @click="saveUi()">{{saveText}}</button>
+        <button class="ui-tools" id="save" @click="saveUi()" ref="save">{{saveText}}</button>
         <span id="now">当前ui<br>{{editing}}</span>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>
@@ -61,6 +61,7 @@ export default defineComponent({
             this.mode = mode;
         },
         async compileAll() {
+            if (this.mode === 'list') return alert('请在编辑模式下编译');
             const res = await compile();
             const editor = this.$refs.editor as any;
             editor.openEditor(res, 'javascript');
@@ -73,10 +74,16 @@ export default defineComponent({
             this.editing = id;
         },
         async saveUi() {
+            if (!this.editing) return alert('请先选择ui');
+            if (this.saveText !== '保存') return;
+            this.saveText = '保存中';
             await save(this.editing, uiList.value);
             this.saveText = '成功';
+            const saveSpan = this.$refs.save as HTMLSpanElement;
+            saveSpan.style.backgroundColor = '#3d3';
             setTimeout(() => {
                 this.saveText = '保存';
+                saveSpan.style.backgroundColor = 'rgb(79, 199, 255)';
             }, 1000);
         }
     },
@@ -174,8 +181,7 @@ export default defineComponent({
     font-size: 16px;
     color: white;
     background-color: rgb(79, 199, 255);
-    transition: border 0.1s ease-in-out, left 0.3s ease-out;
-    -webkit-transition: border 0.1s ease-in-out, left 0.3s ease-out;
+    transition: border 0.1s ease-in-out, left 0.3s ease-out, background-color 0.2s linear;
     box-shadow: 0px 0px 5px black;
     text-shadow: 2px 2px 2px black;
     cursor: pointer;

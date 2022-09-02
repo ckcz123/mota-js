@@ -13,7 +13,6 @@ export async function save(id: string, list: BaseAction<any>[]) {
         res.push(Object.assign({}, { type, sprite: one.sprite }, one.data));
     }
     const str = LZString.compressToBase64(JSON.stringify(res));
-    console.log(res);
 
     await new Promise((res, rej) => fs.writeFile(`_ui/${id}.h5ui`, str, 'utf-8', err => {
         if (err) {

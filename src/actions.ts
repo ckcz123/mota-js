@@ -1,6 +1,22 @@
 import { BaseAction } from "./action";
 import { actionAttributes, sprites } from "./info";
 
+interface CanChange {
+    style: { [K in keyof CSSStyleDeclaration]?: boolean }
+    filter?: boolean
+    globalCompositeOperation?: boolean
+    shadowColor?: boolean
+    shadowBlur?: boolean
+    shadowOffsetX?: boolean
+    shadowOffsetY?: boolean
+    direction?: boolean
+    textAlign?: boolean
+    textBaseline?: boolean
+    globalAlpha?: boolean
+}
+
+const changed: Record<string, CanChange> = {};
+
 /** 引入对应名称的sprite */
 function getSprite(name: string) {
     if (!sprites[name]) throw new ReferenceError(`Use nonexistent sprite.`);
@@ -22,13 +38,33 @@ export function transition(name: string, data: { style: string, time: string, mo
     const tran = `${style} ${time} ${delay} ${mode}`;
     if (s.transition === '') s.transition += tran;
     else s.transition += `, ${tran}`;
+    changed[name].style.transition = true;
 }
 
 export function create(name: string, data: { x: number, y: number, w: number, h: number, z: number }) {
     const sprite = getSprite(name);
+    changed[name] = { style: {} };
+    const none = ['shadowColor', 'filter'];
+    const zero = ['shadowBlur', 'shadowOffsetX', 'shadowOffsetY'];
+    for (const key in changed[name]) {
+        // @ts-ignore
+        if (changed[name][key] && key !== 'style') {
+            if (none.includes(key)) sprite.context[key as 'shadowColor' | 'filter'] = '';
+            else if (zero.includes(key)) sprite.context[key as 'shadowBlur' | 'shadowOffsetX' | 'shadowOffsetY'] = 0;
+            else if (key === 'globalCompositeOperation') sprite.context[key] = 'source-over';
+            else if (key === 'direction') sprite.context[key] = 'ltr';
+            else if (key === 'textAlign') sprite.context[key] = 'left';
+            else if (key === 'textBaseline') sprite.context[key] = 'bottom';
+        } else {
+            for (const key in changed[name].style) {
+                if (changed[name].style[key]) sprite.canvas.style[key] = '';
+            }
+        }
+    }
     sprite.setCss('display: block;');
     sprite.move(data.x, data.y);
     sprite.resize(data.w, data.h);
+    sprite.rotate(0, sprite.width / 2, sprite.height / 2);
     sprite.canvas.style.zIndex = data.z.toString();
 }
 
@@ -64,7 +100,23 @@ export function clear(name: string, data: { x: number, y: number, w: number, h: 
 export function css(name: string, css: { data: string }) {
     const { data } = css;
     const sprite = getSprite(name);
-    sprite.setCss(data);
+    // 解析出编辑的样式
+    const effects = data.replace('\n', ';').replace(';;', ';').split(';');
+    effects.forEach(function (v) {
+        const content = v.split(':');
+        let key = content[0];
+        const value = content[1];
+        key = key.trim().split('-').reduce(function (pre, curr, i, a) {
+            if (i === 0 && curr !== '') return curr;
+            if (a[0] === '' && i === 1) return curr;
+            return pre + curr.toUpperCase()[0] + curr.slice(1);
+        }, '');
+        // @ts-ignore
+        changed[name].style[key] = true;
+        const canvas = sprite.canvas;
+        // @ts-ignore
+        if (name in canvas.style) canvas.style[key] = value;
+    });
 }
 
 export function composite(name: string, data: { mode: GlobalCompositeOperation }) {
@@ -72,12 +124,14 @@ export function composite(name: string, data: { mode: GlobalCompositeOperation }
     const sprite = getSprite(name);
     const ctx = sprite.context;
     ctx.globalCompositeOperation = mode;
+    changed[name].globalCompositeOperation = true;
 }
 
 export function filter(name: string, d: { data: string }) {
     const { data } = d;
     const sprite = getSprite(name);
     sprite.context.filter = data;
+    changed[name].filter = true;
 }
 
 export function shadow(name: string, data: { shadowBlur: number, shadowColor: string, shadowOffsetX: number, shadowOffsetY: number }) {
@@ -88,6 +142,10 @@ export function shadow(name: string, data: { shadowBlur: number, shadowColor: st
     ctx.shadowColor = shadowColor;
     ctx.shadowOffsetX = shadowOffsetX;
     ctx.shadowOffsetY = shadowOffsetY;
+    changed[name].shadowBlur = true;
+    changed[name].shadowColor = true;
+    changed[name].shadowOffsetX = true;
+    changed[name].shadowOffsetY = true;
 }
 
 export function textInfo(name: string, data: { direction: CanvasDirection, textAlign: CanvasTextAlign, textBaseline: CanvasTextBaseline }) {
@@ -97,11 +155,15 @@ export function textInfo(name: string, data: { direction: CanvasDirection, textA
     ctx.direction = direction;
     ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
+    changed[name].direction = true;
+    changed[name].textAlign = true;
+    changed[name].textBaseline = true;
 }
 
 export function opacity(name: string, data: { opacity: number }) {
     const sprite = getSprite(name);
     core.setAlpha(sprite.context, data.opacity);
+    changed[name].globalAlpha = true;
 }
 
 export function save(name: string) {

@@ -56,11 +56,10 @@
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from "vue";
-import { BaseAction } from "../action";
+import { BaseAction, list } from "../action";
 import { drawActions } from "../info";
 import Attr from "./attr.vue";
 import { sprites } from "../info";
-import { Emitter } from "monaco-editor";
 import { previewSync } from "../preview";
 
 export default defineComponent({
@@ -73,7 +72,18 @@ export default defineComponent({
         },
         del() {
             this.$emit('delete', this.index);
-            if (this.type === 'create') delete sprites[this.data.data.name];
+            if (this.type === 'create') {
+                const sprite = sprites[this.data.data.name];
+                delete sprites[this.data.data.name];
+                const pre = Object.values(sprites)[0].name;
+                for (let i = this.index; i < list.value.length; i++) {
+                    const action = list.value[i];
+                    if (action.sprite === sprite.name) {
+                        action.sprite = pre;
+                    }
+                }
+                sprite.destroy();
+            }
         },
         openEditor(data: { value?: string, lang?: 'javascript' | 'txt' }) {
             this.$emit('openEditor', data);

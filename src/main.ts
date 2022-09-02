@@ -1,14 +1,8 @@
-// 需动态导入，不然发到网站上玩家还要加载。。。
+import App from './App.vue';
+import { createApp } from 'vue';
 
-window.onload = () => {
-    if (!core.domStyle.isVertical && !location.href.includes('h5mota.com')) {
-        import('./App.vue').then(App => {
-            import('vue').then(v => v.createApp(App.default).mount('#ui-editor'))
-        })
-        import('./loadMonaco')
+window.addEventListener('load', e => {
+    if (!core.domStyle.isVertical) {
+        createApp(App).mount('#ui-editor');
     }
-}
-
-document.oncontextmenu = e => false;
-
-export { }
+})

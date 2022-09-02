@@ -122,7 +122,7 @@ function filterSearch(value: string) {
 
 watch(search, (v) => {
     clearTimeout(lastId);
-    lastId = setTimeout(() => {
+    lastId = window.setTimeout(() => {
         search.value = v;
         imgs.value = getImgs();
         change();

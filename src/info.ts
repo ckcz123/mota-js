@@ -1,3 +1,9 @@
+type Attr = {
+    [K in Key]: {
+        [A in keyof SpriteDrawInfo<K>]: [string, string]
+    }
+}
+
 /** 枚举一下所有的画布混合方式，方便使用 */
 export const composition = [
     "color", "color-burn", "color-dodge", "copy", "darken",
@@ -8,7 +14,7 @@ export const composition = [
 ];
 
 /** 枚举所有的操作列表 */
-export const drawActions = {
+export const drawActions: { [K in Key]: string } = {
     wait: '等待',
     transition: '设置过渡',
     create: '创建画布',
@@ -22,6 +28,7 @@ export const drawActions = {
     filter: '设置绘制滤镜',
     shadow: '设置阴影',
     textInfo: '设置文本属性',
+    opacity: '设置不透明度',
     save: '保存画布属性',
     restore: '回退画布属性',
     line: '绘制直线',
@@ -41,7 +48,7 @@ export const drawActions = {
 }
 
 /** 枚举每个操作的参数及其类型 */
-export const actionAttributes = {
+export const actionAttributes: Attr = {
     wait: {
         time: ['毫秒数', 'number']
     },
@@ -60,7 +67,7 @@ export const actionAttributes = {
         z: ['纵深', 'number']
     },
     del: {
-        // name: ['画布名称', 'string']
+
     },
     move: {
         x: ['横坐标', 'number'],
@@ -102,6 +109,9 @@ export const actionAttributes = {
         direction: ['文本方向', 'ltr|rtl'],
         textAlign: ['文本对齐', 'left|center|right'],
         textBaseline: ['文本基线', 'bottom|middle|top']
+    },
+    opacity: {
+        opacity: ['不透明度', 'number']
     },
     save: {},
     restore: {},
@@ -200,6 +210,8 @@ export const actionAttributes = {
         icon: ['图标id', 'string_icon'],
         x: ['横坐标', 'number'],
         y: ['纵坐标', 'number'],
+        w: ['宽度', 'number'],
+        h: ['高度', 'number'],
         frame: ['帧数', 'number']
     },
     winskin: {

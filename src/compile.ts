@@ -225,6 +225,9 @@ ctx.stoke();\n`;
         });
         config += `\n}`;
         body = `core.drawTextContent(${sprite}, \`${info.content}\`, ${config});\n`;
+    } else if (type === 'opacity') {
+        const info = data as SpriteOpacity;
+        body = `core.setAlpha(${sprite}.context, ${info.opacity});`;
     }
     return { head, body };
 }

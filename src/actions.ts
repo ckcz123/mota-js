@@ -99,6 +99,11 @@ export function textInfo(name: string, data: { direction: CanvasDirection, textA
     ctx.textBaseline = textBaseline;
 }
 
+export function opacity(name: string, data: { opacity: number }) {
+    const sprite = getSprite(name);
+    core.setAlpha(sprite.context, data.opacity);
+}
+
 export function save(name: string) {
     const sprite = getSprite(name);
     sprite.context.save();
@@ -196,7 +201,7 @@ export function winskin(name: string, data: { img: string, x: number, y: number,
 export function text(name: string, data: { str: string, x: number, y: number, stroke: boolean, italic: boolean, font: string, fontSize: number, fontWeight: string, style: string, strokeStyle: string, lineWidth: number }) {
     const { str, x, y, italic, fontWeight, fontSize, font, lineWidth, stroke, strokeStyle, style } = data;
     const sprite = getSprite(name);
-    const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? ''} ${fontSize ? fontSize + 'px' : ''} ${font ?? ''}`;
+    const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? ''} ${fontSize ?? ''} ${font || 'sans-serif'}`;
     sprite.context.lineWidth = lineWidth;
     if (stroke) core.fillBoldText(sprite.context, str, x, y, style, strokeStyle, fontStyle, void 0, lineWidth);
     else core.fillText(sprite.context, str, x, y, style, fontStyle);

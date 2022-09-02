@@ -27,7 +27,7 @@ interface SpriteDrawInfoMap {
     wait: Wait
     transition: Transition
     create: SpriteCreate
-    del: SpriteDelete
+    del: void
     move: SpriteMove
     resize: SpriteResize
     rotate: SpriteRotate
@@ -37,6 +37,7 @@ interface SpriteDrawInfoMap {
     filter: SpriteFilter
     shadow: SpriteShadow
     textInfo: SpriteTextInfo
+    opacity: SpriteOpacity
     save: void
     restore: void
     line: SpriteLine
@@ -72,10 +73,6 @@ interface SpriteCreate {
     w: number
     h: number
     z: number
-    name: string
-}
-
-interface SpriteDelete {
     name: string
 }
 
@@ -129,10 +126,17 @@ interface SpriteTextInfo {
     textBaseline?: CanvasTextBaseline;
 }
 
+interface SpriteOpacity {
+    opacity: number
+}
+
 interface BaseShape {
-    stroke: boolean
     lineWidth: number
     style: string | CanvasGradient | CanvasPattern
+}
+
+interface Stroke {
+    stroke: boolean
 }
 
 interface BaseLocatedShape extends BaseShape {
@@ -147,32 +151,32 @@ interface SpriteLine extends BaseShape {
     y2: number
 }
 
-interface SpriteArc extends BaseLocatedShape {
+interface SpriteArc extends BaseLocatedShape, Stroke {
     r: number
     start: number
     end: number
 }
 
-interface SpriteCircle extends BaseLocatedShape {
+interface SpriteCircle extends BaseLocatedShape, Stroke {
     r: number
 }
 
-interface SpriteRect extends BaseLocatedShape {
+interface SpriteRect extends BaseLocatedShape, Stroke {
     w: number
     h: number
 }
 
-interface SpriteRoundRect extends BaseLocatedShape {
+interface SpriteRoundRect extends BaseLocatedShape, Stroke {
     w: number
     h: number
     r: number
 }
 
-interface SpritePolygon extends BaseShape {
+interface SpritePolygon extends BaseShape, Stroke {
     path: [number, number][]
 }
 
-interface SpriteEllipse extends BaseLocatedShape {
+interface SpriteEllipse extends BaseLocatedShape, Stroke {
     a: number
     b: number
 }
@@ -207,8 +211,10 @@ interface SpriteImage {
     sh?: number
 }
 
-interface SpriteIcon extends BaseLocatedShape {
+interface SpriteIcon {
     icon: string
+    x: number
+    y: number
     w: number
     h: number
     frame: number

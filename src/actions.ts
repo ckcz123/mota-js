@@ -23,6 +23,26 @@ function getSprite(name: string) {
     return sprites[name];
 }
 
+export function resetSprite(sprite: Sprite) {
+    const none = ['shadowColor', 'filter'];
+    const zero = ['shadowBlur', 'shadowOffsetX', 'shadowOffsetY'];
+    for (const key in changed[sprite.name]) {
+        // @ts-ignore
+        if (changed[sprite.name][key] && key !== 'style') {
+            if (none.includes(key)) sprite.context[key as 'shadowColor' | 'filter'] = '';
+            else if (zero.includes(key)) sprite.context[key as 'shadowBlur' | 'shadowOffsetX' | 'shadowOffsetY'] = 0;
+            else if (key === 'globalCompositeOperation') sprite.context[key] = 'source-over';
+            else if (key === 'direction') sprite.context[key] = 'ltr';
+            else if (key === 'textAlign') sprite.context[key] = 'left';
+            else if (key === 'textBaseline') sprite.context[key] = 'bottom';
+        } else {
+            for (const key in changed[sprite.name].style) {
+                if (changed[sprite.name].style[key]) sprite.canvas.style[key] = '';
+            }
+        }
+    }
+}
+
 export async function wait(name: string, data: { time: number }) {
     const { time } = data;
     await new Promise(res => {
@@ -44,23 +64,7 @@ export function transition(name: string, data: { style: string, time: string, mo
 export function create(name: string, data: { x: number, y: number, w: number, h: number, z: number }) {
     const sprite = getSprite(name);
     changed[name] = { style: {} };
-    const none = ['shadowColor', 'filter'];
-    const zero = ['shadowBlur', 'shadowOffsetX', 'shadowOffsetY'];
-    for (const key in changed[name]) {
-        // @ts-ignore
-        if (changed[name][key] && key !== 'style') {
-            if (none.includes(key)) sprite.context[key as 'shadowColor' | 'filter'] = '';
-            else if (zero.includes(key)) sprite.context[key as 'shadowBlur' | 'shadowOffsetX' | 'shadowOffsetY'] = 0;
-            else if (key === 'globalCompositeOperation') sprite.context[key] = 'source-over';
-            else if (key === 'direction') sprite.context[key] = 'ltr';
-            else if (key === 'textAlign') sprite.context[key] = 'left';
-            else if (key === 'textBaseline') sprite.context[key] = 'bottom';
-        } else {
-            for (const key in changed[name].style) {
-                if (changed[name].style[key]) sprite.canvas.style[key] = '';
-            }
-        }
-    }
+    resetSprite(sprite);
     sprite.setCss('display: block;');
     sprite.move(data.x, data.y);
     sprite.resize(data.w, data.h);

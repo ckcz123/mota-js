@@ -37,9 +37,11 @@ defineExpose({
 })
 
 watch(saved, v => {
+    const save = document.getElementById('save') as HTMLButtonElement;
     if (v === false) {
-        const save = document.getElementById('save') as HTMLButtonElement;
         save.style.backgroundColor = 'rgb(255, 212, 40)';
+    } else {
+        save.style.backgroundColor = 'rgb(79, 199, 255)';
     }
 })
 </script>

@@ -64,6 +64,8 @@
         editorValue.value = value;
         editorLang.value = lang;
         editorOpened.value = true;
+        right.value = false;
+        insert.value = false;
     }
 
     defineExpose({
@@ -128,6 +130,8 @@ export default defineComponent({
             this.list.push(...[data].concat(behind));
             previewSync();
             saved.value = false;
+            this.insert = false;
+            this.right = false;
         },
         triggerInsert(pos: 'top' | 'bottom') {
             this.insert = !this.insert;

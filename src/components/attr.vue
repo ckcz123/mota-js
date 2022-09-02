@@ -62,7 +62,7 @@
     // @ts-ignore
     const type = actionAttributes[props.id][props.name][1] as string;
 
-    const text = ['string', 'number_u', 'number'];
+    const text = ['string', 'number_u', 'number', 'number_time'];
     const select = ['string_img', 'string_icon'];
     const isArray = /^Array<[\u4e00-\u9fa5a-zA-Z,]+>$/.test(type);
     const options = type.includes('|') && type.split('|') as string[];

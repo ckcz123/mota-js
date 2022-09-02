@@ -81,4 +81,4 @@ dist-ssr
 *.sw?
 
 compress.js
-_ui/
+public/_ui/*.h5ui

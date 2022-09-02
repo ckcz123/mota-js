@@ -35,6 +35,13 @@ const saveText = ref('保存');
 defineExpose({
     mode, list, editing, saveText
 })
+
+watch(saved, v => {
+    if (v === false) {
+        const save = document.getElementById('save') as HTMLButtonElement;
+        save.style.backgroundColor = 'rgb(255, 212, 40)';
+    }
+})
 </script>
 
 <script lang="ts">

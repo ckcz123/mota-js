@@ -186,10 +186,10 @@ export function image(name: string, data: { img: string, sx: number, sy: number,
     core.drawImage(sprite.context, img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-export function icon(name: string, data: { icon: string, x: number, y: number, frame: number }) {
-    const { icon, x, y, frame } = data;
+export function icon(name: string, data: SpriteIcon) {
+    const { icon, x, y, w, h, frame } = data;
     const sprite = getSprite(name);
-    core.drawIcon(sprite.context, icon, x, y, void 0, void 0, frame);
+    core.drawIcon(sprite.context, icon, x, y, w, h, frame);
 }
 
 export function winskin(name: string, data: { img: string, x: number, y: number, w: number, h: number }) {

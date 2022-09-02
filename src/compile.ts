@@ -198,6 +198,7 @@ ctx.stoke();\n`;
         const info = data as SpriteIcon;
         body = `core.drawIcon(${sprite}.context, '${info.icon}', ${info.x}, ${info.y}`;
         if (has(info.w) && has(info.h)) body += `, ${info.w}, ${info.h}`;
+        if ((!has(info.w) || !has(info.h)) && has(info.frame)) body += `, void 0, void 0`;
         if (has(info.frame)) body += `, ${info.frame}`;
         body += `);\n`;
     } else if (type === 'winskin') {

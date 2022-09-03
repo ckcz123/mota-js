@@ -1,10 +1,45 @@
-import { BaseAction } from "./action";
-import { actionAttributes, sprites } from "./info";
+import { sprites } from "./info";
+
+interface CanChange {
+    style: { [K in keyof CSSStyleDeclaration]?: boolean }
+    filter?: boolean
+    globalCompositeOperation?: boolean
+    shadowColor?: boolean
+    shadowBlur?: boolean
+    shadowOffsetX?: boolean
+    shadowOffsetY?: boolean
+    direction?: boolean
+    textAlign?: boolean
+    textBaseline?: boolean
+    globalAlpha?: boolean
+}
+
+const changed: Record<string, CanChange> = {};
 
 /** 引入对应名称的sprite */
 function getSprite(name: string) {
     if (!sprites[name]) throw new ReferenceError(`Use nonexistent sprite.`);
     return sprites[name];
+}
+
+export function resetSprite(sprite: Sprite) {
+    const none = ['shadowColor', 'filter'];
+    const zero = ['shadowBlur', 'shadowOffsetX', 'shadowOffsetY'];
+    for (const key in changed[sprite.name]) {
+        // @ts-ignore
+        if (changed[sprite.name][key] && key !== 'style') {
+            if (none.includes(key)) sprite.context[key as 'shadowColor' | 'filter'] = '';
+            else if (zero.includes(key)) sprite.context[key as 'shadowBlur' | 'shadowOffsetX' | 'shadowOffsetY'] = 0;
+            else if (key === 'globalCompositeOperation') sprite.context[key] = 'source-over';
+            else if (key === 'direction') sprite.context[key] = 'ltr';
+            else if (key === 'textAlign') sprite.context[key] = 'left';
+            else if (key === 'textBaseline') sprite.context[key] = 'bottom';
+        } else {
+            for (const key in changed[sprite.name].style) {
+                if (changed[sprite.name].style[key]) sprite.canvas.style[key] = '';
+            }
+        }
+    }
 }
 
 export async function wait(name: string, data: { time: number }) {
@@ -22,13 +57,17 @@ export function transition(name: string, data: { style: string, time: string, mo
     const tran = `${style} ${time} ${delay} ${mode}`;
     if (s.transition === '') s.transition += tran;
     else s.transition += `, ${tran}`;
+    changed[name].style.transition = true;
 }
 
 export function create(name: string, data: { x: number, y: number, w: number, h: number, z: number }) {
     const sprite = getSprite(name);
+    resetSprite(sprite);
+    changed[name] = { style: {} };
     sprite.setCss('display: block;');
     sprite.move(data.x, data.y);
     sprite.resize(data.w, data.h);
+    sprite.rotate(0, sprite.width / 2, sprite.height / 2);
     sprite.canvas.style.zIndex = data.z.toString();
 }
 
@@ -64,7 +103,23 @@ export function clear(name: string, data: { x: number, y: number, w: number, h: 
 export function css(name: string, css: { data: string }) {
     const { data } = css;
     const sprite = getSprite(name);
-    sprite.setCss(data);
+    // 解析出编辑的样式
+    const effects = data.replace('\n', ';').replace(';;', ';').split(';');
+    effects.forEach(function (v) {
+        const content = v.split(':');
+        let key = content[0];
+        const value = content[1];
+        key = key.trim().split('-').reduce(function (pre, curr, i, a) {
+            if (i === 0 && curr !== '') return curr;
+            if (a[0] === '' && i === 1) return curr;
+            return pre + curr.toUpperCase()[0] + curr.slice(1);
+        }, '');
+        // @ts-ignore
+        changed[name].style[key] = true;
+        const canvas = sprite.canvas;
+        // @ts-ignore
+        if (key in canvas.style) canvas.style[key] = value;
+    });
 }
 
 export function composite(name: string, data: { mode: GlobalCompositeOperation }) {
@@ -72,12 +127,14 @@ export function composite(name: string, data: { mode: GlobalCompositeOperation }
     const sprite = getSprite(name);
     const ctx = sprite.context;
     ctx.globalCompositeOperation = mode;
+    changed[name].globalCompositeOperation = true;
 }
 
 export function filter(name: string, d: { data: string }) {
     const { data } = d;
     const sprite = getSprite(name);
     sprite.context.filter = data;
+    changed[name].filter = true;
 }
 
 export function shadow(name: string, data: { shadowBlur: number, shadowColor: string, shadowOffsetX: number, shadowOffsetY: number }) {
@@ -88,6 +145,10 @@ export function shadow(name: string, data: { shadowBlur: number, shadowColor: st
     ctx.shadowColor = shadowColor;
     ctx.shadowOffsetX = shadowOffsetX;
     ctx.shadowOffsetY = shadowOffsetY;
+    changed[name].shadowBlur = true;
+    changed[name].shadowColor = true;
+    changed[name].shadowOffsetX = true;
+    changed[name].shadowOffsetY = true;
 }
 
 export function textInfo(name: string, data: { direction: CanvasDirection, textAlign: CanvasTextAlign, textBaseline: CanvasTextBaseline }) {
@@ -97,6 +158,15 @@ export function textInfo(name: string, data: { direction: CanvasDirection, textA
     ctx.direction = direction;
     ctx.textAlign = textAlign;
     ctx.textBaseline = textBaseline;
+    changed[name].direction = true;
+    changed[name].textAlign = true;
+    changed[name].textBaseline = true;
+}
+
+export function opacity(name: string, data: { opacity: number }) {
+    const sprite = getSprite(name);
+    core.setAlpha(sprite.context, data.opacity);
+    changed[name].globalAlpha = true;
 }
 
 export function save(name: string) {
@@ -150,11 +220,11 @@ export function polygon(name: string, data: { path: Array<[number, number]>, str
     else core.fillPolygon(sprite.context, path, style);
 }
 
-export function ellipse(name: string, data: { x: number, y: number, a: number, b: number, stroke: boolean, lineWidth: number, style: string }) {
-    const { x, y, a, b, stroke, style, lineWidth } = data;
+export function ellipse(name: string, data: SpriteEllipse) {
+    const { x, y, a, b, angle, stroke, style, lineWidth } = data;
     const sprite = getSprite(name);
-    if (stroke) core.strokeEllipse(sprite.context, x, y, a, b, void 0, style, lineWidth);
-    else core.fillEllipse(sprite.context, x, y, a, b, void 0, style);
+    if (stroke) core.strokeEllipse(sprite.context, x, y, a, b, angle, style, lineWidth);
+    else core.fillEllipse(sprite.context, x, y, a, b, angle, style);
 }
 
 export function arrow(name: string, data: { x1: number, y1: number, x2: number, y2: number, lineWidth: number, style: string }) {
@@ -181,10 +251,10 @@ export function image(name: string, data: { img: string, sx: number, sy: number,
     core.drawImage(sprite.context, img, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-export function icon(name: string, data: { icon: string, x: number, y: number, frame: number }) {
-    const { icon, x, y, frame } = data;
+export function icon(name: string, data: SpriteIcon) {
+    const { icon, x, y, w, h, frame } = data;
     const sprite = getSprite(name);
-    core.drawIcon(sprite.context, icon, x, y, void 0, void 0, frame);
+    core.drawIcon(sprite.context, icon, x, y, w, h, frame);
 }
 
 export function winskin(name: string, data: { img: string, x: number, y: number, w: number, h: number }) {
@@ -196,7 +266,7 @@ export function winskin(name: string, data: { img: string, x: number, y: number,
 export function text(name: string, data: { str: string, x: number, y: number, stroke: boolean, italic: boolean, font: string, fontSize: number, fontWeight: string, style: string, strokeStyle: string, lineWidth: number }) {
     const { str, x, y, italic, fontWeight, fontSize, font, lineWidth, stroke, strokeStyle, style } = data;
     const sprite = getSprite(name);
-    const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? ''} ${fontSize ? fontSize + 'px' : ''} ${font ?? ''}`;
+    const fontStyle = `${italic ? 'italic' : ''} ${fontWeight ?? ''} ${fontSize ?? ''} ${font || 'sans-serif'}`;
     sprite.context.lineWidth = lineWidth;
     if (stroke) core.fillBoldText(sprite.context, str, x, y, style, strokeStyle, fontStyle, void 0, lineWidth);
     else core.fillText(sprite.context, str, x, y, style, fontStyle);

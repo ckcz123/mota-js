@@ -198,6 +198,7 @@ ctx.stoke();\n`;
         const info = data as SpriteIcon;
         body = `core.drawIcon(${sprite}.context, '${info.icon}', ${info.x}, ${info.y}`;
         if (has(info.w) && has(info.h)) body += `, ${info.w}, ${info.h}`;
+        if ((!has(info.w) || !has(info.h)) && has(info.frame)) body += `, void 0, void 0`;
         if (has(info.frame)) body += `, ${info.frame}`;
         body += `);\n`;
     } else if (type === 'winskin') {
@@ -225,6 +226,9 @@ ctx.stoke();\n`;
         });
         config += `\n}`;
         body = `core.drawTextContent(${sprite}, \`${info.content}\`, ${config});\n`;
+    } else if (type === 'opacity') {
+        const info = data as SpriteOpacity;
+        body = `core.setAlpha(${sprite}.context, ${info.opacity});\n`;
     }
     return { head, body };
 }

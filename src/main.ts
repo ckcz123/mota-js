@@ -6,3 +6,5 @@ window.addEventListener('load', e => {
         createApp(App).mount('#ui-editor');
     }
 })
+
+window.oncontextmenu = e => false;

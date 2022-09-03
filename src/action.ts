@@ -1,12 +1,27 @@
 ///<reference path='./info.d.ts'/>
 
 import { Ref, ref, watch } from "vue";
-import { actionAttributes, composition, units, sprites } from "./info";
+import { actionAttributes, sprites } from "./info";
 import { previewSync } from "./preview";
 
-export const list: Ref<BaseAction<any>[]> = ref([]);
+export const list: Ref<BaseAction<keyof SpriteDrawInfoMap>[]> = ref([]);
 // @ts-ignore
 window.list = list;
+
+export const saved = ref(false);
+
+export const selected = ref<number[]>([]);
+export const cutIndex = ref<number[]>([]);
+
+export const ctrl = ref(false);
+
+document.body.addEventListener('keydown', e => {
+    if (e.key === 'Control') ctrl.value = true;
+});
+
+document.body.addEventListener('keyup', e => {
+    if (e.key === 'Control') ctrl.value = false;
+})
 
 watch(list, newValue => {
     list.value = newValue;
@@ -27,6 +42,9 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
 
     /** 有没有成功创建这个实例 */
     success = false
+
+    /** 是否被临时禁用 */
+    disable = false
 
     constructor(type: K) {
         this.type = type;
@@ -66,6 +84,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
             // @ts-ignore
             data[key] = value;
         }
+        if (this.type === 'resize') (data as SpriteResize).styleOnly = true;
         return data;
     }
 

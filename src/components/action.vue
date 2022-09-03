@@ -1,11 +1,17 @@
 <template>
     <div id="action">
-        <div id="info" @mouseup="rightClick($event)">
+        <div 
+            id="info" @mouseup="rightClick($event)"  @click="select()" :status="status"
+        >
             <span id="detail" @click="triggerDetail($event)">▲</span>
             <span id="name">{{actions[type as Key]}}</span>
             <span id="del" @click="del()">✖</span>
         </div>
         <div id="attrs" v-if="detailed">
+            <div id="disable">
+                <span id="description">临时禁用</span>
+                <input id="disablebox" type="checkbox" v-model="disable"/>
+            </div>
             <!-- 大部分都需要一个作用画布的参数 -->
             <div id="sprite" v-if="needSprite">
                 <span id="description">作用画布</span>
@@ -24,72 +30,108 @@
 </template>
 
 <script setup lang="ts">
-    const actions = drawActions;
-    const props = defineProps<{
-        data: BaseAction<any>
-        type: Key
-        index: number
-    }>();
-
-    const detailed = ref(false);
-        
-    const attrs = props.data.data as Object;
-    const needSprite = !['wait', 'create'].includes(props.type);
-
-    const sprite = ref(Object.keys(sprites)[0]);
-    
-    defineEmits<{
-        (e: 'delete', i: number): void
-        (e: 'openEditor', data: { value?: string, lang?: 'javascript' | 'txt' }): void
-        (e: 'right', data: { status: boolean, x: number, y: number }): void
-    }>()
-
-    defineExpose({
-        detailed,
-    })
-
-    watch(sprite, newValue => {
-        sprite.value = props.data.sprite = newValue;
-        previewSync();
-    })
-</script>
-
-<script lang="ts">
-import { defineComponent, onMounted, ref, watch } from "vue";
-import { BaseAction } from "../action";
+import { computed, ref, watch } from "vue";
+import { BaseAction, list, selected, ctrl, cutIndex } from "../action";
 import { drawActions } from "../info";
 import Attr from "./attr.vue";
 import { sprites } from "../info";
-import { Emitter } from "monaco-editor";
 import { previewSync } from "../preview";
 
-export default defineComponent({
-    name: 'action',
-    methods: {
-        triggerDetail(e: MouseEvent) {
-            const span = e.currentTarget as HTMLSpanElement;
-            span.style.transform = `rotate(${this.detailed ? 90 : 180}deg)`;
-            this.detailed = !this.detailed;
-        },
-        del() {
-            this.$emit('delete', this.index);
-            if (this.type === 'create') delete sprites[this.data.data.name];
-        },
-        openEditor(data: { value?: string, lang?: 'javascript' | 'txt' }) {
-            this.$emit('openEditor', data);
-        },
-        change(id: string, value: any) {
-            this.data.data[id] = value;
-            previewSync();
-        },
-        rightClick(e: MouseEvent) {
-            if (e.button === 2) {
-                e.preventDefault();
-                this.$emit('right', { status: true, x: e.clientX, y: e.clientY });
-            } else this.$emit('right', { status: false, x: e.clientX, y: e.clientY });
+const actions = drawActions;
+const props = defineProps<{
+    data: BaseAction<any>
+    type: Key
+    index: number
+}>();
+
+const detailed = ref(false);
+
+const attrs = props.data.data as Object;
+const needSprite = !['wait', 'create'].includes(props.type);
+const status = computed(() => {
+    if (cutIndex.value.includes(props.index)) return 'tocut';
+    else if (selected.value.includes(props.index)) return 'selected';
+    else return 'none';
+});
+
+const sprite = ref(Object.keys(sprites)[0]);
+const disable = ref(false);
+
+const emits = defineEmits<{
+    (e: 'delete', i: number): void
+    (e: 'openEditor', data: { value?: string, lang?: 'javascript' | 'txt' }): void
+    (e: 'right', data: { status: boolean, x: number, y: number }): void
+}>()
+
+watch(sprite, newValue => {
+    sprite.value = props.data.sprite = newValue;
+    previewSync();
+})
+
+watch(disable, newValue => {
+    props.data.disable = disable.value = newValue;
+    previewSync();
+})
+
+function triggerDetail(e: MouseEvent) {
+    const span = e.currentTarget as HTMLSpanElement;
+    span.style.transform = `rotate(${detailed.value ? 90 : 180}deg)`;
+    detailed.value = !detailed.value;
+    select();
+}
+
+function del() {
+    emits('delete', props.index);
+    select();
+    if (props.type === 'create' && props.index !== 0) {
+        const sprite = sprites[props.data.data.name];
+        delete sprites[props.data.data.name];
+        const pre = Object.values(sprites)[0].name;
+        for (let i = props.index; i < list.value.length; i++) {
+            const action = list.value[i];
+            if (action.sprite === sprite.name) {
+                action.sprite = pre;
+            }
+        }
+        sprite.destroy();
+    }
+}
+
+function openEditor(data: { value?: string, lang?: 'javascript' | 'txt' }) {
+    emits('openEditor', data);
+}
+
+function change(id: string, value: any) {
+    props.data.data[id] = value;
+    previewSync();
+}
+
+function rightClick(e: MouseEvent) {
+    if (e.button === 2) {
+        e.preventDefault();
+        emits('right', { status: true, x: e.clientX, y: e.clientY });
+    } else emits('right', { status: false, x: e.clientX, y: e.clientY });
+}
+
+function select() {
+    if (ctrl.value === true) {
+        const i = selected.value.findIndex(v => v === props.index);
+        if (i !== -1) selected.value.splice(i, 1);
+        else selected.value.push(props.index);
+    } else {
+        if (selected.value.length > 1) {
+            selected.value = [props.index];
+        } else {
+            if (selected.value[0] === props.index) selected.value = [];
+            else selected.value = [props.index];
         }
     }
-})
+    if (cutIndex.value.includes(props.index)) {
+        const i = cutIndex.value.findIndex(v => v === props.index);
+        cutIndex.value.splice(i, 1);
+        select();
+    }
+}
 </script>
 
 <style lang="less" scoped>
@@ -105,6 +147,7 @@ span {
     font-size: 20px;
     font-weight: 200;
     text-align: center;
+    user-select: none;
 }
 
 #info {
@@ -156,6 +199,15 @@ span {
     box-shadow: 0px 0px 2px #000;
 }
 
+#info[status=selected] {
+    background-color: rgb(255, 217, 0);
+}
+
+#info[status=tocut] {
+    background-color: rgba(119, 119, 119, 0.5);
+    color: rgba(0, 0, 0, 0.5);
+}
+
 #attrs {
     width: 90%;
     left: 10%;
@@ -163,7 +215,7 @@ span {
     background-color: #ddd;
 }
 
-#sprite {
+#sprite, #disable {
     .border();
     display: flex;
     justify-content: space-between;
@@ -177,6 +229,12 @@ span {
         margin-left: 10px;
         height: 100%;
         font-size: 17px;
+        user-select: none;
+    }
+
+    #disablebox {
+        margin-right: 10px;
+        width: 40%;
     }
 }
 

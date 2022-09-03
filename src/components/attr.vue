@@ -50,109 +50,112 @@
 </template>
 
 <script setup lang="ts">
-
-    const props = defineProps<{
-        value: any
-        name: string
-        id: Key
-    }>();
-
-    const arrayDetail = ref(false);
-
-    // @ts-ignore
-    const type = actionAttributes[props.id][props.name][1] as string;
-
-    const text = ['string', 'number_u', 'number'];
-    const select = ['string_img', 'string_icon'];
-    const isArray = /^Array<[\u4e00-\u9fa5a-zA-Z,]+>$/.test(type);
-    const options = type.includes('|') && type.split('|') as string[];
-    const selectImg = ref(false);
-
-    const arrayInfo = (isArray && type.slice(6, -1).split(',')) || [];
-
-    let value = ref(props.value);
-
-    defineExpose({
-        text,
-        select,
-        value,
-        type,
-        multiCallback,
-        selectImg,
-        arrayDetail,
-        arrayInfo
-    })
-
-    const emits = defineEmits<{
-        (e: 'openEditor', data: { value?: string, lang?: 'javascript' | 'txt' }): void
-        (e: 'change', value: any): void
-    }>()
-
-    function multiCallback(v: string) {
-        value.value = v;
-    }
-
-    watch(value, newValue => {
-        emits('change', newValue);
-    })
-</script>
-
-<script lang="ts">
 import { defineComponent, ref, watch } from 'vue';
+import { saved } from '../action';
 import { actionAttributes, units } from '../info.js';
 import { settings } from '../loadMonaco';
 import ImgSelector from './imgSelector.vue';
 
-export default defineComponent({
-    name: 'Attrs',
-    methods: {
-        blur() {
-            if (this.type === 'number_u') {
-                if (!/[0-9]+/.test(this.value)) this.value = '0px';
-                if (!units.some(v => this.value.endsWith(v))) 
-                    this.value = `${parseFloat(this.value)}px`;
-            } else if (this.type === 'number') {
-                this.value = parseFloat(this.value);
-            } else if (this.type === 'number_time') {
-                if (!/[0-9]+/.test(this.value)) this.value = '0ms';
-                if (!['s', 'ms'].some(v => this.value.endsWith(v))) {
-                    this.value = `${parseFloat(this.value)}ms`;
-                }
-            }
-        },
-        openEditor(value: string) {
-            if (this.type === 'string_multi') settings.callback = this.multiCallback;
-            this.$emit('openEditor', { value, lang: 'txt' });
-        },
-        openImageSelector() {
-            this.selectImg = true;
-            main.editorOpened = true;
-        },
-        selectImage(name: string) {
-            this.value = name;
-        },
-        closeImageSelector() {
-            this.selectImg = false;
-            main.editorOpened = false;
-        },
-        blurForArray(i: number, ii: number, e: Event) {
-            const input = e.currentTarget as HTMLInputElement;
-            const value = input.value;
-            this.value[i][ii] = parseFloat(value);
-        },
-        triggerArrayDetail(e: MouseEvent) {
-            const span = e.currentTarget as HTMLSpanElement;
-            span.style.transform = `rotate(${this.arrayDetail ? 90 : 180}deg)`;
-            this.arrayDetail = !this.arrayDetail;
-        },
-        addArray() {
-            this.value.push(new Array(this.arrayInfo.length).fill(0));
-        },
-        arrayDel(i: number) {
-            this.value.splice(i, 1);
+
+const props = defineProps<{
+    value: any
+    name: string
+    id: Key
+}>();
+
+const arrayDetail = ref(false);
+
+// @ts-ignore
+const type = actionAttributes[props.id][props.name][1] as string;
+
+const text = ['string', 'number_u', 'number', 'number_time'];
+const select = ['string_img', 'string_icon'];
+const isArray = /^Array<[\u4e00-\u9fa5a-zA-Z,]+>$/.test(type);
+const options = type.includes('|') && type.split('|') as string[];
+const selectImg = ref(false);
+
+const arrayInfo = (isArray && type.slice(6, -1).split(',')) || [];
+
+let value = ref(props.value);
+
+defineExpose({
+    text,
+    select,
+    value,
+    type,
+    multiCallback,
+    selectImg,
+    arrayDetail,
+    arrayInfo
+})
+
+const emits = defineEmits<{
+    (e: 'openEditor', data: { value?: string, lang?: 'javascript' | 'txt' }): void
+    (e: 'change', value: any): void
+}>()
+
+function multiCallback(v: string) {
+    value.value = v;
+}
+
+watch(value, newValue => {
+    emits('change', newValue);
+    saved.value = false;
+})
+
+function blur() {
+    if (type === 'number_u') {
+        if (!/[0-9]+/.test(value.value)) value.value = '0px';
+        if (!units.some(v => value.value.endsWith(v))) 
+            value.value = `${parseFloat(value.value)}px`;
+    } else if (type === 'number') {
+        value.value = parseFloat(value.value) || 0;
+    } else if (type === 'number_time') {
+        if (!/[0-9]+/.test(value.value)) value.value = '0ms';
+        if (!['s', 'ms'].some(v => value.value.endsWith(v))) {
+            value.value = `${parseFloat(value.value)}ms`;
         }
     }
-})
+}
+
+function openEditor(value: string) {
+    if (type === 'string_multi') settings.callback = multiCallback;
+    emits('openEditor', { value, lang: 'txt' });
+}
+
+function openImageSelector() {
+    selectImg.value = true;
+    main.editorOpened = true;
+}
+
+function selectImage(name: string) {
+    value.value = name;
+}
+
+function closeImageSelector() {
+    selectImg.value = false;
+    main.editorOpened = false;
+}
+
+function blurForArray(i: number, ii: number, e: Event) {
+    const input = e.currentTarget as HTMLInputElement;
+    const v = input.value;
+    value.value[i][ii] = parseFloat(v);
+}
+
+function triggerArrayDetail(e: MouseEvent) {
+    const span = e.currentTarget as HTMLSpanElement;
+    span.style.transform = `rotate(${arrayDetail.value ? 90 : 180}deg)`;
+    arrayDetail.value = !arrayDetail.value;
+}
+
+function addArray() {
+    value.value.push(new Array(arrayInfo.length).fill(0));
+}
+
+function arrayDel(i: number) {
+    value.value.splice(i, 1);
+}
 </script>
 
 <style lang="less" scoped>
@@ -181,6 +184,7 @@ export default defineComponent({
     margin-left: 10px;
     height: 100%;
     font-size: 17px;
+    user-select: none;
 }
 
 input, button {

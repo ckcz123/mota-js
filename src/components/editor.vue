@@ -169,8 +169,8 @@ function paste() {
         data.data = action.data;
         insertIndex.value++;
     }
-    isCut = false;
     if (isCut) copied.forEach(v => doDelete(v));
+    isCut = false;
 }
 
 defineExpose({ openEditor });

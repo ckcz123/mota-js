@@ -26,7 +26,7 @@ function Main () {
     /** 存档页数，每页可存5个；默认为1000页5000个存档 */
     this.savePages = 1000;
     /** 循环临界的分界 */
-    this.criticalUseLoop = 9e15;
+    this.criticalUseLoop = 1;
     //------------------------ 用户修改内容 END ------------------------//
 
     this.dom = {

@@ -1,6 +1,9 @@
 <template>
-    <div id="action" :selected="selected.includes(index)">
-        <div id="info" @mouseup="rightClick($event)"  @click="select()">
+    <div id="action">
+        <div 
+            id="info" @mouseup="rightClick($event)"  @click="select()" 
+            :selected="selected.includes(index)"
+        >
             <span id="detail" @click="triggerDetail($event)">▲</span>
             <span id="name">{{actions[type as Key]}}</span>
             <span id="del" @click="del()">✖</span>
@@ -175,9 +178,8 @@ span {
     box-shadow: 0px 0px 2px #000;
 }
 
-#action[selected=true] {
-    border-top: gold 2px solid;
-    border-bottom: gold 2px solid;
+#info[selected=true] {
+    background-color: rgb(255, 217, 0);
 }
 
 #attrs {

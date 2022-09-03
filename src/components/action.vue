@@ -24,6 +24,13 @@
 </template>
 
 <script setup lang="ts">
+    import { defineComponent, onMounted, ref, watch } from "vue";
+    import { BaseAction, list } from "../action";
+    import { drawActions } from "../info";
+    import Attr from "./attr.vue";
+    import { sprites } from "../info";
+    import { previewSync } from "../preview";
+
     const actions = drawActions;
     const props = defineProps<{
         data: BaseAction<any>
@@ -38,68 +45,54 @@
 
     const sprite = ref(Object.keys(sprites)[0]);
     
-    defineEmits<{
+    const emits = defineEmits<{
         (e: 'delete', i: number): void
         (e: 'openEditor', data: { value?: string, lang?: 'javascript' | 'txt' }): void
         (e: 'right', data: { status: boolean, x: number, y: number }): void
     }>()
 
-    defineExpose({
-        detailed,
-    })
-
     watch(sprite, newValue => {
         sprite.value = props.data.sprite = newValue;
         previewSync();
     })
-</script>
 
-<script lang="ts">
-import { defineComponent, onMounted, ref, watch } from "vue";
-import { BaseAction, list } from "../action";
-import { drawActions } from "../info";
-import Attr from "./attr.vue";
-import { sprites } from "../info";
-import { previewSync } from "../preview";
+    function triggerDetail(e: MouseEvent) {
+        const span = e.currentTarget as HTMLSpanElement;
+        span.style.transform = `rotate(${detailed.value ? 90 : 180}deg)`;
+        detailed.value = !detailed.value;
+    }
 
-export default defineComponent({
-    name: 'action',
-    methods: {
-        triggerDetail(e: MouseEvent) {
-            const span = e.currentTarget as HTMLSpanElement;
-            span.style.transform = `rotate(${this.detailed ? 90 : 180}deg)`;
-            this.detailed = !this.detailed;
-        },
-        del() {
-            this.$emit('delete', this.index);
-            if (this.type === 'create') {
-                const sprite = sprites[this.data.data.name];
-                delete sprites[this.data.data.name];
-                const pre = Object.values(sprites)[0].name;
-                for (let i = this.index; i < list.value.length; i++) {
-                    const action = list.value[i];
-                    if (action.sprite === sprite.name) {
-                        action.sprite = pre;
-                    }
+    function del() {
+        emits('delete', props.index);
+        if (props.type === 'create') {
+            const sprite = sprites[props.data.data.name];
+            delete sprites[props.data.data.name];
+            const pre = Object.values(sprites)[0].name;
+            for (let i = props.index; i < list.value.length; i++) {
+                const action = list.value[i];
+                if (action.sprite === sprite.name) {
+                    action.sprite = pre;
                 }
-                sprite.destroy();
             }
-        },
-        openEditor(data: { value?: string, lang?: 'javascript' | 'txt' }) {
-            this.$emit('openEditor', data);
-        },
-        change(id: string, value: any) {
-            this.data.data[id] = value;
-            previewSync();
-        },
-        rightClick(e: MouseEvent) {
-            if (e.button === 2) {
-                e.preventDefault();
-                this.$emit('right', { status: true, x: e.clientX, y: e.clientY });
-            } else this.$emit('right', { status: false, x: e.clientX, y: e.clientY });
+            sprite.destroy();
         }
     }
-})
+
+    function openEditor(data: { value?: string, lang?: 'javascript' | 'txt' }) {
+        emits('openEditor', data);
+    }
+
+    function change(id: string, value: any) {
+        props.data.data[id] = value;
+        previewSync();
+    }
+
+    function rightClick(e: MouseEvent) {
+        if (e.button === 2) {
+            e.preventDefault();
+            emits('right', { status: true, x: e.clientX, y: e.clientY });
+        } else emits('right', { status: false, x: e.clientX, y: e.clientY });
+    }
 </script>
 
 <style lang="less" scoped>

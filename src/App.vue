@@ -31,6 +31,9 @@ const mode = ref('list');
 const list = [['list', '列表'], ['edit', '编辑']];
 const editing = ref('');
 const saveText = ref('保存');
+const editor = ref(Editor);
+
+let folded = true;
 
 defineExpose({
     mode, list, editing, saveText
@@ -44,65 +47,56 @@ watch(saved, v => {
         save.style.backgroundColor = 'rgb(79, 199, 255)';
     }
 })
-</script>
 
-<script lang="ts">
+function triggerFold() {
+    const root = document.getElementById('root') as HTMLDivElement;
+    const mode = document.getElementById('mode') as HTMLDivElement;
+    
+    root.style.left = folded ? '0px' : '-300px';
+    mode.style.left = folded ? '300px' : '230px';
+    folded = !folded;
+    main.editorOpened = !folded;
+    const status = folded ? 'none' : 'block';
+    Object.values(sprites).forEach(v => v.setCss(`display: ${status};`));
+}
 
-let folded = true;
+function triggerMode(m: string) {
+    if (m === 'edit' && !editing.value) return alert('请先选择ui');
+    if (m === 'list' && !saved.value) {
+        if (!confirm('您尚未保存ui，确定要切换到ui列表吗？')) return;
+    }
+    mode.value = m;
+}
 
-export default defineComponent({
-    name: 'App',
-    methods: {
-        /** 触发折叠 */
-        triggerFold() {
-            const root = document.getElementById('root') as HTMLDivElement;
-            const mode = document.getElementById('mode') as HTMLDivElement;
-            
-            root.style.left = folded ? '0px' : '-300px';
-            mode.style.left = folded ? '300px' : '230px';
-            folded = !folded;
-            main.editorOpened = !folded;
-            const status = folded ? 'none' : 'block';
-            Object.values(sprites).forEach(v => v.setCss(`display: ${status};`));
-        },
-        /** 改变模式 */
-        triggerMode(mode: string) {
-            if (mode === 'edit' && !this.editing) return alert('请先选择ui');
-            if (mode === 'list' && !saved.value) {
-                if (!confirm('您尚未保存ui，确定要切换到ui列表吗？')) return;
-            }
-            this.mode = mode;
-        },
-        async compileAll() {
-            if (this.mode === 'list') return alert('请在编辑模式下编译');
-            const res = await compile();
-            const editor = this.$refs.editor as any;
-            editor.openEditor(res, 'javascript');
-            settings.callback = (v) => {};
-        },
-        async edit(id: string) {
-            const data = await load(id);
-            uiList.value = data;
-            this.mode = 'edit';
-            this.editing = id;
-            saved.value = true;
-        },
-        async saveUi() {
-            if (!this.editing) return alert('请先选择ui');
-            if (this.saveText !== '保存') return;
-            this.saveText = '保存中';
-            await save(this.editing, uiList.value);
-            this.saveText = '成功';
-            const saveSpan = this.$refs.save as HTMLSpanElement;
-            saveSpan.style.backgroundColor = '#3d3';
-            setTimeout(() => {
-                this.saveText = '保存';
-                saveSpan.style.backgroundColor = 'rgb(79, 199, 255)';
-            }, 1000);
-            saved.value = true;
-        }
-    },
-});
+async function compileAll() {
+    if (mode.value === 'list') return alert('请在编辑模式下编译');
+    const res = await compile();
+    editor.value.openEditor(res, 'javascript');
+    settings.callback = (v) => {};
+}
+
+async function edit(id: string) {
+    const data = await load(id);
+    uiList.value = data;
+    mode.value = 'edit';
+    editing.value = id;
+    saved.value = true;
+}
+
+async function saveUi() {
+    if (!editing.value) return alert('请先选择ui');
+    if (saveText.value !== '保存') return;
+    saveText.value = '保存中';
+    await save(editing.value, uiList.value);
+    saveText.value = '成功';
+    const saveSpan = document.getElementById('save') as HTMLSpanElement;
+    saveSpan.style.backgroundColor = '#3d3';
+    setTimeout(() => {
+        saveText.value = '保存';
+        saveSpan.style.backgroundColor = 'rgb(79, 199, 255)';
+    }, 1000);
+    saved.value = true;
+}
 </script>
 
 <style lang="less" scoped>

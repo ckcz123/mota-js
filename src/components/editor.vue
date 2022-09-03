@@ -23,7 +23,7 @@
     <Monaco
         v-if="editorOpened" @close="closeEditor()" :value="editorValue" :lang="editorLang"
     ></Monaco>
-    <div ref="rightMenu" id="right">
+    <div id="right">
         <div v-if="right" id="right-menu" >
             <div v-if="insert && insertPos === 'top'">
                 <button 
@@ -45,6 +45,12 @@
 </template>
 
 <script setup lang="ts">
+    import { ref } from "vue";
+    import { BaseAction, list, saved } from '../action';
+    import { drawActions } from "../info";
+    import { previewSync } from "../preview";
+    import Action from "./action.vue";
+    import Monaco from './monaco.vue';
 
     const actions = ref(Object.entries(drawActions));
     const showActions = ref(false);
@@ -58,7 +64,7 @@
     const insertIndex = ref(0);
     const insert = ref(false);
     const insertPos = ref('top');
-    const pointerY = 0;
+    let pointerY = 0;
 
     function openEditor(value: string = '', lang: 'javascript' | 'txt' = 'javascript') {
         editorValue.value = value;
@@ -68,85 +74,66 @@
         insert.value = false;
     }
 
-    defineExpose({
-        list,
-        actions,
-        showActions,
-        editorLang,
-        editorValue,
-        editorOpened,
-        right,
-        insertIndex,
-        insert,
-        insertPos,
-        pointerY,
-        openEditor
-    })
-</script>
+    function triggerAdd() {
+        showActions.value = !showActions.value;
+    }
 
-<script lang="ts">
-import { defineComponent, Ref, ref } from "vue";
-import { BaseAction, list, saved } from '../action';
-import { drawActions } from "../info";
-import { previewSync } from "../preview";
-import Action from "./action.vue";
-import Monaco from './monaco.vue';
+    function doAdd(action: keyof SpriteDrawInfoMap) {
+        const data = new BaseAction(action);
+        if (!data.success) return;
+        saved.value = false;
+        list.value.push(data);
+    }
 
-export default defineComponent({
-    name: 'Editor',
-    methods: {
-        triggerAdd() {
-            this.showActions = !this.showActions;
-        },
-        doAdd(action: keyof SpriteDrawInfoMap) {
-            const data = new BaseAction(action);
-            if (!data.success) return;
-            saved.value = false;
-            this.list.push(data);
-        },
-        doDelete(i: number) {
-            // 第一个操作不能删，除非只有第一个操作
-            if (i === 0 && this.list.length !== 1) return;
-            this.list.splice(i, 1);
-            previewSync();
-            saved.value = false;
-        },
-        closeEditor() {
-            this.editorOpened = false;
-        },
-        triggerRight(data: { status: boolean, x: number, y: number }, i: number) {
-            this.right = data.status;
-            const div = this.$refs.rightMenu as HTMLDivElement;
-            div.style.left = `${data.x}px`;
-            div.style.top = `${data.y}px`;
-            this.insertIndex = i;
-            this.pointerY = data.y;
-        },
-        doAddAt(action: keyof SpriteDrawInfoMap) {
-            const delta = this.insertPos === 'top' ? 0 : 1;
-            const behind = this.list.splice(this.insertIndex + delta, this.list.length);
-            const data = new BaseAction(action);
-            if (!data.success) return;
-            this.list.push(...[data].concat(behind));
-            previewSync();
-            saved.value = false;
-            this.insert = false;
-            this.right = false;
-        },
-        triggerInsert(pos: 'top' | 'bottom') {
-            this.insert = !this.insert;
-            this.insertPos = pos;
-            this.checkPos();
-        },
-        checkPos() {
-            const div = this.$refs.rightMenu as HTMLDivElement;
-            if (parseInt(getComputedStyle(div).top) > window.innerHeight / 2) {
-                div.style.top = '';
-                div.style.bottom = `${window.innerHeight - this.pointerY}px`;
-            }
+    function doDelete(i: number) {
+        // 第一个操作不能删，除非只有第一个操作
+        if (i === 0 && list.value.length !== 1) return;
+        list.value.splice(i, 1);
+        previewSync();
+        saved.value = false;
+    }
+
+    function closeEditor() {
+        editorOpened.value = false;
+    }
+
+    function doAddAt(action: keyof SpriteDrawInfoMap) {
+        const delta = insertPos.value === 'top' ? 0 : 1;
+        if (insertIndex.value + delta === 0 && action !== 'create') return alert('不能在第一个操作之前插入非创建画布的操作');
+        const behind = list.value.splice(insertIndex.value + delta, list.value.length);
+        const data = new BaseAction(action);
+        if (!data.success) return;
+        list.value.push(...[data].concat(behind));
+        previewSync();
+        saved.value = false;
+        insert.value = false;
+        right.value = false;
+    }
+
+    function triggerInsert(pos: 'top' | 'bottom') {
+        insert.value = !insert.value;
+        insertPos.value = pos;
+        checkPos();
+    }
+
+    function checkPos() {
+        const div = document.getElementById('right') as HTMLDivElement;
+        if (parseInt(getComputedStyle(div).top) > window.innerHeight / 2) {
+            div.style.top = '';
+            div.style.bottom = `${window.innerHeight - pointerY}px`;
         }
     }
-})
+
+    function triggerRight(data: { status: boolean, x: number, y: number }, i: number) {
+        right.value = data.status;
+        const div = document.getElementById('right') as HTMLDivElement;
+        div.style.left = `${data.x}px`;
+        div.style.top = `${data.y}px`;
+        insertIndex.value = i;
+        pointerY = data.y;
+    }
+
+    defineExpose({ openEditor });
 </script>
 
 <style lang="less" scoped>

@@ -228,7 +228,7 @@ ctx.stoke();\n`;
         body = `core.drawTextContent(${sprite}, \`${info.content}\`, ${config});\n`;
     } else if (type === 'opacity') {
         const info = data as SpriteOpacity;
-        body = `core.setAlpha(${sprite}.context, ${info.opacity});`;
+        body = `core.setAlpha(${sprite}.context, ${info.opacity});\n`;
     }
     return { head, body };
 }

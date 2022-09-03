@@ -63,8 +63,8 @@ export function transition(name: string, data: { style: string, time: string, mo
 
 export function create(name: string, data: { x: number, y: number, w: number, h: number, z: number }) {
     const sprite = getSprite(name);
-    changed[name] = { style: {} };
     resetSprite(sprite);
+    changed[name] = { style: {} };
     sprite.setCss('display: block;');
     sprite.move(data.x, data.y);
     sprite.resize(data.w, data.h);

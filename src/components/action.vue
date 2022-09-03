@@ -8,6 +8,10 @@
             <span id="del" @click="del()">✖</span>
         </div>
         <div id="attrs" v-if="detailed">
+            <div id="disable">
+                <span id="description">临时禁用</span>
+                <input id="disablebox" type="checkbox" v-model="disable"/>
+            </div>
             <!-- 大部分都需要一个作用画布的参数 -->
             <div id="sprite" v-if="needSprite">
                 <span id="description">作用画布</span>
@@ -51,6 +55,7 @@ const status = computed(() => {
 });
 
 const sprite = ref(Object.keys(sprites)[0]);
+const disable = ref(false);
 
 const emits = defineEmits<{
     (e: 'delete', i: number): void
@@ -60,6 +65,11 @@ const emits = defineEmits<{
 
 watch(sprite, newValue => {
     sprite.value = props.data.sprite = newValue;
+    previewSync();
+})
+
+watch(disable, newValue => {
+    props.data.disable = disable.value = newValue;
     previewSync();
 })
 
@@ -205,7 +215,7 @@ span {
     background-color: #ddd;
 }
 
-#sprite {
+#sprite, #disable {
     .border();
     display: flex;
     justify-content: space-between;
@@ -220,6 +230,11 @@ span {
         height: 100%;
         font-size: 17px;
         user-select: none;
+    }
+
+    #disablebox {
+        margin-right: 10px;
+        width: 40%;
     }
 }
 

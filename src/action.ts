@@ -43,6 +43,9 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
     /** 有没有成功创建这个实例 */
     success = false
 
+    /** 是否被临时禁用 */
+    disable = false
+
     constructor(type: K) {
         this.type = type;
         const data = this.generateBaseData();

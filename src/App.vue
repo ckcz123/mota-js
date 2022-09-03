@@ -92,10 +92,10 @@ async function saveUi() {
     const saveSpan = document.getElementById('save') as HTMLSpanElement;
     saveSpan.style.backgroundColor = '#3d3';
     setTimeout(() => {
+        saved.value = true;
         saveText.value = '保存';
         saveSpan.style.backgroundColor = 'rgb(79, 199, 255)';
     }, 1000);
-    saved.value = true;
 }
 </script>
 

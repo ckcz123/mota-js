@@ -35,6 +35,8 @@
             <hr/>
             <div @click="copy()">复制</div>
             <hr/>
+            <div @click="cut()">剪切</div>
+            <hr/>
             <div @click="paste()">粘贴到下方</div>
             <hr/>
             <div @click="triggerInsert('bottom')">在下方插入操作</div>
@@ -71,6 +73,8 @@ const insertPos = ref('top');
 let pointerY = 0;
 
 let copied: number[] = [];
+let isCut = false;
+let copiedData: BaseAction<Key>[] = [];
 
 function openEditor(value: string = '', lang: 'javascript' | 'txt' = 'javascript') {
     editorValue.value = value;
@@ -145,20 +149,28 @@ function copy() {
     copied = selected.value.slice();
     insert.value = false;
     right.value = false;
+    isCut = false;
+    copiedData = copied.map(v => list.value[v]);
+}
+
+function cut() {
+    copy();
+    isCut = true;
 }
 
 function paste() {
     insertPos.value = 'bottom';
     insert.value = false;
     right.value = false;
-    for (const i of copied) {
-        const action = list.value[i];
+    for (const action of copiedData) {
         const data = doAddAt(action.type);
         if (!data) return;
         data.sprite = action.sprite;
         data.data = action.data;
         insertIndex.value++;
     }
+    isCut = false;
+    if (isCut) copied.forEach(v => doDelete(v));
 }
 
 defineExpose({ openEditor });

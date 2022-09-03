@@ -52,7 +52,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { BaseAction, list, saved, selected } from '../action';
+import { BaseAction, cutIndex, list, saved, selected } from '../action';
 import { drawActions } from "../info";
 import { previewSync } from "../preview";
 import Action from "./action.vue";
@@ -96,11 +96,11 @@ function doAdd(action: keyof SpriteDrawInfoMap) {
     return data;
 }
 
-function doDelete(i: number) {
+function doDelete(i: number, view: boolean = true) {
     // 第一个操作不能删，除非只有第一个操作
     if (i === 0 && list.value.length !== 1) return;
     list.value.splice(i, 1);
-    previewSync();
+    if (view) previewSync();
     saved.value = false;
 }
 
@@ -108,14 +108,14 @@ function closeEditor() {
     editorOpened.value = false;
 }
 
-function doAddAt(action: keyof SpriteDrawInfoMap) {
+function doAddAt(action: keyof SpriteDrawInfoMap, view: boolean = true) {
     const delta = insertPos.value === 'top' ? 0 : 1;
     if (insertIndex.value + delta === 0 && action !== 'create') return alert('不能在第一个操作之前插入非创建画布的操作');
     const behind = list.value.splice(insertIndex.value + delta, list.value.length);
     const data = new BaseAction(action);
     if (!data.success) return;
     list.value.push(...[data].concat(behind));
-    previewSync();
+    if (view) previewSync();
     saved.value = false;
     insert.value = false;
     right.value = false;
@@ -146,31 +146,50 @@ function triggerRight(data: { status: boolean, x: number, y: number }, i: number
 }
 
 function copy() {
-    copied = selected.value.slice();
+    copied = selected.value.slice().sort((a, b) => a - b);
     insert.value = false;
     right.value = false;
     isCut = false;
     copiedData = copied.map(v => list.value[v]);
+    cutIndex.value = [];
 }
 
 function cut() {
     copy();
     isCut = true;
+    cutIndex.value = selected.value.slice();
 }
 
 function paste() {
+    console.log(1);
+    
     insertPos.value = 'bottom';
     insert.value = false;
     right.value = false;
+    /** 比要插入的地方索引小的被剪切内容数量 */
+    let cnt = 0;
+    cutIndex.value.sort((a, b) => a - b);
+    // 需要倒着删，不然删掉一个整体上移，再删就会出错
+    for (let i = cutIndex.value.length - 1; i >= 0; i--) {
+        const v = cutIndex.value[i];
+        if (v <= insertIndex.value) cnt++;
+        doDelete(v, false);
+    }
+    insertIndex.value -= cnt;
+    const start = insertIndex.value + 1;
+    
     for (const action of copiedData) {
-        const data = doAddAt(action.type);
+        const data = doAddAt(action.type, false);
         if (!data) return;
         data.sprite = action.sprite;
         data.data = action.data;
         insertIndex.value++;
     }
-    if (isCut) copied.forEach(v => doDelete(v));
+    selected.value = [];
+    cutIndex.value = [];
+    for (let i = start; i <= insertIndex.value; i++) selected.value.push(i);
     isCut = false;
+    previewSync();
 }
 
 defineExpose({ openEditor });

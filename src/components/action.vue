@@ -1,8 +1,7 @@
 <template>
     <div id="action">
         <div 
-            id="info" @mouseup="rightClick($event)"  @click="select()" 
-            :selected="selected.includes(index)"
+            id="info" @mouseup="rightClick($event)"  @click="select()" :status="status"
         >
             <span id="detail" @click="triggerDetail($event)">▲</span>
             <span id="name">{{actions[type as Key]}}</span>
@@ -27,8 +26,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from "vue";
-import { BaseAction, list, selected, ctrl } from "../action";
+import { computed, ref, watch } from "vue";
+import { BaseAction, list, selected, ctrl, cutIndex } from "../action";
 import { drawActions } from "../info";
 import Attr from "./attr.vue";
 import { sprites } from "../info";
@@ -45,6 +44,11 @@ const detailed = ref(false);
 
 const attrs = props.data.data as Object;
 const needSprite = !['wait', 'create'].includes(props.type);
+const status = computed(() => {
+    if (cutIndex.value.includes(props.index)) return 'tocut';
+    else if (selected.value.includes(props.index)) return 'selected';
+    else return 'none';
+});
 
 const sprite = ref(Object.keys(sprites)[0]);
 
@@ -68,6 +72,7 @@ function triggerDetail(e: MouseEvent) {
 
 function del() {
     emits('delete', props.index);
+    select();
     if (props.type === 'create' && props.index !== 0) {
         const sprite = sprites[props.data.data.name];
         delete sprites[props.data.data.name];
@@ -111,6 +116,11 @@ function select() {
             else selected.value = [props.index];
         }
     }
+    if (cutIndex.value.includes(props.index)) {
+        const i = cutIndex.value.findIndex(v => v === props.index);
+        cutIndex.value.splice(i, 1);
+        select();
+    }
 }
 </script>
 
@@ -127,6 +137,7 @@ span {
     font-size: 20px;
     font-weight: 200;
     text-align: center;
+    user-select: none;
 }
 
 #info {
@@ -178,8 +189,13 @@ span {
     box-shadow: 0px 0px 2px #000;
 }
 
-#info[selected=true] {
+#info[status=selected] {
     background-color: rgb(255, 217, 0);
+}
+
+#info[status=tocut] {
+    background-color: rgba(119, 119, 119, 0.5);
+    color: rgba(0, 0, 0, 0.5);
 }
 
 #attrs {
@@ -203,6 +219,7 @@ span {
         margin-left: 10px;
         height: 100%;
         font-size: 17px;
+        user-select: none;
     }
 }
 

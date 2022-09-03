@@ -11,6 +11,7 @@ window.list = list;
 export const saved = ref(false);
 
 export const selected = ref<number[]>([]);
+export const cutIndex = ref<number[]>([]);
 
 export const ctrl = ref(false);
 
@@ -80,6 +81,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
             // @ts-ignore
             data[key] = value;
         }
+        if (this.type === 'resize') (data as SpriteResize).styleOnly = true;
         return data;
     }
 

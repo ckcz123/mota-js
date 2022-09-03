@@ -119,7 +119,7 @@ export function css(name: string, css: { data: string }) {
         changed[name].style[key] = true;
         const canvas = sprite.canvas;
         // @ts-ignore
-        if (name in canvas.style) canvas.style[key] = value;
+        if (key in canvas.style) canvas.style[key] = value;
     });
 }
 

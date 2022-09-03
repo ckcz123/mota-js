@@ -1,5 +1,4 @@
-import { BaseAction } from "./action";
-import { actionAttributes, sprites } from "./info";
+import { sprites } from "./info";
 
 interface CanChange {
     style: { [K in keyof CSSStyleDeclaration]?: boolean }

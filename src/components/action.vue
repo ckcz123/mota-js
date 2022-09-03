@@ -1,6 +1,6 @@
 <template>
-    <div id="action">
-        <div id="info" @mouseup="rightClick($event)">
+    <div id="action" :selected="selected.includes(index)">
+        <div id="info" @mouseup="rightClick($event)"  @click="select()">
             <span id="detail" @click="triggerDetail($event)">▲</span>
             <span id="name">{{actions[type as Key]}}</span>
             <span id="del" @click="del()">✖</span>
@@ -24,8 +24,8 @@
 </template>
 
 <script setup lang="ts">
-    import { defineComponent, onMounted, ref, watch } from "vue";
-    import { BaseAction, list } from "../action";
+    import { ref, watch } from "vue";
+    import { BaseAction, list, selected, ctrl } from "../action";
     import { drawActions } from "../info";
     import Attr from "./attr.vue";
     import { sprites } from "../info";
@@ -39,7 +39,7 @@
     }>();
 
     const detailed = ref(false);
-        
+
     const attrs = props.data.data as Object;
     const needSprite = !['wait', 'create'].includes(props.type);
 
@@ -60,11 +60,12 @@
         const span = e.currentTarget as HTMLSpanElement;
         span.style.transform = `rotate(${detailed.value ? 90 : 180}deg)`;
         detailed.value = !detailed.value;
+        select();
     }
 
     function del() {
         emits('delete', props.index);
-        if (props.type === 'create') {
+        if (props.type === 'create' && props.index !== 0) {
             const sprite = sprites[props.data.data.name];
             delete sprites[props.data.data.name];
             const pre = Object.values(sprites)[0].name;
@@ -92,6 +93,21 @@
             e.preventDefault();
             emits('right', { status: true, x: e.clientX, y: e.clientY });
         } else emits('right', { status: false, x: e.clientX, y: e.clientY });
+    }
+
+    function select() {
+        if (ctrl.value === true) {
+            const i = selected.value.findIndex(v => v === props.index);
+            if (i !== -1) selected.value.splice(i, 1);
+            else selected.value.push(props.index);
+        } else {
+            if (selected.value.length > 1) {
+                selected.value = [props.index];
+            } else {
+                if (selected.value[0] === props.index) selected.value = [];
+                else selected.value = [props.index];
+            }
+        }
     }
 </script>
 
@@ -157,6 +173,11 @@ span {
     margin-top: 3px;
     margin-bottom: 3px;
     box-shadow: 0px 0px 2px #000;
+}
+
+#action[selected=true] {
+    border-top: gold 2px solid;
+    border-bottom: gold 2px solid;
 }
 
 #attrs {

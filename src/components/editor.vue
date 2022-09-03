@@ -33,6 +33,10 @@
             </div>
             <div @click="triggerInsert('top')">在上方插入操作</div>
             <hr/>
+            <div @click="copy()">复制</div>
+            <hr/>
+            <div @click="paste()">粘贴到下方</div>
+            <hr/>
             <div @click="triggerInsert('bottom')">在下方插入操作</div>
             <div v-if="insert && insertPos === 'bottom'">
                 <button 
@@ -45,95 +49,119 @@
 </template>
 
 <script setup lang="ts">
-    import { ref } from "vue";
-    import { BaseAction, list, saved } from '../action';
-    import { drawActions } from "../info";
-    import { previewSync } from "../preview";
-    import Action from "./action.vue";
-    import Monaco from './monaco.vue';
+import { ref } from "vue";
+import { BaseAction, list, saved, selected } from '../action';
+import { drawActions } from "../info";
+import { previewSync } from "../preview";
+import Action from "./action.vue";
+import Monaco from './monaco.vue';
 
-    const actions = ref(Object.entries(drawActions));
-    const showActions = ref(false);
+const actions = ref(Object.entries(drawActions));
+const showActions = ref(false);
 
-    const editorOpened = ref(false);
+const editorOpened = ref(false);
 
-    const editorValue = ref('');
-    const editorLang = ref<'javascript' | 'txt'>('javascript');
-    
-    const right = ref(false);
-    const insertIndex = ref(0);
-    const insert = ref(false);
-    const insertPos = ref('top');
-    let pointerY = 0;
+const editorValue = ref('');
+const editorLang = ref<'javascript' | 'txt'>('javascript');
 
-    function openEditor(value: string = '', lang: 'javascript' | 'txt' = 'javascript') {
-        editorValue.value = value;
-        editorLang.value = lang;
-        editorOpened.value = true;
-        right.value = false;
-        insert.value = false;
+const right = ref(false);
+const insertIndex = ref(0);
+const insert = ref(false);
+const insertPos = ref('top');
+let pointerY = 0;
+
+let copied: number[] = [];
+
+function openEditor(value: string = '', lang: 'javascript' | 'txt' = 'javascript') {
+    editorValue.value = value;
+    editorLang.value = lang;
+    editorOpened.value = true;
+    right.value = false;
+    insert.value = false;
+}
+
+function triggerAdd() {
+    showActions.value = !showActions.value;
+}
+
+function doAdd(action: keyof SpriteDrawInfoMap) {
+    const data = new BaseAction(action);
+    if (!data.success) return;
+    saved.value = false;
+    list.value.push(data);
+    return data;
+}
+
+function doDelete(i: number) {
+    // 第一个操作不能删，除非只有第一个操作
+    if (i === 0 && list.value.length !== 1) return;
+    list.value.splice(i, 1);
+    previewSync();
+    saved.value = false;
+}
+
+function closeEditor() {
+    editorOpened.value = false;
+}
+
+function doAddAt(action: keyof SpriteDrawInfoMap) {
+    const delta = insertPos.value === 'top' ? 0 : 1;
+    if (insertIndex.value + delta === 0 && action !== 'create') return alert('不能在第一个操作之前插入非创建画布的操作');
+    const behind = list.value.splice(insertIndex.value + delta, list.value.length);
+    const data = new BaseAction(action);
+    if (!data.success) return;
+    list.value.push(...[data].concat(behind));
+    previewSync();
+    saved.value = false;
+    insert.value = false;
+    right.value = false;
+    return data;
+}
+
+function triggerInsert(pos: 'top' | 'bottom') {
+    insert.value = !insert.value;
+    insertPos.value = pos;
+    checkPos();
+}
+
+function checkPos() {
+    const div = document.getElementById('right') as HTMLDivElement;
+    if (parseInt(getComputedStyle(div).top) > window.innerHeight / 2) {
+        div.style.top = '';
+        div.style.bottom = `${window.innerHeight - pointerY}px`;
     }
+}
 
-    function triggerAdd() {
-        showActions.value = !showActions.value;
+function triggerRight(data: { status: boolean, x: number, y: number }, i: number) {
+    right.value = data.status;
+    const div = document.getElementById('right') as HTMLDivElement;
+    div.style.left = `${data.x}px`;
+    div.style.top = `${data.y}px`;
+    insertIndex.value = i;
+    pointerY = data.y;
+}
+
+function copy() {
+    copied = selected.value.slice();
+    insert.value = false;
+    right.value = false;
+}
+
+function paste() {
+    insertPos.value = 'bottom';
+    insert.value = false;
+    right.value = false;
+    for (const i of copied) {
+        const action = list.value[i];
+        const data = doAddAt(action.type);
+        if (!data) return;
+        data.sprite = action.sprite;
+        data.data = action.data;
+        insertIndex.value++;
     }
+}
 
-    function doAdd(action: keyof SpriteDrawInfoMap) {
-        const data = new BaseAction(action);
-        if (!data.success) return;
-        saved.value = false;
-        list.value.push(data);
-    }
-
-    function doDelete(i: number) {
-        // 第一个操作不能删，除非只有第一个操作
-        if (i === 0 && list.value.length !== 1) return;
-        list.value.splice(i, 1);
-        previewSync();
-        saved.value = false;
-    }
-
-    function closeEditor() {
-        editorOpened.value = false;
-    }
-
-    function doAddAt(action: keyof SpriteDrawInfoMap) {
-        const delta = insertPos.value === 'top' ? 0 : 1;
-        if (insertIndex.value + delta === 0 && action !== 'create') return alert('不能在第一个操作之前插入非创建画布的操作');
-        const behind = list.value.splice(insertIndex.value + delta, list.value.length);
-        const data = new BaseAction(action);
-        if (!data.success) return;
-        list.value.push(...[data].concat(behind));
-        previewSync();
-        saved.value = false;
-        insert.value = false;
-        right.value = false;
-    }
-
-    function triggerInsert(pos: 'top' | 'bottom') {
-        insert.value = !insert.value;
-        insertPos.value = pos;
-        checkPos();
-    }
-
-    function checkPos() {
-        const div = document.getElementById('right') as HTMLDivElement;
-        if (parseInt(getComputedStyle(div).top) > window.innerHeight / 2) {
-            div.style.top = '';
-            div.style.bottom = `${window.innerHeight - pointerY}px`;
-        }
-    }
-
-    function triggerRight(data: { status: boolean, x: number, y: number }, i: number) {
-        right.value = data.status;
-        const div = document.getElementById('right') as HTMLDivElement;
-        div.style.left = `${data.x}px`;
-        div.style.top = `${data.y}px`;
-        insertIndex.value = i;
-        pointerY = data.y;
-    }
-
-    defineExpose({ openEditor });
+defineExpose({ openEditor });
 </script>
 
 <style lang="less" scoped>

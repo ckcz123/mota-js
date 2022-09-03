@@ -20,7 +20,7 @@ interface LZString {
 interface DrawDataOf<K extends keyof SpriteDrawInfoMap> {
     type: K
     sprite: string
-    action: BaseAction<any>
+    action: BaseAction<K>
 }
 
 interface SpriteDrawInfoMap {

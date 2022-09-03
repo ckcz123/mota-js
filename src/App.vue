@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import Editor from "./components/editor.vue";
 import { preview } from "./preview";
 import { compile } from "./compile";

@@ -1,14 +1,26 @@
 ///<reference path='./info.d.ts'/>
 
 import { Ref, ref, watch } from "vue";
-import { actionAttributes, composition, units, sprites } from "./info";
+import { actionAttributes, sprites } from "./info";
 import { previewSync } from "./preview";
 
-export const list: Ref<BaseAction<any>[]> = ref([]);
+export const list: Ref<BaseAction<keyof SpriteDrawInfoMap>[]> = ref([]);
 // @ts-ignore
 window.list = list;
 
 export const saved = ref(false);
+
+export const selected = ref<number[]>([]);
+
+export const ctrl = ref(false);
+
+document.body.addEventListener('keydown', e => {
+    if (e.key === 'Control') ctrl.value = true;
+});
+
+document.body.addEventListener('keyup', e => {
+    if (e.key === 'Control') ctrl.value = false;
+})
 
 watch(list, newValue => {
     list.value = newValue;

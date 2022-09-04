@@ -662,7 +662,7 @@ ui.prototype.closePanel = function () {
     }
     this.clearUI();
     core.maps.generateGroundPattern();
-    core.updateStatusBar(true, true);
+    core.updateStatusBar(true);
     core.unlockControl();
     core.status.event.data = null;
     core.status.event.id = null;
@@ -1739,7 +1739,7 @@ ui.prototype._drawChoices_getHorizontalPosition = function (titleInfo, choices, 
 
 ui.prototype._drawChoices_getVerticalPosition = function (titleInfo, choices, hPos) {
     var length = choices.length;
-    var height = 32 * (length + 2), bottom = core._PY_/2 + height / 2;
+    var height = 32 * (length + 2), bottom = core._PY_ / 2 + height / 2;
     if (length % 2 == 0) bottom += 16;
     var offset = 0;
     var choice_top = bottom - height + 56;
@@ -1810,12 +1810,12 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         var color = core.arrayToRGBA(choices[i].color || core.status.textAttribute.text);
         if (main.mode == 'play' && choices[i].need != null && choices[i].need != '' && !core.calValue(choices[i].need)) color = '#999999';
         core.setFillStyle(ctx, color);
-        var offset = core._PX_/2;
+        var offset = core._PX_ / 2;
         if (choices[i].icon) {
             var iconInfo = this._getDrawableIconInfo(choices[i].icon), image = iconInfo[0], icon = iconInfo[1];
             if (image != null) {
                 core.drawImage(ctx, image, 0, 32 * icon, 32, 32,
-                    core._PX_/2 - choices[i].width / 2, vPos.choice_top + 32 * i - 17, 22, 22);
+                    core._PX_ / 2 - choices[i].width / 2, vPos.choice_top + 32 * i - 17, 22, 22);
                 offset += 14;
             }
         }
@@ -1830,14 +1830,14 @@ ui.prototype._drawChoices_drawChoices = function (choices, isWindowSkin, hPos, v
         if (isWindowSkin) {
             if (hasCtx) {
                 this._drawSelector(ctx, core.status.textAttribute.background,
-                    len + 10, 28, core._PX_/2 - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20);
+                    len + 10, 28, core._PX_ / 2 - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20);
             } else {
                 this._drawWindowSelector(core.status.textAttribute.background,
-                    core._PX_/2 - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
+                    core._PX_ / 2 - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20, len + 10, 28);
             }
         }
         else
-            core.strokeRoundRect(ctx, core._PX_/2 - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
+            core.strokeRoundRect(ctx, core._PX_ / 2 - len / 2 - 5, vPos.choice_top + 32 * core.status.event.selection - 20,
                 len + 10, 28, 6, core.status.globalAttribute.selectColor, 2);
     }
 }
@@ -1870,14 +1870,14 @@ ui.prototype.drawConfirmBox = function (text, yesCallback, noCallback, ctx) {
     core.setTextAlign(ctx, 'center');
     core.setFillStyle(ctx, core.arrayToRGBA(core.status.textAttribute.text))
     for (var i in contents) {
-        core.fillText(ctx, contents[i], core._PX_/2, rect.top + 50 + i * 30);
+        core.fillText(ctx, contents[i], core._PX_ / 2, rect.top + 50 + i * 30);
     }
 
-    core.fillText(ctx, "确定", core._PX_/2 - 38, rect.bottom - 35, null, this._buildFont(17, true));
-    core.fillText(ctx, "取消", core._PX_/2 + 38, rect.bottom - 35);
+    core.fillText(ctx, "确定", core._PX_ / 2 - 38, rect.bottom - 35, null, this._buildFont(17, true));
+    core.fillText(ctx, "取消", core._PX_ / 2 + 38, rect.bottom - 35);
     if (core.status.event.selection != 'none') {
         var len = core.calWidth(ctx, "确定");
-        var strokeLeft = core._PX_/2 + (76 * core.status.event.selection - 38) - parseInt(len / 2) - 5;
+        var strokeLeft = core._PX_ / 2 + (76 * core.status.event.selection - 38) - parseInt(len / 2) - 5;
 
         if (isWindowSkin) {
             if (hasCtx) {
@@ -1896,8 +1896,8 @@ ui.prototype._drawConfirmBox_getRect = function (contents, ctx) {
     var max_width = contents.reduce(function (pre, curr) {
         return Math.max(pre, core.calWidth(ctx, curr));
     }, 0);
-    var left = Math.min(core._PX_/2 - 40 - parseInt(max_width / 2), 100), right = core._PX_ - left;
-    var top = core._PY_/2 - 68 - (contents.length - 1) * 30, bottom = core._PY_/2 + 68;
+    var left = Math.min(core._PX_ / 2 - 40 - parseInt(max_width / 2), 100), right = core._PX_ - left;
+    var top = core._PY_ / 2 - 68 - (contents.length - 1) * 30, bottom = core._PY_ / 2 + 68;
     return { top: top, left: left, bottom: bottom, right: right, width: right - left, height: bottom - top };
 }
 
@@ -1908,11 +1908,11 @@ ui.prototype.drawWaiting = function (text) {
     core.clearUI();
     text = core.replaceText(text || "");
     var text_length = core.calWidth('ui', text, this._buildFont(19, true));
-    var width = Math.max(text_length + 80, 220), left = core._PX_/2 - parseInt(width / 2), right = left + width;
-    var top = core._PY_/2 - 48, height = 96, bottom = top + height;
+    var width = Math.max(text_length + 80, 220), left = core._PX_ / 2 - parseInt(width / 2), right = left + width;
+    var top = core._PY_ / 2 - 48, height = 96, bottom = top + height;
     this.drawBackground(left, top, right, bottom);
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', text, core._PX_/2, top + 56, core.arrayToRGBA(core.status.textAttribute.text));
+    core.fillText('ui', text, core._PX_ / 2, top + 56, core.arrayToRGBA(core.status.textAttribute.text));
 }
 
 ////// 绘制系统设置界面 //////
@@ -2060,9 +2060,9 @@ ui.prototype.drawPagination = function (page, totalPage, y) {
 
     core.setTextAlign('ui', 'center');
     if (page > 1)
-        core.fillText('ui', '上一页', core._PX_/2 - 80, y * 32 + 19);
+        core.fillText('ui', '上一页', core._PX_ / 2 - 80, y * 32 + 19);
     if (page < totalPage)
-        core.fillText('ui', '下一页', core._PX_/2 + 80, y * 32 + 19);
+        core.fillText('ui', '下一页', core._PX_ / 2 + 80, y * 32 + 19);
 }
 
 ////// 绘制键盘光标 //////
@@ -2134,7 +2134,7 @@ ui.prototype._drawBook_drawBackground = function () {
 
 ui.prototype._drawBook_drawEmpty = function () {
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', "本层无怪物", core._PX_/2, core._PY_/2 + 14, '#999999', this._buildFont(50, true));
+    core.fillText('ui', "本层无怪物", core._PX_ / 2, core._PY_ / 2 + 14, '#999999', this._buildFont(50, true));
     core.fillText('ui', '返回游戏', core._PX_ - 46, core._PY_ - 13, '#DDDDDD', this._buildFont(15, true));
 }
 
@@ -2504,14 +2504,14 @@ ui.prototype.drawFly = function (page) {
     core.fillRect('ui', 0, 0, core._PX_, core._PY_, '#000000');
     core.setAlpha('ui', 1);
     core.setTextAlign('ui', 'center');
-    core.fillText('ui', '楼层跳跃', core._PX_/2, 48, '#FFFFFF', this._buildFont(28, true));
-    core.fillText('ui', '返回游戏', core._PX_/2, core._PY_ - 13, null, this._buildFont(15, true))
+    core.fillText('ui', '楼层跳跃', core._PX_ / 2, 48, '#FFFFFF', this._buildFont(28, true));
+    core.fillText('ui', '返回游戏', core._PX_ / 2, core._PY_ - 13, null, this._buildFont(15, true))
     core.setTextAlign('ui', 'right');
     core.fillText('ui', '浏览地图时也', core._PX_ - 10, core._PY_ - 23, '#aaaaaa', this._buildFont(10, false));
     core.fillText('ui', '可楼层跳跃！', core._PX_ - 10, core._PY_ - 11, null, this._buildFont(10, false));
     core.setTextAlign('ui', 'center');
 
-    var middle = core._PY_/2 + 39;
+    var middle = core._PY_ / 2 + 39;
 
     // 换行
     var lines = core.splitLines('ui', title, 120, this._buildFont(19, true));
@@ -2587,35 +2587,35 @@ ui.prototype._drawViewMaps_drawHint = function () {
     }
 
     var perpx = core._PX_ / 5, cornerpx = perpx * 3 / 4, perpy = core._PY_ / 5, cornerpy = perpy * 3 / 4;
-    stroke(perpx               , 0                   , 3 * perpx, perpy     , core.status.globalAttribute.selectColor, 4); // up
-    stroke(0                   , perpy               , perpx    , 3 * perpy); // left
-    stroke(perpx               , 4 * perpy           , 3 * perpx, perpy    ); // down
-    stroke(4 * perpx           , perpy               , perpx    , 3 * perpy); // right
-    stroke(perpx               , perpy               , 3 * perpx, perpy    ); // prev
-    stroke(perpx               , 3 * perpy           , 3 * perpx, perpy    ); // next
-    stroke(0                   , 0                   ,  cornerpx, cornerpy ); // left top
-    stroke(core._PX_ - cornerpx, 0                   ,  cornerpx, cornerpy ); // right top
-    stroke(0                   , core._PY_ - cornerpy,  cornerpx, cornerpy ); // left bottom;
+    stroke(perpx, 0, 3 * perpx, perpy, core.status.globalAttribute.selectColor, 4); // up
+    stroke(0, perpy, perpx, 3 * perpy); // left
+    stroke(perpx, 4 * perpy, 3 * perpx, perpy); // down
+    stroke(4 * perpx, perpy, perpx, 3 * perpy); // right
+    stroke(perpx, perpy, 3 * perpx, perpy); // prev
+    stroke(perpx, 3 * perpy, 3 * perpx, perpy); // next
+    stroke(0, 0, cornerpx, cornerpy); // left top
+    stroke(core._PX_ - cornerpx, 0, cornerpx, cornerpy); // right top
+    stroke(0, core._PY_ - cornerpy, cornerpx, cornerpy); // left bottom;
 
     core.setTextBaseline('ui', 'middle');
-    core.fillText('ui', "上移地图 [W]", core._PX_/2, perpy / 2, core.status.globalAttribute.selectColor, '20px Arial');
-    core.fillText('ui', "下移地图 [S]", core._PX_/2, core._PY_ - perpy / 2);
+    core.fillText('ui', "上移地图 [W]", core._PX_ / 2, perpy / 2, core.status.globalAttribute.selectColor, '20px Arial');
+    core.fillText('ui', "下移地图 [S]", core._PX_ / 2, core._PY_ - perpy / 2);
     core.fillText('ui', 'V', cornerpx / 2, cornerpy / 2);
     core.fillText('ui', 'Z', core._PX_ - cornerpx / 2, cornerpy / 2);
     core.fillText('ui', 'B', cornerpx / 2, core._PY_ - cornerpy / 2);
 
-    var top = core._PY_/2 - 66, left = perpx / 2, right = core._PX_ - left;
+    var top = core._PY_ / 2 - 66, left = perpx / 2, right = core._PX_ - left;
     var lt = ["左", "移", "地", "图", "[A]"], rt = ["右", "移", "地", "图", "[D]"];
     for (var i = 0; i < 5; ++i) {
         core.fillText("ui", lt[i], left, top + 32 * i);
         core.fillText("ui", rt[i], right, top + 32 * i);
     }
-    core.fillText('ui', "前张地图 [▲ / PGUP]", core._PX_/2, perpy * 1.5);
-    core.fillText('ui', "后张地图 [▼ / PGDN]", core._PX_/2, core._PY_ - perpy * 1.5);
+    core.fillText('ui', "前张地图 [▲ / PGUP]", core._PX_ / 2, perpy * 1.5);
+    core.fillText('ui', "后张地图 [▼ / PGDN]", core._PX_ / 2, core._PY_ - perpy * 1.5);
 
-    core.fillText('ui', "退出 [ESC / ENTER]", core._PX_/2, core._PY_/2);
+    core.fillText('ui', "退出 [ESC / ENTER]", core._PX_ / 2, core._PY_ / 2);
     core.fillText('ui', "[X] 可查看" + core.material.items['book'].name +
-                        "   [G] 可使用" + core.material.items['fly'].name, core._PX_, core._PY_ + 32, null, '12px Arial');
+        "   [G] 可使用" + core.material.items['fly'].name, core._PX_, core._PY_ + 32, null, '12px Arial');
 
     core.setTextBaseline('ui', 'alphabetic');
 }
@@ -3113,10 +3113,10 @@ ui.prototype._drawKeyBoard = function () {
     var isWindowSkin = this.drawBackground(left, top, right, bottom);
     core.setTextAlign('ui', 'center');
     core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.title));
-    core.fillText('ui', '虚拟键盘', core._PX_/2 + offset, top + 35, null, this._buildFont(22, true));
+    core.fillText('ui', '虚拟键盘', core._PX_ / 2 + offset, top + 35, null, this._buildFont(22, true));
     core.setFont('ui', this._buildFont(17, false));
     core.setFillStyle('ui', core.arrayToRGBA(core.status.textAttribute.text));
-    var now = core._PY_/2 - 89 + (core._HEIGHT_ % 2 == 0 ? 16 : 0);
+    var now = core._PY_ / 2 - 89 + (core._HEIGHT_ % 2 == 0 ? 16 : 0);
 
     var lines = [
         ["F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "10", "11"],
@@ -3130,17 +3130,17 @@ ui.prototype._drawKeyBoard = function () {
 
     lines.forEach(function (line) {
         for (var i = 0; i < line.length; i++) {
-            core.fillText('ui', line[i], core._PX_/2 + 32 * (i - 5) + offset, now);
+            core.fillText('ui', line[i], core._PX_ / 2 + 32 * (i - 5) + offset, now);
         }
         now += 32;
     });
 
-    core.fillText("ui", "返回游戏", core._PX_/2 + 128 + offset, now - 3, '#FFFFFF', this._buildFont(15, true));
+    core.fillText("ui", "返回游戏", core._PX_ / 2 + 128 + offset, now - 3, '#FFFFFF', this._buildFont(15, true));
 
     if (isWindowSkin)
-        this._drawWindowSelector(core.status.textAttribute.background, core._PX_/2 + 92 + offset, now - 22, 72, 27);
+        this._drawWindowSelector(core.status.textAttribute.background, core._PX_ / 2 + 92 + offset, now - 22, 72, 27);
     else
-        core.strokeRoundRect('ui', core._PX_/2 + 92 + offset, now - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
+        core.strokeRoundRect('ui', core._PX_ / 2 + 92 + offset, now - 22, 72, 27, 6, core.status.globalAttribute.selectColor, 2);
 }
 
 ////// 绘制状态栏 /////

@@ -1,4 +1,3 @@
-/// <reference path="../runtime.d.ts" />
 
 /*
 loader.js：负责对资源的加载

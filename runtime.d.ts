@@ -3,6 +3,21 @@
  * @author 秋橙 & tocque
  */
 
+interface TextContentConfig {
+    left?: number
+    top?: number
+    maxWidth?: number
+    color?: rgbarray | string
+    align?: 'left' | 'center' | 'right'
+    fontSize: number
+    lineHeight?: number
+    time?: number
+    font?: string
+    letterSpacing?: number
+    bold?: boolean
+    italic?: boolean
+}
+
 type direction = 'up' | 'down' | 'left' | 'right'
 type move = 'forward' | direction
 type loc = { direction: direction, x: number, y: number }
@@ -88,7 +103,7 @@ type ResolvedMap = {
         sy?: number
         w?: number
         h?: number
-        frame?: numer
+        frame?: number
     }>
     name: string
     ratio: number
@@ -840,7 +855,7 @@ declare class control {
     resumeBgm(resumeTime?: number): void
 
     /** 设置背景音乐的播放速度和音调 */
-    setBgmSpeed(speed: number, usePitch?: bool): void
+    setBgmSpeed(speed: number, usePitch?: boolean): void
 
     /** 设置音乐图标的显隐状态 */
     setMusicBtn(): void
@@ -1066,10 +1081,10 @@ declare class events {
      * @param time 移动用时，单位为毫秒。不填视为1秒
      * @param callback 图片移动完毕后的回调函数，可选
      */
-    rotateImage(code: number, center?: [number?, number?], angle: number, moveMode?: string, time?: number, callback?: () => void): void
+    rotateImage(code: number, center?: [number?, number?], angle?: number, moveMode?: string, time?: number, callback?: () => void): void
 
     /** 放缩一张图片 */
-    scaleImage(code: number, center?: [Number?, number?], scale: number, moveMode?: string, time?: number, callback?: () => void): void
+    scaleImage(code: number, center?: [Number?, number?], scale?: number, moveMode?: string, time?: number, callback?: () => void): void
 
     /**
      * 绘制一张动图或擦除所有动图
@@ -1326,7 +1341,7 @@ declare class events {
     clearTextBox(code: number): void
 
     /** 移动对话框 */
-    moveTextBox(code: number, loc: [number], relative: bool, moveMode?: string, time?: number, callback?: () => any): void
+    moveTextBox(code: number, loc: [number], relative: boolean, moveMode?: string, time?: number, callback?: () => any): void
 
     /** 设置文件别名 */
     setNameMap(name: string, value?: string): void
@@ -1506,8 +1521,8 @@ declare class enemys {
     getEnemys(): any
 
     /** 获得所有特殊属性定义 */
-    getSpecials(): Array<number, string | ((enemy: Enemy) => string), string | ((enemy: Enemy) => string),
-        string | [number, number, number, number?], number?>[]
+    getSpecials(): [number, string | ((enemy: Enemy) => string), string | ((enemy: Enemy) => string),
+        string | [number, number, number, number?], number?][]
 
     /** 获得所有特殊属性的颜色 */
     getSpecialColor(enemy: string | Enemy): Array<string | [number, number, number, number?]>
@@ -2195,7 +2210,7 @@ declare class ui {
      * name为画布名，可以是系统画布之一，也可以是任意自定义动态创建的画布名；还可以直接传画布的context本身。（下同）
      * 如果name也可以是'all'，若为all则为清空所有系统画布。
      */
-    clearMap(name: CtxRefer): void
+    clearMap(name: CtxRefer, x?: number, y?: number, w?: number, h?: number): void
 
     /**
      * 在某个画布上绘制一段文字
@@ -2212,7 +2227,7 @@ declare class ui {
      * @param strokeStyle 绘制的描边颜色
      * @param font 绘制的字体
      */
-    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number): void
+    fillBoldText(name: CtxRefer, text: string, x: number, y: number, style?: string, strokeStyle?: string, font?: string, maxWidth?: number, lineWidth?: number): void
 
     /**
      * 绘制一个矩形。style可选为绘制样式
@@ -2225,7 +2240,7 @@ declare class ui {
      * 绘制一个矩形的边框
      * @param style 绘制的样式
      */
-    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, angle?: number): void
+    strokeRect(name: CtxRefer, x: number, y: number, width: number, height: number, style: string, lineWidth?: number, angle?: number): void
 
     /**
      * 动态创建一个画布。name为要创建的画布名，如果已存在则会直接取用当前存在的。
@@ -2246,10 +2261,10 @@ declare class ui {
     resizeCanvas(name: string, x?: number, y?: number, styleOnly?: boolean, isTempCanvas?: boolean): void
 
     /** 设置一个自定义画布的旋转角度 */
-    rotateCanvas(name: string, angle: number, centerX?: number, centerY?: number): void
+    rotateCanvas(name: CtxRefer, angle: number, centerX?: number, centerY?: number): void
 
     /** 删除一个自定义画布 */
-    deleteCanvas(name: string | ((name: string) => bool)): void
+    deleteCanvas(name: string | ((name: string) => boolean)): void
 
     /** 清空所有的自定义画布 */
     deleteAllCanvas(): void
@@ -2262,7 +2277,7 @@ declare class ui {
      * @param image 要绘制的图片，可以是一个全塔属性中定义的图片名（会从images中去获取），图片本身，或者一个画布。
      */
     drawImage(name: CtxRefer,
-        image: CanvasImageSource | string, dx: number): void
+        image: CanvasImageSource | string, dx: number, dy: number): void
     drawImage(name: CtxRefer,
         image: CanvasImageSource | string, dx: number, dy: number, dw: number, dh: number): void
     drawImage(name: CtxRefer,
@@ -2358,20 +2373,7 @@ declare class ui {
      *                fontSize：字体大小；lineHeight：行高；time：打字机间隔；font：默认字体名
      * @returns 绘制信息 
      */
-    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: {
-        left?: number
-        top?: number
-        maxWidth?: number
-        color?: number
-        align?: 'left' | 'center' | 'right'
-        fontSize: number
-        lineHeight?: number
-        time?: number
-        font?: string
-        letterSpacing?: number
-        bold?: boolean
-        italic?: boolean
-    }): any
+    drawTextContent(ctx: string | CanvasRenderingContext2D, content: string, config: TextContentConfig): any
 
     /** 获得某段文字的预计绘制高度；参见 drawTextContent */
     getTextContentHeight(content: string, config?: any): void
@@ -2798,7 +2800,7 @@ declare class icons {
     getTilesetOffset(id?: string): void
 }
 
-class plugin {
+declare class plugin {
 
 }
 
@@ -2812,7 +2814,19 @@ type core = {
     /** 游戏素材 */
     readonly material: {
         readonly animates: { [key: string]: Animate },
-        readonly images: {},
+        readonly images: {
+            airwall: HTMLImageElement
+            animates: HTMLImageElement
+            enemys: HTMLImageElement
+            enemy48: HTMLImageElement
+            items: HTMLImageElement
+            npcs: HTMLImageElement
+            npc48: HTMLImageElement
+            terrains: HTMLImageElement
+            autotile: { [x: string]: HTMLImageElement }
+            images: { [x: string]: HTMLImageElement }
+            tilesets: { [x: string]: HTMLImageElement }
+        },
         readonly bgms: { [key: string]: HTMLAudioElement },
         readonly sounds: { [key: string]: HTMLAudioElement },
         readonly ground: CanvasRenderingContext2D
@@ -2823,7 +2837,7 @@ type core = {
         readonly enemys: { [key: string]: Enemy },
         /** 道具信息 */
         readonly items: { [key: string]: Item }
-        readonly icons: {},
+        readonly icons: { [key: string]: { [key: string]: number } },
     }
     readonly timeout: {
         turnHeroTimeout: any,
@@ -2937,6 +2951,12 @@ type core = {
     readonly floors: { [key: string]: ResolvedMap }
     readonly floorIds: string[]
 
+    readonly statusBar: {
+        readonly icons: { [x: string]: HTMLImageElement }
+    }
+
+    readonly materials: string[]
+
     readonly control: control
     readonly loader: loader
     readonly events: events
@@ -2952,6 +2972,7 @@ type core = {
 } & control & events & loader & enemys & items & maps & ui & utils & icons & actions & plugin
 
 type main = {
+    editorOpened: boolean
     readonly core: core
     readonly dom: { [key: string]: HTMLElement }
     /** 游戏版本，发布后会被随机，请勿使用该属性 */
@@ -2966,12 +2987,66 @@ type main = {
     }
     readonly __VERSION__: string
     readonly __VERSION_CODE__: number
+    readonly images: string[]
 
     /** 输出内容（极不好用，建议换成console，我甚至不知道样板为什么会有这个东西）*/
     log(e: string | Error, error: boolean): void
 }
 
+declare class Sprite {
+
+    x: number
+    y: number
+    width: number
+    height: number
+    zIndex: number
+    reference: 'game' | 'window'
+    canvas: HTMLCanvasElement
+    context: CanvasRenderingContext2D
+    name: string
+    readonly count: number
+
+    /** 创建一个sprite画布
+     * @param reference 参考系，游戏画面或者窗口
+     * @param name 可选，sprite的名称，方便通过core.dymCanvas获取
+     */
+    constructor(x: number, y: number, w: number, h: number, z: number, reference?: 'game' | 'window', name?: string)
+
+    /** 初始化 */
+    init(): void
+
+    /** 设置css特效 */
+    setCss(css: string): Sprite
+
+    /** 
+     * 移动sprite
+     * @param isDelta 是否是相对位置，如果是，那么sprite会相对于原先的位置进行移动
+     */
+    move(x: number, y: number, isDelta?: boolean): Sprite
+
+    /**
+     * 重新设置sprite的大小
+     * @param {boolean} styleOnly 是否只修改css效果，如果是，那么将会不高清，如果不是，那么会清空画布
+     */
+    resize(w: number, h: number, styleOnly?: boolean): Sprite
+
+    /** 旋转画布 */
+    rotate(angle: number, cx?: number, cy?: number): Sprite
+
+    /** 擦除画布 */
+    clear(x: number, y: number, w?: number, h?: number): Sprite
+
+    /** 删除 */
+    destroy(): void
+
+    /** 添加事件监听器 */
+    addEventListener: HTMLCanvasElement['addEventListener']
+
+    /** 删除事件监听器 */
+    removeEventListenr: HTMLCanvasElement['addEventListener']
+}
+
 declare let main: main
 declare let core: core
 declare let flags: { [x: string]: any }
-declare let hero = core.status.hero
+declare let hero: HeroStatus

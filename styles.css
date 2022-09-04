@@ -488,3 +488,15 @@ p#name {
     0% { opacity: 1 }
     100% { opacity: 0 }
 }
+
+#ui-editor {
+    z-index: 9999;
+    position: absolute;
+    overflow: visible;
+    height: 100%;
+}
+
+@font-face {
+    font-family: Fira Code;
+    src: url(../src/fonts/FiraCode-Regular.ttf);
+}

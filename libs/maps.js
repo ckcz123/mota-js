@@ -1,4 +1,3 @@
-/// <reference path="../runtime.d.ts" />
 
 "use strict";
 
@@ -18,9 +17,6 @@ maps.prototype._initFloors = function (floorId) {
         });
         return;
     }
-    core.floors[floorId].width = core.floors[floorId].width || core.__SIZE__;
-    core.floors[floorId].height = core.floors[floorId].height || core.__SIZE__;
-
     // 战前事件兼容性
     if (!core.floors[floorId].beforeBattle) core.floors[floorId].beforeBattle = {}
     // cannotMoveIn兼容性
@@ -547,8 +543,8 @@ maps.prototype.resizeMap = function (floorId) {
     core.bigmap.posX = core.bigmap.posY = 0;
 
     core.bigmap.v2 = core.bigmap.width * core.bigmap.height > core.bigmap.threshold;
-    var width = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.width * 32;
-    var height = core.bigmap.v2 ? core.__PIXELS__ + 64 : core.bigmap.height * 32;
+    var width = core.bigmap.v2 ? core._PX_ + 64 : core.bigmap.width * 32;
+    var height = core.bigmap.v2 ? core._PY_ + 64 : core.bigmap.height * 32;
 
     core.bigmap.canvas.forEach(function (cn) {
         if (core.domStyle.hdCanvas.indexOf(cn) >= 0)
@@ -561,8 +557,8 @@ maps.prototype.resizeMap = function (floorId) {
         core.canvas[cn].canvas.style.height = height * core.domStyle.scale + "px";
         core.canvas[cn].translate(core.bigmap.v2 ? 32 : 0, core.bigmap.v2 ? 32 : 0);
         if (main.mode === 'editor' && editor.isMobile) {
-            core.canvas[cn].canvas.style.width = width / core.__PIXELS__ * 96 + "vw";
-            core.canvas[cn].canvas.style.height = height / core.__PIXELS__ * 96 + "vw";
+            core.canvas[cn].canvas.style.width = width / core._PX_ * 96 + "vw";
+            core.canvas[cn].canvas.style.height = height / core._PY_ * 96 + "vw";
         }
     });
 }
@@ -688,9 +684,9 @@ maps.prototype.generateMovableArray = function (floorId) {
     }
     var v2 = floorId == core.status.floorId && core.bigmap.v2;
     var startX = v2 ? Math.max(0, core.bigmap.posX - core.bigmap.extend) : 0;
-    var endX = v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + core.bigmap.extend + 1) : width;
+    var endX = v2 ? Math.min(width, core.bigmap.posX + core._WIDTH_ + core.bigmap.extend + 1) : width;
     var startY = v2 ? Math.max(0, core.bigmap.posY - core.bigmap.extend) : 0;
-    var endY = v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + core.bigmap.extend + 1) : height;
+    var endY = v2 ? Math.min(height, core.bigmap.posY + core._HEIGHT_ + core.bigmap.extend + 1) : height;
 
     for (var x = startX; x < endX; x++) {
         for (var y = startY; y < endY; y++) {
@@ -990,13 +986,13 @@ maps.prototype.drawBlock = function (block, animate, ctx) {
     // 判定是否绘制
     if (core.bigmap.v2) {
         var posX = core.bigmap.posX, posY = core.bigmap.posY;
-        if (x < posX - 1 || y < posY - 1 || x > posX + core.__SIZE__ || y > posY + core.__SIZE__ + 1) { // +1 for 48 height
+        if (x < posX - 1 || y < posY - 1 || x > posX + core._WIDTH_ || y > posY + core._HEIGHT_ + 1) { // +1 for 48 height
             return;
         }
     } else {
         if (redraw && block.event.animate > 1 &&
-            (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
-                || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16)) {
+            (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core._PX_ + 32
+                || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core._PY_ + 32 + 16)) {
             return;
         }
     }
@@ -1163,8 +1159,7 @@ maps.prototype.drawMap = function (floorId) {
 
     this._drawMap_drawAll();
     if (core.status.curtainColor) {
-        core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__,
-            core.arrayToRGBA(core.status.curtainColor));
+        core.fillRect('curtain', 0, 0, core._PX_, core._PY_, core.arrayToRGBA(core.status.curtainColor));
     }
     core.drawHero();
     core.updateStatusBar();
@@ -1192,7 +1187,7 @@ maps.prototype._drawMap_drawBlockInfo = function (ctx, block, blockInfo, arr, co
     if (onMap && core.bigmap.v2) {
         // 判定是否绘制
         var posX = core.bigmap.posX, posY = core.bigmap.posY;
-        if (block.x < posX - 1 || block.y < posY - 1 || block.x > posX + core.__SIZE__ || block.y > posY + core.__SIZE__ + 1) { // +1 for 48 height
+        if (block.x < posX - 1 || block.y < posY - 1 || block.x > posX + core._WIDTH_ || block.y > posY + core._HEIGHT_ + 1) { // +1 for 48 height
             return;
         }
     }
@@ -1273,8 +1268,8 @@ maps.prototype._drawBg_drawBackground = function (floorId, config) {
     var onMap = config.onMap;
     if (groundInfo != null) {
         var start = onMap && core.bigmap.v2 ? -1 : 0;
-        var endX = onMap && core.bigmap.v2 ? core.__SIZE__ + 1 : core.floors[floorId].width;
-        var endY = onMap && core.bigmap.v2 ? core.__SIZE__ + 1 : core.floors[floorId].height;
+        var endX = onMap && core.bigmap.v2 ? core._WIDTH_ + 1 : core.floors[floorId].width;
+        var endY = onMap && core.bigmap.v2 ? core._HEIGHT_ + 1 : core.floors[floorId].height;
 
         var patternCanvas = document.createElement('canvas');
         patternCanvas.width = patternCanvas.height = 32;
@@ -1322,7 +1317,7 @@ maps.prototype.drawEvents = function (floorId, blocks, config) {
         if (config.onMap && core.bigmap.v2) {
             // 判定是否绘制
             var posX = core.bigmap.posX, posY = core.bigmap.posY;
-            if (block.x < posX - 1 || block.y < posY - 1 || block.x > posX + core.__SIZE__ || block.y > posY + core.__SIZE__ + 1) { // +1 for 48 height
+            if (block.x < posX - 1 || block.y < posY - 1 || block.x > posX + core._WIDTH_ || block.y > posY + core._HEIGHT_ + 1) { // +1 for 48 height
                 return false;
             }
         }
@@ -1386,9 +1381,9 @@ maps.prototype._drawBgFgMap = function (floorId, name, config) {
         core.status[name + "maps"] = {};
 
     var startX = config.onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posX - 1) : 0;
-    var endX = config.onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core.__SIZE__ + 1) : width;
+    var endX = config.onMap && core.bigmap.v2 ? Math.min(width, core.bigmap.posX + core._WIDTH_ + 1) : width;
     var startY = config.onMap && core.bigmap.v2 ? Math.max(0, core.bigmap.posY - 1) : 0;
-    var endY = config.onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core.__SIZE__ + 2) : height; // +1 for 48 px
+    var endY = config.onMap && core.bigmap.v2 ? Math.min(height, core.bigmap.posY + core._HEIGHT_ + 2) : height;
 
     var arr = this._getBgFgMapArray(name, floorId, !config.redraw);
     config.postDraw = [];
@@ -1454,8 +1449,8 @@ maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus, on
     var sy = one.sy || 0;
     var x = one.x || 0, y = one.y || 0;
     if (onMap && core.bigmap.v2) {
-        if (x > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || x + width < 32 * core.bigmap.posX - 32
-            || y > 32 * core.bigmap.posX + core.__PIXELS__ + 32 || y + height < 32 * core.bigmap.posY - 32) {
+        if (x > 32 * core.bigmap.posX + core._PX_ + 32 || x + width < 32 * core.bigmap.posX - 32
+            || y > 32 * core.bigmap.posX + core._PY_ + 32 || y + height < 32 * core.bigmap.posY - 32) {
             return;
         }
         x -= 32 * core.bigmap.posX;
@@ -1641,12 +1636,12 @@ maps.prototype._drawAutotileAnimate = function (block, animate) {
     // ------ 界面外的动画不绘制
     if (core.bigmap.v2) {
         var posX = core.bigmap.posX, posY = core.bigmap.posY;
-        if (x < posX - 1 || y < posY - 1 || x > posX + core.__SIZE__ || y > posY + core.__SIZE__) {
+        if (x < posX - 1 || y < posY - 1 || x > posX + core._WIDTH_ || y > posY + core._HEIGHT_) {
             return;
         }
     } else {
-        if (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core.__PIXELS__ + 32
-            || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core.__PIXELS__ + 32 + 16) {
+        if (32 * x < core.bigmap.offsetX - 64 || 32 * x > core.bigmap.offsetX + core._PX_ + 32
+            || 32 * y < core.bigmap.offsetY - 64 || 32 * y > core.bigmap.offsetY + core._PY_ + 32 + 16) {
             return;
         }
     }
@@ -1733,7 +1728,7 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     // 如果是大地图模式？
     if (options.all) {
         // 计算比例
-        var scale = Math.max(core.__SIZE__ / width, core.__SIZE__ / height);
+        var scale = Math.max(core._WIDTH_ / width, core._HEIGHT_ / height);
         if (options.noHD) {
             tempCanvas.canvas.width = width * 32 * scale;
             tempCanvas.canvas.height = height * 32 * scale;
@@ -1742,15 +1737,15 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
         if (options.noHD) {
-            tempCanvas.canvas.width = core.__PIXELS__;
-            tempCanvas.canvas.height = core.__PIXELS__;
-        } else core.resizeCanvas(tempCanvas, core.__PIXELS__, core.__PIXELS__);
+            tempCanvas.canvas.width = core._PX_;
+            tempCanvas.canvas.height = core._PY_;
+        } else core.resizeCanvas(tempCanvas, core._PX_, core._PY_);
         var centerX = options.centerX, centerY = options.centerY;
         if (centerX == null) centerX = Math.floor(width / 2);
         if (centerY == null) centerY = Math.floor(height / 2);
-        var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
-            offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
-        tempCanvas.translate(-32 * offsetX, -32 * offsetY);
+        var offsetX = core.clamp(centerX - core._HALF_WIDTH_, 0, width - core._WIDTH_),
+            offsetY = core.clamp(centerY - core._HALF_HEIGHT_, 0, height - core._HEIGHT_);
+        tempCanvas.translate(-32 * offsetX, -32 * offsetY, false, true);
     } else {
         options.v2 = false;
         if (options.noHD) {
@@ -1807,7 +1802,11 @@ maps.prototype._drawThumbnail_realDrawTempCanvas = function (floorId, blocks, op
 maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     var ctx = core.getContextByName(options.ctx);
     if (ctx == null) return;
-    var x = options.x || 0, y = options.y || 0, size = options.size || core.__PIXELS__;
+    var x = options.x || 0, y = options.y || 0, size = options.size || 1;
+    // size的含义改为(0,1]范围的系数以适配长方形，默认为1，楼传为3/4，SL界面为0.3
+    var w = Math.ceil(size * core._PX_), h = Math.ceil(size * core._PY_);
+    // 特判是否为编辑器，编辑器中长宽均采用core.js的遗留正方形像素边长，以保证下面的绘制正常
+    if (main.mode == 'editor') w = h = size * core.__PIXELS__;
     var width = core.floors[floorId].width, height = core.floors[floorId].height;
     var centerX = options.centerX, centerY = options.centerY;
     if (centerX == null) centerX = Math.floor(width / 2);
@@ -1818,33 +1817,36 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
         var tempWidth = tempCanvas.canvas.width, tempHeight = tempCanvas.canvas.height;
         // 绘制全景图
         if (tempWidth <= tempHeight) {
-            var realHeight = size, realWidth = realHeight * tempWidth / tempHeight;
-            var side = (size - realWidth) / 2;
+            var realHeight = h, realWidth = realHeight * tempWidth / tempHeight;
+            var side = (w - realWidth) / 2;
             core.fillRect(ctx, x, y, side, realHeight, '#000000');
-            core.fillRect(ctx, x + size - side, y, side, realHeight);
+            core.fillRect(ctx, x + w - side, y, side, realHeight);
             core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x + side, y, realWidth, realHeight);
         }
         else {
-            var realWidth = size, realHeight = realWidth * tempHeight / tempWidth;
-            var side = (size - realHeight) / 2;
+            var realWidth = w, realHeight = realWidth * tempHeight / tempWidth;
+            var side = (h - realHeight) / 2;
             core.fillRect(ctx, x, y, realWidth, side, '#000000');
-            core.fillRect(ctx, x, y + size - side, realWidth, side);
+            core.fillRect(ctx, x, y + h - side, realWidth, side);
             core.drawImage(ctx, tempCanvas.canvas, 0, 0, tempWidth, tempHeight, x, y + side, realWidth, realHeight);
         }
     }
     else {
         // 只绘制可见窗口
+        var pw = core._PX_, ph = core._PY_, hw = core._HALF_WIDTH_, hh = core._HALF_HEIGHT_, W = core._WIDTH_, H = core._HEIGHT_;
         var ratio = core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale;
+        if (main.mode == 'editor') { pw = ph = core.__PIXELS__; hw = hh = core.__HALF_SIZE__; W = H = core.__SIZE__; }
         if (options.v2) {
-            core.drawImage(ctx, tempCanvas.canvas, 0, 0, core.__PIXELS__ * ratio, core.__PIXELS__ * ratio, x, y, size, size);
+            core.drawImage(ctx, tempCanvas.canvas, 0, 0, pw * ratio, ph * ratio, x, y, w, h);
         } else {
-            var offsetX = core.clamp(centerX - core.__HALF_SIZE__, 0, width - core.__SIZE__),
-                offsetY = core.clamp(centerY - core.__HALF_SIZE__, 0, height - core.__SIZE__);
+            var offsetX = core.clamp(centerX - hw, 0, width - W),
+                offsetY = core.clamp(centerY - hh, 0, height - H),
+                c = options.noHD ? 1 : core.domStyle.scale;
             if (options.noHD) {
-                core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, core.__PIXELS__, core.__PIXELS__, x, y, size, size);
+                core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, pw, ph, x, y, w, h);
                 return;
             }
-            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * ratio, offsetY * 32 * ratio, core.__PIXELS__ * ratio, core.__PIXELS__ * ratio, x, y, size, size);
+            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * ratio, offsetY * 32 * ratio, pw * ratio, ph * ratio, x, y, w, h);
         }
     }
 }
@@ -2956,7 +2958,7 @@ maps.prototype.drawBoxAnimate = function () {
     if (core.status.boxAnimateObjs.length == 0) return;
     // check ui2
     if (main.mode == 'play' && core.status.boxAnimateObjs.filter(function (one) { return one.bigImage }).length > 0 && !core.dymCanvas.ui2) {
-        core.createCanvas('ui2', 0, 0, core.__PIXELS__, core.__PIXELS__, 142);
+        core.createCanvas('ui2', 0, 0, core._PX_, core._PY_, 142);
     }
     core.clearMap('ui2');
 

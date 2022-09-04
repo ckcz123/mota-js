@@ -1,4 +1,3 @@
-/// <reference path="../runtime.d.ts" />
 
 /*
 utils.js 工具类
@@ -28,69 +27,7 @@ function utils () {
 }
 
 utils.prototype._init = function () {
-    // 定义Object.assign
-    if (typeof Object.assign != "function") {
-        Object.assign = function (target, varArgs) { // .length of function is 2
-            if (target == null) { // TypeError if undefined or null
-                throw new TypeError('Cannot convert undefined or null to object');
-            }
-
-            var to = Object(target);
-
-            for (var index = 1; index < arguments.length; index++) {
-                var nextSource = arguments[index];
-
-                if (nextSource != null) { // Skip over if undefined or null
-                    for (var nextKey in nextSource) {
-                        // Avoid bugs when hasOwnProperty is shadowed
-                        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
-                            to[nextKey] = nextSource[nextKey];
-                        }
-                    }
-                }
-            }
-            return to;
-        };
-    }
-    if (typeof String.prototype.endsWith != "function") {
-        String.prototype.endsWith = function (search, this_len) {
-            if (this_len === undefined || this_len > this.length) {
-                this_len = this.length;
-            }
-            return this.substring(this_len - search.length, this_len) === search;
-        };
-    }
-    if (typeof String.prototype.startsWith != "function") {
-        String.prototype.startsWith = function (search, this_len) {
-            if (this_len === undefined || this_len > this.length) {
-                this_len = this.length;
-            }
-            return this.substring(0, search.length) === search;
-        }
-    }
-    if (typeof Array.prototype.fill != "function") {
-        Array.prototype.fill = function (value) {
-            for (var i = 0; i < this.length; ++i)
-                if (this[i] == null)
-                    this[i] = value;
-            return this;
-        }
-    }
-    if (typeof Array.prototype.includes != "function") {
-        Array.prototype.includes = function (value) {
-            return this.indexOf(value) >= 0;
-        }
-    }
-    if (typeof String.prototype.includes != "function") {
-        String.prototype.includes = function (value) {
-            return this.indexOf(value) >= 0;
-        }
-    }
-    if (typeof Object.values != "function") {
-        Object.values = function (obj) {
-            return Object.keys(obj).map(function (one) { return obj[one]; });
-        }
-    }
+    //
 }
 
 ////// 将文字中的${和}（表达式）进行替换 //////

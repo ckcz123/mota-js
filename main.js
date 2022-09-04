@@ -3,7 +3,7 @@ function main () {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.9"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.10.0"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -189,8 +189,8 @@ function main () {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.9";
-    this.__VERSION_CODE__ = 508;
+    this.__VERSION__ = "2.10.0";
+    this.__VERSION_CODE__ = 510;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -318,7 +318,7 @@ main.prototype.loadFloors = function (callback) {
         callback();
     }
     script.onerror = script.onabort = script.ontimeout = function (e) {
-        console.clear();
+        // console.clear();
         for (var i = 0; i < main.floorIds.length; i++) {
             main.loadFloor(main.floorIds[i], function (modName) {
                 main.setMainTipsText("楼层 " + modName + '.js 加载完毕');
@@ -427,6 +427,7 @@ main.prototype.listen = function () {
 
     ////// 在界面上按下某按键时 //////
     main.dom.body.onkeydown = function (e) {
+        if (main.editorOpened) return;
         try {
             if (main.dom.inputDiv.style.display == 'block') return;
             if (main.core && (main.core.isPlaying() || main.core.status.lockControl))
@@ -436,6 +437,7 @@ main.prototype.listen = function () {
 
     ////// 在界面上放开某按键时 //////
     main.dom.body.onkeyup = function (e) {
+        if (main.editorOpened) return;
         try {
             if (main.dom.startPanel.style.display == 'block' &&
                 (main.dom.startButtons.style.display == 'block' || main.dom.levelChooseButtons.style.display == 'block')) {
@@ -713,8 +715,6 @@ main.prototype.listen = function () {
 
     ////// 点击工具栏时 //////
     main.dom.hard.onclick = function () {
-        if (core.isReplaying())
-            return;
         main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);
     }
 

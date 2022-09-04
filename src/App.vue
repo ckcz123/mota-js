@@ -9,7 +9,7 @@
         </div>
         <button class="ui-tools" id="preview" @click="preview()">预览</button>
         <button class="ui-tools" id="compile" @click="compileAll()">编译</button>
-        <button class="ui-tools" id="save" @click="saveUi()" ref="save">{{saveText}}</button>
+        <button class="ui-tools" id="save" @click="saveUi()">{{saveText}}</button>
         <span id="now">当前ui<br>{{editing}}</span>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>

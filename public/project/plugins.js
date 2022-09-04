@@ -1551,5 +1551,105 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 
 		window.Sprite = Sprite;
+	},
+	"test": function () {
+		this.testUi = function () {
+			// 请复制以下内容至插件中以使用
+			// 使用案例：
+			/* 
+			插件中：
+			this.showMyUi = function () {
+				函数内容
+			}
+			调用时：
+			core.showMyUi();
+			*/
+			var _sprite_0 = new Sprite(100, 100, 200, 200, 100, 'game', '_sprite_0');
+			_sprite_0.setCss('display: none;');
+
+			action_0_19();
+
+			function action_0_19 () {
+				_sprite_0.setCss('display: block;');
+				_sprite_0.move(100, 100);
+				_sprite_0.resize(200, 200);
+				_sprite_0.canvas.style.zIndex = '100';
+				_sprite_0.resize(300, 300, false);
+				_sprite_0.setCss('background-color: white;');
+				_sprite_0.context.save();
+				core.fillRect(_sprite_0.context, 0, 0, 100, 50, '');
+				_sprite_0.context.direction = 'rtl';
+				_sprite_0.context.textAlign = 'center';
+				_sprite_0.context.textBaseline = 'middle';
+				core.fillBoldText(_sprite_0.context, 'test', 50, 25, '#fff', '#0f0', 'italic  16px Verdana', 100);
+				core.strokePolygon(_sprite_0.context, [[10, 10], [50, 30], [70, 20]], '#000', 3);
+				_sprite_0.context.shadowBlur = 2;
+				_sprite_0.context.shadowColor = '#000';
+				_sprite_0.context.shadowOffsetX = 2;
+				_sprite_0.context.shadowOffsetY = 2;
+				core.drawArrow(_sprite_0.context, 120, 120, 170, 30, '#ddd', 1);
+				core.fillEllipse(_sprite_0.context, 70, 100, 30, 20, 0, '#ccc');
+				var ctx = _sprite_0.context;
+				ctx.beginPath();
+				ctx.moveTo(20, 100);
+				ctx.bezierCurveTo(50, 30, 120, 70, 180, 100);
+				ctx.strokeStyle = '#7df';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				core.drawIcon(_sprite_0.context, 'blueDoor', 50, 130, 20, 20, 1);
+				_sprite_0.context.filter = 'grayscale(50%)';
+				core.drawImage(_sprite_0.context, 'bg.jpg', 0, 0, 190, 190, 120, 50, 50, 50);
+				_sprite_0.context.restore();
+				core.drawWindowSkin('winskin.png', _sprite_0.context, 0, 200, 100, 100);
+				core.fillRoundRect(_sprite_0.context, 200, 0, 100, 50, 10, '#a3c');
+				var res = _sprite_0.canvas.style.transition;
+				if (res !== '') res += ', ';
+				res += 'left 200ms  0ms';
+				_sprite_0.canvas.style.transition = res;
+				setTimeout(action_20_22, 50);
+			}
+			function action_20_22 () {
+				_sprite_0.move(50, 100, false);
+				_sprite_0.rotate(10, 150, 150);
+				setTimeout(action_23_32, 500);
+			}
+			function action_23_32 () {
+				_sprite_0.move(150, 100, false);
+				_sprite_0.clear(0, 0, 10, 10);
+				core.drawTextContent(_sprite_0.context, `test
+test
+test
+test`, {
+					left: 150,
+					top: 200,
+					maxWidth: 100,
+					color: '#000',
+					align: 'left',
+					fontSize: 18,
+					lineHeight: 2,
+					time: 100,
+					font: '',
+					letterSpacing: 10,
+					bold: false,
+					italic: false,
+				});
+				core.setAlpha(_sprite_0.context, 0.3);
+				core.strokeCircle(_sprite_0.context, 200, 100, 20, '#00f', 2);
+				_sprite_0.context.globalCompositeOperation = 'difference';
+				core.setAlpha(_sprite_0.context, 0.8);
+				core.strokeArc(_sprite_0.context, 100, 100, 50, 0, 3, '', 0);
+				core.drawLine(_sprite_0.context, 0, 0, 300, 300, '', 13);
+				setTimeout(action_33_33, 2000);
+			}
+			function action_33_33 () {
+				_sprite_0.setCss('display: none');
+				final();
+			}
+
+			function final () {
+				_sprite_0.destroy();
+			}
+
+		}
 	}
 }

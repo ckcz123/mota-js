@@ -24,7 +24,7 @@ import { preview } from "./preview";
 import { compile } from "./compile";
 import { settings } from "./loadMonaco";
 import List from "./components/list.vue";
-import { list as uiList, saved } from './action';
+import { BaseAction, list as uiList, saved } from './action';
 import { load, save } from "./save";
 import { sprites } from "./info";
 
@@ -77,6 +77,12 @@ async function compileAll() {
 }
 
 async function edit(id: string) {
+    for (const i in sprites) {
+        const s = sprites[i];
+        s.destroy();
+        delete sprites[i];
+    }
+    BaseAction.cnt = 0;
     const data = await load(id);
     uiList.value = data;
     mode.value = 'edit';

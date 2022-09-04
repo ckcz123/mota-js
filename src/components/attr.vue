@@ -134,7 +134,6 @@ function selectImage(name: string) {
 
 function closeImageSelector() {
     selectImg.value = false;
-    main.editorOpened = false;
 }
 
 function blurForArray(i: number, ii: number, e: Event) {

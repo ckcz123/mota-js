@@ -26,7 +26,7 @@ core.showMyUi();
     const data = dataCache = split();
     // 遍历list，依次编译
     await new Promise((res, rej) => {
-        body += `action_${data[0][0]}_${data[0].at(-1)}();`
+        body += `action_${data[0][0]}_${data[0].at(-1)}();\n`
         for (let i = 0; i < data.length; i++) {
             const group = data[i]
             const { head: h, func } = generateFn(group, i);
@@ -34,12 +34,14 @@ core.showMyUi();
             funcs += func;
         }
         // 最后把已经被“删除”的画布删除
+        final += `function final() {\n`;
         for (const name in sprites) {
-            if (sprites[name] === true) final += `\n${name}.destroy();\n`;
+            if (sprites[name] === true) final += `${name}.destroy();\n`;
         }
+        final += `}\n`;
         res('success');
     });
-    return `${head}\n${body}\n${final}\n${funcs}`;
+    return `${head}\n${body}\n${funcs}\n${final}`;
 }
 
 /** 将操作以等待为分割线分为多个部分 */
@@ -82,6 +84,7 @@ function generateFn(data: number[], index: number) {
         body += res.body;
         head += res.head;
     }
+    if (!dataCache[index + 1]) body += `final();\n`;
     return { head, func: start + body + end };
 }
 
@@ -178,16 +181,17 @@ ${sprite}.canvas.style.transition = res;\n`;
     } else if (type === 'bezierCurve') {
         const info = data as SpriteBezierCurve;
         body = `var ctx = ${sprite}.context;
+ctx.beginPath();
 ctx.moveTo(${info.sx}, ${info.sy});
 ctx.bezierCurveTo(${info.cp1x}, ${info.cp1y}, ${info.cp2x}, ${info.cp2y}, ${info.x}, ${info.y});
 ctx.strokeStyle = '${info.style}';
 ctx.lineWidth = ${info.lineWidth};
-ctx.stoke();\n`;
+ctx.stroke();\n`;
     } else if (type === 'image') {
         const info = data as SpriteImage;
         body = `core.drawImage(${sprite}.context, '${info.img}', `;
         const d1 = `${info.dx}, ${info.dh}, `;
-        const d2 = `${info.dw}, ${info.dh}, `;
+        const d2 = `${info.dw}, ${info.dh}`;
         const s = `${info.sx}, ${info.sy}, ${info.sw}, ${info.sh}, `;
         const end = `);\n`;
         if ([info.sx, info.sy, info.dw, info.dh].every(v => has(v))) body += s;
@@ -207,7 +211,7 @@ ctx.stoke();\n`;
     } else if (type === 'text') {
         const info = data as SpriteText;
         const before = `${sprite}.context, '${info.str}', ${info.x}, ${info.y}, '${info.style}'`;
-        const font = `${info.italic ? 'italic' : ''} ${info.fontWeight ?? ''} ${info.fontSize ? info.fontSize + 'px' : ''} ${info.font ?? ''}`;
+        const font = `${info.italic ? 'italic' : ''} ${info.fontWeight ?? ''} ${info.fontSize ?? ''} ${info.font || 'sans-serif'}`;
         const after = `'${font.trim()}', ${info.maxWidth}`
         if (info.stroke) body = `core.fillBoldText(${before}, '${info.strokeStyle}', ${after});\n`;
         else body = `core.fillText(${before}, ${after});\n`;
@@ -215,7 +219,7 @@ ctx.stoke();\n`;
         const info = data as SpriteTextContent;
         let config = `{`;
         (['left', 'top', 'maxWidth', 'color', 'align', 'fontSize', 'lineHeight', 'time', 'font', 'letterSpacing', 'bold', 'italic'] as (keyof SpriteTextContent)[]).forEach(v => {
-            if (v === 'color' || v === 'font') {
+            if (v === 'color' || v === 'font' || v === 'align') {
                 if (has(info[v])) config += `
     ${v}: '${info[v]}',`;
             }
@@ -225,7 +229,7 @@ ctx.stoke();\n`;
             }
         });
         config += `\n}`;
-        body = `core.drawTextContent(${sprite}, \`${info.content}\`, ${config});\n`;
+        body = `core.drawTextContent(${sprite}.context, \`${info.content}\`, ${config});\n`;
     } else if (type === 'opacity') {
         const info = data as SpriteOpacity;
         body = `core.setAlpha(${sprite}.context, ${info.opacity});\n`;

@@ -90,7 +90,7 @@ export class BaseAction<K extends keyof SpriteDrawInfoMap> {
 
     addSprite() {
         if (this.type !== 'create') return;
-        const sprite = new Sprite(0, 0, 0, 0, 0, 'game');
+        const sprite = new Sprite(0, 0, 0, 0, 0, 'game', `_sprite_${this.cnt}`);
         (this as BaseAction<'create'>).data.name = sprite.name;
         sprite.setCss('display: none;');
         sprites[sprite.name] = sprite;

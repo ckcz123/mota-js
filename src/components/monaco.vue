@@ -41,6 +41,7 @@ const props = defineProps<{
 
 function close() {
     emits('close');
+    editor.dispose();
 }
 
 function save() {

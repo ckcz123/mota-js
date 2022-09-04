@@ -10,6 +10,7 @@
         <button class="ui-tools" id="preview" @click="preview()">预览</button>
         <button class="ui-tools" id="compile" @click="compileAll()">编译</button>
         <button class="ui-tools" id="save" @click="saveUi()">{{saveText}}</button>
+        <button class="ui-tools" id="doc" @click="openDoc()">文档</button>
         <span id="now">当前ui<br>{{editing}}</span>
         <Editor ref="editor" v-if="mode === 'edit'"></Editor>
         <List v-else @edit="edit($event)"></List>
@@ -96,6 +97,10 @@ async function saveUi() {
         saveText.value = '保存';
         saveSpan.style.backgroundColor = 'rgb(79, 199, 255)';
     }, 1000);
+}
+
+function openDoc() {
+    window.open('/_docs/#/ui-editor');
 }
 </script>
 
@@ -199,14 +204,18 @@ async function saveUi() {
 }
 
 #compile {
-    top: 300px;
+    top: 250px;
 }
 
 #preview {
-    top: 350px;
+    top: 300px;
 }
 
 #save {
+    top: 350px;
+}
+
+#doc {
     top: 400px;
 }
 

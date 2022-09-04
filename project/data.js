@@ -1,4 +1,4 @@
-var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
+var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d = 
 {
 	"main": {
 		"floorIds": [
@@ -165,7 +165,7 @@ var data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d =
 	"firstData": {
 		"title": "魔塔样板",
 		"name": "template",
-		"version": "Ver 2.8.2",
+		"version": "Ver 2.10.0",
 		"floorId": "sample0",
 		"hero": {
 			"image": "hero.png",

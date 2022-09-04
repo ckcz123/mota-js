@@ -161,8 +161,6 @@ function cut() {
 }
 
 function paste() {
-    console.log(1);
-    
     insertPos.value = 'bottom';
     insert.value = false;
     right.value = false;

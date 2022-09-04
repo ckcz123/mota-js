@@ -28,6 +28,10 @@ Error info: ${err}`
         )
         monaco.languages.typescript.javascriptDefaults.addExtraLib(LZString.decompressFromBase64(data))
     })
+
+    fs.mkdir('_ui', (err) => {
+        if (err) alert('自动创建_ui文件夹失败，请自行在样板根目录创建名为_ui的文件夹');
+    })
 })
 
 monaco.editor.defineTheme('light-plus', lightPlus as monaco.editor.IStandaloneThemeData);

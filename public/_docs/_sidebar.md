@@ -6,4 +6,5 @@
 - [个性化](personalization)
 - [脚本](script)
 - [修改编辑器](editor)
+- [UI编辑器](ui-editor)
 - [附录：API列表](api)

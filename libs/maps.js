@@ -1834,16 +1834,20 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     else {
         // 只绘制可见窗口
         var pw = core._PX_, ph = core._PY_, hw = core._HALF_WIDTH_, hh = core._HALF_HEIGHT_, W = core._WIDTH_, H = core._HEIGHT_;
+        var ratio = core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale;
         if (main.mode == 'editor') { pw = ph = core.__PIXELS__; hw = hh = core.__HALF_SIZE__; W = H = core.__SIZE__; }
         if (options.v2) {
-            core.drawImage(ctx, tempCanvas.canvas, 0, 0, pw, ph, x, y, w, h);
+            core.drawImage(ctx, tempCanvas.canvas, 0, 0, pw * ratio, ph * ratio, x, y, w, h);
         } else {
             var offsetX = core.clamp(centerX - hw, 0, width - W),
                 offsetY = core.clamp(centerY - hh, 0, height - H),
                 c = options.noHD ? 1 : core.domStyle.scale;
-            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * c, offsetY * 32 * c, pw * c, ph * c, x, y, w, h);
+            if (options.noHD) {
+                core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, pw, ph, x, y, w, h);
+                return;
+            }
+            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * ratio, offsetY * 32 * ratio, pw * ratio, ph * ratio, x, y, w, h);
         }
-
     }
 }
 

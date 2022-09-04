@@ -1,4 +1,4 @@
-/// <reference path="../runtime.d.ts" />
+///<reference path='../runtime.d.ts'/>
 var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 {
 	"events": {
@@ -150,7 +150,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				color = core.status.maps[floorId].color;
 			core.clearMap('curtain');
 			core.status.curtainColor = color;
-			if (color) core.fillRect('curtain', 0, 0, core.__PIXELS__, core.__PIXELS__, core.arrayToRGBA(color));
+			if (color) core.fillRect('curtain', 0, 0, core._PX_ || core.__PIXELS__, core._PY_ || core.__PIXELS__, core.arrayToRGBA(color));
 			// 更改天气
 			var weather = core.getFlag('__weather__', null);
 			if (!weather && core.status.maps[floorId].weather)
@@ -463,6 +463,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			if (core.status.floorId == null) return;
 			var event = core.floors[core.status.floorId].afterGetItem[x + "," + y];
 			if (event && (event instanceof Array || !isGentleClick || !event.disableOnGentleClick)) {
+				if (event.data) event = event.data;
 				core.unshift(todo, event);
 			}
 
@@ -1234,7 +1235,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 			if (core.statusBar.hard.innerText != core.status.hard) {
 				core.statusBar.hard.innerText = core.status.hard;
 			}
-			var hardColor = core.getFlag('__hardColor__', 'red');
+			var hardColor = core.getFlag('__hardColor__');
+			if (hardColor == null) core.statusBar.hard.innerText = '';
 			if (core.statusBar.hard.getAttribute('_style') != hardColor) {
 				core.statusBar.hard.style.color = hardColor;
 				core.statusBar.hard.setAttribute('_style', hardColor);
@@ -1554,6 +1556,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				if (core.hasFlag('poison')) {
 					core.updateStatusBar(false, true);
 				}
+				core.ui.drawStatusBar();
 				core.checkRouteFolding();
 				return true;
 			}
@@ -1589,106 +1592,73 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				.sort( /*function (id1, id2) { return core.material.items[id1].name <= core.material.items[id2].name ? -1 : 1 }*/);
 		},
 		"drawStatusBar": function () {
-			// 自定义绘制状态栏，需要开启状态栏canvas化
-
-			// 如果是非状态栏canvas化，直接返回
-			if (!core.flags.statusCanvas) return;
-			var ctx = core.dom.statusCanvasCtx;
-			// 清空状态栏
-			core.clearMap(ctx);
-			// 如果是隐藏状态栏模式，直接返回
-			if (!core.domStyle.showStatusBar) return;
-
-			// 作为样板，只绘制楼层、生命、攻击、防御、护盾、金币、钥匙这七个内容
-			// 需要其他的请自行进行修改；横竖屏都需要进行适配绘制。
-			// （可以使用Chrome浏览器开控制台来模拟手机上的竖屏模式的显示效果，具体方式自行百度）
-			// 横屏模式下的画布大小是 129*416
-			// 竖屏模式下的画布大小是 416*(32*rows+9) 其中rows为状态栏行数，即全塔属性中statusCanvasRowsOnMobile值
-			// 可以使用 core.domStyle.isVertical 来判定当前是否是竖屏模式
-
-			core.setFillStyle(ctx, core.status.globalAttribute.statusBarColor || core.initStatus.globalAttribute.statusBarColor);
-
-			// 绘制一段文字，带斜体判定
-			var _fillBoldTextWithFontCheck = function (text, x, y, style) {
-				// 斜体判定：如果不是纯数字和字母，斜体会非常难看，需要取消
-				if (!/^[-a-zA-Z0-9`~!@#$%^&*()_=+\[{\]}\\|;:'",<.>\/?]*$/.test(text))
-					core.setFont(ctx, 'bold 18px Verdana');
-				else core.setFont(ctx, 'italic bold 18px Verdana');
-				core.fillBoldText(ctx, text, x, y, style);
-			}
-
-			// 横竖屏需要分别绘制...
-			if (!core.domStyle.isVertical) {
-				// 横屏模式
-
-				// 绘制楼层
-				core.drawImage(ctx, core.statusBar.icons.floor, 6, 9, 25, 25);
-				_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 42, 29);
-
-				// 绘制生命
-				core.drawImage(ctx, core.statusBar.icons.hp, 6, 43, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 42, 63);
-
-				// 绘制攻击
-				core.drawImage(ctx, core.statusBar.icons.atk, 6, 77, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 42, 97);
-
-				// 绘制防御
-				core.drawImage(ctx, core.statusBar.icons.def, 6, 111, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 42, 131);
-
-				// 绘制护盾
-				core.drawImage(ctx, core.statusBar.icons.mdef, 6, 145, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 42, 165);
-
-				// 绘制金币
-				core.drawImage(ctx, core.statusBar.icons.money, 6, 179, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 42, 199);
-
-				// 绘制经验
-				core.drawImage(ctx, core.statusBar.icons.exp, 6, 213, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 42, 233);
-
-				// 绘制三色钥匙
-				_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 11, 267, '#FFCCAA');
-				_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 46, 267, '#AAAADD');
-				_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 81, 267, '#FF8888');
-
-			} else {
-				// 竖屏模式
-
-				// 绘制楼层
-				core.drawImage(ctx, core.statusBar.icons.floor, 6, 6, 25, 25);
-				_fillBoldTextWithFontCheck((core.status.thisMap || {}).name || "", 42, 26);
-
-				// 绘制生命
-				core.drawImage(ctx, core.statusBar.icons.hp, 137, 6, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('hp')), 173, 26);
-
-				// 绘制攻击
-				core.drawImage(ctx, core.statusBar.icons.atk, 268, 6, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('atk')), 304, 26);
-
-				// 绘制防御
-				core.drawImage(ctx, core.statusBar.icons.def, 6, 38, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('def')), 42, 58);
-
-				// 绘制护盾
-				core.drawImage(ctx, core.statusBar.icons.mdef, 137, 38, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.getRealStatus('mdef')), 173, 58);
-
-				// 绘制金币
-				core.drawImage(ctx, core.statusBar.icons.money, 268, 38, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.money), 304, 58);
-
-				// 绘制经验
-				core.drawImage(ctx, core.statusBar.icons.exp, 6, 70, 25, 25);
-				_fillBoldTextWithFontCheck(core.formatBigNumber(core.status.hero.exp), 42, 90);
-
-				// 绘制三色钥匙
-				_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('yellowKey')), 142, 90, '#FFCCAA');
-				_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('blueKey')), 177, 90, '#AAAADD');
-				_fillBoldTextWithFontCheck(core.setTwoDigits(core.itemCount('redKey')), 212, 90, '#FF8888');
+			var ctx, fill = function (text, x, y, style) {
+				core.ui.setFont(ctx, (/\w+/.test(text) ? 'italic ' : '') + 'bold 18px Verdana');
+				core.ui.fillBoldText(ctx, text, x, y, style);
+			};
+			if (core.flags.statusCanvas) { // 系统开关「自绘状态栏」开启
+				core.ui.clearMap(ctx = core.dom.statusCanvasCtx); // 清空状态栏
+				core.ui.setFillStyle(ctx, core.status.globalAttribute.statusBarColor);
+				if (core.domStyle.isVertical) { // 竖屏
+					core.drawImage(ctx, core.statusBar.icons.floor, 6, 6, 25, 25);
+					fill((core.status.thisMap || {}).name || "Loading", 42, 26);
+					core.drawImage(ctx, core.statusBar.icons.hp, 137, 6, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('hp')), 173, 26);
+					core.drawImage(ctx, core.statusBar.icons.atk, 268, 6, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('atk')), 304, 26);
+					core.drawImage(ctx, core.statusBar.icons.def, 6, 38, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('def')), 42, 58);
+					core.drawImage(ctx, core.statusBar.icons.mdef, 137, 38, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('mdef')), 173, 58);
+					core.drawImage(ctx, core.statusBar.icons.money, 268, 38, 25, 25);
+					fill(core.formatBigNumber(core.status.hero.money), 304, 58);
+					core.drawImage(ctx, core.statusBar.icons.exp, 6, 70, 25, 25);
+					fill(core.formatBigNumber(core.status.hero.exp), 42, 90);
+				} else if (!core.flags.extendToolbar) { // 横屏且未隐藏状态栏
+					core.drawImage(ctx, core.statusBar.icons.floor, 6, 9, 25, 25);
+					fill((core.status.thisMap || {}).name || "Loading", 42, 29);
+					core.drawImage(ctx, core.statusBar.icons.hp, 6, 43, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('hp')), 42, 63);
+					core.drawImage(ctx, core.statusBar.icons.atk, 6, 77, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('atk')), 42, 97);
+					core.drawImage(ctx, core.statusBar.icons.def, 6, 111, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('def')), 42, 131);
+					core.drawImage(ctx, core.statusBar.icons.mdef, 6, 145, 25, 25);
+					fill(core.formatBigNumber(core.getRealStatus('mdef')), 42, 165);
+					core.drawImage(ctx, core.statusBar.icons.money, 6, 179, 25, 25);
+					fill(core.formatBigNumber(core.status.hero.money), 42, 199);
+					core.drawImage(ctx, core.statusBar.icons.exp, 6, 213, 25, 25);
+					fill(core.formatBigNumber(core.status.hero.exp), 42, 233);
+					fill(core.setTwoDigits(core.itemCount('yellowKey')), 11, 267, '#FFCCAA');
+					fill(core.setTwoDigits(core.itemCount('blueKey')), 46, 267, '#AAAADD');
+					fill(core.setTwoDigits(core.itemCount('redKey')), 81, 267, '#FF8888');
+				}
+			} else if (core.flags.extendToolbar && !core.domStyle.isVertical) { // 横屏且隐藏状态栏
+				if (!core.dymCanvas['status'])
+					core.ui.createCanvas('status', 0, 0, core._PX_, core._PY_, 66); // 刚好盖过显伤层
+				core.ui.clearMap(ctx = core.dymCanvas['status']);
+				core.ui.setFillStyle(ctx, core.status.globalAttribute.statusBarColor);
+				var offset = core.status.hero.loc.x - core.bigmap.offsetX / 32 >= core._HEIGHT_ ? 0 : core._PY_;
+				core.ui.setAlpha(ctx, 0.75);
+				core.ui.drawWindowSkin('winskin.png', ctx, offset, 0, core._PX_ - core._PY_, core._PY_);
+				core.ui.setAlpha(ctx, 1);
+				core.drawImage(ctx, core.statusBar.icons.floor, 6 + offset, 9, 25, 25);
+				fill((core.status.thisMap || {}).name || "Loading", 42 + offset, 29);
+				core.drawImage(ctx, core.statusBar.icons.hp, 6 + offset, 43, 25, 25);
+				fill(core.formatBigNumber(core.getRealStatus('hp')), 42 + offset, 63);
+				core.drawImage(ctx, core.statusBar.icons.atk, 6 + offset, 77, 25, 25);
+				fill(core.formatBigNumber(core.getRealStatus('atk')), 42 + offset, 97);
+				core.drawImage(ctx, core.statusBar.icons.def, 6 + offset, 111, 25, 25);
+				fill(core.formatBigNumber(core.getRealStatus('def')), 42 + offset, 131);
+				core.drawImage(ctx, core.statusBar.icons.mdef, 6 + offset, 145, 25, 25);
+				fill(core.formatBigNumber(core.getRealStatus('mdef')), 42 + offset, 165);
+				core.drawImage(ctx, core.statusBar.icons.money, 6 + offset, 179, 25, 25);
+				fill(core.formatBigNumber(core.status.hero.money), 42 + offset, 199);
+				core.drawImage(ctx, core.statusBar.icons.exp, 6 + offset, 213, 25, 25);
+				fill(core.formatBigNumber(core.status.hero.exp), 42 + offset, 233);
+				fill(core.setTwoDigits(core.itemCount('yellowKey')), 11 + offset, 267, '#FFCCAA');
+				fill(core.setTwoDigits(core.itemCount('blueKey')), 46 + offset, 267, '#AAAADD');
+				fill(core.setTwoDigits(core.itemCount('redKey')), 81 + offset, 267, '#FF8888');
 			}
 		},
 		"drawStatistics": function () {
@@ -1715,8 +1685,8 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 			var left = 48,
 				top = 36,
-				right = core.__PIXELS__ - 2 * left,
-				bottom = core.__PIXELS__ - 2 * top;
+				right = (core._PX_ || core.__PIXELS__) - 2 * left,
+				bottom = (core._PY_ || core.__PIXELS__) - 2 * top;
 
 			core.setAlpha('ui', 0.85);
 			core.fillRect('ui', left, top, right, bottom, '#000000');

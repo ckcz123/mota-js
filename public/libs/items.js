@@ -1,4 +1,3 @@
-/// <reference path="../runtime.d.ts" />
 
 "use strict";
 

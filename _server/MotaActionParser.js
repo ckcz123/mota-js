@@ -986,7 +986,7 @@ ActionParser.prototype.parseAction = function() {
       break;
     case "autoSave": // 自动存档
       this.next = MotaActionBlocks['autoSave_s'].xmlText([
-        data.nohint||false, this.next]);
+        data.removeLast||false, this.next]);
       break;
     case "forbidSave": // 禁止存档
       this.next = MotaActionBlocks['forbidSave_s'].xmlText([

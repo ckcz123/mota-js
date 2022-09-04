@@ -561,8 +561,8 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"extendToolbar": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "横屏底部工具栏",
-					"_data": "在横屏状态下是否将工具栏挪动到游戏画布下方，从而完全解放状态栏空间"
+					"_docs": "横屏隐藏状态栏",
+					"_data": "在横屏状态下是否隐藏左侧状态栏，从而获得仿RM的沉浸式体验"
 				},
 				"flyNearStair": {
 					"_leaf": true,

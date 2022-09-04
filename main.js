@@ -715,8 +715,6 @@ main.prototype.listen = function () {
 
     ////// 点击工具栏时 //////
     main.dom.hard.onclick = function () {
-        if (core.isReplaying())
-            return;
         main.core.control.setToolbarButton(!core.domStyle.toolbarBtn);
     }
 

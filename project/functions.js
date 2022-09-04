@@ -1,3 +1,4 @@
+///<reference path='../runtime.d.ts'/>
 var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 {
 	"events": {
@@ -1684,7 +1685,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 
 			var left = 48,
 				top = 36,
-				right  = (core._PX_ || core.__PIXELS__) - 2 * left,
+				right = (core._PX_ || core.__PIXELS__) - 2 * left,
 				bottom = (core._PY_ || core.__PIXELS__) - 2 * top;
 
 			core.setAlpha('ui', 0.85);

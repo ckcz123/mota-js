@@ -61,3 +61,4 @@ dist
 _ui
 
 compress.js
+_server/config.json

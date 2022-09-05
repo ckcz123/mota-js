@@ -236,7 +236,15 @@ editor_multi = function () {
         document.getElementById('left7').style = 'z-index:-1;opacity: 0;';
     }
     editor_multi.setLint = function () {
-        codeEditor.setOption("lint", editor_multi.lintAutocomplete);
+        if (editor_multi.lintAutocomplete) {
+            codeEditor.setOption("lint", {
+                options: {
+                    esversion: 2021
+                }
+            });
+        } else {
+            codeEditor.setOption("lint", false);
+        }
         codeEditor.setOption("autocomplete", editor_multi.lintAutocomplete);
         document.getElementById("lintCheckbox").checked = editor_multi.lintAutocomplete;
     }
@@ -484,6 +492,19 @@ editor_multi = function () {
         editor_multi.lintAutocomplete = true
         editor_multi.setLint()
         editor_multi.importFile(dict[mod])
+    }
+
+    // 字体大小
+    {
+        const CONFIG_KEY = "editor_multi.fontSize";
+        let fontsize = editor.config.get(CONFIG_KEY, 14);
+        const input = document.getElementById("editor_multi_fontsize");
+        input.value = fontsize;
+        editor_multi.setFontSize = function () {
+            const value = Number(input.value);
+            editor.config.set(CONFIG_KEY, value);
+            codeEditor.getWrapperElement().style.fontSize = `${ value }px`;
+        }
     }
 
     return editor_multi;

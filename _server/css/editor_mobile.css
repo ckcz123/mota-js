@@ -710,3 +710,6 @@ div.checkboxSet {
     margin: -5px;
 }
 
+.main .CodeMirror {
+    font-family: Menlo, Consolas, 'Courier New', Courier, monospace;
+}

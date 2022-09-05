@@ -261,7 +261,7 @@ editor_multi = function () {
     var _format = function () {
         if (!editor_multi.lintAutocomplete) return;
         var offset = (codeEditor.getScrollInfo() || {}).top || 0;
-        _setValue(js_beautify(codeEditor.getValue(), {
+        _setValue(beautifier.js(codeEditor.getValue(), {
             brace_style: "collapse-preserve-inline",
             indent_with_tabs: true,
             jslint_happy: true

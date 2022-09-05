@@ -700,6 +700,11 @@ div.checkboxSet {
     margin: -5px;
 }
 
+@font-face {
+    font-family: code;
+    src: url(./FiraCode.ttf);
+}
+
 .main .CodeMirror {
-    font-family: Menlo, Consolas, 'Courier New', Courier, monospace;
+    font-family: code, 微软雅黑, 黑体, 新宋体, Verdana;
 }

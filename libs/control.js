@@ -3456,8 +3456,8 @@ control.prototype._resize_statusBar = function (obj) {
     }
     else {
         core.dom.statusCanvas.style.width = obj.BAR_WIDTH * core.domStyle.scale + "px";
-        core.dom.statusCanvas.style.height = obj.outerHeight - 2 * obj.BORDER + (obj.hideLeftStatusBar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
-        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, core._PY_ + (obj.hideLeftStatusBar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0));
+        core.dom.statusCanvas.style.height = obj.outerHeight - 2 * obj.BORDER + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT * core.domStyle.scale + obj.BORDER : 0) + "px";
+        core.maps._setHDCanvasSize(core.dom.statusCanvasCtx, obj.BAR_WIDTH, core._PY_ + (obj.extendToolbar ? obj.TOOLBAR_HEIGHT + obj.BORDER : 0));
     }
     core.dom.statusCanvas.style.display = core.flags.statusCanvas && !obj.hideLeftStatusBar ? "block" : "none";
 }

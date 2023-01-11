@@ -1592,6 +1592,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 				.sort( /*function (id1, id2) { return core.material.items[id1].name <= core.material.items[id2].name ? -1 : 1 }*/);
 		},
 		"drawStatusBar": function () {
+			// 这真的是人能写出来的东西？
 			var ctx, fill = function (text, x, y, style) {
 				core.ui.setFont(ctx, (/\w+/.test(text) ? 'italic ' : '') + 'bold 18px Verdana');
 				core.ui.fillBoldText(ctx, text, x, y, style);
@@ -1614,7 +1615,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					fill(core.formatBigNumber(core.status.hero.money), 304, 58);
 					core.drawImage(ctx, core.statusBar.icons.exp, 6, 70, 25, 25);
 					fill(core.formatBigNumber(core.status.hero.exp), 42, 90);
-				} else if (!core.flags.extendToolbar) { // 横屏且未隐藏状态栏
+				} else if (!core.flags.hideLeftStatusBar) { // 横屏且未隐藏状态栏
 					core.drawImage(ctx, core.statusBar.icons.floor, 6, 9, 25, 25);
 					fill((core.status.thisMap || {}).name || "Loading", 42, 29);
 					core.drawImage(ctx, core.statusBar.icons.hp, 6, 43, 25, 25);
@@ -1633,7 +1634,7 @@ var functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a =
 					fill(core.setTwoDigits(core.itemCount('blueKey')), 46, 267, '#AAAADD');
 					fill(core.setTwoDigits(core.itemCount('redKey')), 81, 267, '#FF8888');
 				}
-			} else if (core.flags.extendToolbar && !core.domStyle.isVertical) { // 横屏且隐藏状态栏
+			} else if (core.flags.hideLeftStatusBar && !core.domStyle.isVertical) { // 横屏且隐藏状态栏
 				if (!core.dymCanvas['status'])
 					core.ui.createCanvas('status', 0, 0, core._PX_, core._PY_, 66); // 刚好盖过显伤层
 				core.ui.clearMap(ctx = core.dymCanvas['status']);

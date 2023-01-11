@@ -301,7 +301,7 @@ async function watch() {
     // 需要重新加载的文件
     const refresh = await extract('main.js', 'index.html', 'libs/');
     const option = {
-        interval: 50
+        interval: 1000
     };
     refresh.forEach(v => {
         const dir = path.resolve(__dirname, v);
@@ -374,7 +374,7 @@ function watchOneFloor(file) {
     if (!/.*\.js/.test(file)) return;
     const f = file.slice(0, -3);
     listenedFloors.push(file.slice(0, -3));
-    fss.watchFile(`project/floors/${file}`, { interval: 100 }, () => {
+    fss.watchFile(`project/floors/${file}`, { interval: 1000 }, () => {
         const floorId = f;
         if (hotReloadData.includes(`@@floor:${floorId}`)) return;
         hotReloadData += `@@floor:${floorId}`;

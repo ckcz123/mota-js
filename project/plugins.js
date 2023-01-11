@@ -1551,5 +1551,269 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 		}
 
 		window.Sprite = Sprite;
+	},
+	"hotReload": function () {
+		/* ---------- 功能说明 ---------- *
+
+		1. 当 libs/ main.js index.html 中的任意一个文件被更改后，会自动刷新塔的页面
+		2. 修改楼层文件后自动在塔的页面上显示出来，不需要刷新
+		3. 修改脚本编辑或插件编写后也能自动更新更改的插件或脚本，但不保证不会出问题（一般都不会有问题的
+		4. 修改图块属性、怪物属性等后会自动更新
+		5. 当全塔属性被修改时，会自动刷新塔的页面
+		6. 样板的 styles.css 被修改后也可以直接显示，不需要刷新
+		7. 其余内容修改后不会自动更新也不会刷新
+
+		/* ---------- 使用方式 ---------- *
+
+		1. 前往 https://nodejs.org/en/ 下载node.js的LTS版本（点左边那个绿色按钮）并安装
+		2. 将该插件复制到插件编写中
+		3. 在造塔群的群文件-魔塔样板·改中找到server.js，下载并放到塔的根目录（与启动服务同一级）
+		4. 在该目录下按下shift+鼠标右键（win11只按右键即可），选择在终端打开或在powershell打开
+		5. 运行node server.js即可
+
+		*/
+
+		if (main.mode !== 'play' || main.replayChecking) return;
+
+		/**
+		 * 发送请求
+		 * @param {string} url
+		 * @param {string} type
+		 * @param {string} data
+		 * @returns {Promise<string>}
+		 */
+		async function post(url, type, data) {
+			const xhr = new XMLHttpRequest();
+			xhr.open(type, url);
+			xhr.send(data);
+			const res = await new Promise(res => {
+				xhr.onload = e => {
+					if (xhr.status !== 200) {
+						console.error(`hot reload: http ${xhr.status}`);
+						res('@error');
+					} else res('success');
+				};
+				xhr.onerror = e => {
+					res('@error');
+					console.error(`hot reload: error on connection`);
+				};
+			});
+			if (res === 'success') return xhr.response;
+			else return '@error';
+		}
+
+		/**
+		 * 热重载css
+		 * @param {string} data
+		 */
+		function reloadCss(data) {
+			const all = Array.from(document.getElementsByTagName('link'));
+			all.forEach(v => {
+				if (v.rel !== 'stylesheet') return;
+				if (v.href === `http://127.0.0.1:3000/${data}`) {
+					v.remove();
+					const link = document.createElement('link');
+					link.rel = 'stylesheet';
+					link.type = 'text/css';
+					link.href = data;
+					document.head.appendChild(link);
+					console.log(`css hot reload: ${data}`);
+				}
+			});
+		}
+
+		/**
+		 * 热重载楼层
+		 * @param {string} data
+		 */
+		async function reloadFloor(data) {
+			// 首先重新加载main.floors对应的楼层
+			await import(`/project/floors/${data}.js?v=${Date.now()}`);
+			// 然后写入core.floors并解析
+			core.floors[data] = main.floors[data];
+			const floor = core.loadFloor(data);
+			if (core.isPlaying()) {
+				core.status.maps[data] = floor;
+				delete core.status.mapBlockObjs[data];
+				core.extractBlocks(data);
+				if (data === core.status.floorId) {
+					core.drawMap(data);
+					core.setWeather(
+						core.animateFrame.weather.type,
+						core.animateFrame.weather.level
+					);
+				}
+				core.updateStatusBar(true, true);
+			}
+			console.log(`floor hot reload: ${data}`);
+		}
+
+		/**
+		 * 热重载脚本编辑及插件编写
+		 * @param {string} data
+		 */
+		async function reloadScript(data) {
+			if (data === 'plugins') {
+				// 插件编写比较好办
+				const before = plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1;
+				// 这里不能用动态导入，因为动态导入会变成模块，变量就不是全局的了
+				const script = document.createElement('script');
+				script.src = `/project/plugins.js?v=${Date.now()}`;
+				document.body.appendChild(script);
+				await new Promise(res => {
+					script.onload = () => res('success');
+				});
+				const after = plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1;
+				// 找到差异的函数
+				for (const id in before) {
+					const fn = before[id];
+					if (typeof fn !== 'function') continue;
+					if (fn.toString() !== after[id]?.toString()) {
+						try {
+							core.plugin[id] = after[id];
+							core.plugin[id].call(core.plugin);
+							core.updateStatusBar(true, true);
+							console.log(`plugin hot reload: ${id}`);
+						} catch (e) {
+							console.error(e);
+						}
+					}
+				}
+			} else if (data === 'functions') {
+				// 脚本编辑略微麻烦点
+				const before = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
+				// 这里不能用动态导入，因为动态导入会变成模块，变量就不是全局的了
+				const script = document.createElement('script');
+				script.src = `/project/functions.js?v=${Date.now()}`;
+				document.body.appendChild(script);
+				await new Promise(res => {
+					script.onload = () => res('success');
+				});
+				const after = functions_d6ad677b_427a_4623_b50f_a445a3b0ef8a;
+				// 找到差异的函数
+				for (const mod in before) {
+					const fns = before[mod];
+					for (const id in fns) {
+						const fn = fns[id];
+						if (typeof fn !== 'function' || id === 'hasSpecial')
+							continue;
+						const now = after[mod][id];
+						if (fn.toString() !== now.toString()) {
+							try {
+								if (mod === 'events') {
+									core.events.eventdata[id] = now;
+								} else if (mod === 'enemys') {
+									core.enemys.enemydata[id] = now;
+								} else if (mod === 'actions') {
+									core.actions.actionsdata[id] = now;
+								} else if (mod === 'control') {
+									core.control.controldata[id] = now;
+								} else if (mod === 'ui') {
+									core.ui.uidata[id] = now;
+								}
+								core.updateStatusBar(true, true);
+								console.log(
+									`function hot reload: ${mod}.${id}`
+								);
+							} catch (e) {
+								console.error(e);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		/**
+		 * 属性热重载，包括全塔属性等
+		 * @param {string} data
+		 */
+		async function reloadData(data) {
+			const script = document.createElement('script');
+			script.src = `/project/${data}.js?v=${Date.now()}`;
+			document.body.appendChild(script);
+			await new Promise(res => {
+				script.onload = () => res('success');
+			});
+
+			let after;
+			if (data === 'data')
+				after = data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d;
+			if (data === 'enemys')
+				after = enemys_fcae963b_31c9_42b4_b48c_bb48d09f3f80;
+			if (data === 'icons')
+				after = icons_4665ee12_3a1f_44a4_bea3_0fccba634dc1;
+			if (data === 'items')
+				after = items_296f5d02_12fd_4166_a7c1_b5e830c9ee3a;
+			if (data === 'maps')
+				after = maps_90f36752_8815_4be8_b32b_d7fad1d0542e;
+			if (data === 'events')
+				after = events_c12a15a8_c380_4b28_8144_256cba95f760;
+
+			if (data === 'enemys') {
+				core.enemys.enemys = after;
+				for (var enemyId in after) {
+					core.enemys.enemys[enemyId].id = enemyId;
+				}
+				core.material.enemys = core.getEnemys();
+			} else if (data === 'icons') {
+				core.icons.icons = after;
+				core.material.icons = core.getIcons();
+			} else if (data === 'items') {
+				core.items.items = after;
+				for (var itemId in after) {
+					core.items.items[itemId].id = itemId;
+				}
+				core.material.items = core.getItems();
+			} else if (data === 'maps') {
+				core.maps.blocksInfo = after;
+				core.status.mapBlockObjs = {};
+				core.status.number2block = {};
+				Object.values(core.status.maps).forEach(v => delete v.blocks);
+				core.extractBlocks();
+				core.setWeather(
+					core.animateFrame.weather.type,
+					core.animateFrame.weather.level
+				);
+				core.drawMap();
+			} else if (data === 'events') {
+				core.events.commonEvent = after.commonEvent;
+			} else if (data === 'data') {
+				location.reload();
+			}
+			core.updateStatusBar(true, true);
+			console.log(`data hot reload: ${data}`);
+		}
+
+		// 初始化
+		(async function () {
+			const data = await post('/reload', 'POST', 'test');
+			if (data === '@error') {
+				console.log(`未检测到node服务，热重载插件将无法使用`);
+			} else {
+				console.log(`热重载插件加载成功`);
+				// reload
+				setInterval(async () => {
+					const res = await post('/reload', 'POST');
+					if (res === '@error') return;
+					if (res === 'true') location.reload();
+					else return;
+				}, 1000);
+
+				// hot reload
+				setInterval(async () => {
+					const res = await post('/hotReload', 'POST');
+					const data = res.split('@@');
+					data.forEach(v => {
+						if (v === '') return;
+						const [type, file] = v.split(':');
+						if (type === 'css') reloadCss(file);
+						if (type === 'data') reloadData(file);
+						if (type === 'floor') reloadFloor(file);
+						if (type === 'script') reloadScript(file);
+					});
+				}, 1000);
+			}
+		})();
 	}
 }

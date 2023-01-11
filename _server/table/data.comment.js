@@ -555,14 +555,20 @@ var data_comment_c456ea59_6018_45ef_8bcc_211a24c627dc = {
 				"autoScale": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "自动缩放最大化",
-					"_data": "是否自动缩放最大化，关闭后不再最大化"
+					"_docs": "自动缩放",
+					"_data": "是否自动缩放至合适值"
 				},
 				"extendToolbar": {
 					"_leaf": true,
 					"_type": "checkbox",
-					"_docs": "横屏隐藏状态栏",
-					"_data": "在横屏状态下是否隐藏左侧状态栏，从而获得仿RM的沉浸式体验"
+					"_docs": "画面下方道具栏",
+					"_data": "开启后道具栏会被挪动至游戏画面的下方"
+				},
+				"hideLeftStatusBar": {
+					"_leaf": true,
+					"_type": "checkbox",
+					"_docs": "隐藏左侧状态栏",
+					"_data": "是否隐藏左侧状态栏，开启后强制开启画面下方道具栏"
 				},
 				"flyNearStair": {
 					"_leaf": true,

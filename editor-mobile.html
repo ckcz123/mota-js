@@ -242,15 +242,21 @@
         <button onclick="confirmColor()">确定</button>
     </div>
     <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
-        <button onclick="editor_multi.confirm()">确认</button>
-        <button onclick="editor_multi.cancel()">取消</button>
-        <button onclick="editor_multi.confirm(true)">应用</button>
-        <button onclick="editor_multi.format()">格式化</button>
-        <button id="editor_multi_preview" style="display: none;">预览</button>
-        <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
-               style="vertical-align: middle;margin-left:6px"/>
-        <span style="vertical-align: middle; margin-left: -3px">语法检查</span>
-        <select id="codemirrorCommands" onchange="editor_multi.doCommand(this)" style="vertical-align: middle; margin-left: 6px;"></select>
+        <div>
+            <button onclick="editor_multi.confirm()">确认</button>
+            <button onclick="editor_multi.cancel()">取消</button>
+            <button onclick="editor_multi.confirm(true)">应用</button>
+            <button onclick="editor_multi.format()">格式化</button>
+            <button id="editor_multi_preview" style="display: none;">预览</button>
+            <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
+                   style="vertical-align: middle;margin-left:6px"/>
+            <span style="vertical-align: middle; margin-left: -3px">语法检查</span>
+            <select id="codemirrorCommands" onchange="editor_multi.doCommand(this)" style="vertical-align: middle; margin-left: 6px;"></select>
+            <span>字体大小</span>
+            <input style="width: 40px" type="number" onchange="editor_multi.setFontSize()" id="editor_multi_fontsize" />
+             <span>字体加粗</span>
+            <input style="width: 40px" type="checkbox" onchange="editor_multi.setFontSize()" id="editor_multi_fontweight" />
+        </div>
         <textarea id="multiLineCode" name="multiLineCode"></textarea>
     </div>
     <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->

@@ -710,3 +710,11 @@ div.checkboxSet {
     margin: -5px;
 }
 
+@font-face {
+    font-family: Fira;
+    src: url(./FiraCode.ttf);
+}
+
+.main .CodeMirror {
+    font-family: Fira, Menlo, Consolas, 'Courier New', Courier, monospace;
+}

@@ -34,11 +34,10 @@ maps.prototype._resetFloorImages = function () {
     }
 }
 
-maps.prototype._setHDCanvasSize = function (ctx, width, height, isTempCanvas) {
+maps.prototype._setHDCanvasSize = function (ctx, width, height) {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    var ratio = core.domStyle.ratio;
-    if (ctx === core.bigmap.tempCanvas) ratio = core.domStyle.scale;
-    if (isTempCanvas) ratio = core.domStyle.ratio;
+    var ratio = core.domStyle.scale;
+    ratio *= devicePixelRatio;
     if (width != null) ctx.canvas.width = width * ratio;
     if (height != null) ctx.canvas.height = height * ratio;
     ctx.scale(ratio, ratio);
@@ -1728,18 +1727,20 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
     // 如果是大地图模式？
     if (options.all) {
         // 计算比例
-        var scale = Math.max(core._WIDTH_ / width, core._HEIGHT_ / height);
         if (options.noHD) {
-            tempCanvas.canvas.width = width * 32 * scale;
-            tempCanvas.canvas.height = height * 32 * scale;
-        } else core.resizeCanvas(tempCanvas, width * 32 * scale, height * 32 * scale, false, true);
-        tempCanvas.scale(scale, scale);
+            tempCanvas.canvas.width = width * 32;
+            tempCanvas.canvas.height = height * 32;
+            tempCanvas.canvas.removeAttribute('isHD');
+        } else {
+            core.maps._setHDCanvasSize(tempCanvas, width * 32, height * 32);
+        }
     } else if (width * height > core.bigmap.threshold) {
         options.v2 = true;
         if (options.noHD) {
             tempCanvas.canvas.width = core._PX_;
             tempCanvas.canvas.height = core._PY_;
-        } else core.resizeCanvas(tempCanvas, core._PX_, core._PY_);
+            tempCanvas.canvas.removeAttribute('isHD');
+        } else core.maps._setHDCanvasSize(tempCanvas, width * 32, height * 32);
         var centerX = options.centerX, centerY = options.centerY;
         if (centerX == null) centerX = Math.floor(width / 2);
         if (centerY == null) centerY = Math.floor(height / 2);
@@ -1751,7 +1752,8 @@ maps.prototype._drawThumbnail_drawTempCanvas = function (floorId, blocks, option
         if (options.noHD) {
             tempCanvas.canvas.width = width * 32;
             tempCanvas.canvas.height = height * 32;
-        } else core.resizeCanvas(tempCanvas, width * 32, height * 32, false, true);
+            tempCanvas.canvas.removeAttribute('isHD');
+        } else core.maps._setHDCanvasSize(tempCanvas, width * 32, height * 32);
     }
     options.ctx = tempCanvas;
 
@@ -1813,6 +1815,7 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     if (centerY == null) centerY = Math.floor(height / 2);
     var tempCanvas = core.bigmap.tempCanvas;
 
+    const scale = core.domStyle.scale * devicePixelRatio;
     if (options.all) {
         var tempWidth = tempCanvas.canvas.width, tempHeight = tempCanvas.canvas.height;
         // 绘制全景图
@@ -1833,20 +1836,28 @@ maps.prototype._drawThumbnail_drawToTarget = function (floorId, options) {
     }
     else {
         // 只绘制可见窗口
-        var pw = core._PX_, ph = core._PY_, hw = core._HALF_WIDTH_, hh = core._HALF_HEIGHT_, W = core._WIDTH_, H = core._HEIGHT_;
-        var ratio = core.domStyle.isVertical ? core.domStyle.ratio : core.domStyle.scale;
-        if (main.mode == 'editor') { pw = ph = core.__PIXELS__; hw = hh = core.__HALF_SIZE__; W = H = core.__SIZE__; }
+        var pw = core._PX_, 
+            ph = core._PY_, 
+            hw = core._HALF_WIDTH_, 
+            hh = core._HALF_HEIGHT_, 
+            W = core._WIDTH_, 
+            H = core._HEIGHT_;
+        if (main.mode == 'editor') { 
+            pw = ph = core.__PIXELS__; 
+            hw = hh = core.__HALF_SIZE__; 
+            W = H = core.__SIZE__; 
+        }
         if (options.v2) {
-            core.drawImage(ctx, tempCanvas.canvas, 0, 0, pw * ratio, ph * ratio, x, y, w, h);
+            if (options.noHD) core.drawImage(ctx, tempCanvas.canvas, 0, 0, pw, ph, x, y, w, h);
+            else core.drawImage(ctx, tempCanvas.canvas, 0, 0, pw * scale, ph * scale, x, y, w, h);
         } else {
             var offsetX = core.clamp(centerX - hw, 0, width - W),
-                offsetY = core.clamp(centerY - hh, 0, height - H),
-                c = options.noHD ? 1 : core.domStyle.scale;
+                offsetY = core.clamp(centerY - hh, 0, height - H);
             if (options.noHD) {
                 core.drawImage(ctx, tempCanvas.canvas, offsetX * 32, offsetY * 32, pw, ph, x, y, w, h);
-                return;
+            } else {
+                core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * scale, offsetY * 32 * scale, pw * scale, ph * scale, x, y, w, h);
             }
-            core.drawImage(ctx, tempCanvas.canvas, offsetX * 32 * ratio, offsetY * 32 * ratio, pw * ratio, ph * ratio, x, y, w, h);
         }
     }
 }

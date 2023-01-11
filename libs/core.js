@@ -18,7 +18,7 @@ function core () {
     this._HALF_WIDTH_ = Math.floor(this._WIDTH_ / 2);
     this._HALF_HEIGHT_ = Math.floor(this._HEIGHT_ / 2);
 
-    this.__SIZE__ = main.mode == 'editor' ? 15 : this._HEIGHT_;
+    this.__SIZE__ = main.mode == 'editor' ? 13 : this._HEIGHT_;
     this.__PIXELS__ = this.__SIZE__ * 32;
     this.__HALF_SIZE__ = Math.floor(this.__SIZE__ / 2);
     this.material = {

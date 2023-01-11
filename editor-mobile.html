@@ -1,0 +1,501 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,initial-scale=1,user-scalable=no" />
+    <link href="_server/css/editor_mobile.css" rel="stylesheet">
+    <link href="_server/CodeMirror/codemirror.css" rel="stylesheet">
+    <link href="_server/thirdparty/awesomplete.css" rel="stylesheet">
+    <link id="color_css" rel="stylesheet">
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+</head>
+<body>
+<script>
+    if(innerWidth>innerHeight){ //pic:1242*2208 | chrome info:1340*2380
+        confirm('宽大于高的设备请使用正常版本的editor, 点击确定跳转')?(window.location='./editor.html'):'';
+    }
+    if (location.protocol.indexOf("http")!=0) {
+        alert("请在启动服务中打开本编辑器！不然包括编辑在内的绝大多数功能都无法使用。");
+    }
+</script>
+<div class="main">
+    <div id="left" style="z-index:-1;opacity: 0;"><!-- map -->
+        <div id="arrEditor">
+            <table class="col" id='arrColMark'></table>
+            <table class="row" id='arrRowMark'></table>
+            <div id="mapEditArea">
+                <textarea cols="10" rows="10" id="pout"></textarea>
+            </div>
+            <div id="editTip">
+                <input id='newFileName' placeholder="新楼层id" style="width: 100px"/>
+                <span style="vertical-align: bottom">宽</span>
+                <input id='newMapWidth' style="width: 20px"/>
+                <span style="vertical-align: bottom">高</span>
+                <input id='newMapHeight' style="width: 20px"/>
+                <input type="checkbox" id='newMapStatus' checked='checked' style='vertical-align: bottom'/>
+                <span style='vertical-align: bottom;'>保留楼层属性</span>
+                <br/>
+                <input type="button" value="新建空白地图" id='newMap'/>
+            </div>
+            <div id='editBtns'>
+                <input type="button" value="导出并复制地图" id="exportMap"/>
+                <input type="button" value="导入地图" id="importMap"/>
+                <input type="button" value="清除地图" id='clearMapButton'/>
+                <input type="button" value="删除地图" id="deleteMap"/>
+            </div>
+            <input type="button" value="批量创建空白地图 ↓" id='newMaps'/>
+            <div id='newFloors' style='display:none'>
+                <span style="vertical-align: bottom">楼层ID格式: </span>
+                <input id='newFloorIds' style="width: 70px" value='MT${i}'/>
+                <br/>
+                <span style="vertical-align: bottom">地图中文名格式: </span>
+                <input id='newFloorTitles' style="width: 100px" value='主塔 ${i} 层'/>
+                <br/>
+                <span style="vertical-align: bottom">状态栏名称: </span>
+                <input id='newFloorNames' style="width: 70px" value='${i}'/>
+                <br/>
+                <span style="vertical-align: bottom">宽</span>
+                <input id='newMapsWidth' style="width: 20px"/>
+                <span style="vertical-align: bottom">高</span>
+                <input id='newMapsHeight' style="width: 20px"/>
+                <input type="checkbox" id='newMapsStatus' checked='checked' style='vertical-align: bottom'/>
+                <span style='vertical-align: bottom; margin-left: -4px'>保留楼层属性</span>
+                <br/>
+                <span style="vertical-align: bottom">从 i=</span>
+                <input id='newMapsFrom' value="1" style="width: 20px"/>
+                <span style="vertical-align: bottom">到</span>
+                <input id='newMapsTo' value="5" style="width: 20px"/>
+                <input type="button" value="确认创建" id='createNewMaps'>
+            </div>
+        </div>
+    </div>
+    <div id="left1" class='leftTab' style="z-index:-1;opacity: 0;"><!-- appendpic -->
+        <h3 class="leftTabHeader">追加素材</h3>
+        <div class="leftTabContent">
+            <p>
+                <input id="selectFileBtn" type="button" value="导入文件到画板"/>
+                <select id="selectAppend"></select>
+                <!-- ["terrains", "animates", "enemys", "enemy48", "items", "npcs", "npc48"] -->
+                <input id="appendConfirm" type="button" value="追加"/>
+                <input id="quickAppendConfirm" type="button" value="快速追加"/>
+                <span style="font-size: 13px">自动注册</span><input id="appendRegister" type="checkbox" checked/>
+            </p>
+            <p>
+                色相:<input id='changeColorInput' type="range" min="0" max="12" step="1" value="0" list="huelists" style="width: 60%;margin-left: 3%;vertical-align: middle">
+                <datalist id="huelists" style="display: none">
+                    <option value="0"/><option value="1"/><option value="2"/>
+                    <option value="3"/><option value="4"/><option value="5"/>
+                    <option value="6"/><option value="7"/><option value="8"/>
+                    <option value="9"/><option value="10"/><option value="11"/><option value="12"/>
+                </datalist>
+            </p>
+            <div id="appendPicCanvas" style="position:relative;overflow: auto;height:470px;">
+                <canvas style="position:absolute"></canvas><!-- 用于画出灰白相间背景 -->
+                <canvas style="position:absolute"></canvas><!-- 用于画出选中文件 -->
+                <canvas style="position:absolute;z-index:100"></canvas><!-- 用于响应鼠标点击 -->
+                <canvas style="position:absolute;display:none;"></canvas><!-- 画出追加后的sprite用于储存 -->
+                <div id="appendPicSelection">
+                    <div class="appendSelection"><span style="top: 0; left: 2px;">1</span></div>
+                    <div class="appendSelection"><span style="top: 0; left: 14px;">2</span></div>
+                    <div class="appendSelection"><span style="top: 12px; left: 2px;">3</span></div>
+                    <div class="appendSelection"><span style="top: 12px; left: 14px;">4</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="left2" class='leftTab' style="z-index:-1;opacity: 0;"><!-- loc -->
+        <h3 class="leftTabHeader">地图选点&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.uifunctions.addAutoEvent()">添加自动事件页</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('loc')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <p id='pos_a6771a78_a099_417c_828f_0a24851ebfce' style="margin-left: 15px">0,0</p>
+            <div class='etable'>
+                <table>
+                    <tbody id='table_3d846fc4_7644_44d1_aa04_433d266a73df'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="left3" class='leftTab' style="z-index:-1;opacity: 0;"><!-- enemyitem -->
+        <h3 class="leftTabHeader">图块属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('enemyitem')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div id="enemyItemTable"><!-- enemy and item -->
+                <div class='etable'>
+                    <table>
+                        <tbody id='table_a3f03d4c_55b8_4ef6_b362_b345783acd72'>
+                        <tr>
+                            <td>条目</td>
+                            <td>注释</td>
+                            <td>值</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div style="margin-top: -10px; margin-bottom: 10px">
+                    <button id="copyEnemyItem">复制属性</button>
+                    <button id="pasteEnemyItem">粘贴属性</button>
+                    <button id="clearEnemyItem">清空属性</button>
+                    <button id="clearAllEnemyItem">批量清空属性</button>
+                </div>
+            </div>
+            <div id='newIdIdnum'><!-- id and idnum -->
+                <input placeholder="新id（唯一标识符）"/>
+                <input placeholder="新idnum（10000以内数字）"/>
+                <button>确定</button>
+                <br/>
+                <button style="margin-top: 10px">自动注册</button>
+                <button style="margin-top: 10px; margin-left: 5px">删除此素材</button>
+                <button style="margin-top: 10px; margin-left: 5px">以此素材为模板追加</button>
+            </div>
+            <div id='changeId'><!-- id and idnum -->
+                <input placeholder="修改图块id为" style="width: 100px"/>
+                <button>确定</button>
+                <button style="margin-left: 5px">删除此素材</button>
+                <button style="margin-left: 5px">以此素材为模板追加</button>
+            </div>
+        </div>
+    </div>
+    <div id="left4" class='leftTab' style="z-index:-1;opacity: 0;"><!-- floor -->
+        <h3 class="leftTabHeader">楼层属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('floor')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_4a3b1b09_b2fb_4bdf_b9ab_9f4cdac14c74'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id='changeFloorId'><!-- id and idnum -->
+                <input placeholder="修改floorId为"/>
+                <button>确定</button>
+            </div>
+            <div id='changeFloorSize' style="font-size: 13px;">
+                修改地图大小：宽<input style="width: 25px;" value="13" />，高<input style="width: 25px;" value="13" />，
+                偏移x<input style="width: 25px;" value="0" /> y<input style="width: 25px;" value="0" /> 
+                <button>确定</button>
+            </div>
+        </div>
+    </div>
+    <div id="left5" class='leftTab' style="z-index:-1;opacity: 0;"><!-- tower -->
+        <h3 class="leftTabHeader">全塔属性&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('add')">添加</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('tower')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_b6a03e4c_5968_4633_ac40_0dfdd2c9cde5'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="left6" class='leftTab' style="z-index:-1;opacity: 0;">
+        <div style="position: relative; height: 95%"><!-- eventsEditor -->
+            <h3>事件编辑器 &nbsp;&nbsp;
+                <!--
+                <button onclick="editor_blockly.showXML()">Show XML</button>
+                <button onclick="editor_blockly.runCode()">console.log(obj=code)</button>
+                -->
+                <button onclick="editor_blockly.confirm()">确认</button>
+                <button onclick="editor_blockly.confirm(true)">应用</button>
+                <button id='blocklyParse' onclick="editor_blockly.parse()">解析</button>
+                <button onclick="editor_blockly.cancel()">取消</button>
+                <!-- 手机端放不下，因此不显示搜索框 -->
+                <div style="display: none">
+                    <div class="searchLogo"></div>
+                    <input type="text" id="searchBlock" placeholder="搜索事件块..."/>
+                </div>
+                <button class="cpPanel" onclick="editor_blockly.selectPointFromButton()">地图选点</button>
+                <button class="cpPanel" onclick="editor.uievent.searchUsedFlags()" style="margin-left:5px">变量出现位置搜索</button>
+                <input type="checkbox" class="cpPanel" id="blocklyReplace" onchange="editor_blockly.triggerReplace()" style="margin-left: 10px" />
+                <span class="cpPanel" style="margin-left: -4px; font-size: 13px">开启中文名替换</span>
+                <input type="checkbox" class="cpPanel" id="blocklyExpandCompare" onchange="editor_blockly.triggerExpandCompare()" style="margin-left: 10px" />
+                <span class="cpPanel" style="margin-left: -4px; font-size: 13px">展开值块逻辑运算</span>
+                <xml id="toolbox" style="display:none">
+                </xml>
+            </h3>
+            <div style="position: relative;height: 100%">
+                <div id="blocklyArea">
+                    <div id="blocklyDiv"></div>
+                </div>
+                <textarea id="codeArea" spellcheck="false"></textarea>
+            </div>
+        </div>
+    </div>
+    <div id="colorPanel" class="cpPanel" style="display: none">
+        <input class="color" id="colorPicker" value="255,215,0,1"/>
+        <button onclick="confirmColor()">确定</button>
+    </div>
+    <div id="left7" style="z-index:-1;opacity: 0;"><!-- 多行文本编辑器 -->
+        <div>
+            <button onclick="editor_multi.confirm()">确认</button>
+            <button onclick="editor_multi.cancel()">取消</button>
+            <button onclick="editor_multi.confirm(true)">应用</button>
+            <button onclick="editor_multi.format()">格式化</button>
+            <button id="editor_multi_preview" style="display: none;">预览</button>
+            <input type="checkbox" onclick="editor_multi.toggerLint()" id="lintCheckbox"
+                   style="vertical-align: middle;margin-left:6px"/>
+            <span style="vertical-align: middle; margin-left: -3px">语法检查</span>
+            <select id="codemirrorCommands" onchange="editor_multi.doCommand(this)" style="vertical-align: middle; margin-left: 6px;"></select>
+            <span>字体大小</span>
+            <input style="width: 40px" type="number" onchange="editor_multi.setFontSize()" id="editor_multi_fontsize" />
+             <span>字体加粗</span>
+            <input style="width: 40px" type="checkbox" onchange="editor_multi.setFontSize()" id="editor_multi_fontweight" />
+        </div>
+        <textarea id="multiLineCode" name="multiLineCode"></textarea>
+    </div>
+    <div id="left8" class='leftTab' style="z-index:-1;opacity: 0;"><!-- functions -->
+        <h3 class="leftTabHeader">脚本编辑&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('functions')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_e260a2be_5690_476a_b04e_dacddede78b3'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="left9" class='leftTab' style="z-index:-1;opacity: 0;"><!-- commonevent -->
+        <h3 class="leftTabHeader">公共事件&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.table.addfunc()">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('commonevent')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_b7bf0124_99fd_4af8_ae2f_0017f04a7c7d'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="left10" class='leftTab' style="z-index:-1;opacity: 0;"><!-- plugins -->
+        <h3 class="leftTabHeader">插件编写&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.table.addfunc()">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('plugins')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_e2c034ec_47c6_48ae_8db8_4f8f32fea2d6'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="mid">
+        <div class="col" id='mapColMark'></div>
+        <div class="row" id='mapRowMark'></div>
+        <div class="map" id="mapEdit">
+            <canvas class='gameCanvas' id='ebm'></canvas>
+            <canvas class='gameCanvas' id='efg'></canvas>
+            <canvas class='gameCanvas' id='eui' style='z-index:100'></canvas>
+        </div>
+        
+    </div>
+    <div id="mid2" style="display: none">
+        <p style="margin: 10px"><span id='lastUsedTitle'></span> <button id='clearLastUsedBtn'>清除</button></p>
+        <div class="map" style="height: 160px; margin-top: 25px" id="lastUsedDiv">
+            <canvas class='gameCanvas' id='lastUsed'></canvas>
+        </div>
+    </div>
+    <div id="right" style="z-index:-1;opacity: 0;">
+        <div id="iconLib">
+            <div id="iconImages"></div>
+            <div id="selectBox">
+                <div id='dataSelection' style="display:none"></div>
+            </div>
+        </div>
+        <button id="iconExpandBtn"></button>
+    </div>
+    <div id="down">
+        <div style="margin:0.5rem">
+            <div class="tools">
+                <div id="tip"></div>
+                <span id='mobileview'>
+                    <input type="button" value="数据区"/>
+                    <input type="button" value="地图区"/>
+                    <br />
+                    <input type="button" value="素材库"/>
+                    <input type="button" value="前往游戏" onclick="window.location='./index.html'"/>
+                </span>
+                <div id="menuDiv">
+                    <div id="midMenu" style="display:none">
+                        <div id='extraEvent' class='menuitem' style="display:none"><div class="menuitem-content"></div></div>
+                        <div id='chooseThis' class="menuitem"><div class="menuitem-content">选中此点</div></div>
+                        <div id='chooseInRight' class="menuitem"><div class="menuitem-content">在素材区选中此图块</div></div>
+                        <div id='copyLoc' class="menuitem"><div class="menuitem-content">复制此事件</div></div>
+                        <div id='pasteLoc' class="menuitem"><div class="menuitem-content">粘贴到此事件</div></div>
+                        <div id='clearEvent' class="menuitem"><div class="menuitem-content">仅清空此点事件</div></div>
+                        <div id='clearLoc' class="menuitem"><div class="menuitem-content">清空此点及事件</div></div>
+                    </div>
+                </div>
+                <select id="editModeSelect" style="font-size: 12px">
+                    <option value="map">地图编辑</option>
+                    <option value="loc">地图选点</option>
+                    <option value="enemyitem">图块属性</option>
+                    <option value="floor">楼层属性</option>
+                    <option value="tower">全塔属性</option>
+                    <option value="functions">脚本编辑</option>
+                    <option value="appendpic">追加素材</option>
+                    <option value="commonevent">公共事件</option>
+                    <option value="plugins">插件编写</option>
+                </select>
+                <span style="font-size: 12px"><input type="checkbox" id="showMovable"/>通行度</span>
+                <select id="editorTheme" style="font-size: 11px;">
+                    <option value="editor_color">默认白</option>
+                    <option value="editor_color_dark">夜间黑</option>
+                </select>
+                <select id="brushMod" style="clear:right">
+                    <option value="line">画线</option>
+                    <option value="rectangle">画矩形</option>
+                    <option value="tileset">tile平铺</option>
+                    <option value="fill">填充模式</option>
+                </select>
+                <select id="layerMod" style="float:left;margin-right:3px">
+                    <option value="bgmap">背景层</option>
+                    <option value="map" selected>事件层</option>
+                    <option value="fgmap">前景层</option>
+                </select>
+                <div id="viewportButtons" style="float:left">
+                    <input type="button" style="padding:1px 1px" value="←"/>
+                    <input type="button" style="padding:1px 6px" value="↑"/>
+                    <input type="button" style="padding:1px 6px" value="↓"/>
+                    <input type="button" style="padding:1px 1px" value="→"/>
+                    <input type="button" id="bigmapBtn" value="大地图" style="margin-left: 5px"/>
+                </div>
+                <select id="selectFloor" style="clear:left"></select>
+                <input type="button" value="选层" id='selectFloorBtn'/>
+                <input type="button" value="保存地图" id='saveFloor'/>
+                <input type="button" value="后退" id="undoFloor" style="display: none;"/>
+                <input type="button" value="帮助文档" id="openDoc" />
+                <span id='mobileeditdata' style="display:none">
+                    <input type="button" value="编辑"/>
+                    <input type="button" value="显示完整名称" style="display: none;"/>
+                    <input type="button" value="显示完整注释"/>
+                </span>
+            </div>
+        </div>
+    </div>
+    
+</div>
+<!-- <script>/* -->
+
+<div id="gameInject" style='display: none'></div>
+
+<!-- UI预览 & 地图选点 -->
+<div id='uieventDiv' style='display: none'>
+    <div id='uieventDialog'>
+        <div id="uieventHead">
+            <span id="uieventTitle"></span>
+            <select id="uieventSelect" style="margin-left: 20px"></select>
+            <button id="uieventNo">关闭</button>
+            <button id="uieventYes">确定</button>
+        </div>
+        <hr style="clear: both; margin-top: 0"/>
+        <div id='uieventBody'>
+            <canvas class='gameCanvas' id='uievent'></canvas>
+            <div id="selectPointBox"></div>
+            <div id="uieventExtraBody" style="display: none"></div>
+        </div>
+        <div id="selectPoint">
+            <select id="selectPointFloor"></select>
+            <div id="selectPointButtons">
+                <input type="button" value="←"/>
+                <input type="button" value="↑"/>
+                <input type="button" value="↓"/>
+                <input type="button" value="→"/>
+                <input type="button" value="大地图" style="margin-left: 5px"/>
+                <input type="button" value="复制楼层ID">
+            </div>
+        </div>
+    </div>
+</div>
+<!-- */</script> -->
+
+<!-- =========================================================== -->
+
+<!-- <script src='_server/vendor/vue.min.js'></script> -->
+<!-- <script src="https://cdn.bootcss.com/vue/2.5.13/vue.js"></script> -->
+<!-- <script src='_server/vendor/polyfill.min.js'></script> -->
+<script src='_server/fs.js'></script>
+<script src='_server/editor_config.js'></script>
+<script src='_server/editor_util.js'></script>
+<script src='_server/editor_game.js'></script>
+<script src='_server/editor_file.js'></script>
+<script src='_server/editor_table.js'></script>
+<script src='_server/editor_mode.js'></script>
+<script src='_server/editor_ui.js'></script>
+<script src='_server/editor_uievent.js'></script>
+<script src='_server/editor_mappanel.js'></script>
+<script src='_server/editor_datapanel.js'></script>
+<script src='_server/editor_materialpanel.js'></script>
+<script src='_server/editor_listen.js'></script>
+<script src='libs/thirdparty/lz-string.min.js'></script>
+<script src='libs/thirdparty/localforage.min.js'></script>
+<script src='libs/thirdparty/zip.min.js'></script>
+<script src='_server/editor.js'></script>
+<script>
+    editor.isMobile=true;
+    editor.init(function () {
+        editor.listen();
+        editor.mode_listen();
+        editor.mobile_listen();
+    });
+    //main.listen();
+</script>
+
+<!-- hightlight textarea -->
+<script src='_server/editor_multi.js'></script>
+<!-- blockly -->
+<script src="_server/blockly/Converter.bundle.min.js"></script>
+<script src="_server/blockly/blockly_compressed.js"></script>
+<script src="_server/blockly/blocks_compressed.js"></script>
+<script src="_server/blockly/javascript_compressed.js"></script>
+<script src="_server/blockly/zh-hans.js"></script>
+<script src='_server/MotaActionParser.js'></script>
+<script src='_server/editor_blocklyconfig.js'></script>
+<script src='_server/editor_blockly.js'></script>
+<!-- codemirror -->
+<script src="_server/CodeMirror/codeMirror.bundle.min.js"></script>
+<script src="_server/CodeMirror/beautify.min.js"></script>
+<script src="_server/CodeMirror/jshint.min.js"></script>
+<script src="_server/CodeMirror/codeMirror.plugin.min.js"></script>
+<script src="_server/CodeMirror/acorn.min.js"></script>
+<script src="_server/CodeMirror/defs.js"></script>
+<script src="_server/CodeMirror/tern.min.js"></script>
+<!-- thirdparty -->
+<script src="_server/thirdparty/color.all.min.js"></script>
+<script src="_server/thirdparty/awesomplete.min.js"></script>
+<script src="_server/thirdparty/caret-position.js"></script>
+<script src="_server/thirdparty/jsColor.js"></script>
+
+</body>
+</html>

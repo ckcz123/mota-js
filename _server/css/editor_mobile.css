@@ -1,0 +1,720 @@
+/** editor **/
+
+:root {
+    --size: 13;
+}
+
+html{
+    font-size: 4vw;
+}
+input, textarea, select, button {
+    font-size: 1rem;
+}
+
+html, body, div, img {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Roboto, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;;
+}
+
+/* ::-webkit-scrollbar {
+    width: 5px;
+} */
+.main {
+    max-width: 100%;
+    min-height: 500px;
+    margin: 0 auto;
+}
+
+#left, #mid, #right {
+    /* border-radius: 2px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, .14), 0 3px 1px -2px rgba(0, 0, 0, .2), 0 1px 5px 0 rgba(0, 0, 0, .12); */
+    width: 100vw;
+    height: 100vw;
+}
+
+#left {
+    position: absolute;
+}
+
+#mapEditArea {
+    position: absolute;
+    width: 100%;
+    height: 70%;
+    left: 0;
+    top: 0;
+    /* padding: 10px 5px; */
+    box-sizing: border-box;
+    display: none;
+}
+
+#pout {
+    display: block;
+    width: 95vw;
+    height: 62vw;
+    box-sizing: border-box;
+    margin-left: 5vw;
+    margin-top: 23px;
+    line-height: 5vw;
+    font-size: 12px;
+    font-family: 'Lucida Console', Monaco, monospace;
+    white-space: pre;
+    border-radius: 2px;
+    overflow: auto;
+}
+
+#mapEditArea p {
+    margin: 10px;
+    display: block;
+    width: 70%;
+    line-height: 20px;
+    text-align: left;
+    font-size: 14px;
+}
+
+#editTip {
+    position: absolute;
+    width: 95vw;
+    left: 4vw;
+    top: 4vw;
+}
+
+#editTip .btn {
+    float: right;
+    margin-right: 20px;
+    margin-top: 5px;
+}
+
+#editBtns {
+    position: absolute;
+    width: 95vw;
+    left: 4vw;
+    top: 20vw;
+}
+
+#newMaps {
+    position: absolute;
+    left: 4vw;
+    top: 35vw;
+}
+
+#newFloors {
+    position: absolute;
+    width: 95vw;
+    left: 4vw;
+    top: 43vw;
+}
+
+#mid {
+    position: absolute;
+}
+
+#mid2 {
+    display: none;
+}
+
+#mapEdit {
+    overflow: hidden;
+}
+
+.map {
+    position: absolute;
+    left: 4vw;
+    top: 4vw;
+    width: 96vw;
+    height: 96vw;
+}
+.map canvas{
+    width: 96vw;
+    height: 96vw;
+}
+
+#mid .tools {
+    position: absolute;
+    width: 425px;
+    height: 180px;
+    left: 0;
+    bottom: 0;
+    padding: 10px 5px;
+    margin-left: 8px;;
+    box-sizing: border-box;
+}
+
+#tip {
+    float: right;
+    width: 45%;
+    /* height: 95%; */
+    min-height: 9rem;
+    padding: 5px 10px 10px 10px;
+    margin-right: 0;
+    box-sizing: border-box;
+    border-radius: 2px;
+    font-size: 1rem;
+    line-height: 1.2rem;
+}
+
+#tip p{
+    margin: 0.5rem
+}
+
+.files {
+    width: 50%;
+    height: 120px;
+    /* padding: 10px; */
+    margin-top: 15px;
+}
+
+#bgSelect {
+    width: 50%;
+    height: 100px;
+    margin-top: 10px;
+}
+
+#bgSelect span {
+    /* display: block; */
+    font-size: 14px;
+    line-height: 30px;
+}
+
+#printOut {
+    margin-top: 10px;
+    height: 20px;
+}
+
+#right {
+    position: absolute;
+    /* border: 1px solid rgb(238, 13, 13); */
+}
+
+#iconLib {
+    position: absolute;
+    width: 100vw;
+    height: 100vw;
+    top: 5px;
+    overflow: auto;
+}
+
+#iconImages {
+    z-index: 0;
+    overflow: hidden;
+}
+
+#iconImages img {
+    position: absolute;
+}
+
+.gameCanvas {
+    position: absolute;
+}
+
+#dataSelection, .appendSelection {
+    position: absolute;
+    /* top:0;
+    left:320px; */
+    z-index: 75;
+    width: 26px;
+    height: 26px;
+    margin: 3px 0 0 3px;
+    padding: 0;
+    /* display: none; */
+    box-sizing: border-box;
+}
+
+#iconExpandBtn {
+    position: absolute;
+    left: 20px;
+    bottom: 30px;
+    font-size: 15px;
+    padding: 6px;
+    display: none;
+}
+
+.warnText {
+    font-weight: 700;
+    font-size: 14px;
+    line-height: 1.2em;
+}
+
+.successText {
+    line-height: 1.2em;
+}
+
+td, .coltd, .rowtd {
+    cursor: crosshair;
+}
+
+table.col, div.col {
+    position: relative;
+
+    text-align: center;
+    border-collapse: collapse;
+}
+
+#arrColMark td {
+    width: 16px;
+}
+
+#arrColMark {
+    top: 2px;
+    left: 5vw;
+    width: 95vw;
+    height: 16px;
+    font-size: 13px;
+    display: none;
+}
+
+#mapColMark {
+    position: absolute;
+    top: 0;
+    left: 4vw;
+    width: 96vw;
+    height: 4vw;
+    font-size: 3vw;
+}
+
+
+#mapColMark .coltd,
+#mapColMark .coltd .coltext {
+    position: absolute;
+    width: calc(93vw / var(--size));
+    height: 4vw;
+    line-height: 4vw;
+    padding: 0;
+    border-bottom-width: 0px;
+    border-top-width: 0px;
+    border-left-width: calc(1.5vw / var(--size));
+    border-right-width: calc(1.5vw / var(--size));
+}
+
+#mapColMark .coltd:hover .colBlock {
+    position: absolute;
+    top: 4vw;
+    left:0;
+    height: 96vw;
+    width: calc(96vw / var(--size));
+    z-index: 100;
+}
+
+table.row,div.row,
+table.row,div.row .rowtext {
+    width:4vw;
+    position: relative;
+    text-align: right;
+    vertical-align: middle;
+    border-collapse: collapse;
+}
+
+#arrRowMark {
+    top: 5px;
+    left: 0;
+    width: 4vw;
+    height: 62vw;
+    font-size: 12px;
+    display: none;
+}
+
+#mapRowMark {
+    position: absolute;
+    top: 4vw;
+    left: 0;
+    width: 4vw;
+    height: 96vw;
+    font-size: 3vw;
+}
+
+#mapRowMark .rowtd{
+    position: absolute;
+}
+
+#mapRowMark .rowtd,
+#mapRowMark .rowtd .rowtext{
+    height: calc(93vw / var(--size));
+    line-height: calc(93vw / var(--size));
+    padding: 0;
+    border-left-width: 0px;
+    border-right-width: 0px;
+    border-top-width: calc(1.5vw / var(--size));
+    border-bottom-width: calc(1.5vw / var(--size));
+}
+
+#mapRowMark .rowtd:hover .rowBlock {
+    position: absolute;
+    left: 4vw;
+    top: 0;
+    height: calc(96vw / var(--size));
+    width: 96vw;
+    z-index: 100;
+}
+
+#menuDiv * { margin: 0; padding: 0; }
+#midMenu{
+    border-style: solid;
+    border-width: 1px;
+    cursor: default;
+    font: normal 2.5vw Arial, sans-serif;
+    margin: 0;
+    outline: none;
+    padding: 4px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 100%;
+    max-width: 40%;
+    z-index: 101;
+
+    border-radius: 4px;
+}
+#midMenu .menuitem{
+    font: normal 2.5vw Arial, sans-serif;
+    list-style: none;
+    margin: 0;
+    padding: 4px 7em 4px 4px;
+    white-space: nowrap;
+
+    /* padding-left: 12px; */
+
+    /* padding-right: 20px; */
+}
+#midMenu .menuitem:hover{
+    border-style: dotted;
+    border-width: 1px 0;
+    padding-bottom: 3px;
+    padding-top: 3px;
+}
+#midMenu .menuitem-content{
+    font: normal 2.5vw Arial, sans-serif;
+}
+
+#down{
+    position: absolute;
+    left:0;
+    top:100vw;
+    bottom: 0;
+    width: 100vw;
+}
+
+#colorPanel {
+    position: fixed;
+    width: max-content;
+    height: 205px;
+    z-index: 240;
+    padding: 4px 6px;
+    margin-top: 6px;
+    box-sizing: border-box;
+}
+
+#colorPicker {
+    margin: 2px 0;
+    border-radius: 3px;
+    width: 90px;
+}
+
+#uieventDiv {
+    display: none;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2000
+}
+
+#uieventDialog {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    width: 100vw;
+}
+
+#uieventHead {
+    margin: 10px 20px;
+}
+
+#uieventTitle {
+    font-weight: bold;
+}
+
+#uieventNo {
+    float: right;
+}
+
+#uieventYes {
+    display: none;
+    float: right;
+    margin-right: 15px;
+}
+
+#uieventBody {
+    width: 100vw;
+    height: 100vw;
+    position: relative;
+    margin-left: 0;
+    margin-bottom: 5px;
+    overflow: hidden;
+}
+
+#uievent {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+}
+
+#selectPoint {
+    display: none;
+    margin-left: 10px;
+    margin-bottom: 10px;
+}
+
+#selectPointFloor {
+    margin-right: 10px;
+}
+
+#selectPointButtons {
+    display: inline;
+}
+
+#selectPointBox {
+    position: absolute;
+    z-index: 75;
+    width: 26px;
+    height: 26px;
+    margin: 3px 0 0 3px;
+    padding: 0;
+    /* display: none; */
+    box-sizing: border-box;
+}
+
+/** editor_mode **/
+
+.leftTab {
+    width: 100vw;
+    height: 100vw;
+}
+
+.leftTab {
+    overflow: auto;
+    position: absolute;
+    height: 100vw;
+}
+
+.leftTab > * {
+    margin: 2.5px 5px;
+}
+
+.leftTab > :first-child {
+    margin-top: 5px;
+}
+
+.leftTab > :last-child {
+    margin-bottom: 5px;
+}
+
+.leftTab {
+    left: 0;
+    top: 0;
+    width: 100vw;
+}
+
+.leftTab .leftTabHeader {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+}
+
+.leftTab .leftTabContent {
+    padding-top: 50px;
+}
+
+#appendPicSelection span {
+    position: absolute;
+    font-size: 11px;
+}
+
+#left6 {
+    left: 0;
+    top: 0;
+    z-index: 200;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#left6 h3{
+    font-size: 6vw;
+    margin: 1.77vw 0;
+    
+}
+
+#left6 #blocklyArea {
+
+    width: 100vw;
+    height: 100vw;
+}
+
+#left6 #blocklyDiv {
+    position: relative;
+}
+
+#left6 .CodeMirror {
+    height: 38vw;
+    width: 100%;
+}
+
+#left6 #codeArea {
+    width: 99.5%;
+    height: 15.4em;
+    overflow: y; /* resize:none; */
+}
+
+#left6 #blocklyDiv .blocklyToolboxDiv{
+    width:6vw;
+}
+#left6 #blocklyDiv .blocklyTreeLabel{
+    margin-left:-4vw;
+}
+
+#left7 {
+    /* height: 440px; width: 375px;float:left; */
+    left: 0;
+    top: 0;
+    z-index: 200;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+}
+
+#left7 .CodeMirror {
+    font-size: 14px;
+    height: 95%;
+    width: 95%;
+}
+
+.etable table,
+.etable table td {
+    cursor: auto;
+}
+
+/* copy from github-css https://github.com/sindresorhus/github-markdown-css  */
+.etable table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.etable table {
+    margin-top: 0;
+    margin-bottom: 16px;
+}
+
+.etable table {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    word-break: break-all;
+}
+
+.etable table th {
+    font-weight: 600;
+}
+
+.etable table th,
+.etable table td {
+    padding: 5px;
+}
+
+/* copy end ---------------------------------------------  */
+
+.etable tr {
+    width: 100%
+}
+
+.etable tr > :nth-child(1) {
+    width: 20%
+}
+
+.etable tr > :nth-child(2) {
+    width: 20%
+}
+
+.etable tr > :nth-child(3) {
+    width: 38%;
+}
+
+.etable tr > :nth-child(4) {
+    width: 22%;
+    text-align: center;
+}
+
+.etable table {
+    overflow: visible;
+}
+
+.etable tr:not(:first-child) > :nth-child(3) {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    position: relative;
+}
+
+div.etableInputDiv {
+    position: absolute;
+    padding: 5px 0 0 5px;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+
+div.checkboxSet {
+    position: relative !important;
+    max-height: 250px;
+    overflow: auto;
+}
+
+.etableInputDiv > * {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    border: none;
+    background: transparent;
+}
+
+.etableInputDiv .checkbox {
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+}
+
+.etableInputDiv .checkboxSetMember {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+}
+
+.etableInputDiv textarea {
+    resize: none;
+}
+
+.etableInputDiv textarea:hover {
+    margin: -5px;
+}
+
+@font-face {
+    font-family: Fira;
+    src: url(./FiraCode.ttf);
+}
+
+.main .CodeMirror {
+    font-family: Fira, Menlo, Consolas, 'Courier New', Courier, monospace;
+}

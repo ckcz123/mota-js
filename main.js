@@ -3,7 +3,7 @@ function main () {
 
     //------------------------ 用户修改内容 ------------------------//
 
-    this.version = "2.10.0"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
+    this.version = "2.10.2"; // 游戏版本号；如果更改了游戏内容建议修改此version以免造成缓存问题。
 
     this.useCompress = false; // 是否使用压缩文件
     // 当你即将发布你的塔时，请使用“JS代码压缩工具”将所有js代码进行压缩，然后将这里的useCompress改为true。
@@ -189,8 +189,8 @@ function main () {
     this.floors = {}
     this.canvas = {};
 
-    this.__VERSION__ = "2.10.0";
-    this.__VERSION_CODE__ = 510;
+    this.__VERSION__ = "2.10.2";
+    this.__VERSION_CODE__ = 511;
 }
 
 main.prototype.init = function (mode, callback) {
@@ -238,56 +238,58 @@ main.prototype.init = function (mode, callback) {
                 main.core.init(coreData, callback);
                 main.core.resize();
                 // 自动放缩最大化
-                if (core.getLocalStorage('autoScale') == null) {
-                    core.setLocalStorage('autoScale', true);
-                }
-                if (
-                    core.getLocalStorage('autoScale') &&
-                    !core.domStyle.isVertical
-                ) {
-                    try {
-                        if (main.core) {
-                            var index =
-                                main.core.domStyle.availableScale.indexOf(
-                                    core.domStyle.scale
+                if (main.replayChecking) {
+                    if (core.getLocalStorage('autoScale') == null) {
+                        core.setLocalStorage('autoScale', true);
+                    }
+                    if (
+                        core.getLocalStorage('autoScale') &&
+                        !core.domStyle.isVertical
+                    ) {
+                        try {
+                            if (main.core) {
+                                var index =
+                                    main.core.domStyle.availableScale.indexOf(
+                                        core.domStyle.scale
+                                    );
+                                main.core.control.setDisplayScale(
+                                    main.core.domStyle.availableScale.length -
+                                        1 -
+                                        index
                                 );
-                            main.core.control.setDisplayScale(
-                                main.core.domStyle.availableScale.length -
-                                    1 -
-                                    index
-                            );
-                            if (
-                                !main.core.isPlaying() &&
-                                main.core.flags.enableHDCanvas
-                            ) {
-                                main.core.domStyle.ratio = Math.max(
-                                    window.devicePixelRatio || 1,
-                                    main.core.domStyle.scale
-                                );
-                                main.core.resize();
-                            }
-                            requestAnimationFrame(function () {
-                                var style = getComputedStyle(
-                                    main.dom.gameGroup
-                                );
-                                var height = parseFloat(style.height);
-                                if (height > window.innerHeight * 0.95) {
-                                    main.core.control.setDisplayScale(-1);
-                                    if (
-                                        !main.core.isPlaying() &&
-                                        main.core.flags.enableHDCanvas
-                                    ) {
-                                        main.core.domStyle.ratio = Math.max(
-                                            window.devicePixelRatio || 1,
-                                            main.core.domStyle.scale
-                                        );
-                                        main.core.resize();
-                                    }
+                                if (
+                                    !main.core.isPlaying() &&
+                                    main.core.flags.enableHDCanvas
+                                ) {
+                                    main.core.domStyle.ratio = Math.max(
+                                        window.devicePixelRatio || 1,
+                                        main.core.domStyle.scale
+                                    );
+                                    main.core.resize();
                                 }
-                            });
+                                requestAnimationFrame(function () {
+                                    var style = getComputedStyle(
+                                        main.dom.gameGroup
+                                    );
+                                    var height = parseFloat(style.height);
+                                    if (height > window.innerHeight * 0.95) {
+                                        main.core.control.setDisplayScale(-1);
+                                        if (
+                                            !main.core.isPlaying() &&
+                                            main.core.flags.enableHDCanvas
+                                       ) {
+                                            main.core.domStyle.ratio = Math.max(
+                                                window.devicePixelRatio || 1,
+                                                main.core.domStyle.scale
+                                            );
+                                            main.core.resize();
+                                        }
+                                    }
+                                });
+                            }
+                        } catch (e) {
+                            console.error(e);
                         }
-                    } catch (e) {
-                        console.error(e);
                     }
                 }
             });

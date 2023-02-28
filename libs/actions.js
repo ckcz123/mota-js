@@ -1225,7 +1225,7 @@ actions.prototype._clickBook = function (x, y) {
     var data = core.status.event.data;
     if (data != null && y < core._HEIGHT_-1) {
         var per_page = pageinfo.per_page, page = parseInt(data / per_page);
-        var u = this.LAST / per_page;
+        var u = (core._HEIGHT_ - 1) / per_page;
         for (var i = 0; i < per_page; ++i) {
             if (y >= u * i && y < u * (i + 1)) {
                 var index = per_page * page + i;

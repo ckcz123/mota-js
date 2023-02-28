@@ -2532,23 +2532,24 @@ ui.prototype.drawFly = function (page) {
     core.setTextAlign('ui', 'center');
 
     var middle = core._PY_ / 2 + 39;
+    const lastWidth = 0.25 * core._PX_ - 16;
 
     // 换行
-    var lines = core.splitLines('ui', title, 120, this._buildFont(19, true));
+    var lines = core.splitLines('ui', title, lastWidth, this._buildFont(19, true));
     var start_y = middle - (lines.length - 1) * 11;
     for (var i in lines) {
-        core.fillText('ui', lines[i], core._PX_ - 60, start_y, '#FFFFFF');
+        core.fillText('ui', lines[i], core._PX_ - lastWidth * 0.5, start_y, '#FFFFFF');
         start_y += 22;
     }
     if (core.actions._getNextFlyFloor(1) != page) {
-        core.fillText('ui', '▲', core._PX_ - 60, middle - 64, null, this._buildFont(17, false));
-        core.fillText('ui', '▲', core._PX_ - 60, middle - 96);
-        core.fillText('ui', '▲', core._PX_ - 60, middle - 96 - 7);
+        core.fillText('ui', '▲', core._PX_ - lastWidth * 0.5, middle - 64, null, this._buildFont(17, false));
+        core.fillText('ui', '▲', core._PX_ - lastWidth * 0.5, middle - 96);
+        core.fillText('ui', '▲', core._PX_ - lastWidth * 0.5, middle - 96 - 7);
     }
     if (core.actions._getNextFlyFloor(-1) != page) {
-        core.fillText('ui', '▼', core._PX_ - 60, middle + 64, null, this._buildFont(17, false));
-        core.fillText('ui', '▼', core._PX_ - 60, middle + 96);
-        core.fillText('ui', '▼', core._PX_ - 60, middle + 96 + 7);
+        core.fillText('ui', '▼', core._PX_ - lastWidth * 0.5, middle + 64, null, this._buildFont(17, false));
+        core.fillText('ui', '▼', core._PX_ - lastWidth * 0.5, middle + 96);
+        core.fillText('ui', '▼', core._PX_ - lastWidth * 0.5, middle + 96 + 7);
     }
     var size = 0.75;
     core.strokeRect('ui', 16, 64, size * core._PX_, size * core._PY_, '#FFFFFF', 2);

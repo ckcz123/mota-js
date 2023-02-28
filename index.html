@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta http-equiv='content-type' content='text/html' charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=Edge, chrome=1'>
     <meta name='author' content='ckcz123'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=yes'>
+    <meta name='viewport'
+        content='width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=yes'>
     <title>HTML5魔塔</title>
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="screen-orientation" content="portrait">
     <meta name="full-screen" content="yes">
     <meta name="browsermode" content="application">
@@ -15,186 +17,188 @@
     <meta name="x5-page-mode" content="app">
     <link type='text/css' href='styles.css' rel='stylesheet'>
 </head>
-<body>
-<div id='startImageBackgroundDiv'>
-    <div id='startImageDiv'></div>
-    <img id='startImageLogo' />
-</div>
-<script>
-    (function () {
-        var startImageBackgroundDiv = document.getElementById('startImageBackgroundDiv');
-        var startImageLogo = document.getElementById('startImageLogo');
-        var startImageDiv = document.getElementById('startImageDiv');
-        startImageLogo.onload = function () {
-            startImageBackgroundDiv.style.display = 'block';
-            var onAnimationEnd = function () {
-                startImageBackgroundDiv.style.display = 'none';
-                startImageLogo.classList.remove("startImageAnimation");
-                startImageDiv.classList.remove("startImageDivAnimation");
-            }
-            startImageDiv.addEventListener("webkitAnimationEnd", onAnimationEnd);
-            startImageDiv.addEventListener("animationend", onAnimationEnd);
-            startImageLogo.classList.add("startImageAnimation");
-            startImageDiv.classList.add("startImageDivAnimation");
-            // 注释下面这句话以禁止单击立刻跳过开场动画
-            startImageBackgroundDiv.onclick = onAnimationEnd;
-        }
-        startImageLogo.onerror = function () {}
-        startImageLogo.src = "logo.png";
-    })();
-</script>
-<!-- injection -->
-<div id='gameGroup'>
-    <p id='mainTips'>请稍候...</p>
-    <img id='musicBtn'>
-    <div id='startPanel'>
-        <div id='startTop'>
-            <div id='startTopProgressBar'>
-                <div id='startTopProgress'></div>
-            </div>
-            <p id='startTopLoadTips'>资源即将开始加载</p>
-            <p id='startTopHint'>HTML5魔塔游戏平台，享受更多魔塔游戏：<br/>https://h5mota.com/</p>
-        </div>
-        <img id='startBackground'>
-        <p id='startLogo'></p>
-        <div id='startButtonGroup'>
-            <div id='startButtons'>
-                <span class='startButton' id='playGame'>开始游戏</span>
-                <span class='startButton' id='loadGame'>载入游戏</span>
-                <span class='startButton' id='replayGame'>录像回放</span>
-            </div>
-            <div id='levelChooseButtons'></div>
-        </div>
-    </div>
-    <div id='floorMsgGroup'>
-        <p id='logoLabel'></p>
-        <p id='versionLabel'></p>
-        <p id='floorNameLabel'></p>
-    </div>
-    <div id='statusBar' class="clearfix">
-        <div class="status" id="floorCol">
-            <img id="img-floor">
-            <p class='statusLabel statusText' id='floor'></p>
-        </div>
-        <div class="status" id="nameCol">
-            <img id="img-name">
-            <p class='statusLabel statusText' id='name'></p>
-        </div>
-        <div class="status" id="lvCol">
-            <img id="img-lv">
-            <p class='statusLabel statusText' id='lv'></p>
-        </div>
-        <div class="status" id='hpmaxCol'>
-            <img id="img-hpmax">
-            <p class='statusLabel statusText' id='hpmax'></p>
-        </div>
-        <div class="status" id='hpCol'>
-            <img id="img-hp">
-            <p class='statusLabel statusText' id='hp'></p>
-        </div>
-        <div class="status" id='manaCol'>
-            <img id="img-mana">
-            <p class='statusLabel statusText' id='mana'></p>
-        </div>
-        <div class="status" id='atkCol'>
-            <img id="img-atk">
-            <p class='statusLabel statusText' id='atk'></p>
-        </div>
-        <div class="status" id='defCol'>
-            <img id="img-def">
-            <p class='statusLabel statusText' id='def'></p>
-        </div>
-        <div class="status" id="mdefCol">
-            <img id="img-mdef">
-            <p class='statusLabel statusText' id='mdef'></p>
-        </div>
-        <div class="status" id="moneyCol">
-            <img id="img-money">
-            <p class='statusLabel statusText' id='money'></p>
-        </div>
-        <div class="status" id="expCol">
-            <img id="img-exp">
-            <p class='statusLabel statusText' id='exp'></p>
-        </div>
-        <div class="status" id="upCol">
-            <img id="img-up">
-            <p class='statusLabel statusText' id='up'></p>
-        </div>
-        <div class="status" id="skillCol">
-            <img id="img-skill">
-            <p class='statusLabel statusText' id='skill' style='font-style: normal'></p>
-        </div>
-        <div class="status" id='keyCol'>
-            <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
-            <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
-            <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
-            <span class='statusLabel' id='greenKey' style="color:#88FF88"></span>
-        </div>
-        <div class="status" id='pzfCol'>
-            <span class='statusLabel' id='pickaxe' style="color: #BC6E27"></span>
-            <span class='statusLabel' id='bomb' style="color: #FA14B9"></span>
-            <span class='statusLabel' id='fly' style="color: #8DB600"></span>
-        </div>
-        <div class="status" id="debuffCol">
-            <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
-            <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
-            <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>
-        </div>
 
-        <!-- 状态栏canvas化 -->
-        <canvas id="statusCanvas" style="position: absolute; left: 0; top: 0;"></canvas>
+<body>
+    <div id='startImageBackgroundDiv'>
+        <div id='startImageDiv'></div>
+        <img id='startImageLogo' />
     </div>
-    <div id="toolBar" class="clearfix">
-        <img class="tools" id='img-book'>
-        <img class="tools" id='img-fly'>
-        <img class="tools" id='img-toolbox'>
-        <img class="tools" id='img-keyboard'>
-        <img class="tools" id='img-shop'>
-        <img class="tools" id='img-save'>
-        <img class="tools" id='img-load'>
-        <img class="tools" id='img-settings'>
-        <img class="tools" id='img-btn1' style='display:none'>
-        <img class="tools" id='img-btn2' style='display:none'>
-        <img class="tools" id='img-btn3' style='display:none'>
-        <img class="tools" id='img-btn4' style='display:none'>
-        <img class="tools" id='img-btn5' style='display:none'>
-        <img class="tools" id='img-btn6' style='display:none'>
-        <img class="tools" id='img-btn7' style='display:none'>
-        <img class="tools" id='img-btn8' style='display:none'>
-        <p class="statusLabel tools" id="hard"></p>
+    <script>
+        (function () {
+            var startImageBackgroundDiv = document.getElementById('startImageBackgroundDiv');
+            var startImageLogo = document.getElementById('startImageLogo');
+            var startImageDiv = document.getElementById('startImageDiv');
+            startImageLogo.onload = function () {
+                startImageBackgroundDiv.style.display = 'block';
+                var onAnimationEnd = function () {
+                    startImageBackgroundDiv.style.display = 'none';
+                    startImageLogo.classList.remove("startImageAnimation");
+                    startImageDiv.classList.remove("startImageDivAnimation");
+                }
+                startImageDiv.addEventListener("webkitAnimationEnd", onAnimationEnd);
+                startImageDiv.addEventListener("animationend", onAnimationEnd);
+                startImageLogo.classList.add("startImageAnimation");
+                startImageDiv.classList.add("startImageDivAnimation");
+                // 注释下面这句话以禁止单击立刻跳过开场动画
+                startImageBackgroundDiv.onclick = onAnimationEnd;
+            }
+            startImageLogo.onerror = function () { }
+            startImageLogo.src = "logo.png";
+        })();
+    </script>
+    <!-- injection -->
+    <div id='gameGroup'>
+        <p id='mainTips'>请稍候...</p>
+        <img id='musicBtn'>
+        <div id='startPanel'>
+            <div id='startTop'>
+                <div id='startTopProgressBar'>
+                    <div id='startTopProgress'></div>
+                </div>
+                <p id='startTopLoadTips'>资源即将开始加载</p>
+                <p id='startTopHint'>HTML5魔塔游戏平台，享受更多魔塔游戏：<br />https://h5mota.com/</p>
+            </div>
+            <img id='startBackground'>
+            <p id='startLogo'></p>
+            <div id='startButtonGroup'>
+                <div id='startButtons'>
+                    <span class='startButton' id='playGame'>开始游戏</span>
+                    <span class='startButton' id='loadGame'>载入游戏</span>
+                    <span class='startButton' id='replayGame'>录像回放</span>
+                </div>
+                <div id='levelChooseButtons'></div>
+            </div>
+        </div>
+        <div id='floorMsgGroup'>
+            <p id='logoLabel'></p>
+            <p id='versionLabel'></p>
+            <p id='floorNameLabel'></p>
+        </div>
+        <div id='statusBar' class="clearfix">
+            <div class="status" id="floorCol">
+                <img id="img-floor">
+                <p class='statusLabel statusText' id='floor'></p>
+            </div>
+            <div class="status" id="nameCol">
+                <img id="img-name">
+                <p class='statusLabel statusText' id='name'></p>
+            </div>
+            <div class="status" id="lvCol">
+                <img id="img-lv">
+                <p class='statusLabel statusText' id='lv'></p>
+            </div>
+            <div class="status" id='hpmaxCol'>
+                <img id="img-hpmax">
+                <p class='statusLabel statusText' id='hpmax'></p>
+            </div>
+            <div class="status" id='hpCol'>
+                <img id="img-hp">
+                <p class='statusLabel statusText' id='hp'></p>
+            </div>
+            <div class="status" id='manaCol'>
+                <img id="img-mana">
+                <p class='statusLabel statusText' id='mana'></p>
+            </div>
+            <div class="status" id='atkCol'>
+                <img id="img-atk">
+                <p class='statusLabel statusText' id='atk'></p>
+            </div>
+            <div class="status" id='defCol'>
+                <img id="img-def">
+                <p class='statusLabel statusText' id='def'></p>
+            </div>
+            <div class="status" id="mdefCol">
+                <img id="img-mdef">
+                <p class='statusLabel statusText' id='mdef'></p>
+            </div>
+            <div class="status" id="moneyCol">
+                <img id="img-money">
+                <p class='statusLabel statusText' id='money'></p>
+            </div>
+            <div class="status" id="expCol">
+                <img id="img-exp">
+                <p class='statusLabel statusText' id='exp'></p>
+            </div>
+            <div class="status" id="upCol">
+                <img id="img-up">
+                <p class='statusLabel statusText' id='up'></p>
+            </div>
+            <div class="status" id="skillCol">
+                <img id="img-skill">
+                <p class='statusLabel statusText' id='skill' style='font-style: normal'></p>
+            </div>
+            <div class="status" id='keyCol'>
+                <span class='statusLabel' id='yellowKey' style="color:#FFCCAA"></span>
+                <span class='statusLabel' id='blueKey' style="color:#AAAADD"></span>
+                <span class='statusLabel' id='redKey' style="color:#FF8888"></span>
+                <span class='statusLabel' id='greenKey' style="color:#88FF88"></span>
+            </div>
+            <div class="status" id='pzfCol'>
+                <span class='statusLabel' id='pickaxe' style="color: #BC6E27"></span>
+                <span class='statusLabel' id='bomb' style="color: #FA14B9"></span>
+                <span class='statusLabel' id='fly' style="color: #8DB600"></span>
+            </div>
+            <div class="status" id="debuffCol">
+                <span class='statusLabel' id='poison' style="color: #AFFCA8;"></span>
+                <span class='statusLabel' id='weak' style="color: #FECCD0;"></span>
+                <span class='statusLabel' id='curse' style="color: #C2F4E7;"></span>
+            </div>
+
+            <!-- 状态栏canvas化 -->
+            <canvas id="statusCanvas" style="position: absolute; left: 0; top: 0;"></canvas>
+        </div>
+        <div id="toolBar" class="clearfix">
+            <img class="tools" id='img-book'>
+            <img class="tools" id='img-fly'>
+            <img class="tools" id='img-toolbox'>
+            <img class="tools" id='img-keyboard'>
+            <img class="tools" id='img-shop'>
+            <img class="tools" id='img-save'>
+            <img class="tools" id='img-load'>
+            <img class="tools" id='img-settings'>
+            <img class="tools" id='img-btn1' style='display:none'>
+            <img class="tools" id='img-btn2' style='display:none'>
+            <img class="tools" id='img-btn3' style='display:none'>
+            <img class="tools" id='img-btn4' style='display:none'>
+            <img class="tools" id='img-btn5' style='display:none'>
+            <img class="tools" id='img-btn6' style='display:none'>
+            <img class="tools" id='img-btn7' style='display:none'>
+            <img class="tools" id='img-btn8' style='display:none'>
+            <p class="statusLabel tools" id="hard"></p>
+        </div>
+        <div id="gameDraw">
+            <div id="gif"></div>
+            <div id="gif2"></div>
+            <canvas class='gameCanvas anti-aliasing' id='bg'></canvas>
+            <canvas class='gameCanvas anti-aliasing' id='event'></canvas>
+            <canvas class='gameCanvas anti-aliasing' id='hero'></canvas>
+            <canvas class='gameCanvas anti-aliasing' id='event2'></canvas>
+            <canvas class='gameCanvas anti-aliasing' id='fg'></canvas>
+            <canvas class='gameCanvas' id='damage'></canvas>
+            <canvas class='gameCanvas' id='animate'></canvas>
+            <canvas class='gameCanvas' id='curtain'></canvas>
+            <canvas class='gameCanvas' id='ui'></canvas>
+            <canvas class='gameCanvas' id='data'>此浏览器不支持HTML5</canvas>
+            <div id="next"></div>
+        </div>
     </div>
-    <div id="gameDraw">
-        <div id="gif"></div>
-        <div id="gif2"></div>
-        <canvas class='gameCanvas' id='bg'></canvas>
-        <canvas class='gameCanvas' id='event'></canvas>
-        <canvas class='gameCanvas' id='hero'></canvas>
-        <canvas class='gameCanvas' id='event2'></canvas>
-        <canvas class='gameCanvas' id='fg'></canvas>
-        <canvas class='gameCanvas' id='damage'></canvas>
-        <canvas class='gameCanvas' id='animate'></canvas>
-        <canvas class='gameCanvas' id='curtain'></canvas>
-        <canvas class='gameCanvas' id='ui'></canvas>
-        <canvas class='gameCanvas' id='data'>此浏览器不支持HTML5</canvas>
-        <div id="next"></div>
+    <div id='inputDiv'>
+        <div id='inputDialog'>
+            <p id="inputMessage">请输入文字...</p>
+            <input id='inputBox' type="text" autocomplete="off" />
+            <button id='inputYes'>确定</button>
+            <button id='inputNo'>取消</button>
+        </div>
     </div>
-</div>
-<div id='inputDiv'>
-    <div id='inputDialog'>
-        <p id="inputMessage">请输入文字...</p>
-        <input id='inputBox' type="text" autocomplete="off"/>
-        <button id='inputYes'>确定</button>
-        <button id='inputNo'>取消</button>
-    </div>
-</div>
-<div id="ui-editor"></div>
-<!-- injection -->
-<script src='libs/thirdparty/lz-string.min.js'></script>
-<script src='libs/thirdparty/priority-queue.min.js'></script>
-<script src='libs/thirdparty/localforage.min.js'></script>
-<script src='libs/thirdparty/zip.min.js'></script>
-<script id='mainScript' src='main.js'></script>
-<script>main.init('play');main.listen();</script>
+    <div id="ui-editor"></div>
+    <!-- injection -->
+    <script src='libs/thirdparty/lz-string.min.js'></script>
+    <script src='libs/thirdparty/priority-queue.min.js'></script>
+    <script src='libs/thirdparty/localforage.min.js'></script>
+    <script src='libs/thirdparty/zip.min.js'></script>
+    <script id='mainScript' src='main.js'></script>
+    <script>main.init('play'); main.listen();</script>
 
 </body>
+
 </html>

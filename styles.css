@@ -500,3 +500,8 @@ p#name {
     font-family: Fira Code;
     src: url(../src/fonts/FiraCode-Regular.ttf);
 }
+
+/* 注释下面这三行以开启抗锯齿 */
+.anti-aliasing {
+    image-rendering: pixelated;
+}

@@ -362,7 +362,7 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			if (!name) return;
 			var canvas = document.createElement('canvas');
 			canvas.id = name;
-			canvas.className = 'gameCanvas';
+			canvas.className = 'gameCanvas anti-aliasing';
 			// 编辑器模式下设置zIndex会导致加入的图层覆盖优先级过高
 			if (main.mode != "editor") canvas.style.zIndex = zIndex || 0;
 			// 将图层插入进游戏内容

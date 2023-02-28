@@ -3418,9 +3418,7 @@ control.prototype._resize_canvas = function (obj) {
     } else {
         for (var name in core.dymCanvas) {
             var ctx = core.dymCanvas[name], canvas = ctx.canvas;
-            var ratio = canvas.hasAttribute('isHD') ? core.domStyle.ratio : 1;
-            canvas.style.width = canvas.width / ratio * core.domStyle.scale + "px";
-            canvas.style.height = canvas.height / ratio * core.domStyle.scale + "px";
+            core.resizeCanvas(ctx, parseFloat(canvas.getAttribute("_width")), parseFloat(canvas.getAttribute("_height")))
             canvas.style.left = parseFloat(canvas.getAttribute("_left")) * core.domStyle.scale + "px";
             canvas.style.top = parseFloat(canvas.getAttribute("_top")) * core.domStyle.scale + "px";
         }

@@ -57,7 +57,13 @@ ui.prototype.clearMap = function (name, x, y, width, height) {
             if (x != null && y != null && width != null && height != null) {
                 ctx.clearRect(x, y, width, height);
             } else {
-                ctx.clearRect(-32, -32, ctx.canvas.width + 32, ctx.canvas.height + 32);
+                if (ctx.canvas.getAttribute('isHD')) {
+                    const width = ctx.canvas.width / core.domStyle.scale / devicePixelRatio;
+                    const height = ctx.canvas.height / core.domStyle.scale / devicePixelRatio;
+                    ctx.clearRect(0, 0, width, height);
+                } else {
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                }
             }
         }
     }
@@ -3395,6 +3401,8 @@ ui.prototype.createCanvas = function (name, x, y, width, height, z) {
     newCanvas.style.display = 'block';
     newCanvas.setAttribute("_left", x);
     newCanvas.setAttribute("_top", y);
+    newCanvas.setAttribute("_width", width);
+    newCanvas.setAttribute("_height", height);
     newCanvas.style.width = width * core.domStyle.scale + 'px';
     newCanvas.style.height = height * core.domStyle.scale + 'px';
     newCanvas.style.left = x * core.domStyle.scale + 'px';
@@ -3455,16 +3463,19 @@ ui.prototype.rotateCanvas = function (name, angle, centerX, centerY) {
 ////// canvas重置 //////
 ui.prototype.resizeCanvas = function (name, width, height, styleOnly) {
     var ctx = core.getContextByName(name);
+    const canvas = ctx.canvas;
     if (!ctx) return null;
     if (width != null) {
         if (!styleOnly && ctx.canvas.hasAttribute('isHD'))
             core.maps._setHDCanvasSize(ctx, width, null);
         ctx.canvas.style.width = width * core.domStyle.scale + 'px';
+        canvas.setAttribute('_width', width);
     }
     if (height != null) {
         if (!styleOnly && ctx.canvas.hasAttribute('isHD'))
             core.maps._setHDCanvasSize(ctx, null, height);
         ctx.canvas.style.height = height * core.domStyle.scale + 'px';
+        canvas.setAttribute('_height', height);
     }
     return ctx;
 }

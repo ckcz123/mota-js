@@ -539,10 +539,10 @@ editor_table_wrapper = function (editor) {
         }
 
         var mode = editor.dom.editModeSelect.value;
-        var supportText = mode === 'commonevent' || mode === 'plugins';
+        var supportText = ['commonevent', 'plugins', 'commonEventTemplate'].includes(mode);
 
         if (obj == null) {
-            if (mode === 'commonevent') obj = events_c12a15a8_c380_4b28_8144_256cba95f760;
+            if (['commonevent', 'commonEventTemplate'].includes(mode)) obj = events_c12a15a8_c380_4b28_8144_256cba95f760;
             else if (mode === 'plugins') obj = plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1;
             else return;
         }

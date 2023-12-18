@@ -488,6 +488,7 @@ editor_multi = function () {
             functions: '_server/table/functions.comment.js',
             commonevent: '_server/table/events.comment.js',
             plugins: '_server/table/plugins.comment.js',
+            commonEventTemplate: '_server/table/events.comment.js',
         }
         editor_multi.lintAutocomplete = true
         editor_multi.setLint()

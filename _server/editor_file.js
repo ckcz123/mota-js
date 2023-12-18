@@ -852,6 +852,32 @@ editor_file = function (editor, callback) {
 
     ////////////////////////////////////////////////////////////////////
 
+    editor.file.editCommonEventTemplate = function (actionList, callback) {
+        /*actionList:[
+          ["change","['test']",['123']],
+        ]
+        为[]时只查询不修改
+        */
+        var data_obj = events_c12a15a8_c380_4b28_8144_256cba95f760.commonEventTemplate;
+        checkCallback(callback);
+        if (isset(actionList) && actionList.length > 0) {
+            actionList.forEach(function (value) {
+                value[1] = "['commonEventTemplate']" + value[1];
+            });
+            saveSetting('events', actionList, function (err) {
+                callback([err]);
+            });
+        } else {
+            callback([
+                Object.assign({},data_obj),
+                editor.file.eventsComment._data.commonEventTemplate,
+                null]);
+        }
+    }
+    //callback([obj,commentObj,err:String])
+
+    ////////////////////////////////////////////////////////////////////
+
     var plmap = {};
     var pljson = JSON.stringify(plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1, function (k, v) {
         if (v instanceof Function) {

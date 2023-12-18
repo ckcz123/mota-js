@@ -306,6 +306,23 @@
             </div>
         </div>
     </div>
+    <div id="left11" class='leftTab' style="z-index:-1;opacity: 0;"><!-- commonEventTemplate -->
+        <h3 class="leftTabHeader">常見事件模板&nbsp;&nbsp;<button onclick="editor.mode.onmode('save')">保存</button>&nbsp;&nbsp;<button onclick="editor.table.addfunc()">添加</button>&nbsp;&nbsp;<button onclick="editor.mode.changeDoubleClickModeByButton('delete')">删除</button>&nbsp;&nbsp;<button onclick="editor_multi.editCommentJs('commonEventTemplate')">配置表格</button>
+        </h3>
+        <div class="leftTabContent">
+            <div class='etable'>
+                <table>
+                    <tbody id='table_298572d8-93dd-4c6e-a278-6a7d49831e3a'>
+                    <tr>
+                        <td>条目</td>
+                        <td>注释</td>
+                        <td>值</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div id="mid">
         <table class="col" id='mapColMark'></table>
         <table class="row" id='mapRowMark'></table>
@@ -326,6 +343,7 @@
                 <option value="appendpic">追加素材(M)</option>
                 <option value="commonevent">公共事件(,)</option>
                 <option value="plugins">插件编写(.)</option>
+                <option value="commonEventTemplate">常見事件模板(/)</option>
             </select>
             <span style="font-size: 12px"><input type="checkbox" id="showMovable" style="margin-left:0;margin-right: 2px"/>通行度</span>
             <select id="editorTheme" style="margin-left: 0; font-size: 11px;">

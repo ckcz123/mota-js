@@ -312,6 +312,7 @@ editor_ui_wrapper = function (editor) {
                 case 77: editor_mode.change('appendpic'); break; // M
                 case 188: editor_mode.change('commonevent'); break; // ,
                 case 190: editor_mode.change('plugins'); break; // .
+                case 191: editor_mode.change('commonEventTemplate'); break; // /
                 // H
                 case 72: editor.uifunctions.showHelp(); break;
             }

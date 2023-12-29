@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2018, Zhang Chen
+Copyright (c) 2018, ckcz123
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

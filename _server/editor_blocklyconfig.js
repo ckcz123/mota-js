@@ -295,213 +295,8 @@ editor_blocklyconfig=(function(){
       MotaActionBlocks['rand_e'].xmlText(),
       MotaActionBlocks['evalString_e'].xmlText(),
     ],
-    '常见事件模板':[
-      '<label text="检测音乐如果没有开启则系统提示开启"></label>',
-      MotaActionFunctions.actionParser.parseList({"type": "if", "condition": "!core.musicStatus.bgmStatus",
-        "true": [
-          "\t[系统提示]你当前音乐处于关闭状态，本塔开音乐游戏效果更佳"
-        ],
-        "false": []
-      }),
-      '<label text="仿新新魔塔一次性商人"></label>',
-      MotaActionFunctions.actionParser.parse([
-        {
-          "type": "if",
-          "condition": "switch:A",
-          "true": [
-            "\t[行商,trader]\b[this]这是购买我的道具后我给玩家的提示。",
-            {
-              "type": "comment",
-              "text": "下一条指令可视情况使用或不使用"
-            },
-            {
-              "type": "hide",
-              "remove": true,
-              "time": 250
-            }
-          ],
-          "false": [
-            {
-              "type": "confirm",
-              "text": "我有3把黄钥匙，\n你出50金币就卖给你。",
-              "yes": [
-                {
-                  "type": "if",
-                  "condition": "status:money>=50",
-                  "true": [
-                    {
-                      "type": "setValue",
-                      "name": "status:money",
-                      "operator": "-=",
-                      "value": "50"
-                    },
-                    {
-                      "type": "setValue",
-                      "name": "item:yellowKey",
-                      "operator": "+=",
-                      "value": "3"
-                    },
-                    {
-                      "type": "playSound",
-                      "name": "确定",
-                      "stop": true
-                    },
-                    {
-                      "type": "setValue",
-                      "name": "switch:A",
-                      "value": "true"
-                    }
-                  ],
-                  "false": [
-                    {
-                      "type": "playSound",
-                      "name": "操作失败"
-                    },
-                    "\t[行商,trader]\b[this]你的金币不足！"
-                  ]
-                }
-              ],
-              "no": []
-            }
-          ]
-      }
-      ], 'event'),
-      '<label text="全地图选中一个点"></label>',
-      MotaActionFunctions.actionParser.parse([
-        {
-          "type": "comment",
-          "text": "全地图选中一个点，需要用鼠标或触屏操作"
-        },
-        {
-          "type": "setValue",
-          "name": "temp:X",
-          "value": "status:x"
-        },
-        {
-          "type": "setValue",
-          "name": "temp:Y",
-          "value": "status:y"
-        },
-        {
-          "type": "tip",
-          "text": "再次点击闪烁位置确认"
-        },
-        {
-          "type": "while",
-          "condition": "true",
-          "data": [
-            {
-              "type": "drawSelector",
-              "image": "winskin.png",
-              "code": 1,
-              "x": "32*temp:X",
-              "y": "32*temp:Y",
-              "width": 32,
-              "height": 32
-            },
-            {
-              "type": "wait"
-            },
-            {
-              "type": "if",
-              "condition": "(flag:type === 1)",
-              "true": [
-                {
-                  "type": "if",
-                  "condition": "((temp:X===flag:x)&&(temp:Y===flag:y))",
-                  "true": [
-                    {
-                      "type": "break",
-                      "n": 1
-                    }
-                  ]
-                },
-                {
-                  "type": "setValue",
-                  "name": "temp:X",
-                  "value": "flag:x"
-                },
-                {
-                  "type": "setValue",
-                  "name": "temp:Y",
-                  "value": "flag:y"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "drawSelector",
-          "code": 1
-        },
-        {
-          "type": "comment",
-          "text": "流程进行到这里可以对[X,Y]点进行处理，比如"
-        },
-        {
-          "type": "closeDoor",
-          "id": "yellowDoor",
-          "loc": [
-            "temp:X",
-            "temp:Y"
-          ]
-        }
-      ],'event'),
-      '<label text="多阶段Boss战斗"></label>',
-      MotaActionFunctions.actionParser.parse([
-        {
-          "type": "comment",
-          "text": "多阶段boss，请直接作为战后事件使用"
-        },
-        {
-          "type": "setValue",
-          "name": "switch:A",
-          "operator": "+=",
-          "value": "1"
-        },
-        {
-          "type": "switch",
-          "condition": "switch:A",
-          "caseList": [
-            {
-              "case": "1",
-              "action": [
-                {
-                  "type": "setBlock",
-                  "number": "redSlime"
-                },
-                "\t[2阶段boss,redSlime]\b[this]你以为你已经打败我了吗？没听说过史莱姆有九条命吗？"
-              ]
-            },
-            {
-              "case": "2",
-              "action": [
-                {
-                  "type": "setBlock",
-                  "number": "blackSlime"
-                },
-                "\t[3阶段boss,blackSlime]\b[this]不能消灭我的，只会让我更强大！"
-              ]
-            },
-            {
-              "case": "3",
-              "action": [
-                {
-                  "type": "setBlock",
-                  "number": "slimelord"
-                },
-                "\t[4阶段boss,slimelord]\b[this]我还能打！"
-              ]
-            },
-            {
-              "case": "4",
-              "action": [
-                "\t[4阶段boss,slimelord]我一定会回来的！"
-              ]
-            }
-          ]
-        }
-      ],'afterBattle'),
+    '常见事件模板': [
+      '<label text="此处只是占位符,实际定义在#region 動態常見事件模板"></label>',
     ],
     '最近使用事件':[
       '<label text="此处只是占位符,实际定义在editor_blockly.searchBlockCategoryCallback中"></label>',
@@ -510,6 +305,39 @@ editor_blocklyconfig=(function(){
   var toolboxgap = '<sep gap="5"></sep>'
   //xml_text = MotaActionFunctions.actionParser.parse(obj,type||'event')
   //MotaActionBlocks['idString_e'].xmlText()
+
+  //#region 動態常見事件模板
+  let commonEventTemplateHTML = [];
+
+  for (let commonEventName in events_c12a15a8_c380_4b28_8144_256cba95f760.commonEventTemplate) {
+    if (events_c12a15a8_c380_4b28_8144_256cba95f760.commonEventTemplate.hasOwnProperty(commonEventName)) {
+      let actionParserJson = Array.from(events_c12a15a8_c380_4b28_8144_256cba95f760.commonEventTemplate[commonEventName] ?? []);
+
+      let labelHTML = "";
+      let blockHTML = "";
+
+      labelHTML = `<label text="${commonEventName}"></label>`
+
+      if (actionParserJson.length > 1) {
+        actionParserJson = {
+          "type": "if", "condition": "true",
+          "true": actionParserJson
+        }
+      }
+      else if (actionParserJson.length < 1) {
+        actionParserJson = [
+          "空的常用事件模板。\n請在主頁下拉菜單中，選擇常用事件模板，進行編輯。\n編輯後需按F5刷新事件編輯器。",
+        ]
+      }
+      blockHTML = MotaActionFunctions.actionParser.parseList(actionParserJson);
+
+      commonEventTemplateHTML.push(labelHTML);
+      commonEventTemplateHTML.push(blockHTML);
+    }
+  }
+
+  toolboxObj["常见事件模板"] = commonEventTemplateHTML;
+  //#endregion
 
   for (var name in toolboxObj){
     var custom = null;

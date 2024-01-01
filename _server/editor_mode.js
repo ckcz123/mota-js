@@ -14,6 +14,7 @@ editor_mode = function (editor) {
 
             'commonevent': 'left9',
             'plugins': 'left10',
+            'commonEventTemplate': 'left11',
         }
         this._ids = {}
         this.dom = {}
@@ -57,7 +58,7 @@ editor_mode = function (editor) {
                 printe(objs_.slice(-1)[0]);
                 throw (objs_.slice(-1)[0])
             }
-            ; 
+            ;
             var str = '修改成功！';
             if (data_a1e2fb4a_e986_4524_b0da_9b7ba7c0874d.firstData.name == 'template')
                 str += '<br/>请注意：全塔属性的name尚未修改，请及时予以设置。';
@@ -108,6 +109,9 @@ editor_mode = function (editor) {
                 break;
             case 'plugins':
                 editor.file.editPlugins(actionList, cb);
+                break;
+            case 'commonEventTemplate':
+                editor.file.editCommonEventTemplate(actionList, cb);
                 break;
             default:
                 break;
@@ -346,6 +350,19 @@ editor_mode = function (editor) {
         //只查询不修改时,内部实现不是异步的,所以可以这么写
         var tableinfo = editor.table.objToTable(objs[0], objs[1]);
         document.getElementById('table_e2c034ec_47c6_48ae_8db8_4f8f32fea2d6').innerHTML = tableinfo.HTML;
+        tableinfo.listen(tableinfo.guids);
+        if (Boolean(callback)) callback();
+    }
+
+    editor_mode.prototype.commonEventTemplate = function (callback) {
+        var objs = [];
+        editor.file.editCommonEventTemplate([], function (objs_) {
+            objs = objs_;
+            //console.log(objs_)
+        });
+        //只查询不修改时,内部实现不是异步的,所以可以这么写
+        var tableinfo = editor.table.objToTable(objs[0], objs[1]);
+        document.getElementById('table_298572d8-93dd-4c6e-a278-6a7d49831e3a').innerHTML = tableinfo.HTML;
         tableinfo.listen(tableinfo.guids);
         if (Boolean(callback)) callback();
     }

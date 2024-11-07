@@ -601,6 +601,11 @@ server.on('listening', () => {
 server.on('request', async (req, res) => {
     /** @type {string} */
     const p = req.url.replace(`/games/${name}`, '').replace('/all/', '/');
+    if (p.includes('..')) {
+        res.statusCode = 403;
+        res.end();
+        return;
+    }
 
     if (req.method === 'GET') {
         const dir = path

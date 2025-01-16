@@ -106,7 +106,7 @@ core.status.hero    （勇士信息；此项和全塔属性中的hero大体是�
     core.status.hero.equipment     当前装上的装备
     core.status.hero.items   当前拥有的道具信息
     core.status.hero.flags   当前的各项flag信息
-    core.status.hero.step    当前的步数值
+    core.status.hero.steps    当前的步数值
     core.status.hero.statistics    当前的统计信息
 core.status.floorId    （当前所在的楼层）    
 core.status.maps    （所有的地图信息）

@@ -1449,7 +1449,7 @@ maps.prototype._drawFloorImage = function (ctx, name, one, image, currStatus, on
     var x = one.x || 0, y = one.y || 0;
     if (onMap && core.bigmap.v2) {
         if (x > 32 * core.bigmap.posX + core._PX_ + 32 || x + width < 32 * core.bigmap.posX - 32
-            || y > 32 * core.bigmap.posX + core._PY_ + 32 || y + height < 32 * core.bigmap.posY - 32) {
+            || y > 32 * core.bigmap.posY + core._PY_ + 32 || y + height < 32 * core.bigmap.posY - 32) {
             return;
         }
         x -= 32 * core.bigmap.posX;

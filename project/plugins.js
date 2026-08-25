@@ -6,6 +6,131 @@ var plugins_bb40132b_638b_4a9f_b028_d3fe47acc8d1 =
 			// 本函数将在所有资源加载完毕后，游戏开启前被执行
 		}
 	},
+	"gameCanvasSnapshot": function () {
+		// 将分层游戏画布按实际显示顺序合成为单一画布，便于截图和自动化测试。
+		// 合成画布位于游戏画布的最底层，只在调用 captureGameCanvas 或 toDataURL/toBlob 时刷新。
+		if (main.mode != "play") return;
+		var gameDraw = document.getElementById("gameDraw");
+		if (!gameDraw || document.getElementById("gameCanvasSnapshot")) return;
+
+		var snapshot = document.createElement("canvas");
+		snapshot.id = "gameCanvasSnapshot";
+		snapshot.setAttribute("aria-hidden", "true");
+		snapshot.style.position = "absolute";
+		snapshot.style.left = snapshot.style.top = "0";
+		snapshot.style.zIndex = "0";
+		snapshot.style.pointerEvents = "none";
+		gameDraw.insertBefore(snapshot, gameDraw.firstChild);
+
+		function getLayers() {
+			var canvases = gameDraw.getElementsByTagName("canvas");
+			var layers = [];
+			for (var i = 0; i < canvases.length; i++) {
+				var canvas = canvases[i];
+				if (canvas === snapshot) continue;
+				var style = window.getComputedStyle(canvas);
+				if (style.display == "none" || style.visibility == "hidden") continue;
+				layers.push({
+					canvas: canvas,
+					style: style,
+					zIndex: parseInt(style.zIndex, 10) || 0,
+					order: i
+				});
+			}
+			layers.sort(function (a, b) {
+				return a.zIndex - b.zIndex || a.order - b.order;
+			});
+			return layers;
+		}
+
+		function getTransform(style) {
+			var transform = style.transform || style.webkitTransform;
+			var match = transform && transform.match(/^matrix\(([^)]+)\)$/);
+			if (!match) return [1, 0, 0, 1, 0, 0];
+			var values = match[1].split(",").map(function (value) {
+				return parseFloat(value);
+			});
+			return values.length == 6 ? values : [1, 0, 0, 1, 0, 0];
+		}
+
+		function captureGameCanvas() {
+			var layers = getLayers();
+			if (!layers.length) return snapshot;
+
+			var width = gameDraw.clientWidth || core._PX_ || core.__PIXELS__;
+			var height = gameDraw.clientHeight || core._PY_ || core.__PIXELS__;
+			var ratio = 1;
+			layers.forEach(function (layer) {
+				var cssWidth = parseFloat(layer.style.width) || layer.canvas.width || 1;
+				var cssHeight = parseFloat(layer.style.height) || layer.canvas.height || 1;
+				ratio = Math.max(ratio, layer.canvas.width / cssWidth, layer.canvas.height / cssHeight);
+			});
+
+			var realWidth = Math.max(1, Math.round(width * ratio));
+			var realHeight = Math.max(1, Math.round(height * ratio));
+			if (snapshot.width != realWidth) snapshot.width = realWidth;
+			if (snapshot.height != realHeight) snapshot.height = realHeight;
+			snapshot.style.width = width + "px";
+			snapshot.style.height = height + "px";
+
+			var ctx = snapshot.getContext("2d");
+			ctx.setTransform(1, 0, 0, 1, 0, 0);
+			ctx.clearRect(0, 0, realWidth, realHeight);
+			// 未开局时保持透明，使标题 Logo 等 DOM 元素仍可被页面截图回退捕获。
+			if (core.isPlaying()) {
+				ctx.fillStyle = window.getComputedStyle(gameDraw).backgroundColor || "#000000";
+				ctx.fillRect(0, 0, realWidth, realHeight);
+			}
+			ctx.scale(ratio, ratio);
+			ctx.mozImageSmoothingEnabled = false;
+			ctx.webkitImageSmoothingEnabled = false;
+			ctx.msImageSmoothingEnabled = false;
+			ctx.imageSmoothingEnabled = false;
+
+			layers.forEach(function (layer) {
+				var canvas = layer.canvas, style = layer.style;
+				if (!canvas.width || !canvas.height) return;
+				var opacity = parseFloat(style.opacity);
+				if (isFinite(opacity) && opacity <= 0) return;
+				var cssWidth = parseFloat(style.width) || canvas.width;
+				var cssHeight = parseFloat(style.height) || canvas.height;
+				var origin = (style.transformOrigin || "0 0").split(" ");
+				var originX = parseFloat(origin[0]) || 0;
+				var originY = parseFloat(origin[1]) || 0;
+				var transform = getTransform(style);
+
+				ctx.save();
+				ctx.globalAlpha = isFinite(opacity) ? opacity : 1;
+				ctx.translate(canvas.offsetLeft || 0, canvas.offsetTop || 0);
+				ctx.translate(originX, originY);
+				ctx.transform.apply(ctx, transform);
+				ctx.translate(-originX, -originY);
+				ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height, 0, 0, cssWidth, cssHeight);
+				ctx.restore();
+			});
+			return snapshot;
+		}
+
+		this.captureGameCanvas = captureGameCanvas;
+		window.render_game_to_canvas = captureGameCanvas;
+		var nativeToDataURL = snapshot.toDataURL;
+		snapshot.toDataURL = function () {
+			captureGameCanvas();
+			return nativeToDataURL.apply(snapshot, arguments);
+		};
+		if (snapshot.toBlob) {
+			var nativeToBlob = snapshot.toBlob;
+			snapshot.toBlob = function () {
+				captureGameCanvas();
+				return nativeToBlob.apply(snapshot, arguments);
+			};
+		}
+		captureGameCanvas();
+		window.addEventListener("resize", function () {
+			captureGameCanvas();
+			requestAnimationFrame(captureGameCanvas);
+		});
+	},
 	"drawLight": function () {
 
 		// 绘制灯光/漆黑层效果。调用方式 core.plugin.drawLight(...)

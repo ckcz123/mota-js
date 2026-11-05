@@ -116,9 +116,10 @@ dynamicMapEditor.prototype.onMapClick = function(x, y) {
 }
 
 dynamicMapEditor.prototype.getClickLoc = function (e) {
+	var rect = this.dom.getBoundingClientRect();
 	return {
-		x: (e.clientX - core.dom.gameGroup.offsetLeft - 3) / core.domStyle.scale,
-		y: (e.clientY - core.dom.gameGroup.offsetTop - 3) / core.domStyle.scale,
+		x: (e.clientX - rect.left) * this.dom.width / rect.width,
+		y: (e.clientY - rect.top) * this.dom.height / rect.height,
 	};
 }
 
